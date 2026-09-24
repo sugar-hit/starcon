@@ -1,0 +1,39 @@
+name: Feature Request
+description: 新功能需求
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题背景
+      description: 用户痛点是什么？谁会遇到？
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: 期望方案
+      description: 你希望怎么解决？
+    validations:
+      required: true
+  - type: textarea
+    id: alternative
+    attributes:
+      label: 备选方案
+      description: 考虑过哪些其他方案？
+  - type: textarea
+    id: impact
+    attributes:
+      label: 影响面
+      description: 涉及哪些模块 / 团队 / 租户类型
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 优先级
+      options:
+        - P0 (阻塞)
+        - P1 (本季度)
+        - P2 (本年)
+        - P3 (规划外)
+    validations:
+      required: true

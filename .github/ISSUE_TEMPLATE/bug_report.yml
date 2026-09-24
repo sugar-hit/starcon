@@ -1,0 +1,44 @@
+name: Bug Report
+description: 缺陷报告
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 现象
+      description: 看到了什么 bug？
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤
+      description: 1. ... 2. ... 3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望
+      description: 应该发生什么
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际
+      description: 实际发生什么
+  - type: textarea
+    id: env
+    attributes:
+      label: 环境
+      description: 租户 ID / 平台 / 时间 / 浏览器 / API 调用样例
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 严重程度
+      options:
+        - S0 (数据泄漏 / 资金影响)
+        - S1 (核心功能不可用)
+        - S2 (功能降级)
+        - S3 (UI / 文案)
+    validations:
+      required: true

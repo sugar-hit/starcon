@@ -1,0 +1,43 @@
+{
+  "name": "starcon",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Enterprise SaaS ERP for cross-border e-commerce",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20.11.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "bootstrap": "pnpm install && pnpm run build:packages",
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "build:packages": "turbo run build --filter='./packages/*'",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "db:migrate": "pnpm --filter @starcon/database migrate",
+    "db:generate": "pnpm --filter @starcon/database generate",
+    "db:studio": "pnpm --filter @starcon/database studio",
+    "cli": "pnpm --filter @starcon/cli start",
+    "release": "changeset publish",
+    "prepare": "husky install || true"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.0",
+    "@types/node": "^20.11.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.2.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.4.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,md,yaml,yml}": ["prettier --write"]
+  }
+}

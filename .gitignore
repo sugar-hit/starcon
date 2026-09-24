@@ -1,0 +1,83 @@
+# ============================================================
+# starcon .gitignore
+# 源码进仓库，产物全部本地化
+# ============================================================
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs (产物 — 不进仓库)
+dist/
+build/
+out/
+*.tsbuildinfo
+.next/
+.turbo/
+.cache/
+.tmp/
+
+# Generated code (regenerate via codegen)
+**/src/generated/
+**/src/codegen/
+apps/api/src/platform-connectors/**/generated/
+
+# Coverage & test artifacts
+coverage/
+.nyc_output/
+*.lcov
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor / IDE
+.vscode/*
+!.vscode/settings.json.example
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# OS
+.DS_Store
+.Trashes
+.Spotlight-V100
+.AppleDouble
+.LSOverride
+
+# Deployment artifacts (镜像/构建产物)
+deploy/artifacts/*
+!deploy/artifacts/.gitkeep
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.*
+infra/terraform/*.tfvars
+!infra/terraform/*.tfvars.example
+
+# Helm
+infra/helm/**/*.tgz
+
+# Local databases / volume mounts
+*.sqlite
+*.sqlite-journal
+data/
+.postgres-data/
+
+# Misc
+.pnpm-debug.log*
+.history/

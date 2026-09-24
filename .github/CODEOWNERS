@@ -1,0 +1,39 @@
+# CODEOWNERS — 每个路径改动必须经过对应 owner review
+# 详细语法见 https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# 默认 owner: 架构组
+*                                           @starcon/architecture
+
+# 业务模块 owner (占位 — 等团队组建后填实际 @username)
+# /apps/api/src/modules/auth/                @starcon/auth-team
+# /apps/api/src/modules/tenant/              @starcon/platform-team
+# /apps/api/src/modules/product/             @starcon/catalog-team
+# /apps/api/src/modules/inventory/           @starcon/fulfillment-team
+# /apps/api/src/modules/order/               @starcon/order-team
+# /apps/api/src/modules/fulfillment/         @starcon/fulfillment-team
+# /apps/api/src/modules/shipment/            @starcon/fulfillment-team
+# /apps/api/src/modules/finance/             @starcon/finance-team
+# /apps/api/src/modules/billing/             @starcon/finance-team
+# /apps/api/src/modules/analytics/           @starcon/data-team
+# /apps/api/src/modules/notification/        @starcon/platform-team
+
+# 外部适配器
+# /apps/api/src/platform-connectors/         @starcon/integrations-team
+# /apps/api/src/payment-gateways/            @starcon/integrations-team
+# /apps/api/src/shipping-carriers/           @starcon/integrations-team
+
+# 基础设施
+/infra/                                     @starcon/sre
+/deploy/docker/                             @starcon/sre
+/.github/workflows/                         @starcon/sre
+
+# 数据库 schema
+/db/migrations/                             @starcon/data-team
+/packages/database/                         @starcon/data-team
+
+# 架构决策 — 任何 ADR 改动必须架构组 + 至少 1 个业务 owner 双重 review
+/docs/decisions/                            @starcon/architecture
+
+# 安全敏感路径
+/docs/compliance/                           @starcon/security
+/docs/architecture/security.md              @starcon/security
