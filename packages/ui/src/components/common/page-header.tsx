@@ -38,7 +38,7 @@ export function PageHeader({ title, description, actions, children, className }:
     <div className={cn('border-b border-border bg-background', className)}>
       <div className="flex h-12 w-full items-center gap-4 px-5">
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-[18px] font-semibold text-primary tracking-tight">
+          <h1 className="truncate text-h-16 font-semibold text-primary tracking-tight">
             {title}
           </h1>
           {description && (
