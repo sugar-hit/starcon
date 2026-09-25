@@ -56,7 +56,7 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-1 flex-col gap-6 px-3 py-2 overflow-y-auto scrollbar-thin">
+    <nav className="flex flex-1 flex-col gap-6 px-3 py-2">
       {navItems.map((group) => (
         <div key={group.group} className="space-y-1">
           <div className="px-2.5 pb-1.5 text-label-12 uppercase tracking-wider text-sidebar-muted">
@@ -113,13 +113,15 @@ export interface AppShellProps {
 export function AppShell({ title = '工作台', actions, children }: AppShellProps) {
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      {/* === 桌面端侧栏（≥md） === */}
-      <aside className="hidden md:flex md:w-60 md:shrink-0 md:flex-col md:border-r md:border-sidebar-border">
-        <div className="flex h-14 items-center px-5">
+      {/* === 桌面端侧栏（≥md） ===
+          sticky top-0 + h-screen + overflow-y-auto：侧栏固定在视窗顶部，
+          主区滚动时侧栏不滚；侧栏自身只在 nav 溢出时出滚动条 */}
+      <aside className="hidden md:sticky md:top-0 md:h-screen md:flex md:w-60 md:shrink-0 md:flex-col md:border-r md:border-sidebar-border md:overflow-y-auto md:self-start">
+        <div className="flex h-14 shrink-0 items-center px-5">
           <Logo size="sm" />
         </div>
         <NavList />
-        <div className="border-t border-sidebar-border px-5 py-3 text-label-12 text-muted-foreground">
+        <div className="shrink-0 border-t border-sidebar-border px-5 py-3 text-label-12 text-muted-foreground">
           © 2026 starcon
         </div>
       </aside>
