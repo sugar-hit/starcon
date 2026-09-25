@@ -93,6 +93,7 @@ starcon 是 SaaS，**所有业务表必须带 `tenant_id`**，DB 层启用 Row-L
 |---|---|---|---|
 | 架构决策（不可逆） | `docs/decisions/000N-*.md` | 永久 | 人 + AI |
 | 系统设计（活文档） | `docs/architecture/` | 演进 | 人 + AI |
+| 视觉规范（设计令牌 / 组件调性） | `docs/design/` | 演进 | 前端 + AI |
 | 产品需求 | `docs/product/prds/` | 演进 | 人 |
 | 跨模块 TODO | `docs/backlog/` | 临时集中 | AI（自动） |
 | 调研 / 探索 | `docs/investment/` | 一次性 | AI |
@@ -112,6 +113,7 @@ starcon 是 SaaS，**所有业务表必须带 `tenant_id`**，DB 层启用 Row-L
 - 我想看上次会话决定 → `docs/sessions/`（按日期排序找最新）
 - 我想看跨模块 TODO → `docs/backlog/`
 - 我想看 DB schema → `db/schemas/` 或 `packages/database/`
+- 我想看视觉规范 / 设计令牌 → `docs/design/visual-spec.md`
 - 我想加新平台适配器 → 复制 `apps/api/src/platform-connectors/` 下任一 vendor 目录，按统一 interface 实现
 - 我想跑某服务 → `pnpm --filter @starcon/<name> dev`
 

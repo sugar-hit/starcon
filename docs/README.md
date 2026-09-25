@@ -13,6 +13,7 @@ starcon 的**单一信息源**。所有架构、产品、运维、决策、AI �
 | [`onboarding/`](onboarding/) | 新人入职指南 / 约定 / 术语表 | 所有人 |
 | [`api/`](api/) | 自动生成的 API 文档 | CI |
 | [`compliance/`](compliance/) | 合规（GDPR / 数据出境 / SOC2） | 法务 + SRE |
+| [`design/`](design/) | 视觉规范 / 设计令牌 / 组件调性（前端落地用） | 前端 + AI |
 | [`sessions/`](sessions/) | **AI 会话日志**（项目级可检索） | AI |
 | [`backlog/`](backlog/) | 跨模块 TODO 集中地 | AI |
 | [`investment/`](investment/) | 调研 / 探索笔记（一次性） | AI |

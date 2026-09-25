@@ -18,6 +18,8 @@ starcon 的变更日志。所有**用户可见**的改动都记录在此。
 - 15 个 `packages/*` 共享库占位
 - `infra/` Terraform / Helm / ArgoCD / K8s 占位
 - `docs/` 知识库骨架 + AI 会话日志规范
+- `docs/design/visual-spec.md` V1.0 视觉规范（Vercel/Geist 风格，从能耗项目 PIONEERING V1.0 迁移 + ERP 适配）
 - `AGENTS.md` AI 协作入口
+- 推送至 `sugar-hit/starcon` 私有仓库
 
 [Unreleased]: https://example.com/starcon/compare/v0.0.0...HEAD
