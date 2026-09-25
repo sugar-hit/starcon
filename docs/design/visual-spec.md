@@ -100,6 +100,7 @@ Tailwind 通过 `fontSize` 扩展注入,类名直接用:
 | `text-copy-16` | 16 | 400 | 正文(已极少用) |
 | `text-copy-14` | 14 | 400 | **绝大多数正文、helper** |
 | `text-copy-13` | 13 | 400 | 卡片副标题、description |
+| `text-label-15` | 15 | 500 | 主切换控件 (Segmented md) |
 | `text-label-14` | 14 | 500 | — |
 | `text-label-13` | 13 | 500 | — |
 | `text-label-12` | 12 | 500 | 表格头、Badge、KPI 标签(全大写) |
@@ -124,6 +125,7 @@ Tailwind 通过 `fontSize` 扩展注入,类名直接用:
 | Body / Description / helper | `text-copy-14` | 14 | 绝大多数正文 |
 | StatCard label / Tabs | `text-label-13` | 13 | 元信息密度档 |
 | **Segmented md** | `text-h-16` | 16 | 主切换控件;容器 `h-9` (36px);跟 PageHeader / SectionCard 标题同字号 |
+| **Segmented md** | `text-label-15` | 15 | 主切换控件;容器 `h-9` (36px);跟 PageHeader / SectionCard 标题之间一档 |
 | Eyebrow / Badge / Table header / **Segmented sm** | `text-label-12` | 12 | 全大写、tracking-wider |
 
 ### 1.4 圆角、阴影、动效
@@ -643,4 +645,4 @@ starcon 前端尚未实现,以下为**规划中的页面**与本规范的对应,
 | V1.1 | 2026-09-25 | 引入 3 系统 × 15 Domain 架构(AI ERP 总功能地图);顶部 header 改为系统切换器(全部 / 商品供应链 / 交易履约 / 经营管理);新增 PageHeader 独立标题栏;新增 nav-config.ts 单一真相源;catch-all `[...slug]` 兜底路由 |
 | V1.2 | 2026-09-25 | 移除"全部"系统 / 移除侧栏"当前系统"标识;PageHeader h-20 → h-16 font-semibold,h-14 → h-12;主区 padding 跟侧栏对齐(px-5)|
 | V1.3 | 2026-09-25 | 4 系统重命名为 开发/运营/物流/仓储 (按团队职能);PageHeader h-16→h-14 font-semibold, h-12→h-10;NavList item h-8→h-7, copy-14→copy-13;Logo 下加 border-b 分隔 |
-| V1.4 | 2026-09-25 | Typography 重平衡:StatCard value → h-24;PageHeader h1 18→16px font-semibold;Nav item 13→14px;Segmented md 12→13→14→16px(三轮反馈,容器同步 h-8→h-9);Logo / Header 统一 h-16 border-b 在 y=64 对齐 |
+| V1.4 | 2026-09-25 | Typography 重平衡:StatCard value → h-24;PageHeader h1 18→16px font-semibold;Nav item 13→14px;Segmented md 12→13→14→16→15px(四轮反馈,容器同步 h-8→h-9);**新增 text-label-15 token**;Logo / Header 统一 h-16 border-b 在 y=64 对齐 |
