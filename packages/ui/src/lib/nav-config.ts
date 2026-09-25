@@ -22,21 +22,24 @@ import type { LucideIcon } from 'lucide-react';
  *
  * 架构（来自用户提供的 AI ERP 总功能地图）:
  *   全部 (AI ERP)
- *     └─ 系统 × 3
+ *     └─ 系统 × 3        ← 顶部 Segmented Tab（用户硬规则：不含"全部"）
  *          ├─ 商品供应链
  *          ├─ 交易履约
  *          └─ 经营管理
  *              └─ Domain (功能) × 15
- *                  └─ 子功能（页面，未来展开）
+ *
+ *   顶层固定项 × 2      ← 侧栏顶部，不属于任何系统
+ *     ├─ 工作台          （首页 = /）
+ *     └─ AI Copilot
  *
  * 路由约定:
- *   - '/'              = 全部 / 工作台
- *   - '/products'      = 商品中心（商品供应链）
- *   - '/orders'        = 订单中心（交易履约）
- *   - 一级路径用 domain 名
+ *   /            = 工作台
+ *   /products    = 商品中心（商品供应链）
+ *   /orders      = 订单中心（交易履约）
+ *   /finance     = 财务中心（经营管理）
  */
 
-export type SystemId = 'overview' | 'product' | 'trade' | 'manage';
+export type SystemId = 'product' | 'trade' | 'manage';
 
 export interface NavChildItem {
   label: string;
@@ -113,56 +116,44 @@ const manageSystem: SystemDef = {
   ],
 };
 
-/** 全部 / 工作台 — 顶层入口（不属于任何系统） */
-const overviewSystem: SystemDef = {
-  id: 'overview',
-  label: '全部',
-  description: 'AI ERP 总览',
-  defaultHref: '/',
-  items: [
-    { label: '工作台', href: '/', icon: LayoutDashboard, description: '今日待办与关键指标' },
-    { label: 'AI Copilot', href: '/copilot', icon: TrendingUp, description: 'AI 助手与自动化' },
-  ],
-};
+/** 系统列表 — 顶部 Segmented Tab 用（用户硬规则：不包含"全部"） */
+export const SYSTEMS: SystemDef[] = [productSystem, tradeSystem, manageSystem];
 
-/** 系统列表（顶部切换 Tab 用） */
-export const SYSTEMS: SystemDef[] = [overviewSystem, productSystem, tradeSystem, manageSystem];
+/** 顶层固定项 — 侧栏顶部，不属于任何系统 */
+export const TOP_LEVEL_ITEMS: NavItem[] = [
+  { label: '工作台', href: '/', icon: LayoutDashboard, description: '今日待办与关键指标' },
+  { label: 'AI Copilot', href: '/copilot', icon: TrendingUp, description: 'AI 助手与自动化' },
+];
 
 /** 按 id 查系统 */
 export function getSystem(id: SystemId): SystemDef {
-  return SYSTEMS.find((s) => s.id === id) ?? overviewSystem;
+  return SYSTEMS.find((s) => s.id === id) ?? productSystem;
 }
 
 /**
  * 由 pathname 推断当前 system
  * 规则：精确前缀匹配 → 第一个匹配胜出
- *   /                  → overview
- *   /products...       → product
- *   /listings...       → product  (刊登中心)
- *   /orders...         → trade
- *   /inventory...      → trade
- *   /finance...        → manage
- *   其它 → overview
+ *   /products...      → product
+ *   /orders...        → trade
+ *   /finance...       → manage
+ *   其它（含 /, /copilot, /styleguide, /api）→ product (默认)
  */
 export function resolveSystemFromPath(pathname: string): SystemDef {
-  // exact /
-  if (pathname === '/') return overviewSystem;
-
   for (const sys of SYSTEMS) {
-    if (sys.id === 'overview') continue;
     for (const item of sys.items) {
       if (pathname === item.href || pathname.startsWith(item.href + '/')) {
         return sys;
       }
     }
   }
-  return overviewSystem;
+  return productSystem;
 }
 
 /** 由 pathname 推断当前 feature (NavItem) — 用于 PageHeader title + 当前高亮 */
 export function resolveFeatureFromPath(pathname: string, system: SystemDef): NavItem | null {
-  if (system.id === 'overview') {
-    return system.items.find((it) => pathname === it.href || pathname.startsWith(it.href + '/')) ?? null;
-  }
-  return system.items.find((it) => pathname === it.href || pathname.startsWith(it.href + '/')) ?? null;
+  return (
+    system.items.find((it) => pathname === it.href || pathname.startsWith(it.href + '/')) ??
+    TOP_LEVEL_ITEMS.find((it) => pathname === it.href || pathname.startsWith(it.href + '/')) ??
+    null
+  );
 }
