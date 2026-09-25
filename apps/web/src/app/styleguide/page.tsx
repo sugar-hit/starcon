@@ -176,7 +176,9 @@ export default function StyleguidePage() {
             { cls: 'text-copy-18', label: 'copy-18 / 18 / 400', sample: '次级正文' },
             { cls: 'text-copy-14', label: 'copy-14 / 14 / 400', sample: '绝大多数正文、helper' },
             { cls: 'text-copy-13', label: 'copy-13 / 13 / 400', sample: '卡片副标题、description' },
+            { cls: 'text-label-15', label: 'label-15 / 15 / 500', sample: '主切换控件 (Segmented md)' },
             { cls: 'text-label-14', label: 'label-14 / 14 / 500', sample: '表单 label' },
+            { cls: 'text-label-13', label: 'label-13 / 13 / 500', sample: 'StatCard label / Tabs' },
             { cls: 'text-label-12', label: 'label-12 / 12 / 500 UPPER', sample: 'TABLE HEADER / BADGE' },
             { cls: 'text-btn-14', label: 'btn-14 / 14 / 500', sample: '按钮文字' },
           ].map((f) => (
