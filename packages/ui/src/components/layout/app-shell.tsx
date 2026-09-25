@@ -2,115 +2,101 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import {
-  Bell,
-  Boxes,
-  CreditCard,
-  LayoutDashboard,
-  LogOut,
-  Menu,
-  Package,
-  PackageOpen,
-  Search,
-  Settings,
-  Truck,
-  X,
-} from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Bell, Menu, Search, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import {
+  SYSTEMS,
+  getSystem,
+  resolveSystemFromPath,
+  type SystemId,
+  type SystemDef,
+} from '../../lib/nav-config';
 import { Logo } from '../common/logo';
 import { Avatar } from '../common/avatar';
+import { Segmented } from '../common/segmented';
+import { PageHeader } from '../common/page-header';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '../ui/sheet';
 
 /**
- * Nav items — ERP 8 组（来自 docs/design/visual-spec.md § 2.1）
+ * 当前选中 system（默认由 pathname 推断，可由 props 覆盖）
  */
-const navItems = [
-  {
-    group: '工作台',
-    items: [{ label: '工作台', href: '/', icon: LayoutDashboard }],
-  },
-  {
-    group: '业务',
-    items: [
-      { label: '订单', href: '/orders', icon: Package },
-      { label: '库存', href: '/inventory', icon: Boxes },
-      { label: '商品', href: '/products', icon: PackageOpen },
-      { label: '履约', href: '/fulfillment', icon: Truck },
-    ],
-  },
-  {
-    group: '财务与数据',
-    items: [
-      { label: '财务对账', href: '/finance', icon: CreditCard },
-      { label: '数据分析', href: '/analytics', icon: Boxes },
-    ],
-  },
-  {
-    group: '系统',
-    items: [{ label: '设置', href: '/settings', icon: Settings }],
-  },
-];
+function useCurrentSystem(override?: SystemId): SystemDef {
+  const pathname = usePathname();
+  const inferred = resolveSystemFromPath(pathname);
+  return override ? getSystem(override) : inferred;
+}
 
-function NavList({ onNavigate }: { onNavigate?: () => void }) {
+/**
+ * 左侧导航列表 — 仅渲染当前 system 下的功能
+ */
+function NavList({
+  system,
+  onNavigate,
+}: {
+  system: SystemDef;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
 
   return (
     <nav className="flex flex-1 flex-col gap-6 px-3 py-2">
-      {navItems.map((group) => (
-        <div key={group.group} className="space-y-1">
-          <div className="px-2.5 pb-1.5 text-label-12 uppercase tracking-wider text-sidebar-muted">
-            {group.group}
-          </div>
-          <ul className="space-y-0.5">
-            {group.items.map((item) => {
-              const Icon = item.icon;
-              const active = pathname === item.href;
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={onNavigate}
-                    className={cn(
-                      'group flex h-8 items-center gap-2.5 rounded-md px-2.5 text-copy-14 transition-colors duration-base ease-out-expo',
-                      active
-                        ? 'bg-sidebar-accent font-medium text-foreground'
-                        : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        'h-4 w-4 shrink-0 transition-opacity',
-                        active ? 'text-sidebar-primary opacity-100' : 'opacity-70 group-hover:opacity-100'
-                      )}
-                    />
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
+      {system.items.map((item) => {
+        const Icon = item.icon;
+        const active =
+          pathname === item.href || pathname.startsWith(item.href + '/');
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onNavigate}
+            className={cn(
+              'group flex h-8 items-center gap-2.5 rounded-md px-2.5 text-copy-14 transition-colors duration-base ease-out-expo',
+              active
+                ? 'bg-sidebar-accent font-medium text-foreground'
+                : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
+            )}
+            title={item.description}
+          >
+            <Icon
+              className={cn(
+                'h-4 w-4 shrink-0 transition-opacity',
+                active
+                  ? 'text-sidebar-primary opacity-100'
+                  : 'opacity-70 group-hover:opacity-100'
+              )}
+            />
+            {item.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }
 
 export interface AppShellProps {
-  /** 当前页面 title（不要带 group 前缀 — 见用户硬规则 #1） */
+  /** 当前 system（可选 — 默认由 pathname 推断） */
+  system?: SystemId;
+  /** 当前页面标题（不带系统前缀 — 见用户硬规则 #1） */
   title?: string;
-  /** 可选：顶栏右侧操作区 */
+  /** 顶栏右侧操作区 */
   actions?: React.ReactNode;
   children: React.ReactNode;
 }
 
 /**
- * AppShell — 桌面端：左栏 + 顶栏 + 主区
- * 移动端：hamburger 在右上角 → 抽屉从右滑出
+ * AppShell v2 — 三层架构适配版
+ *
+ *   顶部 Header  → 系统切换器（不显示 title）
+ *   主区 PageHeader → 当前页 title（不带系统前缀）
+ *   左侧 Aside  → 当前 system 下的功能列表
  *
  * 设计文档: docs/design/visual-spec.md § 2
  */
-export function AppShell({ title = '工作台', actions, children }: AppShellProps) {
+export function AppShell({ system, title = '工作台', actions, children }: AppShellProps) {
+  const router = useRouter();
+  const currentSystem = useCurrentSystem(system);
+
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       {/* === 桌面端侧栏（≥md） ===
@@ -120,7 +106,16 @@ export function AppShell({ title = '工作台', actions, children }: AppShellPro
         <div className="flex h-14 shrink-0 items-center px-5">
           <Logo size="sm" />
         </div>
-        <NavList />
+        {/* 当前 system 标识（侧栏顶部） — 帮助用户感知"我在哪个系统里" */}
+        <div className="shrink-0 border-b border-sidebar-border px-5 pb-2">
+          <div className="text-label-12 uppercase tracking-wider text-sidebar-muted">
+            当前系统
+          </div>
+          <div className="mt-0.5 text-copy-13 font-medium text-foreground">
+            {currentSystem.label}
+          </div>
+        </div>
+        <NavList system={currentSystem} />
         <div className="shrink-0 border-t border-sidebar-border px-5 py-3 text-label-12 text-muted-foreground">
           © 2026 starcon
         </div>
@@ -128,12 +123,32 @@ export function AppShell({ title = '工作台', actions, children }: AppShellPro
 
       {/* === 右侧主体 === */}
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* 顶栏 — 56px，背景 background（非纯白），底部 1px border */}
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border bg-background/95 px-4 backdrop-blur md:px-6">
-          {/* 左侧：当前页 title（不要 group 前缀 — 见用户硬规则 #1） */}
-          <h1 className="text-h-16 text-foreground tracking-tight truncate">{title}</h1>
+        {/* 顶栏 — 系统切换器（不再显示 title，title 移到 PageHeader）
+            高度从 h-14 提到 h-16 给 Tab 视觉更舒展 */}
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/95 px-4 backdrop-blur md:px-6">
+          {/* 左：Logo + 移动端 */}
+          <div className="md:hidden">
+            <Logo size="sm" />
+          </div>
 
-          {/* 中央：搜索（≥xl 才显示 kbd 提示） */}
+          {/* 中：系统切换器 — 桌面端居中偏左，移动端靠左 */}
+          <div className="flex flex-1 items-center md:flex-none">
+            <Segmented
+              value={currentSystem.id}
+              onChange={(v) => {
+                const target = SYSTEMS.find((s) => s.id === v);
+                if (target) router.push(target.defaultHref);
+              }}
+              size="md"
+              options={SYSTEMS.map((s) => ({
+                value: s.id,
+                label: s.label,
+              }))}
+              className="max-w-full overflow-x-auto"
+            />
+          </div>
+
+          {/* 中右：搜索（≥xl 才显示 kbd 提示） */}
           <div className="hidden flex-1 md:flex md:justify-center">
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -186,7 +201,19 @@ export function AppShell({ title = '工作台', actions, children }: AppShellPro
                     </SheetClose>
                     <Logo size="sm" />
                   </div>
-                  <NavList />
+                  {/* 移动端系统切换 */}
+                  <div className="border-b border-border px-4 py-3">
+                    <Segmented
+                      value={currentSystem.id}
+                      onChange={(v) => {
+                        const target = SYSTEMS.find((s) => s.id === v);
+                        if (target) router.push(target.defaultHref);
+                      }}
+                      size="sm"
+                      options={SYSTEMS.map((s) => ({ value: s.id, label: s.label }))}
+                    />
+                  </div>
+                  <NavList system={currentSystem} />
                   <div className="border-t border-sidebar-border px-5 py-3 text-label-12 text-muted-foreground">
                     © 2026 starcon
                   </div>
@@ -198,6 +225,9 @@ export function AppShell({ title = '工作台', actions, children }: AppShellPro
 
         {/* 主区 */}
         <main className="flex-1 overflow-x-hidden">
+          {/* 新标题栏 — 显示当前页 title（不带系统前缀）+ actions
+              这是用户圈红的位置 */}
+          <PageHeader title={title} />
           <div className="mx-auto w-full max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">{children}</div>
         </main>
       </div>

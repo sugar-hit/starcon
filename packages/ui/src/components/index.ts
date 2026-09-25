@@ -14,6 +14,8 @@ export * from './common/segmented';
 export * from './common/empty-state';
 export * from './common/logo';
 export * from './common/avatar';
+export * from './common/page-header';
+export * from '../lib/nav-config';
 
 // Layout
 export * from './layout/app-shell';
