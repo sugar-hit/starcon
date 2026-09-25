@@ -1,0 +1,5 @@
+@import '@starcon/ui/styles';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

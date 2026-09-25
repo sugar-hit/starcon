@@ -1,0 +1,19 @@
+{
+  "name": "@starcon/config-tailwind",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./preset": "./src/preset.cjs"
+  },
+  "scripts": {
+    "lint": "echo skip",
+    "typecheck": "echo skip",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "tailwindcss": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7"
+  }
+}

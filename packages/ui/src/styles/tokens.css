@@ -1,0 +1,96 @@
+/**
+ * starcon 设计令牌 — CSS 变量
+ * 单一真相源: docs/design/visual-spec.md § 1
+ * 不要在这里直接改值，要改先去 visual-spec.md 改后再回来同步
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* === 背景 / 文字 === */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 9%;
+
+    /* === 卡片 === */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+
+    /* === 主 CTA（近黑） === */
+    --primary: 0 0% 4%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 0 0% 96%;
+
+    /* === 次级 / 弱强调 === */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 44%;
+
+    /* === 边框（gray-alpha 8%） === */
+    --border: 0 0% 0% / 0.08;
+    --border-strong: 0 0% 0% / 0.15;
+
+    /* === 焦点环 === */
+    --ring: 0 0% 4%;
+
+    /* === 状态色 === */
+    --destructive: 0 72% 51%;
+    --success: 152 56% 38%;
+    --warning: 32 95% 44%;
+
+    /* === 品牌色（项目级可改 HSL） === */
+    --brand: 217 91% 50%;
+    --brand-soft: 217 91% 96%;
+
+    /* === 侧栏 === */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 0% / 0.08;
+    --sidebar-accent: 217 91% 96%;
+    --sidebar-accent-foreground: 217 91% 50%;
+    --sidebar-primary: 217 91% 50%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html,
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-inter), Inter, -apple-system, BlinkMacSystemFont,
+      'PingFang SC', 'Microsoft YaHei', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'tnum' 1, 'cv02' 1, 'cv03' 1;
+  }
+
+  /* 等宽数字辅助 */
+  .num {
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* 滚动条美化 */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+}

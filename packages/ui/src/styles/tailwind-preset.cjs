@@ -1,0 +1,1 @@
+module.exports = require('@starcon/config-tailwind/preset');
