@@ -134,6 +134,7 @@ module.exports = {
         'copy-16': ['16px', { lineHeight: '1.6' }],
         'copy-14': ['14px', { lineHeight: '1.55' }],
         'copy-13': ['13px', { lineHeight: '1.55' }],
+        'copy-12': ['12px', { lineHeight: '1.55' }],
         'label-14': ['14px', { lineHeight: '1.4', fontWeight: '500' }],
         'label-13': ['13px', { lineHeight: '1.4', fontWeight: '500' }],
         'label-12': ['12px', { lineHeight: '1.4', fontWeight: '500', letterSpacing: '0.04em' }],
