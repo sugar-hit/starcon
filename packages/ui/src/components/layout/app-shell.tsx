@@ -47,7 +47,7 @@ function NavItemLink({
       href={item.href}
       onClick={onNavigate}
       className={cn(
-        'group flex h-7 items-center gap-2 rounded-md px-2 text-copy-13 transition-colors duration-base ease-out-expo',
+        'group flex h-7 items-center gap-2 rounded-md px-2 text-copy-14 transition-colors duration-base ease-out-expo',
         active
           ? 'bg-sidebar-accent font-medium text-foreground'
           : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
