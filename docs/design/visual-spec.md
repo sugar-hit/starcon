@@ -1,8 +1,8 @@
 # 视觉规范手册 — starcon 跨境电商 ERP
 
 > **项目名称**:starcon
-> **文档版本**:V1.2
-> **最新修订**:2026-09-25 — 引入 3 系统 × 15 Domain 架构,顶部 header 改为系统切换器,新增 PageHeader 独立标题栏;PageHeader 字号 h-20→h-16 font-semibold
+> **文档版本**:V1.3
+> **最新修订**:2026-09-25 — 4 系统架构 (开发/运营/物流/仓储),按团队职能分组;PageHeader h1 → h-14 font-semibold, 高度 h-10;NavList item → h-7 copy-13;Logo 下加 border-b
 > **最新修订**:2026-09-25
 > **修订人**:Mavis(基于"能耗诊断管理系统"V1.0 视觉规范迁移 + 跨境电商 ERP 场景适配)
 > **适用读者**:前端开发 / UI 调整 / Agent 生成新页面
@@ -173,42 +173,45 @@ none / xs / sm / soft / elevated / ring / ring-strong / focus
 | 宽度 | 240px(≥md),移动端隐藏 |
 | 背景 | `--sidebar` 白底 |
 | 边框 | 右侧 1px `border-sidebar-border` |
-| Logo 区 | 56px 高,Logo 组件 `size="sm"` |
-| **当前系统** | 顶部 mini header: 12px label "当前系统" + 13px 系统名(粗体)|
-| 导航项 | 32px(`h-8`),圆角 6px,水平 padding 10px;只显示**当前系统下**的 domain 列表 |
+| Logo 区 | 48px 高(`h-12`),底部 1px `border-sidebar-border`(跟菜单永久分隔) |
+| 导航项 | 28px(`h-7`),圆角 6px,水平 padding 8px;字号 13px(`copy-13`);icon 14px(`h-3.5`) |
 | 未选中态 | `text-sidebar-foreground/70`,hover `bg-sidebar-accent/50` |
 | **选中态** | 浅蓝软底 `bg-sidebar-accent` + 主色图标(`sidebar-primary`)+ `font-medium` |
 | 选中态图标 | `text-[hsl(var(--sidebar-primary))] opacity-100`,**绝不是黑/灰** — 这是区分"我在哪"的关键视觉锚 |
-| 子项 | 缩进 16px,左边线 1px `border-sidebar-border`,高度 28px |
+| 分组标题 | `text-label-12 uppercase tracking-wider text-sidebar-muted` |
 | 底栏 | 边框 + `text-label-12 text-sidebar-muted`,`© 2026 starcon` |
 
-**3 系统 × 15 Domain 架构**(来自用户 2026-09-25 提供的 AI ERP 总功能地图):
+**4 系统 × 15 Domain 架构**(用户 2026-09-25 最终确认 — 按团队职能分组):
 
 ```
-全部 (AI ERP 总览)
-├─ 工作台       / 首页 dashboard、待办、关键指标
-└─ AI Copilot   / AI 助手与自动化
-
-商品供应链
+开发 (5)
 ├─ 商品中心     / SKU 与变型管理
 ├─ 刊登中心     / 多平台商品刊登
 ├─ 定价中心     / 价格策略与汇率
 ├─ 采购中心     / 采购单与供应商
 └─ 供应中心     / 供应商与档口管理
 
-交易履约
+运营 (7)
 ├─ 订单中心     / 多平台订单聚合
-├─ 库存中心     / 全渠道库存协同
-├─ 仓储中心     / 仓位与库内作业
-├─ 物流中心     / 物流轨迹与配送
-└─ 售后中心     / 退款 / 退货 / 客诉
-
-经营管理
+├─ 售后中心     / 退款 / 退货 / 客诉
+├─ CRM / 客服   / 客户档案与工单
+├─ 数据中心     / 数据看板与报表
 ├─ 财务中心     / 对账与结算
 ├─ 利润中心     / 毛利与分润
-├─ 数据中心     / 数据看板与报表
-├─ CRM / 客服   / 客户档案与工单
 └─ 组织 / 权限  / 员工与角色权限
+
+物流 (1)
+└─ 物流中心     / 物流轨迹与配送
+
+仓储 (2)
+├─ 仓储中心     / 仓位与库内作业
+└─ 库存中心     / 全渠道库存协同
+```
+
+顶层固定项 (不属于任何系统):
+```
+├─ 工作台       /  /  首页 dashboard、待办、关键指标
+└─ AI Copilot   /  /copilot  AI 助手与自动化
 ```
 
 **侧栏过滤规则**:`usePathname()` → `resolveSystemFromPath()` 推断 system → 只渲染该 system 的 items。切换系统 = 跳到该 system 的 `defaultHref`。
@@ -229,10 +232,10 @@ none / xs / sm / soft / elevated / ring / ring-strong / focus
 
 ```ts
 [
-  { id: 'overview', label: '全部' },        // 默认
-  { id: 'product',  label: '商品供应链' },
-  { id: 'trade',    label: '交易履约' },
-  { id: 'manage',   label: '经营管理' },
+  { id: 'dev',       label: '开发' },
+  { id: 'ops',       label: '运营' },
+  { id: 'logistics', label: '物流' },
+  { id: 'storage',   label: '仓储' },
 ]
 ```
 
@@ -245,15 +248,15 @@ none / xs / sm / soft / elevated / ring / ring-strong / focus
 | 项目 | 规格 |
 |---|---|
 | 位置 | 主区上方,**不 sticky**(普通块元素,占文档流) |
-| 高度 | 48px(`h-12`) |
+| 高度 | 40px(`h-10`) |
 | 背景 | `bg-background`(实心,不透明) |
 | 边框 | 底部 1px `border-border` |
 | 内边距 | `px-5`(跟侧栏 Logo / Nav padding 对齐,20px) |
-| **左侧** | **当前页 title**,**只显示当前页 label,不带系统/分组前缀**(见 §6 用户硬规则 #1)。类名:`text-h-16 font-semibold tracking-tight truncate`(16px / 600) |
+| **左侧** | **当前页 title**,**只显示当前页 label,不带系统/分组前缀**(见 §6 用户硬规则 #1)。类名:`text-h-14 font-semibold tracking-tight truncate`(14px / 600) |
 | 右侧 | 页面级 actions 槽(`ml-auto`) |
 | 副标题 | 可选 `description`(13px 灰) |
 
-**字号选择**:`text-h-16 font-semibold`(16px / 600),用 **weight 而不是 size** 来突出 — 跟周围 14px 文字层级连续,不突兀。
+**字号选择**:`text-h-14 font-semibold`(14px / 600),用 **weight 而不是 size** 来突出 — 跟周围 13px nav 文字层级连续, 不突兀。
 
 **反面例子**:
 - ❌ "交易履约 / 订单中心"(系统前缀)
@@ -622,3 +625,4 @@ starcon 前端尚未实现,以下为**规划中的页面**与本规范的对应,
 | V1.0 | 2026-09-25 | 初版,从"能耗诊断管理系统"PIONEERING V1.0 视觉规范迁移,适配跨境电商 ERP 场景;移除 `--energy`,StatCard 趋势支持双向,导航按 ERP 领域重组,图表支持多指标 |
 | V1.1 | 2026-09-25 | 引入 3 系统 × 15 Domain 架构(AI ERP 总功能地图);顶部 header 改为系统切换器(全部 / 商品供应链 / 交易履约 / 经营管理);新增 PageHeader 独立标题栏;新增 nav-config.ts 单一真相源;catch-all `[...slug]` 兜底路由 |
 | V1.2 | 2026-09-25 | 移除"全部"系统 / 移除侧栏"当前系统"标识;PageHeader h-20 → h-16 font-semibold,h-14 → h-12;主区 padding 跟侧栏对齐(px-5)|
+| V1.3 | 2026-09-25 | 4 系统重命名为 开发/运营/物流/仓储 (按团队职能);PageHeader h-16→h-14 font-semibold, h-12→h-10;NavList item h-8→h-7, copy-14→copy-13;Logo 下加 border-b 分隔 |
