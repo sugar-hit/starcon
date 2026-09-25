@@ -1,7 +1,8 @@
 # 视觉规范手册 — starcon 跨境电商 ERP
 
 > **项目名称**:starcon
-> **文档版本**:V1.0
+> **文档版本**:V1.1
+> **最新修订**:2026-09-25 — 引入 3 系统 × 15 Domain 架构,顶部 header 改为系统切换器,新增 PageHeader 独立标题栏
 > **最新修订**:2026-09-25
 > **修订人**:Mavis(基于"能耗诊断管理系统"V1.0 视觉规范迁移 + 跨境电商 ERP 场景适配)
 > **适用读者**:前端开发 / UI 调整 / Agent 生成新页面
@@ -143,20 +144,24 @@ none / xs / sm / soft / elevated / ring / ring-strong / focus
 
 ## 2. 布局结构
 
+> **v1.1 更新 (2026-09-25)** — 引入 3 系统架构。
+> 顶部 header 不再显示 page title,改为**系统切换器**;
+> 新增 **PageHeader** 作为页面上方独立的标题栏(用户圈红的位置)。
+
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  Sidebar(240px,≥md)  │  Header(56px,水平条)                       │
+│  Sidebar(240px,≥md)  │  Header(64px,h-16,系统切换器)               │
 │  ─────────────       │  ─────────────────                         │
-│  Logo                │  [标题 title]   搜索🔍   铃铛🔔 头像▾       │
-│  分组导航            ├─────────────────────────────────────────────┤
-│   - 工作台           │                                             │
-│   - 订单             │           Main Content                       │
-│   - 库存             │           (max-w-2xl 居中,p-6 ~ p-8)        │
-│   - 商品             │                                             │
-│   - 履约             │                                             │
-│   - 财务             │                                             │
-│   - 数据             │                                             │
-│   - 设置             │                                             │
+│  Logo                │  [全部][商品供应链][交易履约][经营管理] 搜索 │
+│  ─────────────       ├─────────────────────────────────────────────┤
+│  当前系统            │  PageHeader(56px,h-14,sticky top-16)        │
+│  ─────────────       │  ──────────────────────                     │
+│  功能列表            │  [title]                       [actions]   │
+│   - 订单中心         ├─────────────────────────────────────────────┤
+│   - 库存中心         │                                             │
+│   - 仓储中心         │           Main Content                       │
+│   - 物流中心         │           (max-w-7xl 居中,p-4~p-8)          │
+│   - 售后中心         │                                             │
 │  © 2026 starcon      │                                             │
 └─────────────────────┴─────────────────────────────────────────────┘
 ```
@@ -169,37 +174,88 @@ none / xs / sm / soft / elevated / ring / ring-strong / focus
 | 背景 | `--sidebar` 白底 |
 | 边框 | 右侧 1px `border-sidebar-border` |
 | Logo 区 | 56px 高,Logo 组件 `size="sm"` |
-| 分组标题 | `text-label-12 uppercase tracking-wider text-sidebar-muted`,12px |
-| 导航项高度 | 32px(`h-8`),圆角 6px,水平 padding 10px |
+| **当前系统** | 顶部 mini header: 12px label "当前系统" + 13px 系统名(粗体)|
+| 导航项 | 32px(`h-8`),圆角 6px,水平 padding 10px;只显示**当前系统下**的 domain 列表 |
 | 未选中态 | `text-sidebar-foreground/70`,hover `bg-sidebar-accent/50` |
 | **选中态** | 浅蓝软底 `bg-sidebar-accent` + 主色图标(`sidebar-primary`)+ `font-medium` |
 | 选中态图标 | `text-[hsl(var(--sidebar-primary))] opacity-100`,**绝不是黑/灰** — 这是区分"我在哪"的关键视觉锚 |
 | 子项 | 缩进 16px,左边线 1px `border-sidebar-border`,高度 28px |
 | 底栏 | 边框 + `text-label-12 text-sidebar-muted`,`© 2026 starcon` |
 
-**侧栏分组结构**(starcon ERP 领域分组):
+**3 系统 × 15 Domain 架构**(来自用户 2026-09-25 提供的 AI ERP 总功能地图):
 
 ```
-工作台          首页 dashboard、待办、AI 助手
-订单            多平台订单、异常单、退款单
-库存            库存总览、SKU 管理、调拨
-商品            SPU、Listing、平台映射
-履约            出库、拣货单、物流追踪
-财务            应收应付、结算、对账
-数据            报表、分析、BI 看板
-设置            团队、角色、平台对接、API key
+全部 (AI ERP 总览)
+├─ 工作台       / 首页 dashboard、待办、关键指标
+└─ AI Copilot   / AI 助手与自动化
+
+商品供应链
+├─ 商品中心     / SKU 与变型管理
+├─ 刊登中心     / 多平台商品刊登
+├─ 定价中心     / 价格策略与汇率
+├─ 采购中心     / 采购单与供应商
+└─ 供应中心     / 供应商与档口管理
+
+交易履约
+├─ 订单中心     / 多平台订单聚合
+├─ 库存中心     / 全渠道库存协同
+├─ 仓储中心     / 仓位与库内作业
+├─ 物流中心     / 物流轨迹与配送
+└─ 售后中心     / 退款 / 退货 / 客诉
+
+经营管理
+├─ 财务中心     / 对账与结算
+├─ 利润中心     / 毛利与分润
+├─ 数据中心     / 数据看板与报表
+├─ CRM / 客服   / 客户档案与工单
+└─ 组织 / 权限  / 员工与角色权限
 ```
 
-### 2.2 顶栏
+**侧栏过滤规则**:`usePathname()` → `resolveSystemFromPath()` 推断 system → 只渲染该 system 的 items。切换系统 = 跳到该 system 的 `defaultHref`。
+
+### 2.2 顶栏(系统切换器)
 
 | 项目 | 规格 |
 |---|---|
-| 高度 | 56px(`h-14`) |
-| 背景 | `--background`(与主区一致,非纯白 — 比白色略暗,做"沉下去"感) |
+| 高度 | 64px(`h-16`) — 比 v1.0 的 56px 多 8px,给 Tab 视觉更舒展 |
+| 背景 | `--background` + `bg-background/95 backdrop-blur`(滚动时透出内容) |
 | 边框 | 底部 1px `border-border` |
-| **左侧** | **只显示 page title**(见 §6 用户硬规则)。类名:`text-h-16 text-foreground tracking-tight` |
+| **左侧 (≥md)** | **不再显示 page title**;显示 **Segmented 系统切换器** |
 | 中央 | 全局搜索框(占位 "搜索订单 / 商品 / 客户")+ 右侧 `⌘K` kbd 提示(≥xl 才显示) |
 | 右侧 | 通知铃铛 + 头像下拉(用户菜单、租户切换、登出) |
+| **左侧 (<md)** | Logo + 移动端 hamburger(右上角,见 §2.4) |
+
+**系统切换器 Segmented 配置**:
+
+```ts
+[
+  { id: 'overview', label: '全部' },        // 默认
+  { id: 'product',  label: '商品供应链' },
+  { id: 'trade',    label: '交易履约' },
+  { id: 'manage',   label: '经营管理' },
+]
+```
+
+- 选中态: 浅蓝软底 `bg-background` + `shadow-sm` + `font-medium`
+- 切换 → `router.push(target.defaultHref)`
+- 由 `usePathname()` → `resolveSystemFromPath()` 自动同步当前高亮
+
+### 2.3 PageHeader(新)
+
+| 项目 | 规格 |
+|---|---|
+| 位置 | 主区上方,sticky `top-16`(紧贴顶栏 64px 下方) |
+| 高度 | 56px(`h-14`) |
+| 背景 | `bg-background/95 backdrop-blur`(滚动时半透明) |
+| 边框 | 底部 1px `border-border` |
+| **左侧** | **当前页 title**,**只显示当前页 label,不带系统/分组前缀**(见 §6 用户硬规则 #1)。类名:`text-h-20 text-foreground tracking-tight truncate` |
+| 右侧 | 页面级 actions 槽(`ml-auto`) |
+| 副标题 | 可选 `description`(12px 灰) |
+
+**反面例子**:
+- ❌ "交易履约 / 订单中心"(系统前缀)
+- ❌ "订单中心 / 订单列表"(父级前缀)
+- ✅ "订单列表"(只当前页 label)
 
 ### 2.3 主区
 
@@ -212,7 +268,18 @@ none / xs / sm / soft / elevated / ring / ring-strong / focus
 - <md:**侧栏隐藏**,核心操作放浮动按钮(若需要 AI 助手入口)
 - 顶栏:hamburger 在**右上角**(Menu 图标),点击**从右滑出**抽屉
 - 抽屉头部:**关闭 X 在左**,Logo 在右(贴近入口图标)
+- **抽屉内额外含 Segmented 系统切换器**(置于 Logo 下方),保持系统切换能力
 - 这条规则见 §6 用户硬规则 #3
+
+### 2.5 顶栏 / PageHeader / 侧栏 的层级关系
+
+```
+z-30  ← Header (sticky top-0)
+z-20  ← PageHeader (sticky top-16)
+z-10  ← Sidebar (sticky top-0) — 但 aside 自身只在 nav 溢出时滚动
+```
+
+主区滚动时,Header + PageHeader 都 sticky 不动;侧栏独立滚动(只在 nav 内容溢出时)。
 
 ---
 
@@ -550,3 +617,4 @@ starcon 前端尚未实现,以下为**规划中的页面**与本规范的对应,
 | 版本 | 日期 | 修订说明 |
 |---|---|---|
 | V1.0 | 2026-09-25 | 初版,从"能耗诊断管理系统"PIONEERING V1.0 视觉规范迁移,适配跨境电商 ERP 场景;移除 `--energy`,StatCard 趋势支持双向,导航按 ERP 领域重组,图表支持多指标 |
+| V1.1 | 2026-09-25 | 引入 3 系统 × 15 Domain 架构(AI ERP 总功能地图);顶部 header 改为系统切换器(全部 / 商品供应链 / 交易履约 / 经营管理);新增 PageHeader 独立标题栏;新增 nav-config.ts 单一真相源;catch-all `[...slug]` 兜底路由 |
