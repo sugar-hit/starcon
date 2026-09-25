@@ -1,8 +1,8 @@
 # 视觉规范手册 — starcon 跨境电商 ERP
 
 > **项目名称**:starcon
-> **文档版本**:V1.1
-> **最新修订**:2026-09-25 — 引入 3 系统 × 15 Domain 架构,顶部 header 改为系统切换器,新增 PageHeader 独立标题栏
+> **文档版本**:V1.2
+> **最新修订**:2026-09-25 — 引入 3 系统 × 15 Domain 架构,顶部 header 改为系统切换器,新增 PageHeader 独立标题栏;PageHeader 字号 h-20→h-16 font-semibold
 > **最新修订**:2026-09-25
 > **修订人**:Mavis(基于"能耗诊断管理系统"V1.0 视觉规范迁移 + 跨境电商 ERP 场景适配)
 > **适用读者**:前端开发 / UI 调整 / Agent 生成新页面
@@ -244,13 +244,16 @@ none / xs / sm / soft / elevated / ring / ring-strong / focus
 
 | 项目 | 规格 |
 |---|---|
-| 位置 | 主区上方,sticky `top-16`(紧贴顶栏 64px 下方) |
-| 高度 | 56px(`h-14`) |
-| 背景 | `bg-background/95 backdrop-blur`(滚动时半透明) |
+| 位置 | 主区上方,**不 sticky**(普通块元素,占文档流) |
+| 高度 | 48px(`h-12`) |
+| 背景 | `bg-background`(实心,不透明) |
 | 边框 | 底部 1px `border-border` |
-| **左侧** | **当前页 title**,**只显示当前页 label,不带系统/分组前缀**(见 §6 用户硬规则 #1)。类名:`text-h-20 text-foreground tracking-tight truncate` |
+| 内边距 | `px-5`(跟侧栏 Logo / Nav padding 对齐,20px) |
+| **左侧** | **当前页 title**,**只显示当前页 label,不带系统/分组前缀**(见 §6 用户硬规则 #1)。类名:`text-h-16 font-semibold tracking-tight truncate`(16px / 600) |
 | 右侧 | 页面级 actions 槽(`ml-auto`) |
-| 副标题 | 可选 `description`(12px 灰) |
+| 副标题 | 可选 `description`(13px 灰) |
+
+**字号选择**:`text-h-16 font-semibold`(16px / 600),用 **weight 而不是 size** 来突出 — 跟周围 14px 文字层级连续,不突兀。
 
 **反面例子**:
 - ❌ "交易履约 / 订单中心"(系统前缀)
@@ -618,3 +621,4 @@ starcon 前端尚未实现,以下为**规划中的页面**与本规范的对应,
 |---|---|---|
 | V1.0 | 2026-09-25 | 初版,从"能耗诊断管理系统"PIONEERING V1.0 视觉规范迁移,适配跨境电商 ERP 场景;移除 `--energy`,StatCard 趋势支持双向,导航按 ERP 领域重组,图表支持多指标 |
 | V1.1 | 2026-09-25 | 引入 3 系统 × 15 Domain 架构(AI ERP 总功能地图);顶部 header 改为系统切换器(全部 / 商品供应链 / 交易履约 / 经营管理);新增 PageHeader 独立标题栏;新增 nav-config.ts 单一真相源;catch-all `[...slug]` 兜底路由 |
+| V1.2 | 2026-09-25 | 移除"全部"系统 / 移除侧栏"当前系统"标识;PageHeader h-20 → h-16 font-semibold,h-14 → h-12;主区 padding 跟侧栏对齐(px-5)|
