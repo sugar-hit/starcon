@@ -29,7 +29,7 @@ export default function HomePage() {
             <Sparkles className="h-3.5 w-3.5" />
             设计系统已就绪
           </div>
-          <div className="text-h-20 text-foreground tracking-tight">
+          <div className="text-h-16 font-semibold text-foreground tracking-tight">
             视觉规范 v1.0 已落地
           </div>
           <div className="text-copy-13 text-muted-foreground">
