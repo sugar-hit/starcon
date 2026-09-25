@@ -8,6 +8,9 @@ import { cn } from '../../lib/utils';
  * 不要用 className="bg-blue-500 text-white" 拼按钮
  */
 const buttonVariants = cva(
+  // base 提供 font-size (text-btn-14) — 不要在 size 里重复写，
+  // 否则 twMerge 会把 variant 的 text-* 颜色（如 text-primary-foreground）
+  // 当作与 text-btn-14 同组冲突并覆盖掉，导致按钮看不见字。
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-btn-14 transition-colors duration-base ease-out-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/10 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
@@ -22,9 +25,9 @@ const buttonVariants = cva(
         link: 'text-brand underline-offset-4 hover:underline',
       },
       size: {
-        sm: 'h-8 px-3 text-btn-14',
-        default: 'h-9 px-4 text-btn-14',
-        lg: 'h-10 px-6 text-btn-14',
+        sm: 'h-8 px-3',
+        default: 'h-9 px-4',
+        lg: 'h-10 px-6',
         icon: 'h-9 w-9',
       },
     },
