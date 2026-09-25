@@ -36,9 +36,9 @@ export interface PageHeaderProps {
 export function PageHeader({ title, description, actions, children, className }: PageHeaderProps) {
   return (
     <div className={cn('border-b border-border bg-background', className)}>
-      <div className="mx-auto flex h-12 w-full max-w-7xl items-center gap-4 px-5">
+      <div className="flex h-12 w-full items-center gap-4 px-5">
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-h-20 font-semibold text-primary tracking-tight">
+          <h1 className="truncate text-[18px] font-semibold text-primary tracking-tight">
             {title}
           </h1>
           {description && (
