@@ -1,8 +1,8 @@
 # 视觉规范手册 — starcon 跨境电商 ERP
 
 > **项目名称**:starcon
-> **文档版本**:V1.3
-> **最新修订**:2026-09-25 — 4 系统架构 (开发/运营/物流/仓储),按团队职能分组;PageHeader h1 → h-14 font-semibold, 高度 h-10;NavList item → h-7 copy-13;Logo 下加 border-b
+> **文档版本**:V1.4
+> **最新修订**:2026-09-25 — Typography V1.4 重平衡:StatCard value → h-24 (不再靠屏);PageHeader h1 18→16px font-semibold;Nav item 13→14px 跟正文对齐;Segmented md 12→13px;Logo / Header 统一 h-16 border-b 在 y=64 对齐
 > **最新修订**:2026-09-25
 > **修订人**:Mavis(基于"能耗诊断管理系统"V1.0 视觉规范迁移 + 跨境电商 ERP 场景适配)
 > **适用读者**:前端开发 / UI 调整 / Agent 生成新页面
@@ -109,6 +109,23 @@ Tailwind 通过 `fontSize` 扩展注入,类名直接用:
 - 不允许用 `text-sm` / `text-base` / `text-lg` 这些 Tailwind 默认档,**只准用**上述 `h-N` / `copy-N` / `label-N` / `btn-N` 类名
 - 字距自动:`letter-spacing: -0.02em`(标题)/ `0`(正文)/ `tracking-wider`(全大写 label)
 
+**应用映射 (V1.4)** —— 哪个 token 用在哪儿:
+
+| UI 元素 | token | px | 备注 |
+|---|---|---:|---|
+| StatCard value (KPI hero) | `text-h-24` | 24 | 不再靠屏,跟 SectionCard 标题区分 |
+| PageHeader h1 | `text-h-16` | 16 | font-semibold;页面顶部独立标题栏 |
+| SectionCard title | `text-h-16` | 16 | font-semibold |
+| CardTitle (banner hero) | `text-h-16` | 16 | 弹窗/横幅里的大标题 |
+| CardTitle (typical) | `text-h-14` | 14 | font-medium;常规卡片标题 |
+| Nav item | `text-copy-14` | 14 | 跟正文一致,避免密疏差 |
+| Button text | `text-btn-14` | 14 | |
+| Header 按钮 (Copilot / 通知 / Avatar) | `text-label-13` | 13 | 工具栏次要文本 |
+| Body / Description / helper | `text-copy-14` | 14 | 绝大多数正文 |
+| StatCard label / Segmented md | `text-label-13` | 13 | 元信息密度档 |
+| Eyebrow / Badge / Table header | `text-label-12` | 12 | 全大写、tracking-wider |
+| Segmented sm | `text-label-12` | 12 | 高密度工具条场景 |
+
 ### 1.4 圆角、阴影、动效
 
 **圆角**(`borderRadius` 扩展):
@@ -174,7 +191,7 @@ none / xs / sm / soft / elevated / ring / ring-strong / focus
 | 背景 | `--sidebar` 白底 |
 | 边框 | 右侧 1px `border-sidebar-border` |
 | Logo 区 | 48px 高(`h-12`),底部 1px `border-sidebar-border`(跟菜单永久分隔) |
-| 导航项 | 28px(`h-7`),圆角 6px,水平 padding 8px;字号 13px(`copy-13`);icon 14px(`h-3.5`) |
+| 导航项 | 28px(`h-7`),圆角 6px,水平 padding 8px;字号 14px(`copy-14`);icon 14px(`h-3.5`) |
 | 未选中态 | `text-sidebar-foreground/70`,hover `bg-sidebar-accent/50` |
 | **选中态** | 浅蓝软底 `bg-sidebar-accent` + 主色图标(`sidebar-primary`)+ `font-medium` |
 | 选中态图标 | `text-[hsl(var(--sidebar-primary))] opacity-100`,**绝不是黑/灰** — 这是区分"我在哪"的关键视觉锚 |
@@ -626,3 +643,4 @@ starcon 前端尚未实现,以下为**规划中的页面**与本规范的对应,
 | V1.1 | 2026-09-25 | 引入 3 系统 × 15 Domain 架构(AI ERP 总功能地图);顶部 header 改为系统切换器(全部 / 商品供应链 / 交易履约 / 经营管理);新增 PageHeader 独立标题栏;新增 nav-config.ts 单一真相源;catch-all `[...slug]` 兜底路由 |
 | V1.2 | 2026-09-25 | 移除"全部"系统 / 移除侧栏"当前系统"标识;PageHeader h-20 → h-16 font-semibold,h-14 → h-12;主区 padding 跟侧栏对齐(px-5)|
 | V1.3 | 2026-09-25 | 4 系统重命名为 开发/运营/物流/仓储 (按团队职能);PageHeader h-16→h-14 font-semibold, h-12→h-10;NavList item h-8→h-7, copy-14→copy-13;Logo 下加 border-b 分隔 |
+| V1.4 | 2026-09-25 | Typography 重平衡:StatCard value → h-24;PageHeader h1 18→16px font-semibold;Nav item 13→14px;Segmented md 12→13px;Logo / Header 统一 h-16 border-b 在 y=64 对齐 |
