@@ -267,7 +267,7 @@ export function AppShell({ system, title = '工作台', actions, children }: App
         {/* 主区 */}
         <main className="flex-1 overflow-x-hidden">
           <PageHeader title={title} />
-          <div className="mx-auto w-full max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">{children}</div>
+          <div className="mx-auto w-full max-w-7xl space-y-6 px-5 py-6">{children}</div>
         </main>
       </div>
     </div>
