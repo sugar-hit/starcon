@@ -122,9 +122,9 @@ Tailwind 通过 `fontSize` 扩展注入,类名直接用:
 | Button text | `text-btn-14` | 14 | |
 | Header 按钮 (Copilot / 通知 / Avatar) | `text-label-13` | 13 | 工具栏次要文本 |
 | Body / Description / helper | `text-copy-14` | 14 | 绝大多数正文 |
-| StatCard label / Segmented md | `text-label-13` | 13 | 元信息密度档 |
-| Eyebrow / Badge / Table header | `text-label-12` | 12 | 全大写、tracking-wider |
-| Segmented sm | `text-label-12` | 12 | 高密度工具条场景 |
+| StatCard label / Tabs | `text-label-13` | 13 | 元信息密度档 |
+| **Segmented md** | `text-label-14` | 14 | 主切换控件;跟 Nav / CardTitle 同档 |
+| Eyebrow / Badge / Table header / **Segmented sm** | `text-label-12` | 12 | 全大写、tracking-wider |
 
 ### 1.4 圆角、阴影、动效
 
@@ -643,4 +643,4 @@ starcon 前端尚未实现,以下为**规划中的页面**与本规范的对应,
 | V1.1 | 2026-09-25 | 引入 3 系统 × 15 Domain 架构(AI ERP 总功能地图);顶部 header 改为系统切换器(全部 / 商品供应链 / 交易履约 / 经营管理);新增 PageHeader 独立标题栏;新增 nav-config.ts 单一真相源;catch-all `[...slug]` 兜底路由 |
 | V1.2 | 2026-09-25 | 移除"全部"系统 / 移除侧栏"当前系统"标识;PageHeader h-20 → h-16 font-semibold,h-14 → h-12;主区 padding 跟侧栏对齐(px-5)|
 | V1.3 | 2026-09-25 | 4 系统重命名为 开发/运营/物流/仓储 (按团队职能);PageHeader h-16→h-14 font-semibold, h-12→h-10;NavList item h-8→h-7, copy-14→copy-13;Logo 下加 border-b 分隔 |
-| V1.4 | 2026-09-25 | Typography 重平衡:StatCard value → h-24;PageHeader h1 18→16px font-semibold;Nav item 13→14px;Segmented md 12→13px;Logo / Header 统一 h-16 border-b 在 y=64 对齐 |
+| V1.4 | 2026-09-25 | Typography 重平衡:StatCard value → h-24;PageHeader h1 18→16px font-semibold;Nav item 13→14px;Segmented md 12→13→14px(两轮反馈);Logo / Header 统一 h-16 border-b 在 y=64 对齐 |
