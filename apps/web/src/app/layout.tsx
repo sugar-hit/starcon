@@ -11,6 +11,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'starcon — 跨境电商 ERP',
   description: '企业级跨境电商 ERP SaaS',
+  icons: {
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    apple: [{ url: '/favicon.svg' }],
+  },
 };
 
 export default function RootLayout({
