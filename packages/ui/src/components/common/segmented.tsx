@@ -49,7 +49,7 @@ export function Segmented<T extends string = string>({
             onClick={() => !opt.disabled && onChange(opt.value)}
             className={cn(
               'inline-flex items-center justify-center gap-1.5 rounded-[5px] transition-colors duration-base ease-out-expo',
-              size === 'sm' ? 'h-7 px-3 text-label-13' : 'h-8 px-4 text-label-14',
+              size === 'sm' ? 'h-7 px-3 text-label-12' : 'h-8 px-4 text-label-13',
               isActive
                 ? 'bg-background font-medium text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',
