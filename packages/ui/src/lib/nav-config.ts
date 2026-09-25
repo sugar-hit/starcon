@@ -20,26 +20,18 @@ import type { LucideIcon } from 'lucide-react';
 /**
  * starcon 导航配置 — 单一真相源
  *
- * 架构（来自用户提供的 AI ERP 总功能地图）:
- *   全部 (AI ERP)
- *     └─ 系统 × 3        ← 顶部 Segmented Tab（用户硬规则：不含"全部"）
- *          ├─ 商品供应链
- *          ├─ 交易履约
- *          └─ 经营管理
- *              └─ Domain (功能) × 15
+ * 4 个系统（按团队职能划分，用户 2026-09-25 最终确认）:
+ *   开发     — 商品 / 刊登 / 定价 / 采购 / 供应
+ *   运营     — 订单 / 售后 / CRM 客服 / 数据 / 财务 / 利润 / 组织权限
+ *   物流     — 物流中心
+ *   仓储     — 仓储中心 / 库存中心
  *
- *   顶层固定项 × 2      ← 侧栏顶部，不属于任何系统
- *     ├─ 工作台          （首页 = /）
- *     └─ AI Copilot
- *
- * 路由约定:
- *   /            = 工作台
- *   /products    = 商品中心（商品供应链）
- *   /orders      = 订单中心（交易履约）
- *   /finance     = 财务中心（经营管理）
+ * 顶层固定项 × 2（不属于任何系统）:
+ *   工作台   —  /        首页 dashboard
+ *   AI Copilot — /copilot
  */
 
-export type SystemId = 'product' | 'trade' | 'manage';
+export type SystemId = 'dev' | 'ops' | 'logistics' | 'storage';
 
 export interface NavChildItem {
   label: string;
@@ -61,7 +53,7 @@ export interface NavItem {
 
 export interface SystemDef {
   id: SystemId;
-  /** 系统名，如 "交易履约" */
+  /** 系统名（团队 / 职能） */
   label: string;
   /** 简短描述 */
   description: string;
@@ -71,10 +63,10 @@ export interface SystemDef {
   defaultHref: string;
 }
 
-/** 商品供应链 — 5 个 domain */
-const productSystem: SystemDef = {
-  id: 'product',
-  label: '商品供应链',
+/** 开发 — 商品研发 / 上下架 / 采购供应（5 个） */
+const devSystem: SystemDef = {
+  id: 'dev',
+  label: '开发',
   description: '商品 / 刊登 / 定价 / 采购 / 供应',
   defaultHref: '/products',
   items: [
@@ -86,38 +78,48 @@ const productSystem: SystemDef = {
   ],
 };
 
-/** 交易履约 — 5 个 domain */
-const tradeSystem: SystemDef = {
-  id: 'trade',
-  label: '交易履约',
-  description: '订单 / 库存 / 仓储 / 物流 / 售后',
+/** 运营 — 订单 / 客户 / 售后 / 数据 / 财务 / 利润 / 组织（7 个） */
+const opsSystem: SystemDef = {
+  id: 'ops',
+  label: '运营',
+  description: '订单 / 客户 / 售后 / 数据 / 财务 / 利润 / 组织',
   defaultHref: '/orders',
   items: [
     { label: '订单中心', href: '/orders', icon: Package, description: '多平台订单聚合' },
-    { label: '库存中心', href: '/inventory', icon: Boxes, description: '全渠道库存协同' },
-    { label: '仓储中心', href: '/warehouse', icon: Warehouse, description: '仓位与库内作业' },
-    { label: '物流中心', href: '/logistics', icon: Ship, description: '物流轨迹与配送' },
     { label: '售后中心', href: '/aftersales', icon: HeadphonesIcon, description: '退款 / 退货 / 客诉' },
-  ],
-};
-
-/** 经营管理 — 5 个 domain */
-const manageSystem: SystemDef = {
-  id: 'manage',
-  label: '经营管理',
-  description: '财务 / 利润 / 数据 / CRM / 组织',
-  defaultHref: '/finance',
-  items: [
+    { label: 'CRM / 客服', href: '/crm', icon: Users, description: '客户档案与工单' },
+    { label: '数据中心', href: '/analytics', icon: BarChart3, description: '数据看板与报表' },
     { label: '财务中心', href: '/finance', icon: CircleDollarSign, description: '对账与结算' },
     { label: '利润中心', href: '/profit', icon: TrendingUp, description: '毛利与分润' },
-    { label: '数据中心', href: '/analytics', icon: BarChart3, description: '数据看板与报表' },
-    { label: 'CRM / 客服', href: '/crm', icon: Users, description: '客户档案与工单' },
     { label: '组织 / 权限', href: '/org', icon: Shield, description: '员工与角色权限' },
   ],
 };
 
-/** 系统列表 — 顶部 Segmented Tab 用（用户硬规则：不包含"全部"） */
-export const SYSTEMS: SystemDef[] = [productSystem, tradeSystem, manageSystem];
+/** 物流（1 个） */
+const logisticsSystem: SystemDef = {
+  id: 'logistics',
+  label: '物流',
+  description: '物流轨迹与配送',
+  defaultHref: '/logistics',
+  items: [
+    { label: '物流中心', href: '/logistics', icon: Ship, description: '物流轨迹与配送' },
+  ],
+};
+
+/** 仓储 — 仓储 / 库存（2 个） */
+const storageSystem: SystemDef = {
+  id: 'storage',
+  label: '仓储',
+  description: '仓位 / 库内作业 / 库存协同',
+  defaultHref: '/warehouse',
+  items: [
+    { label: '仓储中心', href: '/warehouse', icon: Warehouse, description: '仓位与库内作业' },
+    { label: '库存中心', href: '/inventory', icon: Boxes, description: '全渠道库存协同' },
+  ],
+};
+
+/** 系统列表 — 顶部 Segmented Tab 用 */
+export const SYSTEMS: SystemDef[] = [devSystem, opsSystem, logisticsSystem, storageSystem];
 
 /** 顶层固定项 — 侧栏顶部，不属于任何系统 */
 export const TOP_LEVEL_ITEMS: NavItem[] = [
@@ -127,16 +129,12 @@ export const TOP_LEVEL_ITEMS: NavItem[] = [
 
 /** 按 id 查系统 */
 export function getSystem(id: SystemId): SystemDef {
-  return SYSTEMS.find((s) => s.id === id) ?? productSystem;
+  return SYSTEMS.find((s) => s.id === id) ?? devSystem;
 }
 
 /**
  * 由 pathname 推断当前 system
  * 规则：精确前缀匹配 → 第一个匹配胜出
- *   /products...      → product
- *   /orders...        → trade
- *   /finance...       → manage
- *   其它（含 /, /copilot, /styleguide, /api）→ product (默认)
  */
 export function resolveSystemFromPath(pathname: string): SystemDef {
   for (const sys of SYSTEMS) {
@@ -146,7 +144,7 @@ export function resolveSystemFromPath(pathname: string): SystemDef {
       }
     }
   }
-  return productSystem;
+  return devSystem;
 }
 
 /** 由 pathname 推断当前 feature (NavItem) — 用于 PageHeader title + 当前高亮 */
