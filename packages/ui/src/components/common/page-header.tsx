@@ -7,9 +7,10 @@ import { cn } from '../../lib/utils';
  * PageHeader — 页面顶部标题栏（用户圈红的位置）
  *
  * 设计要点（来自用户硬规则）：
- *   - 只显示当前页 title，**不要 group / 系统前缀**（如不要"交易履约 / 订单中心"）
- *   - sticky top-16（紧贴顶栏 64px 下方）
- *   - 高度 h-14，背景 background，底部 1px border
+ *   - 只显示当前页 title，**不要 group / 系统前缀**
+ *   - 不 sticky（被内容遮挡反而难看） — 普通块元素占文档流
+ *   - 高度 h-14，背景 background（实心），底部 1px border
+ *   - 主区 padding 由调用方控制（不再 sticky 后无需 top-16 占位）
  *   - 右侧 actions 槽永远在右上
  *
  * 用法：
@@ -29,12 +30,7 @@ export interface PageHeaderProps {
 
 export function PageHeader({ title, description, actions, children, className }: PageHeaderProps) {
   return (
-    <div
-      className={cn(
-        'sticky top-16 z-20 border-b border-border bg-background/95 backdrop-blur',
-        className
-      )}
-    >
+    <div className={cn('border-b border-border bg-background', className)}>
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 md:px-6 lg:px-8">
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-h-20 text-foreground tracking-tight">{title}</h1>
