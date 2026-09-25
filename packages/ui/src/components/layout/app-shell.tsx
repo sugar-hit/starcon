@@ -47,7 +47,7 @@ function NavItemLink({
       href={item.href}
       onClick={onNavigate}
       className={cn(
-        'group flex h-7 items-center gap-2 rounded-md px-2 text-copy-13 transition-colors duration-base ease-out-expo',
+        'group flex h-7 items-center gap-2 rounded-md px-2 text-copy-12 transition-colors duration-base ease-out-expo',
         active
           ? 'bg-sidebar-accent font-medium text-foreground'
           : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
@@ -76,9 +76,9 @@ function NavList({ system, onNavigate }: { system: SystemDef; onNavigate?: () =>
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-1 flex-col gap-3 px-2 py-2">
+    <nav className="flex flex-1 flex-col gap-4 px-2 py-3">
       {/* 顶层固定项 — 工作台 / AI Copilot */}
-      <ul className="space-y-0.5">
+      <ul className="space-y-1">
         {TOP_LEVEL_ITEMS.map((item) => (
           <li key={item.href}>
             <NavItemLink
@@ -93,12 +93,12 @@ function NavList({ system, onNavigate }: { system: SystemDef; onNavigate?: () =>
       {/* 当前系统下的功能 */}
       {system.items.length > 0 && (
         <>
-          <div className="mx-1.5 border-t border-sidebar-border" />
+          <div className="mx-2 border-t border-sidebar-border" />
           <div className="px-1">
-            <div className="px-1.5 pb-1 pt-0.5 text-label-12 uppercase tracking-wider text-sidebar-muted">
+            <div className="px-2 pb-1.5 pt-1 text-label-12 uppercase tracking-wider text-sidebar-muted">
               {system.label}
             </div>
-            <ul className="space-y-0.5">
+            <ul className="space-y-1">
               {system.items.map((item) => (
                 <li key={item.href}>
                   <NavItemLink
