@@ -47,7 +47,7 @@ function NavItemLink({
       href={item.href}
       onClick={onNavigate}
       className={cn(
-        'group flex h-8 items-center gap-2.5 rounded-md px-2.5 text-copy-14 transition-colors duration-base ease-out-expo',
+        'group flex h-7 items-center gap-2 rounded-md px-2 text-copy-13 transition-colors duration-base ease-out-expo',
         active
           ? 'bg-sidebar-accent font-medium text-foreground'
           : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
@@ -56,7 +56,7 @@ function NavItemLink({
     >
       <Icon
         className={cn(
-          'h-4 w-4 shrink-0 transition-opacity',
+          'h-3.5 w-3.5 shrink-0 transition-opacity',
           active
             ? 'text-sidebar-primary opacity-100'
             : 'opacity-70 group-hover:opacity-100'
@@ -76,7 +76,7 @@ function NavList({ system, onNavigate }: { system: SystemDef; onNavigate?: () =>
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-1 flex-col gap-4 px-3 py-2">
+    <nav className="flex flex-1 flex-col gap-3 px-2 py-2">
       {/* 顶层固定项 — 工作台 / AI Copilot */}
       <ul className="space-y-0.5">
         {TOP_LEVEL_ITEMS.map((item) => (
@@ -93,9 +93,9 @@ function NavList({ system, onNavigate }: { system: SystemDef; onNavigate?: () =>
       {/* 当前系统下的功能 */}
       {system.items.length > 0 && (
         <>
-          <div className="mx-2.5 border-t border-sidebar-border" />
-          <div className="px-2.5">
-            <div className="pb-1.5 text-label-12 uppercase tracking-wider text-sidebar-muted">
+          <div className="mx-1.5 border-t border-sidebar-border" />
+          <div className="px-1">
+            <div className="px-1.5 pb-1 pt-0.5 text-label-12 uppercase tracking-wider text-sidebar-muted">
               {system.label}
             </div>
             <ul className="space-y-0.5">
@@ -145,7 +145,7 @@ export function AppShell({ system, title = '工作台', actions, children }: App
           sticky top-0 + h-screen + overflow-y-auto：侧栏固定在视窗顶部，
           主区滚动时侧栏不滚；侧栏自身只在 nav 溢出时出滚动条 */}
       <aside className="hidden md:sticky md:top-0 md:h-screen md:flex md:w-60 md:shrink-0 md:flex-col md:border-r md:border-sidebar-border md:overflow-y-auto md:self-start">
-        <div className="flex h-14 shrink-0 items-center px-5">
+        <div className="flex h-12 shrink-0 items-center border-b border-sidebar-border px-5">
           <Logo size="sm" />
         </div>
         <NavList system={currentSystem} />
