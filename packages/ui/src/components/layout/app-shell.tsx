@@ -47,7 +47,7 @@ function NavItemLink({
       href={item.href}
       onClick={onNavigate}
       className={cn(
-        'group flex h-7 items-center gap-2 rounded-md px-2 text-copy-12 transition-colors duration-base ease-out-expo',
+        'group flex h-7 items-center gap-2 rounded-md px-2 text-copy-13 transition-colors duration-base ease-out-expo',
         active
           ? 'bg-sidebar-accent font-medium text-foreground'
           : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
@@ -145,7 +145,7 @@ export function AppShell({ system, title = '工作台', actions, children }: App
           sticky top-0 + h-screen + overflow-y-auto：侧栏固定在视窗顶部，
           主区滚动时侧栏不滚；侧栏自身只在 nav 溢出时出滚动条 */}
       <aside className="hidden md:sticky md:top-0 md:h-screen md:flex md:w-60 md:shrink-0 md:flex-col md:border-r md:border-sidebar-border md:overflow-y-auto md:self-start">
-        <div className="flex h-12 shrink-0 items-center border-b border-sidebar-border px-5">
+        <div className="flex h-16 shrink-0 items-center border-b border-sidebar-border px-5">
           <Logo size="sm" />
         </div>
         <NavList system={currentSystem} />
