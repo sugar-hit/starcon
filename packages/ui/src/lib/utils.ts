@@ -25,7 +25,7 @@ const customTwMerge = extendTailwindMerge({
         'text-h-20', 'text-h-16', 'text-h-14',
         'text-copy-24', 'text-copy-20', 'text-copy-18', 'text-copy-16', 'text-copy-14',
         'text-copy-13', 'text-copy-12',
-        'text-label-14', 'text-label-13', 'text-label-12',
+        'text-label-15', 'text-label-14', 'text-label-13', 'text-label-12',
         'text-btn-14',
       ],
     },
