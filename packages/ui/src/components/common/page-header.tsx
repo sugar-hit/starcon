@@ -38,11 +38,11 @@ export function PageHeader({ title, description, actions, children, className }:
     <div className={cn('border-b border-border bg-background', className)}>
       <div className="mx-auto flex h-12 w-full max-w-7xl items-center gap-4 px-5">
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-h-16 font-semibold text-primary tracking-tight">
+          <h1 className="truncate text-h-20 font-semibold text-primary tracking-tight">
             {title}
           </h1>
           {description && (
-            <p className="truncate text-copy-12 text-muted-foreground">{description}</p>
+            <p className="truncate text-copy-13 text-muted-foreground">{description}</p>
           )}
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-2">{actions}</div>
