@@ -3,14 +3,16 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Bell, Menu, Search, X } from 'lucide-react';
+import { Bell, Menu, Search, Sparkles, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
   SYSTEMS,
+  TOP_LEVEL_ITEMS,
   getSystem,
   resolveSystemFromPath,
   type SystemId,
   type SystemDef,
+  type NavItem,
 } from '../../lib/nav-config';
 import { Logo } from '../common/logo';
 import { Avatar } from '../common/avatar';
@@ -28,48 +30,88 @@ function useCurrentSystem(override?: SystemId): SystemDef {
 }
 
 /**
- * 左侧导航列表 — 仅渲染当前 system 下的功能
+ * 通用导航项渲染 — 用于左侧 + 移动端抽屉
  */
-function NavList({
-  system,
+function NavItemLink({
+  item,
+  active,
   onNavigate,
 }: {
-  system: SystemDef;
+  item: NavItem;
+  active: boolean;
   onNavigate?: () => void;
 }) {
+  const Icon = item.icon;
+  return (
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      className={cn(
+        'group flex h-8 items-center gap-2.5 rounded-md px-2.5 text-copy-14 transition-colors duration-base ease-out-expo',
+        active
+          ? 'bg-sidebar-accent font-medium text-foreground'
+          : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
+      )}
+      title={item.description}
+    >
+      <Icon
+        className={cn(
+          'h-4 w-4 shrink-0 transition-opacity',
+          active
+            ? 'text-sidebar-primary opacity-100'
+            : 'opacity-70 group-hover:opacity-100'
+        )}
+      />
+      {item.label}
+    </Link>
+  );
+}
+
+/**
+ * 左侧导航列表
+ *   - 顶部固定区：工作台 + AI Copilot（不属于任何 system）
+ *   - 分隔后：当前 system 的 domain 列表
+ */
+function NavList({ system, onNavigate }: { system: SystemDef; onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-1 flex-col gap-6 px-3 py-2">
-      {system.items.map((item) => {
-        const Icon = item.icon;
-        const active =
-          pathname === item.href || pathname.startsWith(item.href + '/');
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onNavigate}
-            className={cn(
-              'group flex h-8 items-center gap-2.5 rounded-md px-2.5 text-copy-14 transition-colors duration-base ease-out-expo',
-              active
-                ? 'bg-sidebar-accent font-medium text-foreground'
-                : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground'
-            )}
-            title={item.description}
-          >
-            <Icon
-              className={cn(
-                'h-4 w-4 shrink-0 transition-opacity',
-                active
-                  ? 'text-sidebar-primary opacity-100'
-                  : 'opacity-70 group-hover:opacity-100'
-              )}
+    <nav className="flex flex-1 flex-col gap-4 px-3 py-2">
+      {/* 顶层固定项 — 工作台 / AI Copilot */}
+      <ul className="space-y-0.5">
+        {TOP_LEVEL_ITEMS.map((item) => (
+          <li key={item.href}>
+            <NavItemLink
+              item={item}
+              active={pathname === item.href || pathname.startsWith(item.href + '/')}
+              onNavigate={onNavigate}
             />
-            {item.label}
-          </Link>
-        );
-      })}
+          </li>
+        ))}
+      </ul>
+
+      {/* 当前系统下的功能 */}
+      {system.items.length > 0 && (
+        <>
+          <div className="mx-2.5 border-t border-sidebar-border" />
+          <div className="px-2.5">
+            <div className="pb-1.5 text-label-12 uppercase tracking-wider text-sidebar-muted">
+              {system.label}
+            </div>
+            <ul className="space-y-0.5">
+              {system.items.map((item) => (
+                <li key={item.href}>
+                  <NavItemLink
+                    item={item}
+                    active={pathname === item.href || pathname.startsWith(item.href + '/')}
+                    onNavigate={onNavigate}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
+      )}
     </nav>
   );
 }
@@ -85,11 +127,11 @@ export interface AppShellProps {
 }
 
 /**
- * AppShell v2 — 三层架构适配版
+ * AppShell v3 — 三层架构简化版
  *
- *   顶部 Header  → 系统切换器（不显示 title）
- *   主区 PageHeader → 当前页 title（不带系统前缀）
- *   左侧 Aside  → 当前 system 下的功能列表
+ *   顶部 Header  → 系统切换器（3 个真实系统，不含"全部"）
+ *   新 PageHeader → 当前页 title（不带系统前缀）
+ *   左侧 Aside  → 顶部固定项（工作台/AI Copilot）+ 当前系统下的功能
  *
  * 设计文档: docs/design/visual-spec.md § 2
  */
@@ -106,15 +148,6 @@ export function AppShell({ system, title = '工作台', actions, children }: App
         <div className="flex h-14 shrink-0 items-center px-5">
           <Logo size="sm" />
         </div>
-        {/* 当前 system 标识（侧栏顶部） — 帮助用户感知"我在哪个系统里" */}
-        <div className="shrink-0 border-b border-sidebar-border px-5 pb-2">
-          <div className="text-label-12 uppercase tracking-wider text-sidebar-muted">
-            当前系统
-          </div>
-          <div className="mt-0.5 text-copy-13 font-medium text-foreground">
-            {currentSystem.label}
-          </div>
-        </div>
         <NavList system={currentSystem} />
         <div className="shrink-0 border-t border-sidebar-border px-5 py-3 text-label-12 text-muted-foreground">
           © 2026 starcon
@@ -123,15 +156,14 @@ export function AppShell({ system, title = '工作台', actions, children }: App
 
       {/* === 右侧主体 === */}
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* 顶栏 — 系统切换器（不再显示 title，title 移到 PageHeader）
-            高度从 h-14 提到 h-16 给 Tab 视觉更舒展 */}
+        {/* 顶栏 — 系统切换器（不再显示 title，title 移到 PageHeader） */}
         <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/95 px-4 backdrop-blur md:px-6">
-          {/* 左：Logo + 移动端 */}
+          {/* 左：移动端 Logo（桌面端侧栏已显示） */}
           <div className="md:hidden">
             <Logo size="sm" />
           </div>
 
-          {/* 中：系统切换器 — 桌面端居中偏左，移动端靠左 */}
+          {/* 中：系统切换器 — 只 3 个真实系统，不含"全部" */}
           <div className="flex flex-1 items-center md:flex-none">
             <Segmented
               value={currentSystem.id}
@@ -165,6 +197,15 @@ export function AppShell({ system, title = '工作台', actions, children }: App
           {/* 右侧操作 */}
           <div className="ml-auto flex items-center gap-2">
             {actions}
+            {/* AI Copilot 入口 */}
+            <Link
+              href="/copilot"
+              className="hidden h-9 items-center gap-1.5 rounded-md px-2.5 text-label-13 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:inline-flex"
+              aria-label="AI Copilot"
+            >
+              <Sparkles className="h-4 w-4" />
+              AI Copilot
+            </Link>
             {/* bell + avatar 仅桌面端显示 */}
             <button
               type="button"
@@ -225,8 +266,6 @@ export function AppShell({ system, title = '工作台', actions, children }: App
 
         {/* 主区 */}
         <main className="flex-1 overflow-x-hidden">
-          {/* 新标题栏 — 显示当前页 title（不带系统前缀）+ actions
-              这是用户圈红的位置 */}
           <PageHeader title={title} />
           <div className="mx-auto w-full max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">{children}</div>
         </main>
