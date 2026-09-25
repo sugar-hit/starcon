@@ -79,7 +79,7 @@ export function StatCard({
       </div>
 
       <div className="mt-3 flex items-baseline gap-1">
-        <div className={cn('text-h-32 text-foreground tracking-tight', numClass)}>{formatted}</div>
+        <div className={cn('text-h-24 text-foreground tracking-tight', numClass)}>{formatted}</div>
         {unit && <div className="text-copy-14 text-muted-foreground">{unit}</div>}
       </div>
 
