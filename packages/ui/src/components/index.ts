@@ -18,6 +18,9 @@ export * from './common/page-header';
 export * from './common/feature-list';
 export * from './common/domain-status-banner';
 export * from './common/domain-placeholder';
+export * from './common/detail-drawer';
+export * from './common/external-link';
+export * from './common/command-palette';
 export * from '../lib/nav-config';
 export * from '../lib/domain-spec';
 
