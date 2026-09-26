@@ -1,99 +1,83 @@
 import Link from 'next/link';
-import {
-  ArrowRight,
-  Boxes,
-  CreditCard,
-  Package,
-  PackageOpen,
-  Truck,
-  LayoutDashboard,
-  Sparkles,
-} from 'lucide-react';
-import { AppShell, Button, SectionCard, StatCard } from '@starcon/ui';
-import { OrderTrendChart } from '@/components/order-trend-chart';
+import { ArrowRight, Box, CheckCircle2, Clock3 } from 'lucide-react';
+import { AppShell, Button, DomainPlaceholder, getDomainSpec, SectionCard } from '@starcon/ui';
 
-const stats = [
-  { label: '今日订单', value: 12847, delta: 12.5, deltaDirection: 'up' as const, polarity: 'positive' as const, comparisonLabel: '较昨日', icon: <Package className="h-4 w-4" /> },
-  { label: '今日营收', value: 2483950, unit: 'CNY', delta: 8.2, deltaDirection: 'up' as const, polarity: 'positive' as const, comparisonLabel: '较昨日', icon: <CreditCard className="h-4 w-4" /> },
-  { label: '待处理订单', value: 384, delta: 4.2, deltaDirection: 'up' as const, polarity: 'negative' as const, comparisonLabel: '较昨日', icon: <Boxes className="h-4 w-4" /> },
-  { label: '库存预警 SKU', value: 23, delta: 12.0, deltaDirection: 'down' as const, polarity: 'negative' as const, comparisonLabel: '较昨日', icon: <PackageOpen className="h-4 w-4" /> },
-];
-
+/**
+ * 工作台 — 首页
+ *
+ * 设计原则:
+ *   - 不展示 mock 数据
+ *   - 顶部放快速入口,引导用户进入具体 domain
+ *   - 主区域展示工作台 domain 的功能清单与上下游
+ */
 export default function HomePage() {
+  const spec = getDomainSpec('overview');
   return (
-    <AppShell title="工作台">
-      {/* 欢迎 / 跳转 banner */}
-      <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-5 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-label-12 uppercase tracking-wider text-brand">
-            <Sparkles className="h-3.5 w-3.5" />
-            设计系统已就绪
-          </div>
-          <div className="text-h-16 font-semibold text-foreground tracking-tight">
-            视觉规范 v1.0 已落地
-          </div>
-          <div className="text-copy-13 text-muted-foreground">
-            前往 Styleguide 查看所有设计令牌、组件与图表。
-          </div>
+    <AppShell
+      title="工作台"
+      description="今日关键指标与待办,业务一日开屏。"
+      actions={
+        <Button variant="outline" asChild>
+          <Link href="/orders">
+            订单中心
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </Button>
+      }
+    >
+      <div className="text-copy-13 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="font-medium">2026 年 9 月 26 日</span>
+          <span className="text-muted-foreground">Asia/Shanghai</span>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" asChild>
-            <Link href="https://github.com/sugar-hit/starcon" target="_blank">
-              查看仓库
-            </Link>
-          </Button>
-          <Button variant="brand" asChild>
-            <Link href="/styleguide">
-              进入 Styleguide
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
+        <span className="text-copy-13 text-muted-foreground">
+          指标与图表将在数据接入后展示
+        </span>
       </div>
 
-      {/* KPI 4 卡（双向趋势演示） */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((s) => (
-          <StatCard key={s.label} {...s} />
-        ))}
-      </div>
-
-      {/* 订单趋势图 + 平台分布 */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <SectionCard
-          title="订单趋势"
-          description="近 7 天订单量走势（主色 vs 同期对比）"
-          className="lg:col-span-2"
-          bodyClassName="px-2 py-3"
-        >
-          <OrderTrendChart />
-        </SectionCard>
-
-        <SectionCard title="平台分布" description="本周订单来源">
-          <div className="space-y-3">
-            {[
-              { name: 'Amazon', share: 42, color: 'hsl(32 95% 44%)' },
-              { name: 'Shopify', share: 26, color: 'hsl(152 56% 38%)' },
-              { name: 'eBay', share: 14, color: 'hsl(220 70% 45%)' },
-              { name: 'TikTok Shop', share: 11, color: 'hsl(330 75% 55%)' },
-              { name: '其他', share: 7, color: 'hsl(0 0% 60%)' },
-            ].map((p) => (
-              <div key={p.name} className="space-y-1.5">
-                <div className="flex items-center justify-between text-copy-13">
-                  <span className="text-foreground">{p.name}</span>
-                  <span className="num text-muted-foreground">{p.share}%</span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full"
-                    style={{ width: `${p.share}%`, background: p.color }}
-                  />
-                </div>
+      <SectionCard
+        title="快捷入口"
+        description="按任务类型快速进入业务"
+        bodyClassName="p-0"
+      >
+        <div className="divide-border divide-y">
+          {[
+            {
+              label: '处理新订单',
+              description: '检查订单信息与履约条件',
+              href: '/orders',
+              icon: Clock3,
+            },
+            {
+              label: '关注库存',
+              description: '检查可用量与补货需求',
+              href: '/inventory',
+              icon: Box,
+            },
+            {
+              label: '核对结算',
+              description: '按币种与店铺核对账目',
+              href: '/finance',
+              icon: CheckCircle2,
+            },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="hover:bg-muted/50 flex items-center gap-3 p-5"
+            >
+              <item.icon className="text-muted-foreground h-4 w-4 shrink-0" />
+              <div className="flex-1">
+                <p className="text-label-13">{item.label}</p>
+                <p className="text-copy-12 text-muted-foreground mt-1">{item.description}</p>
               </div>
-            ))}
-          </div>
-        </SectionCard>
-      </div>
+              <ArrowRight className="text-muted-foreground h-4 w-4" />
+            </Link>
+          ))}
+        </div>
+      </SectionCard>
+
+      {spec && <DomainPlaceholder spec={spec} />}
     </AppShell>
   );
 }

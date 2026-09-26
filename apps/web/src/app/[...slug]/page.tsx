@@ -1,41 +1,38 @@
-import { AppShell, EmptyState, Button } from '@starcon/ui';
-import { resolveSystemFromPath, resolveFeatureFromPath } from '@starcon/ui';
-import { Package } from 'lucide-react';
-
-interface PlaceholderProps {
-  params: { slug?: string[] };
-}
+import Link from 'next/link';
+import { ArrowLeft, Search } from 'lucide-react';
+import { AppShell, Button, EmptyState } from '@starcon/ui';
 
 /**
- * 兜底路由 — 所有已规划但还没实现具体业务页的 domain
- * 走这里（订单中心 / 商品中心 / 财务中心 ...）
+ * 兜底路由 — 仅处理未规划的路径(如拼错 /oders、未来新增路径)
  *
- * 不覆盖：
- *   - /               （app/page.tsx）
- *   - /styleguide     （app/styleguide/page.tsx）
- *   - /api/[...]      （app/api/.../route.ts）
+ * 已规划的 17 个路由都有专属 page.tsx,不走这里:
+ *   /                  (工作台)
+ *   /styleguide        (设计系统)
+ *   /copilot           (AI Copilot)
+ *   /products /listings /pricing /purchase /supply
+ *   /orders /aftersales /crm /analytics /finance /profit /org
+ *   /logistics /warehouse /inventory
+ *   /api/[...]         (API 路由)
  */
-export default function PlaceholderPage({ params }: PlaceholderProps) {
-  // 由 pathname 推断当前 system + feature
-  // 这里 params.slug 是数组，转回 string
-  const pathname = '/' + (params.slug?.join('/') ?? '');
-  const system = resolveSystemFromPath(pathname);
-  const feature = resolveFeatureFromPath(pathname, system);
-
+export default function NotFoundPage() {
   return (
-    <AppShell title={feature?.label ?? '未知页面'}>
+    <AppShell title="页面不存在">
       <EmptyState
-        icon={<Package className="h-6 w-6" />}
-        title={`${feature?.label ?? '该功能'} 即将上线`}
-        description={
-          feature?.description
-            ? `${feature.description}。当前正在搭建，先用 styleguide 看设计令牌。`
-            : '该功能正在搭建，先用 styleguide 看设计令牌。'
-        }
+        icon={<Search className="h-6 w-6" />}
+        title="这里没有页面"
+        description="你访问的路径尚未规划,或地址输入有误。可以返回工作台,或查看左侧导航。"
         action={
-          <a href="/styleguide">
-            <Button variant="outline">查看设计系统</Button>
-          </a>
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button asChild>
+              <Link href="/">
+                <ArrowLeft className="h-4 w-4" />
+                返回工作台
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/styleguide">查看设计系统</Link>
+            </Button>
+          </div>
         }
       />
     </AppShell>
