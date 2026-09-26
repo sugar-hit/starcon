@@ -52,10 +52,26 @@ function findNavItemByHref(href: string): NavItem | null {
 function WorkspaceTabsImpl() {
   const pathname = usePathname();
   const router = useRouter();
-  const { tabs, activeTabId, activateTab, openTab } = useWorkspaceTabs();
+  const { tabs, activeTabId, hydrated, activateTab, openTab } = useWorkspaceTabs();
+  /**
+   * 防止 closeTab 的 race condition 误重开 tab
+   *
+   * closeTab 顺序:setTabs(filter) → setActiveTabId(null) → router.replace('/')
+   * router.replace 是异步的,React 提交 state 后 pathname 还没变,
+   * 此时 sync effect 看 pathname 仍是 /orders + tabs=[] → 又把 /orders 加回去
+   *
+   * 用 prevPathRef 守住:只有在 pathname 真正变化时才跑同步逻辑,
+   * tabs / activeTabId 变化触发的 effect 不再误开 tab
+   */
+  const prevPathRef = React.useRef<string | null>(null);
 
   // URL → tab store 严格同步(单一真相源)
+  // 等 hydrated=true 后才跑,避免 closeTab 后 router.replace 异步触发 sync 误开 tab
   React.useEffect(() => {
+    if (!hydrated) return;
+    // pathname 没变 → 不跑同步(关闭 tab 时 tabs 变了但 pathname 没变,避免误重开)
+    if (prevPathRef.current === pathname) return;
+    prevPathRef.current = pathname;
     // 工作台:tab 永远不 active,也不加 tab
     if (pathname === '/') {
       if (activeTabId !== null) activateTab(null);
@@ -82,7 +98,7 @@ function WorkspaceTabsImpl() {
       activateTab(pathname);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [pathname, tabs, activeTabId, hydrated]);
 
   if (tabs.length === 0) return null;
 

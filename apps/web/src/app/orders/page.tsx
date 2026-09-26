@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  AppShell,
   Badge,
   DetailDrawer,
   DetailDrawerBody,
@@ -32,10 +31,7 @@ export default function OrdersPage() {
   const spec = getDomainSpec('orders');
   const [drawerOpen, setDrawerOpen] = useState(false);
   return (
-    <AppShell
-      title="订单中心"
-      description="集中查看跨平台订单,关注每一笔履约进度。"
-    >
+    <>
       <SectionCard
         title="交互预览"
         description="本轮新增的详情抽屉与跨模块跳转能力,接入真实数据后即可用于查看订单/SKU/客户档案。"
@@ -148,6 +144,6 @@ export default function OrdersPage() {
           </DetailDrawerFooter>
         </DetailDrawerContent>
       </DetailDrawer>
-    </AppShell>
+    </>
   );
 }

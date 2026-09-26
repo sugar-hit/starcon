@@ -9,11 +9,13 @@ import {
   SYSTEMS,
   TOP_LEVEL_ITEMS,
   getSystem,
+  resolveFeatureFromPath,
   resolveSystemFromPath,
   type SystemId,
   type SystemDef,
   type NavItem,
 } from '../../lib/nav-config';
+import { getDomainSpec } from '../../lib/domain-spec';
 import { Logo } from '../common/logo';
 import { PageHeader } from '../common/page-header';
 import { CommandPalette, type CommandPaletteGroup } from '../common/command-palette';
@@ -190,9 +192,6 @@ function LogoLink() {
 
 export interface AppShellProps {
   system?: SystemId;
-  title?: string;
-  description?: string;
-  actions?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -245,15 +244,36 @@ function KeepAliveShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function AppShellInner({
-  system,
-  title = '工作台',
-  description,
-  actions,
-  children,
-}: AppShellProps) {
+function AppShellInner({ system, children }: AppShellProps) {
   const pathname = usePathname();
   const currentSystem = system ? getSystem(system) : resolveSystemFromPath(pathname);
+  /**
+   * 推导当前页的 PageHeader(标题 + 描述)
+   *
+   * 数据流:pathname → resolveFeatureFromPath → nav-config NavItem
+   *        → 若有对应 domain-spec,优先用 spec.purpose(更面向用户的描述);
+   *          否则 fallback 到 nav-config 的短描述
+   *
+   * 例外:
+   *   - /styleguide:硬编码 "设计系统"
+   *   - 404 / 未匹配路径:不渲染 PageHeader(由 EmptyState 承担视觉权重)
+   */
+  const pageHeaderMeta = React.useMemo(() => {
+    if (pathname === '/styleguide') {
+      return {
+        title: '设计系统',
+        description: 'Starcon 的共同语言。从商业数据,到每一次操作。',
+      };
+    }
+    const feature = resolveFeatureFromPath(pathname, currentSystem);
+    if (!feature) return null;
+    // feature.href 形如 "/products" → domain id 为 "products"
+    const spec = getDomainSpec(feature.href.replace(/^\//, ''));
+    return {
+      title: feature.label,
+      description: spec?.purpose ?? feature.description ?? '',
+    };
+  }, [pathname, currentSystem]);
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
   React.useEffect(() => {
@@ -426,8 +446,10 @@ function AppShellInner({
         </header>
         <WorkspaceTabs />
         <main id="main-content" tabIndex={-1} className="min-w-0 flex-1">
-          <PageHeader title={title} {...(description ? { description } : {})} actions={actions} />
           <div className="mx-auto w-full max-w-7xl space-y-6 px-4 pb-10 pt-6 md:px-6">
+            {pageHeaderMeta && (
+              <PageHeader title={pageHeaderMeta.title} description={pageHeaderMeta.description} />
+            )}
             <KeepAliveShell>{children}</KeepAliveShell>
           </div>
         </main>

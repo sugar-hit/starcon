@@ -38,6 +38,8 @@ export interface WorkspaceTab {
 export interface WorkspaceTabsContextValue {
   tabs: WorkspaceTab[];
   activeTabId: string | null;
+  /** 客户端 hydration 完成(localStorage 读完后)— sync 逻辑需等此值变 true 再跑 */
+  hydrated: boolean;
   openTab: (tab: Omit<WorkspaceTab, 'order'>) => void;
   closeTab: (id: string) => void;
   activateTab: (id: string | null) => void;
@@ -98,6 +100,7 @@ export function WorkspaceTabsProvider({
   const router = useRouter();
   const [tabs, setTabs] = React.useState<WorkspaceTab[]>(initialTabs);
   const [activeTabId, setActiveTabId] = React.useState<string | null>(initialActiveTabId);
+  const [hydrated, setHydrated] = React.useState(false);
   const hydratedRef = React.useRef(false);
   const activeTabIdRef = React.useRef<string | null>(initialActiveTabId);
   activeTabIdRef.current = activeTabId;
@@ -109,6 +112,7 @@ export function WorkspaceTabsProvider({
       setActiveTabId(persisted.activeTabId);
     }
     hydratedRef.current = true;
+    setHydrated(true);
   }, []);
 
   React.useEffect(() => {
@@ -202,6 +206,7 @@ export function WorkspaceTabsProvider({
     return {
       tabs,
       activeTabId,
+      hydrated,
       openTab,
       closeTab,
       activateTab,
@@ -213,7 +218,7 @@ export function WorkspaceTabsProvider({
       clearAll,
       reorderTabs,
     };
-  }, [tabs, activeTabId, router]);
+  }, [tabs, activeTabId, hydrated, router]);
 
   return (
     <WorkspaceTabsContext.Provider value={value}>{children}</WorkspaceTabsContext.Provider>

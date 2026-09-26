@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight, Box, CheckCircle2, Clock3 } from 'lucide-react';
-import { AppShell, Button, DomainPlaceholder, getDomainSpec, SectionCard } from '@starcon/ui';
+import { DomainPlaceholder, getDomainSpec, SectionCard } from '@starcon/ui';
 
 /**
  * 工作台 — 首页
@@ -13,18 +13,7 @@ import { AppShell, Button, DomainPlaceholder, getDomainSpec, SectionCard } from 
 export default function HomePage() {
   const spec = getDomainSpec('overview');
   return (
-    <AppShell
-      title="工作台"
-      description="今日关键指标与待办,业务一日开屏。"
-      actions={
-        <Button variant="outline" asChild>
-          <Link href="/orders">
-            订单中心
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
-      }
-    >
+    <>
       <div className="text-copy-13 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="font-medium">2026 年 9 月 26 日</span>
@@ -78,6 +67,6 @@ export default function HomePage() {
       </SectionCard>
 
       {spec && <DomainPlaceholder spec={spec} />}
-    </AppShell>
+    </>
   );
 }

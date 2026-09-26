@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, Check, Layers3, LockKeyhole, Plus, Search, X } from 'lucide-react';
 import {
-  AppShell,
   Badge,
   Button,
   EmptyState,
@@ -56,11 +55,7 @@ export default function StyleguidePage() {
   const [saved, setSaved] = useState('');
   const [notice, setNotice] = useState('');
   return (
-    <AppShell
-      title="设计系统"
-      description="Starcon 的共同语言。从商业数据,到每一次操作。"
-      actions={<Badge tone="neutral">v2.0 · Commerce UI</Badge>}
-    >
+    <>
       <nav
         aria-label="设计系统目录"
         className="border-border flex flex-wrap gap-x-5 gap-y-3 border-b pb-4"
@@ -513,7 +508,7 @@ export default function StyleguidePage() {
           </form>
         </ModalContent>
       </Modal>
-    </AppShell>
+    </>
   );
 }
 function SectionHeading({
