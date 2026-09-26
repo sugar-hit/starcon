@@ -24,6 +24,20 @@ import {
 import { WorkspaceTabs } from './workspace-tabs';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '../ui/sheet';
 
+/**
+ * AppShell — 应用 shell(侧栏 + header + tab 栏 + main)
+ *
+ * 集成:
+ *   - WorkspaceTabsProvider / WorkspaceTabs:顶部 tab 栏
+ *   - keep-alive:把每个 tab 的 React tree 缓存,切回不丢滚动/表单
+ *   - Logo 点击 → 清空 tab + 跳工作台
+ *   - 系统切换 → 打开默认页 tab
+ *   - Cmd+K 命令面板
+ *
+ * 工作台特殊:
+ *   - 工作台 (/) 不进 tab store — 仅 Logo / 关闭全部时显示
+ */
+
 function NavItemLink({
   item,
   active,
@@ -42,7 +56,6 @@ function NavItemLink({
     <Link
       href={item.href}
       onClick={(e) => {
-        // 中键 / Cmd+Ctrl 点击 — 浏览器原生新 tab,不动 store
         if (e.metaKey || e.ctrlKey || e.button === 1) return;
         e.preventDefault();
         onNavigate?.();
@@ -124,7 +137,6 @@ function SystemSwitcher({
               if (e.metaKey || e.ctrlKey || e.button === 1) return;
               e.preventDefault();
               onNavigate?.();
-              // 切系统:打开该系统默认页 tab
               const defaultItem = s.items[0];
               if (defaultItem) {
                 openTab({
@@ -152,12 +164,85 @@ function SystemSwitcher({
   );
 }
 
+/**
+ * LogoLink — 点击 Logo → 清空所有 tab + 跳工作台
+ * (用户硬规则:工作台不进 tab,只在 Logo / 关闭全部时出现)
+ */
+function LogoLink() {
+  const router = useRouter();
+  const { clearAll } = useWorkspaceTabs();
+  return (
+    <Link
+      href="/"
+      aria-label="Starcon 工作台"
+      onClick={(e) => {
+        if (e.metaKey || e.ctrlKey || e.button === 1) return;
+        e.preventDefault();
+        clearAll();
+        router.replace('/');
+      }}
+      className="border-border flex h-16 shrink-0 items-center border-b px-5"
+    >
+      <Logo size="sm" />
+    </Link>
+  );
+}
+
 export interface AppShellProps {
   system?: SystemId;
   title?: string;
   description?: string;
   actions?: React.ReactNode;
   children: React.ReactNode;
+}
+
+/**
+ * KeepAliveShell — 把每个 tab 的 React tree 缓存,切回不丢滚动 / 表单
+ *
+ * 实现:用 ref Map<tabId, ReactNode> 缓存当前路由的 children。
+ * 切到非 active tab 时,从 cache 取之前缓存的 React tree 用 hidden 包裹。
+ * React 不会重新执行 cached element,只 diff,所以状态保留。
+ */
+function KeepAliveShell({ children }: { children: React.ReactNode }) {
+  const { tabs, activeTabId } = useWorkspaceTabs();
+  const pathname = usePathname();
+  const cacheRef = React.useRef<Map<string, React.ReactNode>>(new Map());
+  const lastPathRef = React.useRef<string | null>(null);
+
+  // 把当前 children 按 activeTabId 缓存
+  // pathname 变化时也更新(用户切系统 / 外部跳转)
+  React.useLayoutEffect(() => {
+    if (!activeTabId || pathname === '/' || pathname === '/styleguide') return;
+    if (lastPathRef.current === pathname) return;
+    cacheRef.current.set(activeTabId, children);
+    lastPathRef.current = pathname;
+  }, [activeTabId, pathname, children]);
+
+  // 工作台 / styleguide:直接渲染 children(不进 tab 系统)
+  if (pathname === '/' || pathname === '/styleguide' || activeTabId === null || tabs.length === 0) {
+    return <>{children}</>;
+  }
+
+  return (
+    <>
+      {tabs.map((tab) => {
+        if (tab.id === activeTabId) {
+          return (
+            <div key={tab.id} data-panel-active={tab.id}>
+              {children}
+            </div>
+          );
+        }
+        const cached = cacheRef.current.get(tab.id);
+        if (!cached) return null;
+        return (
+          <div key={tab.id} data-panel-cached={tab.id} hidden>
+            {cached}
+          </div>
+        );
+      })}
+    </>
+  );
 }
 
 function AppShellInner({
@@ -243,10 +328,7 @@ function AppShellInner({
   }, []);
 
   const systemsDesktop = (
-    <SystemSwitcher
-      currentSystem={currentSystem}
-      variant="desktop"
-    />
+    <SystemSwitcher currentSystem={currentSystem} variant="desktop" />
   );
   const systemsSheet = (
     <SystemSwitcher
@@ -264,13 +346,7 @@ function AppShellInner({
         跳到主要内容
       </a>
       <aside className="md:border-border hidden md:sticky md:top-0 md:flex md:h-screen md:w-56 md:shrink-0 md:flex-col md:self-start md:overflow-y-auto md:border-r">
-        <Link
-          href="/"
-          aria-label="Starcon 工作台"
-          className="border-border flex h-16 shrink-0 items-center border-b px-5"
-        >
-          <Logo size="sm" />
-        </Link>
+        <LogoLink />
         <NavList system={currentSystem} />
         <div className="border-border space-y-3 border-t p-4">
           <Link
@@ -352,7 +428,7 @@ function AppShellInner({
         <main id="main-content" tabIndex={-1} className="min-w-0 flex-1">
           <PageHeader title={title} {...(description ? { description } : {})} actions={actions} />
           <div className="mx-auto w-full max-w-7xl space-y-6 px-4 pb-10 pt-6 md:px-6">
-            {children}
+            <KeepAliveShell>{children}</KeepAliveShell>
           </div>
         </main>
       </div>

@@ -5,56 +5,56 @@ import { useRouter } from 'next/navigation';
 import type { SystemId } from './nav-config';
 
 /**
- * WorkspaceTabs — 应用内 tab 栏(类似中国后台 ERP 标配)
+ * WorkspaceTabs — 应用内 tab 栏(中国后台 ERP 标配)
  *
- * 当前范围:
- *   - 打开 / 激活 / 关闭 / 关闭其他 / 关闭全部 / 关闭左面 / 关闭右面
+ * 完整功能:
+ *   - 打开 / 激活 / 关闭
+ *   - 关闭其他 / 关闭左面所有 / 关闭右面所有 / 关闭全部
  *   - 钉住 (pinned) — 关闭其他时不关
- *   - 持久化(localStorage)
+ *   - 拖拽排序 (reorder)
+ *   - localStorage 持久化(刷新页面 tab 还在)
  *
  * 关闭语义(用户硬规则):
- *   - closeTab:不再自动 activate 邻接 tab
- *     关闭的是 active tab → router.push('/') + activeTabId=null(回到工作台)
- *     关闭的不是 active tab → 只关,不影响 active
- *   - closeAll:router.push('/') + tabs=[] + activeTabId=null
+ *   - closeTab:不再自动 fallback 到邻接 tab
+ *     关闭 active → router.replace('/') + activeTabId=null(回工作台)
+ *     关闭非 active → 不影响 active
+ *   - closeAll:清空非 pinned + router.replace('/') + activeTabId=null
+ *   - clearAll:彻底清空所有 tab(Logo 用) + router.replace('/')
  *
- * 后续 TODO(暂不实现):
- *   - 拖拽排序
- *   - keep-alive 缓存(Next.js App Router 需要 react-activation 等)
+ * 不实现(用户明确排除):
+ *   - 多 monitor 拖出 tab(workspace 模式 B)
  */
 
 export interface WorkspaceTab {
-  /** Tab id — 与 href 同值(后续 keep-alive 用) */
   id: string;
-  /** 路由 */
   href: string;
-  /** 显示标题 */
   label: string;
-  /** 所属系统(用于排序 / 分组) */
   systemId: SystemId;
-  /** 是否钉住 — 关闭其他时不关 */
   pinned?: boolean;
-  /** 打开时间戳 */
-  openedAt: number;
+  /** 拖拽排序用的序列 */
+  order: number;
 }
 
 export interface WorkspaceTabsContextValue {
   tabs: WorkspaceTab[];
   activeTabId: string | null;
-  /** 打开或激活:已存在则激活,否则添加 */
-  openTab: (tab: Omit<WorkspaceTab, 'openedAt'>) => void;
+  openTab: (tab: Omit<WorkspaceTab, 'order'>) => void;
   closeTab: (id: string) => void;
-  activateTab: (id: string) => void;
+  activateTab: (id: string | null) => void;
   pinTab: (id: string, pinned?: boolean) => void;
   closeOthers: (id: string) => void;
   closeLeft: (id: string) => void;
   closeRight: (id: string) => void;
   closeAll: () => void;
+  /** 彻底清空(含 pinned)— Logo 点击用 */
+  clearAll: () => void;
+  /** 拖拽重排:把 fromId 拖到 toId 位置 */
+  reorderTabs: (fromId: string, toId: string) => void;
 }
 
 const WorkspaceTabsContext = React.createContext<WorkspaceTabsContextValue | null>(null);
 
-const STORAGE_KEY = 'starcon.workspace.tabs.v1';
+const STORAGE_KEY = 'starcon.workspace.tabs.v2';
 const HOME_HREF = '/';
 
 interface PersistedShape {
@@ -80,13 +80,12 @@ function writePersisted(value: PersistedShape) {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
   } catch {
-    // localStorage 可能满 / 禁用了,静默失败
+    /* quota / disabled — silent */
   }
 }
 
 export interface WorkspaceTabsProviderProps {
   children: React.ReactNode;
-  /** SSR/CSR 注水前的初始 tab(用于 hydration mismatch 保护) */
   initialTabs?: WorkspaceTab[];
   initialActiveTabId?: string | null;
 }
@@ -97,7 +96,6 @@ export function WorkspaceTabsProvider({
   initialActiveTabId = null,
 }: WorkspaceTabsProviderProps) {
   const router = useRouter();
-  // SSR 用初始值,客户端 mount 后再 hydrate 真实数据
   const [tabs, setTabs] = React.useState<WorkspaceTab[]>(initialTabs);
   const [activeTabId, setActiveTabId] = React.useState<string | null>(initialActiveTabId);
   const hydratedRef = React.useRef(false);
@@ -113,7 +111,6 @@ export function WorkspaceTabsProvider({
     hydratedRef.current = true;
   }, []);
 
-  // 持久化(debounced)
   React.useEffect(() => {
     if (!hydratedRef.current) return;
     const handle = window.setTimeout(() => {
@@ -123,12 +120,15 @@ export function WorkspaceTabsProvider({
   }, [tabs, activeTabId]);
 
   const value = React.useMemo<WorkspaceTabsContextValue>(() => {
-    const openTab = (incoming: Omit<WorkspaceTab, 'openedAt'>) => {
+    const nextOrder = (current: WorkspaceTab[]) =>
+      current.length === 0 ? 0 : Math.max(...current.map((t) => t.order)) + 1;
+
+    const openTab = (incoming: Omit<WorkspaceTab, 'order'>) => {
       const id = incoming.id;
       setTabs((current) => {
         const exists = current.find((t) => t.id === id);
         if (exists) return current;
-        const next: WorkspaceTab = { ...incoming, openedAt: Date.now() };
+        const next: WorkspaceTab = { ...incoming, order: nextOrder(current) };
         return [...current, next];
       });
       setActiveTabId(id);
@@ -136,14 +136,20 @@ export function WorkspaceTabsProvider({
     const closeTab = (id: string) => {
       const wasActive = activeTabIdRef.current === id;
       setTabs((current) => current.filter((t) => t.id !== id));
-      // 用户硬规则:关闭 tab 就是关闭,不再自动 fallback
-      // 关闭的是 active → 回到工作台
+      // 用户硬规则:关闭 tab 就是关闭,不再自动 fallback 到邻接
+      // 关闭的是 active → 回工作台(用 replace,避免 history 堆叠)
       if (wasActive) {
         setActiveTabId(null);
-        router.push(HOME_HREF);
+        router.replace(HOME_HREF);
       }
     };
-    const activateTab = (id: string) => setActiveTabId(id);
+    const activateTab = (id: string | null) => {
+      if (id === null) {
+        setActiveTabId(null);
+        return;
+      }
+      setActiveTabId(id);
+    };
     const pinTab = (id: string, pinned: boolean = true) => {
       setTabs((current) =>
         current.map((t) => (t.id === id ? { ...t, pinned } : t)),
@@ -157,11 +163,8 @@ export function WorkspaceTabsProvider({
       setTabs((current) => {
         const idx = current.findIndex((t) => t.id === id);
         if (idx < 0) return current;
-        const next = current.slice(idx);
-        // 关闭后,active 失效(关闭的是当前或左侧)
-        return next;
+        return current.slice(idx);
       });
-      // 关闭后 active 切到 id(如果它还在)
       setActiveTabId(id);
     };
     const closeRight = (id: string) => {
@@ -175,8 +178,27 @@ export function WorkspaceTabsProvider({
     const closeAll = () => {
       setTabs((current) => current.filter((t) => t.pinned));
       setActiveTabId(null);
-      router.push(HOME_HREF);
+      router.replace(HOME_HREF);
     };
+    const clearAll = () => {
+      setTabs([]);
+      setActiveTabId(null);
+      router.replace(HOME_HREF);
+    };
+    const reorderTabs = (fromId: string, toId: string) => {
+      if (fromId === toId) return;
+      setTabs((current) => {
+        const fromIdx = current.findIndex((t) => t.id === fromId);
+        const toIdx = current.findIndex((t) => t.id === toId);
+        if (fromIdx < 0 || toIdx < 0) return current;
+        const next = [...current];
+        const [moved] = next.splice(fromIdx, 1);
+        if (!moved) return current;
+        next.splice(toIdx, 0, moved);
+        return next;
+      });
+    };
+
     return {
       tabs,
       activeTabId,
@@ -188,6 +210,8 @@ export function WorkspaceTabsProvider({
       closeLeft,
       closeRight,
       closeAll,
+      clearAll,
+      reorderTabs,
     };
   }, [tabs, activeTabId, router]);
 

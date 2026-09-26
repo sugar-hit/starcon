@@ -23,24 +23,22 @@ import {
 /**
  * WorkspaceTabs — 顶部应用内 tab 栏
  *
- * 设计:
- *   - 紧贴 header 下方独立一行(h-10)
- *   - 横向溢出滚动
- *   - 钉住的 tab 排前面(pin 图标 + 不可关闭)
- *   - active tab: bg-card + 边框 + 当前页的 icon 在文字前
- *   - hover 显示关闭按钮 / `···` 操作菜单
+ * 完整功能:
+ *   - 显示 / 激活 / 关闭(×)
+ *   - 每个 tab 操作菜单(··· 或右键):
+ *     钉住 / 关闭其他 / 关闭左面所有 / 关闭右面所有
+ *   - 拖拽排序(HTML5 DnD)
+ *   - 中键关闭
  *
- * 关闭行为(用户硬规则):
- *   - 关闭 tab 就是关闭,不再 fallback 到邻接
- *   - 关闭 active tab → 自动回到工作台(/)
- *   - 关闭非 active tab → 当前 active 不变
+ * 关闭语义(用户硬规则):
+ *   - 关闭 active tab → 自动回工作台(URL '/')
+ *   - 关闭非 active → 当前 active 不变
  *
- * Tab 操作菜单(右键 / hover `···` 触发):
- *   - 关闭其他 / 关闭左面 / 关闭右面 / 钉住切换
- *
- * 后续 TODO:
- *   - 拖拽排序
- *   - keep-alive 缓存
+ * URL 严格同步(修复之前 tab 显示错位 bug):
+ *   - pathname === '/' → activeTabId 永远 null(工作台不进 tab)
+ *   - pathname === '/styleguide' → 不参与 tab 系统
+ *   - pathname 是 nav item 但不在 tabs → 自动加 tab
+ *   - pathname 是 nav item 且在 tabs → 激活
  */
 
 function findNavItemByHref(href: string): NavItem | null {
@@ -53,43 +51,45 @@ function findNavItemByHref(href: string): NavItem | null {
 
 function WorkspaceTabsImpl() {
   const pathname = usePathname();
+  const router = useRouter();
   const { tabs, activeTabId, activateTab, openTab } = useWorkspaceTabs();
 
-  // 同步 active tab → url(确保刷新或外部跳转时 tab 也对齐)
+  // URL → tab store 严格同步(单一真相源)
   React.useEffect(() => {
-    if (!tabs.length) return;
-    const matched = tabs.find((t) => t.href === pathname || pathname.startsWith(t.href + '/'));
-    if (matched && matched.id !== activeTabId) {
-      activateTab(matched.id);
+    // 工作台:tab 永远不 active,也不加 tab
+    if (pathname === '/') {
+      if (activeTabId !== null) activateTab(null);
+      return;
     }
-  }, [pathname, tabs, activeTabId, activateTab]);
-
-  // 如果当前 pathname 不在 tabs 里,但用户访问了 — 自动加 tab
-  // 例:刷新页面 / 直接打 URL
-  React.useEffect(() => {
+    // styleguide:不参与 tab store
     if (pathname === '/styleguide') return;
-    if (pathname === '/') return; // 工作台不加 tab
+
     const exists = tabs.find((t) => t.href === pathname);
-    if (exists) return;
-    const item = findNavItemByHref(pathname);
-    if (!item) return;
-    const system = resolveSystemFromPath(pathname);
-    openTab({
-      id: pathname,
-      href: pathname,
-      label: item.label,
-      systemId: system.id,
-    });
-    // 只在 pathname 变化时触发
+    if (!exists) {
+      const item = findNavItemByHref(pathname);
+      if (item) {
+        const system = resolveSystemFromPath(pathname);
+        openTab({
+          id: pathname,
+          href: pathname,
+          label: item.label,
+          systemId: system.id,
+        });
+      }
+      return;
+    }
+    if (activeTabId !== pathname) {
+      activateTab(pathname);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   if (tabs.length === 0) return null;
 
-  // 钉住的 tab 排前面
+  // 钉住排前 + 按 order 排
   const sorted = [...tabs].sort((a, b) => {
     if (Boolean(a.pinned) !== Boolean(b.pinned)) return a.pinned ? -1 : 1;
-    return a.openedAt - b.openedAt;
+    return a.order - b.order;
   });
 
   return (
@@ -103,7 +103,10 @@ function WorkspaceTabsImpl() {
           key={tab.id}
           tab={tab}
           active={tab.id === activeTabId}
-          onActivate={() => activateTab(tab.id)}
+          onActivate={() => {
+            activateTab(tab.id);
+            router.push(tab.href);
+          }}
         />
       ))}
     </div>
@@ -118,41 +121,94 @@ interface WorkspaceTabItemProps {
 
 function WorkspaceTabItem({ tab, active, onActivate }: WorkspaceTabItemProps) {
   const router = useRouter();
-  const { closeTab, pinTab, closeOthers, closeLeft, closeRight } = useWorkspaceTabs();
+  const {
+    closeTab,
+    pinTab,
+    closeOthers,
+    closeLeft,
+    closeRight,
+    reorderTabs,
+  } = useWorkspaceTabs();
   const item = findNavItemByHref(tab.href);
   const Icon = item?.icon;
 
-  const handleActivate = () => {
-    onActivate();
-    router.push(tab.href);
-  };
+  const [draggingOver, setDraggingOver] = React.useState<'left' | 'right' | null>(null);
 
   const handleClose = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     closeTab(tab.id);
-    // store 内 closeTab 已处理 active 跳转逻辑
   };
+
+  const handleAuxClick = (e: React.MouseEvent) => {
+    if (e.button === 1 && !tab.pinned) {
+      e.preventDefault();
+      closeTab(tab.id);
+    }
+  };
+
+  // 拖拽(DnD)
+  const handleDragStart = (e: React.DragEvent) => {
+    if (tab.pinned) {
+      e.preventDefault();
+      return;
+    }
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', tab.id);
+  };
+  const handleDragOver = (e: React.DragEvent) => {
+    if (tab.pinned) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const midpoint = rect.left + rect.width / 2;
+    setDraggingOver(e.clientX < midpoint ? 'left' : 'right');
+  };
+  const handleDragLeave = () => setDraggingOver(null);
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const fromId = e.dataTransfer.getData('text/plain');
+    setDraggingOver(null);
+    if (!fromId || fromId === tab.id) return;
+    // 简化:drop 在左半 = 拖到当前 tab 之前;右半 = 之后
+    if (draggingOver === 'left') {
+      reorderTabs(fromId, tab.id);
+    } else {
+      // 右半:拖到 tab 之后的位置(把 fromId 移到 tab 之后)
+      // reorderTabs 把 fromId 放到 toId 位置;如果 toId 是 fromId 的下一个,会互换
+      // 所以我们要"挪到 tab 之后" → 找到 tab 之后下一个非 pinned tab,否则 reorder
+      const tabs = Array.from(document.querySelectorAll('[data-tab-id]')) as HTMLElement[];
+      const myIdx = tabs.findIndex((el) => el.dataset.tabId === tab.id);
+      const nextEl = tabs[myIdx + 1];
+      if (nextEl && nextEl.dataset.tabId !== fromId) {
+        reorderTabs(fromId, nextEl.dataset.tabId ?? '');
+      }
+    }
+  };
+  const handleDragEnd = () => setDraggingOver(null);
 
   return (
     <div
       role="tab"
       aria-selected={active}
-      onClick={handleActivate}
-      onAuxClick={(e) => {
-        // 中键关闭
-        if (e.button === 1 && !tab.pinned) {
-          e.preventDefault();
-          closeTab(tab.id);
-        }
-      }}
+      data-tab-id={tab.id}
+      draggable={!tab.pinned}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      onDragEnd={handleDragEnd}
+      onClick={onActivate}
+      onAuxClick={handleAuxClick}
       className={cn(
-        'group flex h-8 cursor-pointer items-center gap-1.5 rounded-md pl-2.5 pr-1 text-copy-13 transition-colors',
+        'group relative flex h-8 cursor-pointer items-center gap-1.5 rounded-md pl-2.5 pr-1 text-copy-13 transition-colors',
         'shrink-0',
         active
           ? 'bg-card text-foreground shadow-xs'
           : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
         tab.pinned && 'border-brand/30 border',
+        draggingOver === 'left' && 'before:bg-brand before:absolute before:left-0 before:top-1 before:bottom-1 before:w-0.5 before:rounded',
+        draggingOver === 'right' && 'after:bg-brand after:absolute after:right-0 after:top-1 after:bottom-1 after:w-0.5 after:rounded',
       )}
     >
       {tab.pinned ? (
@@ -194,60 +250,77 @@ function WorkspaceTabItem({ tab, active, onActivate }: WorkspaceTabItemProps) {
             <button
               type="button"
               onClick={(e) => e.stopPropagation()}
+              onContextMenu={(e) => e.preventDefault()}
               className={cn(
                 'rounded p-0.5 opacity-0 transition-opacity group-hover:opacity-100',
                 'hover:bg-muted-foreground/20',
                 active && 'opacity-100',
               )}
               aria-label={`${tab.label} 操作菜单`}
-              title="关闭其他 / 左面 / 右面 / 钉住"
+              title="关闭其他 / 左面 / 右面 / 钉住 (右键也行)"
             >
               <MoreHorizontal className="h-3 w-3" />
             </button>
           </PopoverTrigger>
-          <PopoverContent align="start" sideOffset={6}>
-            <div className="flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
-              <button
-                type="button"
-                onClick={() => {
-                  pinTab(tab.id, !tab.pinned);
-                }}
-                className="hover:bg-muted rounded px-2.5 py-1.5 text-left"
-              >
-                {tab.pinned ? '取消钉住' : '钉住'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  closeOthers(tab.id);
-                }}
-                className="hover:bg-muted rounded px-2.5 py-1.5 text-left"
-              >
-                关闭其他
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  closeLeft(tab.id);
-                }}
-                className="hover:bg-muted rounded px-2.5 py-1.5 text-left"
-              >
-                关闭左面所有
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  closeRight(tab.id);
-                }}
-                className="hover:bg-muted rounded px-2.5 py-1.5 text-left"
-              >
-                关闭右面所有
-              </button>
-            </div>
-          </PopoverContent>
+          <TabActionsMenu
+            tab={tab}
+            onPin={() => pinTab(tab.id, !tab.pinned)}
+            onCloseOthers={() => closeOthers(tab.id)}
+            onCloseLeft={() => closeLeft(tab.id)}
+            onCloseRight={() => closeRight(tab.id)}
+            onRefresh={() => router.refresh()}
+          />
         </Popover>
       </div>
     </div>
+  );
+}
+
+interface TabActionsMenuProps {
+  tab: WorkspaceTab;
+  onPin: () => void;
+  onCloseOthers: () => void;
+  onCloseLeft: () => void;
+  onCloseRight: () => void;
+  onRefresh: () => void;
+}
+
+function TabActionsMenu({
+  tab,
+  onPin,
+  onCloseOthers,
+  onCloseLeft,
+  onCloseRight,
+  onRefresh,
+}: TabActionsMenuProps) {
+  return (
+    <PopoverContent align="start" sideOffset={6}>
+      <div className="flex flex-col gap-0.5" onClick={(e) => e.stopPropagation()}>
+        <MenuButton onClick={onPin}>{tab.pinned ? '取消钉住' : '钉住'}</MenuButton>
+        <MenuButton onClick={onRefresh}>刷新</MenuButton>
+        <MenuButton onClick={onCloseOthers}>关闭其他</MenuButton>
+        <MenuButton onClick={onCloseLeft}>关闭左面所有</MenuButton>
+        <MenuButton onClick={onCloseRight}>关闭右面所有</MenuButton>
+      </div>
+    </PopoverContent>
+  );
+}
+
+function MenuButton({
+  children,
+  onClick,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="hover:bg-muted rounded px-2.5 py-1.5 text-left"
+    >
+      {children}
+    </button>
   );
 }
 
