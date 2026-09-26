@@ -92,7 +92,7 @@ export default function OrdersPage() {
       {spec && <DomainPlaceholder spec={spec} />}
 
       <DetailDrawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DetailDrawerContent>
+        <DetailDrawerContent width="md">
           <DetailDrawerHeader>
             <DetailDrawerTitle>订单详情</DetailDrawerTitle>
             <DetailDrawerDescription>

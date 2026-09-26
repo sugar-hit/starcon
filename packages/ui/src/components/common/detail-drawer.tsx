@@ -19,6 +19,11 @@ import { cn } from '../../lib/utils';
  * 与 Modal 的区别:
  *   - Modal    → 编辑/创建/确认 (强焦点,打断列表)
  *   - DetailDrawer → 查看/预览 (不打断列表上下文)
+ *
+ * 宽度:
+ *   - 默认 `md:max-w-[640px]` — 适合订单/SKU/客户档案的中等内容
+ *   - 调用方可传 `width` prop 覆盖(根据页面内容多少决定)
+ *   - 例如客户档案可能需要 `width="xl"`,简单预览用 `width="sm"`
  */
 
 const DetailDrawer = DialogPrimitive.Root;
@@ -32,7 +37,8 @@ const DetailDrawerOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'animate-fade-in fixed inset-0 z-50 bg-black/40 backdrop-blur-sm',
+      // 不模糊 — 抽屉本身已经够聚焦,模糊让用户看不清上下文
+      'animate-fade-in fixed inset-0 z-50 bg-black/40',
       className,
     )}
     {...props}
@@ -40,19 +46,35 @@ const DetailDrawerOverlay = React.forwardRef<
 ));
 DetailDrawerOverlay.displayName = 'DetailDrawerOverlay';
 
+export type DetailDrawerWidth = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+
+const WIDTH_CLASS: Record<DetailDrawerWidth, string> = {
+  sm: 'md:max-w-[420px]',
+  md: 'md:max-w-[640px]',
+  lg: 'md:max-w-[820px]',
+  xl: 'md:max-w-[1024px]',
+  full: 'md:max-w-[calc(100vw-2rem)]',
+};
+
+export interface DetailDrawerContentProps
+  extends Omit<React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>, 'width'> {
+  /** 抽屉宽度 — 根据内容多少决定,默认 md (640px) */
+  width?: DetailDrawerWidth;
+}
+
 const DetailDrawerContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  DetailDrawerContentProps
+>(({ className, children, width = 'md', ...props }, ref) => (
   <DialogPrimitive.Portal>
     <DetailDrawerOverlay />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        // 桌面端:右侧滑出 w-[480px]
         // 移动端 (<md):全屏
+        // 桌面端 (md+):右侧滑出,按 width 决定 max-w
         'fixed inset-y-0 right-0 z-50 flex h-full w-full flex-col border-l border-border bg-card shadow-elevated',
-        'md:max-w-[480px]',
+        WIDTH_CLASS[width],
         'data-[state=open]:animate-slide-in-right data-[state=closed]:animate-fade-out',
         className,
       )}
