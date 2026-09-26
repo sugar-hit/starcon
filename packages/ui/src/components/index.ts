@@ -5,6 +5,7 @@ export * from './ui/badge';
 export * from './ui/tabs';
 export * from './ui/modal';
 export * from './ui/sheet';
+export * from './ui/popover';
 export * from './ui/input';
 
 // Business components

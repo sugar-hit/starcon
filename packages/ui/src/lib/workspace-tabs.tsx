@@ -1,28 +1,26 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import type { SystemId } from './nav-config';
 
 /**
  * WorkspaceTabs — 应用内 tab 栏(类似中国后台 ERP 标配)
  *
- * 用途:
- *   - 顶部 tab 栏,像 Chrome 但在 App 内
- *   - 点 nav / ExternalLink / Cmd+K → 在 tab 栏加新条目
- *   - 切回旧 tab 不丢上下文(配合 Next.js 路由)
- *   - localStorage 持久化,刷新页面 tab 还在
- *
  * 当前范围:
- *   - 打开 / 激活 / 关闭 / 关闭其他 / 关闭全部
- *   - 钉住 (pinned) — 关闭时优先保留
+ *   - 打开 / 激活 / 关闭 / 关闭其他 / 关闭全部 / 关闭左面 / 关闭右面
+ *   - 钉住 (pinned) — 关闭其他时不关
  *   - 持久化(localStorage)
+ *
+ * 关闭语义(用户硬规则):
+ *   - closeTab:不再自动 activate 邻接 tab
+ *     关闭的是 active tab → router.push('/') + activeTabId=null(回到工作台)
+ *     关闭的不是 active tab → 只关,不影响 active
+ *   - closeAll:router.push('/') + tabs=[] + activeTabId=null
  *
  * 后续 TODO(暂不实现):
  *   - 拖拽排序
- *   - 右键菜单
  *   - keep-alive 缓存(Next.js App Router 需要 react-activation 等)
- *
- * 注意:Tab 不存 icon 组件引用 — 渲染时根据 href 从 nav-config 反查
  */
 
 export interface WorkspaceTab {
@@ -49,12 +47,15 @@ export interface WorkspaceTabsContextValue {
   activateTab: (id: string) => void;
   pinTab: (id: string, pinned?: boolean) => void;
   closeOthers: (id: string) => void;
+  closeLeft: (id: string) => void;
+  closeRight: (id: string) => void;
   closeAll: () => void;
 }
 
 const WorkspaceTabsContext = React.createContext<WorkspaceTabsContextValue | null>(null);
 
 const STORAGE_KEY = 'starcon.workspace.tabs.v1';
+const HOME_HREF = '/';
 
 interface PersistedShape {
   tabs: WorkspaceTab[];
@@ -95,10 +96,13 @@ export function WorkspaceTabsProvider({
   initialTabs = [],
   initialActiveTabId = null,
 }: WorkspaceTabsProviderProps) {
+  const router = useRouter();
   // SSR 用初始值,客户端 mount 后再 hydrate 真实数据
   const [tabs, setTabs] = React.useState<WorkspaceTab[]>(initialTabs);
   const [activeTabId, setActiveTabId] = React.useState<string | null>(initialActiveTabId);
   const hydratedRef = React.useRef(false);
+  const activeTabIdRef = React.useRef<string | null>(initialActiveTabId);
+  activeTabIdRef.current = activeTabId;
 
   React.useEffect(() => {
     const persisted = readPersisted();
@@ -130,17 +134,14 @@ export function WorkspaceTabsProvider({
       setActiveTabId(id);
     };
     const closeTab = (id: string) => {
-      setTabs((current) => {
-        const next = current.filter((t) => t.id !== id);
-        setActiveTabId((currentActive) => {
-          if (currentActive !== id) return currentActive;
-          if (next.length === 0) return null;
-          const removedIdx = current.findIndex((t) => t.id === id);
-          const fallback = next[Math.min(removedIdx, next.length - 1)] ?? next[0];
-          return fallback?.id ?? null;
-        });
-        return next;
-      });
+      const wasActive = activeTabIdRef.current === id;
+      setTabs((current) => current.filter((t) => t.id !== id));
+      // 用户硬规则:关闭 tab 就是关闭,不再自动 fallback
+      // 关闭的是 active → 回到工作台
+      if (wasActive) {
+        setActiveTabId(null);
+        router.push(HOME_HREF);
+      }
     };
     const activateTab = (id: string) => setActiveTabId(id);
     const pinTab = (id: string, pinned: boolean = true) => {
@@ -152,16 +153,43 @@ export function WorkspaceTabsProvider({
       setTabs((current) => current.filter((t) => t.id === id || t.pinned));
       setActiveTabId(id);
     };
+    const closeLeft = (id: string) => {
+      setTabs((current) => {
+        const idx = current.findIndex((t) => t.id === id);
+        if (idx < 0) return current;
+        const next = current.slice(idx);
+        // 关闭后,active 失效(关闭的是当前或左侧)
+        return next;
+      });
+      // 关闭后 active 切到 id(如果它还在)
+      setActiveTabId(id);
+    };
+    const closeRight = (id: string) => {
+      setTabs((current) => {
+        const idx = current.findIndex((t) => t.id === id);
+        if (idx < 0) return current;
+        return current.slice(0, idx + 1);
+      });
+      setActiveTabId(id);
+    };
     const closeAll = () => {
       setTabs((current) => current.filter((t) => t.pinned));
-      setActiveTabId((current) => {
-        if (!current) return null;
-        const isPinned = tabs.find((t) => t.id === current)?.pinned;
-        return isPinned ? current : null;
-      });
+      setActiveTabId(null);
+      router.push(HOME_HREF);
     };
-    return { tabs, activeTabId, openTab, closeTab, activateTab, pinTab, closeOthers, closeAll };
-  }, [tabs, activeTabId]);
+    return {
+      tabs,
+      activeTabId,
+      openTab,
+      closeTab,
+      activateTab,
+      pinTab,
+      closeOthers,
+      closeLeft,
+      closeRight,
+      closeAll,
+    };
+  }, [tabs, activeTabId, router]);
 
   return (
     <WorkspaceTabsContext.Provider value={value}>{children}</WorkspaceTabsContext.Provider>
