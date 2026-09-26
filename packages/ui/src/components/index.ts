@@ -23,9 +23,11 @@ export * from './common/external-link';
 export * from './common/command-palette';
 export * from '../lib/nav-config';
 export * from '../lib/domain-spec';
+export * from '../lib/workspace-tabs';
 
 // Layout
 export * from './layout/app-shell';
+export * from './layout/workspace-tabs';
 
 // Utils
 export { cn, num, pct, numClass } from '../lib/utils';

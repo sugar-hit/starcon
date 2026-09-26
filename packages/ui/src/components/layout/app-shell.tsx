@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { BookOpen, Menu, Search, X, type LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
@@ -17,6 +17,11 @@ import {
 import { Logo } from '../common/logo';
 import { PageHeader } from '../common/page-header';
 import { CommandPalette, type CommandPaletteGroup } from '../common/command-palette';
+import {
+  WorkspaceTabsProvider,
+  useWorkspaceTabs,
+} from '../../lib/workspace-tabs';
+import { WorkspaceTabs } from './workspace-tabs';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '../ui/sheet';
 
 function NavItemLink({
@@ -28,11 +33,27 @@ function NavItemLink({
   active: boolean;
   onNavigate?: (() => void) | undefined;
 }) {
+  const router = useRouter();
+  const { openTab } = useWorkspaceTabs();
+  const pathname = usePathname();
+  const system = resolveSystemFromPath(pathname);
   const Icon = item.icon;
   return (
     <Link
       href={item.href}
-      onClick={() => onNavigate?.()}
+      onClick={(e) => {
+        // 中键 / Cmd+Ctrl 点击 — 浏览器原生新 tab,不动 store
+        if (e.metaKey || e.ctrlKey || e.button === 1) return;
+        e.preventDefault();
+        onNavigate?.();
+        openTab({
+          id: item.href,
+          href: item.href,
+          label: item.label,
+          systemId: system.id,
+        });
+        router.push(item.href);
+      }}
       aria-current={active ? 'page' : undefined}
       className={cn(
         'text-copy-14 flex min-h-9 items-center gap-2.5 rounded-md px-3 py-1.5 transition-colors md:min-h-8',
@@ -46,6 +67,7 @@ function NavItemLink({
     </Link>
   );
 }
+
 function NavList({
   system,
   onNavigate,
@@ -75,6 +97,61 @@ function NavList({
     </nav>
   );
 }
+
+function SystemSwitcher({
+  currentSystem,
+  onNavigate,
+  variant = 'desktop',
+}: {
+  currentSystem: SystemDef;
+  onNavigate?: (() => void) | undefined;
+  variant?: 'desktop' | 'sheet';
+}) {
+  const router = useRouter();
+  const { openTab } = useWorkspaceTabs();
+  return (
+    <nav
+      aria-label="系统导航"
+      className={cn('flex items-center gap-1', variant === 'sheet' && 'w-full')}
+    >
+      {SYSTEMS.map((s) => {
+        const isActive = currentSystem.id === s.id;
+        return (
+          <Link
+            key={s.id}
+            href={s.defaultHref}
+            onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.button === 1) return;
+              e.preventDefault();
+              onNavigate?.();
+              // 切系统:打开该系统默认页 tab
+              const defaultItem = s.items[0];
+              if (defaultItem) {
+                openTab({
+                  id: s.defaultHref,
+                  href: s.defaultHref,
+                  label: defaultItem.label,
+                  systemId: s.id,
+                });
+                router.push(s.defaultHref);
+              }
+            }}
+            aria-current={isActive ? 'true' : undefined}
+            className={cn(
+              'text-label-14 whitespace-nowrap rounded-md px-3 py-2',
+              isActive
+                ? 'bg-card text-foreground shadow-xs font-semibold'
+                : 'text-muted-foreground hover:bg-card',
+            )}
+          >
+            {s.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
 export interface AppShellProps {
   system?: SystemId;
   title?: string;
@@ -82,7 +159,8 @@ export interface AppShellProps {
   actions?: React.ReactNode;
   children: React.ReactNode;
 }
-export function AppShell({
+
+function AppShellInner({
   system,
   title = '工作台',
   description,
@@ -104,12 +182,6 @@ export function AppShell({
     return () => window.removeEventListener('keydown', handleKey);
   }, []);
 
-  /**
-   * CommandPalette 数据
-   * - 功能导航:nav-config 全部条目
-   * - 业务对象:预留分组,数据接入后填入(用户硬规则:永远不 mock)
-   * - 系统动作:静态快捷命令
-   */
   const searchGroups: CommandPaletteGroup[] = React.useMemo(() => {
     const buildItem = (
       it: { label: string; href: string; description?: string; icon: LucideIcon },
@@ -170,25 +242,18 @@ export function AppShell({
     return [navItems, businessObjects, actions];
   }, []);
 
-  const systems = (
-    <nav aria-label="系统导航" className="flex items-center gap-1">
-      {SYSTEMS.map((s) => (
-        <Link
-          key={s.id}
-          href={s.defaultHref}
-          onClick={() => setMenuOpen(false)}
-          aria-current={currentSystem.id === s.id ? 'true' : undefined}
-          className={cn(
-            'text-label-14 whitespace-nowrap rounded-md px-3 py-2',
-            currentSystem.id === s.id
-              ? 'bg-card text-foreground shadow-xs font-semibold'
-              : 'text-muted-foreground hover:bg-card',
-          )}
-        >
-          {s.label}
-        </Link>
-      ))}
-    </nav>
+  const systemsDesktop = (
+    <SystemSwitcher
+      currentSystem={currentSystem}
+      variant="desktop"
+    />
+  );
+  const systemsSheet = (
+    <SystemSwitcher
+      currentSystem={currentSystem}
+      variant="sheet"
+      onNavigate={() => setMenuOpen(false)}
+    />
   );
   return (
     <div className="bg-background text-foreground flex min-h-screen">
@@ -229,7 +294,7 @@ export function AppShell({
           <Link href="/" className="md:hidden" aria-label="Starcon 工作台">
             <Logo size="sm" markOnly />
           </Link>
-          <div className="bg-muted/70 hidden rounded-lg p-0.5 md:block">{systems}</div>
+          <div className="bg-muted/70 hidden rounded-lg p-0.5 md:block">{systemsDesktop}</div>
           <span className="text-label-14 md:hidden">{currentSystem.label}系统</span>
           <button
             type="button"
@@ -271,7 +336,7 @@ export function AppShell({
                 </SheetClose>
                 <Logo size="sm" />
               </div>
-              <div className="border-border border-b p-3">{systems}</div>
+              <div className="border-border border-b p-3">{systemsSheet}</div>
               <NavList system={currentSystem} onNavigate={() => setMenuOpen(false)} />
               <Link
                 href="/styleguide"
@@ -283,6 +348,7 @@ export function AppShell({
             </SheetContent>
           </Sheet>
         </header>
+        <WorkspaceTabs />
         <main id="main-content" tabIndex={-1} className="min-w-0 flex-1">
           <PageHeader title={title} {...(description ? { description } : {})} actions={actions} />
           <div className="mx-auto w-full max-w-7xl space-y-6 px-4 pb-10 pt-6 md:px-6">
@@ -296,5 +362,13 @@ export function AppShell({
         groups={searchGroups}
       />
     </div>
+  );
+}
+
+export function AppShell(props: AppShellProps) {
+  return (
+    <WorkspaceTabsProvider>
+      <AppShellInner {...props} />
+    </WorkspaceTabsProvider>
   );
 }
