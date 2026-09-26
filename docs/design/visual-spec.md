@@ -1,9 +1,9 @@
 # 视觉规范手册 — starcon 跨境电商 ERP
 
 > **项目名称**:starcon
-> **文档版本**:V1.4
-> **最新修订**:2026-09-25 — Typography V1.4 重平衡:StatCard value → h-24 (不再靠屏);PageHeader h1 18→16px font-semibold;Nav item 13→14px 跟正文对齐;Segmented md 12→13px;Logo / Header 统一 h-16 border-b 在 y=64 对齐
-> **最新修订**:2026-09-25
+> **文档版本**:V1.5
+> **最新修订**:2026-09-26 — Logo 重做:废弃 v3 蓝紫渐变多层几何,改用品牌源 B1 精修方案"4 节点 + 中心 4 角星";副字标 → Commerce OS
+> **最新修订**:2026-09-26
 > **修订人**:Mavis(基于"能耗诊断管理系统"V1.0 视觉规范迁移 + 跨境电商 ERP 场景适配)
 > **适用读者**:前端开发 / UI 调整 / Agent 生成新页面
 
@@ -620,7 +620,102 @@ starcon 前端尚未实现,以下为**规划中的页面**与本规范的对应,
 
 ---
 
-## 9. 单一真相源 — 文件索引(落地后)
+## 9. Logo 品牌源与设计理念
+
+> 本节为 starcon Logo 的**品牌侧规范**——4 节点连接形成中心之星的灵感、6 个精修变体、字标规范、配色应用、真实场景示例。所有视觉细节的最终解释权以品牌源文件为准。
+
+### 9.1 品牌源文件
+
+[`docs/design/brand-source-b1-refined.png`](./brand-source-b1-refined.png) — B1 精修方案,1536×1024,6 个变体 (B1-1 ~ B1-6) + 字标规范 + 配色应用 + 真实场景示例。
+
+> 任何 logo 调整必须先回到本图比对,**禁止**脱离品牌源自创几何变体。
+
+### 9.2 核心设计理念
+
+**"四个商业节点连接,形成中心之星"**(品牌源原文)
+
+- **4 个商业节点**:代表 starcon 的 4 个业务系统 —— 开发 / 运营 / 物流 / 仓储(详见 §2)
+- **中心 4 角星**:`STAR` 概念 + 业务汇聚的双重隐喻
+- **节点之间的连接**:协作 / 数据流 / 跨业务协同
+- **几何本质**:**4 旋转对称**(N/NE/SE/S / NW),任何角度旋转 90° 视觉一致
+
+### 9.3 B1 六个变体(品牌源图标注)
+
+| 变体 | 名称 | 描述 | 推荐用途 |
+|---|---|---|---|
+| **B1-1** | **经典版(推荐)** | 平衡的几何形态,识别度高,简洁现代,适用性最广 | **starcon 主 mark** |
+| B1-2 | 更几何化 | 圆角更克制,几何感更强,体现专业与稳定感 | 印刷品 / 品牌物料 |
+| B1-3 | 更圆润 | 节点更圆润,整体更友好,亲和力,适合面向全球市场 | 海外市场物料 |
+| B1-4 | 星形更明显 | 强化中心星形负空间,STAR 概念更突出 | 营销头图 / 大尺寸场景 |
+| B1-5 | 极简版 | 进一步简化形态,线条更轻,极简简洁 | **favicon / 16px 小尺寸** |
+| B1-6 | 动态感 | 微微倾斜的连接形态,体现连接 / 流动 / 增长 | 启动屏 / 动画 |
+
+### 9.4 字标规范(Wordmark)
+
+```
+STARCON          ← 主字标(粗体无衬线,大写)
+Commerce OS      ← 副字标(细体,Title Case)
+```
+
+- **字体建议**(品牌源标注):
+  - 英文:Inter / SF Pro / Manrope(Bold / Semibold)
+  - 中文:思源黑体 / 苹方(按需使用)
+- **图标高度 = x-height**(图标高度跟字标 x-height 对齐)
+- **字间距 = 0.4 × x-height**(中英文都按此)
+- **字标可单独使用**(lockup 去掉 mark,纯文字版本)
+
+### 9.5 三种标准尺寸(品牌源)
+
+| 尺寸 | 用途 |
+|---|---|
+| **64 px** | 主用 —— 顶栏 / 侧栏 / App Icon / 大尺寸场景 |
+| **24 px** | 中尺寸 —— 行内 icon / button / 表格内 |
+| **16 px** | 小尺寸 —— favicon / 工具栏 / 状态栏 |
+
+> 16px 及以下建议使用 B1-5 极简版,避免过细元素糊掉。
+
+### 9.6 色彩应用
+
+| 场景 | 配色 | 示例 |
+|---|---|---|
+| **主用** | 单色黑 `#0A0A0A` | 产品内 mark、文档、合同 |
+| **数字化场景** | 品牌蓝 `--brand` (`#1D4ED8`) | 官网首页、推广物料、App 内强调 |
+| 深色背景 | 白 mark `#FFFFFF` | 深色 App Icon、深色头图 |
+| 品牌色背景 | 白 mark | 数字大屏、彩色印刷品 |
+| 浅色 App Icon | 黑 mark + `#F5F5F5` 底 | PWA / Web App 安装图标 |
+| 深色 App Icon | 白 mark + `#1D4ED8` 底 | iOS / Android App 图标 |
+| 渐变背景 | 白 mark + 蓝紫渐变 | App Store / 营销头图(可选) |
+
+> **规则**:**优先使用单色 mark**,保证在不同场景下的清晰度与辨识度;品牌色只在数字化场景中使用。
+
+### 9.7 真实场景示例(品牌源)
+
+- **产品左上角**(sidebar 顶部、App Icon、产品列表)
+- **顶栏 header** 左侧(logo + 文字)
+- **登录页 / 启动屏** 居中放大
+- **文档 / 邮件 / 合同** 页眉
+- **favicon** 浏览器 tab
+- **PWA 安装提示** App Icon
+
+### 9.8 落地文件清单(本仓库)
+
+| 文件 | 用途 | 颜色 |
+|---|---|---|
+| `apps/web/public/logo-mark.svg` | **主 mark**(B1-1 经典版) | `#0A0A0A` 黑 |
+| `apps/web/public/logo-mark-dark.svg` | 深色背景用 | `#FFFFFF` 白 |
+| `apps/web/public/logo-mark-brand.svg` | 数字化场景用 | `#1D4ED8` 品牌蓝 |
+| `apps/web/public/favicon.svg` | 浏览器 favicon (B1-5 极简版) | `#0A0A0A` 黑 |
+| `apps/web/public/logo-wordmark.svg` | 纯字标(STARCON + Commerce OS) | `#0A0A0A` 黑 |
+| `apps/web/public/logo-lockup.svg` | mark + 字标 横版 | `#0A0A0A` 黑 |
+| `apps/web/public/logo-app-icon-light.svg` | 浅色 App Icon | 黑 mark + `#F5F5F5` 底 |
+| `apps/web/public/logo-app-icon-dark.svg` | 深色 App Icon | 白 mark + `#1D4ED8` 底 |
+| `packages/ui/src/components/common/logo.tsx` | Logo React 组件(引用 mark.svg + 字标 inline) | — |
+
+> 旧版 v3 (蓝紫渐变 + 罗盘 + 六边网络 + 金角星) 全部废弃,本节为唯一规范。
+
+---
+
+## 10. 单一真相源 — 文件索引(落地后)
 
 | 内容 | 文件路径(规划) |
 |---|---|
@@ -637,7 +732,7 @@ starcon 前端尚未实现,以下为**规划中的页面**与本规范的对应,
 
 ---
 
-## 10. 修订记录
+## 11. 修订记录
 
 | 版本 | 日期 | 修订说明 |
 |---|---|---|
@@ -646,3 +741,4 @@ starcon 前端尚未实现,以下为**规划中的页面**与本规范的对应,
 | V1.2 | 2026-09-25 | 移除"全部"系统 / 移除侧栏"当前系统"标识;PageHeader h-20 → h-16 font-semibold,h-14 → h-12;主区 padding 跟侧栏对齐(px-5)|
 | V1.3 | 2026-09-25 | 4 系统重命名为 开发/运营/物流/仓储 (按团队职能);PageHeader h-16→h-14 font-semibold, h-12→h-10;NavList item h-8→h-7, copy-14→copy-13;Logo 下加 border-b 分隔 |
 | V1.4 | 2026-09-25 | Typography 重平衡:StatCard value → h-24;PageHeader h1 18→16px font-semibold;Nav item 13→14px;Segmented md 12→13→14→16→15px(四轮反馈,容器同步 h-8→h-9);**新增 text-label-15 token**;Logo / Header 统一 h-16 border-b 在 y=64 对齐 |
+| **V1.5** | **2026-09-26** | **Logo 重做:废弃 v3 蓝紫渐变多层几何,改用品牌源 B1 精修方案"4 节点 + 中心 4 角星";新增 §9 Logo 品牌源与设计理念;新增 logo-mark / logo-mark-dark / logo-mark-brand / favicon / logo-wordmark / logo-lockup / logo-app-icon-light / logo-app-icon-dark 共 8 个 SVG;副字标从"跨境电商 AI ERP" 改为"Commerce OS"** |

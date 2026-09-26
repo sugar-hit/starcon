@@ -5,15 +5,18 @@ import { cn } from '../../lib/utils';
 /**
  * Logo — image mark + styled wordmark + subtitle
  *
- * 设计: docs/design/visual-spec.md § 3.10
+ * 设计: docs/design/visual-spec.md §9 (Logo 品牌源与设计理念)
  * 真实 mark: apps/web/public/logo-mark.svg / logo-mark-dark.svg / favicon.svg
  *
- * mark 设计（多层几何，避开手画字形）:
- *   - 蓝紫渐变圆角方块 + 顶部高光（玻璃感）
- *   - 内嵌六边形网络线（cross-border / global）
- *   - 罗盘指针（白色钻石，朝上）+ 中央分隔带
- *   - 4 个方位点（白色，从中心递减不透明）
- *   - 右上角金色 4 角星（识别点）
+ * mark 设计（品牌源 B1 精修方案）:
+ *   - 4 个圆点 = 4 业务系统(开发/运营/物流/仓储)
+ *   - 中心 4 角星 = STAR 概念 + 业务汇聚
+ *   - 单色黑主用 / 品牌蓝版(数字化场景)
+ *   - 详见 docs/design/brand-source-b1-refined.png
+ *
+ * 字标:
+ *   - 主: STARCON(粗体大写)
+ *   - 副: Commerce OS(细体 Title Case)
  *
  * 尺寸对齐（mark ≈ wordmark + mt + subtitle）:
  *   sm: 32 / md: 40 / lg: 48
@@ -89,7 +92,7 @@ export function Logo({ tone = 'light', size = 'md', markOnly = false, className 
             subtitleColorClass(tone)
           )}
         >
-          跨境电商 AI ERP
+          Commerce OS
         </span>
       </div>
     </div>

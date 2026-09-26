@@ -1,16 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
-  <defs>
-    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1E40AF"/>
-      <stop offset="55%" stop-color="#4338CA"/>
-      <stop offset="100%" stop-color="#6D28D9"/>
-    </linearGradient>
-  </defs>
-  <rect width="40" height="40" rx="9" fill="url(#bgGrad)"/>
-  <g transform="translate(20, 20)">
-    <path d="M0 -9 L3 0 L0 9 L-3 0 Z" fill="white"/>
-  </g>
-  <g transform="translate(32.5, 8.5)">
-    <path d="M0 -2.6 L0.78 -0.78 L2.6 0 L0.78 0.78 L0 2.6 L-0.78 0.78 L-2.6 0 L-0.78 -0.78 Z" fill="#FBBF24"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="starcon">
+  <!--
+    Favicon — B1-5 极简版
+    16px 及以下小尺寸场景专用
+    圆点稍大、臂稍粗,保证小尺寸下不糊
+    详见 docs/design/visual-spec.md §9.3 (B1-5) + §9.5 (16px)
+  -->
+  <g fill="#0A0A0A">
+    <!-- 4 角星主体 — 比 B1-1 臂更粗 (外尖 24, 内尖 ~11) -->
+    <path d="M32 8 L41 23 L56 32 L41 41 L32 56 L23 41 L8 32 L23 23 Z"/>
+    <!-- 4 节点圆点 (r=10,稍大于 B1-1) -->
+    <circle cx="32" cy="8" r="10"/>
+    <circle cx="56" cy="32" r="10"/>
+    <circle cx="32" cy="56" r="10"/>
+    <circle cx="8" cy="32" r="10"/>
   </g>
 </svg>
