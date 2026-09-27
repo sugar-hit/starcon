@@ -29,7 +29,8 @@ const priorities = [
 
 export default function HomePage() {
   const [now, setNow] = React.useState<Date | null>(null);
-  const { tabs, activateTab } = useWorkspaceTabs();
+  const { tabs: allTabs, activateTab } = useWorkspaceTabs();
+  const tabs = allTabs.filter((tab) => tab.id !== '/');
   React.useEffect(() => {
     const tick = () => setNow(new Date());
     tick();

@@ -44,14 +44,13 @@ export function WorkspaceTabs() {
       .querySelector<HTMLElement>('[data-tab-active="true"]')
       ?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }, [activeTabId]);
-  if (!tabs.length) return null;
 
   return (
     <div className="border-border bg-background relative z-20 flex h-10 min-w-0 shrink-0 items-center border-b px-4 md:px-6">
       <div
         role="tablist"
         aria-label="已打开的页面"
-        className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto"
+        className="flex min-w-0 flex-1 scroll-pl-20 items-center gap-1 overflow-x-auto"
       >
         {tabs.map((tab, index) => (
           <Popover
@@ -63,7 +62,7 @@ export function WorkspaceTabs() {
               <div
                 data-tab-id={tab.id}
                 data-tab-active={tab.id === activeTabId}
-                draggable
+                draggable={tab.id !== '/'}
                 onDragStart={(event) => event.dataTransfer.setData('text/plain', tab.id)}
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={(event) => {
@@ -82,6 +81,7 @@ export function WorkspaceTabs() {
                 }}
                 className={cn(
                   'text-copy-13 flex h-8 shrink-0 items-center rounded-md',
+                  tab.id === '/' && 'bg-background sticky left-0 z-10',
                   tab.id === activeTabId
                     ? 'bg-card text-foreground shadow-xs'
                     : 'text-muted-foreground hover:bg-muted',
@@ -120,14 +120,16 @@ export function WorkspaceTabs() {
                 >
                   {tab.label}
                 </button>
-                <button
-                  type="button"
-                  aria-label={`关闭 ${tab.label}`}
-                  className="hover:bg-muted mr-1 rounded p-1 focus-visible:opacity-100"
-                  onClick={() => closeTab(tab.id)}
-                >
-                  <X className="h-3 w-3" />
-                </button>
+                {tab.id !== '/' && (
+                  <button
+                    type="button"
+                    aria-label={`关闭 ${tab.label}`}
+                    className="hover:bg-muted mr-1 rounded p-1 focus-visible:opacity-100"
+                    onClick={() => closeTab(tab.id)}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </div>
             </PopoverAnchor>
             <PopoverContent
@@ -167,19 +169,19 @@ export function WorkspaceTabs() {
                 }}
               >
                 {[
-                  { label: '关闭当前', action: () => closeTab(tab.id), disabled: false },
+                  { label: '关闭当前', action: () => closeTab(tab.id), disabled: tab.id === '/' },
                   {
                     label: '关闭其他',
                     action: () => closeOthers(tab.id),
-                    disabled: tabs.length === 1,
+                    disabled: tabs.length <= (tab.id === '/' ? 1 : 2),
                   },
-                  { label: '关闭左侧', action: () => closeLeft(tab.id), disabled: index === 0 },
+                  { label: '关闭左侧', action: () => closeLeft(tab.id), disabled: index <= 1 },
                   {
                     label: '关闭右侧',
                     action: () => closeRight(tab.id),
                     disabled: index === tabs.length - 1,
                   },
-                  { label: '关闭全部', action: closeAll, disabled: false },
+                  { label: '关闭全部', action: closeAll, disabled: tabs.length === 1 },
                 ].map(({ label, action, disabled }) => (
                   <button
                     type="button"

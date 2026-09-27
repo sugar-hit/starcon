@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { AccountMenu } from '../common/account-menu';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BookOpen, ChevronDown, Menu, Search, Sparkles, X, type LucideIcon } from 'lucide-react';
@@ -174,7 +175,7 @@ function SystemSwitcher({
             }}
             aria-current={isActive ? 'true' : undefined}
             className={cn(
-              'text-label-14 flex-1 whitespace-nowrap rounded-md px-3 py-2 text-center md:min-w-20 md:px-5',
+              'text-label-14 flex-1 whitespace-nowrap rounded-md px-3 py-2 text-center md:min-w-12 md:px-2 lg:min-w-20 lg:px-5',
               isActive
                 ? 'bg-card text-foreground shadow-xs font-semibold'
                 : 'text-muted-foreground hover:bg-card',
@@ -363,12 +364,6 @@ function AppShellInner({ system, children }: AppShellProps) {
             <p className="text-copy-12 mt-2 leading-relaxed">湃宁科技（深圳）有限责任公司</p>
             <p className="text-copy-12 mt-1">© {new Date().getFullYear()} · All rights reserved.</p>
           </div>
-          <div className="text-copy-13 flex items-center gap-2">
-            <span className="border-border bg-card text-label-12 flex h-7 w-7 items-center justify-center rounded-md border">
-              S
-            </span>
-            <span>Starcon 演示空间</span>
-          </div>
         </div>
       </aside>
       <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
@@ -386,7 +381,9 @@ function AppShellInner({ system, children }: AppShellProps) {
             <Logo size="sm" markOnly />
           </Link>
           <div className="bg-muted/70 hidden rounded-lg p-0.5 md:block">{systemsDesktop}</div>
-          <span className="text-label-14 md:hidden">{currentSystem.label}系统</span>
+          <span className="text-label-14 hidden sm:inline md:hidden">
+            {currentSystem.label}系统
+          </span>
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
@@ -426,6 +423,7 @@ function AppShellInner({ system, children }: AppShellProps) {
               </div>
             </SheetContent>
           </Sheet>
+          <AccountMenu />
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <button

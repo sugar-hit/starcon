@@ -38,6 +38,14 @@ const WorkspaceTabsContext = React.createContext<WorkspaceTabsContextValue | nul
 
 const STORAGE_KEY = 'starcon.workspace.tabs.v2';
 const HOME_HREF = '/';
+const HOME_TAB: WorkspaceTab = {
+  id: '/',
+  href: '/',
+  label: '工作台',
+  systemId: 'dev',
+  order: -1,
+  pinned: true,
+};
 
 interface PersistedShape {
   tabs: WorkspaceTab[];
@@ -95,8 +103,11 @@ export interface WorkspaceTabsProviderProps {
 export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceTabsProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [tabs, setTabs] = React.useState<WorkspaceTab[]>(initialTabs);
-  const activeTabId = tabs.find((tab) => tab.href === pathname)?.id ?? null;
+  const [tabs, setTabs] = React.useState<WorkspaceTab[]>(
+    initialTabs.filter((tab) => tab.id !== HOME_HREF && tab.href !== HOME_HREF),
+  );
+  const activeTabId =
+    pathname === HOME_HREF ? HOME_HREF : (tabs.find((tab) => tab.href === pathname)?.id ?? null);
   const [hydrated, setHydrated] = React.useState(false);
   const activeTabIdRef = React.useRef<string | null>(null);
   activeTabIdRef.current = activeTabId;
@@ -119,6 +130,10 @@ export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceT
       current.length === 0 ? 0 : Math.max(...current.map((t) => t.order)) + 1;
 
     const openTab = (incoming: Omit<WorkspaceTab, 'order'>) => {
+      if (incoming.href === HOME_HREF) {
+        router.push(HOME_HREF);
+        return;
+      }
       const id = incoming.id;
       setTabs((current) => {
         const exists = current.find((t) => t.id === id);
@@ -129,6 +144,7 @@ export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceT
       if (pathname !== incoming.href) router.push(incoming.href);
     };
     const closeTab = (id: string) => {
+      if (id === HOME_HREF) return;
       const wasActive = activeTabIdRef.current === id;
       setTabs((current) => current.filter((t) => t.id !== id));
       // 用户硬规则:关闭 tab 就是关闭,不再自动 fallback 到邻接
@@ -139,7 +155,7 @@ export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceT
     };
     const activateTab = (id: string | null) => {
       const tab = tabs.find((item) => item.id === id);
-      if (id === null) router.push(HOME_HREF);
+      if (id === null || id === HOME_HREF) router.push(HOME_HREF);
       else if (tab) router.push(tab.href);
     };
     const pinTab = (id: string, pinned: boolean = true) => {
@@ -158,6 +174,11 @@ export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceT
       activateTab(id);
     };
     const closeRight = (id: string) => {
+      if (id === HOME_HREF) {
+        setTabs([]);
+        router.replace(HOME_HREF);
+        return;
+      }
       setTabs((current) => {
         const idx = current.findIndex((t) => t.id === id);
         if (idx < 0) return current;
@@ -188,7 +209,7 @@ export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceT
     };
 
     return {
-      tabs,
+      tabs: [HOME_TAB, ...tabs],
       activeTabId,
       hydrated,
       openTab,

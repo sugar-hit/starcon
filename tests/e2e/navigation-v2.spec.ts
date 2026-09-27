@@ -31,9 +31,14 @@ test('all 55 task destinations render and parent buttons never navigate', async 
       }
     }
   }
-  await expect(page.getByRole('tab')).toHaveCount(55);
+  await expect(page.getByRole('tab')).toHaveCount(56);
+  await expect(page.getByRole('tab', { name: '工作台', exact: true })).toBeInViewport();
+  await page.getByRole('tab', { name: '工作台', exact: true }).click();
+  await expect(page).toHaveURL('/');
+  await page.getByRole('button', { name: '跳到最右 Tab' }).click();
+  await expect(page).toHaveURL('/inventory/aging');
   await page.reload();
-  await expect(page.getByRole('tab')).toHaveCount(55);
+  await expect(page.getByRole('tab')).toHaveCount(56);
   await expect(page.getByRole('tab', { selected: true })).toHaveText('库龄与预警');
 });
 
@@ -44,8 +49,8 @@ for (const width of [320, 390, 768, 1440, 1920]) {
     await expect(page.getByRole('tab', { selected: true })).toHaveText('选品与开发');
     await page.getByRole('link', { name: 'Starcon 工作台' }).filter({ visible: true }).click();
     await expect(page).toHaveURL('/');
-    await expect(page.getByRole('tab')).toHaveCount(1);
-    await expect(page.getByRole('tab', { selected: true })).toHaveCount(0);
+    await expect(page.getByRole('tab')).toHaveCount(2);
+    await expect(page.getByRole('tab', { selected: true })).toHaveText('工作台');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('工作台');
     await expect(page.getByLabel('北京时间')).toHaveText(/\d{2}:\d{2}/);
     await expect(page.getByRole('region', { name: '全球时间' }).locator('time')).toHaveCount(6);
@@ -64,7 +69,7 @@ for (const width of [320, 390, 768, 1440, 1920]) {
     expect(Math.round(box!.width)).toBe(width < 640 ? width : Math.min(960, width - 48));
     expect(await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
     await expect(page).toHaveURL('/products/research');
-    await expect(page.getByRole('tab', { includeHidden: true })).toHaveCount(1);
+    await expect(page.getByRole('tab', { includeHidden: true })).toHaveCount(2);
     const scrim = page.locator('.copilot-backdrop');
     expect(await scrim.evaluate((el) => getComputedStyle(el).backdropFilter)).toBe('none');
     expect(await scrim.evaluate((el) => getComputedStyle(el).backgroundColor)).toContain('0.14');
@@ -73,7 +78,7 @@ for (const width of [320, 390, 768, 1440, 1920]) {
     await page.getByRole('tab', { name: '选品与开发', exact: true }).click({ button: 'right' });
     await page.getByRole('menuitem', { name: '关闭全部', exact: true }).click();
     await expect(page).toHaveURL('/');
-    await expect(page.getByRole('tab')).toHaveCount(0);
+    await expect(page.getByRole('tab')).toHaveCount(1);
     if (width < 768) {
       await page.getByRole('button', { name: '菜单', exact: true }).click();
       const nav = page.getByRole('dialog', { name: '功能导航' });
@@ -93,25 +98,25 @@ test('direct nested route, history, closing and restoring secondary tabs', async
     .getByRole('navigation', { name: '功能导航' })
     .getByRole('link', { name: '库龄与预警', exact: true })
     .click();
-  await expect(page.getByRole('tab')).toHaveCount(2);
+  await expect(page.getByRole('tab')).toHaveCount(3);
   await expect(page).toHaveURL('/inventory/aging');
   await page.goBack();
   await expect(page.getByRole('tab', { selected: true })).toHaveText('补货建议');
   await page.getByRole('button', { name: '关闭 补货建议', exact: true }).click();
   await expect(page).toHaveURL('/');
-  await expect(page.getByRole('tab')).toHaveCount(1);
+  await expect(page.getByRole('tab')).toHaveCount(2);
   await page.getByRole('button', { name: '库龄与预警', exact: true }).click();
   await expect(page).toHaveURL('/inventory/aging');
   await page
     .getByRole('navigation', { name: '功能导航' })
     .getByRole('link', { name: '补货建议', exact: true })
     .click();
-  await expect(page.getByRole('tab')).toHaveCount(2);
+  await expect(page.getByRole('tab')).toHaveCount(3);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('补货建议');
 });
 
 test('unknown child URLs do not create phantom tabs', async ({ page }) => {
   await page.goto('/inventory/not-a-task');
   await expect(page.getByText('这里没有页面')).toBeVisible();
-  await expect(page.getByRole('tab')).toHaveCount(0);
+  await expect(page.getByRole('tab')).toHaveCount(1);
 });

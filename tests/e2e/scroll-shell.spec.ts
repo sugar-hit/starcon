@@ -40,7 +40,7 @@ test('content scroll and overscroll leave the logo, navigation and tabs fixed', 
   await page.getByRole('link', { name: 'Starcon 工作台' }).click();
   await expect(page).toHaveURL('/');
   await expect.poll(() => main.evaluate((el) => el.scrollTop)).toBe(0);
-  await expect(page.getByRole('tab')).toHaveCount(1);
+  await expect(page.getByRole('tab')).toHaveCount(2);
 });
 
 test('long side navigation scrolls independently of branding and content', async ({ page }) => {
