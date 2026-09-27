@@ -1,12 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" fill="none" role="img" aria-label="STARCON wordmark">
-  <!--
-    纯字标 — STARCON + Commerce OS
-    字体: Inter / SF Pro / Manrope (Bold/Semibold)
-    字间距: 0.4 × x-height
-    详见 docs/design/visual-spec.md §9.4
-  -->
-  <g fill="#0A0A0A" font-family="Inter, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif">
-    <text x="0" y="36" font-size="28" font-weight="900" letter-spacing="1.4">STARCON</text>
-    <text x="2" y="56" font-size="11" font-weight="500" letter-spacing="0.5" fill="#707070">Commerce OS</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 152 64" role="img" aria-label="STARCON">
+  <!-- B1-1: four rounded business nodes surrounding a transparent central star. -->
+  <g font-family="Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif">
+    <text x="0" y="31" font-size="28" font-weight="700" letter-spacing="0.2" fill="#0A0A0A">STARCON</text>
+    <text x="0" y="51" font-size="17" font-weight="400" fill="#707070">Commerce OS</text>
   </g>
 </svg>

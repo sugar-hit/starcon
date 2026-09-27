@@ -1,14 +1,10 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import { Command } from 'cmdk';
 import { ArrowUpRight, Search, type LucideIcon } from 'lucide-react';
-import {
-  Modal,
-  ModalContent,
-  ModalTitle,
-  ModalDescription,
-} from '../ui/modal';
+import { Modal, ModalContent, ModalTitle, ModalDescription } from '../ui/modal';
 import { cn } from '../../lib/utils';
 
 /**
@@ -79,13 +75,11 @@ export function CommandPalette({
   emptyMessage = '没有匹配的命令。试试其他关键词。',
   className,
 }: CommandPaletteProps) {
+  const router = useRouter();
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent
-        className={cn(
-          'max-w-xl gap-0 overflow-hidden p-0',
-          className,
-        )}
+        className={cn('max-w-xl gap-0 overflow-hidden p-0', className)}
         // cmdk 自己管理键盘事件,关闭 Radix 默认焦点陷阱(避免吞键盘)
         onOpenAutoFocus={(e: Event) => e.preventDefault()}
       >
@@ -94,7 +88,7 @@ export function CommandPalette({
           按 Cmd/Ctrl + K 打开,跨模块快速跳转。
         </ModalDescription>
         <Command
-          label="命令面板"
+          label="搜索功能名称"
           shouldFilter
           loop
           className="flex max-h-[60dvh] min-h-[280px] flex-col"
@@ -132,7 +126,7 @@ export function CommandPalette({
                         if (isDisabled) return;
                         item.onSelect?.();
                         if (item.href) {
-                          window.location.href = item.href;
+                          router.push(item.href);
                         }
                         onOpenChange(false);
                       }}
@@ -142,7 +136,7 @@ export function CommandPalette({
                       )}
                     >
                       {Icon ? (
-                        <span className="bg-background text-muted-foreground flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border">
+                        <span className="bg-background text-muted-foreground border-border flex h-7 w-7 shrink-0 items-center justify-center rounded-md border">
                           <Icon className="h-3.5 w-3.5" />
                         </span>
                       ) : (

@@ -1,3 +1,4 @@
+import { TASK_PAGES, findTaskPage } from './task-pages';
 import {
   LayoutDashboard,
   Package,
@@ -36,6 +37,7 @@ export type SystemId = 'dev' | 'ops' | 'logistics' | 'storage';
 export interface NavChildItem {
   label: string;
   href: string;
+  description?: string;
 }
 
 export interface NavItem {
@@ -86,7 +88,12 @@ const opsSystem: SystemDef = {
   defaultHref: '/orders',
   items: [
     { label: '订单中心', href: '/orders', icon: Package, description: '多平台订单聚合' },
-    { label: '售后中心', href: '/aftersales', icon: HeadphonesIcon, description: '退款 / 退货 / 客诉' },
+    {
+      label: '售后中心',
+      href: '/aftersales',
+      icon: HeadphonesIcon,
+      description: '退款 / 退货 / 客诉',
+    },
     { label: 'CRM / 客服', href: '/crm', icon: Users, description: '客户档案与工单' },
     { label: '数据中心', href: '/analytics', icon: BarChart3, description: '数据看板与报表' },
     { label: '财务中心', href: '/finance', icon: CircleDollarSign, description: '对账与结算' },
@@ -101,9 +108,7 @@ const logisticsSystem: SystemDef = {
   label: '物流',
   description: '物流轨迹与配送',
   defaultHref: '/logistics',
-  items: [
-    { label: '物流中心', href: '/logistics', icon: Ship, description: '物流轨迹与配送' },
-  ],
+  items: [{ label: '物流中心', href: '/logistics', icon: Ship, description: '物流轨迹与配送' }],
 };
 
 /** 仓储 — 仓储 / 库存（2 个） */
@@ -119,7 +124,20 @@ const storageSystem: SystemDef = {
 };
 
 /** 系统列表 — 顶部 Segmented Tab 用 */
-export const SYSTEMS: SystemDef[] = [devSystem, opsSystem, logisticsSystem, storageSystem];
+export const SYSTEMS: SystemDef[] = [devSystem, opsSystem, logisticsSystem, storageSystem].map(
+  (system) => ({
+    ...system,
+    items: system.items.map((item) => ({
+      ...item,
+      children: TASK_PAGES.filter((page) => page.domain === item.href.slice(1)),
+    })),
+  }),
+);
+export const NAV_DESTINATIONS: NavItem[] = SYSTEMS.flatMap((system) =>
+  system.items.flatMap((item) =>
+    (item.children ?? []).map((child) => ({ ...child, icon: item.icon })),
+  ),
+);
 
 /** 顶层固定项 — 侧栏顶部，不属于任何系统 */
 export const TOP_LEVEL_ITEMS: NavItem[] = [
@@ -129,7 +147,7 @@ export const TOP_LEVEL_ITEMS: NavItem[] = [
 
 /** 按 id 查系统 */
 export function getSystem(id: SystemId): SystemDef {
-  return SYSTEMS.find((s) => s.id === id) ?? devSystem;
+  return SYSTEMS.find((s) => s.id === id) ?? SYSTEMS[0]!;
 }
 
 /**
@@ -144,11 +162,16 @@ export function resolveSystemFromPath(pathname: string): SystemDef {
       }
     }
   }
-  return devSystem;
+  return SYSTEMS[0]!;
 }
 
 /** 由 pathname 推断当前 feature (NavItem) — 用于 PageHeader title + 当前高亮 */
 export function resolveFeatureFromPath(pathname: string, system: SystemDef): NavItem | null {
+  const task = findTaskPage(pathname);
+  if (task) {
+    const parent = system.items.find((item) => item.href === `/${task.domain}`);
+    if (parent) return { ...parent, ...task };
+  }
   return (
     system.items.find((it) => pathname === it.href || pathname.startsWith(it.href + '/')) ??
     TOP_LEVEL_ITEMS.find((it) => pathname === it.href || pathname.startsWith(it.href + '/')) ??

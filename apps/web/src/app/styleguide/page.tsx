@@ -48,6 +48,7 @@ const palette = [
 ];
 
 export default function StyleguidePage() {
+  const [density, setDensity] = useState('comfortable');
   const [state, setState] = useState('empty');
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
@@ -334,14 +335,17 @@ export default function StyleguidePage() {
             </div>
             <Segmented
               aria-label="表格密度"
-              value="comfortable"
-              onChange={() => undefined}
+              value={density}
+              onChange={setDensity}
               options={[
                 { label: '舒适', value: 'comfortable' },
                 { label: '紧凑', value: 'compact' },
               ]}
             />
           </div>
+          <p role="status" className="text-copy-12 text-muted-foreground px-4 py-2">
+            当前密度：{density === 'compact' ? '紧凑' : '舒适'}
+          </p>
           <EmptyState
             icon={<Search className="h-5 w-5" />}
             title="数据接入后展示"

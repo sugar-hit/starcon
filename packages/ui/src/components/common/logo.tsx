@@ -30,9 +30,27 @@ export interface LogoProps {
 }
 
 const sizeMap = {
-  sm: { box: 'h-8 w-8',  wordmark: 'text-h-14', subtitle: 'text-[10px]',  markPx: 32 },
-  md: { box: 'h-10 w-10', wordmark: 'text-h-16', subtitle: 'text-label-12', markPx: 40 },
-  lg: { box: 'h-12 w-12', wordmark: 'text-h-20', subtitle: 'text-label-13', markPx: 48 },
+  sm: {
+    box: 'h-8 w-8',
+    wordmark: 'text-[14px]',
+    subtitle: 'text-[10px]',
+    gap: 'gap-3',
+    markPx: 32,
+  },
+  md: {
+    box: 'h-10 w-10',
+    wordmark: 'text-[18px]',
+    subtitle: 'text-[12px]',
+    gap: 'gap-3.5',
+    markPx: 40,
+  },
+  lg: {
+    box: 'h-12 w-12',
+    wordmark: 'text-[22px]',
+    subtitle: 'text-[14px]',
+    gap: 'gap-4',
+    markPx: 48,
+  },
 };
 
 const textColorClass = (tone: NonNullable<LogoProps['tone']>) => {
@@ -49,7 +67,11 @@ const subtitleColorClass = (tone: NonNullable<LogoProps['tone']>) => {
 
 export function Logo({ tone = 'light', size = 'md', markOnly = false, className }: LogoProps) {
   const sizes = sizeMap[size];
-  const markSrc = tone === 'dark' ? '/logo-mark-dark.svg' : '/logo-mark.svg';
+  const markSrc = {
+    light: '/logo-mark.svg',
+    dark: '/logo-mark-dark.svg',
+    brand: '/logo-mark-brand.svg',
+  }[tone];
 
   if (markOnly) {
     return (
@@ -67,20 +89,20 @@ export function Logo({ tone = 'light', size = 'md', markOnly = false, className 
   }
 
   return (
-    <div className={cn('inline-flex items-center gap-2.5', className)}>
+    <div className={cn('inline-flex items-center', sizes.gap, className)}>
       <Image
         src={markSrc}
-        alt="starcon"
+        alt=""
         width={sizes.markPx}
         height={sizes.markPx}
         className={cn(sizes.box, 'shrink-0')}
         priority
       />
-      <div className={cn('flex flex-col leading-none', textColorClass(tone))}>
+      <div className={cn('flex flex-col whitespace-nowrap', textColorClass(tone))}>
         <span
           className={cn(
             sizes.wordmark,
-            'font-black tracking-[0.04em] uppercase select-none'
+            'font-bold leading-none tracking-[0.01em] uppercase select-none',
           )}
         >
           STARCON
@@ -88,8 +110,8 @@ export function Logo({ tone = 'light', size = 'md', markOnly = false, className 
         <span
           className={cn(
             sizes.subtitle,
-            'mt-1 font-medium tracking-[0.05em] select-none',
-            subtitleColorClass(tone)
+            'mt-1 font-normal leading-none tracking-normal select-none',
+            subtitleColorClass(tone),
           )}
         >
           Commerce OS

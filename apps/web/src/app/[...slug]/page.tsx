@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowLeft, Search } from 'lucide-react';
-import { Button, EmptyState } from '@starcon/ui';
+import { Button, EmptyState, TaskWorkspace, findTaskPage } from '@starcon/ui';
 
 /**
  * 兜底路由 — 仅处理未规划的路径(如拼错 /oders、未来新增路径)
@@ -14,7 +14,9 @@ import { Button, EmptyState } from '@starcon/ui';
  *   /logistics /warehouse /inventory
  *   /api/[...]         (API 路由)
  */
-export default function NotFoundPage() {
+export default function TaskPage({ params }: { params: { slug: string[] } }) {
+  const page = findTaskPage('/' + params.slug.join('/'));
+  if (page) return <TaskWorkspace page={page} />;
   return (
     <EmptyState
       icon={<Search className="h-6 w-6" />}

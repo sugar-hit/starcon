@@ -1,72 +1,194 @@
+'use client';
+
+import * as React from 'react';
 import Link from 'next/link';
-import { ArrowRight, Box, CheckCircle2, Clock3 } from 'lucide-react';
-import { DomainPlaceholder, getDomainSpec, SectionCard } from '@starcon/ui';
+import { ArrowUpRight, Clock3, Globe2, Layers3, ListTodo, ArrowRight } from 'lucide-react';
+import { SectionCard, useWorkspaceTabs, WORLD_CITIES, clockParts } from '@starcon/ui';
 
-/**
- * 工作台 — 首页
- *
- * 设计原则:
- *   - 不展示 mock 数据
- *   - 顶部放快速入口,引导用户进入具体 domain
- *   - 主区域展示工作台 domain 的功能清单与上下游
- */
+const priorities = [
+  {
+    title: '审核订单',
+    caption: '处理地址、库存与风控异常',
+    href: '/orders/review',
+    group: '订单履约',
+  },
+  {
+    title: '安排补货',
+    caption: '联动在途、交期与安全库存',
+    href: '/inventory/replenishment',
+    group: '库存协同',
+  },
+  {
+    title: '跟进货件',
+    caption: '核对 FBA 发运与签收差异',
+    href: '/logistics/fba',
+    group: '跨境物流',
+  },
+  { title: '核对结算', caption: '复核平台账单与原币回款', href: '/finance', group: '财务结算' },
+];
+
 export default function HomePage() {
-  const spec = getDomainSpec('overview');
+  const [now, setNow] = React.useState<Date | null>(null);
+  const { tabs, activateTab } = useWorkspaceTabs();
+  React.useEffect(() => {
+    const tick = () => setNow(new Date());
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
   return (
-    <>
-      <div className="text-copy-13 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="font-medium">2026 年 9 月 26 日</span>
-          <span className="text-muted-foreground">Asia/Shanghai</span>
+    <div className="space-y-6">
+      <section aria-label="工作台概览" className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <h1 className="text-h-20 font-semibold tracking-tight">工作台</h1>
+            <p className="text-copy-13 text-muted-foreground" data-testid="beijing-date">
+              {now
+                ? new Intl.DateTimeFormat('zh-CN', {
+                    timeZone: 'Asia/Shanghai',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'long',
+                  }).format(now)
+                : '正在读取日期'}
+            </p>
+          </div>
+          <span className="text-copy-12 text-muted-foreground flex items-center gap-1.5">
+            <Globe2 className="h-3.5 w-3.5" />
+            全球时间
+          </span>
         </div>
-        <span className="text-copy-13 text-muted-foreground">
-          指标与图表将在数据接入后展示
-        </span>
-      </div>
+        <section
+          aria-label="全球时间"
+          className="border-border bg-border grid grid-cols-2 gap-px overflow-hidden rounded-lg border sm:grid-cols-3 xl:grid-cols-6"
+        >
+          {[{ city: '北京', country: '中国', zone: 'Asia/Shanghai' }, ...WORLD_CITIES].map(
+            (city, index) => {
+              const parts = now ? clockParts(now, city.zone) : null;
+              return (
+                <div
+                  key={city.zone}
+                  className={index === 0 ? 'bg-brand-soft px-4 py-3' : 'bg-card px-4 py-3'}
+                  aria-label={`${city.country} ${city.city}`}
+                >
+                  <div className="text-copy-12 flex flex-wrap items-center gap-x-1.5">
+                    <span className="font-medium">{city.city}</span>
+                    <span className="text-muted-foreground">· {city.country}</span>
+                  </div>
+                  <time
+                    aria-label={index === 0 ? '北京时间' : `${city.city}时间`}
+                    className={`text-h-20 my-1.5 block font-medium tabular-nums ${index === 0 ? 'text-brand' : ''}`}
+                    dateTime={now?.toISOString()}
+                  >
+                    {parts?.time ?? '—:—'}
+                  </time>
+                  <p className="text-copy-12 text-muted-foreground whitespace-nowrap">
+                    {parts?.date ?? '—'} · {parts?.offset ?? '—'}
+                  </p>
+                </div>
+              );
+            },
+          )}
+        </section>
+      </section>
 
-      <SectionCard
-        title="快捷入口"
-        description="按任务类型快速进入业务"
-        bodyClassName="p-0"
-      >
-        <div className="divide-border divide-y">
-          {[
-            {
-              label: '处理新订单',
-              description: '检查订单信息与履约条件',
-              href: '/orders',
-              icon: Clock3,
-            },
-            {
-              label: '关注库存',
-              description: '检查可用量与补货需求',
-              href: '/inventory',
-              icon: Box,
-            },
-            {
-              label: '核对结算',
-              description: '按币种与店铺核对账目',
-              href: '/finance',
-              icon: CheckCircle2,
-            },
-          ].map((item) => (
+      <section aria-label="日常任务">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-h-16 font-semibold">从一件事开始</h2>
+          <span className="text-copy-12 text-muted-foreground">贯穿采购、履约与回款</span>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {priorities.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="hover:bg-muted/50 flex items-center gap-3 p-5"
+              className="border-border bg-card hover:border-control-border group rounded-lg border p-4 transition-colors"
             >
-              <item.icon className="text-muted-foreground h-4 w-4 shrink-0" />
-              <div className="flex-1">
-                <p className="text-label-13">{item.label}</p>
-                <p className="text-copy-12 text-muted-foreground mt-1">{item.description}</p>
+              <div className="text-copy-12 text-muted-foreground mb-4 flex items-center justify-between">
+                <span>{item.group}</span>
+                <ArrowUpRight className="group-hover:text-brand h-4 w-4" />
               </div>
-              <ArrowRight className="text-muted-foreground h-4 w-4" />
+              <p className="text-h-16 font-semibold">{item.title}</p>
+              <p className="text-copy-13 text-muted-foreground mt-2">{item.caption}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <div className="grid items-start gap-4 xl:grid-cols-3">
+        <SectionCard
+          title="待办与关注"
+          description="把需要处理的事情放在同一个地方"
+          className="xl:col-span-2"
+        >
+          <div className="grid gap-3 sm:grid-cols-3">
+            {['待审核订单', '库存风险', '物流异常'].map((title) => (
+              <div key={title} className="bg-muted/50 rounded-md p-3">
+                <p className="text-copy-13">{title}</p>
+                <p className="text-h-24 text-muted-foreground my-2">—</p>
+                <p className="text-copy-12 text-muted-foreground">等待业务数据接入</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-copy-13 text-muted-foreground mt-5 flex items-start gap-2">
+            <ListTodo className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>连接店铺与仓库后，在这里汇总按负责人、处理期限排列的任务。</p>
+          </div>
+          <Link
+            href="/org/stores"
+            className="text-copy-13 text-brand mt-4 inline-flex items-center gap-1"
+          >
+            管理店铺连接 <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </SectionCard>
+        <SectionCard title="继续处理" description="返回工作台不会关闭已打开的页面">
+          {tabs.length ? (
+            <ul className="max-h-64 space-y-1 overflow-y-auto">
+              {tabs.map((tab) => (
+                <li key={tab.id}>
+                  <button
+                    type="button"
+                    onClick={() => activateTab(tab.id)}
+                    className="hover:bg-muted text-copy-13 flex w-full items-center gap-2 rounded-md px-2 py-2 text-left"
+                  >
+                    <Layers3 className="text-muted-foreground h-4 w-4 shrink-0" />
+                    <span className="min-w-0 flex-1 truncate">{tab.label}</span>
+                    <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-copy-13 text-muted-foreground py-6">
+              <Clock3 className="mb-3 h-5 w-5" />
+              从左侧展开业务分组，打开一个任务开始工作。
+            </div>
+          )}
+        </SectionCard>
+      </div>
+
+      <SectionCard title="准备好你的业务空间" description="建议按以下顺序完成基础配置">
+        <div className="grid gap-4 md:grid-cols-3">
+          {[
+            ['01', '连接销售渠道', '配置平台店铺与授权状态', '/org/stores'],
+            ['02', '整理商品资料', '建立 SKU 与平台商品对应关系', '/products'],
+            ['03', '配置仓库与库存', '明确可用库存、库位和履约范围', '/warehouse'],
+          ].map(([step, title, description, href]) => (
+            <Link
+              key={step}
+              href={href!}
+              className="hover:bg-muted group flex min-w-0 gap-3 rounded-md p-2"
+            >
+              <span className="text-brand text-label-12 pt-1 font-semibold">{step}</span>
+              <div>
+                <p className="text-label-14">{title}</p>
+                <p className="text-copy-13 text-muted-foreground mt-1">{description}</p>
+              </div>
             </Link>
           ))}
         </div>
       </SectionCard>
-
-      {spec && <DomainPlaceholder spec={spec} />}
-    </>
+    </div>
   );
 }

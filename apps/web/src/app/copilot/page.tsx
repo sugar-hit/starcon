@@ -1,6 +1,5 @@
-import { DomainPlaceholder, getDomainSpec } from '@starcon/ui';
+import { redirect } from 'next/navigation';
 
 export default function CopilotPage() {
-  const spec = getDomainSpec('copilot');
-  return <>{spec && <DomainPlaceholder spec={spec} />}</>;
+  redirect('/');
 }

@@ -13,6 +13,7 @@ import { cn } from '../../lib/utils';
 const Sheet = DialogPrimitive.Root;
 const SheetTrigger = DialogPrimitive.Trigger;
 const SheetClose = DialogPrimitive.Close;
+const SheetTitle = DialogPrimitive.Title;
 const SheetPortal = DialogPrimitive.Portal;
 
 const SheetOverlay = React.forwardRef<
@@ -21,10 +22,7 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
-    className={cn(
-      'fixed inset-0 z-50 bg-black/40 backdrop-blur-sm animate-fade-in',
-      className
-    )}
+    className={cn('animate-fade-in fixed inset-0 z-50 bg-black/40 backdrop-blur-sm', className)}
     {...props}
   />
 ));
@@ -38,26 +36,28 @@ const sheetVariants = cva(
         top: 'inset-x-0 top-0 border-b animate-slide-in-right',
         bottom: 'inset-x-0 bottom-0 border-t animate-slide-in-right',
         left: 'inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm animate-slide-in-left',
-        right:
-          'inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm animate-slide-in-right',
+        right: 'inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm animate-slide-in-right',
       },
     },
     defaultVariants: {
       side: 'right',
     },
-  }
+  },
 );
 
 export interface SheetContentProps
-  extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>,
-    VariantProps<typeof sheetVariants> {}
+  extends
+    React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>,
+    VariantProps<typeof sheetVariants> {
+  overlayClassName?: string;
+}
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   SheetContentProps
->(({ side = 'right', className, children, ...props }, ref) => (
+>(({ side = 'right', className, overlayClassName, children, ...props }, ref) => (
   <SheetPortal>
-    <SheetOverlay />
+    <SheetOverlay className={overlayClassName} />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(sheetVariants({ side }), className)}
@@ -69,11 +69,4 @@ const SheetContent = React.forwardRef<
 ));
 SheetContent.displayName = DialogPrimitive.Content.displayName;
 
-export {
-  Sheet,
-  SheetTrigger,
-  SheetClose,
-  SheetContent,
-  SheetOverlay,
-  SheetPortal,
-};
+export { Sheet, SheetTrigger, SheetTitle, SheetClose, SheetContent, SheetOverlay, SheetPortal };

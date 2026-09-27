@@ -2,12 +2,12 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { BookOpen, Menu, Search, X, type LucideIcon } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { BookOpen, ChevronDown, Menu, Search, Sparkles, X, type LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import {
   SYSTEMS,
-  TOP_LEVEL_ITEMS,
+  NAV_DESTINATIONS,
   getSystem,
   resolveFeatureFromPath,
   resolveSystemFromPath,
@@ -17,12 +17,10 @@ import {
 } from '../../lib/nav-config';
 import { getDomainSpec } from '../../lib/domain-spec';
 import { Logo } from '../common/logo';
+import { DomainPlaceholder } from '../common/domain-placeholder';
 import { PageHeader } from '../common/page-header';
 import { CommandPalette, type CommandPaletteGroup } from '../common/command-palette';
-import {
-  WorkspaceTabsProvider,
-  useWorkspaceTabs,
-} from '../../lib/workspace-tabs';
+import { WorkspaceTabsProvider, useWorkspaceTabs } from '../../lib/workspace-tabs';
 import { WorkspaceTabs } from './workspace-tabs';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '../ui/sheet';
 
@@ -31,8 +29,8 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from '../ui
  *
  * 集成:
  *   - WorkspaceTabsProvider / WorkspaceTabs:顶部 tab 栏
- *   - keep-alive:把每个 tab 的 React tree 缓存,切回不丢滚动/表单
- *   - Logo 点击 → 清空 tab + 跳工作台
+ *   - 页面内容由 Next 路由管理，Tab 高亮只跟随已提交的 pathname
+ *   - Logo 点击 → 保留 tab + 跳工作台
  *   - 系统切换 → 打开默认页 tab
  *   - Cmd+K 命令面板
  *
@@ -49,11 +47,8 @@ function NavItemLink({
   active: boolean;
   onNavigate?: (() => void) | undefined;
 }) {
-  const router = useRouter();
   const { openTab } = useWorkspaceTabs();
-  const pathname = usePathname();
-  const system = resolveSystemFromPath(pathname);
-  const Icon = item.icon;
+  const system = resolveSystemFromPath(item.href);
   return (
     <Link
       href={item.href}
@@ -67,7 +62,6 @@ function NavItemLink({
           label: item.label,
           systemId: system.id,
         });
-        router.push(item.href);
       }}
       aria-current={active ? 'page' : undefined}
       className={cn(
@@ -77,7 +71,6 @@ function NavItemLink({
           : 'text-muted-foreground hover:bg-muted hover:text-foreground',
       )}
     >
-      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
       {item.label}
     </Link>
   );
@@ -91,20 +84,51 @@ function NavList({
   onNavigate?: (() => void) | undefined;
 }) {
   const pathname = usePathname();
-  const render = (item: NavItem) => (
-    <li key={item.href}>
-      <NavItemLink
-        item={item}
-        active={
-          pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href + '/'))
-        }
-        onNavigate={onNavigate}
-      />
-    </li>
-  );
+  const [expanded, setExpanded] = React.useState<Record<string, boolean>>({});
+  React.useEffect(() => {
+    const parent = system.items.find(
+      (item) => pathname === item.href || pathname.startsWith(item.href + '/'),
+    );
+    if (parent) setExpanded((state) => ({ ...state, [parent.href]: true }));
+  }, [pathname, system]);
+  const idPrefix = React.useId();
+  const render = (item: NavItem) => {
+    const Icon = item.icon;
+    const open = expanded[item.href] ?? false;
+    const groupId = `${idPrefix}-${item.href.slice(1)}`;
+    return (
+      <li key={item.href}>
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={groupId}
+          onClick={() => setExpanded((state) => ({ ...state, [item.href]: !open }))}
+          className="text-copy-14 hover:bg-muted flex min-h-9 w-full items-center gap-2.5 rounded-md px-3 py-2 text-left font-medium"
+        >
+          <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <span className="flex-1">{item.label}</span>
+          <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', !open && '-rotate-90')} />
+        </button>
+        <ul
+          id={groupId}
+          hidden={!open}
+          className="border-border ml-5 space-y-0.5 border-l py-1 pl-2"
+        >
+          {item.children?.map((child) => (
+            <li key={child.href}>
+              <NavItemLink
+                item={{ ...child, icon: item.icon }}
+                active={pathname === child.href}
+                onNavigate={onNavigate}
+              />
+            </li>
+          ))}
+        </ul>
+      </li>
+    );
+  };
   return (
     <nav aria-label="功能导航" className="flex flex-1 flex-col gap-5 px-3 py-5">
-      <ul className="space-y-1">{TOP_LEVEL_ITEMS.map(render)}</ul>
       <div>
         <p className="text-label-12 text-muted-foreground mb-2 px-3">{system.label}系统</p>
         <ul className="space-y-1">{system.items.map(render)}</ul>
@@ -122,7 +146,6 @@ function SystemSwitcher({
   onNavigate?: (() => void) | undefined;
   variant?: 'desktop' | 'sheet';
 }) {
-  const router = useRouter();
   const { openTab } = useWorkspaceTabs();
   return (
     <nav
@@ -139,7 +162,7 @@ function SystemSwitcher({
               if (e.metaKey || e.ctrlKey || e.button === 1) return;
               e.preventDefault();
               onNavigate?.();
-              const defaultItem = s.items[0];
+              const defaultItem = s.items[0]?.children?.[0];
               if (defaultItem) {
                 openTab({
                   id: s.defaultHref,
@@ -147,12 +170,11 @@ function SystemSwitcher({
                   label: defaultItem.label,
                   systemId: s.id,
                 });
-                router.push(s.defaultHref);
               }
             }}
             aria-current={isActive ? 'true' : undefined}
             className={cn(
-              'text-label-14 whitespace-nowrap rounded-md px-3 py-2',
+              'text-label-14 flex-1 whitespace-nowrap rounded-md px-3 py-2 text-center md:min-w-20 md:px-5',
               isActive
                 ? 'bg-card text-foreground shadow-xs font-semibold'
                 : 'text-muted-foreground hover:bg-card',
@@ -167,12 +189,11 @@ function SystemSwitcher({
 }
 
 /**
- * LogoLink — 点击 Logo → 清空所有 tab + 跳工作台
+ * LogoLink — 点击 Logo → 保留所有 tab + 跳工作台
  * (用户硬规则:工作台不进 tab,只在 Logo / 关闭全部时出现)
  */
 function LogoLink() {
-  const router = useRouter();
-  const { clearAll } = useWorkspaceTabs();
+  const { activateTab } = useWorkspaceTabs();
   return (
     <Link
       href="/"
@@ -180,8 +201,7 @@ function LogoLink() {
       onClick={(e) => {
         if (e.metaKey || e.ctrlKey || e.button === 1) return;
         e.preventDefault();
-        clearAll();
-        router.replace('/');
+        activateTab(null);
       }}
       className="border-border flex h-16 shrink-0 items-center border-b px-5"
     >
@@ -195,57 +215,13 @@ export interface AppShellProps {
   children: React.ReactNode;
 }
 
-/**
- * KeepAliveShell — 把每个 tab 的 React tree 缓存,切回不丢滚动 / 表单
- *
- * 实现:用 ref Map<tabId, ReactNode> 缓存当前路由的 children。
- * 切到非 active tab 时,从 cache 取之前缓存的 React tree 用 hidden 包裹。
- * React 不会重新执行 cached element,只 diff,所以状态保留。
- */
-function KeepAliveShell({ children }: { children: React.ReactNode }) {
-  const { tabs, activeTabId } = useWorkspaceTabs();
-  const pathname = usePathname();
-  const cacheRef = React.useRef<Map<string, React.ReactNode>>(new Map());
-  const lastPathRef = React.useRef<string | null>(null);
-
-  // 把当前 children 按 activeTabId 缓存
-  // pathname 变化时也更新(用户切系统 / 外部跳转)
-  React.useLayoutEffect(() => {
-    if (!activeTabId || pathname === '/' || pathname === '/styleguide') return;
-    if (lastPathRef.current === pathname) return;
-    cacheRef.current.set(activeTabId, children);
-    lastPathRef.current = pathname;
-  }, [activeTabId, pathname, children]);
-
-  // 工作台 / styleguide:直接渲染 children(不进 tab 系统)
-  if (pathname === '/' || pathname === '/styleguide' || activeTabId === null || tabs.length === 0) {
-    return <>{children}</>;
-  }
-
-  return (
-    <>
-      {tabs.map((tab) => {
-        if (tab.id === activeTabId) {
-          return (
-            <div key={tab.id} data-panel-active={tab.id}>
-              {children}
-            </div>
-          );
-        }
-        const cached = cacheRef.current.get(tab.id);
-        if (!cached) return null;
-        return (
-          <div key={tab.id} data-panel-cached={tab.id} hidden>
-            {cached}
-          </div>
-        );
-      })}
-    </>
-  );
-}
-
 function AppShellInner({ system, children }: AppShellProps) {
+  const { activateTab } = useWorkspaceTabs();
   const pathname = usePathname();
+  const mainRef = React.useRef<HTMLElement>(null);
+  React.useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, left: 0 });
+  }, [pathname]);
   const currentSystem = system ? getSystem(system) : resolveSystemFromPath(pathname);
   /**
    * 推导当前页的 PageHeader(标题 + 描述)
@@ -259,6 +235,7 @@ function AppShellInner({ system, children }: AppShellProps) {
    *   - 404 / 未匹配路径:不渲染 PageHeader(由 EmptyState 承担视觉权重)
    */
   const pageHeaderMeta = React.useMemo(() => {
+    if (pathname === '/') return null;
     if (pathname === '/styleguide') {
       return {
         title: '设计系统',
@@ -271,9 +248,10 @@ function AppShellInner({ system, children }: AppShellProps) {
     const spec = getDomainSpec(feature.href.replace(/^\//, ''));
     return {
       title: feature.label,
-      description: spec?.purpose ?? feature.description ?? '',
+      description: feature.description ?? spec?.purpose ?? '',
     };
   }, [pathname, currentSystem]);
+  const [copilotOpen, setCopilotOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
   React.useEffect(() => {
@@ -293,9 +271,7 @@ function AppShellInner({ system, children }: AppShellProps) {
       prefix: string,
       subLabel?: string,
     ) => {
-      const desc = subLabel
-        ? `${subLabel} · ${it.description ?? ''}`
-        : it.description;
+      const desc = subLabel ? `${subLabel} · ${it.description ?? ''}` : it.description;
       return {
         id: `${prefix}-${it.href}`,
         label: it.label,
@@ -307,8 +283,9 @@ function AppShellInner({ system, children }: AppShellProps) {
     const navItems: CommandPaletteGroup = {
       heading: '功能导航',
       items: [
-        ...TOP_LEVEL_ITEMS.map((it) => buildItem(it, 'nav')),
-        ...SYSTEMS.flatMap((s) => s.items.map((it) => buildItem(it, 'nav', `${s.label}系统`))),
+        ...NAV_DESTINATIONS.map((it) =>
+          buildItem(it, 'nav', resolveSystemFromPath(it.href).label + '系统'),
+        ),
         {
           id: 'nav-styleguide',
           label: '设计系统',
@@ -347,9 +324,7 @@ function AppShellInner({ system, children }: AppShellProps) {
     return [navItems, businessObjects, actions];
   }, []);
 
-  const systemsDesktop = (
-    <SystemSwitcher currentSystem={currentSystem} variant="desktop" />
-  );
+  const systemsDesktop = <SystemSwitcher currentSystem={currentSystem} variant="desktop" />;
   const systemsSheet = (
     <SystemSwitcher
       currentSystem={currentSystem}
@@ -358,16 +333,18 @@ function AppShellInner({ system, children }: AppShellProps) {
     />
   );
   return (
-    <div className="bg-background text-foreground flex min-h-screen">
+    <div className="bg-background text-foreground flex h-dvh min-h-0 overflow-hidden">
       <a
         href="#main-content"
         className="focus:bg-card sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded focus:p-3"
       >
         跳到主要内容
       </a>
-      <aside className="md:border-border hidden md:sticky md:top-0 md:flex md:h-screen md:w-56 md:shrink-0 md:flex-col md:self-start md:overflow-y-auto md:border-r">
+      <aside className="md:border-border hidden md:flex md:h-full md:w-56 md:shrink-0 md:flex-col md:border-r">
         <LogoLink />
-        <NavList system={currentSystem} />
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <NavList system={currentSystem} />
+        </div>
         <div className="border-border space-y-3 border-t p-4">
           <Link
             href="/styleguide"
@@ -377,6 +354,15 @@ function AppShellInner({ system, children }: AppShellProps) {
             <BookOpen className="h-4 w-4" />
             设计系统 <span className="text-label-12 ml-auto">2.0</span>
           </Link>
+          <div className="border-border text-muted-foreground border-t pt-3" aria-label="版权信息">
+            <p className="text-label-12 font-semibold uppercase tracking-wider">
+              pioneering
+              <br />
+              innovation<span className="text-brand">.</span>
+            </p>
+            <p className="text-copy-12 mt-2 leading-relaxed">湃宁科技（深圳）有限责任公司</p>
+            <p className="text-copy-12 mt-1">© {new Date().getFullYear()} · All rights reserved.</p>
+          </div>
           <div className="text-copy-13 flex items-center gap-2">
             <span className="border-border bg-card text-label-12 flex h-7 w-7 items-center justify-center rounded-md border">
               S
@@ -385,9 +371,18 @@ function AppShellInner({ system, children }: AppShellProps) {
           </div>
         </div>
       </aside>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="border-border bg-background/95 sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b px-4 backdrop-blur md:px-6">
-          <Link href="/" className="md:hidden" aria-label="Starcon 工作台">
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="border-border shell-header relative z-30 flex h-16 shrink-0 items-center gap-3 border-b px-4 backdrop-blur md:px-6">
+          <Link
+            href="/"
+            className="md:hidden"
+            aria-label="Starcon 工作台"
+            onClick={(event) => {
+              if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+              event.preventDefault();
+              activateTab(null);
+            }}
+          >
             <Logo size="sm" markOnly />
           </Link>
           <div className="bg-muted/70 hidden rounded-lg p-0.5 md:block">{systemsDesktop}</div>
@@ -404,9 +399,33 @@ function AppShellInner({ system, children }: AppShellProps) {
               ⌘ K
             </kbd>
           </button>
-          <span className="border-border bg-card text-label-12 text-muted-foreground hidden rounded border px-2 py-1 sm:inline">
-            演示环境
-          </span>
+          <Sheet open={copilotOpen} onOpenChange={setCopilotOpen}>
+            <SheetTrigger asChild>
+              <button
+                type="button"
+                aria-label="AI Copilot"
+                className="hover:bg-muted flex h-9 shrink-0 items-center gap-2 rounded-md px-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span className="hidden lg:inline">AI Copilot</span>
+              </button>
+            </SheetTrigger>
+            <SheetContent
+              aria-describedby={undefined}
+              overlayClassName="copilot-backdrop"
+              className="copilot-panel flex flex-col overflow-hidden"
+            >
+              <div className="border-border flex shrink-0 items-center justify-between border-b px-6 py-4">
+                <SheetTitle>AI Copilot</SheetTitle>
+                <SheetClose aria-label="关闭 AI Copilot" className="hover:bg-muted rounded-md p-2">
+                  <X className="h-4 w-4" />
+                </SheetClose>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6">
+                <DomainPlaceholder spec={getDomainSpec('copilot')!} />
+              </div>
+            </SheetContent>
+          </Sheet>
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <button
@@ -445,20 +464,21 @@ function AppShellInner({ system, children }: AppShellProps) {
           </Sheet>
         </header>
         <WorkspaceTabs />
-        <main id="main-content" tabIndex={-1} className="min-w-0 flex-1">
-          <div className="mx-auto w-full max-w-7xl space-y-6 px-4 pb-10 pt-6 md:px-6">
+        <main
+          ref={mainRef}
+          id="main-content"
+          tabIndex={-1}
+          className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain"
+        >
+          <div className="w-full space-y-4 px-4 pb-10 pt-4 md:px-6">
             {pageHeaderMeta && (
               <PageHeader title={pageHeaderMeta.title} description={pageHeaderMeta.description} />
             )}
-            <KeepAliveShell>{children}</KeepAliveShell>
+            {children}
           </div>
         </main>
       </div>
-      <CommandPalette
-        open={searchOpen}
-        onOpenChange={setSearchOpen}
-        groups={searchGroups}
-      />
+      <CommandPalette open={searchOpen} onOpenChange={setSearchOpen} groups={searchGroups} />
     </div>
   );
 }

@@ -17,41 +17,53 @@ import { test, expect } from '@playwright/test';
 test.describe('应用内 tab 栏', () => {
   test('访问 /orders 后 tab 栏出现', async ({ page }) => {
     await page.goto('/orders');
-    await expect(page.getByRole('tab', { name: /订单中心/ })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /全部订单/ })).toBeVisible();
   });
 
   test('点击侧栏 nav 会加新 tab', async ({ page }) => {
     await page.goto('/orders');
-    await expect(page.getByRole('tab', { name: /订单中心/ })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /全部订单/ })).toBeVisible();
 
     // 点"商品中心"
-    await page.getByRole('link', { name: '商品中心', exact: true }).click();
-    await expect(page.getByRole('tab', { name: /商品中心/ })).toBeVisible();
-    await expect(page.getByRole('tab', { name: /订单中心/ })).toBeVisible();
+    await page
+      .getByRole('navigation', { name: '系统导航' })
+      .getByRole('link', { name: '开发', exact: true })
+      .click();
+    await expect(page).toHaveURL('/products');
+    await expect(page.getByRole('tab', { name: /商品档案/ })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /全部订单/ })).toBeVisible();
   });
 
   test('关闭 tab 后只剩其他 tab', async ({ page }) => {
     await page.goto('/orders');
-    await page.getByRole('link', { name: '商品中心', exact: true }).click();
-    await expect(page.getByRole('tab', { name: /订单中心/ })).toBeVisible();
-    await expect(page.getByRole('tab', { name: /商品中心/ })).toBeVisible();
+    await page
+      .getByRole('navigation', { name: '系统导航' })
+      .getByRole('link', { name: '开发', exact: true })
+      .click();
+    await expect(page).toHaveURL('/products');
+    await expect(page.getByRole('tab', { name: /全部订单/ })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /商品档案/ })).toBeVisible();
 
     // 关闭"订单中心" tab
-    await page.getByRole('tab', { name: /订单中心/ }).hover();
-    await page.getByRole('button', { name: /关闭 订单中心/ }).click();
-    await expect(page.getByRole('tab', { name: /订单中心/ })).not.toBeVisible();
+    await page.getByRole('tab', { name: /全部订单/ }).hover();
+    await page.getByRole('button', { name: /关闭 全部订单/ }).click();
+    await expect(page.getByRole('tab', { name: /全部订单/ })).not.toBeVisible();
   });
 
   test('tab 状态持久化到 localStorage', async ({ page, context }) => {
     await page.goto('/orders');
-    await page.getByRole('link', { name: '商品中心', exact: true }).click();
-    await expect(page.getByRole('tab', { name: /商品中心/ })).toBeVisible();
+    await page
+      .getByRole('navigation', { name: '系统导航' })
+      .getByRole('link', { name: '开发', exact: true })
+      .click();
+    await expect(page).toHaveURL('/products');
+    await expect(page.getByRole('tab', { name: /商品档案/ })).toBeVisible();
 
     // 刷新
     await page.reload();
     // tabs 应该还在
-    await expect(page.getByRole('tab', { name: /订单中心/ })).toBeVisible();
-    await expect(page.getByRole('tab', { name: /商品中心/ })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /全部订单/ })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /商品档案/ })).toBeVisible();
 
     await context.clearCookies();
   });

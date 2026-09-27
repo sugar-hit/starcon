@@ -13,8 +13,8 @@
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
     "build:packages": "turbo run build --filter='./packages/*'",
-    "test": "turbo run test",
-    "test:e2e": "turbo run test:e2e",
+    "test": "pnpm test:unit",
+    "test:e2e": "playwright test",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
@@ -25,19 +25,30 @@
     "db:studio": "pnpm --filter @starcon/database studio",
     "cli": "pnpm --filter @starcon/cli start",
     "release": "changeset publish",
-    "prepare": "husky install || true"
+    "prepare": "husky install || true",
+    "test:unit": "vitest run"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^20.11.0",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "14.2.35",
     "husky": "^9.0.0",
     "lint-staged": "^15.2.0",
     "prettier": "^3.2.0",
+    "prettier-plugin-tailwindcss": "^0.6.0",
     "turbo": "^2.0.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^3.2.7"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
-    "*.{json,md,yaml,yml}": ["prettier --write"]
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yaml,yml}": [
+      "prettier --write"
+    ]
   }
 }
