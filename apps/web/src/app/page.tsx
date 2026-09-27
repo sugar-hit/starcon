@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { ArrowUpRight, Clock3, Globe2, Layers3, ListTodo, ArrowRight } from 'lucide-react';
-import { SectionCard, useWorkspaceTabs, WORLD_CITIES, clockParts } from '@starcon/ui';
+import { SectionCard, useWorkspaceTabs, WorldClockStrip } from '@starcon/ui';
 
 const priorities = [
   {
@@ -59,38 +59,7 @@ export default function HomePage() {
             全球时间
           </span>
         </div>
-        <section
-          aria-label="全球时间"
-          className="border-border bg-border grid grid-cols-2 gap-px overflow-hidden rounded-lg border sm:grid-cols-3 xl:grid-cols-6"
-        >
-          {[{ city: '北京', country: '中国', zone: 'Asia/Shanghai' }, ...WORLD_CITIES].map(
-            (city, index) => {
-              const parts = now ? clockParts(now, city.zone) : null;
-              return (
-                <div
-                  key={city.zone}
-                  className={index === 0 ? 'bg-brand-soft px-4 py-3' : 'bg-card px-4 py-3'}
-                  aria-label={`${city.country} ${city.city}`}
-                >
-                  <div className="text-copy-12 flex flex-wrap items-center gap-x-1.5">
-                    <span className="font-medium">{city.city}</span>
-                    <span className="text-muted-foreground">· {city.country}</span>
-                  </div>
-                  <time
-                    aria-label={index === 0 ? '北京时间' : `${city.city}时间`}
-                    className={`text-h-20 my-1.5 block font-medium tabular-nums ${index === 0 ? 'text-brand' : ''}`}
-                    dateTime={now?.toISOString()}
-                  >
-                    {parts?.time ?? '—:—'}
-                  </time>
-                  <p className="text-copy-12 text-muted-foreground whitespace-nowrap">
-                    {parts?.date ?? '—'} · {parts?.offset ?? '—'}
-                  </p>
-                </div>
-              );
-            },
-          )}
-        </section>
+        <WorldClockStrip />
       </section>
 
       <section aria-label="日常任务">
