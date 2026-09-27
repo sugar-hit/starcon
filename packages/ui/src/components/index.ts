@@ -40,6 +40,7 @@ export * from './common/form-field';
 export * from '../lib/task-pages';
 export * from './common/task-workspace';
 export * from '../lib/world-clock';
+export * from '../lib/geo';
 export * from '../lib/use-city-rotation';
-export * from './common/city-globe';
+export * from './common/mini-globe';
 export * from './common/world-clock-strip';

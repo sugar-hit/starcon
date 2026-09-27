@@ -3,20 +3,28 @@
 import * as React from 'react';
 import { cn } from '../../lib/utils';
 import { useCityRotation } from '../../lib/use-city-rotation';
-import { HOME_CITY, PRIMARY_CITIES, clockParts, type WorldCity } from '../../lib/world-clock';
-import { CityGlobe } from './city-globe';
+import {
+  CLOCK_SWAP_STAGGER_MS,
+  REGION_POOLS,
+  clockParts,
+  type WorldCity,
+} from '../../lib/world-clock';
+import { MiniGlobe } from './mini-globe';
 
 interface ClockSlot {
   city: WorldCity;
-  rotating: boolean;
-  /** 轮换格已切换次数，> 0 才播换场动效，避免首屏入场就闪一下 */
-  switches: number;
+  /** 轮换格所属分组，本地时区为 null */
+  region: string | null;
+  /** 是否刚换过场 */
+  switching: boolean;
+  /** 换场错峰序号 */
+  stagger: number;
 }
 
 /**
- * 工作台全球时间条：本地时区 + 三个固定城市 + 两格自动轮换城市。
- * 每格右上角带地球标记；轮换格以极短的淡入上移动效换城市，
- * 时间数字本身不参与动画，保证读秒准确。
+ * 工作台全球时间带：本地时区 + 五个区域轮换格。
+ * 每格带一颗转到该城市的迷你地球，轮换时地球沿最短路径转过去，
+ * 时间数字不参与动画，保证读秒即时准确。
  */
 export function WorldClockStrip({
   className,
@@ -26,7 +34,7 @@ export function WorldClockStrip({
   intervalMs?: number;
 }) {
   const [now, setNow] = React.useState<Date | null>(null);
-  const { slots: rotating } = useCityRotation(intervalMs);
+  const { cities, switches } = useCityRotation(intervalMs);
 
   React.useEffect(() => {
     const tick = () => setNow(new Date());
@@ -35,46 +43,57 @@ export function WorldClockStrip({
     return () => window.clearInterval(timer);
   }, []);
 
-  const fixed = (city: WorldCity): ClockSlot => ({ city, rotating: false, switches: 0 });
-  const slots: ClockSlot[] = [
-    fixed(HOME_CITY),
-    ...PRIMARY_CITIES.map(fixed),
-    ...rotating.map((slot) => ({ city: slot.city, rotating: true, switches: slot.switches })),
-  ];
+  const slots: ClockSlot[] = cities.map((city, index) => ({
+    city,
+    region: REGION_POOLS[index - 1]?.label ?? null,
+    switching: index > 0 && switches > 0,
+    stagger: index * CLOCK_SWAP_STAGGER_MS,
+  }));
 
   return (
     <section
       aria-label="全球时间"
       className={cn(
-        'border-border bg-border grid grid-cols-2 gap-px overflow-hidden rounded-lg border sm:grid-cols-3 xl:grid-cols-6',
+        'border-border bg-border relative grid grid-cols-2 gap-px overflow-hidden rounded-lg border sm:grid-cols-3 xl:grid-cols-6',
         className,
       )}
     >
+      <span
+        aria-hidden="true"
+        className="from-brand/[0.05] pointer-events-none absolute inset-0 bg-gradient-to-b to-transparent"
+      />
       {slots.map((slot, index) => {
         const parts = now ? clockParts(now, slot.city.zone) : null;
-        const swapping = slot.rotating && slot.switches > 0;
         return (
           <div
-            key={slot.city.zone}
-            className={index === 0 ? 'bg-brand-soft px-4 py-3' : 'bg-card px-4 py-3'}
+            key={index}
+            className={cn(
+              'relative overflow-hidden px-4 py-3',
+              index === 0 ? 'bg-brand-soft' : 'bg-card',
+            )}
             aria-label={`${slot.city.country} ${slot.city.city}`}
-            data-rotating={slot.rotating || undefined}
-            data-switches={slot.switches}
-            title={slot.rotating ? '该城市自动轮换' : undefined}
+            data-rotating={slot.region ? true : undefined}
+            data-switches={slot.region ? switches : undefined}
+            title={slot.region ? `${slot.region} · 自动轮换` : undefined}
           >
-            <div className="text-copy-12 flex items-start justify-between gap-2">
+            <div className="flex items-start justify-between gap-2">
               <span
                 key={slot.city.zone}
                 data-clock-label
                 className={cn(
-                  'inline-flex min-w-0 flex-wrap items-baseline gap-x-1',
-                  swapping && 'clock-swap-in',
+                  'text-copy-12 inline-flex min-w-0 flex-wrap items-baseline gap-x-1 pt-1',
+                  slot.switching && 'clock-swap-in',
                 )}
               >
                 <span className="font-medium">{slot.city.city}</span>
                 <span className="text-muted-foreground">· {slot.city.country}</span>
               </span>
-              <CityGlobe />
+              <MiniGlobe
+                city={slot.city}
+                delay={slot.stagger}
+                label={`${slot.city.city}在地球上的位置`}
+                className="h-14 w-14"
+              />
             </div>
             <time
               aria-label={index === 0 ? '北京时间' : `${slot.city.city}时间`}
@@ -90,11 +109,14 @@ export function WorldClockStrip({
               key={slot.city.zone}
               className={cn(
                 'text-copy-12 text-muted-foreground whitespace-nowrap',
-                swapping && 'clock-swap-in',
+                slot.switching && 'clock-swap-in',
               )}
             >
               {parts?.date ?? '—'} · {parts?.offset ?? '—'}
             </p>
+            {slot.switching ? (
+              <span key={switches} aria-hidden="true" className="clock-sweep" />
+            ) : null}
           </div>
         );
       })}

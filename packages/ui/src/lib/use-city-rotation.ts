@@ -4,22 +4,18 @@ import * as React from 'react';
 import {
   CLOCK_ROTATION_INTERVAL_MS,
   nextRotationCursor,
-  rotationCities,
+  visibleCities,
   type WorldCity,
 } from './world-clock';
 
-export interface CityRotationSlot {
-  city: WorldCity;
-  /** 已换场次数，首屏为 0；用于首屏不播入场动效 */
-  switches: number;
-}
-
 /**
- * 末两格的轮换时钟：共用一个游标，每 intervalMs 同一次换场。
- * 两格取池中相邻城市，任意时刻都不会出现两格同城。
+ * 时间带轮换：每 intervalMs 前进一个游标，各区域取自己池子里的下一个城市。
+ * 返回 switches 供 UI 判断是否刚换过场（首屏为 0，不播入场动效）。
  */
 export function useCityRotation(intervalMs = CLOCK_ROTATION_INTERVAL_MS): {
-  slots: CityRotationSlot[];
+  cursor: number;
+  switches: number;
+  cities: WorldCity[];
 } {
   const [state, setState] = React.useState({ cursor: 0, switches: 0 });
 
@@ -33,6 +29,5 @@ export function useCityRotation(intervalMs = CLOCK_ROTATION_INTERVAL_MS): {
     return () => window.clearInterval(timer);
   }, [intervalMs]);
 
-  const slots = rotationCities(state.cursor).map((city) => ({ city, switches: state.switches }));
-  return { slots };
+  return { ...state, cities: visibleCities(state.cursor) };
 }
