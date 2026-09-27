@@ -2,12 +2,10 @@
 
 import * as React from 'react';
 import { cn } from '../../lib/utils';
-import { useCityRotation } from '../../lib/use-city-rotation';
-import { useAutoInk } from '../../lib/use-auto-ink';
 import { photoFor } from '../../lib/city-photos';
 import {
-  CLOCK_SWAP_STAGGER_MS,
-  REGION_POOLS,
+  FIXED_CITIES,
+  FIXED_REGIONS,
   clockParts,
   splitClockTime,
   type WorldCity,
@@ -17,32 +15,21 @@ import { MiniGlobe } from './mini-globe';
 
 interface ClockSlot {
   city: WorldCity;
-  /** 轮换格所属分组,本地时区为 null */
+  /** 所属区域标签,本地时区为 null */
   region: string | null;
-  /** 是否刚换过场 */
-  switching: boolean;
-  /** 换场错峰序号 */
-  stagger: number;
 }
 
 /**
- * 工作台全球时间带:本地时区 + 五个区域轮换格。
+ * 工作台全球时间带:六个固定城市。
  *
+ * 城市不轮换 —— 照片版下换城就等于换图,用户要求图片固定,所以城市也定死。
  * 每格带:
- * - 一颗转到该城市的迷你地球(48px,换城时球体沿最短路径补间)
+ * - 一颗转到该城市的迷你地球(48px)
  * - 一张该城地标照片(背景层,object-fit cover,底部对齐)
- * - 自动墨色的文字(由照片顶部像素亮度推导,白底深字/暗底白字)
  * - 时间数字不参与动画,保证读秒即时准确
  */
-export function WorldClockStrip({
-  className,
-  intervalMs,
-}: {
-  className?: string;
-  intervalMs?: number;
-}) {
+export function WorldClockStrip({ className }: { className?: string }) {
   const [now, setNow] = React.useState<Date | null>(null);
-  const { cities, switches } = useCityRotation(intervalMs);
 
   React.useEffect(() => {
     const tick = () => setNow(new Date());
@@ -51,11 +38,9 @@ export function WorldClockStrip({
     return () => window.clearInterval(timer);
   }, []);
 
-  const slots: ClockSlot[] = cities.map((city, index) => ({
+  const slots: ClockSlot[] = FIXED_CITIES.map((city, index) => ({
     city,
-    region: REGION_POOLS[index - 1]?.label ?? null,
-    switching: index > 0 && switches > 0,
-    stagger: index * CLOCK_SWAP_STAGGER_MS,
+    region: FIXED_REGIONS[index] ?? null,
   }));
 
   return (
@@ -67,13 +52,7 @@ export function WorldClockStrip({
       )}
     >
       {slots.map((slot, index) => (
-        <ClockCard
-          key={index}
-          slot={slot}
-          now={now}
-          switches={switches}
-          index={index}
-        />
+        <ClockCard key={index} slot={slot} now={now} index={index} />
       ))}
     </section>
   );
@@ -82,21 +61,16 @@ export function WorldClockStrip({
 function ClockCard({
   slot,
   now,
-  switches,
   index,
 }: {
   slot: ClockSlot;
   now: Date | null;
-  switches: number;
   index: number;
 }) {
   const parts = now ? clockParts(now, slot.city.zone) : null;
   const { hours, minutes } = splitClockTime(parts?.time ?? '—:—');
 
   const photo = photoFor(slot.city.city);
-  const ink = useAutoInk(photo?.url);
-  const isLight = ink === 'light';
-
   const hasPhoto = !!photo?.url;
 
   return (
@@ -107,11 +81,8 @@ function ClockCard({
         !hasPhoto && (index === 0 ? 'bg-brand-soft' : 'bg-card'),
       )}
       aria-label={`${slot.city.country} ${slot.city.city}`}
-      data-rotating={slot.region ? true : undefined}
-      data-switches={slot.region ? switches : undefined}
-      data-ink={ink}
+      data-region={slot.region ?? undefined}
       data-has-photo={hasPhoto ? 'true' : undefined}
-      title={slot.region ? `${slot.region} · 自动轮换` : undefined}
     >
       {hasPhoto && photo ? <CityBackdrop url={photo.url} className="z-0" /> : null}
       {/*
@@ -124,13 +95,11 @@ function ClockCard({
       <div className="relative z-10">
         <div className="flex items-start justify-between gap-2">
           <span
-            key={slot.city.zone}
             data-clock-label
             className={cn(
               'text-copy-12 inline-flex min-w-0 flex-wrap items-baseline gap-x-1 pt-1',
-              // 有照片时统一用白字(压暗罩兜底);ink 仍保留给调试/后续接入真实地标照
-              hasPhoto ? 'text-white/90' : 'text-foreground',
-              slot.switching && 'clock-swap-in',
+              // 文字区底色恒定(见 CityBackdrop 深色板),墨色不需要跟着照片变
+              hasPhoto ? 'text-white/95' : 'text-foreground',
             )}
           >
             <span className="font-semibold">{slot.city.city}</span>
@@ -140,7 +109,6 @@ function ClockCard({
           </span>
           <MiniGlobe
             city={slot.city}
-            delay={slot.stagger}
             label={`${slot.city.city}在地球上的位置`}
             className="h-12 w-12"
           />
@@ -160,18 +128,13 @@ function ClockCard({
           {minutes}
         </time>
         <p
-          key={slot.city.zone}
           className={cn(
             'text-copy-12 whitespace-nowrap',
-            hasPhoto ? 'text-white/75' : 'text-muted-foreground',
-            slot.switching && 'clock-swap-in',
+            hasPhoto ? 'text-white/70' : 'text-muted-foreground',
           )}
         >
           {parts?.date ?? '—'} · {parts?.offset ?? '—'}
         </p>
-        {slot.switching ? (
-          <span key={switches} aria-hidden="true" className="clock-sweep" />
-        ) : null}
       </div>
     </div>
   );

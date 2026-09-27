@@ -41,6 +41,8 @@ export * from '../lib/task-pages';
 export * from './common/task-workspace';
 export * from '../lib/world-clock';
 export * from '../lib/geo';
-export * from '../lib/use-city-rotation';
+export * from '../lib/city-photos';
+
+export * from './common/city-backdrop';
 export * from './common/mini-globe';
 export * from './common/world-clock-strip';

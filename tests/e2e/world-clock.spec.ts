@@ -60,45 +60,36 @@ test('each globe faces a different part of the world', async ({ page }) => {
   expect(new Set(outlines).size).toBe(6);
 });
 
-test('the five regional clocks rotate while the local one stays', async ({ page }) => {
-  await expect(rotatingCards(page)).toHaveCount(5);
+test('six fixed cities stay put and never rotate', async ({ page }) => {
   const before = await cardLabels(page);
   expect(before).toHaveLength(6);
   expect(new Set(before).size).toBe(6);
+  expect(before[0]).toContain('北京');
 
-  await expect
-    .poll(async () => (await cardLabels(page)).slice(1), { timeout: ROTATION_WAIT })
-    .not.toEqual(before.slice(1));
-
+  // 图片固定 = 城市固定：跨过原先的轮换周期也不该换城
+  await page.waitForTimeout(ROTATION_WAIT + 2000);
   const after = await cardLabels(page);
-  expect(after[0]).toBe(before[0]);
-  expect(new Set(after).size).toBe(6);
-  for (const tooltip of await cards(page).evaluateAll((els) =>
-    els.map((el) => el.getAttribute('title') || ''),
-  )) {
-    expect(tooltip === '' || /轮换/.test(tooltip)).toBe(true);
-  }
+  expect(after, '城市不应轮换').toEqual(before);
+  // 轮换标记已下线
+  await expect(rotatingCards(page)).toHaveCount(0);
 });
 
-test('each regional globe actually turns instead of jumping', async ({ page }) => {
-  const card = cards(page).nth(1);
-  const read = () => card.locator('svg[role="img"] g[clip-path] path').first().getAttribute('d');
-  await expect(card).toHaveAttribute('data-switches', '1', { timeout: ROTATION_WAIT });
+test('each fixed city gets a distinct landmark photo', async ({ page }) => {
+  await expect
+    .poll(
+      async () =>
+        cards(page).evaluateAll(
+          (els) => els.map((el) => el.querySelector('img')?.naturalWidth ?? 0).filter(Boolean).length,
+        ),
+      { timeout: 15_000 },
+    )
+    .toBe(6);
 
-  // 换场后连续采样：补间应当逐帧改变轮廓，而不是一次跳完
-  const seen = new Set<string>();
-  for (let frame = 0; frame < 20; frame += 1) {
-    seen.add((await read()) || '');
-    await page.waitForTimeout(80);
-  }
-  expect(seen.size, '旋转过程应产生多帧不同的地球轮廓').toBeGreaterThan(6);
-});
-
-test('all six clocks stay distinct while rotating', async ({ page }) => {
-  for (let sample = 0; sample < 14; sample += 1) {
-    expect(new Set(await cardLabels(page)).size).toBe(6);
-    await page.waitForTimeout(1000);
-  }
+  const photos = await cards(page).evaluateAll((els) =>
+    els.map((el) => el.querySelector('span[aria-hidden="true"] img')?.getAttribute('src') ?? ''),
+  );
+  expect(photos.every((src) => src.length > 0), '六格都应配到照片').toBe(true);
+  expect(new Set(photos).size, '六张照片应互不相同').toBe(6);
 });
 
 test('every clock colon breathes while the digits stay still', async ({ page }) => {
@@ -138,31 +129,29 @@ test('every clock colon breathes while the digits stay still', async ({ page }) 
   expect((await times.first().textContent())?.trim()).toMatch(/^\d{2}:\d{2}$/);
 });
 
-test('rotation animates briefly and keeps the clock readable', async ({ page }) => {
-  const rotating = rotatingCards(page).first();
-
-  // 首屏不播入场动效
-  expect(
-    await rotating
-      .locator('[data-clock-label]')
-      .evaluate((el) => getComputedStyle(el).animationName),
-  ).toBe('none');
-
-  await expect(rotating).toHaveAttribute('data-switches', '1', { timeout: ROTATION_WAIT });
-  await expect(rotating.locator('.clock-sweep')).toHaveCount(1);
-
-  const seconds = Number.parseFloat(
-    await rotating
-      .locator('[data-clock-label]')
-      .evaluate((el) => getComputedStyle(el).animationDuration),
+test('clock readings stay instant and unanimated', async ({ page }) => {
+  // 城市固定后没有换场动效了，读数必须始终即时可读、不参与任何动画
+  const names = await cards(page).evaluateAll((els) =>
+    els.map((card) => {
+      const nodes = [
+        ['time', card.querySelector('time')],
+        ['label', card.querySelector('[data-clock-label]')],
+        ['meta', card.querySelector('p')],
+      ] as const;
+      return {
+        label: card.getAttribute('aria-label'),
+        anims: nodes
+          .filter(([, node]) => node)
+          .map(([name, node]) => [name, getComputedStyle(node!).animationName] as const),
+      };
+    }),
   );
-  expect(seconds).toBeGreaterThan(0.2);
-  expect(seconds).toBeLessThanOrEqual(0.6);
 
-  // 时间读数本身不参与动画，轮换时保持即时可读
-  expect(await rotating.locator('time').evaluate((el) => getComputedStyle(el).animationName)).toBe(
-    'none',
-  );
+  for (const card of names) {
+    for (const [name, animation] of card.anims) {
+      expect(animation, `${card.label} 的 ${name} 不应有动画`).toBe('none');
+    }
+  }
 });
 
 test('cells either show their photo backdrop or fall back to a clean card', async ({ page }) => {
@@ -175,7 +164,7 @@ test('cells either show their photo backdrop or fall back to a clean card', asyn
         // 照片层走 aria-hidden 的 span 包裹 img
         imgInBackdrop: card.querySelector('span[aria-hidden="true"] img') !== null,
         imgSrc: img?.getAttribute('src') ?? null,
-        ink: card.getAttribute('data-ink'),
+        region: card.getAttribute('data-region'),
       };
     }),
   );
@@ -185,12 +174,15 @@ test('cells either show their photo backdrop or fall back to a clean card', asyn
     if (state.hasPhoto) {
       expect(state.imgInBackdrop, `${state.label} 有照片必须渲染 img`).toBe(true);
       expect(state.imgSrc, `${state.label} img 必须有 src`).not.toBeNull();
-      // 同一卡片有照片时,ink 必须存在
-      expect(state.ink, `${state.label} 照片格必须有 ink 判定`).toMatch(/light|dark/);
     } else {
       expect(state.imgInBackdrop, `${state.label} 无照片不应渲染 img`).toBe(false);
-      expect(state.ink, `${state.label} 无照片格 ink 必须为 dark`).toBe('dark');
     }
+  }
+
+  // 第一格是本地时区（无区域标签），其余五格各带区域
+  expect(states[0]?.region, '第一格应为本地时区').toBeNull();
+  for (const state of states.slice(1)) {
+    expect(state.region, `${state.label} 应有区域标签`).toBeTruthy();
   }
 });
 
@@ -226,23 +218,33 @@ test('photo-backed cells keep the time readable above the backdrop', async ({ pa
   }
 });
 
-test('photo-backed cells use a fixed-light ink regardless of placeholder luminance', async ({ page }) => {
-  // 当前阶段用 picsum 随机实景照占位,亮区不可控,auto-ink 采样会误判。
-  // 组件采用静态压暗罩 + 固定白字兜底;真实地标照(天空在上/地标在下)接入后
-  // 重新启用 useAutoInk 颜色分支,届时改这条断言为采样"照片+罩"合成再判断。
+test('photo-backed cells read light-on-dark against the fixed text plate', async ({ page }) => {
+  // 照片亮度横跨夜景/日落/正午，没有共同规律（实测文字区亮度 0.246~0.658，
+  // 北京与伦敦落在中灰区，任何阈值都判不对）。所以文字区底色改为恒定深色板，
+  // 墨色固定浅色；这里断言文字确实是浅色，且背景确实被压到足够暗。
   const states = await cards(page).evaluateAll((els) =>
     els
       .filter((card) => card.hasAttribute('data-has-photo'))
       .map((card) => {
         const time = card.querySelector('time')!;
-        const cs = getComputedStyle(time);
-        return { timeColor: cs.color, ink: card.getAttribute('data-ink') };
+        const plate = card.querySelector('span[aria-hidden="true"] > span:last-child');
+        return {
+          label: card.getAttribute('aria-label'),
+          timeColor: getComputedStyle(time).color,
+          plate: plate ? getComputedStyle(plate).backgroundImage : '',
+        };
       }),
   );
 
-  expect(states.length, '应有照片格被采样').toBeGreaterThan(0);
+  expect(states.length, '应有照片格被采样').toBe(6);
   for (const state of states) {
-    // 占位阶段统一白字;CDN 上线后,这里按 ink 期望 dark/light 文字色
-    expect(state.timeColor, '照片格当前统一走白字').toBe('rgb(255, 255, 255)');
+    expect(state.timeColor, `${state.label} 应为浅色读数`).toBe('rgb(255, 255, 255)');
+    // 深色板必须存在且顶部足够实（>= 0.7 不透明度）
+    expect(state.plate, `${state.label} 应有文字区深色板`).toContain('linear-gradient');
+    // 浏览器会把 rgba 序列化成带空格形式，正则需容忍
+    const alphas = [...state.plate.matchAll(/rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/g)];
+    expect(alphas.length, `${state.label} 深色板应有渐变停点`).toBeGreaterThan(0);
+    const topAlpha = Number(alphas[0]?.[4] ?? '0');
+    expect(topAlpha, `${state.label} 顶部遮罩应 >= 0.7`).toBeGreaterThanOrEqual(0.7);
   }
 });

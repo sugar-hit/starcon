@@ -1,114 +1,122 @@
 import { describe, expect, it } from 'vitest';
 import {
-  CLOCK_ROTATION_INTERVAL_MS,
-  CLOCK_SWAP_STAGGER_MS,
+  FIXED_CITIES,
+  FIXED_REGIONS,
   HOME_CITY,
   REGION_POOLS,
   clockParts,
-  nextRotationCursor,
+  localHourOf,
   splitClockTime,
-  visibleCities,
 } from './world-clock';
 
-const SAMPLE = new Date('2026-09-27T00:00:00Z');
-const ALL_CITIES = [HOME_CITY, ...REGION_POOLS.flatMap((region) => region.cities)];
+const ALL_CITIES = [
+  HOME_CITY.city,
+  ...REGION_POOLS.flatMap((region) => region.cities.map((city) => city.city)),
+];
 
-describe('world clocks', () => {
-  it('shows the previous date in New York at Beijing midnight', () => {
-    expect(clockParts(new Date('2026-09-27T00:30:00+08:00'), 'America/New_York')).toMatchObject({
-      time: '12:30',
-      date: '09/26',
-      offset: 'GMT-4',
-    });
+describe('时区与夏令时', () => {
+  it('用 IANA 时区处理跨日与夏令时', () => {
+    // 2026-07-01 12:00 UTC：纽约夏令时 UTC-4，伦敦 BST UTC+1
+    const summer = new Date('2026-07-01T12:00:00Z');
+    const ny = clockParts(summer, 'America/New_York');
+    expect(ny.time).toBe('08:00');
+    expect(ny.offset).toContain('GMT-4');
+    expect(clockParts(summer, 'Europe/London').offset).toContain('GMT+1');
+
+    // 2026-01-01 12:00 UTC：纽约冬令时 UTC-5，伦敦 GMT+0
+    const winter = new Date('2026-01-01T12:00:00Z');
+    expect(clockParts(winter, 'America/New_York').offset).toContain('GMT-5');
+    expect(clockParts(winter, 'Europe/London').offset).toContain('GMT');
   });
 
-  it('uses daylight saving rules instead of fixed US and UK offsets', () => {
-    expect(clockParts(new Date('2026-01-15T12:00:00Z'), 'America/New_York').time).toBe('07:00');
-    expect(clockParts(new Date('2026-07-15T12:00:00Z'), 'America/New_York').time).toBe('08:00');
-    expect(clockParts(new Date('2026-01-15T12:00:00Z'), 'Europe/London').time).toBe('12:00');
-    expect(clockParts(new Date('2026-07-15T12:00:00Z'), 'Europe/London').time).toBe('13:00');
+  it('跨日时日期与本地小时同步翻转', () => {
+    // UTC 2026-09-27 22:00 → 悉尼 9 月是冬令时 UTC+10，已是 09-28 08:00
+    const moment = new Date('2026-09-27T22:00:00Z');
+    const sydney = clockParts(moment, 'Australia/Sydney');
+    expect(sydney.time).toBe('08:00');
+    expect(sydney.date).toBe('09/28');
+    expect(localHourOf(moment, 'Australia/Sydney')).toBeCloseTo(8, 2);
+  });
+});
+
+describe('固定六城', () => {
+  it('正好六格且第一格是北京', () => {
+    expect(FIXED_CITIES).toHaveLength(6);
+    expect(FIXED_CITIES[0]).toEqual(HOME_CITY);
   });
 
-  it('renders a valid time and offset for every city in every pool', () => {
-    for (const city of ALL_CITIES) {
-      const parts = clockParts(SAMPLE, city.zone);
-      expect(parts.time, city.city).toMatch(/^\d{2}:\d{2}$/);
-      expect(parts.offset, city.city).toMatch(/^GMT/);
-      expect(parts.date, city.city).toMatch(/^\d{2}\/\d{2}$/);
+  it('时区互不重复', () => {
+    const zones = FIXED_CITIES.map((city) => city.zone);
+    expect(new Set(zones).size).toBe(6);
+  });
+
+  it('每格都有区域标签，北京为 null', () => {
+    expect(FIXED_REGIONS).toHaveLength(6);
+    expect(FIXED_REGIONS[0]).toBeNull();
+    for (const region of FIXED_REGIONS.slice(1)) {
+      expect(region).toBeTruthy();
     }
   });
 
-  it('covers five rotating regions with usable city pools', () => {
-    expect(REGION_POOLS.map((region) => region.key)).toEqual(['na', 'eu', 'sea', 'asia', 'other']);
+  it('六城都覆盖六个大区且各自属于对应区域', () => {
+    const byRegion = new Map(REGION_POOLS.map((r) => [r.label, r]));
+    for (let i = 1; i < FIXED_CITIES.length; i += 1) {
+      const city = FIXED_CITIES[i]!;
+      const label = FIXED_REGIONS[i]!;
+      const pool = byRegion.get(label);
+      expect(pool, `区域池 ${label} 应存在`).toBeDefined();
+      expect(
+        pool!.cities.some((c) => c.city === city.city),
+        `${city.city} 应属于 ${label}`,
+      ).toBe(true);
+    }
+  });
+
+  it('坐标落在合法范围内', () => {
+    for (const city of FIXED_CITIES) {
+      expect(city.lat).toBeGreaterThanOrEqual(-90);
+      expect(city.lat).toBeLessThanOrEqual(90);
+      expect(city.lon).toBeGreaterThanOrEqual(-180);
+      expect(city.lon).toBeLessThanOrEqual(180);
+      expect(city.city.length).toBeGreaterThan(0);
+      expect(city.country.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('城市名不与区域池重复挑选（固定版就是池内成员）', () => {
+    const poolNames = new Set(ALL_CITIES);
+    for (const city of FIXED_CITIES) {
+      expect(poolNames.has(city.city)).toBe(true);
+    }
+  });
+});
+
+describe('区域池数据完整性', () => {
+  it('五个区域覆盖 34 城且无重名', () => {
+    expect(REGION_POOLS).toHaveLength(5);
+    expect(ALL_CITIES).toHaveLength(34);
+    expect(new Set(ALL_CITIES).size).toBe(34);
+  });
+
+  it('每个区域池内时区不重复', () => {
     for (const region of REGION_POOLS) {
-      expect(region.label.length, region.key).toBeGreaterThan(0);
-      expect(region.cities.length, region.key).toBeGreaterThanOrEqual(5);
-      expect(new Set(region.cities.map((city) => city.zone)).size, region.key).toBe(
-        region.cities.length,
-      );
+      const zones = region.cities.map((c) => c.zone);
+      expect(new Set(zones).size, `${region.label} 池内时区应唯一`).toBe(zones.length);
     }
   });
+});
 
-  it('keeps every city coordinate on the globe', () => {
-    for (const city of ALL_CITIES) {
-      expect(city.lat, city.city).toBeGreaterThanOrEqual(-90);
-      expect(city.lat, city.city).toBeLessThanOrEqual(90);
-      expect(city.lon, city.city).toBeGreaterThanOrEqual(-180);
-      expect(city.lon, city.city).toBeLessThanOrEqual(180);
-    }
+describe('splitClockTime', () => {
+  it('拆分后读数不变', () => {
+    const { hours, minutes } = splitClockTime('14:07');
+    expect(hours).toBe('14');
+    expect(minutes).toBe('07');
+    expect(`${hours}:${minutes}`).toBe('14:07');
   });
 
-  it('does not repeat a zone anywhere on screen, at any rotation step', () => {
-    const zones = new Set(ALL_CITIES.map((city) => city.zone));
-    expect(zones.size).toBe(ALL_CITIES.length);
-    const steps = Math.max(...REGION_POOLS.map((region) => region.cities.length)) * 2;
-    for (let cursor = 0; cursor < steps; cursor += 1) {
-      const onScreen = visibleCities(cursor);
-      expect(onScreen, `cursor ${cursor}`).toHaveLength(6);
-      expect(new Set(onScreen.map((city) => city.zone)).size, `cursor ${cursor}`).toBe(6);
-    }
-  });
-
-  it('keeps the local zone first and walks each region through its own pool', () => {
-    expect(visibleCities(0)[0]).toEqual(HOME_CITY);
-    expect(visibleCities(0).slice(1)).toEqual(REGION_POOLS.map((r) => r.cities[0]));
-    expect(visibleCities(1).slice(1)).toEqual(REGION_POOLS.map((r) => r.cities[1]));
-    expect(visibleCities(1)[0]).toEqual(HOME_CITY);
-  });
-
-  it('excludes the local city and south-east Asia from the other-Asia pool', () => {
-    const otherAsia = REGION_POOLS.find((region) => region.key === 'asia')!.cities;
-    const southEast = REGION_POOLS.find((region) => region.key === 'sea')!.cities;
-    expect(otherAsia.some((city) => city.country === '中国')).toBe(false);
-    expect(otherAsia.some((city) => southEast.includes(city))).toBe(false);
-  });
-
-  it('groups south america, oceania and africa into the last region', () => {
-    const other = REGION_POOLS.find((region) => region.key === 'other')!;
-    const countries = new Set(other.cities.map((city) => city.country));
-    for (const expected of ['巴西', '澳大利亚', '南非', '肯尼亚']) {
-      expect(countries.has(expected), expected).toBe(true);
-    }
-    expect(other.cities.some((city) => city.zone.startsWith('Asia/'))).toBe(false);
-    expect(other.cities.some((city) => city.zone.startsWith('Europe/'))).toBe(false);
-  });
-
-  it('splits the clock for the breathing colon and keeps the reading intact', () => {
-    expect(splitClockTime('07:42')).toEqual({ hours: '07', minutes: '42' });
-    expect(splitClockTime('00:00')).toEqual({ hours: '00', minutes: '00' });
-    // 占位符也要能拆，冒号单独渲染不影响读数
+  it('占位符原样返回不崩', () => {
     expect(splitClockTime('—:—')).toEqual({ hours: '—', minutes: '—' });
-    for (const city of [HOME_CITY, ...REGION_POOLS.flatMap((r) => r.cities)]) {
-      const { hours, minutes } = splitClockTime(clockParts(SAMPLE, city.zone).time);
-      expect(`${hours}:${minutes}`, city.city).toBe(clockParts(SAMPLE, city.zone).time);
-    }
-  });
-
-  it('advances the cursor and keeps rotation timings usable', () => {
-    expect(nextRotationCursor(0)).toBe(1);
-    expect(nextRotationCursor(7)).toBe(8);
-    expect(CLOCK_ROTATION_INTERVAL_MS).toBeGreaterThanOrEqual(4000);
-    // 错峰步长要小于一个轮换间隔，否则整条时间带会串成一团
-    expect(CLOCK_SWAP_STAGGER_MS * REGION_POOLS.length).toBeLessThan(CLOCK_ROTATION_INTERVAL_MS);
+    // 空串 split 后没有第一段，minutes 落到默认值
+    expect(splitClockTime('')).toEqual({ hours: '', minutes: '—' });
   });
 });

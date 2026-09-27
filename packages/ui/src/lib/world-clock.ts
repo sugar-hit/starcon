@@ -124,34 +124,32 @@ export const REGION_POOLS: readonly RegionPool[] = [
   },
 ];
 
-/** 每格轮换间隔 */
-export const CLOCK_ROTATION_INTERVAL_MS = 6000;
+/**
+ * 固定展示的六个城市。
+ *
+ * 之前是「北京 + 五个区域各自轮换」，但照片版下换城就等于换图 ——
+ * 用户要求图片固定，所以城市也一并定死，六格各自配一张有地标的照片。
+ * 选点覆盖六个大区，且都是辨识度极高的地标：天安门 / 自由女神 /
+ * 大本钟 / 滨海湾金沙 / 东京塔 / 悉尼歌剧院。
+ */
+export const FIXED_CITIES: readonly WorldCity[] = [
+  HOME_CITY,
+  { city: '纽约', country: '美国', zone: 'America/New_York', lat: 40.7128, lon: -74.006 },
+  { city: '伦敦', country: '英国', zone: 'Europe/London', lat: 51.5074, lon: -0.1278 },
+  { city: '新加坡', country: '新加坡', zone: 'Asia/Singapore', lat: 1.3521, lon: 103.8198 },
+  { city: '东京', country: '日本', zone: 'Asia/Tokyo', lat: 35.6762, lon: 139.6503 },
+  { city: '悉尼', country: '澳大利亚', zone: 'Australia/Sydney', lat: -33.8688, lon: 151.2093 },
+];
 
-/** 轮换格在换场动画里的错峰步长，避免整条时间带同时抖动 */
-export const CLOCK_SWAP_STAGGER_MS = 160;
-
-/** 取某一游标下各轮换区域的城市 */
-export function rotationCities(cursor: number): WorldCity[] {
-  return REGION_POOLS.map((region) => region.cities[positiveMod(cursor, region.cities.length)]!);
-}
-
-/** 游标前进一格 */
-export function nextRotationCursor(cursor: number): number {
-  return cursor + 1;
-}
-
-/** 工作台一屏展示的六个城市：本地时区 + 五个区域 */
-export function visibleCities(cursor: number): WorldCity[] {
-  return [HOME_CITY, ...rotationCities(cursor)];
-}
-
-export function regionOf(index: number): RegionPool | undefined {
-  return REGION_POOLS[index];
-}
-
-function positiveMod(value: number, length: number): number {
-  return ((value % length) + length) % length;
-}
+/** 各格所属区域标签,固定城市版按顺序对应;本地时区为 null */
+export const FIXED_REGIONS: readonly (string | null)[] = [
+  null,
+  '北美',
+  '欧洲',
+  '东南亚',
+  '亚洲其他',
+  '南美、大洋洲、非洲',
+];
 
 /** 拆出小时与分钟，冒号单独渲染以便做呼吸动效；占位符原样返回 */
 export function splitClockTime(time: string): { hours: string; minutes: string } {

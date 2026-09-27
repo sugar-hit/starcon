@@ -1,46 +1,39 @@
 import { describe, expect, it } from 'vitest';
-import { HOME_CITY, REGION_POOLS } from './world-clock';
-import {
-  CITY_PHOTOS,
-  citiesWithPhotos,
-  photoCoverage,
-  photoFor,
-} from './city-photos';
+import { CITY_PHOTOS, photoFor } from './city-photos';
+import { FIXED_CITIES } from './world-clock';
 
-describe('city-photos manifest', () => {
-  const allCities = [
-    HOME_CITY.city,
-    ...REGION_POOLS.flatMap((region) => region.cities.map((city) => city.city)),
-  ];
+describe('地标照片清单', () => {
+  const cities = FIXED_CITIES.map((city) => city.city);
 
-  it('覆盖全部 34 个城市,即使 url 暂缺也应有占位条目', () => {
-    expect(new Set(allCities).size).toBe(34);
-    for (const city of allCities) {
-      const entry = photoFor(city);
-      expect(entry, `${city} 缺 manifest 条目`).toBeDefined();
-      expect(entry?.city).toBe(city);
-      expect(entry?.landmark.length, `${city} 缺 landmark 描述`).toBeGreaterThan(0);
+  it('固定六城全部有照片', () => {
+    for (const city of cities) {
+      expect(photoFor(city), `${city} 缺照片条目`).toBeDefined();
     }
   });
 
-  it('已配 URL 的条目 url 是合法 http(s) 地址', () => {
+  it('照片 URL 是 https 且指向 Wikimedia 缩略图直连', () => {
     for (const entry of Object.values(CITY_PHOTOS)) {
-      if (entry.url.length === 0) continue;
-      expect(entry.url, `${entry.city} url 不合法`).toMatch(/^https?:\/\//);
-      // 许可证元数据必须配齐(占位时除外)
-      expect(entry.license.length, `${entry.city} 缺 license`).toBeGreaterThan(0);
-      expect(entry.author.length, `${entry.city} 缺 author`).toBeGreaterThan(0);
+      expect(entry.url, `${entry.city} 必须是 https`).toMatch(/^https:\/\//);
+      // 直连 upload|thumb.wikimedia.org —— Special:FilePath 多跳会被 Chrome ORB 拦
+      expect(entry.url, `${entry.city} 应直连 Wikimedia 缩略图`).toMatch(
+        /^https:\/\/(upload|thumb)\.wikimedia\.org\//,
+      );
+      expect(entry.url, `${entry.city} 不应带查询串`).not.toContain('?');
     }
   });
 
-  it('photoCoverage 区分已配/未配 url', () => {
-    const { covered, missing } = photoCoverage(allCities);
-    expect(covered.length + missing.length).toBe(34);
-    expect(citiesWithPhotos()).toEqual(covered);
-    // 至少有一个配上了 url(否则 manifest 完全空)
-    expect(covered.length, '应有部分城市先配上 url,作为 CDN 上线前的可视化样例').toBeGreaterThan(0);
-    // 不重复
-    expect(new Set([...covered, ...missing]).size).toBe(34);
+  it('每条都有归因信息：地标名、来源页、许可证、作者', () => {
+    for (const entry of Object.values(CITY_PHOTOS)) {
+      expect(entry.landmark.length, `${entry.city} 缺地标名`).toBeGreaterThan(0);
+      expect(entry.source, `${entry.city} 缺来源页`).toMatch(/^https:\/\/commons\.wikimedia\.org\//);
+      expect(entry.license.length, `${entry.city} 缺许可证`).toBeGreaterThan(0);
+      expect(entry.author.length, `${entry.city} 缺作者`).toBeGreaterThan(0);
+    }
+  });
+
+  it('每城照片 URL 互不相同（避免六格同图）', () => {
+    const urls = Object.values(CITY_PHOTOS).map((entry) => entry.url);
+    expect(new Set(urls).size).toBe(urls.length);
   });
 
   it('未知城市返回 undefined', () => {
