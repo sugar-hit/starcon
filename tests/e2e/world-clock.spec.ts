@@ -164,3 +164,79 @@ test('rotation animates briefly and keeps the clock readable', async ({ page }) 
     'none',
   );
 });
+
+test('every clock carries a landmark skyline in its own city shape', async ({ page }) => {
+  const skylines = await cards(page).evaluateAll((els) =>
+    els.map((card) => {
+      // 剪影是氛围层，走 aria-hidden 的 span
+      const layer = card.querySelector('span[aria-hidden="true"] > svg[preserveAspectRatio]')!;
+      const path = layer.querySelector('path')!;
+      return {
+        d: path.getAttribute('d') ?? '',
+        // slice 才是等比；none 会把地标压变形（圆变椭圆、塔变矮）
+        preserve: layer.getAttribute('preserveAspectRatio'),
+        commands: (path.getAttribute('d') ?? '').split(/[A-Z]/).filter(Boolean).length,
+      };
+    }),
+  );
+
+  const shapes = new Set<string>();
+  for (const skyline of skylines) {
+    expect(skyline.d.length, '剪影路径不应为空').toBeGreaterThan(20);
+    expect(skyline.commands, '剪影应由多个图元组成').toBeGreaterThan(2);
+    expect(skyline.preserve, '剪影必须等比缩放，不能拉伸').toBe('xMidYMax slice');
+    shapes.add(skyline.d);
+  }
+  // 六格六个城市，地标不应重复
+  expect(shapes.size).toBe(6);
+});
+
+test('ink follows the local sky so night cities read light on dark', async ({ page }) => {
+  // 对比度必须在浏览器侧算：getComputedStyle 的结果只存在于页面上下文
+  const states = await cards(page).evaluateAll((els) => {
+    const parse = (value: string) => {
+      const parts = (value.match(/[\d.]+/g) ?? []).map(Number);
+      return { r: parts[0] ?? 0, g: parts[1] ?? 0, b: parts[2] ?? 0 };
+    };
+    const channel = (value: number) => {
+      const v = value / 255;
+      return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    };
+    const luminance = (c: { r: number; g: number; b: number }) =>
+      0.2126 * channel(c.r) + 0.7152 * channel(c.g) + 0.0722 * channel(c.b);
+
+    return els.map((card) => {
+      const time = card.querySelector('time')!;
+      const ink = card.getAttribute('data-sky-ink');
+      const fg = parse(getComputedStyle(time).color);
+      const bg = parse(getComputedStyle(card).backgroundColor);
+      const l1 = luminance(fg);
+      const l2 = luminance(bg);
+      return {
+        ink,
+        timeColor: getComputedStyle(time).color,
+        background: getComputedStyle(card).backgroundColor,
+        ratio: (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05),
+        // 用于验证 ink 判定方向：底色亮度（0–255 感知加权）
+        backgroundLuma: 0.2126 * bg.r + 0.7152 * bg.g + 0.0722 * bg.b,
+      };
+    });
+  });
+
+  for (const state of states) {
+    expect(state.ink, '每格都应判定出 ink 模式').toMatch(/light|dark/);
+
+    // 无论昼夜，文字与自身底色的对比度都要达到 WCAG AA 正文标准
+    expect(
+      state.ratio,
+      `文字 ${state.timeColor} 对底色 ${state.background} 对比不足`,
+    ).toBeGreaterThan(4.5);
+
+    // 判定确实跟着底色走：浅墨配深底，深墨配浅底
+    if (state.ink === 'light') {
+      expect(state.backgroundLuma, '浅墨必须配深底').toBeLessThan(160);
+    } else {
+      expect(state.backgroundLuma, '深墨必须配浅底').toBeGreaterThan(160);
+    }
+  }
+});

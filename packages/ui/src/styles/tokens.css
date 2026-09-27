@@ -57,6 +57,8 @@
     --space-section: 24px;
     --row-comfortable: 56px;
     --row-compact: 44px;
+    /* 夜间城市时钟的底色：深靛蓝，与前景白字构成高对比 */
+    --clock-night: 224 47% 12%;
 
     /* === 侧栏 === */
     --sidebar-background: 0 0% 100%;

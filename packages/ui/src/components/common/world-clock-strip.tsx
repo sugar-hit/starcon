@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/utils';
 import { useCityRotation } from '../../lib/use-city-rotation';
+import { inkForSkyLevel, skyLevelForLocalHour } from '../../lib/clock-sky';
 import {
   CLOCK_SWAP_STAGGER_MS,
   REGION_POOLS,
@@ -10,6 +11,7 @@ import {
   splitClockTime,
   type WorldCity,
 } from '../../lib/world-clock';
+import { CitySkyline } from './city-skyline';
 import { MiniGlobe } from './mini-globe';
 
 interface ClockSlot {
@@ -59,37 +61,42 @@ export function WorldClockStrip({
         className,
       )}
     >
-      <span
-        aria-hidden="true"
-        className="from-brand/[0.05] pointer-events-none absolute inset-0 bg-gradient-to-b to-transparent"
-      />
       {slots.map((slot, index) => {
         const parts = now ? clockParts(now, slot.city.zone) : null;
         // 冒号单独渲染，数字保持即时更新，只有冒号呼吸
         const { hours, minutes } = splitClockTime(parts?.time ?? '—:—');
+        // 天空明度由当地时刻推导，明度再决定文字用深墨还是浅墨
+        const level = skyLevelForLocalHour(parts?.localHour ?? 12);
+        const ink = inkForSkyLevel(level);
+        const isNight = ink === 'light';
         return (
           <div
             key={index}
             className={cn(
               'relative overflow-hidden px-4 py-2.5',
-              index === 0 ? 'bg-brand-soft' : 'bg-card',
+              isNight ? 'bg-[hsl(var(--clock-night))]' : index === 0 ? 'bg-brand-soft' : 'bg-card',
             )}
             aria-label={`${slot.city.country} ${slot.city.city}`}
             data-rotating={slot.region ? true : undefined}
             data-switches={slot.region ? switches : undefined}
+            data-sky-ink={ink}
             title={slot.region ? `${slot.region} · 自动轮换` : undefined}
           >
-            <div className="flex items-start justify-between gap-2">
+            <CitySkyline city={slot.city.city} level={level} />
+            <div className="relative flex items-start justify-between gap-2">
               <span
                 key={slot.city.zone}
                 data-clock-label
                 className={cn(
                   'text-copy-12 inline-flex min-w-0 flex-wrap items-baseline gap-x-1 pt-1',
+                  isNight ? 'text-white/85' : 'text-foreground',
                   slot.switching && 'clock-swap-in',
                 )}
               >
                 <span className="font-medium">{slot.city.city}</span>
-                <span className="text-muted-foreground">· {slot.city.country}</span>
+                <span className={isNight ? 'text-white/55' : 'text-muted-foreground'}>
+                  · {slot.city.country}
+                </span>
               </span>
               <MiniGlobe
                 city={slot.city}
@@ -102,7 +109,7 @@ export function WorldClockStrip({
               aria-label={index === 0 ? '北京时间' : `${slot.city.city}时间`}
               className={cn(
                 'text-h-20 my-1 block font-medium tabular-nums',
-                index === 0 && 'text-brand',
+                isNight ? 'text-white' : index === 0 ? 'text-brand' : 'text-foreground',
               )}
               dateTime={now?.toISOString()}
             >
@@ -115,7 +122,8 @@ export function WorldClockStrip({
             <p
               key={slot.city.zone}
               className={cn(
-                'text-copy-12 text-muted-foreground whitespace-nowrap',
+                'text-copy-12 whitespace-nowrap',
+                isNight ? 'text-white/55' : 'text-muted-foreground',
                 slot.switching && 'clock-swap-in',
               )}
             >

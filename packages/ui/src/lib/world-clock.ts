@@ -174,5 +174,21 @@ export function clockParts(date: Date, timeZone: string) {
       new Intl.DateTimeFormat('en', { timeZone, timeZoneName: 'shortOffset' })
         .formatToParts(date)
         .find((part) => part.type === 'timeZoneName')?.value ?? '',
+    /** 当地小时（含分钟小数），供天空层推导昼夜明度 */
+    localHour: localHourOf(date, timeZone),
   };
+}
+
+/** 某时刻在指定时区的小时数（0–24，含分钟小数） */
+export function localHourOf(date: Date, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(date);
+  const read = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((part) => part.type === type)?.value ?? 0);
+  return read('hour') + read('minute') / 60 + read('second') / 3600;
 }
