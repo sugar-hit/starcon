@@ -155,6 +155,7 @@ starcon 是 SaaS，**所有业务表必须带 `tenant_id` NOT NULL**，DB 层启
 - 我想看后端领域模块 → `backend/libs/domain-*/`
 - 我想看平台对接 → `backend/libs/platform-connectors/`
 - 我想看租户上下文实现 → `backend/libs/tenancy/`
+- 我想看数据模型 / 表结构设计 → `db/schemas/`（设计稿，写迁移前必读；全局约定在 `db/schemas/README.md`）
 - 我想看 DB 迁移 → `backend/apps/api/src/main/resources/db/migration/`（Flyway）
 - 我想看前后端契约 → `packages/api-contracts/`（生成物，只读）
 - 我想看 ADR → `docs/decisions/`（**动手前先查有没有已决策的同类问题**）
