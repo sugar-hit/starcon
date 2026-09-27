@@ -71,7 +71,7 @@ export function WorldClockStrip({
           <div
             key={index}
             className={cn(
-              'relative overflow-hidden px-4 py-3',
+              'relative overflow-hidden px-4 py-2.5',
               index === 0 ? 'bg-brand-soft' : 'bg-card',
             )}
             aria-label={`${slot.city.country} ${slot.city.city}`}
@@ -95,13 +95,13 @@ export function WorldClockStrip({
                 city={slot.city}
                 delay={slot.stagger}
                 label={`${slot.city.city}在地球上的位置`}
-                className="h-14 w-14"
+                className="h-12 w-12"
               />
             </div>
             <time
               aria-label={index === 0 ? '北京时间' : `${slot.city.city}时间`}
               className={cn(
-                'text-h-20 my-1.5 block font-medium tabular-nums',
+                'text-h-20 my-1 block font-medium tabular-nums',
                 index === 0 && 'text-brand',
               )}
               dateTime={now?.toISOString()}
