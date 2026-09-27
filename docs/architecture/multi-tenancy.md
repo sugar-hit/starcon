@@ -1,7 +1,7 @@
 # 多租户架构
 
 > Status: Stable — 决策已锁，详见 ADR
-> 关联 ADR: `0006-multi-tenancy-strategy.md`（待写）
+> 关联 ADR: [`0002-multi-tenancy-strategy.md`](../decisions/0002-multi-tenancy-strategy.md)、[`0003-backend-runtime-kotlin-spring-boot.md`](../decisions/0003-backend-runtime-kotlin-spring-boot.md)
 
 ## 目标
 
@@ -59,16 +59,17 @@ CREATE POLICY tenant_isolation ON orders
 
 每个请求生命周期：
 
-```ts
-// apps/api/src/shared/tenant.middleware.ts
-export async function tenantContext(req, next) {
-  const tenantId = resolveTenant(req); // JWT / X-Tenant-Id header
-  await db.execute(`SET LOCAL app.current_tenant = '${tenantId}'`);
-  return next();
+```kotlin
+// backend/libs/tenancy —— 每个请求事务开始时注入
+@Transactional
+fun <T> withTenant(tenantId: TenantId, block: () -> T): T {
+    // SET LOCAL 只在当前事务生效，事务结束/连接归还后自动失效，杜绝连接复用串租户
+    jdbc.execute("SELECT set_config('app.current_tenant', ?, true)", tenantId.value)
+    return block()
 }
 ```
 
-`packages/tenancy/` 提供 `getCurrentTenant()` / `withTenant(id, fn)` 工具，所有业务代码走这里，**禁止任何模块硬编码 tenant**。
+`backend/libs/tenancy` 提供 `currentTenant()` / `withTenant(id) { }` 工具，所有业务代码走这里，**禁止任何模块硬编码 tenant**。租户 ID 由**已认证用户的成员关系**解析得出，不信任客户端任意 `X-Tenant-Id` 头。
 
 ### 4. 跨租户操作白名单
 
@@ -97,9 +98,10 @@ export async function tenantContext(req, next) {
 - [ ] 所有新表带 `tenant_id NOT NULL`
 - [ ] RLS policy 已建立
 - [ ] 没有硬编码 tenant_id 的代码路径
-- [ ] 缓存 key 强制带 tenant 前缀（`packages/tenancy` 提供 helper）
-- [ ] Kafka 消息 header 带 `x-tenant-id`
+- [ ] 缓存 key 强制带 tenant 前缀（`backend/libs/tenancy` 提供 helper）
+- [ ] 事件 / 消息 header 带 `x-tenant-id`
 - [ ] E2E 测试覆盖：跨租户访问直接 403
+- [ ] Testcontainers 集成测试覆盖 ADR-0002 的三条断言：两租户互不可见、伪造 tenant header 无效、连接池归还后不串租户
 
 ## 故障模式与降级
 

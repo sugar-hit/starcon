@@ -1,5 +1,10 @@
 # 2026-09-26 后端语言选型调研
 
+> **结论已落地**：本文推荐的 Kotlin + Spring Boot 3 于 2026-09-27 被采纳为 [ADR-0003](../decisions/0003-backend-runtime-kotlin-spring-boot.md)。本文作为决策依据保留。
+> 另一份当日稍晚的调研 `2026-09-27-backend-and-master-data.md` 曾给出相反的 NestJS 建议，该建议已作废。
+
+日期：2026-09-26。性质：调研，结论已升级为 ADR-0003。
+
 ## 背景
 
 starcon 是企业级跨境电商 SaaS ERP,用户明确诉求:
