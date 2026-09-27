@@ -1,20 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import { usePathname } from 'next/navigation';
 import { ChevronsLeft, ChevronsRight, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Popover, PopoverAnchor, PopoverContent } from '../ui/popover';
-import { NAV_DESTINATIONS, resolveSystemFromPath } from '../../lib/nav-config';
 import { useWorkspaceTabs } from '../../lib/workspace-tabs';
 
 export function WorkspaceTabs() {
-  const pathname = usePathname();
   const {
     tabs,
     activeTabId,
-    hydrated,
-    openTab,
     activateTab,
     closeTab,
     closeOthers,
@@ -23,22 +18,7 @@ export function WorkspaceTabs() {
     closeAll,
     reorderTabs,
   } = useWorkspaceTabs();
-  const previousPath = React.useRef<string | null>(null);
   const [menu, setMenu] = React.useState<string | null>(null);
-  React.useEffect(() => {
-    if (!hydrated || previousPath.current === pathname) return;
-    previousPath.current = pathname;
-    const item = NAV_DESTINATIONS.find((item) => item.href === pathname);
-    if (item && !tabs.some((tab) => tab.href === pathname)) {
-      openTab({
-        id: pathname,
-        href: pathname,
-        label: item.label,
-        systemId: resolveSystemFromPath(pathname).id,
-      });
-    }
-  }, [pathname, hydrated, tabs, openTab]);
-
   React.useEffect(() => {
     document
       .querySelector<HTMLElement>('[data-tab-active="true"]')
@@ -46,11 +26,11 @@ export function WorkspaceTabs() {
   }, [activeTabId]);
 
   return (
-    <div className="border-border bg-background relative z-20 flex h-10 min-w-0 shrink-0 items-center border-b px-4 md:px-6">
+    <div className="border-border bg-background relative z-20 flex h-12 min-w-0 shrink-0 items-center border-b px-4 md:px-6">
       <div
         role="tablist"
         aria-label="已打开的页面"
-        className="flex min-w-0 flex-1 scroll-pl-20 items-center gap-1 overflow-x-auto"
+        className="flex min-w-0 flex-1 scroll-pl-20 items-center gap-1.5 overflow-x-auto"
       >
         {tabs.map((tab, index) => (
           <Popover
@@ -80,18 +60,18 @@ export function WorkspaceTabs() {
                   }
                 }}
                 className={cn(
-                  'text-copy-13 flex h-8 shrink-0 items-center rounded-md',
-                  tab.id === '/' && 'bg-background sticky left-0 z-10',
+                  'text-copy-13 relative flex h-9 shrink-0 items-center rounded-md border',
+                  tab.id === '/' && 'sticky left-0 z-10',
                   tab.id === activeTabId
-                    ? 'bg-card text-foreground shadow-xs'
-                    : 'text-muted-foreground hover:bg-muted',
+                    ? 'border-brand bg-brand-soft text-brand shadow-xs'
+                    : 'border-border bg-card text-foreground hover:border-control-border hover:bg-background',
                 )}
               >
                 <button
                   type="button"
                   role="tab"
                   aria-selected={tab.id === activeTabId}
-                  className="max-w-40 truncate rounded-md px-2 py-1.5 font-medium"
+                  className="focus-visible:ring-brand max-w-48 truncate rounded-md px-3 py-2 font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset"
                   onClick={() => activateTab(tab.id)}
                   onKeyDown={(event) => {
                     if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
@@ -124,7 +104,7 @@ export function WorkspaceTabs() {
                   <button
                     type="button"
                     aria-label={`关闭 ${tab.label}`}
-                    className="hover:bg-muted mr-1 rounded p-1 focus-visible:opacity-100"
+                    className="hover:bg-muted focus-visible:ring-brand mr-1 rounded p-1.5 focus-visible:outline-none focus-visible:ring-2"
                     onClick={() => closeTab(tab.id)}
                   >
                     <X className="h-3 w-3" />

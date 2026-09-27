@@ -94,6 +94,22 @@ function writePersisted(value: PersistedShape) {
   }
 }
 
+/** Register during render so the route and its tab are committed together. */
+function withRouteTab(tabs: WorkspaceTab[], pathname: string): WorkspaceTab[] {
+  const item = NAV_DESTINATIONS.find((item) => item.href === pathname);
+  if (!item || tabs.some((tab) => tab.href === pathname)) return tabs;
+  return [
+    ...tabs,
+    {
+      id: item.href,
+      href: item.href,
+      label: item.label,
+      systemId: resolveSystemFromPath(item.href).id,
+      order: tabs.length,
+    },
+  ];
+}
+
 export interface WorkspaceTabsProviderProps {
   children: React.ReactNode;
   initialTabs?: WorkspaceTab[];
@@ -103,9 +119,18 @@ export interface WorkspaceTabsProviderProps {
 export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceTabsProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [tabs, setTabs] = React.useState<WorkspaceTab[]>(
-    initialTabs.filter((tab) => tab.id !== HOME_HREF && tab.href !== HOME_HREF),
+  const [tabs, setTabs] = React.useState<WorkspaceTab[]>(() =>
+    withRouteTab(
+      initialTabs.filter((tab) => tab.id !== HOME_HREF && tab.href !== HOME_HREF),
+      pathname,
+    ),
   );
+  const [registeredPath, setRegisteredPath] = React.useState(pathname);
+  // Only a new pathname registers a tab; closing on the same route must not reopen it.
+  if (registeredPath !== pathname) {
+    setRegisteredPath(pathname);
+    setTabs((current) => withRouteTab(current, pathname));
+  }
   const activeTabId =
     pathname === HOME_HREF ? HOME_HREF : (tabs.find((tab) => tab.href === pathname)?.id ?? null);
   const [hydrated, setHydrated] = React.useState(false);
@@ -115,7 +140,12 @@ export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceT
   React.useEffect(() => {
     const persisted = readPersisted();
     if (persisted) {
-      setTabs(persisted.tabs);
+      setTabs((current) =>
+        [
+          ...persisted.tabs,
+          ...current.filter((tab) => !persisted.tabs.some((saved) => saved.href === tab.href)),
+        ].map((tab, order) => ({ ...tab, order })),
+      );
     }
     setHydrated(true);
   }, []);
