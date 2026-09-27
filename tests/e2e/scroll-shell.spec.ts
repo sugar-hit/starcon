@@ -61,13 +61,16 @@ test('long side navigation scrolls independently of branding and content', async
   expect(await page.locator('main').evaluate((el) => el.scrollTop)).toBe(0);
 });
 
-test('all six clocks share the same visual baseline', async ({ page }) => {
+test('all six clocks share the same baseline within their row', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   const clocks = page.getByRole('region', { name: '全球时间' }).locator('time');
   await expect(clocks).toHaveCount(6);
   const positions = await clocks.evaluateAll((els) =>
-    els.map((el) => ({ y: el.getBoundingClientRect().y, font: getComputedStyle(el).fontSize })),
+    els.map((el) => ({
+      y: el.getBoundingClientRect().y - el.closest('[data-has-photo]')!.getBoundingClientRect().y,
+      font: getComputedStyle(el).fontSize,
+    })),
   );
   expect(new Set(positions.map((item) => item.y)).size).toBe(1);
   expect(new Set(positions.map((item) => item.font)).size).toBe(1);

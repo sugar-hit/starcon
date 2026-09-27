@@ -52,7 +52,7 @@ export function MiniGlobe({ city, delay = 0, duration = 900, className, label }:
   const cityRef = React.useRef(city);
   const frameRef = React.useRef(0);
   const timerRef = React.useRef(0);
-  const idRef = React.useRef(`globe-${Math.random().toString(36).slice(2, 8)}`);
+  const id = React.useId();
 
   const draw = React.useCallback((view: GlobeView, arrival: number) => {
     const grid = graticulePaths(view, RADIUS);
@@ -87,6 +87,11 @@ export function MiniGlobe({ city, delay = 0, duration = 900, className, label }:
     window.clearTimeout(timerRef.current);
     window.cancelAnimationFrame(frameRef.current);
     const from = viewRef.current;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      viewRef.current = target;
+      draw(target, 1);
+      return;
+    }
     // 视角没变就不补间（首屏、本地时区格都是静止的）
     if (
       Math.abs(target.lat - from.lat) < 0.01 &&
@@ -117,69 +122,52 @@ export function MiniGlobe({ city, delay = 0, duration = 900, className, label }:
     };
   }, [city, delay, duration, draw]);
 
-  const id = idRef.current;
   return (
     <svg
       viewBox={`0 0 ${VIEW} ${VIEW}`}
-      className={cn('shrink-0', className)}
+      className={cn('shrink-0 text-white/80', className)}
       role={label ? 'img' : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
       focusable="false"
     >
       <defs>
-        <radialGradient id={`${id}-ocean`} cx="36%" cy="30%" r="76%">
-          <stop offset="0%" stopColor="hsl(var(--brand) / 0.16)" />
-          <stop offset="62%" stopColor="hsl(var(--brand) / 0.09)" />
-          <stop offset="100%" stopColor="hsl(var(--brand) / 0.05)" />
-        </radialGradient>
-        <radialGradient id={`${id}-shade`} cx="34%" cy="28%" r="80%">
-          <stop offset="0%" stopColor="#fff" stopOpacity="0.5" />
-          <stop offset="52%" stopColor="#fff" stopOpacity="0" />
-          <stop offset="100%" stopColor="hsl(var(--brand))" stopOpacity="0.14" />
-        </radialGradient>
-        <radialGradient id={`${id}-pin`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="hsl(var(--brand))" stopOpacity="0.42" />
-          <stop offset="100%" stopColor="hsl(var(--brand))" stopOpacity="0" />
-        </radialGradient>
         <clipPath id={`${id}-clip`}>
           <circle cx={CENTER} cy={CENTER} r={RADIUS} />
         </clipPath>
       </defs>
 
-      <circle cx={CENTER} cy={CENTER} r={RADIUS} fill={`url(#${id}-ocean)`} />
       <g clipPath={`url(#${id}-clip)`}>
         {/* 投影输出以球心为原点，这里平移到 viewBox 中心 */}
         <g transform={`translate(${CENTER} ${CENTER})`}>
           <path
             ref={landRef}
-            fill="hsl(var(--brand) / 0.3)"
+            fill="none"
             fillRule="nonzero"
-            stroke="hsl(var(--brand) / 0.34)"
-            strokeWidth="0.5"
+            stroke="currentColor"
+            strokeWidth="1.4"
           />
           <path
             ref={gridRef}
             fill="none"
-            stroke="hsl(var(--brand) / 0.28)"
-            strokeWidth="0.7"
+            stroke="currentColor"
+            strokeWidth="0.65"
+            opacity="0.3"
             strokeLinecap="round"
           />
         </g>
       </g>
-      <circle cx={CENTER} cy={CENTER} r={RADIUS} fill={`url(#${id}-shade)`} />
       <circle
         cx={CENTER}
         cy={CENTER}
         r={RADIUS}
         fill="none"
-        stroke="hsl(var(--brand) / 0.28)"
-        strokeWidth="0.8"
+        stroke="currentColor"
+        strokeWidth="1.2"
       />
       <g ref={pinRef}>
-        <circle r="9" fill={`url(#${id}-pin)`} />
-        <circle r="3.4" fill="none" stroke="hsl(var(--brand))" strokeWidth="1.1" />
-        <circle r="1.4" fill="hsl(var(--brand))" />
+        <circle r="4.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
+        <circle r="1.5" fill="currentColor" />
       </g>
     </svg>
   );

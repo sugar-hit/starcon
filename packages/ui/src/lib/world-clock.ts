@@ -124,32 +124,32 @@ export const REGION_POOLS: readonly RegionPool[] = [
   },
 ];
 
-/**
- * 固定展示的六个城市。
- *
- * 之前是「北京 + 五个区域各自轮换」，但照片版下换城就等于换图 ——
- * 用户要求图片固定，所以城市也一并定死，六格各自配一张有地标的照片。
- * 选点覆盖六个大区，且都是辨识度极高的地标：天安门 / 自由女神 /
- * 大本钟 / 滨海湾金沙 / 东京塔 / 悉尼歌剧院。
- */
-export const FIXED_CITIES: readonly WorldCity[] = [
-  HOME_CITY,
-  { city: '纽约', country: '美国', zone: 'America/New_York', lat: 40.7128, lon: -74.006 },
-  { city: '伦敦', country: '英国', zone: 'Europe/London', lat: 51.5074, lon: -0.1278 },
-  { city: '新加坡', country: '新加坡', zone: 'Asia/Singapore', lat: 1.3521, lon: 103.8198 },
-  { city: '东京', country: '日本', zone: 'Asia/Tokyo', lat: 35.6762, lon: 139.6503 },
-  { city: '悉尼', country: '澳大利亚', zone: 'Australia/Sydney', lat: -33.8688, lon: 151.2093 },
-];
+/** 34 城轮换：北京固定，其余五个槽位每 15 秒推进一城。 */
+export const CITY_ROTATION_MS = 15_000;
 
-/** 各格所属区域标签,固定城市版按顺序对应;本地时区为 null */
-export const FIXED_REGIONS: readonly (string | null)[] = [
-  null,
-  '北美',
-  '欧洲',
-  '东南亚',
-  '亚洲其他',
-  '南美、大洋洲、非洲',
-];
+export function rotationCities(cursor: number): readonly WorldCity[] {
+  return [
+    HOME_CITY,
+    ...REGION_POOLS.map(
+      (pool) => pool.cities[(cursor + (pool.key === 'other' ? 3 : 0)) % pool.cities.length]!,
+    ),
+  ];
+}
+
+/** 分组用于轮换，大洲用于展示；东南亚不是大洲，“其他”也不能当大洲。 */
+export function continentFor(city: WorldCity): string {
+  const area = city.zone.split('/')[0];
+  if (area === 'Asia') return '亚洲';
+  if (area === 'Europe') return '欧洲';
+  if (area === 'Africa') return '非洲';
+  if (area === 'Australia' || area === 'Pacific') return '大洋洲';
+  if (['巴西', '阿根廷', '智利'].includes(city.country)) return '南美洲';
+  return '北美洲';
+}
+
+export function cityLabel(city: WorldCity): string {
+  return `${city.city} ${city.country}（${continentFor(city)}）`;
+}
 
 /** 拆出小时与分钟，冒号单独渲染以便做呼吸动效；占位符原样返回 */
 export function splitClockTime(time: string): { hours: string; minutes: string } {

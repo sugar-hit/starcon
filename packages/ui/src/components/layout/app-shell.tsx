@@ -356,10 +356,8 @@ function AppShellInner({ system, children }: AppShellProps) {
             设计系统 <span className="text-label-12 ml-auto">2.0</span>
           </Link>
           <div className="border-border text-muted-foreground border-t pt-3" aria-label="版权信息">
-            <p className="text-label-12 font-semibold uppercase tracking-wider">
-              pioneering
-              <br />
-              innovation<span className="text-brand">.</span>
+            <p className="whitespace-nowrap text-[10px] font-semibold uppercase leading-4 tracking-wide">
+              pioneering innovation<span className="text-brand">.</span>
             </p>
             <p className="text-copy-12 mt-2 leading-relaxed">湃宁科技（深圳）有限责任公司</p>
             <p className="text-copy-12 mt-1">© {new Date().getFullYear()} · All rights reserved.</p>

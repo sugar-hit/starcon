@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { CITY_PHOTOS, photoFor } from './city-photos';
-import { FIXED_CITIES } from './world-clock';
+import { HOME_CITY, REGION_POOLS } from './world-clock';
 
 describe('地标照片清单', () => {
-  const cities = FIXED_CITIES.map((city) => city.city);
+  const cities = [HOME_CITY, ...REGION_POOLS.flatMap((pool) => pool.cities)].map(
+    (city) => city.city,
+  );
 
-  it('固定六城全部有照片', () => {
+  it('全部 34 城都有各自照片', () => {
+    expect(cities).toHaveLength(34);
     for (const city of cities) {
       expect(photoFor(city), `${city} 缺照片条目`).toBeDefined();
     }
@@ -25,7 +28,9 @@ describe('地标照片清单', () => {
   it('每条都有归因信息：地标名、来源页、许可证、作者', () => {
     for (const entry of Object.values(CITY_PHOTOS)) {
       expect(entry.landmark.length, `${entry.city} 缺地标名`).toBeGreaterThan(0);
-      expect(entry.source, `${entry.city} 缺来源页`).toMatch(/^https:\/\/commons\.wikimedia\.org\//);
+      expect(entry.source, `${entry.city} 缺来源页`).toMatch(
+        /^https:\/\/commons\.wikimedia\.org\//,
+      );
       expect(entry.license.length, `${entry.city} 缺许可证`).toBeGreaterThan(0);
       expect(entry.author.length, `${entry.city} 缺作者`).toBeGreaterThan(0);
     }

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
-  FIXED_CITIES,
-  FIXED_REGIONS,
+  rotationCities,
+  continentFor,
+  cityLabel,
   HOME_CITY,
   REGION_POOLS,
   clockParts,
@@ -39,55 +40,48 @@ describe('时区与夏令时', () => {
   });
 });
 
-describe('固定六城', () => {
-  it('正好六格且第一格是北京', () => {
-    expect(FIXED_CITIES).toHaveLength(6);
-    expect(FIXED_CITIES[0]).toEqual(HOME_CITY);
-  });
-
-  it('时区互不重复', () => {
-    const zones = FIXED_CITIES.map((city) => city.zone);
-    expect(new Set(zones).size).toBe(6);
-  });
-
-  it('每格都有区域标签，北京为 null', () => {
-    expect(FIXED_REGIONS).toHaveLength(6);
-    expect(FIXED_REGIONS[0]).toBeNull();
-    for (const region of FIXED_REGIONS.slice(1)) {
-      expect(region).toBeTruthy();
+describe('区域轮换', () => {
+  it('北京不动，五个区域轮换并覆盖全部 34 城', () => {
+    const seen = new Set<string>();
+    for (let cursor = 0; cursor < 18; cursor += 1) {
+      const cities = rotationCities(cursor);
+      expect(cities).toHaveLength(6);
+      expect(cities[0]).toEqual(HOME_CITY);
+      expect(new Set(cities.map((city) => city.zone)).size).toBe(6);
+      cities.forEach((city) => seen.add(city.city));
+      cities.slice(1).forEach((city, index) => {
+        expect(REGION_POOLS[index]!.cities).toContainEqual(city);
+      });
     }
+    expect(seen.size).toBe(34);
+    expect(rotationCities(18)).toEqual(rotationCities(0));
+    expect(
+      rotationCities(1)
+        .slice(1)
+        .map((city) => city.city),
+    ).not.toEqual(
+      rotationCities(0)
+        .slice(1)
+        .map((city) => city.city),
+    );
   });
 
-  it('六城都覆盖六个大区且各自属于对应区域', () => {
-    const byRegion = new Map(REGION_POOLS.map((r) => [r.label, r]));
-    for (let i = 1; i < FIXED_CITIES.length; i += 1) {
-      const city = FIXED_CITIES[i]!;
-      const label = FIXED_REGIONS[i]!;
-      const pool = byRegion.get(label);
-      expect(pool, `区域池 ${label} 应存在`).toBeDefined();
-      expect(
-        pool!.cities.some((c) => c.city === city.city),
-        `${city.city} 应属于 ${label}`,
-      ).toBe(true);
-    }
-  });
-
-  it('坐标落在合法范围内', () => {
-    for (const city of FIXED_CITIES) {
-      expect(city.lat).toBeGreaterThanOrEqual(-90);
-      expect(city.lat).toBeLessThanOrEqual(90);
-      expect(city.lon).toBeGreaterThanOrEqual(-180);
-      expect(city.lon).toBeLessThanOrEqual(180);
-      expect(city.city.length).toBeGreaterThan(0);
-      expect(city.country.length).toBeGreaterThan(0);
-    }
-  });
-
-  it('城市名不与区域池重复挑选（固定版就是池内成员）', () => {
-    const poolNames = new Set(ALL_CITIES);
-    for (const city of FIXED_CITIES) {
-      expect(poolNames.has(city.city)).toBe(true);
-    }
+  it('大洲按城市区分，混合区域不会统一标成其他', () => {
+    expect(cityLabel(HOME_CITY)).toBe('北京 中国（亚洲）');
+    const other = REGION_POOLS.find((pool) => pool.key === 'other')!;
+    expect(other.cities.map(continentFor)).toEqual([
+      '南美洲',
+      '南美洲',
+      '南美洲',
+      '大洋洲',
+      '大洋洲',
+      '大洋洲',
+      '非洲',
+      '非洲',
+      '非洲',
+    ]);
+    expect(continentFor(REGION_POOLS[0]!.cities[0]!)).toBe('北美洲');
+    expect(continentFor(REGION_POOLS[1]!.cities[0]!)).toBe('欧洲');
   });
 });
 

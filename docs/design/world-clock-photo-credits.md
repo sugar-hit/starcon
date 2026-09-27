@@ -1,0 +1,40 @@
+# 世界时钟照片来源
+
+图片用于城市背景展示；运行时清单在 packages/ui/src/lib/city-photos.ts。下表保留原图作者、来源和许可证；当前通过 CSS 等比裁切，不修改源文件。
+
+| 城市 | 作者 | 许可证 | 来源 |
+| --- | --- | --- | --- |
+| 北京 | Charlie fong 冯成 | Public domain | [原图](https://commons.wikimedia.org/wiki/File:天安门夜景.jpg) |
+| 纽约 | William Warby | CC BY 2.0 | [原图](https://commons.wikimedia.org/wiki/File:Statue_of_Liberty,_NY.jpg) |
+| 伦敦 | Colin | CC BY-SA 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Big_Ben_at_sunset_-_2014-10-27_17-30.jpg) |
+| 新加坡 | Basile Morin | CC BY-SA 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Marina_Bay_Sands_and_illuminated_polyhedral_building_Louis_Vuitton_over_the_water_at_blue_hour_with_pink_clouds_in_Singapore.jpg) |
+| 东京 | David Kernan | CC BY 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Tokyo_Tower,_Minato_City.jpg) |
+| 悉尼 | Diliff | CC BY-SA 3.0 | [原图](https://commons.wikimedia.org/wiki/File:Sydney_Opera_House_-_Dec_2008.jpg) |
+| 洛杉矶 | Thomas Wolf, www.foto-tw.de | CC BY-SA 3.0 | [原图](https://commons.wikimedia.org/wiki/File:Hollywood_Sign.jpg) |
+| 芝加哥 | Daniel Schwen | CC BY-SA 2.5 | [原图](https://commons.wikimedia.org/wiki/File:Willis_Tower.jpg) |
+| 多伦多 | Wladyslaw | CC BY-SA 3.0 | [原图](https://commons.wikimedia.org/wiki/File:Toronto_-_ON_-_Toronto_Harbourfront7.jpg) |
+| 温哥华 | Mfield, Matthew Field, http://www.photography.mattfield.com | CC BY-SA 3.0 | [原图](https://commons.wikimedia.org/wiki/File:Vancouver_dusk_pano.jpg) |
+| 墨西哥城 | Jeses | CC BY-SA 2.5 | [原图](https://commons.wikimedia.org/wiki/File:Mexico_City_Palacio_de_bellas_artes.jpg) |
+| 巴黎 | Benh LIEU SONG | Public domain | [原图](https://commons.wikimedia.org/wiki/File:Tour_Eiffel_Wikimedia_Commons.jpg) |
+| 法兰克福 | Christian Wolf (www.c-w-design.de) | CC BY-SA 3.0 de | [原图](https://commons.wikimedia.org/wiki/File:Skyline_Frankfurt_am_Main_2015.jpg) |
+| 阿姆斯特丹 | Basile Morin | CC BY-SA 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Water_reflection_of_canal_houses_at_blue_hour_in_Damrak_Amsterdam_the_Netherlands.jpg) |
+| 马德里 | kallerna | CC BY-SA 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Royal_Palace_of_Madrid_east_facade_1.jpg) |
+| 斯德哥尔摩 | ArildV | CC BY-SA 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Stockholms_stadshus_February_2026_02.jpg) |
+| 曼谷 | Diego Delso | CC BY-SA 3.0 | [原图](https://commons.wikimedia.org/wiki/File:Templo_Wat_Arun,_Bangkok,_Tailandia,_2013-08-22,_DD_30.jpg) |
+| 吉隆坡 | Dcubillas | CC BY-SA 3.0 | [原图](https://commons.wikimedia.org/wiki/File:Petronas_Towers_at_Night_-_from_the_base_upwards.jpg) |
+| 雅加达 | Gunawan Kartapranata | CC BY-SA 3.0 | [原图](https://commons.wikimedia.org/wiki/File:Jakarta_Panorama.jpg) |
+| 马尼拉 | Paul Sableman | CC BY 2.0 | [原图](https://commons.wikimedia.org/wiki/File:Cathedral_Basilica_of_the_Immaculate_Conception_(23775939900).jpg) |
+| 胡志明市 | Maksim Sokolov (maxergon.com) | CC BY-SA 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Basilica_of_Our_Lady_Immaculate.jpg) |
+| 首尔 | Frank Schulenburg | CC BY-SA 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Gyeonghoeru_(Royal_Banquet_Hall)_at_Gyeongbokgung_Palace,_Seoul.jpg) |
+| 孟买 | iMahesh | CC BY-SA 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Panoramic_view_of_Taj_Palace_Hotel_and_Taj_Tower_with_the_iconic_Gateway_of_India_in_the_background.jpg) |
+| 迪拜 | Laika ac | CC BY-SA 2.0 | [原图](https://commons.wikimedia.org/wiki/File:Burj_Khalifa_(16260269606).jpg) |
+| 阿拉木图 | Michael Grau | CC BY-SA 3.0 | [原图](https://commons.wikimedia.org/wiki/File:TV-Turm_Almaty_-_3.jpg) |
+| 德黑兰 | بهادر های زاده | CC BY-SA 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Azadi_Tower_at_night_in_low_angle.jpg) |
+| 圣保罗 | Wilfredor | CC0 | [原图](https://commons.wikimedia.org/wiki/File:Catedral_da_S%C3%A9,_S%C3%A3o_Paulo,_Brasil.jpg) |
+| 布宜诺斯艾利斯 | ProtoplasmaKid | CC BY-SA 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Parte_superior_del_Obelisco_de_Buenos_Aires.jpg) |
+| 圣地亚哥 | 3BRBS | CC BY-SA 3.0 | [原图](https://commons.wikimedia.org/wiki/File:Gran_Santiago_Tower,_Views_from_San_Crit%C3%B3bal_Hill_-_Santiago_-_Chile_08.jpg) |
+| 墨尔本 | Diliff | CC BY-SA 3.0 | [原图](https://commons.wikimedia.org/wiki/File:Melbourne_Skyline_from_Rialto_Crop_-_Nov_2008.jpg) |
+| 奥克兰 | Krzysztof Golik | CC BY-SA 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Sky_Tower_Auckland_01.jpg) |
+| 开普敦 | Dietmar Rabich | CC BY-SA 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Cape_Town_(ZA),_Table_Mountain_--_2024_--_2825.jpg) |
+| 拉各斯 | kopee15 | Public domain | [原图](https://commons.wikimedia.org/wiki/File:Lagos_skyline_with_marina.jpg) |
+| 内罗毕 | This Photo was taken by Timothy A. Gonsalves.  Feel free to use my photos, but please mention me as the author.  I would much appreciate if you send me an email tagooty@yahoo.com or write on my talk page, for my information.  Please contact me before commercial use.    Please do not upload an edited image here without consulting me.  I would like to make corrections only at my own source to ensure that the changes improve the image and are preserved.Otherwise you may upload an edited image with a new name. Please use one of the templates derivative or extract. | CC BY-SA 4.0 | [原图](https://commons.wikimedia.org/wiki/File:Buffalo_Nairobi_Skyline_Savannah_Kenya_May19_R1600769.jpg) |
