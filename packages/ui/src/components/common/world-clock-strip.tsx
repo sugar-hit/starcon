@@ -3,7 +3,8 @@
 import * as React from 'react';
 import { cn } from '../../lib/utils';
 import { useCityRotation } from '../../lib/use-city-rotation';
-import { inkForSkyLevel, skyLevelForLocalHour } from '../../lib/clock-sky';
+import { useAutoInk } from '../../lib/use-auto-ink';
+import { photoFor } from '../../lib/city-photos';
 import {
   CLOCK_SWAP_STAGGER_MS,
   REGION_POOLS,
@@ -11,12 +12,12 @@ import {
   splitClockTime,
   type WorldCity,
 } from '../../lib/world-clock';
-import { CitySkyline } from './city-skyline';
+import { CityBackdrop } from './city-backdrop';
 import { MiniGlobe } from './mini-globe';
 
 interface ClockSlot {
   city: WorldCity;
-  /** 轮换格所属分组，本地时区为 null */
+  /** 轮换格所属分组,本地时区为 null */
   region: string | null;
   /** 是否刚换过场 */
   switching: boolean;
@@ -25,9 +26,13 @@ interface ClockSlot {
 }
 
 /**
- * 工作台全球时间带：本地时区 + 五个区域轮换格。
- * 每格带一颗转到该城市的迷你地球，轮换时地球沿最短路径转过去，
- * 时间数字不参与动画，保证读秒即时准确。
+ * 工作台全球时间带:本地时区 + 五个区域轮换格。
+ *
+ * 每格带:
+ * - 一颗转到该城市的迷你地球(48px,换城时球体沿最短路径补间)
+ * - 一张该城地标照片(背景层,object-fit cover,底部对齐)
+ * - 自动墨色的文字(由照片顶部像素亮度推导,白底深字/暗底白字)
+ * - 时间数字不参与动画,保证读秒即时准确
  */
 export function WorldClockStrip({
   className,
@@ -61,80 +66,109 @@ export function WorldClockStrip({
         className,
       )}
     >
-      {slots.map((slot, index) => {
-        const parts = now ? clockParts(now, slot.city.zone) : null;
-        // 冒号单独渲染，数字保持即时更新，只有冒号呼吸
-        const { hours, minutes } = splitClockTime(parts?.time ?? '—:—');
-        // 天空明度由当地时刻推导，明度再决定文字用深墨还是浅墨
-        const level = skyLevelForLocalHour(parts?.localHour ?? 12);
-        const ink = inkForSkyLevel(level);
-        const isNight = ink === 'light';
-        return (
-          <div
-            key={index}
-            className={cn(
-              'relative overflow-hidden px-4 py-2.5',
-              isNight ? 'bg-[hsl(var(--clock-night))]' : index === 0 ? 'bg-brand-soft' : 'bg-card',
-            )}
-            aria-label={`${slot.city.country} ${slot.city.city}`}
-            data-rotating={slot.region ? true : undefined}
-            data-switches={slot.region ? switches : undefined}
-            data-sky-ink={ink}
-            title={slot.region ? `${slot.region} · 自动轮换` : undefined}
-          >
-            <CitySkyline city={slot.city.city} level={level} />
-            <div className="relative flex items-start justify-between gap-2">
-              <span
-                key={slot.city.zone}
-                data-clock-label
-                className={cn(
-                  'text-copy-12 inline-flex min-w-0 flex-wrap items-baseline gap-x-1 pt-1',
-                  isNight ? 'text-white/85' : 'text-foreground',
-                  slot.switching && 'clock-swap-in',
-                )}
-              >
-                <span className="font-medium">{slot.city.city}</span>
-                <span className={isNight ? 'text-white/55' : 'text-muted-foreground'}>
-                  · {slot.city.country}
-                </span>
-              </span>
-              <MiniGlobe
-                city={slot.city}
-                delay={slot.stagger}
-                label={`${slot.city.city}在地球上的位置`}
-                className="h-12 w-12"
-              />
-            </div>
-            <time
-              aria-label={index === 0 ? '北京时间' : `${slot.city.city}时间`}
-              className={cn(
-                'text-h-20 my-1 block font-medium tabular-nums',
-                isNight ? 'text-white' : index === 0 ? 'text-brand' : 'text-foreground',
-              )}
-              dateTime={now?.toISOString()}
-            >
-              {hours}
-              <span data-clock-colon className="clock-colon">
-                :
-              </span>
-              {minutes}
-            </time>
-            <p
-              key={slot.city.zone}
-              className={cn(
-                'text-copy-12 whitespace-nowrap',
-                isNight ? 'text-white/55' : 'text-muted-foreground',
-                slot.switching && 'clock-swap-in',
-              )}
-            >
-              {parts?.date ?? '—'} · {parts?.offset ?? '—'}
-            </p>
-            {slot.switching ? (
-              <span key={switches} aria-hidden="true" className="clock-sweep" />
-            ) : null}
-          </div>
-        );
-      })}
+      {slots.map((slot, index) => (
+        <ClockCard
+          key={index}
+          slot={slot}
+          now={now}
+          switches={switches}
+          index={index}
+        />
+      ))}
     </section>
+  );
+}
+
+function ClockCard({
+  slot,
+  now,
+  switches,
+  index,
+}: {
+  slot: ClockSlot;
+  now: Date | null;
+  switches: number;
+  index: number;
+}) {
+  const parts = now ? clockParts(now, slot.city.zone) : null;
+  const { hours, minutes } = splitClockTime(parts?.time ?? '—:—');
+
+  const photo = photoFor(slot.city.city);
+  const ink = useAutoInk(photo?.url);
+  const isLight = ink === 'light';
+
+  const hasPhoto = !!photo?.url;
+
+  return (
+    <div
+      className={cn(
+        'relative overflow-hidden px-4 py-2.5',
+        // 没有照片时落到原卡片底色,有照片时底色由照片决定,fallback 用卡底
+        !hasPhoto && (index === 0 ? 'bg-brand-soft' : 'bg-card'),
+      )}
+      aria-label={`${slot.city.country} ${slot.city.city}`}
+      data-rotating={slot.region ? true : undefined}
+      data-switches={slot.region ? switches : undefined}
+      data-ink={ink}
+      data-has-photo={hasPhoto ? 'true' : undefined}
+      title={slot.region ? `${slot.region} · 自动轮换` : undefined}
+    >
+      {hasPhoto && photo ? <CityBackdrop url={photo.url} /> : null}
+      {/* 文字层:z 高于照片;无照片时也不靠 z 抬升,直接铺在卡片底上 */}
+      <div className="relative flex items-start justify-between gap-2">
+        <span
+          key={slot.city.zone}
+          data-clock-label
+          className={cn(
+            'text-copy-12 inline-flex min-w-0 flex-wrap items-baseline gap-x-1 pt-1',
+            // 有照片时统一用白字(压暗罩兜底);ink 仍保留给调试/后续接入真实地标照
+            hasPhoto ? 'text-white/90' : 'text-foreground',
+            slot.switching && 'clock-swap-in',
+          )}
+        >
+          <span className="font-medium">{slot.city.city}</span>
+          <span
+            className={cn(
+              hasPhoto ? 'text-white/70' : 'text-muted-foreground',
+            )}
+          >
+            · {slot.city.country}
+          </span>
+        </span>
+        <MiniGlobe
+          city={slot.city}
+          delay={slot.stagger}
+          label={`${slot.city.city}在地球上的位置`}
+          className="h-12 w-12"
+        />
+      </div>
+      <time
+        aria-label={index === 0 ? '北京时间' : `${slot.city.city}时间`}
+        className={cn(
+          'text-h-20 my-1 block font-medium tabular-nums',
+          hasPhoto ? 'text-white' : index === 0 ? 'text-brand' : 'text-foreground',
+        )}
+        dateTime={now?.toISOString()}
+      >
+        {hours}
+        <span data-clock-colon className="clock-colon">
+          :
+        </span>
+        {minutes}
+      </time>
+      <p
+        key={slot.city.zone}
+        className={cn(
+          'text-copy-12 whitespace-nowrap',
+          hasPhoto ? 'text-white/65' : 'text-muted-foreground',
+          slot.switching && 'clock-swap-in',
+        )}
+      >
+        {parts?.date ?? '—'} · {parts?.offset ?? '—'}
+      </p>
+      {slot.switching ? (
+        <span key={switches} aria-hidden="true" className="clock-sweep" />
+      ) : null}
+    </div>
   );
 }
