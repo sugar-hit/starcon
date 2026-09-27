@@ -35,13 +35,15 @@ export function CityBackdrop({ url, className }: CityBackdropProps) {
         className="absolute inset-0 h-full w-full object-cover"
         style={{ objectPosition: 'center bottom' }}
       />
-      {/* 压暗罩:顶到底从 0.42 渐变到 0。
-          关键:不要上锁品牌色相,让照片本色透出。文字区(顶部 38%)始终低于
-          rgba(0,0,0,0.25),白字对比度足够。 */}
+      {/* 压暗罩：必须覆盖**整个文字区**（0~78%），不是只压顶部。
+          时间数字在 ~50% 高度，如果罩子在那里已衰减到 0，白字会直接
+          消失在照片亮区里。所以前 72% 保持 0.5 以上的压暗，
+          只在最后 28%（地标主体）轻微放开，让照片本色透出来。 */}
       <span
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.30) 38%, rgba(0,0,0,0) 72%)',
+          background:
+            'linear-gradient(to bottom, rgba(0,0,0,0.58) 0%, rgba(0,0,0,0.52) 72%, rgba(0,0,0,0.34) 100%)',
         }}
       />
     </span>

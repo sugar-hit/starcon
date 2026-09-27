@@ -194,6 +194,38 @@ test('cells either show their photo backdrop or fall back to a clean card', asyn
   }
 });
 
+test('photo-backed cells keep the time readable above the backdrop', async ({ page }) => {
+  // 回归:照片层是 position:absolute,时间/日期原本是 position:static,
+  // 同一 stacking context 里绝对定位永远压在静态流之上 → 时间数字被整层盖住。
+  // 这里用 elementFromPoint 验证时间中心点命中的就是 <time> 本身,不是照片层。
+  const checks = await cards(page).evaluateAll((els) =>
+    els.map((card) => {
+      const time = card.querySelector('time')!;
+      const r = time.getBoundingClientRect();
+      const cx = r.x + r.width / 2;
+      const cy = r.y + r.height / 2;
+      const hit = document.elementFromPoint(cx, cy);
+      const onTop = hit === time || time.contains(hit);
+      return {
+        label: card.getAttribute('aria-label'),
+        hasPhoto: card.hasAttribute('data-has-photo'),
+        onTop,
+        hitTag: hit?.tagName ?? null,
+        text: time.textContent?.trim() ?? '',
+      };
+    }),
+  );
+
+  for (const check of checks) {
+    expect(check.text, `${check.label} 应有读数`).toMatch(/^\d{2}:\d{2}$/);
+    if (!check.hasPhoto) continue;
+    expect(
+      check.onTop,
+      `${check.label} 时间被压在照片层下（命中 ${check.hitTag}），读数不可见`,
+    ).toBe(true);
+  }
+});
+
 test('photo-backed cells use a fixed-light ink regardless of placeholder luminance', async ({ page }) => {
   // 当前阶段用 picsum 随机实景照占位,亮区不可控,auto-ink 采样会误判。
   // 组件采用静态压暗罩 + 固定白字兜底;真实地标照(天空在上/地标在下)接入后

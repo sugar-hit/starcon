@@ -113,62 +113,66 @@ function ClockCard({
       data-has-photo={hasPhoto ? 'true' : undefined}
       title={slot.region ? `${slot.region} · 自动轮换` : undefined}
     >
-      {hasPhoto && photo ? <CityBackdrop url={photo.url} /> : null}
-      {/* 文字层:z 高于照片;无照片时也不靠 z 抬升,直接铺在卡片底上 */}
-      <div className="relative flex items-start justify-between gap-2">
-        <span
-          key={slot.city.zone}
-          data-clock-label
+      {hasPhoto && photo ? <CityBackdrop url={photo.url} className="z-0" /> : null}
+      {/*
+        文字整体收进 relative z-10 容器。
+        之前 time / p 是 position:static,而照片层是 position:absolute ——
+        同一 stacking context 里绝对定位元素永远压在静态流内容之上，
+        所以时间数字虽然在 DOM 里排在照片之后，视觉上被整层盖掉。
+        显式 z-0(照片) / z-10(文字) 把层级写死，以后新增元素不会再踩。
+      */}
+      <div className="relative z-10">
+        <div className="flex items-start justify-between gap-2">
+          <span
+            key={slot.city.zone}
+            data-clock-label
+            className={cn(
+              'text-copy-12 inline-flex min-w-0 flex-wrap items-baseline gap-x-1 pt-1',
+              // 有照片时统一用白字(压暗罩兜底);ink 仍保留给调试/后续接入真实地标照
+              hasPhoto ? 'text-white/90' : 'text-foreground',
+              slot.switching && 'clock-swap-in',
+            )}
+          >
+            <span className="font-semibold">{slot.city.city}</span>
+            <span className={hasPhoto ? 'text-white/70' : 'text-muted-foreground'}>
+              · {slot.city.country}
+            </span>
+          </span>
+          <MiniGlobe
+            city={slot.city}
+            delay={slot.stagger}
+            label={`${slot.city.city}在地球上的位置`}
+            className="h-12 w-12"
+          />
+        </div>
+        <time
+          aria-label={index === 0 ? '北京时间' : `${slot.city.city}时间`}
           className={cn(
-            'text-copy-12 inline-flex min-w-0 flex-wrap items-baseline gap-x-1 pt-1',
-            // 有照片时统一用白字(压暗罩兜底);ink 仍保留给调试/后续接入真实地标照
-            hasPhoto ? 'text-white/90' : 'text-foreground',
+            'text-h-20 my-1 block font-semibold tabular-nums',
+            hasPhoto ? 'text-white' : index === 0 ? 'text-brand' : 'text-foreground',
+          )}
+          dateTime={now?.toISOString()}
+        >
+          {hours}
+          <span data-clock-colon className="clock-colon">
+            :
+          </span>
+          {minutes}
+        </time>
+        <p
+          key={slot.city.zone}
+          className={cn(
+            'text-copy-12 whitespace-nowrap',
+            hasPhoto ? 'text-white/75' : 'text-muted-foreground',
             slot.switching && 'clock-swap-in',
           )}
         >
-          <span className="font-medium">{slot.city.city}</span>
-          <span
-            className={cn(
-              hasPhoto ? 'text-white/70' : 'text-muted-foreground',
-            )}
-          >
-            · {slot.city.country}
-          </span>
-        </span>
-        <MiniGlobe
-          city={slot.city}
-          delay={slot.stagger}
-          label={`${slot.city.city}在地球上的位置`}
-          className="h-12 w-12"
-        />
+          {parts?.date ?? '—'} · {parts?.offset ?? '—'}
+        </p>
+        {slot.switching ? (
+          <span key={switches} aria-hidden="true" className="clock-sweep" />
+        ) : null}
       </div>
-      <time
-        aria-label={index === 0 ? '北京时间' : `${slot.city.city}时间`}
-        className={cn(
-          'text-h-20 my-1 block font-medium tabular-nums',
-          hasPhoto ? 'text-white' : index === 0 ? 'text-brand' : 'text-foreground',
-        )}
-        dateTime={now?.toISOString()}
-      >
-        {hours}
-        <span data-clock-colon className="clock-colon">
-          :
-        </span>
-        {minutes}
-      </time>
-      <p
-        key={slot.city.zone}
-        className={cn(
-          'text-copy-12 whitespace-nowrap',
-          hasPhoto ? 'text-white/65' : 'text-muted-foreground',
-          slot.switching && 'clock-swap-in',
-        )}
-      >
-        {parts?.date ?? '—'} · {parts?.offset ?? '—'}
-      </p>
-      {slot.switching ? (
-        <span key={switches} aria-hidden="true" className="clock-sweep" />
-      ) : null}
     </div>
   );
 }
