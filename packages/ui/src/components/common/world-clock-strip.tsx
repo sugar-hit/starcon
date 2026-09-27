@@ -7,6 +7,7 @@ import {
   CLOCK_SWAP_STAGGER_MS,
   REGION_POOLS,
   clockParts,
+  splitClockTime,
   type WorldCity,
 } from '../../lib/world-clock';
 import { MiniGlobe } from './mini-globe';
@@ -64,6 +65,8 @@ export function WorldClockStrip({
       />
       {slots.map((slot, index) => {
         const parts = now ? clockParts(now, slot.city.zone) : null;
+        // 冒号单独渲染，数字保持即时更新，只有冒号呼吸
+        const { hours, minutes } = splitClockTime(parts?.time ?? '—:—');
         return (
           <div
             key={index}
@@ -103,7 +106,11 @@ export function WorldClockStrip({
               )}
               dateTime={now?.toISOString()}
             >
-              {parts?.time ?? '—:—'}
+              {hours}
+              <span data-clock-colon className="clock-colon">
+                :
+              </span>
+              {minutes}
             </time>
             <p
               key={slot.city.zone}

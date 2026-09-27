@@ -101,6 +101,43 @@ test('all six clocks stay distinct while rotating', async ({ page }) => {
   }
 });
 
+test('every clock colon breathes while the digits stay still', async ({ page }) => {
+  const colons = clocks(page).locator('[data-clock-colon]');
+  await expect(colons).toHaveCount(6);
+
+  const first = colons.first();
+  const style = await first.evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return {
+      name: cs.animationName,
+      duration: Number.parseFloat(cs.animationDuration),
+      iteration: cs.animationIterationCount,
+      text: el.textContent,
+    };
+  });
+  expect(style.name).toBe('clock-breathe');
+  expect(style.iteration).toBe('infinite');
+  expect(style.text).toBe(':');
+  // 呼吸要慢：单程至少 1 秒，不能像闪烁
+  expect(style.duration).toBeGreaterThanOrEqual(1);
+  expect(style.duration).toBeLessThanOrEqual(4);
+
+  const opacities = new Set<number>();
+  for (let frame = 0; frame < 10; frame += 1) {
+    opacities.add(
+      await first.evaluate((el) => Math.round(Number(getComputedStyle(el).opacity) * 20) / 20),
+    );
+    await page.waitForTimeout(200);
+  }
+  expect(opacities.size, '冒号透明度应随时间变化').toBeGreaterThan(3);
+  // 暗到头也要看得见，不能消失
+  expect(Math.min(...opacities)).toBeGreaterThanOrEqual(0.35);
+
+  const times = clocks(page).locator('time');
+  expect(await times.first().evaluate((el) => getComputedStyle(el).animationName)).toBe('none');
+  expect((await times.first().textContent())?.trim()).toMatch(/^\d{2}:\d{2}$/);
+});
+
 test('rotation animates briefly and keeps the clock readable', async ({ page }) => {
   const rotating = rotatingCards(page).first();
 

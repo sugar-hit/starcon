@@ -9,6 +9,7 @@
 - 换城市时球体沿最短经度路径补间 900ms，五格按 160ms 依次启动形成波浪；定位点随投影飞入并放大。
 - 换场叠加品牌色渐变横扫（560ms）+ 城市标签与日期行淡入上移（420ms）；时间数字不参与动画。
 - 容器顶部加 brand 5% 向下渐变，整条带成为一个区块。
+- 冒号呼吸：`<time>` 内把冒号拆成独立 `clock-colon`，2.6s ease-in-out 无限循环，透明度 0.42 ↔ 1；数字不参与动画。
 
 ## 陆地数据
 
@@ -49,7 +50,7 @@
 - `packages/ui/src/components/common/world-clock-strip.tsx`（重写）
 - `packages/ui/src/components/common/city-globe.tsx`（删除，被 mini-globe 取代）
 - `packages/ui/src/components/index.ts`、`packages/ui/src/styles/tokens.css`
-- `tests/e2e/world-clock.spec.ts`（重写，6 项）
+- `tests/e2e/world-clock.spec.ts`（重写，7 项）
 - `docs/design/visual-spec.md`（V2.1.2 重写）
 
 ## 验证结果

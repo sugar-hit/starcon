@@ -6,6 +6,7 @@ import {
   REGION_POOLS,
   clockParts,
   nextRotationCursor,
+  splitClockTime,
   visibleCities,
 } from './world-clock';
 
@@ -90,6 +91,17 @@ describe('world clocks', () => {
     }
     expect(other.cities.some((city) => city.zone.startsWith('Asia/'))).toBe(false);
     expect(other.cities.some((city) => city.zone.startsWith('Europe/'))).toBe(false);
+  });
+
+  it('splits the clock for the breathing colon and keeps the reading intact', () => {
+    expect(splitClockTime('07:42')).toEqual({ hours: '07', minutes: '42' });
+    expect(splitClockTime('00:00')).toEqual({ hours: '00', minutes: '00' });
+    // 占位符也要能拆，冒号单独渲染不影响读数
+    expect(splitClockTime('—:—')).toEqual({ hours: '—', minutes: '—' });
+    for (const city of [HOME_CITY, ...REGION_POOLS.flatMap((r) => r.cities)]) {
+      const { hours, minutes } = splitClockTime(clockParts(SAMPLE, city.zone).time);
+      expect(`${hours}:${minutes}`, city.city).toBe(clockParts(SAMPLE, city.zone).time);
+    }
   });
 
   it('advances the cursor and keeps rotation timings usable', () => {

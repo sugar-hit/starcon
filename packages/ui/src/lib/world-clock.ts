@@ -153,6 +153,12 @@ function positiveMod(value: number, length: number): number {
   return ((value % length) + length) % length;
 }
 
+/** 拆出小时与分钟，冒号单独渲染以便做呼吸动效；占位符原样返回 */
+export function splitClockTime(time: string): { hours: string; minutes: string } {
+  const [hours = '—', minutes = '—'] = time.split(':');
+  return { hours, minutes };
+}
+
 export function clockParts(date: Date, timeZone: string) {
   return {
     time: new Intl.DateTimeFormat('en-GB', {
