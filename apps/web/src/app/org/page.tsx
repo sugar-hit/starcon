@@ -1,6 +1,4 @@
-import { DomainPlaceholder, getDomainSpec } from '@starcon/ui';
-
-export default function OrgPage() {
-  const spec = getDomainSpec('org');
-  return <>{spec && <DomainPlaceholder spec={spec} />}</>;
+import { IdentityWorkspace } from '@/components/iam/identity-workspace';
+export default function Page() {
+  return <IdentityWorkspace />;
 }

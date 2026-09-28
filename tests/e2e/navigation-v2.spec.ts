@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/authenticated';
 import { SYSTEMS } from '../../packages/ui/src/lib/nav-config';
 
 const destinations = SYSTEMS.flatMap((system) =>

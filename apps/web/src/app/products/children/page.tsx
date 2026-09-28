@@ -1,4 +1,4 @@
-import { CatalogWorkspace } from '@/components/catalog/catalog-workspace';
+import { redirect } from 'next/navigation';
 export default function Page() {
-  return <CatalogWorkspace kind="children" />;
+  redirect('/org/children');
 }

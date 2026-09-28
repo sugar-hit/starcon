@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/authenticated';
 
 async function openProductTasks(page: import('@playwright/test').Page) {
   await page.goto('/products');
@@ -66,11 +66,12 @@ test('legacy tab metadata upgrades and invalid entries are discarded', async ({ 
   await expect(page.getByRole('tab', { selected: true })).toHaveText('工作台');
 });
 
-test('direct route renders its selected tab before client JavaScript runs', async ({ browser }) => {
+test('未认证页面在 JavaScript 执行前不暴露业务工作区', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto('http://localhost:3000/products/research');
-  await expect(page.getByRole('tab', { selected: true })).toHaveText('选品与开发');
+  await expect(page.getByRole('tab')).toHaveCount(0);
+  await expect(page.getByRole('status')).toHaveText('正在验证登录状态…');
   await context.close();
 });
 

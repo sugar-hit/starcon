@@ -213,10 +213,11 @@ function LogoLink() {
 
 export interface AppShellProps {
   system?: SystemId;
+  account?: React.ReactNode;
   children: React.ReactNode;
 }
 
-function AppShellInner({ system, children }: AppShellProps) {
+function AppShellInner({ system, children, account }: AppShellProps) {
   const { activateTab } = useWorkspaceTabs();
   const pathname = usePathname();
   const mainRef = React.useRef<HTMLElement>(null);
@@ -421,7 +422,7 @@ function AppShellInner({ system, children }: AppShellProps) {
               </div>
             </SheetContent>
           </Sheet>
-          <AccountMenu />
+          {account ?? <AccountMenu />}
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <button

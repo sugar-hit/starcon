@@ -21,3 +21,10 @@ it('every task is uniquely addressable and has matching nav/header metadata', ()
     for (const group of system.items) expect(group.children?.length).toBeGreaterThan(0);
   expect(findTaskPage('/orders/unknown')).toBeUndefined();
 });
+
+it('IAM 管理页面独立于商品中心，商品页面不承载身份管理', () => {
+  for (const kind of ['roles', 'members', 'departments', 'children']) {
+    expect(findTaskPage(`/products/${kind}`)).toBeUndefined();
+    expect(findTaskPage(`/org/${kind}`)?.domain).toBe('org');
+  }
+});

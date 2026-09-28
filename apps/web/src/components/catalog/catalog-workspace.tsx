@@ -9,55 +9,38 @@ import {
   Layers,
   SlidersHorizontal,
   Pencil,
-  LogOut,
 } from 'lucide-react';
 import { Button } from '@starcon/ui';
 import type {
-  Access,
-  LoginResult,
   Product,
   Detail,
   Attribute,
   Sku,
 } from '../../../../../packages/api-contracts/src/catalog';
 import { api, ApiError } from './api';
-import { control, Field, statuses, modes, types } from './fields';
+import { control, statuses, modes, types } from './fields';
 import { SpuEditor, AttributeEditor, SkuEditor } from './product-editors';
 import { ProductRecords } from './product-records';
-import { AdministrationPanel } from './administration-panel';
-import {
-  canManage,
-  canAccessRecord,
-  switchTenant,
-  type AdministrationKind,
-} from './administration-model';
+import { canAccessRecord } from '../iam/administration-model';
+import { useIdentity } from '../iam/identity-shell';
 
 type Editing =
   | { kind: 'spu'; product?: Product }
   | { kind: 'attribute'; attribute?: Attribute }
   | { kind: 'sku'; sku?: Sku }
   | null;
-export type WorkspaceKind = 'products' | 'research' | 'compliance' | 'assets' | AdministrationKind;
+export type WorkspaceKind = 'products' | 'research' | 'compliance' | 'assets';
 const destinations = [
   ['products', '/products', '商品档案'],
   ['research', '/products/research', '选品与开发'],
   ['compliance', '/products/compliance', '合规与资质'],
   ['assets', '/products/assets', '素材与翻译'],
-  ['roles', '/products/roles', '角色配置'],
-  ['members', '/products/members', '成员管理'],
-  ['departments', '/products/departments', '部门管理'],
-  ['children', '/products/children', '子租户管理'],
 ] as const;
 
 export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }) {
-  const [session, setSession] = useState<Access | null>(null);
+  const { session } = useIdentity();
   const [ready, setReady] = useState(false);
   const [error, setError] = useState('');
-  const [username, setUsername] = useState('local-admin');
-  const [password, setPassword] = useState('');
-  const [memberships, setMemberships] = useState<LoginResult['memberships']>([]);
-  const [availableMemberships, setAvailableMemberships] = useState<LoginResult['memberships']>([]);
-  const [membershipId, setMembershipId] = useState('');
   const [busy, setBusy] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [detail, setDetail] = useState<Detail | null>(null);
@@ -70,7 +53,6 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
   const handleError = useCallback((e: unknown) => {
     setError(e instanceof Error ? e.message : '请求失败，请重试');
     if (e instanceof ApiError && e.status === 401) {
-      setSession(null);
       setDetail(null);
       setProducts([]);
     }
@@ -78,23 +60,20 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
   const load = useCallback(async () => {
     try {
       setError('');
-      const access = await api<Access>('auth/session');
-      setSession(access);
-      setAvailableMemberships(await api<LoginResult['memberships']>('auth/memberships'));
+      const access = session;
       setDetail(null);
       setProducts([]);
       if (access.permissions.includes('catalog.spu.read'))
         setProducts(await api<Product[]>('catalog/products'));
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
-        setSession(null);
         setDetail(null);
         setProducts([]);
       } else handleError(e);
     } finally {
       setReady(true);
     }
-  }, [handleError]);
+  }, [handleError, session]);
   useEffect(() => {
     void load();
   }, [load]);
@@ -130,87 +109,6 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
         正在连接商品工作区…
       </p>
     );
-  if (!session)
-    return (
-      <div className="bg-card mx-auto mt-8 max-w-md rounded-lg border p-6">
-        <Package className="text-brand mb-3 h-6 w-6" />
-        <h2 className="text-lg font-semibold">登录商品工作区</h2>
-        <p className="text-muted-foreground mb-5 mt-2 text-sm">
-          使用你的账号登录，并选择已获授权的租户。
-        </p>
-        <form
-          className="space-y-4"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            setBusy(true);
-            setError('');
-            try {
-              const result = await api<LoginResult>('auth/login', 'POST', {
-                username,
-                password,
-                membershipId: membershipId || null,
-              });
-              if (result.memberships.length > 1 && !membershipId) {
-                setMemberships(result.memberships);
-                setMembershipId(result.memberships[0]?.id ?? '');
-              } else {
-                setPassword('');
-                await load();
-              }
-            } catch (e) {
-              handleError(e);
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          <Field label="账号">
-            <input
-              required
-              autoComplete="username"
-              className={control}
-              value={username}
-              onChange={(e) => {
-                setUsername(e.target.value);
-                setMemberships([]);
-                setMembershipId('');
-              }}
-            />
-          </Field>
-          <Field label="密码">
-            <input
-              required
-              type="password"
-              autoComplete="current-password"
-              className={control}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </Field>
-          {memberships.length > 1 && (
-            <Field label="选择租户">
-              <select
-                className={control}
-                value={membershipId}
-                onChange={(e) => setMembershipId(e.target.value)}
-              >
-                {memberships.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          )}
-          <p role="alert" className="text-destructive text-sm">
-            {error}
-          </p>
-          <Button type="submit" disabled={busy} className="w-full">
-            {busy ? '登录中…' : '登录'}
-          </Button>
-        </form>
-      </div>
-    );
   const filtered = products.filter((p) =>
     `${p.code} ${p.name} ${p.brand} ${p.category}`.toLowerCase().includes(search.toLowerCase()),
   );
@@ -218,71 +116,17 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <nav aria-label="商品中心功能" className="flex flex-wrap gap-1">
-          {destinations
-            .filter(
-              ([key]) =>
-                !['roles', 'members', 'departments', 'children'].includes(key) ||
-                canManage(session, key as AdministrationKind),
-            )
-            .map(([key, href, label]) => (
-              <Link
-                key={key}
-                href={href}
-                aria-current={kind === key ? 'page' : undefined}
-                className={`rounded-md px-3 py-2 text-sm ${kind === key ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted'}`}
-              >
-                {label}
-              </Link>
-            ))}
-        </nav>
-        <div className="text-muted-foreground flex items-center gap-2 text-xs">
-          <span>{session.tenantName}</span>
-          {availableMemberships.length > 1 && (
-            <select
-              aria-label="切换租户"
-              className={control}
-              value={session.membershipId}
-              disabled={busy}
-              onChange={async (e) => {
-                setBusy(true);
-                try {
-                  await switchTenant(e.target.value);
-                  setDetail(null);
-                  setEditing(null);
-                  setProducts([]);
-                  await load();
-                } catch (error) {
-                  handleError(error);
-                } finally {
-                  setBusy(false);
-                }
-              }}
+          {destinations.map(([key, href, label]) => (
+            <Link
+              key={key}
+              href={href}
+              aria-current={kind === key ? 'page' : undefined}
+              className={`rounded-md px-3 py-2 text-sm ${kind === key ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted'}`}
             >
-              {availableMemberships.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={async () => {
-              try {
-                await api('auth/logout', 'POST');
-                setSession(null);
-                setDetail(null);
-                setProducts([]);
-              } catch (e) {
-                handleError(e);
-              }
-            }}
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            退出
-          </Button>
-        </div>
+              {label}
+            </Link>
+          ))}
+        </nav>
       </div>
       {error && (
         <div
@@ -300,15 +144,7 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
           {notice}
         </p>
       )}
-      {kind === 'roles' || kind === 'members' || kind === 'departments' || kind === 'children' ? (
-        <AdministrationPanel
-          key={`${session.tenantId}:${kind}`}
-          kind={kind}
-          session={session}
-          reloadSession={load}
-          onError={handleError}
-        />
-      ) : kind !== 'products' ? (
+      {kind !== 'products' ? (
         <ProductRecords
           key={`${session.tenantId}:${kind}`}
           kind={kind}

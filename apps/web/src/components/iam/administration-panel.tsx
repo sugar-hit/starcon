@@ -10,8 +10,8 @@ import type {
   ChildView,
   AssignmentInput,
 } from '../../../../../packages/api-contracts/src/catalog';
-import { api } from './api';
-import { Field, Editor, control } from './fields';
+import { api } from '@/lib/api';
+import { Field, Editor, control } from '../common/fields';
 import {
   actionLabels,
   assignRole,
@@ -26,7 +26,7 @@ import {
 
 const titles = {
   roles: '角色配置',
-  members: '成员管理',
+  members: '用户与成员',
   departments: '部门管理',
   children: '子租户管理',
 };

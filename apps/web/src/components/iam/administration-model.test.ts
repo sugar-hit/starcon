@@ -93,12 +93,12 @@ describe('管理页真实 API 命令', () => {
     };
     await saveAdministration('roles', undefined, role);
     expect(fetcher).toHaveBeenLastCalledWith(
-      '/api/catalog/identity/roles',
+      '/api/iam/identity/roles',
       expect.objectContaining({ method: 'POST', body: JSON.stringify(role) }),
     );
     await saveAdministration('roles', 'role-id', role);
     expect(fetcher).toHaveBeenLastCalledWith(
-      '/api/catalog/identity/roles/role-id',
+      '/api/iam/identity/roles/role-id',
       expect.objectContaining({ method: 'PUT' }),
     );
   });
@@ -115,14 +115,14 @@ describe('管理页真实 API 命令', () => {
       password: null,
     });
     expect(fetcher).toHaveBeenLastCalledWith(
-      '/api/catalog/identity/members',
+      '/api/iam/identity/members',
       expect.objectContaining({
         body: JSON.stringify({ ...member, username: 'existing-user', password: null }),
       }),
     );
     await saveAdministration('members', 'member', member);
     expect(fetcher).toHaveBeenLastCalledWith(
-      '/api/catalog/identity/members/member',
+      '/api/iam/identity/members/member',
       expect.objectContaining({ method: 'PUT', body: JSON.stringify(member) }),
     );
   });
@@ -130,18 +130,18 @@ describe('管理页真实 API 命令', () => {
     const fetcher = mockFetch();
     await saveAdministration('departments', undefined, { name: '商品部' });
     expect(fetcher).toHaveBeenLastCalledWith(
-      '/api/catalog/identity/departments',
+      '/api/iam/identity/departments',
       expect.objectContaining({ method: 'POST' }),
     );
     await saveAdministration('departments', 'department', { name: '运营部' });
     expect(fetcher).toHaveBeenLastCalledWith(
-      '/api/catalog/identity/departments/department',
+      '/api/iam/identity/departments/department',
       expect.objectContaining({ method: 'PUT' }),
     );
     for (const kind of ['roles', 'members', 'departments'] as const) {
       await removeAdministration(kind, 'id');
       expect(fetcher).toHaveBeenLastCalledWith(
-        `/api/catalog/identity/${kind}/id`,
+        `/api/iam/identity/${kind}/id`,
         expect.objectContaining({ method: 'DELETE' }),
       );
     }
@@ -151,13 +151,13 @@ describe('管理页真实 API 命令', () => {
     const child = { code: 'CHILD', name: '子租户', ownerUsername: 'owner', ownerPassword: null };
     await saveAdministration('children', undefined, child);
     expect(fetcher).toHaveBeenLastCalledWith(
-      '/api/catalog/identity/children',
+      '/api/iam/identity/children',
       expect.objectContaining({ body: JSON.stringify(child) }),
     );
     for (const status of ['SUSPENDED', 'ACTIVE']) {
       await saveAdministration('children', 'child', { name: '子租户', status });
       expect(fetcher).toHaveBeenLastCalledWith(
-        '/api/catalog/identity/children/child',
+        '/api/iam/identity/children/child',
         expect.objectContaining({
           method: 'PUT',
           body: JSON.stringify({ name: '子租户', status }),
@@ -169,12 +169,12 @@ describe('管理页真实 API 命令', () => {
     const fetcher = mockFetch();
     await switchTenant('target-member');
     expect(fetcher).toHaveBeenLastCalledWith(
-      '/api/catalog/auth/switch',
+      '/api/iam/auth/switch',
       expect.objectContaining({ method: 'POST', body: '{"membershipId":"target-member"}' }),
     );
     await transferOwner('successor');
     expect(fetcher).toHaveBeenLastCalledWith(
-      '/api/catalog/identity/owner-transfer',
+      '/api/iam/identity/owner-transfer',
       expect.objectContaining({ method: 'POST', body: '{"membershipId":"successor"}' }),
     );
   });

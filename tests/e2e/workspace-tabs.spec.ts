@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/authenticated';
 
 /**
  * WorkspaceTabs — 应用内 tab 栏 e2e 测试

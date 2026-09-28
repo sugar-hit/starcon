@@ -113,7 +113,7 @@ public class IdentityController {
 
   Access resolve(String bearer) {
     var row = sql.fetchOne("select * from session_access(?)", hash(token(bearer)));
-    if (row == null) throw error(HttpStatus.UNAUTHORIZED, "请先登录商品工作区");
+    if (row == null) throw error(HttpStatus.UNAUTHORIZED, "登录已失效，请重新登录");
     return new Access(
         row.get("user_id", UUID.class),
         row.get("tenant_id", UUID.class),
@@ -158,7 +158,7 @@ public class IdentityController {
 
   String token(String bearer) {
     if (!bearer.startsWith("Bearer ") || bearer.length() > 200)
-      throw error(HttpStatus.UNAUTHORIZED, "请先登录商品工作区");
+      throw error(HttpStatus.UNAUTHORIZED, "登录已失效，请重新登录");
     return bearer.substring(7);
   }
 

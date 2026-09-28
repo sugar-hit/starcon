@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from './support/authenticated';
+import type { Page } from '@playwright/test';
 
 function clocks(page: Page) {
   return page.getByRole('region', { name: '全球时间' });

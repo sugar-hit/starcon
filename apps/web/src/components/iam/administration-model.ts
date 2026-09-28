@@ -8,7 +8,7 @@ import type {
   ChildInput,
   ChildUpdate,
 } from '../../../../../packages/api-contracts/src/catalog';
-import { api } from './api';
+import { api } from '../../lib/api';
 
 export type AdministrationKind = 'roles' | 'members' | 'departments' | 'children';
 export const scopeLabels: Record<string, string> = {

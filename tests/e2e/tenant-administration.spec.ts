@@ -15,9 +15,10 @@ async function signIn(page: Page, username: string, password: string) {
   await page.getByLabel('账号', { exact: true }).fill(username);
   await page.getByLabel('密码', { exact: true }).fill(password);
   await page.getByRole('button', { name: '登录', exact: true }).click();
-  await expect(page.getByRole('navigation', { name: '商品中心功能' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '账户与租户' })).toBeVisible();
 }
 async function signOut(page: Page) {
+  await page.getByRole('button', { name: '账户与租户' }).click();
   await page.getByRole('button', { name: '退出', exact: true }).click();
   await expect(page.getByRole('button', { name: '登录', exact: true })).toBeVisible();
 }
@@ -45,7 +46,8 @@ test('租户管理：部门、角色、成员、子租户的真实授权闭环',
   };
   const save = () => page.getByRole('button', { name: '保存', exact: true }).click();
 
-  await page.goto('/products/departments');
+  await page.goto('/org/departments');
+  await expect(page).toHaveURL(/\/login/);
   await signIn(page, OWNER, PASSWORD);
 
   // 部门：创建后同时出现在页面列表与授权 API。
@@ -59,7 +61,7 @@ test('租户管理：部门、角色、成员、子租户的真实授权闭环',
 
   // 角色：勾选的权限与状态真实保存。含身份管理权限的角色只能给全量范围，
   // 数据范围收窄只对纯商品权限开放。
-  await page.goto('/products/roles');
+  await page.goto('/org/roles');
   await page.getByRole('button', { name: '新增', exact: true }).click();
   await page.getByLabel('角色编码', { exact: true }).fill(`VIEWER${suffix}`);
   await page.getByLabel('角色名称', { exact: true }).fill(roleName);
@@ -80,7 +82,7 @@ test('租户管理：部门、角色、成员、子租户的真实授权闭环',
   expect(adminRole.permissions).toEqual(expect.arrayContaining(['identity.member.read']));
 
   // 成员：部门归属与角色范围在同一次保存里生效。
-  await page.goto('/products/members');
+  await page.goto('/org/members');
   await page.getByRole('button', { name: '新增', exact: true }).click();
   await page.getByLabel('账号', { exact: true }).fill(memberName);
   await page.getByLabel('新账号密码', { exact: true }).fill(memberPassword);
@@ -94,7 +96,7 @@ test('租户管理：部门、角色、成员、子租户的真实授权闭环',
   expect(member.assignments).toEqual([{ roleId: role.id, scopeMode: 'DEPARTMENT' }]);
 
   // 子租户：创建即带首位所有者，父子关系不自动授予业务访问。
-  await page.goto('/products/children');
+  await page.goto('/org/children');
   await page.getByRole('button', { name: '新增', exact: true }).click();
   await page.getByLabel('租户编码', { exact: true }).fill(childCode);
   await page.getByLabel('租户名称', { exact: true }).fill(childName);
@@ -108,10 +110,11 @@ test('租户管理：部门、角色、成员、子租户的真实授权闭环',
   // 受限成员：本部门范围看不到管理页入口，也没有新增商品的权限。
   await signOut(page);
   await signIn(page, memberName, memberPassword);
-  const workspaceNav = page.getByRole('navigation', { name: '商品中心功能' });
+  await page.goto('/org');
+  const workspaceNav = page.getByRole('navigation', { name: '组织管理功能' });
   await expect(workspaceNav.getByRole('link', { name: '成员管理', exact: true })).toHaveCount(0);
   await expect(workspaceNav.getByRole('link', { name: '角色配置', exact: true })).toHaveCount(0);
-  await expect(workspaceNav.getByRole('link', { name: '商品档案', exact: true })).toBeVisible();
+  await expect(workspaceNav.getByRole('link', { name: '商品档案', exact: true })).toHaveCount(0);
   await page.goto('/products');
   await expect(page.getByRole('button', { name: '新建 SPU', exact: true })).toHaveCount(0);
   const forbidden = await request('catalog/products', 'POST', {
@@ -128,15 +131,34 @@ test('租户管理：部门、角色、成员、子租户的真实授权闭环',
   // 子租户所有者：管理能力在自己租户内成立，看不到父租户的商品。
   await signOut(page);
   await signIn(page, childOwner, childOwnerPassword);
-  await expect(workspaceNav.getByRole('link', { name: '成员管理', exact: true })).toBeVisible();
+  await page.goto('/org');
+  await expect(workspaceNav.getByRole('link', { name: '用户与成员', exact: true })).toBeVisible();
   await page.goto('/products');
   await expect(page.getByRole('table')).toBeVisible();
   await expect(page.getByText('创建你的第一款商品', { exact: true })).toBeVisible();
 
+  // 组织只读成员不需要商品权限：IAM 可独立访问，管理写操作仍被拒绝。
+  await signOut(page);
+  await signIn(page, OWNER, PASSWORD);
+  const updated = await request(`identity/members/${member.id}`, 'PUT', {
+    status: 'ACTIVE',
+    departmentId: null,
+    assignments: [{ roleId: adminRole.id, scopeMode: 'ALL' }],
+  });
+  expect(updated.status).toBe(200);
+  await signOut(page);
+  await signIn(page, memberName, memberPassword);
+  await page.goto('/org/members');
+  await expect(page.getByText(memberName, { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: '新增', exact: true })).toHaveCount(0);
+  expect((await request('catalog/products')).status).toBe(403);
+  await page.goto('/products');
+  await expect(page.getByText('当前角色没有商品查看权限，请联系租户管理员。')).toBeVisible();
+
   // 回收：子租户按设计无删除入口，其余按依赖顺序删除。
   await signOut(page);
   await signIn(page, OWNER, PASSWORD);
-  await page.goto('/products/members');
+  await page.goto('/org/members');
   page.once('dialog', (dialog) => void dialog.accept());
   await page
     .getByRole('listitem')
@@ -144,7 +166,7 @@ test('租户管理：部门、角色、成员、子租户的真实授权闭环',
     .getByRole('button', { name: '移除' })
     .click();
   await expect(page.getByText(memberName, { exact: true })).toHaveCount(0);
-  await page.goto('/products/roles');
+  await page.goto('/org/roles');
   for (const name of [roleName, adminRoleName]) {
     page.once('dialog', (dialog) => void dialog.accept());
     await page
@@ -154,7 +176,7 @@ test('租户管理：部门、角色、成员、子租户的真实授权闭环',
       .click();
     await expect(page.getByText(name, { exact: true })).toHaveCount(0);
   }
-  await page.goto('/products/departments');
+  await page.goto('/org/departments');
   page.once('dialog', (dialog) => void dialog.accept());
   await page
     .getByRole('listitem')

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/authenticated';
 
 test('content scroll and overscroll leave the logo, navigation and tabs fixed', async ({
   page,

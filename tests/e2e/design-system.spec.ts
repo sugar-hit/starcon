@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/authenticated';
 
 test('view form validates, cancels and submits without a backend mutation', async ({ page }) => {
   await page.goto('/styleguide');

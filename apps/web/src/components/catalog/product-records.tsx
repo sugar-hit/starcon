@@ -9,7 +9,7 @@ import type {
   RecordInput,
 } from '../../../../../packages/api-contracts/src/catalog';
 import { api } from './api';
-import { canAccessRecord } from './administration-model';
+import { canAccessRecord } from '../iam/administration-model';
 import { control, Editor, Field, statuses } from './fields';
 
 const copy = {

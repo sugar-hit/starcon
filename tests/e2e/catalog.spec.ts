@@ -16,6 +16,8 @@ test('商品中心：SPU、公共属性、SKU 覆写、真实持久化与移动�
   const name = `集成验证手机 ${suffix}`;
   const created: string[] = [];
   await page.goto('/products');
+  await expect(page).toHaveURL(/\/login\?/);
+  await page.getByLabel('账号', { exact: true }).fill('local-admin');
   await page.getByLabel('密码', { exact: true }).fill(env.LOCAL_ADMIN_PASSWORD!);
   await page.getByRole('button', { name: '登录', exact: true }).click();
   await expect(page.getByRole('button', { name: '新建 SPU' })).toBeVisible();
