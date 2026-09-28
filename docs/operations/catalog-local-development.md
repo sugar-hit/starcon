@@ -1,6 +1,6 @@
 # 商品中心：本地启动、SQL 迁移与功能范围
 
-更新：2026-09-28。本轮角色/子租户/数据范围代码与 V3 迁移已写入，尚未在当前受限环境完成 PostgreSQL 集成验收；不能将以下接口说明视为已部署结果。Java 21 + Spring Boot 3.5.6 + Maven 3.9.9；PostgreSQL 16；jOOQ 3.19.26；Flyway 11.7.2。版本由 backend/pom.xml 及 Spring Boot BOM 固定。
+更新：2026-09-28。角色、子租户与数据范围的 V3 迁移已部署，并完成 Java21、真实 PostgreSQL 与浏览器验收。Java 21 + Spring Boot 3.5.6 + Maven 3.9.9；PostgreSQL 16；jOOQ 3.19.26；Flyway 11.7.2。版本由 backend/pom.xml 及 Spring Boot BOM 固定。
 
 ## 已运行的服务
 
@@ -53,7 +53,7 @@ pnpm db:generate         # 从已迁移 catalog 数据库生成 jOOQ 到 target/
 pnpm contracts:generate # 从两个 Java 服务的 OpenAPI 生成 TS DTO 和 spec 快照
 ```
 
-重复迁移验证已通过，已有版本保持不变。后续改表新增 `V3__*.sql` 等版本，**不修改已成功应用的 V1/V2，不使用 clean、删卷或 repair 掩盖校验失败**。某一服务迁移成功不代表另一服务成功；脚本失败即停止，应读具体服务日志后修复。跨库变更按向后兼容顺序发布，不承诺两个库一个事务回滚。
+重复迁移验证已通过，已有版本保持不变。后续改表新增 `V4__*.sql` 等版本，**不修改已成功应用的 V1/V2/V3，不使用 clean、删卷或 repair 掩盖校验失败**。某一服务迁移成功不代表另一服务成功；脚本失败即停止，应读具体服务日志后修复。跨库变更按向后兼容顺序发布，不承诺两个库一个事务回滚。
 
 jOOQ 生成目标是数据库真实结构；目前业务查询使用显式绑定参数的 jOOQ SQL，可审阅且受 RLS 保护。生成物不手改、不提交。前端通过后端 DTO 生成的 `packages/api-contracts/src/catalog.ts` 使用契约，接口变化后重新生成。
 
@@ -110,7 +110,7 @@ pnpm exec playwright test tests/e2e/catalog.spec.ts
 
 ### V3 验证状态与契约导出
 
-当前会话中 `pnpm typecheck && pnpm lint && pnpm test` 通过（36 项 Vitest）；Java 主源码在宿主 JDK25 上以 `javac --release 21 -parameters` 编译通过，这**不是** Java21 Maven 集成验收。`./mvnw verify` 被 Maven wrapper 缓存目录写权限阻挡，Docker 测试脚本被 Docker socket 权限拒绝，离线 Maven 缓存也缺少 3.5.6 父 POM 和 Testcontainers。`pnpm build` 因 Google Fonts 域名无法解析失败。新增数据库测试尚未执行，V3 尚未应用到本地持久库。
+Java21 Docker 工具链下 19 项后端集成与契约测试、Spotless 检查通过；两库 V1/V2/V3 迁移成功。前端 typecheck、lint、36 项单元测试及生产构建通过。角色/成员/部门/子租户真实浏览器流程及受限成员、父子租户隔离验证通过。详细证据见 [租户权限验收记录](../sessions/2026-09/2026-09-28-tenant-roles-data-scopes.md)。
 
 契约仍由后端 SpringDoc OpenAPI 生成。新增 `OpenApiContractTest` 使用 MockMvc 导出真实控制器/DTO 的文档，不需连接数据库或启动监听 socket；在依赖可用的环境可以单独生成：
 
@@ -121,6 +121,4 @@ cd ..
 python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi
 ```
 
-本轮通过当前 Java 源码编译结果及已有应用依赖，在临时目录启动 SpringDoc + MockMvc 导出文档，再运行上述生成脚本的 `--spec-dir` 路径，生成 30 个 DTO 和两个快照；未手改契约。正常服务启动后 `pnpm contracts:generate` 保持原用法。
-
-V3 交付验收仍需在可访问 Java21、Maven 依赖与 Docker 的环境执行完整 `./mvnw verify`，执行两库迁移、真实浏览器联调及生产构建。未通过前不应合入或宣称完整可用。
+生成脚本支持从测试导出的文档生成 30 个 DTO 和两个快照；已验证重新生成无差异，未手改契约。正常服务启动后 `pnpm contracts:generate` 保持原用法。

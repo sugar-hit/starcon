@@ -17,6 +17,13 @@ test('content scroll and overscroll leave the logo, navigation and tabs fixed', 
     tabs.boundingBox(),
   ]);
   const main = page.locator('main');
+  // Shell scrolling must not depend on the current route's record count or login state.
+  await main.evaluate((el) => {
+    const spacer = document.createElement('div');
+    spacer.style.height = '1600px';
+    spacer.setAttribute('aria-hidden', 'true');
+    el.firstElementChild!.appendChild(spacer);
+  });
   await main.hover();
   await page.mouse.wheel(0, 700);
   await expect.poll(() => main.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
