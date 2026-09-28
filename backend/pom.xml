@@ -13,14 +13,32 @@
   <properties>
     <java.version>21</java.version>
     <maven.compiler.release>21</maven.compiler.release>
+    <!--
+      Testcontainers 1.21.3 embeds docker-java, which negotiates Docker API 1.32 by default.
+      Docker Desktop 4.90 reports MinAPIVersion=1.40 and answers anything older with HTTP 400,
+      so Testcontainers fails with "Could not find a valid Docker environment" even though the
+      daemon is healthy. Pinning a supported API version (engines clamp to their own minimum)
+      keeps `./mvnw verify` working on both old and current Docker engines.
+    -->
+    <docker.api.version>1.44</docker.api.version>
   </properties>
   <modules>
     <module>libraries/tenancy</module>
     <module>services/identity</module>
     <module>services/catalog</module>
+    
   </modules>
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <api.version>${docker.api.version}</api.version>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
