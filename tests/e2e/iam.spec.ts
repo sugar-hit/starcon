@@ -83,11 +83,12 @@ test('切换租户清空编辑状态并同步其他标签页，多租户登录�
     await other.goto('/org');
     await expect(other.getByRole('button', { name: '账户与租户' })).toBeVisible();
     await other.getByRole('button', { name: '账户与租户' }).click();
-    other.once('dialog', (dialog) => void dialog.accept());
-    await other.getByLabel('切换租户').selectOption({ label: name });
+    await other.getByLabel('切换租户').click();
+    await other.getByRole('option', { name, exact: true }).click();
+    await other.getByRole('button', { name: '确认切换', exact: true }).click();
     await expect(other).toHaveURL('/');
-    await expect(page.getByRole('button', { name: '账户与租户' })).toHaveText(name);
-    await expect(other.getByRole('button', { name: '账户与租户' })).toHaveText(name);
+    await expect(page.getByRole('button', { name: '账户与租户' })).toContainText(name);
+    await expect(other.getByRole('button', { name: '账户与租户' })).toContainText(name);
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await page.getByRole('button', { name: '账户与租户' }).click();
     await page.getByRole('button', { name: '退出', exact: true }).click();
@@ -95,10 +96,12 @@ test('切换租户清空编辑状态并同步其他标签页，多租户登录�
     await page.getByLabel('账号', { exact: true }).fill('local-admin');
     await page.getByLabel('密码', { exact: true }).fill(password);
     await page.getByRole('button', { name: '登录', exact: true }).click();
-    await expect(page.getByLabel('选择租户')).toBeVisible();
-    await page.getByLabel('选择租户').selectOption(initial.membershipId);
+    await expect(page.getByRole('radio', { name: initial.tenantName })).toBeVisible();
+    await page.getByRole('radio', { name: initial.tenantName }).click();
     await page.getByRole('button', { name: '进入工作空间' }).click();
-    await expect(page.getByRole('button', { name: '账户与租户' })).toHaveText(initial.tenantName);
+    await expect(page.getByRole('button', { name: '账户与租户' })).toContainText(
+      initial.tenantName,
+    );
   } finally {
     await post('auth/login', {
       username: 'local-admin',

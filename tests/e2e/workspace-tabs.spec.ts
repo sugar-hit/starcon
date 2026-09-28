@@ -34,6 +34,30 @@ test.describe('应用内 tab 栏', () => {
     await expect(page.getByRole('tab', { name: /全部订单/ })).toBeVisible();
   });
 
+  test('页面导航提交时新 tab 与新页面一起出现', async ({ page }) => {
+    await page.goto('/orders');
+    await page.route('**/products?*', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await route.continue();
+    });
+    const navigation = page
+      .getByRole('navigation', { name: '系统导航' })
+      .getByRole('link', { name: '开发', exact: true })
+      .click();
+    await expect(page.getByRole('tab', { name: /商品档案/ })).toHaveCount(0);
+    await expect(page.getByRole('tab', { name: /全部订单/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await navigation;
+    await expect(page).toHaveURL('/products');
+    await expect(page.getByRole('tab', { name: /商品档案/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await expect(page.getByRole('heading', { name: '商品档案' }).first()).toBeVisible();
+  });
+
   test('关闭 tab 后只剩其他 tab', async ({ page }) => {
     await page.goto('/orders');
     await page

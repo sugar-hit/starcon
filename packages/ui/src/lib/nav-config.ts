@@ -14,7 +14,6 @@ import {
   TrendingUp,
   BarChart3,
   Users,
-  Shield,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -23,7 +22,7 @@ import type { LucideIcon } from 'lucide-react';
  *
  * 4 个系统（按团队职能划分，用户 2026-09-25 最终确认）:
  *   开发     — 商品 / 刊登 / 定价 / 采购 / 供应
- *   运营     — 订单 / 售后 / CRM 客服 / 数据 / 财务 / 利润 / 组织权限
+ *   运营     — 订单 / 售后 / CRM 客服 / 数据 / 财务 / 利润
  *   物流     — 物流中心
  *   仓储     — 仓储中心 / 库存中心
  *
@@ -80,11 +79,11 @@ const devSystem: SystemDef = {
   ],
 };
 
-/** 运营 — 订单 / 客户 / 售后 / 数据 / 财务 / 利润 / 组织（7 个） */
+/** 运营 — 订单 / 客户 / 售后 / 数据 / 财务 / 利润（6 个） */
 const opsSystem: SystemDef = {
   id: 'ops',
   label: '运营',
-  description: '订单 / 客户 / 售后 / 数据 / 财务 / 利润 / 组织',
+  description: '订单 / 客户 / 售后 / 数据 / 财务 / 利润',
   defaultHref: '/orders',
   items: [
     { label: '订单中心', href: '/orders', icon: Package, description: '多平台订单聚合' },
@@ -98,7 +97,6 @@ const opsSystem: SystemDef = {
     { label: '数据中心', href: '/analytics', icon: BarChart3, description: '数据看板与报表' },
     { label: '财务中心', href: '/finance', icon: CircleDollarSign, description: '对账与结算' },
     { label: '利润中心', href: '/profit', icon: TrendingUp, description: '毛利与分润' },
-    { label: '组织 / 权限', href: '/org', icon: Shield, description: '员工与角色权限' },
   ],
 };
 
@@ -138,6 +136,16 @@ export const NAV_DESTINATIONS: NavItem[] = SYSTEMS.flatMap((system) =>
     (item.children ?? []).map((child) => ({ ...child, icon: item.icon })),
   ),
 );
+
+/** Global account/tenant pages: addressable by workspace tabs, never rendered in business menus. */
+export const ACCOUNT_DESTINATIONS = [
+  { label: '个人资料', href: '/account' },
+  { label: '组织与权限', href: '/org' },
+  { label: '用户与成员', href: '/org/members' },
+  { label: '角色配置', href: '/org/roles' },
+  { label: '部门管理', href: '/org/departments' },
+  { label: '子租户管理', href: '/org/children' },
+] as const;
 
 /** 顶层固定项 — 侧栏顶部，不属于任何系统 */
 export const TOP_LEVEL_ITEMS: NavItem[] = [

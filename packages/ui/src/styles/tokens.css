@@ -151,6 +151,15 @@
   }
 }
 
+@keyframes tab-route-progress {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(410%);
+  }
+}
+
 @layer utilities {
   .scrollbar-thin::-webkit-scrollbar {
     width: 4px;
