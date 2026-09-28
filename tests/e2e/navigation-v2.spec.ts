@@ -1,7 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { SYSTEMS } from '../../packages/ui/src/lib/nav-config';
 
-test('all 55 task destinations render and parent buttons never navigate', async ({ page }) => {
+const destinations = SYSTEMS.flatMap((system) =>
+  system.items.flatMap((item) => item.children ?? []),
+);
+
+test(`all ${destinations.length} task destinations render and parent buttons never navigate`, async ({
+  page,
+}) => {
   test.setTimeout(120000);
   await page.goto('/');
   for (const system of SYSTEMS) {
@@ -31,14 +37,14 @@ test('all 55 task destinations render and parent buttons never navigate', async 
       }
     }
   }
-  await expect(page.getByRole('tab')).toHaveCount(56);
+  await expect(page.getByRole('tab')).toHaveCount(destinations.length + 1);
   await expect(page.getByRole('tab', { name: '工作台', exact: true })).toBeInViewport();
   await page.getByRole('tab', { name: '工作台', exact: true }).click();
   await expect(page).toHaveURL('/');
   await page.getByRole('button', { name: '跳到最右 Tab' }).click();
   await expect(page).toHaveURL('/inventory/aging');
   await page.reload();
-  await expect(page.getByRole('tab')).toHaveCount(56);
+  await expect(page.getByRole('tab')).toHaveCount(destinations.length + 1);
   await expect(page.getByRole('tab', { selected: true })).toHaveText('库龄与预警');
 });
 

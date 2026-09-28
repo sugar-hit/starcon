@@ -54,16 +54,36 @@ const products: DomainSpec = {
   purpose: '管理 SKU 与变型,为下游刊登/库存/采购提供主数据',
   upstream: [],
   downstream: ['刊登中心', '定价中心', '采购中心', '订单中心', '库存中心', '仓储中心'],
-  pageStatus: 'scaffold',
+  pageStatus: 'partial',
   features: [
-    { name: 'SKU 主数据', description: 'SPU / 变型 / 单位 / 条码,统一商品主索引', status: PLANNED },
-    { name: '商品分类与标签', description: '多级类目树 + 业务标签(季节/活动/合规)', status: PLANNED },
-    { name: '商品图片与多媒体', description: '主图 / 详情图 / 视频 / 3D 模型集中管理', status: PLANNED },
+    {
+      name: 'SPU / SKU 与自定义属性',
+      description: '真实存储 / 规格组合 / 公共属性继承与覆写 / 单位与条码',
+      status: SHIPPED,
+    },
+    {
+      name: '商品分类与标签',
+      description: '多级类目树 + 业务标签(季节/活动/合规)',
+      status: PLANNED,
+    },
+    {
+      name: '商品图片与多媒体',
+      description: '主图 / 详情图 / 视频 / 3D 模型集中管理',
+      status: PLANNED,
+    },
     { name: '多语言商品资料', description: '中/英/日/德/西等多语言资料与本地化', status: PLANNED },
     { name: '包装与尺寸', description: '长宽重 / 材积 / HS Code / 危险品标识', status: PLANNED },
     { name: '成本结构', description: '采购 / 头程 / 关税 / 包材等全链路成本分摊', status: PLANNED },
-    { name: '商品生命周期', description: '草稿 / 在售 / 停售 / 归档 状态机', status: PLANNED },
-    { name: '合规与品牌资质', description: '商标 / 认证 / 平台品牌备案信息', status: PLANNED },
+    {
+      name: '商品生命周期',
+      description: '草稿 / 启用 / 停用 / 归档，启用时校验必填属性',
+      status: SHIPPED,
+    },
+    {
+      name: '合规与品牌资质',
+      description: '已支持资质记录、链接、国家与有效期；自动审核和通知待接入',
+      status: 'in-progress',
+    },
   ],
 };
 
@@ -75,12 +95,24 @@ const listings: DomainSpec = {
   downstream: ['订单中心', '库存中心', '数据中心'],
   pageStatus: 'scaffold',
   features: [
-    { name: '多平台 Listing 同步', description: 'Amazon / Shopify / eBay / TikTok Shop / Lazada 等', status: PLANNED },
-    { name: 'Listing 内容编辑器', description: '标题 / 五点描述 / A+ / 视频 / 主图', status: PLANNED },
+    {
+      name: '多平台 Listing 同步',
+      description: 'Amazon / Shopify / eBay / TikTok Shop / Lazada 等',
+      status: PLANNED,
+    },
+    {
+      name: 'Listing 内容编辑器',
+      description: '标题 / 五点描述 / A+ / 视频 / 主图',
+      status: PLANNED,
+    },
     { name: '多语言翻译与本地化', description: '机器翻译 + 人工审校工作流', status: PLANNED },
     { name: '关键词与 SEO 优化', description: '平台搜索词分析与关键词埋词建议', status: PLANNED },
     { name: '批量刊登与定时上架', description: '批量模板 / 定时发布 / 大促日历', status: PLANNED },
-    { name: 'Listing 健康监控', description: '被跟卖 / 合规风险 / 类目审核 / 评分告警', status: PLANNED },
+    {
+      name: 'Listing 健康监控',
+      description: '被跟卖 / 合规风险 / 类目审核 / 评分告警',
+      status: PLANNED,
+    },
     { name: '评论与评分聚合', description: '多平台评论聚合、负面评论告警', status: PLANNED },
     { name: '变型与捆绑销售', description: 'Variant / Bundle / 多件装刊登', status: PLANNED },
   ],
@@ -94,13 +126,21 @@ const pricing: DomainSpec = {
   downstream: ['刊登中心', '订单中心', '利润中心'],
   pageStatus: 'scaffold',
   features: [
-    { name: '多币种基础价', description: 'CNY / USD / EUR / GBP / JPY 等基础价格体系', status: PLANNED },
+    {
+      name: '多币种基础价',
+      description: 'CNY / USD / EUR / GBP / JPY 等基础价格体系',
+      status: PLANNED,
+    },
     { name: '汇率源与刷新策略', description: '实时 / T+1 / 锁定等多种汇率策略', status: PLANNED },
     { name: '定价策略', description: '固定 / 动态 / 竞品跟随 / 阶梯 / 促销价', status: PLANNED },
     { name: '价格调整审批流', description: '跨权限的价格变更审批与审计', status: PLANNED },
     { name: '价格历史与回溯', description: '价格变更记录、回溯价格用于退款计算', status: PLANNED },
     { name: '平台费率模型', description: '佣金 / FBA 费 / MFN 费 / 广告费率配置', status: PLANNED },
-    { name: '促销与折扣引擎', description: '满减 / 折扣码 / 限时优惠 / 平台 Promotion', status: PLANNED },
+    {
+      name: '促销与折扣引擎',
+      description: '满减 / 折扣码 / 限时优惠 / 平台 Promotion',
+      status: PLANNED,
+    },
   ],
 };
 
@@ -112,7 +152,11 @@ const purchase: DomainSpec = {
   downstream: ['仓储中心', '财务中心'],
   pageStatus: 'scaffold',
   features: [
-    { name: '采购需求生成', description: '基于销量预测 + 安全库存 + FBA 备货周期', status: PLANNED },
+    {
+      name: '采购需求生成',
+      description: '基于销量预测 + 安全库存 + FBA 备货周期',
+      status: PLANNED,
+    },
     { name: '采购单管理', description: '创建 / 审批 / 跟踪 / 入库 全流程', status: PLANNED },
     { name: '1688 / 档口直连', description: '一键下单 / 代采工作流 / 议价记录', status: PLANNED },
     { name: '到货质检', description: '抽检 / 全检 / 不良品退货流程', status: PLANNED },
@@ -152,10 +196,18 @@ const orders: DomainSpec = {
   downstream: ['物流中心', '仓储中心', '售后中心', '财务中心', '利润中心'],
   pageStatus: 'scaffold',
   features: [
-    { name: '多平台订单聚合', description: 'Amazon / Shopify / eBay / TikTok Shop / Lazada 等', status: PLANNED },
+    {
+      name: '多平台订单聚合',
+      description: 'Amazon / Shopify / eBay / TikTok Shop / Lazada 等',
+      status: PLANNED,
+    },
     { name: '智能审单', description: '黑名单 / 高风险 / 地址校验 / 关税校验', status: PLANNED },
     { name: '订单拆分与合并', description: '多仓拆分 / 跨店合并 / 拆单策略', status: PLANNED },
-    { name: '订单状态机', description: '待付款 / 待发货 / 已发货 / 已完成 / 退款', status: PLANNED },
+    {
+      name: '订单状态机',
+      description: '待付款 / 待发货 / 已发货 / 已完成 / 退款',
+      status: PLANNED,
+    },
     { name: '拣货与配货', description: '拣货单生成 / 配货指令 / 批量打单', status: PLANNED },
     { name: '缺货订单处理', description: '缺货告警 / 自动退款 / 替代品推荐', status: PLANNED },
     { name: '异常订单告警', description: '地址异常 / 重复订单 / 风控订单', status: PLANNED },
@@ -226,12 +278,24 @@ const finance: DomainSpec = {
   downstream: ['利润中心', '数据中心'],
   pageStatus: 'scaffold',
   features: [
-    { name: '平台结算单抓取', description: 'Amazon Payout / Shopify Payments / eBay Payout', status: PLANNED },
-    { name: '支付网关对账', description: 'PayPal / Stripe / PingPong / 连连 / 空中云汇', status: PLANNED },
+    {
+      name: '平台结算单抓取',
+      description: 'Amazon Payout / Shopify Payments / eBay Payout',
+      status: PLANNED,
+    },
+    {
+      name: '支付网关对账',
+      description: 'PayPal / Stripe / PingPong / 连连 / 空中云汇',
+      status: PLANNED,
+    },
     { name: '应收应付管理', description: 'AR / AP / 账期 / 票据管理', status: PLANNED },
     { name: '多币种核算', description: '汇率锁定 / 浮动 / 重估', status: PLANNED },
     { name: '头程成本分摊', description: '海运 / 空运 / 快件 按 SKU 分摊', status: PLANNED },
-    { name: 'VAT / IOSS / EPR 申报', description: '欧盟 IOSS / EPR / 日本 JCT 申报数据', status: PLANNED },
+    {
+      name: 'VAT / IOSS / EPR 申报',
+      description: '欧盟 IOSS / EPR / 日本 JCT 申报数据',
+      status: PLANNED,
+    },
     { name: '发票管理', description: '进项发票 / 销项发票 / 电子发票', status: PLANNED },
     { name: '银行流水与对账', description: '银行 API / 流水导入 / 自动对账', status: PLANNED },
   ],
@@ -247,7 +311,11 @@ const profit: DomainSpec = {
   features: [
     { name: 'SKU 维度毛利', description: '收入 - 成本 - 费用 = 毛利', status: PLANNED },
     { name: '订单维度净利', description: '订单级净利计算与回溯', status: PLANNED },
-    { name: '广告费归集', description: 'Amazon SP / TikTok Ads / 独立站 Marketing', status: PLANNED },
+    {
+      name: '广告费归集',
+      description: 'Amazon SP / TikTok Ads / 独立站 Marketing',
+      status: PLANNED,
+    },
     { name: '退款与售后成本归集', description: '退款 / 退货 / 索赔成本分摊', status: PLANNED },
     { name: '分润与提成', description: '团队 / 供应商 / 合伙人分润规则', status: PLANNED },
     { name: '利润报表', description: '日 / 周 / 月 / 自定义周期', status: PLANNED },
@@ -285,8 +353,16 @@ const logistics: DomainSpec = {
   downstream: ['售后中心', '财务中心'],
   pageStatus: 'scaffold',
   features: [
-    { name: '物流商对接', description: 'DHL / FedEx / 顺丰 / 燕文 / 4PX / 云途 / UPS', status: PLANNED },
-    { name: '智能路由推荐', description: '基于目的地 / 重量 / 时效 / 成本四维算法', status: PLANNED },
+    {
+      name: '物流商对接',
+      description: 'DHL / FedEx / 顺丰 / 燕文 / 4PX / 云途 / UPS',
+      status: PLANNED,
+    },
+    {
+      name: '智能路由推荐',
+      description: '基于目的地 / 重量 / 时效 / 成本四维算法',
+      status: PLANNED,
+    },
     { name: '面单批量打印', description: 'FNSKU / GS1 / 国际面单模板', status: PLANNED },
     { name: '物流轨迹跟踪', description: '实时轨迹 + 异常件告警', status: PLANNED },
     { name: '异常件处理', description: '丢件 / 延误 / 签收异常 工作流', status: PLANNED },
@@ -364,7 +440,11 @@ const copilot: DomainSpec = {
   downstream: [],
   pageStatus: 'scaffold',
   features: [
-    { name: '对话式查询', description: '自然语言查询业务数据(SKU 销量 / 平台毛利)', status: PLANNED },
+    {
+      name: '对话式查询',
+      description: '自然语言查询业务数据(SKU 销量 / 平台毛利)',
+      status: PLANNED,
+    },
     { name: '自动化工作流', description: '条件触发的 Agent / 定时任务', status: PLANNED },
     { name: 'AI 选品 / 调价建议', description: '基于历史数据的选品 / 调价建议', status: PLANNED },
     { name: '智能客服辅助', description: '站内信草稿 / 退款话术', status: PLANNED },

@@ -1,6 +1,4 @@
-import { DomainPlaceholder, getDomainSpec } from '@starcon/ui';
-
+import { CatalogWorkspace } from '@/components/catalog/catalog-workspace';
 export default function ProductsPage() {
-  const spec = getDomainSpec('products');
-  return <>{spec && <DomainPlaceholder spec={spec} />}</>;
+  return <CatalogWorkspace />;
 }
