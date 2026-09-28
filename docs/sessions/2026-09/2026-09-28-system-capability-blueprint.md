@@ -119,3 +119,76 @@ README §4.1 给出端到端闭环主线图，并写明：**任何功能设计�
 - 总账/多账簿（B2B）未细化到"各国法定科目差异"层面
 - 达人/社媒内容生产（视频制作、素材管理）仍偏薄，只有 14.5 达人建联
 - 未覆盖线下零售/POS 场景（若客户有实体店）
+
+
+---
+
+## 第三轮：物理数据结构设计（PG 16）— 同日
+
+用户要求：复检后直接开始 schema 设计，先 PG 后缓存，输出完整数据结构设计。
+
+### 复检：蓝图无问题，但"已实施迁移 vs 蓝图"有 6 个真实缺陷
+
+蓝图本身复检通过（树/详情一致、四项字段完整、编号无重复、编码无损）。
+把蓝图与**已实施的 identity/catalog 迁移**对照后发现 6 个差距（README §0 完整记录）：
+
+| # | 缺陷 | 证据 |
+|---|---|---|
+| D1 | `product_compliance` / `product_asset` 是 `LIKE product_research INCLUDING ALL` 的**同构复制** | catalog V1:77-80 |
+| D2 | 缺 `inbox_message` | 全仓 grep 0 命中 |
+| D3 | 缺 `idempotency_request` | 全仓 grep 0 命中 |
+| D4 | `spu.brand` / `spu.category` 是自由文本 varchar | catalog V1:3 |
+| D5 | `department` 平表无层级 | identity V3:1-3 |
+| D6 | `role_assignment.scope_mode` 只按 owner/department 过滤，无法表达"法人+仓库"四维范围 | catalog V3 `catalog_scope()` |
+
+**最严重的是 D1**：三张表列结构完全相同，合规表装不了 HS 编码与认证，素材表装不了文件键——蓝图 3.4/3.7 的需求物理上落不了库。
+
+### 产出：db/schemas/v3/
+
+- `README.md` — 物理设计规约（12 条，全服务适用）+ 全量表清单（约 150 张表 / 6 个服务库）+ 6 项缺陷 + 落地顺序 V4–V9
+- `01-technical-core.sql` — 跨服务技术表模板：inbox / outbox / idempotency / audit / reference_projection / job_run
+- `02-warehouse-inventory.sql` — warehouse 全部 29 张表（货主、仓库库位、批次序列号、库存桶、流水、预占、调拨、盘点、收货出库、包裹、组装、外部仓观测、分摊）
+- `03-cache-design.md` — 缓存设计
+- `99-constraint-smoke.sql` — 约束冒烟测试
+
+### 关键设计决策
+
+**1. 规约从已实施迁移提炼，不推翻**
+沿用 `id uuid` / `UNIQUE(tenant_id,id)` / 复合外键 / `version` 乐观锁 / `text+CHECK` 状态 / RLS 三件套。**不用 PG enum**（加值要 ALTER TYPE，迁移回滚都麻烦）。
+
+**2. 把蓝图铁律下沉为 DB 约束（关键价值）**
+
+| 蓝图约束 | 物理实现 |
+|---|---|
+| `available = on_hand - reserved` | **生成列**，应用无法写出不一致的值 |
+| 禁负库存 | CHECK |
+| 不可售质量状态禁止预留 | 触发器 |
+| 预占终态不可复活 | 触发器 |
+| 流水 append-only | REVOKE + 触发器 |
+| 内部转移 bucket 净额为零 | **延迟约束触发器**（提交时校验） |
+| 预占防超卖 | `reserve_stock()` 原子条件更新，**不用 Redis 锁** |
+| 货主（07.7） | `stock_bucket.stock_owner_id`，不与 tenant_id 混用 |
+
+**3. 缓存的核心结论**
+- 可缓存：平台目录、只读主数据、报表投影、限流计数
+- **禁缓存**：可用量、预占、余额、幂等键、inbox 去重、凭证、汇率
+- **库存变更不用 Redis 锁**，靠 DB 条件更新（锁在故障切换时会失效，数据更新不会）
+- key **必须带 tenant_id**——RLS 只保护 DB，缓存不会自动隔离租户
+- 权限判定可缓存但 ≤30s + 写操作实时校验
+
+### 实测踩到的两个坑（写进 README）
+
+1. **RLS 必须用运行账号测**：`starcon_migrator` 是超级用户，超级用户绕过 RLS（即使 FORCE），用它测会**假阳性通过**。改用 `SET ROLE warehouse_test`（NOSUPERUSER NOBYPASSRLS）后才真正验证。
+2. **复合外键要求被引用表有 `UNIQUE(tenant_id, id)`**，本轮补了 6 张表才全部加载成功。
+3. `DELETE` 触发器的 WHEN 不能引用 `NEW`，UPDATE/DELETE 权限必须拆两个触发器。
+
+### 验证结果
+
+在真实 PG 16.14 上：35 表 / 92 CHECK / 41 复合外键 / 120 索引 / 14 触发器 / 35 表启用 RLS，冒烟 **10 项全过**。
+
+### 边界（明确未做）
+
+- trade / channel / finance 三个服务的 DDL 未写（只给了表清单与列要点），按 V4–V9 顺序推进
+- 分区策略等真实数据量再定
+- Java 实体与 jOOQ 生成配置不在本文
+- `deploy/docker/catalog-init/01-databases.sh` 需新增 warehouse_app 等角色（未改，属实现任务）
