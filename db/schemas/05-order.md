@@ -1,3 +1,5 @@
+> **历史设计稿，已由 [V2 微服务数据模型](v2/README.md) 取代。** 下文跨域外键、事务与服务划分不可直接用于新迁移。
+
 # 05 · 订单与履约
 
 owner 域：`order`（订单）/ `fulfillment`（出库）/ `shipment`（包裹与运单）。首批接 Shopify（见 [ADR-0003](../../docs/decisions/0003-backend-runtime-kotlin-spring-boot.md)）。

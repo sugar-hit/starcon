@@ -20,13 +20,15 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yaml,yml}\"",
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean && rm -rf node_modules",
-    "db:migrate": "pnpm --filter @starcon/database migrate",
-    "db:generate": "pnpm --filter @starcon/database generate",
-    "db:studio": "pnpm --filter @starcon/database studio",
+    "db:migrate": "./deploy/scripts/catalog-db-sync.sh",
+    "db:generate": "./deploy/scripts/catalog-db-generate.sh",
     "cli": "pnpm --filter @starcon/cli start",
     "release": "changeset publish",
     "prepare": "husky install || true",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run",
+    "dev:backend": "./deploy/scripts/catalog-dev.sh",
+    "test:backend": "./deploy/scripts/backend-test.sh",
+    "contracts:generate": "python3 tools/codegen/catalog-contracts.py"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",

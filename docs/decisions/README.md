@@ -25,14 +25,16 @@
 
 | 编号 | 标题 | 状态 |
 |---|---|---|
-| [0001](0001-monorepo-and-modular-monolith.md) | Monorepo + Modular Monolith 起步 | Accepted（部分措辞由 0003 修正） |
+| [0001](0001-monorepo-and-modular-monolith.md) | Monorepo + Modular Monolith 起步 | 单体决策被 0004 取代；保留 Monorepo |
 | [0002](0002-multi-tenancy-strategy.md) | 多租户：Shared Schema + RLS | Accepted |
-| [0003](0003-backend-runtime-kotlin-spring-boot.md) | 后端运行时 Kotlin + Spring Boot 3 | Accepted |
-| _(后续编号陆续补)_ | | |
+| [0003](0003-backend-runtime-kotlin-spring-boot.md) | 后端运行时 Kotlin + Spring Boot 3 | 被 0004 取代 |
+| [0004](0004-java-spring-boot-microservices.md) | Java + Spring Boot 微服务 | Accepted |
+
+| [0005](0005-tenant-hierarchy-and-page-rbac.md) | 子租户层级与页面操作权限 | Proposed（需求明确，默认策略待评审） |
 
 ## Pending（待决策）
 
-- 数据访问层已在 [0003](0003-backend-runtime-kotlin-spring-boot.md) 锁定为 jOOQ + Flyway；若要换 ORM 需新开 ADR supersede 0003
+- 数据访问层在 [0004](0004-java-spring-boot-microservices.md) 保留 jOOQ + Flyway；当前后端语言为 Java
 - 消息队列 (Kafka / RabbitMQ / NATS JetStream) — 第一期用 PostgreSQL outbox，不阻塞主线
 - 前端状态管理 (TanStack Query + Zustand vs Redux Toolkit)
 - 可观测性后端 (Prometheus + Grafana + Tempo + Loki vs Datadog vs 自托管 ELK) — 采集端已在 0003 定为 Micrometer + OpenTelemetry

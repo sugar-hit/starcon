@@ -88,3 +88,6 @@ data/
 work/
 playwright-report/
 test-results/
+
+# Java/Maven generated output
+backend/**/target/
