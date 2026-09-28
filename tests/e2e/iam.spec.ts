@@ -46,7 +46,7 @@ for (const width of [320, 768, 1440])
     await page.getByRole('button', { name: '登录', exact: true }).click();
     await expect(page.getByRole('button', { name: '账户与租户' })).toBeVisible();
     await page.goto('/org');
-    await expect(page.getByRole('navigation', { name: '组织管理功能' })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: '组织管理功能' })).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );

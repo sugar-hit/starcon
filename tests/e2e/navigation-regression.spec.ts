@@ -1,5 +1,15 @@
 import { test, expect } from './support/authenticated';
 
+test('侧栏二级任务不在页面正文重复为 tab 或快捷导航', async ({ page }) => {
+  await page.goto('/products');
+  await expect(page.getByRole('navigation', { name: '商品中心功能' })).toHaveCount(0);
+  await expect(page.getByRole('main').getByRole('link', { name: '选品与开发' })).toHaveCount(0);
+  await page.goto('/org');
+  await expect(page.getByRole('navigation', { name: '组织管理功能' })).toHaveCount(0);
+  await page.goto('/orders/review');
+  await expect(page.getByRole('heading', { name: '相关任务' })).toHaveCount(0);
+});
+
 async function openProductTasks(page: import('@playwright/test').Page) {
   await page.goto('/products');
   await expect(page.getByRole('tab', { selected: true })).toHaveText('商品档案');
@@ -27,11 +37,11 @@ for (const action of ['关闭当前', '关闭其他', '关闭左侧', '关闭右
     }
   });
 }
-test('edge jumps, keyboard menu and logo preserve the workspace', async ({ page }) => {
+test('group switcher, keyboard menu and logo preserve the workspace', async ({ page }) => {
   await openProductTasks(page);
-  await page.getByRole('button', { name: '跳到最左 Tab' }).click();
-  await expect(page).toHaveURL('/');
-  await page.getByRole('button', { name: '跳到最右 Tab' }).click();
+  await page.getByRole('button', { name: '当前分组的上一个 Tab' }).click();
+  await expect(page).toHaveURL('/products/research');
+  await page.getByRole('button', { name: '当前分组的下一个 Tab' }).click();
   await expect(page).toHaveURL('/products/compliance');
   await page.getByRole('tab', { name: '合规与资质', exact: true }).press('Home');
   await expect(page).toHaveURL('/');
@@ -71,13 +81,11 @@ test('未认证页面在 JavaScript 执行前不暴露业务工作区', async ({
   const page = await context.newPage();
   await page.goto('http://localhost:3000/products/research');
   await expect(page.getByRole('tab')).toHaveCount(0);
-  await expect(page.getByRole('status')).toHaveText('正在验证登录状态…');
+  await expect(page.getByRole('status')).toHaveText('正在恢复工作空间…');
   await context.close();
 });
 
-test('new tab appears while the destination is still loading and survives refresh', async ({
-  page,
-}) => {
+test('new tab and destination commit together and survive refresh', async ({ page }) => {
   await page.goto('/products');
   await expect(page.getByRole('tab', { selected: true })).toHaveText('商品档案');
   let release!: () => void;
@@ -93,7 +101,7 @@ test('new tab appears while the destination is still loading and survives refres
       .getByRole('navigation', { name: '功能导航' })
       .getByRole('link', { name: '选品与开发', exact: true })
       .click();
-    await expect(page.getByRole('tab', { name: '选品与开发', exact: true })).toBeVisible();
+    await expect(page.getByRole('tab', { name: '选品与开发', exact: true })).toHaveCount(0);
     await expect(page.getByRole('tab', { selected: true })).toHaveText('商品档案');
   } finally {
     release();
