@@ -111,10 +111,8 @@ test('租户管理：部门、角色、成员、子租户的真实授权闭环',
   await signOut(page);
   await signIn(page, memberName, memberPassword);
   await page.goto('/org');
-  const workspaceNav = page.getByRole('navigation', { name: '组织管理功能' });
-  await expect(workspaceNav.getByRole('link', { name: '成员管理', exact: true })).toHaveCount(0);
-  await expect(workspaceNav.getByRole('link', { name: '角色配置', exact: true })).toHaveCount(0);
-  await expect(workspaceNav.getByRole('link', { name: '商品档案', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: '用户与成员', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: '角色配置', exact: true })).toHaveCount(0);
   await page.goto('/products');
   await expect(page.getByRole('button', { name: '新建 SPU', exact: true })).toHaveCount(0);
   const forbidden = await request('catalog/products', 'POST', {
@@ -131,8 +129,8 @@ test('租户管理：部门、角色、成员、子租户的真实授权闭环',
   // 子租户所有者：管理能力在自己租户内成立，看不到父租户的商品。
   await signOut(page);
   await signIn(page, childOwner, childOwnerPassword);
-  await page.goto('/org');
-  await expect(workspaceNav.getByRole('link', { name: '用户与成员', exact: true })).toBeVisible();
+  await page.goto('/org/members');
+  await expect(page.getByRole('heading', { name: '用户与成员' }).first()).toBeVisible();
   await page.goto('/products');
   await expect(page.getByRole('table')).toBeVisible();
   await expect(page.getByText('创建你的第一款商品', { exact: true })).toBeVisible();

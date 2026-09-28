@@ -1,13 +1,9 @@
-import Link from 'next/link';
-import { ArrowRight, ListChecks } from 'lucide-react';
+import { ListChecks } from 'lucide-react';
 import { SectionCard } from './section-card';
-import { TASK_PAGES, type TaskPage } from '../../lib/task-pages';
+import type { TaskPage } from '../../lib/task-pages';
 
 /** A truthful task workspace: explicit schema and workflow, no invented business records. */
 export function TaskWorkspace({ page }: { page: TaskPage }) {
-  const related = TASK_PAGES.filter(
-    (item) => item.domain === page.domain && item.href !== page.href,
-  );
   return (
     <div className="space-y-4">
       <div className="border-border bg-card flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3">
@@ -62,20 +58,6 @@ export function TaskWorkspace({ page }: { page: TaskPage }) {
               </tr>
             </tbody>
           </table>
-        </div>
-      </SectionCard>
-      <SectionCard title="相关任务">
-        <div className="flex flex-wrap gap-2">
-          {related.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="border-border text-copy-13 hover:bg-muted inline-flex items-center gap-2 rounded-md border px-3 py-2"
-            >
-              {item.label}
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          ))}
         </div>
       </SectionCard>
     </div>

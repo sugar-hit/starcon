@@ -37,21 +37,6 @@ export function IdentityWorkspace({
   );
   return (
     <div className="space-y-5">
-      <nav aria-label="组织管理功能" className="flex flex-wrap gap-3 border-b pb-3">
-        <Link href="/org">租户概览</Link>
-        {destinations
-          .filter(([key]) => canManage(session, key))
-          .map(([key, label]) => (
-            <Link
-              key={key}
-              href={`/org/${key}`}
-              aria-current={kind === key ? 'page' : undefined}
-              className={kind === key ? 'text-brand font-semibold' : 'text-muted-foreground'}
-            >
-              {label}
-            </Link>
-          ))}
-      </nav>
       {error && (
         <p role="alert" className="text-destructive">
           {error}

@@ -2,7 +2,7 @@
 
 ## 摘要
 
-修复登录态刷新闪现登录背景、组织权限归属错误、右上角账户入口粗糙以及页面跳转时 Tab 与页面错位四项体验问题。认证恢复改用中性启动态；组织与权限从运营系统导航移出，统一从账户卡片进入；账户卡片按设计令牌重构并支持头像上传/更换；Tab 与新页面（或其加载骨架）在同一路由提交边界出现。账户与组织页使用靠右、可关闭的独立 Tab 组。
+修复登录态刷新闪现登录背景、组织权限归属错误、右上角账户入口粗糙以及页面跳转时 Tab 与页面错位四项体验问题。认证恢复改用中性启动态；组织与权限从运营系统导航移出，统一从账户卡片进入；账户卡片按设计令牌重构并支持头像上传/更换；Tab 与新页面（或其加载骨架）在同一路由提交边界出现。账户与组织页使用靠右、可关闭的独立 Tab 组。切换到跨系统的工作台时沿用此前业务系统的顶部与侧栏导航，避免菜单意外跳回开发系统。
 
 ## 决策 / 结论
 
@@ -13,6 +13,8 @@
 - 工作台永远固定且不可关闭：从工作台“关闭其他”会清空全部可关闭 Tab；从业务或账户 Tab“关闭其他”只保留当前 Tab 与工作台，不受左右分组限制。
 - Tab 栏尾部切换器以细分隔线与 Tab 视觉分离，不使用额外卡片外框、阴影或常驻底色；它以当前激活 Tab 判断业务/账户分组，前后按钮和键盘方向键都只能在当前组内移动。
 - 账户浮层增加登录状态、租户身份、角色/权限摘要和会话边界；租户切换与多租户登录不再使用原生 `select` 或 `window.confirm`，统一改为项目风格列表和确认弹窗。
+- 清理正文中的重复路由导航：商品工作区顶部功能栏、组织管理顶部导航和通用任务页“相关任务”均与侧栏/工作区 Tab 重复，已移除；正文 Tab 只保留真正的页面内部状态切换。
+- 工作台不改变当前业务系统上下文；从任一业务 Tab 切回工作台时，顶部系统选择和左侧功能菜单保持不变。直接打开工作台时仍使用默认开发系统。
 - 头像按用户 ID 存入浏览器本地存储，支持 JPG、PNG、WebP 与 2 MB 上限；服务端对象存储能力未建立前不伪造跨设备同步承诺。
 
 ## 涉及文件
@@ -23,7 +25,11 @@
 - `packages/ui/src/lib/nav-config.ts`
 - `packages/ui/src/lib/workspace-tabs.tsx`
 - `packages/ui/src/components/common/avatar.tsx`
+- `packages/ui/src/components/layout/app-shell.tsx`
+- `packages/ui/src/components/common/task-workspace.tsx`
+- `apps/web/src/components/catalog/catalog-workspace.tsx`
 - `tests/e2e/workspace-tabs.spec.ts`
+- `tests/e2e/navigation-regression.spec.ts`
 - `tests/e2e/scroll-shell.spec.ts`
 
 ## 关键 trade-off / 讨论
