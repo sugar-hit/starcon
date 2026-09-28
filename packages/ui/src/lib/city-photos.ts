@@ -166,12 +166,11 @@ export const CITY_PHOTOS: Record<string, CityPhoto> = {
   },
   吉隆坡: {
     city: '吉隆坡',
-    landmark: 'Petronas Twin Towers',
-    source:
-      'https://commons.wikimedia.org/wiki/File:Petronas_Towers_at_Night_-_from_the_base_upwards.jpg',
-    url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/Petronas_Towers_at_Night_-_from_the_base_upwards.jpg/960px-Petronas_Towers_at_Night_-_from_the_base_upwards.jpg',
-    author: 'Dcubillas',
-    license: 'CC BY-SA 3.0',
+    source: 'https://commons.wikimedia.org/wiki/File:Kl-skyline-at-night-2022.jpg',
+    url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/Kl-skyline-at-night-2022.jpg/960px-Kl-skyline-at-night-2022.jpg',
+    author: 'Shahee Ilyas',
+    license: 'CC BY-SA 4.0',
+    landmark: '吉隆坡天际线与双子塔',
   },
   雅加达: {
     city: '雅加达',
@@ -183,20 +182,19 @@ export const CITY_PHOTOS: Record<string, CityPhoto> = {
   },
   马尼拉: {
     city: '马尼拉',
-    landmark: 'Manila Cathedral',
-    source:
-      'https://commons.wikimedia.org/wiki/File:Cathedral_Basilica_of_the_Immaculate_Conception_(23775939900).jpg',
-    url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/Cathedral_Basilica_of_the_Immaculate_Conception_%2823775939900%29.jpg/960px-Cathedral_Basilica_of_the_Immaculate_Conception_%2823775939900%29.jpg',
-    author: 'Paul Sableman',
-    license: 'CC BY 2.0',
+    source: 'https://commons.wikimedia.org/wiki/File:Manila,_Manila_Cathedral,_Philippines.jpg',
+    url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/75/Manila%2C_Manila_Cathedral%2C_Philippines.jpg/960px-Manila%2C_Manila_Cathedral%2C_Philippines.jpg',
+    author: 'Vyacheslav Argenberg',
+    license: 'CC BY 4.0',
+    landmark: '马尼拉大教堂',
   },
   胡志明市: {
     city: '胡志明市',
-    landmark: 'Notre Dame Cathedral Saigon',
-    source: 'https://commons.wikimedia.org/wiki/File:Basilica_of_Our_Lady_Immaculate.jpg',
-    url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Basilica_of_Our_Lady_Immaculate.jpg/960px-Basilica_of_Our_Lady_Immaculate.jpg',
-    author: 'Maksim Sokolov (maxergon.com)',
-    license: 'CC BY-SA 4.0',
+    source: 'https://commons.wikimedia.org/wiki/File:Notre_Dame_-_Saigon_(5539086757).jpg',
+    url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Notre_Dame_-_Saigon_%285539086757%29.jpg/960px-Notre_Dame_-_Saigon_%285539086757%29.jpg',
+    author: 'Sistak',
+    license: 'CC BY-SA 2.0',
+    landmark: '西贡圣母大教堂',
   },
   首尔: {
     city: '首尔',
@@ -251,12 +249,11 @@ export const CITY_PHOTOS: Record<string, CityPhoto> = {
   },
   布宜诺斯艾利斯: {
     city: '布宜诺斯艾利斯',
-    landmark: 'Obelisco Buenos Aires',
-    source:
-      'https://commons.wikimedia.org/wiki/File:Parte_superior_del_Obelisco_de_Buenos_Aires.jpg',
-    url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Parte_superior_del_Obelisco_de_Buenos_Aires.jpg/960px-Parte_superior_del_Obelisco_de_Buenos_Aires.jpg',
-    author: 'ProtoplasmaKid',
+    source: 'https://commons.wikimedia.org/wiki/File:Obelisco_de_Buenos_Aires_at_sunset.jpg',
+    url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Obelisco_de_Buenos_Aires_at_sunset.jpg/960px-Obelisco_de_Buenos_Aires_at_sunset.jpg',
+    author: 'Dpalma01',
     license: 'CC BY-SA 4.0',
+    landmark: '布宜诺斯艾利斯方尖碑',
   },
   圣地亚哥: {
     city: '圣地亚哥',
@@ -303,13 +300,11 @@ export const CITY_PHOTOS: Record<string, CityPhoto> = {
   },
   内罗毕: {
     city: '内罗毕',
-    landmark: 'Nairobi skyline',
-    source:
-      'https://commons.wikimedia.org/wiki/File:Buffalo_Nairobi_Skyline_Savannah_Kenya_May19_R1600769.jpg',
-    url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d2/Buffalo_Nairobi_Skyline_Savannah_Kenya_May19_R1600769.jpg/960px-Buffalo_Nairobi_Skyline_Savannah_Kenya_May19_R1600769.jpg',
-    author:
-      'This Photo was taken by Timothy A. Gonsalves.  Feel free to use my photos, but please mention me as the author.  I would much appreciate if you send me an email tagooty@yahoo.com or write on my talk page, for my information.  Please contact me before commercial use.\n\n\n\nPlease do not upload an edited image here without consulting me.  I would like to make corrections only at my own source to ensure that the changes improve the image and are preserved.Otherwise you may upload an edited image with a new name. Please use one of the templates derivative or extract.',
-    license: 'CC BY-SA 4.0',
+    source: 'https://commons.wikimedia.org/wiki/File:Nairobi_Skyline.jpeg',
+    url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/Nairobi_Skyline.jpeg/960px-Nairobi_Skyline.jpeg',
+    author: 'User:Stephenwanjau',
+    license: 'CC BY-SA 3.0',
+    landmark: '内罗毕天际线',
   },
 };
 

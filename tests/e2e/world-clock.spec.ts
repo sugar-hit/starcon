@@ -335,6 +335,8 @@ test('clock layout stays compact and footer slogan fits one line', async ({ page
       }),
     );
     await page.screenshot({ path: testInfo.outputPath('clock-' + width + '.png') });
+    if (width === 1440)
+      await clocks(page).screenshot({ path: testInfo.outputPath('clock-strip.png') });
     for (const card of layout) {
       expect(card.height).toBeLessThanOrEqual(120);
       expect(card.overlap).toBe(false);
