@@ -337,6 +337,14 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['归集费用', '选择依据', '确认分摊'],
   },
   {
+    href: '/account',
+    domain: 'org',
+    label: '个人资料',
+    description: '维护个人资料、登录安全与界面偏好。',
+    fields: ['姓名', '邮箱', '头像', '语言与时区', '默认店铺', '密码'],
+    workflow: ['编辑资料', '保存', '立即生效'],
+  },
+  {
     href: '/org',
     domain: 'org',
     label: '租户概览',
@@ -483,4 +491,31 @@ export const TASK_PAGES: TaskPage[] = [
 ];
 export function findTaskPage(href: string) {
   return TASK_PAGES.find((page) => page.href === href);
+}
+
+/**
+ * 账户域：组织、角色、成员、权限、租户与店铺授权。
+ * 这些页面从 ce5c78e 起不再进入业务系统侧栏，改由账户卡片与账户 Tab 承载，
+ * 因此不参与业务菜单（NAV_DESTINATIONS）的构成。
+ */
+export const ACCOUNT_DOMAINS = new Set(['org']);
+
+/**
+ * 账户菜单展示顺序。成员关系只有一个真相源 = TASK_PAGES 的账户域，
+ * 这里只规定「按什么顺序摆」，不再单独维护一份入口清单——
+ * 否则就会出现「有页面没入口」或「有入口没页面」的割裂。
+ */
+export const ACCOUNT_MENU_ORDER = [
+  '/account',
+  '/org',
+  '/org/members',
+  '/org/roles',
+  '/org/departments',
+  '/org/children',
+  '/org/stores',
+  '/org/permissions',
+  '/org/audit',
+];
+export function isAccountDomain(domain: string): boolean {
+  return ACCOUNT_DOMAINS.has(domain);
 }
