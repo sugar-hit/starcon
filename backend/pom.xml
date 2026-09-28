@@ -26,7 +26,7 @@
     <module>libraries/tenancy</module>
     <module>services/identity</module>
     <module>services/catalog</module>
-    
+    <module>services/channel</module>
   </modules>
   <build>
     <plugins>
