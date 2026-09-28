@@ -16,6 +16,10 @@ for service,port in [('identity',8081),('catalog',8082)]:
         spec=json.loads((args.spec_dir/f'{service}.openapi.json').read_text())
     else:
         with urllib.request.urlopen(f'http://127.0.0.1:{port}/v3/api-docs') as response: spec=json.load(response)
+    # The exported server URL depends on where the spec came from (live port vs MockMvc), so pin it
+    # to a same-origin value. Otherwise the same code generates two different contracts and CI's
+    # "no drift" check fails depending on how the spec was fetched.
+    spec['servers']=[{'url':'/','description':'Same-origin service base'}]
     (target/f'{service}.openapi.json').write_text(json.dumps(spec,ensure_ascii=False,indent=2)+'\n')
     all_schemas.update(spec.get('components',{}).get('schemas',{}))
 def ts(s):
