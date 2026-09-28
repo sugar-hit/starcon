@@ -1,159 +1,56 @@
 # 系统架构总览
 
-> Status: Living document — 随系统演进持续更新
-> Owner: Architecture Team
-> Last updated: 2026-09-25
+更新：2026-09-27。当前依据：[ADR-0004 Java 微服务](../decisions/0004-java-spring-boot-microservices.md)。identity/catalog 已在本地实现，其余为目标架构。启动、迁移和范围见[本地开发说明](../operations/catalog-local-development.md)。
 
-## 一句话
+starcon 是面向跨境电商的多租户 SaaS ERP。前端保持 Next.js/TypeScript，后端采用 Java + Spring Boot 微服务，代码仍在同一 Monorepo。后端 Maven 独立构建，不进入 pnpm/Turbo。
 
-starcon 是一个**多租户 SaaS ERP**，服务跨境电商公司在多个海外平台（Amazon / Shopify / eBay / TikTok Shop / Lazada / 1688 等）上的日常运营，核心闭环：**多平台订单接入 → 库存协同 → 履约调度 → 多币种结算 → 数据洞察**。
+## 业务服务
 
-## 架构选型摘要
+| 服务      | 责任                                   |
+| --------- | -------------------------------------- |
+| identity  | 身份、租户、法人、部门、权限           |
+| catalog   | 商品、SKU、商业伙伴、价格              |
+| channel   | 平台授权、店铺、商品映射与同步         |
+| trade     | 销售订单、采购订单、售后及履约流程     |
+| warehouse | 库存、预占、实物收发、包裹、调拨、盘点 |
+| finance   | 应收应付、收付款、结算对账、成本与总账 |
 
-| 维度 | 选型 | 原因 |
-|---|---|---|
-| 代码组织 | Monorepo (pnpm + Turborepo) | 跨模块共享类型多；多服务同步演进 |
-| 后端形态 | Modular Monolith | 早期 SaaS 分布式 = 复杂度爆炸；按领域强隔离，未来再拆 |
-| 前端 | Next.js (App Router) + React Server Components | RSC 天然适配 SaaS 列表 + 表单 |
-| 数据库 | PostgreSQL（主） + Redis（缓存） + ClickHouse（分析） | 强一致业务 + 高频聚合分析分离 |
-| 队列 | Kafka | 跨服务事件流 + 重放能力 |
-| 缓存 | Redis | Session / rate limit / 热点库存 |
-| 对象存储 | S3-compatible（S3 / MinIO / OSS） | 票据 / 标签 / 截图 |
-| 多租户 | Postgres RLS + 租户上下文中间件 | 物理共享、逻辑隔离，性能 / 运维 / 合规平衡 |
-| 适配器 | 各三方平台 / 支付 / 物流独立 package，对外统一接口 | 跨境行业三方多且杂 |
-| IaC | Terraform + Helm + ArgoCD | 跨云可移植 + GitOps |
-| 可观测性 | OpenTelemetry → Prometheus / Grafana / Tempo / Loki | 链路追踪 + 指标 + 日志统一 |
-
-## 系统架构图（mermaid）
+每个服务独立部署、数据库和账号；初期数据库可在同一 PostgreSQL 集群。跨服务不能 SQL JOIN、建 FK 或直接写表。每库内部采用 tenant_id + RLS。共享库只提供技术能力，不共享领域实体。
 
 ```mermaid
-graph TB
-    subgraph Clients["客户端"]
-        Web["apps/web<br/>(Next.js)"]
-        Admin["apps/admin<br/>(Next.js)"]
-        Mob[("未来: 移动端")]
-    end
-
-    subgraph Edge["入口层"]
-        CDN["CDN / WAF"]
-        GW["API Gateway<br/>(apps/api)"]
-    end
-
-    subgraph Apps["应用层 (K8s pods)"]
-        API["apps/api<br/>(modular monolith)"]
-        Worker["apps/worker"]
-        Sched["apps/scheduler"]
-        Notif["apps/notification-gateway"]
-    end
-
-    subgraph Modules["apps/api/src/modules"]
-        M_auth[auth]
-        M_tenant[tenant]
-        M_product[product]
-        M_inventory[inventory]
-        M_order[order]
-        M_fulfill[fulfillment]
-        M_ship[shipment]
-        M_finance[finance]
-        M_billing[billing]
-        M_analytics[analytics]
-        M_notif[notification]
-    end
-
-    subgraph Adapters["适配器层"]
-        PC["platform-connectors<br/>Amazon / Shopify / eBay / ..."]
-        PG["payment-gateways<br/>PayPal / Stripe / PingPong / ..."]
-        SC["shipping-carriers<br/>DHL / FedEx / 顺丰 / ..."]
-    end
-
-    subgraph Data["数据层"]
-        DB[("Postgres<br/>(RLS)")]
-        Cache[("Redis")]
-        Queue[("Kafka")]
-        S3[("S3 / OSS")]
-        CH[("ClickHouse<br/>(analytics)")]
-    end
-
-    subgraph Obs["可观测性"]
-        OTel["OTel Collector"]
-        Prom["Prometheus"]
-        Graf["Grafana"]
-    end
-
-    Web --> CDN --> GW --> API
-    Admin --> CDN --> GW
-    API --> Modules
-    Modules --> PC
-    Modules --> PG
-    Modules --> SC
-    API --> Worker
-    Worker --> Queue
-    Sched --> API
-    Notif --> S3
-    Modules --> DB
-    Modules --> Cache
-    Modules --> Queue
-    Modules --> CH
-    API -.-> OTel -.-> Prom -.-> Graf
-    Worker -.-> OTel
+flowchart LR
+  UI[Next.js 前端] --> EDGE[路由入口 / API 网关]
+  EDGE --> I[identity]
+  EDGE --> C[catalog]
+  EDGE --> T[trade]
+  EDGE --> W[warehouse]
+  EDGE --> F[finance]
+  EDGE --> H[channel]
+  I --> IDB[(identity DB)]
+  C --> CDB[(catalog DB)]
+  T --> TDB[(trade DB)]
+  W --> WDB[(warehouse DB)]
+  F --> FDB[(finance DB)]
+  H --> HDB[(channel DB)]
+  H <--> EXT[电商平台]
 ```
 
-## 关键数据流：订单生命周期
+图仅表达路由和数据所有权。跨服务通过授权 HTTP API 和可靠事件协作：事件由各服务本地 outbox 提交，经 relay 投递至消费者 inbox；重复、乱序、超时均需可恢复。订单预占/取消流程由 trade 持久化协调；库存账与余额由 warehouse 本地事务维护。
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant AMZ as Amazon SP-API
-    participant Con as platform-connectors/amazon
-    participant Q as Kafka
-    participant Ord as modules/order
-    participant Inv as modules/inventory
-    participant Ful as modules/fulfillment
-    participant Ship as modules/shipment
-    participant Fin as modules/finance
+## 技术基线
 
-    AMZ->>Con: webhook (OrderCreated)
-    Con->>Con: 规范化 → 统一 OrderDTO
-    Con->>Q: emit order.created.v1
-    Q->>Ord: 订阅事件，持久化订单
-    Ord->>Inv: 预占库存 (reserve)
-    Inv-->>Ord: reserved
-    Ord->>Q: emit order.reserved.v1
-    Q->>Ful: 触发履约 (生成出库单)
-    Ful->>Q: emit fulfillment.created.v1
-    Q->>Ship: 创建物流运单 (DHL/FedEx/...)
-    Ship->>Q: emit shipment.dispatched.v1
-    Q->>Fin: 记账 (应收 / 待结算)
-    Fin->>Q: emit finance.recorded.v1
-```
+Java 21、Spring Boot、Maven Wrapper、PostgreSQL 16、jOOQ、Flyway、JUnit 5/AssertJ/Testcontainers、OpenAPI。具体框架版本在骨架阶段验证锁定。Micrometer/OpenTelemetry 采集观测数据。
 
-## 多租户模型
+Redis 仅在缓存/限流需要时引入，不做库存账源。附件采用 S3-compatible 对象存储。消息中间件、分析库、注册中心、配置中心和 service mesh 暂未锁定；不用旧文档中的 Kafka/ClickHouse 示例当成已实施依赖。
 
-- **物理共享、逻辑隔离**：所有业务表带 `tenant_id`，DB 启用 RLS
-- **租户上下文**：每个请求经 `@starcon/tenancy` 包从 JWT / header 解析 tenant_id，注入 DB session
-- **跨租户事件隔离**：Kafka 主题按租户分区 / 加 tenant 标签
-- **缓存 key 强制带 tenant 前缀**
-- 详见 [`multi-tenancy.md`](multi-tenancy.md)
+## 开发入口
 
-## 部署拓扑
+1. [实体目录、业务关系与开发阶段](../../db/schemas/v2/README.md)
+2. [身份与商品字段/约束设计](../../db/schemas/v2/01-foundation.md)
+3. [多租户原则](../decisions/0002-multi-tenancy-strategy.md)，其中共享 schema 现指每服务内部。
 
-- **多环境**：dev / staging / prod 三套 K8s 集群
-- **GitOps**：ArgoCD 监听 `infra/helm/`，自动同步
-- **CI**：GitHub Actions → 单元测试 + lint + typecheck + image build
-- **CD**：镜像推镜像仓库 → ArgoCD 检测到版本更新 → 滚动升级
-- **金丝雀**：prod 用 Argo Rollouts 做 traffic split
+先完成身份隔离和商品主数据，再实现手工订单→库存预占→出库闭环，然后接首个平台与财务。旧 01–09 SQL 草稿未验证，不直接作为 Flyway 迁移执行。
 
-## 已知约束 / 暂未决定
+## 子租户与权限补充
 
-下列待 ADR 确认（详见 [`docs/decisions/`](../decisions/)）：
-
-- 队列: Kafka vs RabbitMQ vs NATS（决策见 `0002-message-queue.md`，待写）
-- API 风格: REST + OpenAPI vs tRPC vs GraphQL（决策见 `0003-api-style.md`，待写）
-- ORM: Prisma vs Drizzle vs TypeORM（决策见 `0004-orm.md`，待写）
-- 后端框架: NestJS vs Hono vs Fastify（决策见 `0005-backend-framework.md`，待写）
-
-## 演进路线
-
-- **Phase 1 (0-12 月)**: Modular Monolith，10 个领域模块全部进 `apps/api/`
-- **Phase 2 (12-24 月)**: 拆 `order` `inventory` `fulfillment` 为独立服务（订单量 / 团队规模临界点）
-- **Phase 3 (24 月+)**: 拆 `platform-connectors` 为独立 worker 集群；引入专用数据服务
+[ADR-0005](../decisions/0005-tenant-hierarchy-and-page-rbac.md) 记录子租户与页面 CRUD 设计。每个子租户仍为独立隔离单元，父级访问默认需要目标租户显式授权。商品 SPU/SKU、角色页面权限矩阵及共享目录规则见[专项设计](../../db/schemas/v2/02-product-tenant-permissions.md)。

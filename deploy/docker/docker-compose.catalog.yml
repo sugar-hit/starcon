@@ -1,0 +1,84 @@
+name: starcon-catalog-dev
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: starcon_migrator
+      POSTGRES_PASSWORD: ${PG_PASSWORD:?Run deploy/scripts/catalog-dev.sh first}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Missing runtime password}
+    ports: ['127.0.0.1:5433:5432']
+    volumes:
+      - catalog-pg-data:/var/lib/postgresql/data
+      - ./catalog-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U starcon_migrator -d postgres']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  identity:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.backend
+      args: { SERVICE: identity }
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+    ports: ['127.0.0.1:8081:8081']
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/starcon_identity
+      DB_USER: identity_app
+      DB_PASSWORD: ${APP_DB_PASSWORD}
+      DB_MIGRATION_USER: starcon_migrator
+      DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
+      INTERNAL_KEY: ${INTERNAL_KEY}
+      LOCAL_BOOTSTRAP_ENABLED: 'true'
+      LOCAL_ADMIN_PASSWORD: ${LOCAL_ADMIN_PASSWORD}
+  catalog:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.backend
+      args: { SERVICE: catalog }
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+      identity: { condition: service_started }
+    ports: ['127.0.0.1:8082:8082']
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/starcon_catalog
+      DB_USER: catalog_app
+      DB_PASSWORD: ${APP_DB_PASSWORD}
+      DB_MIGRATION_USER: starcon_migrator
+      DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
+      IDENTITY_URL: http://identity:8081
+      INTERNAL_KEY: ${INTERNAL_KEY}
+  migrate-identity:
+    image: starcon-catalog-dev-identity
+    profiles: [tools]
+    command: ['--spring.main.web-application-type=none']
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/starcon_identity
+      DB_USER: identity_app
+      DB_PASSWORD: ${APP_DB_PASSWORD}
+      DB_MIGRATION_USER: starcon_migrator
+      DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
+      INTERNAL_KEY: ${INTERNAL_KEY}
+      LOCAL_BOOTSTRAP_ENABLED: 'false'
+  migrate-catalog:
+    image: starcon-catalog-dev-catalog
+    profiles: [tools]
+    command: ['--spring.main.web-application-type=none']
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/starcon_catalog
+      DB_USER: catalog_app
+      DB_PASSWORD: ${APP_DB_PASSWORD}
+      DB_MIGRATION_USER: starcon_migrator
+      DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
+      IDENTITY_URL: http://identity:8081
+      INTERNAL_KEY: ${INTERNAL_KEY}
+volumes:
+  catalog-pg-data:

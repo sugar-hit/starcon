@@ -8,12 +8,15 @@ import { cn } from '../../lib/utils';
  * 不要用 className="bg-blue-500 text-white" 拼按钮
  */
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-btn-14 transition-colors duration-base ease-out-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/10 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  // base 提供 font-size (text-btn-14) — 不要在 size 里重复写，
+  // 否则 twMerge 会把 variant 的 text-* 颜色（如 text-primary-foreground）
+  // 当作与 text-btn-14 同组冲突并覆盖掉，导致按钮看不见字。
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-btn-14 transition-colors duration-base ease-out-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-        outline: 'border border-border bg-transparent hover:bg-muted',
+        outline: 'border border-control-border bg-card hover:bg-muted',
         secondary: 'bg-muted text-foreground hover:bg-muted/80',
         ghost: 'bg-transparent hover:bg-muted',
         brand: 'bg-brand text-white hover:bg-brand/90',
@@ -22,9 +25,9 @@ const buttonVariants = cva(
         link: 'text-brand underline-offset-4 hover:underline',
       },
       size: {
-        sm: 'h-8 px-3 text-btn-14',
-        default: 'h-9 px-4 text-btn-14',
-        lg: 'h-10 px-6 text-btn-14',
+        sm: 'h-8 px-3',
+        default: 'h-9 px-4',
+        lg: 'h-10 px-6',
         icon: 'h-9 w-9',
       },
     },
@@ -32,22 +35,26 @@ const buttonVariants = cva(
       variant: 'default',
       size: 'default',
     },
-  }
+  },
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, type, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
     return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+      <Comp
+        type={asChild ? type : (type ?? 'button')}
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
     );
-  }
+  },
 );
 Button.displayName = 'Button';
 

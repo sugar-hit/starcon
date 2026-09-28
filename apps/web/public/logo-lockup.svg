@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 232 64" role="img" aria-label="STARCON">
+  <!-- B1-1: four rounded business nodes surrounding a transparent central star. -->
+  <path fill="#0A0A0A" fill-rule="evenodd" d="M32 2 C38 2 42 6 42 12 C42 19 45 22 52 22 C58 22 62 26 62 32 C62 38 58 42 52 42 C45 42 42 45 42 52 C42 58 38 62 32 62 C26 62 22 58 22 52 C22 45 19 42 12 42 C6 42 2 38 2 32 C2 26 6 22 12 22 C19 22 22 19 22 12 C22 6 26 2 32 2 Z M24 20 Q32 24 40 20 Q44 20 44 24 Q40 32 44 40 Q44 44 40 44 Q32 40 24 44 Q20 44 20 40 Q24 32 20 24 Q20 20 24 20 Z"/>
+  <g font-family="Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif">
+    <text x="80" y="31" font-size="28" font-weight="700" letter-spacing="0.2" fill="#0A0A0A">STARCON</text>
+    <text x="80" y="51" font-size="17" font-weight="400" fill="#707070">Commerce OS</text>
+  </g>
+</svg>

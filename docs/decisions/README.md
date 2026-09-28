@@ -25,16 +25,18 @@
 
 | 编号 | 标题 | 状态 |
 |---|---|---|
-| [0001](0001-monorepo-and-modular-monolith.md) | Monorepo + Modular Monolith 起步 | Accepted |
-| [0002](0002-multi-tenancy-strategy.md) | 多租户：Shared Schema + RLS | Accepted（待补） |
-| _(后续编号陆续补)_ | | |
+| [0001](0001-monorepo-and-modular-monolith.md) | Monorepo + Modular Monolith 起步 | 单体决策被 0004 取代；保留 Monorepo |
+| [0002](0002-multi-tenancy-strategy.md) | 多租户：Shared Schema + RLS | Accepted |
+| [0003](0003-backend-runtime-kotlin-spring-boot.md) | 后端运行时 Kotlin + Spring Boot 3 | 被 0004 取代 |
+| [0004](0004-java-spring-boot-microservices.md) | Java + Spring Boot 微服务 | Accepted |
+
+| [0005](0005-tenant-hierarchy-and-page-rbac.md) | 子租户层级与页面操作权限 | Proposed（需求明确，默认策略待评审） |
 
 ## Pending（待决策）
 
-- 后端框架 (NestJS / Hono / Fastify / Spring)
-- ORM (Prisma / Drizzle / Kysely)
-- 消息队列 (Kafka / RabbitMQ / NATS JetStream)
-- API 风格 (REST + OpenAPI / tRPC / GraphQL)
+- 数据访问层在 [0004](0004-java-spring-boot-microservices.md) 保留 jOOQ + Flyway；当前后端语言为 Java
+- 消息队列 (Kafka / RabbitMQ / NATS JetStream) — 第一期用 PostgreSQL outbox，不阻塞主线
 - 前端状态管理 (TanStack Query + Zustand vs Redux Toolkit)
-- 可观测性栈 (Prometheus + Grafana + Tempo + Loki vs Datadog vs 自托管 ELK)
+- 可观测性后端 (Prometheus + Grafana + Tempo + Loki vs Datadog vs 自托管 ELK) — 采集端已在 0003 定为 Micrometer + OpenTelemetry
 - K8s service mesh (Istio vs Linkerd vs Cilium)
+- 物理隔离（热点租户独立部署 / 独立 schema）的临界指标

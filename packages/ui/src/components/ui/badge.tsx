@@ -14,22 +14,21 @@ const badgeVariants = cva(
       tone: {
         neutral: 'bg-gray-2 text-foreground/80',
         primary: 'bg-foreground text-background',
-        success: 'bg-emerald-50 text-emerald-700',
-        warning: 'bg-amber-50 text-amber-700',
-        danger: 'bg-rose-50 text-rose-700',
-        info: 'bg-sky-50 text-sky-700',
+        success: 'bg-success-soft text-success',
+        warning: 'bg-warning-soft text-warning',
+        danger: 'bg-destructive-soft text-destructive',
+        info: 'bg-info-soft text-info',
         brand: 'bg-brand-soft text-brand',
       },
     },
     defaultVariants: {
       tone: 'neutral',
     },
-  }
+  },
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badgeVariants> {}
+  extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof badgeVariants> {}
 
 export function Badge({ className, tone, ...props }: BadgeProps) {
   return <span className={cn(badgeVariants({ tone }), className)} {...props} />;

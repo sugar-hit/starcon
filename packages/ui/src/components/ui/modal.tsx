@@ -22,10 +22,7 @@ const ModalOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
-    className={cn(
-      'fixed inset-0 z-50 bg-black/40 backdrop-blur-sm animate-fade-in',
-      className
-    )}
+    className={cn('animate-fade-in fixed inset-0 z-50 bg-black/40 backdrop-blur-sm', className)}
     {...props}
   />
 ));
@@ -40,8 +37,8 @@ const ModalContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border border-border bg-card p-6 shadow-elevated animate-fade-up focus:outline-none',
-        className
+        'border-border bg-card shadow-elevated focus-visible:outline-brand fixed left-[50%] top-[50%] z-50 grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto rounded-lg border p-6 focus-visible:outline focus-visible:outline-2',
+        className,
       )}
       {...props}
     >
@@ -51,16 +48,9 @@ const ModalContent = React.forwardRef<
 ));
 ModalContent.displayName = DialogPrimitive.Content.displayName;
 
-const ModalHeader = ({
-  className,
-  children,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+const ModalHeader = ({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn(
-      'flex flex-col space-y-1.5 border-b border-border pb-4',
-      className
-    )}
+    className={cn('border-border flex flex-col space-y-1.5 border-b pb-4', className)}
     {...props}
   >
     {children}
@@ -68,15 +58,9 @@ const ModalHeader = ({
 );
 ModalHeader.displayName = 'ModalHeader';
 
-const ModalFooter = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+const ModalFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn(
-      'flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-2',
-      className
-    )}
+    className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-2', className)}
     {...props}
   />
 );
@@ -113,13 +97,13 @@ const ModalCloseButton = React.forwardRef<
   <DialogPrimitive.Close
     ref={ref}
     className={cn(
-      'absolute right-4 top-4 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none',
-      className
+      'text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-brand absolute right-4 top-4 rounded-md p-1 transition-colors focus-visible:outline focus-visible:outline-2',
+      className,
     )}
     {...props}
   >
     <X className="h-4 w-4" />
-    <span className="sr-only">Close</span>
+    <span className="sr-only">关闭</span>
   </DialogPrimitive.Close>
 ));
 ModalCloseButton.displayName = 'ModalCloseButton';

@@ -1,0 +1,639 @@
+'use client';
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { Button } from '@starcon/ui';
+import type {
+  Access,
+  RoleView,
+  PermissionView,
+  MemberView,
+  DepartmentView,
+  ChildView,
+  AssignmentInput,
+} from '../../../../../packages/api-contracts/src/catalog';
+import { api } from '@/lib/api';
+import { Field, Editor, control } from '../common/fields';
+import {
+  actionLabels,
+  assignRole,
+  canManage,
+  scopeLabels,
+  togglePermission,
+  saveAdministration,
+  removeAdministration,
+  transferOwner,
+  type AdministrationKind,
+} from './administration-model';
+
+const titles = {
+  roles: '角色配置',
+  members: '用户与成员',
+  departments: '部门管理',
+  children: '子租户管理',
+};
+export function AdministrationPanel({
+  kind,
+  session,
+  reloadSession,
+  onError,
+}: {
+  kind: AdministrationKind;
+  session: Access;
+  reloadSession: () => Promise<void>;
+  onError: (error: unknown) => void;
+}) {
+  const [roles, setRoles] = useState<RoleView[]>([]);
+  const [permissions, setPermissions] = useState<PermissionView[]>([]);
+  const [members, setMembers] = useState<MemberView[]>([]);
+  const [departments, setDepartments] = useState<DepartmentView[]>([]);
+  const [children, setChildren] = useState<ChildView[]>([]);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [notice, setNotice] = useState('');
+  const load = useCallback(async () => {
+    setLoaded(false);
+    try {
+      if (canManage(session, 'roles')) {
+        setRoles(await api<RoleView[]>('identity/roles'));
+        setPermissions(await api<PermissionView[]>('identity/permissions'));
+      }
+      if (canManage(session, 'members')) setMembers(await api<MemberView[]>('identity/members'));
+      if (canManage(session, 'departments'))
+        setDepartments(await api<DepartmentView[]>('identity/departments'));
+      if (canManage(session, 'children')) setChildren(await api<ChildView[]>('identity/children'));
+      setLoaded(true);
+    } catch (e) {
+      onError(e);
+    }
+  }, [session, onError]);
+  useEffect(() => {
+    void load();
+  }, [load]);
+  async function mutate(work: () => Promise<unknown>) {
+    setBusy(true);
+    setNotice('');
+    try {
+      await work();
+      setEditing(null);
+      await load();
+      await reloadSession();
+      setNotice('已保存');
+    } catch (e) {
+      onError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+  if (!canManage(session, kind))
+    return (
+      <p className="rounded-lg border p-6 text-sm">
+        当前角色没有此页面查看权限，请联系租户所有者。
+      </p>
+    );
+  const rows =
+    kind === 'roles'
+      ? roles
+      : kind === 'members'
+        ? members
+        : kind === 'departments'
+          ? departments
+          : children;
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-xl font-semibold">{titles[kind]}</h2>
+        {canManage(session, kind, 'create') && (
+          <Button onClick={() => setEditing('new')} disabled={busy}>
+            新增
+          </Button>
+        )}
+      </div>
+      <p className="text-muted-foreground text-sm">
+        {kind === 'children'
+          ? '子租户独立管理成员与业务数据。创建时指定首位所有者；获得目标租户成员身份后，可切换租户管理成员。'
+          : kind === 'roles'
+            ? '页面操作和数据范围由同一个角色分配共同决定。所有者负责授权变更。'
+            : kind === 'members'
+              ? '每个角色可分别选择租户内全部、本部门或仅本人范围。本部门按记录创建时的归属部门匹配。'
+              : '部门属于当前租户，用于成员归属和数据访问范围。已被成员引用的部门不能删除。'}
+      </p>
+      {notice && (
+        <p role="status" className="text-sm">
+          {notice}
+        </p>
+      )}
+      {!loaded ? (
+        <p role="status">正在加载…</p>
+      ) : rows.length === 0 ? (
+        <p className="rounded-lg border p-6 text-sm">暂无记录</p>
+      ) : (
+        <ul className="divide-y rounded-lg border">
+          {rows.map((row) => {
+            const role = kind === 'roles' ? (row as RoleView) : null;
+            const member = kind === 'members' ? (row as MemberView) : null;
+            const child = kind === 'children' ? (row as ChildView) : null;
+            const protectedRole = role?.system;
+            return (
+              <li key={row.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+                <div className="min-w-0 space-y-1">
+                  <p className="break-words font-medium">
+                    {member ? member.username : (row as RoleView | DepartmentView | ChildView).name}
+                  </p>
+                  {role && (
+                    <p className="text-muted-foreground text-xs">
+                      {role.code} · {role.status === 'ACTIVE' ? '启用' : '停用'} ·{' '}
+                      {role.permissions.length} 项权限
+                    </p>
+                  )}
+                  {member && (
+                    <p className="text-muted-foreground text-xs">
+                      {member.status === 'ACTIVE' ? '启用' : '停用'} ·{' '}
+                      {departments.find((d) => d.id === member.departmentId)?.name ?? '未设置部门'}{' '}
+                      ·{' '}
+                      {member.assignments
+                        .map(
+                          (a) =>
+                            `${roles.find((r) => r.id === a.roleId)?.name ?? '角色'}（${scopeLabels[a.scopeMode]}）`,
+                        )
+                        .join('、') || '未分配角色'}
+                    </p>
+                  )}
+                  {child && (
+                    <p className="text-muted-foreground text-xs">
+                      {child.code} · {child.status === 'ACTIVE' ? '启用' : '暂停'}
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {canManage(session, kind, 'update') && !protectedRole && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busy}
+                      onClick={() => setEditing(row.id)}
+                    >
+                      编辑
+                    </Button>
+                  )}
+                  {kind !== 'children' &&
+                    canManage(session, kind, 'delete') &&
+                    !protectedRole &&
+                    !member?.owner && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={busy}
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              kind === 'members'
+                                ? '移除此成员的全部角色并停用其身份？'
+                                : '确认删除？角色删除将同时撤销所有成员的该角色分配。',
+                            )
+                          )
+                            void mutate(() => removeAdministration(kind, row.id));
+                        }}
+                      >
+                        {kind === 'members' ? '移除' : '删除'}
+                      </Button>
+                    )}
+                  {member &&
+                    !member.owner &&
+                    member.status === 'ACTIVE' &&
+                    canManage(session, 'members', 'update') && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={busy}
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `将所有者转移给 ${member.username}？你将失去所有者权限。`,
+                            )
+                          )
+                            void mutate(() => transferOwner(member.id));
+                        }}
+                      >
+                        转移所有者
+                      </Button>
+                    )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {editing !== null && (
+        <Editor
+          title={`${editing === 'new' ? '新增' : '编辑'}${titles[kind]}`}
+          description="保存后立即生效。"
+          close={() => {
+            if (!busy) setEditing(null);
+          }}
+        >
+          {kind === 'roles' ? (
+            <RoleForm
+              role={roles.find((r) => r.id === editing)}
+              permissions={permissions}
+              busy={busy}
+              save={(input) =>
+                mutate(() =>
+                  saveAdministration('roles', editing === 'new' ? undefined : editing, input),
+                )
+              }
+            />
+          ) : kind === 'members' ? (
+            <MemberForm
+              member={members.find((m) => m.id === editing)}
+              roles={roles}
+              departments={departments}
+              busy={busy}
+              save={(input) =>
+                mutate(() =>
+                  saveAdministration('members', editing === 'new' ? undefined : editing, input),
+                )
+              }
+            />
+          ) : kind === 'children' ? (
+            <ChildForm
+              child={children.find((c) => c.id === editing)}
+              busy={busy}
+              save={(input) =>
+                mutate(() =>
+                  saveAdministration('children', editing === 'new' ? undefined : editing, input),
+                )
+              }
+            />
+          ) : (
+            <DepartmentForm
+              department={departments.find((d) => d.id === editing)}
+              busy={busy}
+              save={(name) =>
+                mutate(() =>
+                  saveAdministration('departments', editing === 'new' ? undefined : editing, {
+                    name,
+                  }),
+                )
+              }
+            />
+          )}
+        </Editor>
+      )}
+    </section>
+  );
+}
+
+function Form({
+  children,
+  busy,
+  submit,
+}: {
+  children: ReactNode;
+  busy: boolean;
+  submit: () => Promise<void>;
+}) {
+  return (
+    <form
+      className="max-h-[70vh] space-y-4 overflow-y-auto p-1"
+      onSubmit={(e: FormEvent) => {
+        e.preventDefault();
+        if (!busy) void submit();
+      }}
+    >
+      <fieldset disabled={busy} className="space-y-4">
+        {children}
+        <Button type="submit" disabled={busy}>
+          {busy ? '保存中…' : '保存'}
+        </Button>
+      </fieldset>
+    </form>
+  );
+}
+function RoleForm({
+  role,
+  permissions,
+  busy,
+  save,
+}: {
+  role: RoleView | undefined;
+  permissions: PermissionView[];
+  busy: boolean;
+  save: (
+    input: import('../../../../../packages/api-contracts/src/catalog').RoleInput,
+  ) => Promise<void>;
+}) {
+  const [code, setCode] = useState(role?.code ?? '');
+  const [name, setName] = useState(role?.name ?? '');
+  const [status, setStatus] = useState(role?.status ?? 'ACTIVE');
+  const [selected, setSelected] = useState(role?.permissions ?? []);
+  const pages = [...new Map(permissions.map((p) => [p.pageCode, p.pageName])).entries()];
+  return (
+    <Form busy={busy} submit={() => save({ code, name, status, permissions: selected })}>
+      <Field label="角色编码">
+        <input
+          className={control}
+          required
+          pattern="[A-Z][A-Z0-9_-]{0,63}"
+          maxLength={64}
+          value={code}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+        />
+      </Field>
+      <Field label="角色名称">
+        <input
+          className={control}
+          required
+          maxLength={100}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </Field>
+      <Status value={status} change={setStatus} />
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <caption className="pb-2 text-left font-medium">页面权限</caption>
+          <thead>
+            <tr>
+              <th className="p-2 text-left">页面</th>
+              {Object.values(actionLabels).map((label) => (
+                <th className="p-2" key={label}>
+                  {label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {pages.map(([page, label]) => (
+              <tr key={page}>
+                <th className="p-2 text-left font-normal">{label}</th>
+                {Object.entries(actionLabels).map(([action, title]) => {
+                  const code = `${page}.${action}`;
+                  const exists = permissions.some((p) => p.code === code);
+                  return (
+                    <td key={action} className="p-2 text-center">
+                      <input
+                        type="checkbox"
+                        aria-label={`${label}·${title}`}
+                        disabled={!exists}
+                        checked={selected.includes(code)}
+                        onChange={(e) =>
+                          setSelected(togglePermission(selected, code, e.target.checked))
+                        }
+                      />
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Form>
+  );
+}
+function Status({
+  value,
+  change,
+  suspended = false,
+  disabled = false,
+}: {
+  value: string;
+  change: (value: string) => void;
+  suspended?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <Field label="状态">
+      <select
+        className={control}
+        value={value}
+        onChange={(e) => change(e.target.value)}
+        disabled={disabled}
+      >
+        <option value="ACTIVE">启用</option>
+        <option value={suspended ? 'SUSPENDED' : 'INACTIVE'}>{suspended ? '暂停' : '停用'}</option>
+      </select>
+    </Field>
+  );
+}
+function MemberForm({
+  member,
+  roles,
+  departments,
+  busy,
+  save,
+}: {
+  member: MemberView | undefined;
+  roles: RoleView[];
+  departments: DepartmentView[];
+  busy: boolean;
+  save: (
+    input:
+      | import('../../../../../packages/api-contracts/src/catalog').MemberInput
+      | import('../../../../../packages/api-contracts/src/catalog').MemberUpdate,
+  ) => Promise<void>;
+}) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [status, setStatus] = useState(member?.status ?? 'ACTIVE');
+  const [departmentId, setDepartment] = useState(member?.departmentId ?? '');
+  const [assignments, setAssignments] = useState<AssignmentInput[]>(member?.assignments ?? []);
+  return (
+    <Form
+      busy={busy}
+      submit={() =>
+        save({
+          ...(member ? {} : { username, password: password || null }),
+          status,
+          departmentId: departmentId || null,
+          assignments,
+        })
+      }
+    >
+      {!member && (
+        <AccountFields
+          username={username}
+          setUsername={setUsername}
+          password={password}
+          setPassword={setPassword}
+        />
+      )}
+      <Status value={status} change={setStatus} disabled={member?.owner ?? false} />
+      <Field label="所属部门">
+        <select
+          className={control}
+          value={departmentId}
+          onChange={(e) => setDepartment(e.target.value)}
+          required={assignments.some((a) => a.scopeMode === 'DEPARTMENT')}
+        >
+          <option value="">未设置部门</option>
+          {departments.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <fieldset disabled={member?.owner ?? false} className="space-y-3">
+        <legend className="mb-2 text-sm font-medium">角色与数据范围</legend>
+        {roles
+          .filter(
+            (r) =>
+              !r.system && (r.status === 'ACTIVE' || assignments.some((a) => a.roleId === r.id)),
+          )
+          .map((r) => (
+            <Field key={r.id} label={r.name}>
+              <select
+                className={control}
+                value={assignments.find((a) => a.roleId === r.id)?.scopeMode ?? ''}
+                onChange={(e) =>
+                  setAssignments(assignRole(assignments, r.id, e.target.value || null))
+                }
+              >
+                <option value="">不分配</option>
+                {Object.entries(scopeLabels)
+                  .filter(
+                    ([scope]) =>
+                      scope === 'ALL' || r.permissions.every((p) => p.startsWith('catalog.')),
+                  )
+                  .map(([scope, label]) => (
+                    <option key={scope} value={scope}>
+                      {label}
+                    </option>
+                  ))}
+              </select>
+            </Field>
+          ))}
+      </fieldset>
+    </Form>
+  );
+}
+function AccountFields({
+  username,
+  setUsername,
+  password,
+  setPassword,
+}: {
+  username: string;
+  setUsername: (v: string) => void;
+  password: string;
+  setPassword: (v: string) => void;
+}) {
+  return (
+    <>
+      <Field label="账号">
+        <input
+          className={control}
+          required
+          maxLength={100}
+          autoComplete="off"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+      </Field>
+      <Field
+        label="新账号密码"
+        hint="添加已有账号时留空。新建账号需设置 12–72 位密码；不会修改已有账号密码。"
+      >
+        <input
+          className={control}
+          type="password"
+          minLength={12}
+          maxLength={72}
+          autoComplete="new-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </Field>
+    </>
+  );
+}
+function ChildForm({
+  child,
+  busy,
+  save,
+}: {
+  child: ChildView | undefined;
+  busy: boolean;
+  save: (
+    input:
+      | import('../../../../../packages/api-contracts/src/catalog').ChildInput
+      | import('../../../../../packages/api-contracts/src/catalog').ChildUpdate,
+  ) => Promise<void>;
+}) {
+  const [code, setCode] = useState('');
+  const [name, setName] = useState(child?.name ?? '');
+  const [status, setStatus] = useState(child?.status ?? 'ACTIVE');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  return (
+    <Form
+      busy={busy}
+      submit={() =>
+        save(
+          child
+            ? { name, status }
+            : { code, name, ownerUsername: username, ownerPassword: password || null },
+        )
+      }
+    >
+      {!child && (
+        <Field label="租户编码">
+          <input
+            className={control}
+            required
+            pattern="[A-Z][A-Z0-9_-]{0,63}"
+            value={code}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
+          />
+        </Field>
+      )}
+      <Field label="租户名称">
+        <input
+          className={control}
+          required
+          maxLength={100}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </Field>
+      {child ? (
+        <Status suspended value={status} change={setStatus} />
+      ) : (
+        <fieldset className="space-y-3">
+          <legend className="mb-2 text-sm font-medium">首位所有者</legend>
+          <AccountFields
+            username={username}
+            setUsername={setUsername}
+            password={password}
+            setPassword={setPassword}
+          />
+        </fieldset>
+      )}
+    </Form>
+  );
+}
+function DepartmentForm({
+  department,
+  busy,
+  save,
+}: {
+  department: DepartmentView | undefined;
+  busy: boolean;
+  save: (name: string) => Promise<void>;
+}) {
+  const [name, setName] = useState(department?.name ?? '');
+  return (
+    <Form busy={busy} submit={() => save(name)}>
+      <Field label="部门名称">
+        <input
+          className={control}
+          required
+          maxLength={100}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </Field>
+    </Form>
+  );
+}
