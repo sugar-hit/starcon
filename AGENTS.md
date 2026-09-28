@@ -136,6 +136,7 @@ starcon 是 SaaS，**所有业务表必须带 `tenant_id` NOT NULL**，DB 层启
 | ------------------------------- | -------------------------- | ------------ | -------------- |
 | 架构决策（不可逆）              | `docs/decisions/000N-*.md` | 永久         | 人 + AI        |
 | 系统设计（活文档）              | `docs/architecture/`       | 演进         | 人 + AI        |
+| **系统功能蓝图**（四级功能目录）| `docs/product/capability-blueprint/` | 演进 | 人 + AI |
 | 视觉规范（设计令牌 / 组件调性） | `docs/design/`             | 演进         | 前端 + AI      |
 | 产品需求                        | `docs/product/prds/`       | 演进         | 人             |
 | 跨模块 TODO                     | `docs/backlog/`            | 临时集中     | AI（自动）     |
@@ -157,6 +158,7 @@ starcon 是 SaaS，**所有业务表必须带 `tenant_id` NOT NULL**，DB 层启
 - 我想看平台对接 → `backend/services/channel/`
 - 我想看租户上下文实现 → `backend/libraries/tenancy/`
 - 我想看数据模型 / 表结构设计 → `db/schemas/`（当前设计入口 `db/schemas/v2/README.md`，写迁移前必读；旧稿不可直接执行）
+- 我想知道这个功能该放在哪 / 系统应该有哪些功能 → `docs/product/capability-blueprint/README.md`（18 系统 × 四级目录，每个模块有职责/输入/输出/关系）
 - 我想看 DB 迁移 → `backend/services/<name>/src/main/resources/db/migration/`（Flyway）
 - 我想看前后端契约 → `packages/api-contracts/`（生成物，只读）
 - 我想看 ADR → `docs/decisions/`（**动手前先查有没有已决策的同类问题**）
