@@ -91,8 +91,21 @@ describe('菜单结构自洽', () => {
   });
 
   it('已实现任务页与菜单条目一一对应', () => {
+    // /channels 是跨职能的固定入口（见 nav-config 的 TOP_LEVEL_ITEMS），不属于任何一个
+    // 职能系统，因此 NAV_DESTINATIONS 不含它。不变量是"每个已实现页面都有入口"，
+    // 而不是"入口数 == 页面数"。
+    const businessPages = IMPLEMENTED_TASK_PAGES.filter((p) => !isAccountDomain(p.domain));
+    const topLevel = new Set(TOP_LEVEL_ITEMS.map((i) => i.href));
+    const businessDestinations = NAV_DESTINATIONS.map((i) => i.href);
+    for (const page of businessPages) {
+      expect(
+        businessDestinations.includes(page.href) || topLevel.has(page.href),
+        `${page.href} 既不在业务菜单也不在顶层入口中`,
+      ).toBe(true);
+    }
+    // 业务系统下的页面仍然必须恰好对应一个子菜单条目
     expect(NAV_DESTINATIONS).toHaveLength(
-      IMPLEMENTED_TASK_PAGES.filter((p) => !isAccountDomain(p.domain)).length,
+      businessPages.filter((p) => !topLevel.has(p.href)).length,
     );
   });
 

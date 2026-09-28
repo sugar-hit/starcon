@@ -1,5 +1,6 @@
 package com.starcon.channel;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -150,8 +151,9 @@ public final class ChannelModels {
       @NotBlank @Pattern(regexp = "[A-Za-z0-9_-]{1,64}", message = "店铺编码只允许字母数字下划线中划线") String code,
       @NotBlank @Size(max = 150) String name,
       @NotBlank String platformCode,
-      UUID connectionId,
-      UUID legalEntityId,
+      // 连接与法人可留空：新建店铺时往往先建档再授权，连接可稍后在详情页绑定
+      @Schema(nullable = true) UUID connectionId,
+      @Schema(nullable = true) UUID legalEntityId,
       @NotBlank String operatingMode,
       /**
        * 乐观锁版本号。

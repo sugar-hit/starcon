@@ -20,6 +20,15 @@ export interface TaskPage {
 }
 export const TASK_PAGES: TaskPage[] = [
   {
+    href: '/channels',
+    implemented: true,
+    domain: 'channels',
+    label: '渠道与店铺',
+    description: '平台目录、授权连接、店铺档案与启用站点。',
+    fields: ['平台', '连接状态', '店铺', '经营模式', '启用站点', '凭据有效期'],
+    workflow: ['选平台', '授权连接', '建店铺并启用站点'],
+  },
+  {
     href: '/products',
     implemented: true,
     domain: 'products',

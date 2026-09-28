@@ -466,11 +466,14 @@ public class ChannelService {
     UUID platformId = one(UUID.class, "select id from platform where code=?", input.platformCode());
     if (platformId == null)
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "平台不存在或尚未开放接入");
-    if (input.connectionId() != null) {
+    // 新建店铺时连接与法人可以尚未选定；空串不是合法输入，Jackson 会在绑定阶段拒绝
+    UUID connectionId = input.connectionId();
+    UUID legalEntityId = input.legalEntityId();
+    if (connectionId != null) {
       Integer owned =
           one(Integer.class,
               "select 1 from channel_connection where tenant_id=? and id=? and platform_id=?",
-              actor.tenantId(), input.connectionId(), platformId);
+              actor.tenantId(), connectionId, platformId);
       if (owned == null)
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "所选连接不属于该平台或当前租户");
     }
@@ -481,8 +484,8 @@ public class ChannelService {
         id,
         actor.tenantId(),
         platformId,
-        input.connectionId(),
-        input.legalEntityId(),
+        connectionId,
+        legalEntityId,
         input.code(),
         input.name(),
         input.operatingMode());

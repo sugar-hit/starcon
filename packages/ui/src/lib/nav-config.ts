@@ -19,6 +19,7 @@ import {
   TrendingUp,
   BarChart3,
   Users,
+  Link2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -31,9 +32,13 @@ import type { LucideIcon } from 'lucide-react';
  *   物流     — 物流中心
  *   仓储     — 仓储中心 / 库存中心
  *
- * 顶层固定项 × 2（不属于任何系统）:
+ * 顶层固定项 × 3（不属于任何系统）:
  *   工作台   —  /        首页 dashboard
+ *   渠道店铺 — /channels 平台目录 / 授权连接 / 店铺与站点
  *   AI Copilot — /copilot
+ *
+ * /channels 是蓝图 §7 列出的跨 Tab 入口：所有平台同步的前置条件，
+ * 每个职能角色都要用，因此不属于任何一个职能系统。
  */
 
 export type SystemId = 'dev' | 'ops' | 'logistics' | 'storage';
@@ -167,6 +172,7 @@ export const ACCOUNT_DESTINATIONS: readonly { label: string; href: string }[] = 
 /** 顶层固定项 — 侧栏顶部，不属于任何系统 */
 export const TOP_LEVEL_ITEMS: NavItem[] = [
   { label: '工作台', href: '/', icon: LayoutDashboard, description: '今日待办与关键指标' },
+  { label: '渠道与店铺', href: '/channels', icon: Link2, description: '平台授权、店铺与站点' },
   { label: 'AI Copilot', href: '/copilot', icon: TrendingUp, description: 'AI 助手与自动化' },
 ];
 

@@ -2,22 +2,74 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const cookieName = 'starcon_session';
 const legacyCookieName = 'starcon_catalog_session';
-const allowed =
-  /^(auth\/(login|logout|session|memberships|switch)|identity\/(?:permissions|owner-transfer|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?)|catalog\/(products(?:\/[0-9a-f-]+(?:\/(?:attributes|skus)(?:\/[0-9a-f-]+)?)?)?|records\/(research|compliance|assets)(?:\/[0-9a-f-]+)?))$/;
+
+/**
+ * Upstream routing.
+ *
+ * <p>Each backend service owns a prefix and its own database; the browser never talks to them
+ * directly. A path is only proxied when it matches a service's allowlist — unknown paths must 404
+ * here rather than being forwarded, so a typo cannot reach a service that would treat it as valid.
+ *
+ * <p>The full path is forwarded upstream, prefix included: the services expose their own namespace
+ * (`/identity/roles`, `/catalog/products`) and the browser's /api mount is only a local alias.
+ */
+const services: readonly {
+  prefix: string;
+  pattern: RegExp;
+  env: string;
+  fallback: string;
+}[] = [
+  {
+    prefix: 'auth/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern: /^(login|logout|session|memberships|switch)$/,
+  },
+  {
+    prefix: 'identity/',
+    env: 'IDENTITY_URL',
+    fallback: 'http://127.0.0.1:8081',
+    pattern:
+      /^(permissions|owner-transfer|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?)$/,
+  },
+  {
+    prefix: 'catalog/',
+    env: 'CATALOG_URL',
+    fallback: 'http://127.0.0.1:8082',
+    pattern:
+      /^(products(?:\/[0-9a-f-]+(?:\/(?:attributes|skus)(?:\/[0-9a-f-]+)?)?)?|records\/(research|compliance|assets)(?:\/[0-9a-f-]+)?)$/,
+  },
+  {
+    // 02 渠道与店铺：平台目录、授权连接、店铺与站点。
+    // health/reminders 属于连接健康，marketplace 挂在店铺下，transfer 是负责人转让。
+    prefix: 'channel/',
+    env: 'CHANNEL_URL',
+    fallback: 'http://127.0.0.1:8083',
+    pattern:
+      /^(platforms(?:\/[A-Za-z0-9_]+\/enums)?|connections(?:\/(?:reminders|[0-9a-f-]+(?:\/(?:credential|health|revoke))?))?|shops(?:\/[0-9a-f-]+(?:\/(?:marketplaces(?:\/[0-9a-f-]+)?|transfer))?)?)$/,
+  },
+];
+
+function resolve(path: string) {
+  for (const service of services) {
+    if (!path.startsWith(service.prefix)) continue;
+    if (service.pattern.test(path.slice(service.prefix.length)))
+      return { base: process.env[service.env] ?? service.fallback };
+  }
+  return null;
+}
 
 export async function proxy(request: NextRequest, context: { params: { path: string[] } }) {
   const path = context.params.path.join('/');
-  if (!allowed.test(path)) return NextResponse.json({ message: '接口不存在' }, { status: 404 });
+  const target = resolve(path);
+  if (!target) return NextResponse.json({ message: '接口不存在' }, { status: 404 });
   if (
     !['GET', 'HEAD'].includes(request.method) &&
     request.headers.get('origin') !== request.nextUrl.origin
   ) {
     return NextResponse.json({ message: '请求来源不正确' }, { status: 403 });
   }
-  const identity = path.startsWith('auth/') || path.startsWith('identity/');
-  const base = identity
-    ? (process.env.IDENTITY_URL ?? 'http://127.0.0.1:8081')
-    : (process.env.CATALOG_URL ?? 'http://127.0.0.1:8082');
+  const { base } = target;
   const body = request.method === 'GET' ? undefined : await request.text();
   if (body && body.length > 200_000)
     return NextResponse.json({ message: '请求内容过大' }, { status: 413 });

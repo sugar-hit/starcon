@@ -26,14 +26,17 @@ it('every task is uniquely addressable and has matching nav/header metadata', ()
 
 it('业务菜单只承载业务页面，账户页面走账户通道', () => {
   // ce5c78e 起组织与权限已移出业务系统，改由账户卡片进入。
-  // 业务菜单条目数 = 已实现的业务任务页数，既不等于全部任务页数，也不等于域条目数。
-  expect(NAV_DESTINATIONS).toHaveLength(BUSINESS_TASKS.length);
+  // 业务菜单条目数 = 已实现的业务任务页数减去顶层固定页（如 /channels），既不等于全部任务页数，
+  // 也不等于域条目数。账户页永远不进业务菜单。
+  const topLevel = new Set(TOP_LEVEL_ITEMS.map((i) => i.href));
+  const inBusinessMenu = BUSINESS_TASKS.filter((p) => !topLevel.has(p.href));
+  expect(NAV_DESTINATIONS).toHaveLength(inBusinessMenu.length);
   expect(NAV_DESTINATIONS.length).toBeLessThan(TASK_PAGES.length);
   expect(ACCOUNT_TASKS.length).toBeGreaterThan(0);
   for (const page of ACCOUNT_TASKS) {
     expect(NAV_DESTINATIONS.some((item) => item.href === page.href)).toBe(false);
   }
-  for (const page of BUSINESS_TASKS) {
+  for (const page of inBusinessMenu) {
     expect(NAV_DESTINATIONS.some((item) => item.href === page.href)).toBe(true);
   }
 });
