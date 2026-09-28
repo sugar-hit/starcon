@@ -8,6 +8,7 @@ import type { Access, LoginResult } from '../../../../../packages/api-contracts/
 import { api, ApiError } from '@/lib/api';
 import { loginDestination } from '@/lib/identity-navigation';
 import { Field, control } from '../common/fields';
+import { LoginScene } from './login-scene';
 
 type Identity = { session: Access; reload: () => Promise<void> };
 const Context = createContext<Identity | null>(null);
@@ -84,23 +85,25 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
   if (pathname === '/styleguide') return <AppShell>{children}</AppShell>;
   if (!ready)
     return (
-      <p role="status" className="p-8">
-        正在验证登录状态…
-      </p>
+      <LoginScene>
+        <p role="status" className="text-muted-foreground py-20 text-center text-sm">
+          正在验证登录状态…
+        </p>
+      </LoginScene>
     );
   if (!session)
     return (
-      <main className="bg-background flex min-h-dvh items-center justify-center p-5">
-        <section className="bg-card w-full max-w-md space-y-6 rounded-xl border p-8">
+      <LoginScene>
+        <div className="space-y-7">
           <div>
-            <p className="text-brand text-sm font-semibold">STARCON · 跨境电商 ERP</p>
-            <h1 className="mt-3 text-2xl font-semibold">登录 Starcon</h1>
-            <p className="text-muted-foreground mt-2 text-sm">
-              一个账号，进入你获授权的企业工作空间。
+            <p className="text-muted-foreground mb-3 text-xs tracking-[0.12em]">
+              你的业务，从这里启程
             </p>
+            <h1 className="text-2xl font-semibold tracking-tight">登录 Starcon</h1>
+            <p className="text-muted-foreground mt-2 text-sm">欢迎回来，请登录你的企业工作空间。</p>
           </div>
           <form
-            className="space-y-4"
+            className="space-y-5"
             onSubmit={async (event) => {
               event.preventDefault();
               setBusy(true);
@@ -135,7 +138,8 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
               <input
                 required
                 autoComplete="username"
-                className={control}
+                placeholder="输入你的账号"
+                className={`${control} h-11 bg-white`}
                 value={username}
                 onChange={(e) => {
                   setUsername(e.target.value);
@@ -149,7 +153,8 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
                 required
                 type="password"
                 autoComplete="current-password"
-                className={control}
+                placeholder="输入登录密码"
+                className={`${control} h-11 bg-white`}
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
@@ -180,15 +185,17 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
                 {error}
               </p>
             )}
-            <Button className="w-full" type="submit" disabled={busy}>
+            <Button className="h-11 w-full" type="submit" disabled={busy}>
               {busy ? '登录中…' : choices.length ? '进入工作空间' : '登录'}
             </Button>
           </form>
-          <p className="text-muted-foreground text-xs">
-            没有账号或无法登录？请联系企业管理员开通成员身份。
+          <p className="text-muted-foreground border-t pt-5 text-xs leading-6">
+            没有账号或无法登录？
+            <br />
+            请联系企业管理员开通成员身份。
           </p>
-        </section>
-      </main>
+        </div>
+      </LoginScene>
     );
   const account = (
     <Popover open={accountOpen} onOpenChange={setAccountOpen}>
