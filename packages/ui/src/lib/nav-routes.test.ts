@@ -1,85 +1,110 @@
 import { it, expect, describe } from 'vitest';
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { NAV_DESTINATIONS, SYSTEMS, TOP_LEVEL_ITEMS, ACCOUNT_DESTINATIONS } from './nav-config';
-import { TASK_PAGES } from './task-pages';
+import { TASK_PAGES, IMPLEMENTED_TASK_PAGES, isAccountDomain, findTaskPage } from './task-pages';
 
 /**
- * 菜单与路由的单一守卫。
+ * 菜单与真实页面的守卫。
  *
- * 背景：功能蓝图 docs/product/capability-blueprint/README.md §7 列出了
- * /channels、/ads、/logistics/customs、/finance/costing、/settings/approvals
- * 等入口，但这些页面尚未实现。菜单必须只暴露真实存在的路由——
- * 否则用户点进去是 404，等于「有名字没功能」。
- * 这条测试让"先有页面、后有菜单"成为硬约束，而不是靠自觉。
+ * 背景：功能蓝图 docs/product/capability-blueprint/README.md 规划了 18 系统、465 个模块，
+ * 但实现是分批推进的。此前 TASK_PAGES 里有 37 个任务页并没有对应的 page.tsx，
+ * 点击后落到 [...slug] 兜底页——菜单看起来很全，实际点进去是空。
+ *
+ * 本测试把「implemented 标记」与真实文件系统对照：
+ *   - 标记为 true  → 必须真的存在 page.tsx
+ *   - 标记为 false → 不允许出现在任何菜单里
+ *
+ * 注意：这里**不能**把 [...slug] 当作兜底放行。上一版的守卫就是因此失效的，
+ * 37 个不存在的页面全部「通过」了。
  */
 
 const APP_DIR = join(process.cwd(), 'apps/web/src/app');
 
-/** 扫描 Next.js app 目录，收集真实存在的页面路由。 */
-function collectRoutes(dir: string, prefix = ''): Set<string> {
-  const routes = new Set<string>();
-  if (!existsSync(dir)) return routes;
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name.startsWith('.') || entry.name.startsWith('_')) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      const segment = entry.name.startsWith('[') ? '' : entry.name;
-      for (const route of collectRoutes(full, `${prefix}/${segment}`)) routes.add(route);
-      if (existsSync(join(full, 'page.tsx'))) routes.add(`${prefix}/${segment}`.replace(/\/$/, '') || '/');
-    } else if (entry.name === 'page.tsx') {
-      routes.add(prefix === '' ? '/' : prefix);
-    }
-  }
-  return routes;
+function hasPage(href: string): boolean {
+  return href === '/'
+    ? existsSync(join(APP_DIR, 'page.tsx'))
+    : existsSync(join(APP_DIR, href.replace(/^\//, ''), 'page.tsx'));
 }
 
-const ROUTES = collectRoutes(APP_DIR);
-
-/** 动态段（[...slug]）能兜住任意路径，这里单列出来豁免具体性检查。 */
-const CATCH_ALL = '/[...slug]';
-
-function isRoutable(href: string): boolean {
-  if (existsSync(join(process.cwd(), `apps/web/src/app${CATCH_ALL}`))) return true;
-  return ROUTES.has(href);
-}
-
-describe('菜单入口必须指向真实页面', () => {
-  it('至少扫描到 app 路由（防止路径写错导致全部通过）', () => {
-    expect(ROUTES.size).toBeGreaterThan(10);
-    expect(ROUTES.has('/orders')).toBe(true);
+describe('implemented 标记必须与真实文件系统一致', () => {
+  it('每个任务页的 implemented 标记都符合真实路由', () => {
+    const wrong = TASK_PAGES.filter((page) => page.implemented !== hasPage(page.href)).map(
+      (page) => `${page.href} 标记=${page.implemented} 实际=${hasPage(page.href)}`,
+    );
+    expect(wrong).toEqual([]);
   });
 
-  it('业务系统入口全部可路由', () => {
-    for (const system of SYSTEMS)
-      for (const item of system.items) {
-        expect(isRoutable(item.href), `${system.label}/${item.label} -> ${item.href} 没有对应页面`).toBe(
-          true,
-        );
-      }
-  });
-
-  it('业务子页面全部可路由', () => {
-    for (const item of NAV_DESTINATIONS) {
-      expect(isRoutable(item.href), `子页面 ${item.href} 没有对应页面`).toBe(true);
-    }
-  });
-
-  it('顶层固定项与账户入口全部可路由', () => {
-    for (const item of TOP_LEVEL_ITEMS) expect(isRoutable(item.href)).toBe(true);
-    for (const item of ACCOUNT_DESTINATIONS) expect(isRoutable(item.href)).toBe(true);
+  it('有真实页面的任务页不能被标成未实现（防止漏做入口）', () => {
+    const missing = TASK_PAGES.filter((page) => hasPage(page.href) && !page.implemented);
+    expect(missing.map((p) => p.href)).toEqual([]);
   });
 });
 
-describe('任务页与菜单入口一一对应', () => {
-  it('任务页都有实现页面', () => {
-    for (const page of TASK_PAGES) {
-      expect(isRoutable(page.href), `任务页 ${page.href} 没有对应页面`).toBe(true);
+describe('菜单只暴露已实现页面', () => {
+  it('业务系统入口全部有真实页面', () => {
+    for (const system of SYSTEMS)
+      for (const item of system.items) {
+        expect(hasPage(item.href), `${system.label}/${item.label} -> ${item.href} 无页面`).toBe(true);
+      }
+  });
+
+  it('业务子页面全部已实现且有真实页面', () => {
+    for (const item of NAV_DESTINATIONS) {
+      const page = findTaskPage(item.href);
+      expect(page, `${item.href} 不是任务页`).toBeDefined();
+      expect(page!.implemented, `${item.href} 未实现却出现在菜单`).toBe(true);
+      expect(hasPage(item.href), `${item.href} 无真实页面`).toBe(true);
+    }
+  });
+
+  it('顶层固定项与账户入口全部已实现且有真实页面', () => {
+    for (const item of TOP_LEVEL_ITEMS) {
+      expect(hasPage(item.href), `顶层项 ${item.href} 无页面`).toBe(true);
+    }
+    for (const item of ACCOUNT_DESTINATIONS) {
+      expect(hasPage(item.href), `账户入口 ${item.href} 无页面`).toBe(true);
+      const page = findTaskPage(item.href);
+      expect(page?.implemented, `账户入口 ${item.href} 未实现`).toBe(true);
+    }
+  });
+
+  it('未实现的任务页不得进入任何菜单', () => {
+    const menuHrefs = new Set<string>([
+      ...NAV_DESTINATIONS.map((i) => i.href),
+      ...ACCOUNT_DESTINATIONS.map((i) => i.href),
+      ...SYSTEMS.flatMap((s) => s.items.map((i) => i.href)),
+      ...TOP_LEVEL_ITEMS.map((i) => i.href),
+    ]);
+    for (const page of TASK_PAGES.filter((p) => !p.implemented)) {
+      expect(menuHrefs.has(page.href), `${page.href} 未实现却出现在菜单`).toBe(false);
+    }
+  });
+});
+
+describe('菜单结构自洽', () => {
+  it('业务系统分组不出现空子页', () => {
+    for (const system of SYSTEMS)
+      for (const item of system.items) {
+        expect(item.children?.length, `${system.label}/${item.label} 没有子页面`).toBeGreaterThan(0);
+      }
+  });
+
+  it('已实现任务页与菜单条目一一对应', () => {
+    expect(NAV_DESTINATIONS).toHaveLength(
+      IMPLEMENTED_TASK_PAGES.filter((p) => !isAccountDomain(p.domain)).length,
+    );
+  });
+
+  it('账户域已实现页面全部有入口，无孤儿', () => {
+    const accountHrefs = new Set(ACCOUNT_DESTINATIONS.map((d) => d.href));
+    for (const page of IMPLEMENTED_TASK_PAGES.filter((p) => isAccountDomain(p.domain))) {
+      expect(accountHrefs.has(page.href), `账户页 ${page.href} 没有入口`).toBe(true);
     }
   });
 
   it('菜单入口不重复', () => {
-    const hrefs = NAV_DESTINATIONS.map((item) => item.href);
+    const hrefs = NAV_DESTINATIONS.map((i) => i.href);
     expect(new Set(hrefs).size).toBe(hrefs.length);
   });
 });

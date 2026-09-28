@@ -1,5 +1,5 @@
 import { it, expect } from 'vitest';
-import { TASK_PAGES, findTaskPage, isAccountDomain } from './task-pages';
+import { TASK_PAGES, IMPLEMENTED_TASK_PAGES, findTaskPage, isAccountDomain } from './task-pages';
 import {
   NAV_DESTINATIONS,
   ACCOUNT_DESTINATIONS,
@@ -10,8 +10,9 @@ import {
 } from './nav-config';
 
 /** 账户/组织页面不进入业务菜单；它们由账户卡片与账户 Tab 承载。 */
-const BUSINESS_TASKS = TASK_PAGES.filter((page) => !isAccountDomain(page.domain));
-const ACCOUNT_TASKS = TASK_PAGES.filter((page) => isAccountDomain(page.domain));
+// 菜单只承载「已实现」页面；未实现的仍留在 TASK_PAGES 作为设计登记，但不进导航。
+const BUSINESS_TASKS = IMPLEMENTED_TASK_PAGES.filter((page) => !isAccountDomain(page.domain));
+const ACCOUNT_TASKS = IMPLEMENTED_TASK_PAGES.filter((page) => isAccountDomain(page.domain));
 
 it('every task is uniquely addressable and has matching nav/header metadata', () => {
   expect(new Set(TASK_PAGES.map((page) => page.href)).size).toBe(TASK_PAGES.length);
@@ -25,8 +26,9 @@ it('every task is uniquely addressable and has matching nav/header metadata', ()
 
 it('业务菜单只承载业务页面，账户页面走账户通道', () => {
   // ce5c78e 起组织与权限已移出业务系统，改由账户卡片进入。
-  // 因此业务菜单条目数等于「业务任务页数」，不再等于全部任务页数。
+  // 业务菜单条目数 = 已实现的业务任务页数，既不等于全部任务页数，也不等于域条目数。
   expect(NAV_DESTINATIONS).toHaveLength(BUSINESS_TASKS.length);
+  expect(NAV_DESTINATIONS.length).toBeLessThan(TASK_PAGES.length);
   expect(ACCOUNT_TASKS.length).toBeGreaterThan(0);
   for (const page of ACCOUNT_TASKS) {
     expect(NAV_DESTINATIONS.some((item) => item.href === page.href)).toBe(false);
@@ -41,6 +43,15 @@ it('业务页面的标题与其所属系统导航一致', () => {
     expect(resolveFeatureFromPath(page.href, resolveSystemFromPath(page.href))?.label).toBe(
       page.label,
     );
+  }
+});
+
+it('未实现的任务页仍保留设计登记，但不进菜单', () => {
+  const planned = TASK_PAGES.filter((page) => !page.implemented);
+  expect(planned.length).toBeGreaterThan(0);
+  for (const page of planned) {
+    expect(page.label.length).toBeGreaterThan(0);
+    expect(page.workflow).toHaveLength(3);
   }
 });
 
