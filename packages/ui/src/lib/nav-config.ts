@@ -1,4 +1,9 @@
-import { ACCOUNT_MENU_ORDER, TASK_PAGES, findTaskPage, isAccountDomain } from './task-pages';
+import {
+  ACCOUNT_MENU_ORDER,
+  IMPLEMENTED_TASK_PAGES,
+  findTaskPage,
+  isAccountDomain,
+} from './task-pages';
 import {
   LayoutDashboard,
   Package,
@@ -127,7 +132,7 @@ export const SYSTEMS: SystemDef[] = [devSystem, opsSystem, logisticsSystem, stor
     ...system,
     items: system.items.map((item) => ({
       ...item,
-      children: TASK_PAGES.filter(
+      children: IMPLEMENTED_TASK_PAGES.filter(
         (page) => page.domain === item.href.slice(1) && !isAccountDomain(page.domain),
       ),
     })),
@@ -147,13 +152,17 @@ export const NAV_DESTINATIONS: NavItem[] = SYSTEMS.flatMap((system) =>
  * 「有页面没入口」（/org/stores、/org/permissions、/org/audit）
  * 与「有入口没页面」（/account）两类割裂，现已消除。
  */
-export const ACCOUNT_DESTINATIONS: readonly { label: string; href: string }[] = ACCOUNT_MENU_ORDER.map(
-  (href) => {
+export const ACCOUNT_DESTINATIONS: readonly { label: string; href: string }[] = ACCOUNT_MENU_ORDER.filter(
+  (href) => IMPLEMENTED_TASK_PAGES.some((page) => page.href === href),
+)
+  .map((href) => {
     const page = findTaskPage(href);
     if (!page) throw new Error(`ACCOUNT_MENU_ORDER 指向不存在的任务页：${href}`);
     return { label: page.label, href: page.href };
-  },
-).filter((destination) => !SYSTEMS.some((system) => system.items.some((i) => i.href === destination.href)));
+  })
+  .filter(
+    (destination) => !SYSTEMS.some((system) => system.items.some((i) => i.href === destination.href)),
+  );
 
 /** 顶层固定项 — 侧栏顶部，不属于任何系统 */
 export const TOP_LEVEL_ITEMS: NavItem[] = [
