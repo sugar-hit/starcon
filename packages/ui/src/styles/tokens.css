@@ -161,6 +161,14 @@
 }
 
 @layer utilities {
+  /* Workspace tabs keep native scrolling semantics without exposing platform chrome. */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
   .scrollbar-thin::-webkit-scrollbar {
     width: 4px;
   }
