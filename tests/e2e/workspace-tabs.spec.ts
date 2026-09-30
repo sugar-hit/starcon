@@ -34,6 +34,51 @@ test.describe('应用内 tab 栏', () => {
     await expect(page.getByRole('tab', { name: /全部订单/ })).toBeVisible();
   });
 
+  test('切换到工作台时保留顶部系统和左侧功能菜单', async ({ page }) => {
+    await page.goto('/orders');
+    const systemNav = page.getByRole('navigation', { name: '系统导航' });
+    const featureNav = page.getByRole('navigation', { name: '功能导航' });
+    await expect(systemNav.getByRole('link', { name: '运营', exact: true })).toHaveAttribute(
+      'aria-current',
+      'true',
+    );
+    await expect(featureNav.getByRole('button', { name: '订单中心', exact: true })).toBeVisible();
+
+    await page.getByRole('tab', { name: '工作台', exact: true }).click();
+
+    await expect(page).toHaveURL('/');
+    await expect(systemNav.getByRole('link', { name: '运营', exact: true })).toHaveAttribute(
+      'aria-current',
+      'true',
+    );
+    await expect(featureNav.getByRole('button', { name: '订单中心', exact: true })).toBeVisible();
+    await expect(featureNav.getByRole('button', { name: '商品中心', exact: true })).toHaveCount(0);
+  });
+
+  test('页面导航提交时新 tab 与新页面一起出现', async ({ page }) => {
+    await page.goto('/orders');
+    await page.route('**/products?*', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await route.continue();
+    });
+    const navigation = page
+      .getByRole('navigation', { name: '系统导航' })
+      .getByRole('link', { name: '开发', exact: true })
+      .click();
+    await expect(page.getByRole('tab', { name: /商品档案/ })).toHaveCount(0);
+    await expect(page.getByRole('tab', { name: /全部订单/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await navigation;
+    await expect(page).toHaveURL('/products');
+    await expect(page.getByRole('tab', { name: /商品档案/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await expect(page.getByRole('heading', { name: '商品档案' }).first()).toBeVisible();
+  });
+
   test('关闭 tab 后只剩其他 tab', async ({ page }) => {
     await page.goto('/orders');
     await page

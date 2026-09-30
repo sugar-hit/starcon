@@ -45,6 +45,53 @@ export type ChildInput = {
 };
 export type ChildUpdate = { name: string; status: string };
 export type ChildView = { id: string; code: string; name: string; status: string };
+export type ConnectionHealthView = {
+  connectionId: string;
+  status: string;
+  diagnosis: string;
+  recommendation: string;
+  canSync: boolean;
+  tokenExpiresAt: string;
+  daysUntilExpiry: number;
+  lastSyncAt: string;
+  lastError: string;
+};
+export type ConnectionInput = {
+  platformCode: string;
+  authorizedAccount: string;
+  displayName: string;
+};
+export type ConnectionView = {
+  id: string;
+  platformId: string;
+  platformCode: string;
+  platformName: string;
+  authorizedAccount: string;
+  displayName: string;
+  status: string;
+  syncPaused: boolean;
+  lastSyncAt: string;
+  lastError: string;
+  version: number;
+  credential: CredentialMetaView;
+  shopCount: number;
+};
+export type CredentialMetaView = {
+  id: string;
+  provider: string;
+  tokenType: string;
+  grantedScopes: string;
+  authorizedAt: string;
+  expiresAt: string;
+  rotatedAt: string;
+  status: string;
+};
+export type CredentialRotateInput = {
+  externalRef: string;
+  grantedScopes: string;
+  authorizedAt: string;
+  expiresAt: string;
+};
 export type DepartmentInput = { name: string };
 export type DepartmentView = { id: string; name: string };
 export type Detail = { product: Product; attributes: Array<Attribute>; skus: Array<Sku> };
@@ -55,6 +102,13 @@ export type EffectiveValue = {
   effectiveValues: Array<string>;
   source: string;
 };
+export type EnumMappingView = {
+  id: string;
+  platformCode: string;
+  enumKind: string;
+  externalValue: string;
+  internalValue: string;
+};
 export type Grant = {
   roleId: string;
   roleCode: string;
@@ -63,6 +117,17 @@ export type Grant = {
 };
 export type Login = { username: string; password: string; membershipId: string | null };
 export type LoginResult = { token: string | null; memberships: Array<Membership> };
+export type MarketplaceView = {
+  id: string;
+  code: string;
+  name: string;
+  countryCode: string;
+  defaultCurrency: string;
+  defaultTimezone: string;
+  defaultLocale: string;
+  currencyScale: number;
+  vatRequired: boolean;
+};
 export type MemberInput = {
   username: string;
   password: string | null;
@@ -87,6 +152,15 @@ export type MemberView = {
 export type Membership = { id: string; tenantId: string; name: string };
 export type OwnerTransfer = { membershipId: string };
 export type PermissionView = { code: string; pageCode: string; pageName: string; action: string };
+export type PlatformView = {
+  id: string;
+  code: string;
+  name: string;
+  integration: string;
+  supportStatus: string;
+  capabilities: Array<string>;
+  marketplaces: Array<MarketplaceView>;
+};
 export type Product = {
   id: string;
   code: string;
@@ -114,6 +188,14 @@ export type ProductRecord = {
   ownerId: string | null;
   departmentId: string | null;
 };
+export type ReauthorizationReminderView = {
+  connectionId: string;
+  platformCode: string;
+  authorizedAccount: string;
+  expiresAt: string;
+  daysUntilExpiry: number;
+  severity: string;
+};
 export type RecordInput = {
   spuId: string | null;
   title: string;
@@ -133,6 +215,44 @@ export type RoleView = {
   status: string;
   system: boolean;
   permissions: Array<string>;
+};
+export type ShopInput = {
+  code: string;
+  name: string;
+  platformCode: string;
+  connectionId: string | null;
+  legalEntityId: string | null;
+  operatingMode: string;
+  version: number;
+};
+export type ShopMarketplaceInput = { marketplaceCode: string; status: string };
+export type ShopMarketplaceView = {
+  marketplaceId: string;
+  marketplaceCode: string;
+  marketplaceName: string;
+  status: string;
+  enabledAt: string;
+};
+export type ShopOwnerTransferInput = { newOwnerId: string; departmentId: string };
+export type ShopView = {
+  id: string;
+  platformId: string;
+  platformCode: string;
+  platformName: string;
+  connectionId: string;
+  connectionAccount: string;
+  legalEntityId: string;
+  code: string;
+  name: string;
+  platformShopId: string;
+  operatingMode: string;
+  ownerId: string;
+  departmentId: string;
+  status: string;
+  version: number;
+  marketplaceCount: number;
+  marketplaces: Array<ShopMarketplaceView>;
+  lastSyncAt: string;
 };
 export type Sku = {
   id: string;

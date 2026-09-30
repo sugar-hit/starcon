@@ -8,7 +8,7 @@ starcon 的**单一信息源**。所有架构、产品、运维、决策、AI �
 |---|---|---|
 | [`architecture/`](architecture/) | 系统架构设计（活文档，随演进更新） | 人 + AI |
 | [`decisions/`](decisions/) | 架构决策记录 ADR（永久，不可逆追溯） | 人 + AI |
-| [`product/`](product/) | 产品 PRD / 用户故事 / 用户画像 | 产品 |
+| [`product/`](product/) | 产品 PRD / 用户故事 / 用户画像 / [系统功能蓝图](product/capability-blueprint/) | 产品 + AI |
 | [`operations/`](operations/) | 运维 Runbook / 故障复盘 / On-call 指南 | SRE |
 | [`onboarding/`](onboarding/) | 新人入职指南 / 约定 / 术语表 | 所有人 |
 | [`api/`](api/) | 自动生成的 API 文档 | CI |

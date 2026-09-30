@@ -52,6 +52,24 @@ services:
       DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
       IDENTITY_URL: http://identity:8081
       INTERNAL_KEY: ${INTERNAL_KEY}
+  channel:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.backend
+      args: { SERVICE: channel }
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+      identity: { condition: service_started }
+    ports: ['127.0.0.1:8083:8083']
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/starcon_channel
+      DB_USER: channel_app
+      DB_PASSWORD: ${APP_DB_PASSWORD}
+      DB_MIGRATION_USER: starcon_migrator
+      DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
+      IDENTITY_URL: http://identity:8081
+      INTERNAL_KEY: ${INTERNAL_KEY}
   migrate-identity:
     image: starcon-catalog-dev-identity
     profiles: [tools]
@@ -80,5 +98,20 @@ services:
       DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
       IDENTITY_URL: http://identity:8081
       INTERNAL_KEY: ${INTERNAL_KEY}
+  migrate-channel:
+    image: starcon-catalog-dev-channel
+    profiles: [tools]
+    command: ['--spring.main.web-application-type=none']
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/starcon_channel
+      DB_USER: channel_app
+      DB_PASSWORD: ${APP_DB_PASSWORD}
+      DB_MIGRATION_USER: starcon_migrator
+      DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
+      IDENTITY_URL: http://identity:8081
+      INTERNAL_KEY: ${INTERNAL_KEY}
+      LOCAL_BOOTSTRAP_ENABLED: 'false'
 volumes:
   catalog-pg-data:

@@ -6,10 +6,31 @@ export interface TaskPage {
   description: string;
   fields: string[];
   workflow: string[];
+  /**
+   * 该任务页是否已有真实页面（apps/web/src/app 下存在对应 page.tsx）。
+   *
+   * 这是「先有页面、后有菜单」的开关：未实现的页面不进导航、工作区 Tab 与搜索，
+   * 避免用户点进去落到 [...slug] 兜底页。设计意图见
+   * docs/product/capability-blueprint/README.md，功能蓝图里记录"应该有什么"，
+   * 这里只记录"现在有什么"。
+   *
+   * 该标记由 nav-routes.test.ts 对照真实文件系统校验，防止手滑写成假阳性。
+   */
+  implemented: boolean;
 }
 export const TASK_PAGES: TaskPage[] = [
   {
+    href: '/channels',
+    implemented: true,
+    domain: 'channels',
+    label: '渠道与店铺',
+    description: '平台目录、授权连接、店铺档案与启用站点。',
+    fields: ['平台', '连接状态', '店铺', '经营模式', '启用站点', '凭据有效期'],
+    workflow: ['选平台', '授权连接', '建店铺并启用站点'],
+  },
+  {
     href: '/products',
+    implemented: true,
     domain: 'products',
     label: '商品档案',
     description: '维护 SPU、SKU、自定义属性与公共值继承。',
@@ -18,6 +39,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/products/research',
+    implemented: true,
     domain: 'products',
     label: '选品与开发',
     description: '从选品线索、样品评估到开发立项，保留决策依据。',
@@ -26,6 +48,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/products/compliance',
+    implemented: true,
     domain: 'products',
     label: '合规与资质',
     description: '按销售国家与品类管理认证、品牌授权和到期提醒。',
@@ -34,6 +57,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/products/assets',
+    implemented: true,
     domain: 'products',
     label: '素材与翻译',
     description: '集中管理产品图片、文案和各站点语言版本。',
@@ -42,6 +66,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/org/roles',
+    implemented: true,
     domain: 'org',
     label: '角色配置',
     description: '为角色勾选页面权限与数据范围，保存后立即生效。',
@@ -50,6 +75,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/org/members',
+    implemented: true,
     domain: 'org',
     label: '用户与成员',
     description: '维护成员账号、所属部门与角色分配，必要时转移所有者。',
@@ -58,6 +84,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/org/departments',
+    implemented: true,
     domain: 'org',
     label: '部门管理',
     description: '维护部门作为成员归属，本部门数据范围按此判定。',
@@ -66,6 +93,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/org/children',
+    implemented: true,
     domain: 'org',
     label: '子租户管理',
     description: '创建子租户并指定首位所有者，子租户需分别授权才能访问。',
@@ -74,6 +102,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/listings',
+    implemented: true,
     domain: 'listings',
     label: '在线商品',
     description: '按平台与店铺管理在线商品、映射和同步状态。',
@@ -82,6 +111,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/listings/drafts',
+    implemented: false,
     domain: 'listings',
     label: '刊登草稿',
     description: '集中准备多站点刊登资料并进行发布前校验。',
@@ -90,6 +120,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/listings/publish',
+    implemented: false,
     domain: 'listings',
     label: '发布任务',
     description: '追踪批量刊登、平台反馈和失败重试。',
@@ -98,6 +129,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/pricing',
+    implemented: true,
     domain: 'pricing',
     label: '定价规则',
     description: '按站点、币种和成本边界维护价格策略。',
@@ -106,6 +138,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/pricing/simulation',
+    implemented: false,
     domain: 'pricing',
     label: '价格测算',
     description: '纳入采购、头程、平台费和履约成本测算售价。',
@@ -114,6 +147,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/pricing/changes',
+    implemented: false,
     domain: 'pricing',
     label: '调价记录',
     description: '审阅每次价格变更的原因、审批与平台结果。',
@@ -122,6 +156,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/purchase',
+    implemented: true,
     domain: 'purchase',
     label: '采购订单',
     description: '跟进供应商交期、到货、质检和采购结算。',
@@ -130,6 +165,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/purchase/plans',
+    implemented: false,
     domain: 'purchase',
     label: '采购计划',
     description: '将补货需求合并为可审批的采购计划。',
@@ -138,6 +174,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/purchase/receiving',
+    implemented: false,
     domain: 'purchase',
     label: '到货与质检',
     description: '登记采购到货与检验差异，关联仓库入库。',
@@ -146,6 +183,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/purchase/returns',
+    implemented: false,
     domain: 'purchase',
     label: '采购退货',
     description: '处理不良品与供应商退换货并追踪退款。',
@@ -154,6 +192,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/supply',
+    implemented: true,
     domain: 'supply',
     label: '供应商档案',
     description: '维护供应商、合作资质、联系人和账期。',
@@ -162,6 +201,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/supply/quotes',
+    implemented: false,
     domain: 'supply',
     label: '询价与报价',
     description: '比较采购报价、起订量、交期与币种。',
@@ -170,6 +210,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/supply/performance',
+    implemented: false,
     domain: 'supply',
     label: '供应商绩效',
     description: '按准时交付、质检和售后表现复核供应能力。',
@@ -178,6 +219,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/orders',
+    implemented: true,
     domain: 'orders',
     label: '全部订单',
     description: '按平台、店铺、订单状态和履约方式核对订单。',
@@ -186,6 +228,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/orders/review',
+    implemented: false,
     domain: 'orders',
     label: '订单审核',
     description: '集中处理地址、缺货、风控和商品匹配异常。',
@@ -194,6 +237,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/orders/fulfillment',
+    implemented: false,
     domain: 'orders',
     label: '待发货订单',
     description: '按发货时限、仓库与物流渠道安排订单履约。',
@@ -202,6 +246,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/orders/rules',
+    implemented: false,
     domain: 'orders',
     label: '订单规则',
     description: '配置商品匹配、分仓与审核规则并审计变更。',
@@ -210,6 +255,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/aftersales',
+    implemented: true,
     domain: 'aftersales',
     label: '售后工单',
     description: '统一跟进退款、退货、补发和平台争议。',
@@ -218,6 +264,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/aftersales/returns',
+    implemented: false,
     domain: 'aftersales',
     label: '退货入库',
     description: '追踪退件收货、检测与可售库存恢复。',
@@ -226,6 +273,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/aftersales/refunds',
+    implemented: false,
     domain: 'aftersales',
     label: '退款与补发',
     description: '核对退款币种、金额与补发履约进度。',
@@ -234,6 +282,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/crm',
+    implemented: true,
     domain: 'crm',
     label: '客户档案',
     description: '按平台聚合买家联系历史与服务记录。',
@@ -242,6 +291,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/crm/inbox',
+    implemented: false,
     domain: 'crm',
     label: '消息中心',
     description: '按店铺与平台集中处理买家消息及回复时限。',
@@ -250,6 +300,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/crm/templates',
+    implemented: false,
     domain: 'crm',
     label: '回复模板',
     description: '维护多语言客服模板及审核版本。',
@@ -258,6 +309,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/analytics',
+    implemented: true,
     domain: 'analytics',
     label: '销售分析',
     description: '按店铺、站点、商品及币种分析销售表现。',
@@ -266,6 +318,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/analytics/ads',
+    implemented: false,
     domain: 'analytics',
     label: '广告分析',
     description: '比较广告花费、归因销售与投放效果。',
@@ -274,6 +327,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/analytics/operations',
+    implemented: false,
     domain: 'analytics',
     label: '运营报表',
     description: '查看订单时效、退款与缺货等运营指标。',
@@ -282,6 +336,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/finance',
+    implemented: true,
     domain: 'finance',
     label: '平台结算',
     description: '按结算单核对销售、佣金、退款与平台回款。',
@@ -290,6 +345,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/finance/payables',
+    implemented: false,
     domain: 'finance',
     label: '应付与付款',
     description: '跟进采购、物流和服务商费用的审批与付款。',
@@ -298,6 +354,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/finance/reconciliation',
+    implemented: false,
     domain: 'finance',
     label: '差异对账',
     description: '集中处理平台、仓库和物流账单差异。',
@@ -306,6 +363,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/finance/exchange',
+    implemented: false,
     domain: 'finance',
     label: '汇率与费用',
     description: '维护原币、结算币、汇率快照和费用口径。',
@@ -314,6 +372,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/profit',
+    implemented: true,
     domain: 'profit',
     label: '订单利润',
     description: '按订单分摊商品、物流与平台费用。',
@@ -322,6 +381,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/profit/products',
+    implemented: false,
     domain: 'profit',
     label: '商品利润',
     description: '比较 SKU 在各站点与店铺的利润表现。',
@@ -330,6 +390,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/profit/costs',
+    implemented: false,
     domain: 'profit',
     label: '成本分摊',
     description: '管理头程、仓储和其他费用的分摊批次。',
@@ -337,7 +398,17 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['归集费用', '选择依据', '确认分摊'],
   },
   {
+    href: '/account',
+    implemented: true,
+    domain: 'org',
+    label: '个人资料',
+    description: '维护个人资料、登录安全与界面偏好。',
+    fields: ['姓名', '邮箱', '头像', '语言与时区', '默认店铺', '密码'],
+    workflow: ['编辑资料', '保存', '立即生效'],
+  },
+  {
     href: '/org',
+    implemented: true,
     domain: 'org',
     label: '租户概览',
     description: '查看当前企业工作空间与组织管理入口。',
@@ -346,6 +417,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/org/stores',
+    implemented: false,
     domain: 'org',
     label: '店铺与授权',
     description: '管理多平台多店铺的授权、有效期和同步状况。',
@@ -354,6 +426,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/org/permissions',
+    implemented: false,
     domain: 'org',
     label: '数据权限',
     description: '按团队、店铺、仓库与业务动作管理权限范围。',
@@ -362,6 +435,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/org/audit',
+    implemented: false,
     domain: 'org',
     label: '操作审计',
     description: '检索关键操作、规则变更与授权记录。',
@@ -370,6 +444,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/logistics',
+    implemented: true,
     domain: 'logistics',
     label: '发货与运单',
     description: '管理自发货订单的运单申请、交接和配送。',
@@ -378,6 +453,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/logistics/fba',
+    implemented: false,
     domain: 'logistics',
     label: 'FBA 货件',
     description: '跟进 FBA 备货、装箱、头程、签收与差异。',
@@ -386,6 +462,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/logistics/tracking',
+    implemented: false,
     domain: 'logistics',
     label: '物流异常',
     description: '追踪揽收延迟、清关、停滞和签收异常。',
@@ -394,6 +471,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/logistics/channels',
+    implemented: false,
     domain: 'logistics',
     label: '物流渠道',
     description: '维护承运商服务、计费规则与可达范围。',
@@ -402,6 +480,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/logistics/claims',
+    implemented: false,
     domain: 'logistics',
     label: '索赔与账单',
     description: '核对物流计费、丢损证据及索赔进度。',
@@ -410,6 +489,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/warehouse',
+    implemented: true,
     domain: 'warehouse',
     label: '仓库与库位',
     description: '配置本地仓、海外仓、库区及拣货路径。',
@@ -418,6 +498,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/warehouse/inbound',
+    implemented: false,
     domain: 'warehouse',
     label: '入库作业',
     description: '处理采购、退货、调拨等来源的收货与上架。',
@@ -426,6 +507,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/warehouse/outbound',
+    implemented: false,
     domain: 'warehouse',
     label: '拣货与出库',
     description: '按波次完成拣货、复核、包装和出库交接。',
@@ -434,6 +516,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/warehouse/transfers',
+    implemented: false,
     domain: 'warehouse',
     label: '调拨管理',
     description: '追踪仓间调拨、在途及收货差异。',
@@ -442,6 +525,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/warehouse/counts',
+    implemented: false,
     domain: 'warehouse',
     label: '盘点与调整',
     description: '组织循环盘点、差异复核与库存调整。',
@@ -450,6 +534,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/inventory',
+    implemented: true,
     domain: 'inventory',
     label: '全仓库存',
     description: '统一查看本地、海外、FBA 与在途库存。',
@@ -458,6 +543,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/inventory/replenishment',
+    implemented: false,
     domain: 'inventory',
     label: '补货建议',
     description: '结合销售、交期、在途与安全库存制定补货方案。',
@@ -466,6 +552,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/inventory/ledger',
+    implemented: false,
     domain: 'inventory',
     label: '库存流水',
     description: '逐笔核对出入库、调拨和调整的库存变化。',
@@ -474,6 +561,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/inventory/aging',
+    implemented: false,
     domain: 'inventory',
     label: '库龄与预警',
     description: '识别断货、滞销和超龄库存并安排处理。',
@@ -483,4 +571,34 @@ export const TASK_PAGES: TaskPage[] = [
 ];
 export function findTaskPage(href: string) {
   return TASK_PAGES.find((page) => page.href === href);
+}
+
+/**
+ * 账户域：组织、角色、成员、权限、租户与店铺授权。
+ * 这些页面从 ce5c78e 起不再进入业务系统侧栏，改由账户卡片与账户 Tab 承载，
+ * 因此不参与业务菜单（NAV_DESTINATIONS）的构成。
+ */
+export const ACCOUNT_DOMAINS = new Set(['org']);
+
+/** 账户域中已实现（存在真实页面）的任务页。 */
+export const IMPLEMENTED_TASK_PAGES = TASK_PAGES.filter((page) => page.implemented);
+
+/**
+ * 账户菜单展示顺序。成员关系只有一个真相源 = TASK_PAGES 的账户域，
+ * 这里只规定「按什么顺序摆」，不再单独维护一份入口清单——
+ * 否则就会出现「有页面没入口」或「有入口没页面」的割裂。
+ */
+export const ACCOUNT_MENU_ORDER = [
+  '/account',
+  '/org',
+  '/org/members',
+  '/org/roles',
+  '/org/departments',
+  '/org/children',
+  '/org/stores',
+  '/org/permissions',
+  '/org/audit',
+];
+export function isAccountDomain(domain: string): boolean {
+  return ACCOUNT_DOMAINS.has(domain);
 }

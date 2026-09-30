@@ -2,7 +2,12 @@
 
 import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { NAV_DESTINATIONS, resolveSystemFromPath, type SystemId } from './nav-config';
+import {
+  ACCOUNT_DESTINATIONS,
+  NAV_DESTINATIONS,
+  resolveSystemFromPath,
+  type SystemId,
+} from './nav-config';
 
 /** Ordered tabs persist; the committed pathname alone determines selection. */
 export interface WorkspaceTab {
@@ -11,6 +16,7 @@ export interface WorkspaceTab {
   label: string;
   systemId: SystemId;
   pinned?: boolean;
+  surface?: 'business' | 'account';
   /** 拖拽排序用的序列 */
   order: number;
 }
@@ -20,6 +26,7 @@ export interface WorkspaceTabsContextValue {
   activeTabId: string | null;
   /** 客户端 hydration 完成(localStorage 读完后)— sync 逻辑需等此值变 true 再跑 */
   hydrated: boolean;
+  navigatingTo: string | null;
   openTab: (tab: Omit<WorkspaceTab, 'order'>) => void;
   closeTab: (id: string) => void;
   activateTab: (id: string | null) => void;
@@ -45,7 +52,15 @@ const HOME_TAB: WorkspaceTab = {
   systemId: 'dev',
   order: -1,
   pinned: true,
+  surface: 'business',
 };
+
+function destination(pathname: string) {
+  const business = NAV_DESTINATIONS.find((item) => item.href === pathname);
+  if (business) return { ...business, surface: 'business' as const };
+  const account = ACCOUNT_DESTINATIONS.find((item) => item.href === pathname);
+  return account ? { ...account, surface: 'account' as const } : undefined;
+}
 
 interface PersistedShape {
   tabs: WorkspaceTab[];
@@ -60,7 +75,7 @@ function readPersisted(): PersistedShape | null {
     const data = JSON.parse(raw) as PersistedShape;
     if (!Array.isArray(data?.tabs)) return null;
     const tabs = data.tabs.flatMap((tab) => {
-      const item = NAV_DESTINATIONS.find((item) => item.href === tab?.href);
+      const item = destination(tab?.href);
       return item
         ? [
             {
@@ -68,6 +83,7 @@ function readPersisted(): PersistedShape | null {
               href: item.href,
               label: item.label,
               systemId: resolveSystemFromPath(item.href).id,
+              surface: item.surface,
               order: 0,
             },
           ]
@@ -96,7 +112,7 @@ function writePersisted(value: PersistedShape) {
 
 /** Register during render so the route and its tab are committed together. */
 function withRouteTab(tabs: WorkspaceTab[], pathname: string): WorkspaceTab[] {
-  const item = NAV_DESTINATIONS.find((item) => item.href === pathname);
+  const item = destination(pathname);
   if (!item || tabs.some((tab) => tab.href === pathname)) return tabs;
   return [
     ...tabs,
@@ -105,6 +121,7 @@ function withRouteTab(tabs: WorkspaceTab[], pathname: string): WorkspaceTab[] {
       href: item.href,
       label: item.label,
       systemId: resolveSystemFromPath(item.href).id,
+      surface: item.surface,
       order: tabs.length,
     },
   ];
@@ -126,9 +143,11 @@ export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceT
     ),
   );
   const [registeredPath, setRegisteredPath] = React.useState(pathname);
+  const [navigatingTo, setNavigatingTo] = React.useState<string | null>(null);
   // Only a new pathname registers a tab; closing on the same route must not reopen it.
   if (registeredPath !== pathname) {
     setRegisteredPath(pathname);
+    setNavigatingTo(null);
     setTabs((current) => withRouteTab(current, pathname));
   }
   const activeTabId =
@@ -156,22 +175,18 @@ export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceT
   }, [tabs, activeTabId, hydrated]);
 
   const value = React.useMemo<WorkspaceTabsContextValue>(() => {
-    const nextOrder = (current: WorkspaceTab[]) =>
-      current.length === 0 ? 0 : Math.max(...current.map((t) => t.order)) + 1;
-
     const openTab = (incoming: Omit<WorkspaceTab, 'order'>) => {
       if (incoming.href === HOME_HREF) {
+        if (pathname !== HOME_HREF) setNavigatingTo(HOME_HREF);
         router.push(HOME_HREF);
         return;
       }
-      const id = incoming.id;
-      setTabs((current) => {
-        const exists = current.find((t) => t.id === id);
-        if (exists) return current;
-        const next: WorkspaceTab = { ...incoming, order: nextOrder(current) };
-        return [...current, next];
-      });
-      if (pathname !== incoming.href) router.push(incoming.href);
+      // Keep the committed page and tab paired. The destination tab is registered from
+      // pathname during the route commit, at the same boundary as the new page/skeleton.
+      if (pathname !== incoming.href) {
+        setNavigatingTo(incoming.href);
+        router.push(incoming.href);
+      }
     };
     const closeTab = (id: string) => {
       if (id === HOME_HREF) return;
@@ -185,21 +200,30 @@ export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceT
     };
     const activateTab = (id: string | null) => {
       const tab = tabs.find((item) => item.id === id);
-      if (id === null || id === HOME_HREF) router.push(HOME_HREF);
-      else if (tab) router.push(tab.href);
+      const href = id === null || id === HOME_HREF ? HOME_HREF : tab?.href;
+      if (href && href !== pathname) {
+        setNavigatingTo(href);
+        router.push(href);
+      }
     };
     const pinTab = (id: string, pinned: boolean = true) => {
       setTabs((current) => current.map((t) => (t.id === id ? { ...t, pinned } : t)));
     };
     const closeOthers = (id: string) => {
-      setTabs((current) => current.filter((t) => t.id === id));
+      // Home is implicit and permanent. From home, close every closable tab;
+      // from any other tab, preserve only that tab plus implicit home.
+      setTabs((current) => (id === HOME_HREF ? [] : current.filter((tab) => tab.id === id)));
       activateTab(id);
     };
     const closeLeft = (id: string) => {
       setTabs((current) => {
-        const idx = current.findIndex((t) => t.id === id);
+        const target = current.find((tab) => tab.id === id);
+        if (!target) return current;
+        const peers = current.filter((tab) => tab.surface === target.surface);
+        const idx = peers.findIndex((tab) => tab.id === id);
         if (idx < 0) return current;
-        return current.slice(idx);
+        const removed = new Set(peers.slice(0, idx).map((tab) => tab.id));
+        return current.filter((tab) => !removed.has(tab.id));
       });
       activateTab(id);
     };
@@ -210,9 +234,13 @@ export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceT
         return;
       }
       setTabs((current) => {
-        const idx = current.findIndex((t) => t.id === id);
+        const target = current.find((tab) => tab.id === id);
+        if (!target) return current;
+        const peers = current.filter((tab) => tab.surface === target.surface);
+        const idx = peers.findIndex((tab) => tab.id === id);
         if (idx < 0) return current;
-        return current.slice(0, idx + 1);
+        const removed = new Set(peers.slice(idx + 1).map((tab) => tab.id));
+        return current.filter((tab) => !removed.has(tab.id));
       });
       activateTab(id);
     };
@@ -239,9 +267,14 @@ export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceT
     };
 
     return {
-      tabs: [HOME_TAB, ...tabs],
+      tabs: [
+        HOME_TAB,
+        ...tabs.filter((tab) => tab.surface !== 'account'),
+        ...tabs.filter((tab) => tab.surface === 'account'),
+      ],
       activeTabId,
       hydrated,
+      navigatingTo,
       openTab,
       closeTab,
       activateTab,
@@ -253,7 +286,7 @@ export function WorkspaceTabsProvider({ children, initialTabs = [] }: WorkspaceT
       clearAll,
       reorderTabs,
     };
-  }, [tabs, activeTabId, hydrated, router, pathname]);
+  }, [tabs, activeTabId, hydrated, navigatingTo, router, pathname]);
 
   return <WorkspaceTabsContext.Provider value={value}>{children}</WorkspaceTabsContext.Provider>;
 }

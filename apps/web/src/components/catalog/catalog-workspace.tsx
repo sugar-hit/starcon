@@ -1,6 +1,5 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
 import {
   ArrowLeft,
   Plus,
@@ -30,12 +29,6 @@ type Editing =
   | { kind: 'sku'; sku?: Sku }
   | null;
 export type WorkspaceKind = 'products' | 'research' | 'compliance' | 'assets';
-const destinations = [
-  ['products', '/products', '商品档案'],
-  ['research', '/products/research', '选品与开发'],
-  ['compliance', '/products/compliance', '合规与资质'],
-  ['assets', '/products/assets', '素材与翻译'],
-] as const;
 
 export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }) {
   const { session } = useIdentity();
@@ -114,20 +107,6 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
   );
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <nav aria-label="商品中心功能" className="flex flex-wrap gap-1">
-          {destinations.map(([key, href, label]) => (
-            <Link
-              key={key}
-              href={href}
-              aria-current={kind === key ? 'page' : undefined}
-              className={`rounded-md px-3 py-2 text-sm ${kind === key ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted'}`}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
-      </div>
       {error && (
         <div
           role="alert"

@@ -54,7 +54,7 @@ test('long side navigation scrolls independently of branding and content', async
   await page.setViewportSize({ width: 1280, height: 640 });
   await page.goto('/orders');
   const nav = page.getByRole('navigation', { name: '功能导航' });
-  for (const name of ['售后中心', 'CRM / 客服', '数据中心', '财务中心', '利润中心', '组织 / 权限'])
+  for (const name of ['售后中心', 'CRM / 客服', '数据中心', '财务中心', '利润中心'])
     await nav.getByRole('button', { name, exact: true }).click();
   const logo = page.getByRole('link', { name: 'Starcon 工作台' });
   const copyright = page.getByLabel('版权信息');

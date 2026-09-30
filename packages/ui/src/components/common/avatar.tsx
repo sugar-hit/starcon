@@ -1,10 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/utils';
 
-/**
- * Avatar — 占位圆形头像
- * 不上真实头像功能，纯展示
- */
+/** Avatar with an initials fallback. */
 export interface AvatarProps {
   size?: 'sm' | 'md' | 'lg';
   src?: string;
@@ -30,9 +27,9 @@ export function Avatar({ size = 'md', src, alt, name, className }: AvatarProps) 
   return (
     <div
       className={cn(
-        'flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-gray-1 to-gray-3 font-medium text-foreground/80 ring-1 ring-border',
+        'bg-muted text-foreground/80 ring-border flex shrink-0 items-center justify-center overflow-hidden rounded-full font-medium ring-1',
         sizeMap[size],
-        className
+        className,
       )}
     >
       {src ? (

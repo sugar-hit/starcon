@@ -224,7 +224,12 @@ function AppShellInner({ system, children, account }: AppShellProps) {
   React.useEffect(() => {
     mainRef.current?.scrollTo({ top: 0, left: 0 });
   }, [pathname]);
-  const currentSystem = system ? getSystem(system) : resolveSystemFromPath(pathname);
+  const routeSystem = system ? getSystem(system) : resolveSystemFromPath(pathname);
+  const lastSystemRef = React.useRef(routeSystem);
+  // 工作台是跨系统页面。切回工作台时保留用户刚才所在的系统导航，避免顶部系统菜单
+  // 和左侧功能菜单因为 `/` 的默认路由归属而跳回开发系统。
+  if (pathname !== '/') lastSystemRef.current = routeSystem;
+  const currentSystem = pathname === '/' ? lastSystemRef.current : routeSystem;
   /**
    * 推导当前页的 PageHeader(标题 + 描述)
    *

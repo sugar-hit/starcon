@@ -2,9 +2,21 @@
 
 ## 子目录
 
+- [`capability-blueprint/`](capability-blueprint/) — **系统功能蓝图**：starcon 应该有哪些功能，四级目录（系统-功能-子功能-模块）与每个最小模块的输入/输出/关系
 - [`prds/`](prds/) — Product Requirements Document（产品需求文档）
 - [`user-stories/`](user-stories/) — 用户故事
 - [`personas/`](personas/) — 用户画像
+
+## 功能蓝图 vs PRD
+
+| | 功能蓝图 | PRD |
+|---|---|---|
+| 回答 | 整个系统**应该有哪些功能** | 某个功能**具体怎么做** |
+| 粒度 | 四级目录，最小模块 | 单功能 |
+| 生命周期 | 演进，随系统设计更新 | 立项后趋于稳定 |
+| 入口 | [`capability-blueprint/README.md`](capability-blueprint/README.md) | `prds/` |
+
+写新功能前先在蓝图里找到它所在的系统与相邻模块，确认边界后再写 PRD。
 
 ## PRD 模板
 

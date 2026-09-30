@@ -3,7 +3,34 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AppShell, Button, Popover, PopoverTrigger, PopoverContent } from '@starcon/ui';
+import {
+  AppShell,
+  Avatar,
+  Badge,
+  Button,
+  Modal,
+  ModalClose,
+  ModalCloseButton,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@starcon/ui';
+import {
+  Building2,
+  Check,
+  ChevronDown,
+  KeyRound,
+  LogOut,
+  Settings2,
+  ShieldCheck,
+  Upload,
+  UserRound,
+} from 'lucide-react';
 import type { Access, LoginResult } from '../../../../../packages/api-contracts/src/catalog';
 import { api, ApiError } from '@/lib/api';
 import { loginDestination } from '@/lib/identity-navigation';
@@ -42,6 +69,10 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
   const [membershipId, setMembershipId] = useState('');
   const [epoch, setEpoch] = useState(0);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [tenantOpen, setTenantOpen] = useState(false);
+  const [pendingMembershipId, setPendingMembershipId] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string | undefined>();
+  const avatarInput = useRef<HTMLInputElement>(null);
   const reload = useCallback(async () => {
     const access = await api<Access>('auth/session');
     const available = await api<LoginResult['memberships']>('auth/memberships');
@@ -71,6 +102,26 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
     };
   }, [reload]);
   useEffect(() => {
+    if (!session) return;
+    const readAvatar = () => {
+      try {
+        setAvatar(window.localStorage.getItem(`starcon.avatar.${session.userId}`) ?? undefined);
+      } catch {
+        setAvatar(undefined);
+      }
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === `starcon.avatar.${session.userId}`) readAvatar();
+    };
+    readAvatar();
+    window.addEventListener('starcon-avatar-changed', readAvatar);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('starcon-avatar-changed', readAvatar);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [session]);
+  useEffect(() => {
     if (
       ready &&
       !session &&
@@ -85,11 +136,12 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
   if (pathname === '/styleguide') return <AppShell>{children}</AppShell>;
   if (!ready)
     return (
-      <LoginScene>
-        <p role="status" className="text-muted-foreground py-20 text-center text-sm">
-          正在验证登录状态…
-        </p>
-      </LoginScene>
+      <main className="bg-background flex h-dvh items-center justify-center" aria-busy="true">
+        <div className="flex flex-col items-center gap-4" role="status">
+          <span className="border-brand/20 border-t-brand h-8 w-8 animate-spin rounded-full border-2" />
+          <p className="text-muted-foreground text-sm">正在恢复工作空间…</p>
+        </div>
+      </main>
     );
   if (!session)
     return (
@@ -164,28 +216,36 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
               />
             </Field>
             {choices.length > 1 && (
-              <Field label="选择租户">
-                <select
-                  required
-                  className={control}
-                  value={membershipId}
-                  onChange={(e) => setMembershipId(e.target.value)}
-                >
-                  <option value="">请选择企业工作空间</option>
-                  {choices.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
-              </Field>
+              <fieldset className="space-y-2">
+                <legend className="text-copy-13 mb-2 font-medium">选择企业工作空间</legend>
+                {choices.map((choice) => (
+                  <button
+                    key={choice.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={membershipId === choice.id}
+                    onClick={() => setMembershipId(choice.id)}
+                    className={`border-border flex w-full items-center gap-3 rounded-md border p-3 text-left text-sm ${
+                      membershipId === choice.id ? 'border-brand bg-brand-soft' : 'hover:bg-muted'
+                    }`}
+                  >
+                    <Building2 className="text-muted-foreground h-4 w-4" />
+                    <span className="min-w-0 flex-1 truncate">{choice.name}</span>
+                    {membershipId === choice.id && <Check className="text-brand h-4 w-4" />}
+                  </button>
+                ))}
+              </fieldset>
             )}
             {error && (
               <p role="alert" className="text-destructive text-sm">
                 {error}
               </p>
             )}
-            <Button className="h-11 w-full" type="submit" disabled={busy}>
+            <Button
+              className="h-11 w-full"
+              type="submit"
+              disabled={busy || (choices.length > 1 && !membershipId)}
+            >
               {busy ? '登录中…' : choices.length ? '进入工作空间' : '登录'}
             </Button>
           </form>
@@ -197,81 +257,264 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
         </div>
       </LoginScene>
     );
+  const switchMembership = async (nextMembershipId: string) => {
+    setBusy(true);
+    setError('');
+    try {
+      await api('auth/switch', 'POST', { membershipId: nextMembershipId });
+      announceIdentityChange();
+      setSession(null);
+      setReady(false);
+      setAccountOpen(false);
+      setPendingMembershipId(null);
+      await reload();
+      setEpoch((n) => n + 1);
+      router.replace('/');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '切换失败');
+    } finally {
+      setReady(true);
+      setBusy(false);
+    }
+  };
+  const owner = session.grants.some(
+    (grant) => grant.roleCode === 'OWNER' && grant.scopeMode === 'ALL',
+  );
   const account = (
-    <Popover open={accountOpen} onOpenChange={setAccountOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" className="max-w-32 truncate" aria-label="账户与租户">
-          <span className="truncate">{session.tenantName}</span>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="end" className="w-64 space-y-4">
-        <p className="text-sm font-semibold">当前企业工作空间</p>
-        <select
-          aria-label="切换租户"
-          className={control}
-          disabled={busy}
-          value={session.membershipId}
-          onChange={async (e) => {
-            if (!window.confirm('切换租户将关闭当前页面的未保存内容，确认继续？')) return;
-            setBusy(true);
-            setError('');
-            try {
-              await api('auth/switch', 'POST', { membershipId: e.target.value });
-              announceIdentityChange();
-              setSession(null);
-              setReady(false);
-              setAccountOpen(false);
-              await reload();
-              setEpoch((n) => n + 1);
-              router.replace('/');
-            } catch (e) {
-              setError(e instanceof Error ? e.message : '切换失败');
-            } finally {
-              setReady(true);
-              setBusy(false);
-            }
-          }}
+    <>
+      <Popover open={accountOpen} onOpenChange={setAccountOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className="hover:bg-muted focus-visible:ring-brand flex h-9 min-w-0 max-w-48 items-center gap-2 rounded-md px-1.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2"
+            aria-label="账户与租户"
+          >
+            <Avatar
+              size="sm"
+              {...(avatar ? { src: avatar } : {})}
+              name={session.tenantName}
+              className="bg-brand-soft text-brand ring-0"
+            />
+            <span className="text-copy-13 hidden max-w-28 truncate font-medium sm:block">
+              {session.tenantName}
+            </span>
+            <ChevronDown className="text-muted-foreground hidden h-3.5 w-3.5 shrink-0 sm:block" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="end"
+          sideOffset={8}
+          className="w-96 max-w-[calc(100vw-1rem)] overflow-hidden rounded-md p-0"
         >
-          {memberships.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
-        <Link href="/account" onClick={() => setAccountOpen(false)} className="block text-sm">
-          我的账户
-        </Link>
-        <Link href="/org" onClick={() => setAccountOpen(false)} className="block text-sm">
-          组织管理
-        </Link>
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={busy}
-          onClick={async () => {
-            setBusy(true);
-            setError('');
-            try {
-              await api('auth/logout', 'POST');
-              intentionalLogout.current = true;
-              setAccountOpen(false);
-              announceIdentityChange();
-              setSession(null);
-              setMemberships([]);
-              setPassword('');
-              setEpoch((n) => n + 1);
-              router.replace('/login');
-            } catch (e) {
-              setError(e instanceof Error ? e.message : '退出失败');
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          退出
-        </Button>
-      </PopoverContent>
-    </Popover>
+          <div className="border-border flex items-start gap-3 border-b p-4">
+            <div className="group relative">
+              <Avatar size="lg" {...(avatar ? { src: avatar } : {})} name={session.tenantName} />
+              <button
+                type="button"
+                aria-label="上传或修改头像"
+                onClick={() => avatarInput.current?.click()}
+                className="bg-foreground/75 absolute inset-0 flex items-center justify-center rounded-full text-white opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+              >
+                <Upload className="h-4 w-4" />
+              </button>
+              <input
+                ref={avatarInput}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="sr-only"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  event.target.value = '';
+                  if (!file) return;
+                  if (file.size > 2_000_000) {
+                    setError('头像文件不能超过 2 MB');
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    const value = typeof reader.result === 'string' ? reader.result : undefined;
+                    if (!value) return;
+                    try {
+                      window.localStorage.setItem(`starcon.avatar.${session.userId}`, value);
+                      setAvatar(value);
+                      window.dispatchEvent(new Event('starcon-avatar-changed'));
+                      setError('');
+                    } catch {
+                      setError('头像保存失败，请选择更小的图片');
+                    }
+                  };
+                  reader.readAsDataURL(file);
+                }}
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="text-copy-14 font-semibold">我的账户</p>
+                <Badge tone="success">已登录</Badge>
+              </div>
+              <p className="text-muted-foreground mt-1 truncate text-xs">{session.tenantName}</p>
+              <button
+                type="button"
+                onClick={() => avatarInput.current?.click()}
+                className="text-brand mt-1.5 text-xs font-medium"
+              >
+                {avatar ? '修改头像' : '上传头像'}
+              </button>
+            </div>
+          </div>
+          <div className="space-y-2 p-3">
+            <dl className="grid grid-cols-2 gap-2">
+              <div className="bg-muted/60 rounded-md p-3">
+                <dt className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                  <UserRound className="h-3.5 w-3.5" /> 当前身份
+                </dt>
+                <dd className="mt-1.5 text-sm font-semibold">
+                  {owner ? '租户所有者' : '租户成员'}
+                </dd>
+              </div>
+              <div className="bg-muted/60 rounded-md p-3">
+                <dt className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                  <KeyRound className="h-3.5 w-3.5" /> 权限状态
+                </dt>
+                <dd className="mt-1.5 text-sm font-semibold">
+                  {session.grants.length} 个角色 · {session.permissions.length} 项权限
+                </dd>
+              </div>
+            </dl>
+            <div className="border-border rounded-md border p-3">
+              <p className="text-muted-foreground mb-2 flex items-center gap-2 text-xs font-medium">
+                <Building2 className="h-3.5 w-3.5" /> 当前企业工作空间
+              </p>
+              <Popover open={tenantOpen} onOpenChange={setTenantOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="切换租户"
+                    aria-expanded={tenantOpen}
+                    disabled={busy}
+                    className="border-control-border bg-card focus-visible:ring-brand flex h-10 w-full items-center gap-2 rounded-md border px-3 text-left text-sm focus-visible:outline-none focus-visible:ring-2"
+                  >
+                    <span className="min-w-0 flex-1 truncate font-medium">
+                      {session.tenantName}
+                    </span>
+                    <ChevronDown className="text-muted-foreground h-4 w-4" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="start"
+                  className="w-[var(--radix-popover-trigger-width)] p-1"
+                >
+                  <div role="listbox" aria-label="企业工作空间" className="space-y-0.5">
+                    {memberships.map((membership) => {
+                      const selected = membership.id === session.membershipId;
+                      return (
+                        <button
+                          key={membership.id}
+                          type="button"
+                          role="option"
+                          aria-selected={selected}
+                          className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm ${
+                            selected ? 'bg-brand-soft text-brand' : 'hover:bg-muted'
+                          }`}
+                          onClick={() => {
+                            setTenantOpen(false);
+                            if (!selected) {
+                              setAccountOpen(false);
+                              setPendingMembershipId(membership.id);
+                            }
+                          }}
+                        >
+                          <span className="min-w-0 flex-1 truncate">{membership.name}</span>
+                          {selected && <Check className="h-4 w-4" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <p className="text-muted-foreground px-1 text-[11px]">
+              会话受租户边界保护 · 成员身份 {session.membershipId.slice(0, 8)}
+            </p>
+            <nav aria-label="账户设置" className="flex flex-col">
+              <Link
+                href="/account"
+                onClick={() => setAccountOpen(false)}
+                className="hover:bg-muted flex items-center gap-3 rounded-md px-3 py-2 text-sm"
+              >
+                <Settings2 className="text-muted-foreground h-4 w-4" /> 个人资料与头像
+              </Link>
+              <Link
+                href="/org"
+                onClick={() => setAccountOpen(false)}
+                className="hover:bg-muted flex items-center gap-3 rounded-md px-3 py-2 text-sm"
+              >
+                <ShieldCheck className="text-muted-foreground h-4 w-4" /> 组织与权限
+              </Link>
+            </nav>
+          </div>
+          <div className="border-border border-t p-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-label="退出"
+              className="text-muted-foreground hover:text-destructive w-full justify-start gap-3"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                setError('');
+                try {
+                  await api('auth/logout', 'POST');
+                  intentionalLogout.current = true;
+                  setAccountOpen(false);
+                  announceIdentityChange();
+                  setSession(null);
+                  setMemberships([]);
+                  setPassword('');
+                  setEpoch((n) => n + 1);
+                  router.replace('/login');
+                } catch (e) {
+                  setError(e instanceof Error ? e.message : '退出失败');
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              <LogOut className="h-4 w-4" /> 退出登录
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+      <Modal
+        open={pendingMembershipId !== null}
+        onOpenChange={(open) => {
+          if (!open && !busy) setPendingMembershipId(null);
+        }}
+      >
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>切换企业工作空间</ModalTitle>
+            <ModalDescription>
+              切换后将关闭当前页面的未保存内容，并重新加载目标工作空间。
+            </ModalDescription>
+          </ModalHeader>
+          <ModalCloseButton disabled={busy} />
+          <ModalFooter>
+            <ModalClose asChild>
+              <Button variant="outline" disabled={busy}>
+                取消
+              </Button>
+            </ModalClose>
+            <Button
+              disabled={busy || !pendingMembershipId}
+              onClick={() => pendingMembershipId && void switchMembership(pendingMembershipId)}
+            >
+              {busy ? '正在切换…' : '确认切换'}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
   );
   return (
     <Context.Provider value={{ session, reload }}>

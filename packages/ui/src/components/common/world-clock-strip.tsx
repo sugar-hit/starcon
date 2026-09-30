@@ -78,7 +78,7 @@ function ClockCard({ city, now, index }: { city: WorldCity; now: Date | null; in
     >
       {photo ? <CityBackdrop url={photo.url} className="z-0" /> : null}
       {/*
-        文字层随城市一起淡入。key 用 city.zone：换城市才换 key，
+        文字层随城市一起轻微翻牌落位。key 用 city.zone：换城市才换 key，
         换 key 触发重挂载，clock-swap-in 动画重播；秒级 tick 不换 key，
         所以读数不会每帧重播动画。
       */}
@@ -102,7 +102,7 @@ function ClockCard({ city, now, index }: { city: WorldCity; now: Date | null; in
             </time>
             <p
               data-clock-meta
-              className="clock-swap-in text-copy-12 mt-1 flex flex-wrap gap-x-2 text-white/90"
+              className="clock-swap-in clock-swap-in-delayed text-copy-12 mt-1 flex flex-wrap gap-x-2 text-white/90"
             >
               <span>{parts?.date ?? '—'}</span>
               <span>{parts?.offset ?? '—'}</span>

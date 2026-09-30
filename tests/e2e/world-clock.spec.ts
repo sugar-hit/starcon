@@ -67,7 +67,7 @@ test('Beijing stays fixed while all five regions rotate together', async ({ page
   await page.goto('/');
   await expect(clocks(page).locator('time').first()).not.toHaveText('—:—');
   const before = await cardLabels(page);
-  await page.clock.runFor(15_100);
+  await page.clock.runFor(5_100);
   const after = await cardLabels(page);
   expect(after[0]).toBe(before[0]);
   for (let index = 1; index < 6; index += 1) expect(after[index]).not.toBe(before[index]);
@@ -155,18 +155,32 @@ test('the reading itself stays instant while labels cross-fade on rotation', asy
         label: card.getAttribute('aria-label'),
         anims: nodes
           .filter(([, node]) => node)
-          .map(([name, node]) => [name, getComputedStyle(node!).animationName] as const),
+          .map(([name, node]) => {
+            const style = getComputedStyle(node!);
+            return [
+              name,
+              style.animationName,
+              style.animationDuration,
+              style.animationDelay,
+            ] as const;
+          }),
       };
     }),
   );
 
   for (const card of names) {
-    for (const [name, animation] of card.anims) {
+    for (const [name, animation, duration, delay] of card.anims) {
       if (name === 'time') {
         expect(animation, `${card.label} 的读数不应有动画`).toBe('none');
       } else {
         // 首屏已播完，animation 保留在结束态；只要求它是 swap-in 而非 none
         expect(animation, `${card.label} 的 ${name} 应为换城淡入`).toBe('clock-swap-in');
+        expect(
+          Number.parseFloat(duration),
+          `${card.label} 的 ${name} 应保持克制`,
+        ).toBeLessThanOrEqual(0.8);
+        expect(Number.parseFloat(duration)).toBeGreaterThanOrEqual(0.5);
+        if (name === 'meta') expect(Number.parseFloat(delay)).toBeGreaterThan(0);
       }
     }
   }
@@ -192,8 +206,8 @@ test('photo backdrop cross-fades instead of hard-swapping', async ({ page }) => 
     if (!layer.hasNew) continue;
     expect(layer.transition, `${layer.label} 新层应有 opacity 过渡`).toContain('opacity');
     const seconds = Number.parseFloat(layer.duration);
-    expect(seconds, `${layer.label} 过渡时长应在 0.3~1.2s`).toBeGreaterThanOrEqual(0.3);
-    expect(seconds).toBeLessThanOrEqual(1.2);
+    expect(seconds, `${layer.label} 过渡时长应在 1.4~2s`).toBeGreaterThanOrEqual(1.4);
+    expect(seconds).toBeLessThanOrEqual(2);
   }
 
   // 过渡过程中至少一帧两层同时可见（证明是交叉而非替换）

@@ -1,6 +1,7 @@
 'use client';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { Avatar, Button } from '@starcon/ui';
 import { useIdentity } from './identity-shell';
 import { AdministrationPanel } from './administration-panel';
 import { canManage, isOwner, type AdministrationKind } from './administration-model';
@@ -20,27 +21,22 @@ export function IdentityWorkspace({
 }) {
   const { session, reload } = useIdentity();
   const [error, setError] = useState('');
+  const [avatar, setAvatar] = useState<string | undefined>();
+  const avatarInput = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!account) return;
+    try {
+      setAvatar(window.localStorage.getItem(`starcon.avatar.${session.userId}`) ?? undefined);
+    } catch {
+      setAvatar(undefined);
+    }
+  }, [account, session.userId]);
   const onError = useCallback(
     (e: unknown) => setError(e instanceof Error ? e.message : '请求失败'),
     [],
   );
   return (
     <div className="space-y-5">
-      <nav aria-label="组织管理功能" className="flex flex-wrap gap-3 border-b pb-3">
-        <Link href="/org">租户概览</Link>
-        {destinations
-          .filter(([key]) => canManage(session, key))
-          .map(([key, label]) => (
-            <Link
-              key={key}
-              href={`/org/${key}`}
-              aria-current={kind === key ? 'page' : undefined}
-              className={kind === key ? 'text-brand font-semibold' : 'text-muted-foreground'}
-            >
-              {label}
-            </Link>
-          ))}
-      </nav>
       {error && (
         <p role="alert" className="text-destructive">
           {error}
@@ -58,6 +54,53 @@ export function IdentityWorkspace({
         <>
           <section className="bg-card space-y-3 rounded-lg border p-6">
             <h2 className="text-xl font-semibold">{account ? '我的账户' : '租户概览'}</h2>
+            {account && (
+              <div className="border-border flex flex-wrap items-center gap-4 border-b pb-5">
+                <Avatar size="lg" {...(avatar ? { src: avatar } : {})} name={session.tenantName} />
+                <div>
+                  <p className="font-medium">个人头像</p>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    支持 JPG、PNG 或 WebP，最大 2 MB
+                  </p>
+                </div>
+                <input
+                  ref={avatarInput}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="sr-only"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    event.target.value = '';
+                    if (!file) return;
+                    if (file.size > 2_000_000) {
+                      setError('头像文件不能超过 2 MB');
+                      return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      const value = typeof reader.result === 'string' ? reader.result : undefined;
+                      if (!value) return;
+                      try {
+                        window.localStorage.setItem(`starcon.avatar.${session.userId}`, value);
+                        setAvatar(value);
+                        window.dispatchEvent(new Event('starcon-avatar-changed'));
+                        setError('');
+                      } catch {
+                        setError('头像保存失败，请选择更小的图片');
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                />
+                <Button
+                  className="sm:ml-auto"
+                  variant="outline"
+                  onClick={() => avatarInput.current?.click()}
+                >
+                  {avatar ? '更换头像' : '上传头像'}
+                </Button>
+              </div>
+            )}
             <p className="text-lg">{session.tenantName}</p>
             <p className="text-muted-foreground text-sm">
               当前身份：{isOwner(session) ? '租户所有者' : '租户成员'}。角色授权仅在当前租户内生效。

@@ -1,4 +1,9 @@
-import { TASK_PAGES, findTaskPage } from './task-pages';
+import {
+  ACCOUNT_MENU_ORDER,
+  IMPLEMENTED_TASK_PAGES,
+  findTaskPage,
+  isAccountDomain,
+} from './task-pages';
 import {
   LayoutDashboard,
   Package,
@@ -14,7 +19,7 @@ import {
   TrendingUp,
   BarChart3,
   Users,
-  Shield,
+  Link2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -23,13 +28,17 @@ import type { LucideIcon } from 'lucide-react';
  *
  * 4 个系统（按团队职能划分，用户 2026-09-25 最终确认）:
  *   开发     — 商品 / 刊登 / 定价 / 采购 / 供应
- *   运营     — 订单 / 售后 / CRM 客服 / 数据 / 财务 / 利润 / 组织权限
+ *   运营     — 订单 / 售后 / CRM 客服 / 数据 / 财务 / 利润
  *   物流     — 物流中心
  *   仓储     — 仓储中心 / 库存中心
  *
- * 顶层固定项 × 2（不属于任何系统）:
+ * 顶层固定项 × 3（不属于任何系统）:
  *   工作台   —  /        首页 dashboard
+ *   渠道店铺 — /channels 平台目录 / 授权连接 / 店铺与站点
  *   AI Copilot — /copilot
+ *
+ * /channels 是蓝图 §7 列出的跨 Tab 入口：所有平台同步的前置条件，
+ * 每个职能角色都要用，因此不属于任何一个职能系统。
  */
 
 export type SystemId = 'dev' | 'ops' | 'logistics' | 'storage';
@@ -80,11 +89,11 @@ const devSystem: SystemDef = {
   ],
 };
 
-/** 运营 — 订单 / 客户 / 售后 / 数据 / 财务 / 利润 / 组织（7 个） */
+/** 运营 — 订单 / 客户 / 售后 / 数据 / 财务 / 利润（6 个） */
 const opsSystem: SystemDef = {
   id: 'ops',
   label: '运营',
-  description: '订单 / 客户 / 售后 / 数据 / 财务 / 利润 / 组织',
+  description: '订单 / 客户 / 售后 / 数据 / 财务 / 利润',
   defaultHref: '/orders',
   items: [
     { label: '订单中心', href: '/orders', icon: Package, description: '多平台订单聚合' },
@@ -98,7 +107,6 @@ const opsSystem: SystemDef = {
     { label: '数据中心', href: '/analytics', icon: BarChart3, description: '数据看板与报表' },
     { label: '财务中心', href: '/finance', icon: CircleDollarSign, description: '对账与结算' },
     { label: '利润中心', href: '/profit', icon: TrendingUp, description: '毛利与分润' },
-    { label: '组织 / 权限', href: '/org', icon: Shield, description: '员工与角色权限' },
   ],
 };
 
@@ -129,7 +137,9 @@ export const SYSTEMS: SystemDef[] = [devSystem, opsSystem, logisticsSystem, stor
     ...system,
     items: system.items.map((item) => ({
       ...item,
-      children: TASK_PAGES.filter((page) => page.domain === item.href.slice(1)),
+      children: IMPLEMENTED_TASK_PAGES.filter(
+        (page) => page.domain === item.href.slice(1) && !isAccountDomain(page.domain),
+      ),
     })),
   }),
 );
@@ -139,9 +149,30 @@ export const NAV_DESTINATIONS: NavItem[] = SYSTEMS.flatMap((system) =>
   ),
 );
 
+/**
+ * Global account/tenant pages: addressable by workspace tabs, never rendered in business menus.
+ *
+ * 成员关系来自 TASK_PAGES 的账户域（isAccountDomain），展示顺序由 ACCOUNT_MENU_ORDER 规定。
+ * 不再维护独立入口清单——ce5c78e 之后这里曾与 TASK_PAGES 漂移出
+ * 「有页面没入口」（/org/stores、/org/permissions、/org/audit）
+ * 与「有入口没页面」（/account）两类割裂，现已消除。
+ */
+export const ACCOUNT_DESTINATIONS: readonly { label: string; href: string }[] = ACCOUNT_MENU_ORDER.filter(
+  (href) => IMPLEMENTED_TASK_PAGES.some((page) => page.href === href),
+)
+  .map((href) => {
+    const page = findTaskPage(href);
+    if (!page) throw new Error(`ACCOUNT_MENU_ORDER 指向不存在的任务页：${href}`);
+    return { label: page.label, href: page.href };
+  })
+  .filter(
+    (destination) => !SYSTEMS.some((system) => system.items.some((i) => i.href === destination.href)),
+  );
+
 /** 顶层固定项 — 侧栏顶部，不属于任何系统 */
 export const TOP_LEVEL_ITEMS: NavItem[] = [
   { label: '工作台', href: '/', icon: LayoutDashboard, description: '今日待办与关键指标' },
+  { label: '渠道与店铺', href: '/channels', icon: Link2, description: '平台授权、店铺与站点' },
   { label: 'AI Copilot', href: '/copilot', icon: TrendingUp, description: 'AI 助手与自动化' },
 ];
 
