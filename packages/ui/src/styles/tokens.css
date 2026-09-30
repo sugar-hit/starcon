@@ -113,14 +113,16 @@
   }
 }
 
-/* 城市轮换换场：极短的淡入 + 轻微上移，读数不参与动画 */
+/* 城市轮换换场：参考机场/交易所字牌的轻微翻转落位，读数不参与动画 */
 @keyframes clock-swap-in {
   from {
     opacity: 0;
-    transform: translateY(3px);
+    filter: blur(0.6px);
+    transform: perspective(180px) translateY(-5px) rotateX(-10deg);
   }
   to {
     opacity: 1;
+    filter: blur(0);
     transform: none;
   }
 }
@@ -173,15 +175,19 @@
     width: 4px;
   }
   /*
-   * 换城时照片交叉淡入：旧层淡出与新层淡入同时进行，700ms。
+   * 换城时照片交叉淡入：旧层淡出与新层淡入同时进行，1600ms。
    * 时长与 city-backdrop.tsx 里的 FADE_MS 保持一致（该处靠它卸载旧层）。
    * 挂载即终值不会产生过渡，所以 opacity 由组件分两步驱动（先 0，再推 1/0）。
    */
   .clock-photo-layer {
-    transition: opacity 700ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 1600ms cubic-bezier(0.22, 1, 0.36, 1);
   }
   .clock-swap-in {
-    animation: clock-swap-in 420ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+    animation: clock-swap-in 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: 50% 0;
+  }
+  .clock-swap-in-delayed {
+    animation-delay: 70ms;
   }
   .clock-colon {
     animation: clock-breathe 2.6s ease-in-out infinite;

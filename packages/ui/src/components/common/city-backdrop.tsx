@@ -9,7 +9,7 @@ interface CityBackdropProps {
 }
 
 /** 交叉淡入时长，需与 tokens.css 里 .clock-photo-layer 的 transition 一致 */
-const FADE_MS = 700;
+const FADE_MS = 1600;
 
 /**
  * 城市照片层：铺满整格，object-fit cover，底部对齐让地标贴近地平线。

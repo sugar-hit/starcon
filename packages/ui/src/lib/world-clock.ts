@@ -124,8 +124,8 @@ export const REGION_POOLS: readonly RegionPool[] = [
   },
 ];
 
-/** 34 城轮换：北京固定，其余五个槽位每 15 秒推进一城。 */
-export const CITY_ROTATION_MS = 15_000;
+/** 34 城轮换：北京固定，其余五个槽位每 5 秒推进一城。 */
+export const CITY_ROTATION_MS = 5_000;
 
 export function rotationCities(cursor: number): readonly WorldCity[] {
   return [

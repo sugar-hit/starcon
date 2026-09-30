@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CITY_ROTATION_MS,
   rotationCities,
   continentFor,
   cityLabel,
@@ -41,6 +42,10 @@ describe('时区与夏令时', () => {
 });
 
 describe('区域轮换', () => {
+  it('每 5 秒推进一轮', () => {
+    expect(CITY_ROTATION_MS).toBe(5_000);
+  });
+
   it('北京不动，五个区域轮换并覆盖全部 34 城', () => {
     const seen = new Set<string>();
     for (let cursor = 0; cursor < 18; cursor += 1) {
