@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 40 |
+| 已交付 | 41 |
 | 进行中 | 0 |
-| **未开发** | **425** |
-| 完成率 | 8.6% |
+| **未开发** | **424** |
+| 完成率 | 8.8% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 39 | 0 | 41 | 80 |
+| **D1–D2** | 40 | 0 | 40 | 80 |
 | **D3** | 1 | 0 | 39 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
-| 03 | 商品主数据系统 | D1–D2 | 10 | 40 |
+| 03 | 商品主数据系统 | D1–D2 | 11 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
@@ -149,7 +149,7 @@
 | 3.1.2.4 | 单位与换算 | /products/sku | D1–D2 | 已交付 | V8__unit_conversion.sql（unit_of_measure 单位字典含量纲/数量精度/可用场景，sku_unit_conversion_snapshot 单据冻结快照 + refuse_snapshot_mutation 触发器禁止改删 + GRANT 只授 SELECT/INSERT；guard_unit_conversion_dimension 量纲守卫；复用 V6 已有的 sku_unit_conversion 生效区间不重叠触发器；2 表强制 RLS）+ UnitRules 纯规则（量纲/角色/单据类型词表、中文单位码字符集、比例与数量校验、HALF_UP 换算精度、生效区间判定）+ UnitConversionService/UnitConversionController（GET/POST /catalog/unit-conversion/units、PUT/DELETE /units/{id}、GET /overview、GET /skus/{id}、POST /skus/{id}/conversions、POST /convert、POST/GET /snapshots）+ /products/sku/units 工作区（字典/换算版本分组/换算试算/单据冻结，四种状态）+ UnitRulesTest（12 例）+ UnitConversionIntegrationTest（22 例，含租户隔离三断言、快照不可变双层断言与量纲拒绝断言） |
 | 3.1.3.1 | 规格轴定义 | — | D1–D2 | 已交付 | V9__spec_axes.sql（spec_axis 租户级规格轴字典、spu_spec_axis 绑定含承载属性复合外键、spec_axis_option 选项、category_spec_axis 类目允许规则；guard_spu_spec_axis 触发器校验承载属性属本 SPU 且为 variant_axis 且 code 与轴一致、guard_spec_axis_option_source 强制规格选项必须在attribute_option 值源中（蓝图硬约束）、guard_attribute_option_in_use 阻止值源被删/改名；4 表强制 RLS + GRANT）+ SpecAxisRules 纯规则（轴编码 ASCII 词表、选项值中文词表与 varchar(100) 同长度、矩阵笛卡尔积 long 防溢出）+ SpecAxisService/SpecAxisController（GET/POST /catalog/spec-axis/axes、PUT/DELETE /axes/{id}、GET /overview、GET /axes/{id}/options、POST /axes/{id}/options、DELETE /axes/{id}/options?value=、GET /spus/{id}、POST /spus/{id}/axes、DELETE /spus/{id}/axes/{axisId}、GET/POST/DELETE /category-rules）+ /products/sku/spec-axis 工作区（概览与治理缺口/轴字典/选项与值源说明/SPU 绑定与矩阵/类目规则，加载空错误停用四态）+ SpecAxisRulesTest（9 例）+ SpecAxisIntegrationTest（27 例，含租户隔离三断言与值源硬约束正反向断言） |
 | 3.1.3.2 | 组合唯一性校验 | — | D1–D2 | 已交付 | V10__variant_combination_uniqueness.sql（spu_variant_combination 组合台账 + UNIQUE(tenant_id,spu_id,signature) 唯一约束本体（蓝图硬要求）、spu_variant_combination_value 规范化轴值明细（PK 含 spec_axis_id + UNIQUE 含 axis_code，DB 层表达「一组合每轴恰好一值」）、sku_matrix_draft / sku_matrix_draft_item 待建 SKU 草稿与明细、guard_variant_combination_value 触发器（轴须绑本 SPU、轴与取值须启用、axis_code 由 spec_axis 推导不接受自报）、guard_variant_combination_lines 延迟约束触发器 DEFERRABLE INITIALLY DEFERRED（提交前复核明细行数==axis_count 且按轴编码 COLLATE "C" 重算签名一致）、guard_variant_combination_against_sku 触发器（与既有真实 SKU 签名撞车即 23505，补 V1 只管 sku 表内部的缺口）、4 表 ENABLE+FORCE RLS + isolation/data_scope 双策略 + GRANT catalog_app/starcon_app）+ CombinationRules 纯规则（签名轴编码升序拼接与 DB 侧同序、批次内重复定位到下标、缺轴/混轴区分、笛卡尔积展开与单草稿 2000 上限、matrixSize 先判再乘防 long 溢出）+ CombinationConflictException + ApiErrorHandler 结构化 409（ProblemDetail 挂 conflicts 清单，不压成一句提示）+ VariantCombinationService/VariantCombinationController（GET /catalog/variant-combination/overview、GET /spus/{id}、GET /spus/{id}/combinations、GET /spus/{id}/drafts、GET /spus/{id}/drafts/{draftId}、POST /spus/{id}/check（纯查询不写库）、POST /spus/{id}/drafts（MATRIX |
-| 3.2.1.1 | 属性定义列表 | /products/attributes | D1–D2 | 未开发 | — |
+| 3.2.1.1 | 属性定义列表 | /products/attributes | D1–D2 | 已交付 | V11__attribute_dictionary.sql（spu_id 可空 + usage/filterable/enabled + NULLS NOT DISTINCT 编码唯一 + category_attribute_rule/option + RLS）；/catalog/attributes 列表分页筛选 + 概览 + 增改删 + 选项集合增删改查与停用 + 类目规则增删查；/products/attributes 工作区；AttributeDictionaryIntegrationTest 26 例（含租户隔离三断言与 3.2.2.1 回归桩）+ AttributeDictionaryRulesTest 12 例 |
 | 3.2.1.2 | 属性选项管理 | /products/attributes | D1–D2 | 未开发 | — |
 | 3.2.2.1 | SPU 公共属性 | — | D1–D2 | 已交付 | POST/PUT/DELETE /products/{id}/attributes + 属性录入与校验（OPTION/DECIMAL/BOOLEAN/DATE） |
 | 3.2.2.2 | SKU 属性覆写 | — | D1–D2 | 未开发 | — |
