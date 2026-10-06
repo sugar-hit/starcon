@@ -11,6 +11,94 @@
     }
   ],
   "paths": {
+    "/catalog/skus/{id}": {
+      "get": {
+        "tags": [
+          "sku-detail-controller"
+        ],
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "sku-detail-controller"
+        ],
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuDetailInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuDetailSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/records/{kind}/{id}": {
       "put": {
         "tags": [
@@ -123,7 +211,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "detail",
+        "operationId": "detail_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -161,7 +249,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "update",
+        "operationId": "update_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1471,6 +1559,77 @@
   },
   "components": {
     "schemas": {
+      "SkuDetailInput": {
+        "required": [
+          "barcode",
+          "baseUnit",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "barcode": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "baseUnit": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "packagingType": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "lengthMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "widthMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "heightMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "netWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SkuDetailSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "packagingChanged": {
+            "type": "boolean"
+          }
+        }
+      },
       "RecordInput": {
         "required": [
           "locale",
@@ -2140,6 +2299,381 @@
           },
           "value": {
             "type": "string"
+          }
+        }
+      },
+      "SkuAsset": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "targetCountry": {
+            "type": "string"
+          },
+          "expiresOn": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuAttributeSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "overridden": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cleared": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inherited": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unset": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "variantAxes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingRequired": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SkuBarcode": {
+        "type": "object",
+        "properties": {
+          "primary": {
+            "type": "string"
+          },
+          "identifierOwner": {
+            "type": "string"
+          },
+          "identifierNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "variantSignature": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "spuName": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "spuStatus": {
+            "type": "string"
+          },
+          "specs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuSpec"
+            }
+          },
+          "attributeSummary": {
+            "$ref": "#/components/schemas/SkuAttributeSummary"
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuEffectiveAttribute"
+            }
+          },
+          "baseUnit": {
+            "type": "string"
+          },
+          "unitConversions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuUnitConversion"
+            }
+          },
+          "barcode": {
+            "$ref": "#/components/schemas/SkuBarcode"
+          },
+          "packaging": {
+            "$ref": "#/components/schemas/SkuPackaging"
+          },
+          "mediaAvailable": {
+            "type": "boolean"
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuAsset"
+            }
+          },
+          "mediaLimitation": {
+            "type": "string"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuDetailSource"
+            }
+          },
+          "statusHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuStatusChange"
+            }
+          }
+        }
+      },
+      "SkuDetailSource": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuEffectiveAttribute": {
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "dataType": {
+            "type": "string"
+          },
+          "valueMode": {
+            "type": "string"
+          },
+          "valueModeLabel": {
+            "type": "string"
+          },
+          "multiple": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "variantAxis": {
+            "type": "boolean"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "groupName": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "overrideState": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "rawValues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "effectiveValues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inherited": {
+            "type": "boolean"
+          },
+          "missingRequired": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SkuPackaging": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lengthMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "widthMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "heightMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "netWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "packagingType": {
+            "type": "string"
+          },
+          "volumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "nullable": true
+      },
+      "SkuStatusChange": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuUnitConversion": {
+        "type": "object",
+        "properties": {
+          "unitCode": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "roleLabel": {
+            "type": "string"
+          },
+          "quantityPerBase": {
+            "type": "number"
+          },
+          "current": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
