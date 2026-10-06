@@ -63,9 +63,35 @@ public class AdministrationController {
       @Schema(nullable = true) UUID departmentId,
       @NotNull List<@NotNull @Valid AssignmentInput> assignments) {}
 
-  public record DepartmentView(UUID id, String name) {}
+  /**
+   * 17.2.1.1 部门树。
+   *
+   * <p>部门是**组织维度**，与法人（法律主体维度）分离：{@code legalEntityId} 只是部门的一条归属引用，
+   * 不代表这个部门就是那个法人。输出 = 整棵树 + 每个节点的成员分布，children 递归嵌套根节点列表。
+   */
+  public record DepartmentView(
+      UUID id,
+      String code,
+      String name,
+      @Schema(nullable = true) UUID parentId,
+      @Schema(nullable = true) UUID legalEntityId,
+      @Schema(nullable = true) String legalEntityName,
+      @Schema(nullable = true) UUID leaderMembershipId,
+      @Schema(nullable = true) String leaderName,
+      int memberCount,
+      List<DepartmentView> children) {}
 
-  public record DepartmentInput(@NotBlank @Size(max = 100) String name) {}
+  /** 层级调整单独走 {@code PUT /departments/{id}/parent}，所以这里刻意不含 parentId。 */
+  public record DepartmentInput(
+      @NotBlank @Pattern(regexp = "[A-Z0-9_-]{1,64}", message = "部门编码只允许大写字母数字下划线中划线")
+          String code,
+      @NotBlank @Size(max = 100) String name,
+      @Schema(nullable = true) UUID parentId,
+      @Schema(nullable = true) UUID legalEntityId,
+      @Schema(nullable = true) UUID leaderMembershipId) {}
+
+  /** 拖拽移动：parentId 为空表示提升为根部门。 */
+  public record DepartmentMove(@Schema(nullable = true) UUID parentId) {}
 
   public record ChildView(UUID id, String code, String name, String status) {}
 
@@ -152,6 +178,11 @@ public class AdministrationController {
 
   private static void check(boolean value, String message) {
     if (!value) throw IdentityController.error(HttpStatus.BAD_REQUEST, message);
+  }
+
+  /** 业务规则冲突（不是字段格式问题）：删除保护、层级约束等，带可读原因。 */
+  private static void reject(String message) {
+    throw IdentityController.error(HttpStatus.CONFLICT, message);
   }
 
   private void audit(IdentityController.Access a, UUID id, String action) {
@@ -491,10 +522,102 @@ public class AdministrationController {
         auth,
         "identity.department.read",
         false,
-        a ->
-            sql.fetch("select * from department order by name")
-                .map(
-                    r -> new DepartmentView(r.get("id", UUID.class), r.get("name", String.class))));
+        a -> {
+          var nodes = new LinkedHashMap<UUID, DepartmentNode>();
+          for (var r : sql.fetch("select * from department_tree(?)", hash(auth))) {
+            nodes.put(
+                r.get("id", UUID.class),
+                new DepartmentNode(
+                    r.get("id", UUID.class),
+                    r.get("code", String.class),
+                    r.get("name", String.class),
+                    r.get("parent_id", UUID.class),
+                    r.get("legal_entity_id", UUID.class),
+                    r.get("legal_name", String.class),
+                    r.get("leader_membership_id", UUID.class),
+                    r.get("leader_name", String.class),
+                    r.get("member_count", Integer.class)));
+          }
+          // 行序即 depth, code, name，父节点总在子节点之前入表，直接挂到父节点即可保持排序。
+          var roots = new ArrayList<DepartmentNode>();
+          for (var node : nodes.values()) {
+            var parent = node.parentId == null ? null : nodes.get(node.parentId);
+            if (parent == null) roots.add(node);
+            else parent.children.add(node);
+          }
+          return roots.stream().map(DepartmentNode::view).toList();
+        });
+  }
+
+  /** 建树用的可变节点；视图不可变，children 在装配完成后冻结。 */
+  private static final class DepartmentNode {
+    private final UUID id;
+    private final String code;
+    private final String name;
+    private final UUID parentId;
+    private final UUID legalEntityId;
+    private final String legalEntityName;
+    private final UUID leaderMembershipId;
+    private final String leaderName;
+    private final int memberCount;
+    private final List<DepartmentNode> children = new ArrayList<>();
+
+    private DepartmentNode(
+        UUID id,
+        String code,
+        String name,
+        UUID parentId,
+        UUID legalEntityId,
+        String legalEntityName,
+        UUID leaderMembershipId,
+        String leaderName,
+        int memberCount) {
+      this.id = id;
+      this.code = code;
+      this.name = name;
+      this.parentId = parentId;
+      this.legalEntityId = legalEntityId;
+      this.legalEntityName = legalEntityName;
+      this.leaderMembershipId = leaderMembershipId;
+      this.leaderName = leaderName;
+      this.memberCount = memberCount;
+    }
+
+    private DepartmentView view() {
+      return new DepartmentView(
+          id,
+          code,
+          name,
+          parentId,
+          legalEntityId,
+          legalEntityName,
+          leaderMembershipId,
+          leaderName,
+          memberCount,
+          children.stream().map(DepartmentNode::view).toList());
+    }
+  }
+
+  private boolean exists(String statement, Object... bindings) {
+    return sql.fetchOne(statement, bindings) != null;
+  }
+
+  /**
+   * 引用存在性校验。租户上下文由 RLS 决定，所以跨租户 ID 在这里表现为「不存在」——
+   * 应用层给出可读错误，DB 层的复合外键再兜一道。
+   */
+  private void references(UUID parentId, UUID legalEntityId, UUID leaderMembershipId) {
+    if (parentId != null)
+      check(
+          exists("select 1 from department where id=?", parentId), "上级部门不存在或不属于当前租户");
+    if (legalEntityId != null)
+      check(
+          exists("select 1 from legal_entity where id=?", legalEntityId),
+          "所属法人不存在或不属于当前租户");
+    if (leaderMembershipId != null)
+      check(
+          exists("select 1 from membership where id=?", leaderMembershipId),
+          "负责人不存在或不属于当前租户");
   }
 
   @PostMapping("/departments")
@@ -506,9 +629,18 @@ public class AdministrationController {
         "identity.department.create",
         true,
         a -> {
+          references(input.parentId(), input.legalEntityId(), input.leaderMembershipId());
           UUID id = Ids.next();
           sql.execute(
-              "insert into department values(?,?,?)", id, a.tenantId(), input.name().trim());
+              "insert into department(id,tenant_id,code,name,parent_id,legal_entity_id,leader_membership_id)"
+                  + " values (?,?,?,?,?,?,?)",
+              id,
+              a.tenantId(),
+              input.code().trim(),
+              input.name().trim(),
+              input.parentId(),
+              input.legalEntityId(),
+              input.leaderMembershipId());
           audit(a, id, "DepartmentCreated");
           return id;
         });
@@ -524,14 +656,64 @@ public class AdministrationController {
         "identity.department.update",
         true,
         a -> {
+          // parentId 在这里被忽略：层级调整是独立的 DepartmentMoved 动作，
+          // 防环校验只存在于那一处，不重复实现。
+          references(null, input.legalEntityId(), input.leaderMembershipId());
           check(
-              sql.execute("update department set name=? where id=?", input.name().trim(), id) == 1,
+              sql.execute(
+                      "update department set code=?, name=?, legal_entity_id=?, leader_membership_id=?"
+                          + " where id=?",
+                      input.code().trim(),
+                      input.name().trim(),
+                      input.legalEntityId(),
+                      input.leaderMembershipId(),
+                      id)
+                  == 1,
               "部门不存在");
           audit(a, id, "DepartmentUpdated");
           return null;
         });
   }
 
+  /** 拖拽移动：只改 parent_id，并拒绝把节点挂到自己或自己的子孙下面（否则形成环）。 */
+  @PutMapping("/departments/{id}/parent")
+  public void moveDepartment(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @Valid @RequestBody DepartmentMove input) {
+    call(
+        auth,
+        "identity.department.update",
+        true,
+        a -> {
+          check(exists("select 1 from department where id=?", id), "部门不存在");
+          references(input.parentId(), null, null);
+          // 成环的条件是「新父节点在当前节点的子树内」，等价于「当前节点是新父节点的祖先」。
+          // 所以这里沿 parent_id 向上走新父节点的祖先链，看是否碰到自己——
+          // 直接把父挂到自己也算：新父节点的祖先链第一个就是它自己。
+          if (input.parentId() != null)
+            check(
+                !sql.fetchOne(
+                        "with recursive ancestors as ("
+                            + " select id, parent_id from department where id = ?"
+                            + " union all"
+                            + " select d.id, d.parent_id from department d"
+                            + "   join ancestors a on d.id = a.parent_id)"
+                            + " select exists(select 1 from ancestors where id = ?) as cycle",
+                        input.parentId(),
+                        id)
+                    .get("cycle", Boolean.class),
+                "不能把部门移动到自身或自己的下级部门下");
+          sql.execute("update department set parent_id=? where id=?", input.parentId(), id);
+          audit(a, id, "DepartmentMoved");
+          return null;
+        });
+  }
+
+  /**
+   * 删除语义：有子部门或仍有成员挂靠就拒绝，并说明具体数量——不静默级联。
+   * 组织树一旦被级联删掉，成员的部门归属和 17.3.2.2 的数据范围都会失去依据。
+   */
   @DeleteMapping("/departments/{id}")
   public void deleteDepartment(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -541,6 +723,16 @@ public class AdministrationController {
         "identity.department.delete",
         true,
         a -> {
+          check(exists("select 1 from department where id=?", id), "部门不存在");
+          int children =
+              sql.fetchOne("select count(*) from department where parent_id=?", id)
+                  .get(0, Integer.class);
+          if (children > 0)
+            reject("该部门下仍有 " + children + " 个子部门，请先移动或删除这些子部门");
+          int members =
+              sql.fetchOne("select count(*) from membership where department_id=?", id)
+                  .get(0, Integer.class);
+          if (members > 0) reject("该部门仍挂靠 " + members + " 名成员，请先调整成员归属");
           check(sql.execute("delete from department where id=?", id) == 1, "部门不存在");
           audit(a, id, "DepartmentDeleted");
           return null;

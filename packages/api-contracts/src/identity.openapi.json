@@ -315,6 +315,49 @@
         }
       }
     },
+    "/identity/departments/{id}/parent": {
+      "put": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "moveDepartment",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DepartmentMove"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/children/{id}": {
       "put": {
         "tags": [
@@ -1164,14 +1207,45 @@
       },
       "DepartmentInput": {
         "required": [
+          "code",
           "name"
         ],
         "type": "object",
         "properties": {
+          "code": {
+            "minLength": 1,
+            "pattern": "[A-Z0-9_-]{1,64}",
+            "type": "string"
+          },
           "name": {
             "maxLength": 100,
             "minLength": 0,
             "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "leaderMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "DepartmentMove": {
+        "type": "object",
+        "properties": {
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
           }
         }
       },
@@ -1554,8 +1628,44 @@
             "type": "string",
             "format": "uuid"
           },
+          "code": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "leaderMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "leaderName": {
+            "type": "string",
+            "nullable": true
+          },
+          "memberCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DepartmentView"
+            }
           }
         }
       },

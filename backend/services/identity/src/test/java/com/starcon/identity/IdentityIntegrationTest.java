@@ -172,7 +172,12 @@ class IdentityIntegrationTest {
   void rolesMembersDepartmentsAndRevocationWorkThroughAuthorizedApis() throws Exception {
     String token = login(), tag = suffix();
     String department =
-        request(token, "POST", "/identity/departments", Map.of("name", "Dept " + tag), 200)
+        request(
+                token,
+                "POST",
+                "/identity/departments",
+                Map.of("code", "DEPT" + tag, "name", "Dept " + tag),
+                200)
             .asText();
     String role =
         request(
@@ -299,7 +304,11 @@ class IdentityIntegrationTest {
                 .asText())
         .isEqualTo("SELF");
     request(
-        token, "PUT", "/identity/departments/" + department, Map.of("name", "Renamed " + tag), 200);
+        token,
+        "PUT",
+        "/identity/departments/" + department,
+        Map.of("code", "DEPT" + tag, "name", "Renamed " + tag),
+        200);
     request(token, "DELETE", "/identity/departments/" + department, null, 409);
     request(token, "DELETE", "/identity/roles/" + role, null, 200);
     assertThat(request(memberToken, "GET", "/auth/session", null, 200).get("grants").isEmpty())
@@ -642,5 +651,235 @@ class IdentityIntegrationTest {
     String code = "LE" + suffix();
     request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "USD"), 200);
     request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "EUR"), 409);
+  }
+
+  // ------------------------------------------------------------------
+  // 17.2.1.1 部门树
+  // ------------------------------------------------------------------
+
+  Map<String, Object> departmentInput(String code, String name) {
+    var input = new HashMap<String, Object>();
+    input.put("code", code);
+    input.put("name", name);
+    return input;
+  }
+
+  Map<String, Object> departmentInput(String code, String name, UUID parent) {
+    var input = departmentInput(code, name);
+    input.put("parentId", parent);
+    return input;
+  }
+
+  /** 部门输入 + 可选引用（所属法人 / 负责人），避免每个断言都手搓 HashMap。 */
+  Map<String, Object> departmentInput(
+      String code, String name, UUID parent, UUID legalEntity, UUID leader) {
+    var input = departmentInput(code, name, parent);
+    input.put("legalEntityId", legalEntity);
+    input.put("leaderMembershipId", leader);
+    return input;
+  }
+
+  UUID createDepartment(String token, String code, String name, UUID parent) throws Exception {
+    return UUID.fromString(
+        request(token, "POST", "/identity/departments", departmentInput(code, name, parent), 200)
+            .asText());
+  }
+
+  /** 树里按 code 找节点，找不到返回 null，方便断言里直接取 children。 */
+  JsonNode findNode(JsonNode nodes, String code) {
+    for (JsonNode node : nodes) {
+      if (code.equals(node.get("code").asText())) return node;
+      var deeper = findNode(node.get("children"), code);
+      if (deeper != null) return deeper;
+    }
+    return null;
+  }
+
+  @Test
+  void departmentTreeIsHierarchicalAndCarriesLegalEntityLeaderAndMemberCount() throws Exception {
+    String token = login(), tag = suffix();
+    UUID entity =
+        UUID.fromString(
+            request(token, "POST", "/identity/legal-entities", legalEntityInput("LE" + tag, "USD"), 200)
+                .asText());
+    UUID root = createDepartment(token, "ROOT" + tag, "总部" + tag, null);
+    UUID mid = createDepartment(token, "MID" + tag, "研发部" + tag, root);
+    UUID leaf = createDepartment(token, "LEAF" + tag, "平台组" + tag, mid);
+
+    // 负责人只是一个指向 membership 的字段引用：代管/临时授权属于 17.2.1.2，本模块不做。
+    String leaderUser = "dept-leader-" + tag.toLowerCase();
+    String leader =
+        request(token, "POST", "/identity/members", memberInput(leaderUser, null, List.of()), 200)
+            .asText();
+    request(
+        token,
+        "PUT",
+        "/identity/departments/" + mid,
+        departmentInput("MID" + tag, "研发部" + tag, null, entity, UUID.fromString(leader)),
+        200);
+
+    // 成员分布：一个挂靠研发部，两个挂靠平台组
+    request(
+            token,
+            "POST",
+            "/identity/members",
+            memberInput("dept-m" + tag.toLowerCase(), mid.toString(), List.of()),
+            200)
+        .asText();
+    request(
+            token,
+            "POST",
+            "/identity/members",
+            memberInput("dept-p1-" + tag.toLowerCase(), leaf.toString(), List.of()),
+            200)
+        .asText();
+    request(
+            token,
+            "POST",
+            "/identity/members",
+            memberInput("dept-p2-" + tag.toLowerCase(), leaf.toString(), List.of()),
+            200)
+        .asText();
+
+    var tree = request(token, "GET", "/identity/departments", null, 200);
+    var rootNode = findNode(tree, "ROOT" + tag);
+    assertThat(rootNode).isNotNull();
+    assertThat(rootNode.get("parentId").isNull()).isTrue();
+    assertThat(rootNode.get("id").asText()).isEqualTo(root.toString());
+    // 父部门只统计直接挂靠的人，不把子部门的人重复累计
+    assertThat(rootNode.get("memberCount").asInt()).isZero();
+    assertThat(rootNode.get("children")).hasSize(1);
+
+    var midNode = findNode(tree, "MID" + tag);
+    assertThat(midNode.get("parentId").asText()).isEqualTo(root.toString());
+    assertThat(midNode.get("memberCount").asInt()).isEqualTo(1);
+    assertThat(midNode.get("legalEntityId").asText()).isEqualTo(entity.toString());
+    assertThat(midNode.get("legalEntityName").asText()).isEqualTo("测试法人 LE" + tag);
+    assertThat(midNode.get("leaderMembershipId").asText()).isEqualTo(leader);
+    assertThat(midNode.get("leaderName").asText()).isEqualTo(leaderUser);
+
+    var leafNode = findNode(tree, "LEAF" + tag);
+    assertThat(leafNode.get("parentId").asText()).isEqualTo(mid.toString());
+    assertThat(leafNode.get("memberCount").asInt()).isEqualTo(2);
+    assertThat(leafNode.get("children")).isEmpty();
+    // 负责人可为空：没有负责人的部门需要在审批流里指定兜底人
+    assertThat(leafNode.get("leaderMembershipId").isNull()).isTrue();
+  }
+
+  @Test
+  void departmentMoveRelocatesSubtreeAndRejectsCycles() throws Exception {
+    String token = login(), tag = suffix();
+    UUID a = createDepartment(token, "A" + tag, "A部门" + tag, null);
+    UUID b = createDepartment(token, "B" + tag, "B部门" + tag, a);
+    UUID c = createDepartment(token, "C" + tag, "C部门" + tag, b);
+
+    // 拖拽：C 移到 A 之下
+    request(token, "PUT", "/identity/departments/" + c + "/parent", Map.of("parentId", a), 200);
+    var tree = request(token, "GET", "/identity/departments", null, 200);
+    assertThat(findNode(tree, "C" + tag).get("parentId").asText()).isEqualTo(a.toString());
+    assertThat(findNode(tree, "B" + tag).get("children")).isEmpty();
+
+    // 防环：把 A 挂到自己的子孙 C 之下必须被拒绝，且数据不变
+    request(token, "PUT", "/identity/departments/" + a + "/parent", Map.of("parentId", c), 400);
+    request(token, "PUT", "/identity/departments/" + a + "/parent", Map.of("parentId", b), 400);
+    request(token, "PUT", "/identity/departments/" + a + "/parent", Map.of("parentId", a), 400);
+    var after = request(token, "GET", "/identity/departments", null, 200);
+    assertThat(findNode(after, "A" + tag).get("parentId").isNull()).isTrue();
+
+    // 提升为根部门。Map.of 不接受 null 值，显式 parentId=null 才是「提升为根」的真实请求体。
+    var promote = new HashMap<String, Object>();
+    promote.put("parentId", null);
+    request(token, "PUT", "/identity/departments/" + b + "/parent", promote, 200);
+    var roots = request(token, "GET", "/identity/departments", null, 200);
+    assertThat(findNode(roots, "B" + tag).get("parentId").isNull()).isTrue();
+  }
+
+  @Test
+  void departmentHierarchyStaysInsideTheTenant() throws Exception {
+    String owner = login(), tag = suffix();
+
+    // 建一个子租户，用子租户所有者的身份建一个部门
+    String childUser = "dept-child-" + tag.toLowerCase();
+    request(
+            owner,
+            "POST",
+            "/identity/children",
+            Map.of(
+                "code", "DC" + tag,
+                "name", "Child",
+                "ownerUsername", childUser,
+                "ownerPassword", "test-member-password"),
+            200)
+        .asText();
+    String childToken = loginUser(childUser);
+    UUID foreign = createDepartment(childToken, "F" + tag, "外部部门" + tag, null);
+
+    // 父租户看不到子租户的部门
+    assertThat(findNode(request(owner, "GET", "/identity/departments", null, 200), "F" + tag))
+        .isNull();
+    // 伪造 parentId 指向别的租户：RLS 让它不可见，应用层给出可读业务错误。
+    // request() 每次都带随机 X-Tenant-Id，这个头不影响判定。
+    request(owner, "POST", "/identity/departments", departmentInput("X" + tag, "跨租户挂靠", foreign), 400);
+    // 同一个编码在另一个租户可以用
+    request(childToken, "POST", "/identity/departments", departmentInput("X" + tag, "另一租户同编码", null), 200);
+  }
+
+  @Test
+  void departmentDeleteRefusesWhileChildrenOrMembersRemain() throws Exception {
+    String token = login(), tag = suffix();
+    UUID root = createDepartment(token, "R" + tag, "待删总部" + tag, null);
+    UUID child = createDepartment(token, "S" + tag, "待删子部门" + tag, root);
+
+    request(token, "DELETE", "/identity/departments/" + root, null, 409);
+    assertThat(findNode(request(token, "GET", "/identity/departments", null, 200), "R" + tag))
+        .isNotNull();
+
+    // 成员仍挂靠时也不能删
+    request(
+            token,
+            "POST",
+            "/identity/members",
+            memberInput("dept-del-" + tag.toLowerCase(), child.toString(), List.of()),
+            200)
+        .asText();
+    request(token, "DELETE", "/identity/departments/" + child, null, 409);
+
+    // 清空子部门与成员后才可删除
+    request(token, "DELETE", "/identity/departments/" + child, null, 409);
+    var members = request(token, "GET", "/identity/members", null, 200);
+    for (JsonNode m : members) {
+      if (child.toString().equals(m.get("departmentId").asText())) {
+        request(
+            token,
+            "DELETE",
+            "/identity/members/" + m.get("id").asText(),
+            null,
+            200);
+      }
+    }
+    request(token, "DELETE", "/identity/departments/" + child, null, 200);
+    request(token, "DELETE", "/identity/departments/" + root, null, 200);
+    assertThat(findNode(request(token, "GET", "/identity/departments", null, 200), "R" + tag))
+        .isNull();
+  }
+
+  @Test
+  void departmentCodeIsUniqueWithinTenantAndCrossTenantReferencesAreRejected() throws Exception {
+    String token = login(), tag = suffix();
+    createDepartment(token, "DUP" + tag, "编码部门" + tag, null);
+    request(token, "POST", "/identity/departments", departmentInput("DUP" + tag, "重名编码", null), 409);
+    // 所属法人 / 负责人 必须是本租户的行，跨租户引用给出可读业务错误而不是 500
+    request(
+            token,
+            "POST",
+            "/identity/departments",
+            departmentInput("LE" + tag, "假法人", null, UUID.randomUUID(), null),
+            400);
+    request(
+            token,
+            "POST",
+            "/identity/departments",
+            departmentInput("LD" + tag, "假负责人", null, null, UUID.randomUUID()),
+            400);
   }
 }
