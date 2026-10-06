@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 46 |
+| 已交付 | 47 |
 | 进行中 | 0 |
-| **未开发** | **419** |
-| 完成率 | 9.9% |
+| **未开发** | **418** |
+| 完成率 | 10.1% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 45 | 0 | 35 | 80 |
+| **D1–D2** | 46 | 0 | 34 | 80 |
 | **D3** | 1 | 0 | 39 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
-| 03 | 商品主数据系统 | D1–D2 | 16 | 40 |
+| 03 | 商品主数据系统 | D1–D2 | 17 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
@@ -156,7 +156,7 @@
 | 3.3.1.1 | 分类树管理 | /products/categories | D1–D2 | 已交付 | V14__category_tree.sql（product_category_tree/product_category/product_category_name/spu_category，强制 RLS + GRANT；防环触发器 guard_product_category_cycle + 子树 path 同步；category_attribute_rule / category_attribute_option / category_spec_axis 加 category_id 并做自由文本数据迁移后收口 NOT NULL）+ GET /catalog/categories/overview、/trees、/trees/{treeId}/nodes，POST /trees、/trees/{treeId}/nodes，PUT /nodes/{id}、/nodes/{id}/move、/nodes/{id}/enabled、/spus/{spuId}，DELETE /trees/{id}、/nodes/{id} + /products/categories 页面（CategoryTreeWorkspace：树切换 / 概览 / 节点树 / 新建 / 编辑 / 移动 / 启用停用 / 删除，含加载态·空态·错误态）+ CategoryTreeIntegrationTest（15 例，含租户隔离三断言与防环断言）与 category-tree-model.test.ts（17 例）+ api-proxy 放行 categories 前缀（含放行/拒绝用例） |
 | 3.3.1.2 | 类目属性要求 | /products/categories | D1–D2 | 已交付 | V15__category_attribute_requirements.sql（category_attribute_rule 加 requirement/condition_attribute_id/condition_operator/max_length/allow_free_text/enabled/version/updated_at；新建 category_attribute_condition_value；sync_category_attribute_rule_requirement 触发器让 requirement 为权威列、required 为派生列防两列漂移；guard_category_attribute_condition_value 拒绝条件取值挂错前置属性；(tenant_id,category_id,attribute_id) 唯一索引 + 强制 RLS/GRANT）；GET /catalog/categories/attribute-requirements/overview、/{categoryId}、/{categoryId}/effective，POST /{categoryId}、/{categoryId}/entry-form-schema、/{categoryId}/validate，PUT /{categoryId}/{attributeId}/enabled，DELETE /{categoryId}/{attributeId}；/products/categories/requirements 页面（CategoryRequirementsWorkspace：类目下拉 / 生效规则集含继承来源标注 / 新增·编辑·启停·删除 / 录入表单 schema 预览 / 保存前逐字段校验，加载·空·错误三态）+ 分类树页面入口链接；继承语义为「按属性逐条就近覆盖（nearest-wins），停用最近那条即豁免祖先要求」，表单 schema 与保存前校验共用同一条件求值器；CategoryAttributeRequirementIntegrationTest 12 例（含租户隔离三断言、继承与豁免语义、条件求值四分支、表单 schema 依赖排序、逐字段校验码、平台树拒绝、与 3.2.1.1 写入路径的列同步）+ CategoryAttributeRequirementRulesTest 11 例 + category-requirements-model.test.ts 15 例 + api-proxy 放行/拒绝 2 例 |
 | 3.3.2.1 | 品牌 | /products/brands | D1–D2 | 已交付 | V16__brand_management.sql（brand 字典本体 code 租户内唯一 / name / logo_uri / authorization_status 枚举 OWNED·AGENCY·LICENSED / enabled / version；brand_name 多语言补充名主键 (tenant_id,brand_id,locale) 挡同语言两条；brand_authorization 授权凭证 certificate_no 品牌内唯一 + grantor + valid_from/valid_to date + evidence_uri + enabled，一个品牌多条并存按各自有效期判定，撤销即 enabled=false 行仍保留；brand_category 关联类目走复合外键指向 3.3.1.1 的 product_category(tenant_id,id) 不复刻类目表；四表均 tenant_id NOT NULL + 强制 RLS isolation + catalog_app/starcon_app GRANT + 5 条索引）；GET /catalog/brands（分页 + 关键词覆盖编码/名称/多语言名 + 授权状态/启用/刊登可行性/类目筛选，LIKE 通配符 escape 转义）、/overview、/candidates、/{id}、/{id}/authorizations、/{id}/listing-eligibility，POST /catalog/brands、/listing-eligibility（批量，上限 500）、/{id}/authorizations，PUT /{id}、/{id}/enabled、/{id}/authorizations/{authId}、/{id}/authorizations/{authId}/enabled，DELETE /{id}?version=；/products/brands 页面（BrandWorkspace：概览四项指标含「不可刊登数」/ 分页搜索筛选列表每行带刊登判定与原因 / 品牌编辑含多语言名与类目多选整体替换 / 凭证维护含有效期与撤销 / 刊登与合规引用候选区块，加载·空·错误三态且两种空态文案不同）+ brand-model.ts；蓝图业务规则「需授权但无有效凭证时阻止刊登」落成 BrandRules.publishBlock 单一实现 + 三个出口（列表行/详情/单个与批量判定端点），四条原因码 BRAND_DISABLED·LICENSE_MISSING·LICENSE_NOT_YET_EFFECTIVE·LICENSE_EXPIRED（区分未生效与已过期是因为 04 刊登与 16 侵权检测处理动作不同），判定基准日 UTC 当天并回带 asOf；建档不要求凭证（被拒的是刊登不是建档）、撤销不是删除、编码建后不可改、列表 SQL 判定与规则类判定逐字同口径；BrandIntegrationTest 15 例（含租户隔离三断言、阻止刊登四分支与状态改判立刻生效、跨模块关联类目重命名跟随、凭证不随类目删除级联、分页与 LIKE 转义、HTTP 全链路与权限）+ BrandRulesTest 10 例 + brand-model.test.ts 32 例 + api-proxy 放行 1 例 |
-| 3.3.3.1 | 计量单位 | /products/units | D1–D2 | 未开发 | — |
+| 3.3.3.1 | 计量单位 | /products/units | D1–D2 | 已交付 | V17__measurement_units.sql（unit_group 单位组：code 租户内唯一 / name / dimension 与 V8 同一量纲词表 / base_unit_code 复合外键指向 unit_of_measure(tenant_id,code) / note / enabled / version；unit_group_member 组成员主键 (tenant_id,group_id,unit_code) + unit_code 复合外键指向字典 + position；unit_group_conversion 组内换算版本 quantity_per_base numeric(19,6) + UNIQUE(tenant_id,group_id,unit_code,effective_from) + 复合外键指向组成员保证「换算行必是组内成员」+ 生效区间 CHECK；四个守卫触发器 guard_unit_group_dimension（建组时基准单位量纲要等于组量纲）/ guard_unit_group_member_dimension（每次加成员再判量纲）/ refuse_unit_group_base_removal（组基础单位不可移出组）/ guard_unit_group_conversion_dimension（换算版本再判量纲且基准单位不占行）+ validate_unit_group_conversion_window（区间不重叠，同 V6 形状）；6 条索引含部分索引 unit_group_conversion_open；三表均 tenant_id NOT NULL + ENABLE/FORCE RLS isolation 策略 + catalog_app/starcon_app GRANT）；GET /catalog/unit-groups（分页 + 关键词覆盖编码/名称/基准单位/成员单位名 + 量纲/启用筛选，LIKE 通配符 escape 转义）、/overview（十个指标含未归组单位数与缺生效版本组数 + 按量纲统计）、/{id}?asOf=（组本体 + 成员带当天生效比例 + 换算版本按成员与生效起始日倒序）、POST /convert；POST /catalog/unit-groups、/{id}/conversions，PUT /{id}、/{id}/enabled、DELETE /{id}?version=、/{id}/conversions/{conversionId}（只删已闭合的历史版本）；换算查询返回 200 + denied=true + 七条原因码 SELF_CONVERSION·UNIT_UNREGISTERED·UNIT_DISABLED·GROUP_DISABLED·DIMENSION_MISMATCH·NOT_SAME_GROUP·NO_EFFECTIVE_VERSION 而非 HTTP 错误，判定顺序从最具体到最笼统且量纲守卫先于组内判断；/products/units 页面（UnitGroupWorkspace：概览四项指标含未归组单位与缺生效版本组 / 单位字典维护复用 3.1.2.4 写入端点 / 单位组分页搜索筛选 / 组详情含成员与历史版本 / 组内换算版本新增与删除 / 换算试算含原因码与处理动作，加载·空·错误三态且两种空态文案不同）+ unit-group-model.ts；蓝图硬约束「量纲不匹配的单位之间不允许换算」双层兑现：应用层给可执行的人话、DB 层三个守卫触发器兜底，集成测试直连 SQL 证明绕过应用层也写不进跨量纲数据；UnitGroupIntegrationTest 19 例（含租户隔离三断言、DB 层量纲守卫、七条原因码、基准单位迁移、区间不重叠、RLS 与 numeric(19,6) 表结构断言）+ UnitGroupRulesTest 11 例 + unit-group-model.test.ts 27 例 + api-proxy 放行 1 例 |
 | 3.4.1.1 | 媒体库 | /products/media | D1–D2 | 未开发 | 阻塞：product_asset 是 `LIKE product_research INCLUDING ALL` 的同构复制（catalog V1:77-80），装不了文件键/图片处理元数据。须先拆表。 |
 | 3.4.1.2 | 图片处理 | /products/media | D1–D2 | 未开发 | — |
 | 3.4.2.1 | 标题库 | /products/content | D1–D2 | 未开发 | — |

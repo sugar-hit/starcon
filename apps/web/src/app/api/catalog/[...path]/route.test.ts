@@ -280,6 +280,68 @@ it('catalog/brands 的全部路由被放行且转发到 catalog 服务（3.3.2.1
   ).toBe(200);
 });
 
+it('catalog/unit-groups 的全部路由被放行且转发到 catalog 服务（3.3.3.1 计量单位）', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const group = '11111111-1111-1111-1111-111111111111';
+  const version = '22222222-2222-2222-2222-222222222222';
+  for (const path of [
+    'catalog/unit-groups',
+    'catalog/unit-groups/overview',
+    `catalog/unit-groups/${group}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8082/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 建组、建换算版本与换算试算都是 POST；试算的数量与基准日放请求体而不是 URL。
+  for (const path of [
+    'catalog/unit-groups',
+    'catalog/unit-groups/convert',
+    `catalog/unit-groups/${group}/conversions`,
+  ]) {
+    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(
+      200,
+    );
+  }
+  expect(
+    (
+      await PUT(request(`catalog/unit-groups/${group}/enabled`, 'PUT'), {
+        params: { path: ['catalog', 'unit-groups', group, 'enabled'] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await PUT(request(`catalog/unit-groups/${group}`, 'PUT'), {
+        params: { path: ['catalog', 'unit-groups', group] },
+      })
+    ).status,
+  ).toBe(200);
+  // 删组 / 删已闭合的历史换算版本。
+  for (const [path, segments] of [
+    [`catalog/unit-groups/${group}`, ['catalog', 'unit-groups', group]],
+    [
+      `catalog/unit-groups/${group}/conversions/${version}`,
+      ['catalog', 'unit-groups', group, 'conversions', version],
+    ],
+  ] as const) {
+    expect((await DELETE(request(path, 'DELETE'), { params: { path: [...segments] } })).status).toBe(
+      200,
+    );
+  }
+  // 不在白名单里的子路径仍然 404：放行不能是前缀通配。
+  expect(
+    (await GET(request(`catalog/unit-groups/${group}/unknown`, 'GET'), {
+      params: { path: ['catalog', 'unit-groups', group, 'unknown'] },
+    })).status,
+  ).toBe(404);
+});
+
 it('catalog/categories/attribute-requirements 的全部路由被放行（3.3.1.2 类目属性要求）', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
   vi.stubGlobal('fetch', fetcher);
