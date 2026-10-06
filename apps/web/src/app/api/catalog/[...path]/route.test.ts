@@ -174,6 +174,80 @@ it('variant-combination 放行不等于放行任意 catalog 子路径', async ()
  * （本模块的租户级字典）被混为一谈：前者第一段是 UUID，后者第一段是字面量 attributes。
  * 少写这一条会让整个字典页只进错误态，而 POST 依然被 405/404 拦掉。
  */
+it('catalog/categories 的全部路由被放行且转发到 catalog 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const tree = '22222222-2222-2222-2222-222222222222';
+  for (const path of [
+    'catalog/categories/overview',
+    'catalog/categories/trees',
+    'catalog/categories/trees/22222222-2222-2222-2222-222222222222',
+    `catalog/categories/trees/${tree}/nodes`,
+    `catalog/categories/nodes/${id}`,
+    `catalog/categories/spus/${id}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8082/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 建树 / 建节点 / 拖拽落点 / 启用停用 / 写 SPU 分类都是写方法。
+  for (const path of [
+    'catalog/categories/trees',
+    `catalog/categories/trees/${tree}/nodes`,
+    `catalog/categories/spus/${id}`,
+  ]) {
+    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(
+      200,
+    );
+  }
+  expect(
+    (
+      await PUT(request(`catalog/categories/trees/${tree}`), {
+        params: { path: ['catalog', 'categories', 'trees', tree] },
+      })
+    ).status,
+  ).toBe(200);
+  for (const path of [
+    `catalog/categories/nodes/${id}`,
+    `catalog/categories/nodes/${id}/move`,
+    `catalog/categories/nodes/${id}/enabled`,
+  ]) {
+    expect((await PUT(request(path, 'PUT'), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  for (const path of [
+    `catalog/categories/trees/${tree}`,
+    `catalog/categories/nodes/${id}`,
+  ]) {
+    expect((await DELETE(request(path, 'DELETE'), { params: { path: path.split('/') } })).status).toBe(
+      200,
+    );
+  }
+});
+
+it('categories 放行不等于放行任意 catalog 子路径', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const tree = '22222222-2222-2222-2222-222222222222';
+  for (const path of [
+    'catalog/categories/unknown',
+    'catalog/categories/nodes',
+    `catalog/categories/nodes/${id}/unknown`,
+    // 整棵树一次取回（结构 + 路径串 + 商品数来自同一次查询），后面不接第三段 id。
+    `catalog/categories/trees/${tree}/nodes/${id}`,
+    `catalog/categories/spus/${id}/extra`,
+    'catalog/categoriesx',
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
 it('catalog/attributes 的全部路由被放行且转发到 catalog 服务', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
   vi.stubGlobal('fetch', fetcher);
