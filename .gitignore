@@ -88,6 +88,9 @@ data/
 work/
 playwright-report/
 test-results/
+# Editor/manual backups and captured session cookies — never commit credentials
+*.bak
+.dev-cookie.txt
 
 # Java/Maven generated output
 backend/**/target/
