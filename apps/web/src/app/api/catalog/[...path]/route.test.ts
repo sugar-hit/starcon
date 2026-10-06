@@ -198,8 +198,11 @@ it('catalog/attributes 的全部路由被放行且转发到 catalog 服务', asy
     expect((await POST(request(path), { params: { path: path.split('/') } })).status).toBe(200);
   }
   expect(
-    (await PUT(request(`catalog/attributes/${id}`), { params: { path: [`catalog`, 'attributes', id] } }))
-      .status,
+    (
+      await PUT(request(`catalog/attributes/${id}`), {
+        params: { path: [`catalog`, 'attributes', id] },
+      })
+    ).status,
   ).toBe(200);
   const rule = `catalog/attributes/${id}/category-rules`;
   expect(
@@ -255,4 +258,68 @@ it('catalog/attributes/options 的三条路由被放行', async () => {
       })
     ).status,
   ).toBe(404);
+});
+
+/**
+ * 3.2.2.2 SKU 属性覆写：catalog allowlist 必须放行 sku-attribute-override 全路径。
+ *
+ * <p>同一个坑：allowlist 是锚定正则，落不在分支里的路径一律 404，页面只会进错误态，
+ * 看起来像「后端没实现」（见 docs/backlog/2026-10/2026-10-07-sku-code-api-proxy-allowlist.md）。
+ * 这里把四条路由都钉住：读面板、覆写、显式清空、取消覆写。
+ *
+ * <p>要防的混用是「sku-attribute-override」（第一段是字面量）与 `products/{id}/...`
+ *（第一段是 UUID）：本模块刻意按 SKU 寻址，路径里没有商品 id。
+ */
+it('catalog/sku-attribute-override 的全部路由被放行且转发到 catalog 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const sku = '11111111-1111-1111-1111-111111111111';
+  const attribute = '22222222-2222-2222-2222-222222222222';
+  const panel = `catalog/sku-attribute-override/skus/${sku}`;
+  for (const path of [
+    panel,
+    `${panel}/attribute-overrides/${attribute}`,
+    `${panel}/attribute-overrides/${attribute}/clear`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8082/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 覆写与显式清空都用 PUT，取消覆写用 DELETE
+  for (const path of [
+    `${panel}/attribute-overrides/${attribute}`,
+    `${panel}/attribute-overrides/${attribute}/clear`,
+  ]) {
+    expect((await PUT(request(path, 'PUT'), { params: { path: path.split('/') } })).status).toBe(
+      200,
+    );
+  }
+  expect(
+    (
+      await DELETE(request(`${panel}/attribute-overrides/${attribute}`, 'DELETE'), {
+        params: { path: `${panel}/attribute-overrides/${attribute}`.split('/') },
+      })
+    ).status,
+  ).toBe(200);
+});
+
+it('sku-attribute-override 放行不等于放行任意 catalog 子路径', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const sku = '11111111-1111-1111-1111-111111111111';
+  const attribute = '22222222-2222-2222-2222-222222222222';
+  // allowlist 是精确路径：多一层未声明的子路径、或少了 SKU 段，仍应 404，
+  // 否则拼错的路径会被静默转发到后端，后端给出的错误会与真正的参数错误混在一起。
+  for (const path of [
+    'catalog/sku-attribute-override',
+    `catalog/sku-attribute-override/skus/${sku}/unknown`,
+    `catalog/sku-attribute-override/skus/${sku}/attribute-overrides/${attribute}/clear/extra`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
 });
