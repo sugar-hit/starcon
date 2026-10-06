@@ -99,6 +99,106 @@
         }
       }
     },
+    "/catalog/sku-code/skus/{id}/code": {
+      "put": {
+        "tags": [
+          "sku-code-controller"
+        ],
+        "operationId": "setCode",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuCodeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuCodeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-code/rules/{id}": {
+      "put": {
+        "tags": [
+          "sku-code-controller"
+        ],
+        "operationId": "updateRule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuCodeRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuCodeRuleSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/records/{kind}/{id}": {
       "put": {
         "tags": [
@@ -677,6 +777,211 @@
         }
       }
     },
+    "/catalog/sku-code/skus/{id}/identifiers": {
+      "post": {
+        "tags": [
+          "sku-code-controller"
+        ],
+        "operationId": "addIdentifier",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuIdentifierInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuIdentifierSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-code/rules": {
+      "get": {
+        "tags": [
+          "sku-code-controller"
+        ],
+        "operationId": "rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SkuCodeRule"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "sku-code-controller"
+        ],
+        "operationId": "createRule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuCodeRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuCodeRuleSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-code/identifiers/import": {
+      "post": {
+        "tags": [
+          "sku-code-controller"
+        ],
+        "operationId": "importIdentifiers",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuIdentifierImportInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuIdentifierImportResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-code/batch": {
+      "post": {
+        "tags": [
+          "sku-code-controller"
+        ],
+        "operationId": "batch_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuCodeBatchInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuCodeBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/records/{kind}": {
       "get": {
         "tags": [
@@ -1037,7 +1342,7 @@
         "tags": [
           "lifecycle-controller"
         ],
-        "operationId": "rules",
+        "operationId": "rules_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1464,6 +1769,117 @@
         }
       }
     },
+    "/catalog/sku-code/skus/{id}": {
+      "get": {
+        "tags": [
+          "sku-code-controller"
+        ],
+        "operationId": "panel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuCodePanel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-code/overview": {
+      "get": {
+        "tags": [
+          "sku-code-controller"
+        ],
+        "operationId": "overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuCodeOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-code/batches/{id}": {
+      "get": {
+        "tags": [
+          "sku-code-controller"
+        ],
+        "operationId": "batch_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuCodeBatchResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/lifecycle/rules/{id}/preview": {
       "get": {
         "tags": [
@@ -1555,6 +1971,58 @@
           }
         }
       }
+    },
+    "/catalog/sku-code/skus/{id}/identifiers/{identifierId}": {
+      "delete": {
+        "tags": [
+          "sku-code-controller"
+        ],
+        "operationId": "deleteIdentifier",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "identifierId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1627,6 +2095,121 @@
           },
           "packagingChanged": {
             "type": "boolean"
+          }
+        }
+      },
+      "SkuCodeInput": {
+        "required": [
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SkuCodeSaved": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromCode": {
+            "type": "string"
+          },
+          "toCode": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SkuCodeRuleInput": {
+        "required": [
+          "code",
+          "description",
+          "name",
+          "prefix",
+          "scope",
+          "suffix"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "scope": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "prefix": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "suffix": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "seqWidth": {
+            "maximum": 12,
+            "type": "integer",
+            "format": "int32"
+          },
+          "startFrom": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SkuCodeRuleSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sampleCode": {
+            "type": "string"
           }
         }
       },
@@ -2059,6 +2642,276 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SkuBatchItem"
+            }
+          }
+        }
+      },
+      "SkuIdentifierInput": {
+        "required": [
+          "scheme",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "scheme": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "value": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "occurredAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SkuIdentifierSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scheme": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SkuIdentifierImportInput": {
+        "required": [
+          "rows"
+        ],
+        "type": "object",
+        "properties": {
+          "rows": {
+            "maxItems": 1000,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuIdentifierRow"
+            }
+          },
+          "occurredAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "dryRun": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SkuIdentifierRow": {
+        "required": [
+          "scheme",
+          "skuId",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scheme": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "value": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "occurredAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SkuIdentifierImportItem": {
+        "type": "object",
+        "properties": {
+          "rowNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "scheme": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuIdentifierImportResult": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "requestedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuIdentifierImportItem"
+            }
+          }
+        }
+      },
+      "SkuCodeBatchInput": {
+        "required": [
+          "action",
+          "ruleId"
+        ],
+        "type": "object",
+        "properties": {
+          "action": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuIds": {
+            "maxItems": 500,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "occurredAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "dryRun": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SkuCodeBatchItem": {
+        "type": "object",
+        "properties": {
+          "rowNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "codeBefore": {
+            "type": "string",
+            "nullable": true
+          },
+          "codeAfter": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SkuCodeBatchResult": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "requestedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "matchedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuCodeBatchItem"
             }
           }
         }
@@ -2720,6 +3573,268 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "SkuCodeAssignment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromCode": {
+            "type": "string"
+          },
+          "toCode": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuCodePanel": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "internalCode": {
+            "type": "string"
+          },
+          "internalSource": {
+            "type": "string"
+          },
+          "internalRuleCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "identifiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuIdentifier"
+            }
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuCodeAssignment"
+            }
+          }
+        }
+      },
+      "SkuIdentifier": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scheme": {
+            "type": "string"
+          },
+          "schemeLabel": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuCodeRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "spuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "prefix": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "seqWidth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startFrom": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nextValue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sampleCode": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuCodeBatchSummary": {
+        "type": "object",
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "requestedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuCodeOverview": {
+        "type": "object",
+        "properties": {
+          "totalSkus": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "uncodedSkus": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "identifierCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabledRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "schemeCounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuIdentifierSchemeCount"
+            }
+          },
+          "recentBatches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuCodeBatchSummary"
+            }
+          },
+          "sellerSkuNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuIdentifierSchemeCount": {
+        "type": "object",
+        "properties": {
+          "scheme": {
+            "type": "string"
+          },
+          "schemeLabel": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
