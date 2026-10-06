@@ -1097,6 +1097,130 @@
         }
       }
     },
+    "/channel/oauth/sessions": {
+      "post": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "oauthStart",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthStartInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthStartView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/oauth/sessions/{id}/confirm": {
+      "post": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "oauthConfirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthConfirmInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthCompletedView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/oauth/sessions/{id}/cancel": {
+      "post": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "oauthCancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/channel/connections": {
       "get": {
         "tags": [
@@ -1428,6 +1552,152 @@
                   "items": {
                     "$ref": "#/components/schemas/PlatformView"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/oauth/sessions/{id}": {
+      "get": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "oauthSession",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthSessionView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/oauth/sessions/{id}/shops": {
+      "get": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "oauthShops",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OAuthShopCandidateView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/oauth/callback": {
+      "get": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "oauthCallback",
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "application/json"
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "errorDescription",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
                 }
               }
             }
@@ -1936,6 +2206,120 @@
           }
         }
       },
+      "OAuthStartInput": {
+        "required": [
+          "idempotencyKey",
+          "platformCode"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "loginHint": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          },
+          "scopes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "OAuthStartView": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "authorizeUrl": {
+            "type": "string"
+          },
+          "requestedScopes": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "OAuthConfirmInput": {
+        "required": [
+          "idempotencyKey"
+        ],
+        "type": "object",
+        "properties": {
+          "shopIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "shopCodePrefix": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "OAuthCompletedView": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "connectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "credentialId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "shopCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nextRoute": {
+            "type": "string"
+          }
+        }
+      },
       "ConnectionInput": {
         "required": [
           "authorizedAccount",
@@ -2387,6 +2771,93 @@
           "occurredAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "OAuthSessionView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "failureCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "failureMessage": {
+            "type": "string"
+          },
+          "authorizedAccount": {
+            "type": "string",
+            "nullable": true
+          },
+          "authorizedAccountName": {
+            "type": "string"
+          },
+          "requestedScopes": {
+            "type": "string"
+          },
+          "grantedScopes": {
+            "type": "string"
+          },
+          "connectionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "credentialId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopCandidateCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "selectedShopCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "OAuthShopCandidateView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "externalShopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "marketplaceCode": {
+            "type": "string"
+          },
+          "selected": {
+            "type": "boolean"
           }
         }
       },
