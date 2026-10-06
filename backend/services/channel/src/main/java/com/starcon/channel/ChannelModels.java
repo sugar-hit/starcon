@@ -112,6 +112,87 @@ public final class ChannelModels {
       @NotBlank @Pattern(regexp = ".+@.+\\..+|^[0-9]{6,}$", message = "平台账号格式不正确") String authorizedAccount,
       String displayName) {}
 
+  // ---- 2.2.1.2 授权向导 ----
+
+  /**
+   * 2.2.1.2 第 1、2、3 步：发起授权。
+   *
+   * <p>{@code loginHint} 就是向导第 2 步「选账号」的落点：有的平台用它预选账号，有的平台
+   * （eBay）用 {@code prompt=select_account} 强制在授权页重新选，适配器按平台协议处理。
+   *
+   * <p>{@code scopes} 留空表示用平台配置的默认范围。{@code idempotencyKey} 必填：重复提交
+   * 同一个键会拿回同一个会话，不会重复跳转、也不会产生第二条会话。
+   */
+  public record OAuthStartInput(
+      @NotBlank String platformCode,
+      @Size(max = 255) String loginHint,
+      @Size(max = 2000) String scopes,
+      @NotBlank @Size(max = 128) String idempotencyKey) {}
+
+  /**
+   * 2.2.1.2 第 3 步结果：授权跳转地址。
+   *
+   * <p>{@code authorizeUrl} 是完整可用的跳转地址（含 state 与 PKCE challenge），前端只需要
+   * {@code window.location.href = authorizeUrl}。令牌与 client_secret 不会出现在这里。
+   */
+  public record OAuthStartView(
+      UUID sessionId,
+      String platformCode,
+      String platformName,
+      String authorizeUrl,
+      String requestedScopes,
+      Instant expiresAt,
+      String status) {}
+
+  /**
+   * 2.2.1.2 第 4 步：授权会话状态。
+   *
+   * <p>前端在跳转后回到页面时轮询它，判断是"还在等用户授权""平台拒绝了"还是"已拿到令牌、
+   * 可以进入第 5 步"。{@code failureCode} / {@code failureMessage} 只在 FAILED 时有值，
+   * 且是可直接展示给用户的原因（凭据错、权限不足、店铺已被其他租户绑定）。
+   */
+  public record OAuthSessionView(
+      UUID id,
+      String platformCode,
+      String platformName,
+      String status,
+      @Schema(nullable = true) String failureCode,
+      String failureMessage,
+      @Schema(nullable = true) String authorizedAccount,
+      String authorizedAccountName,
+      String requestedScopes,
+      String grantedScopes,
+      @Schema(nullable = true) UUID connectionId,
+      @Schema(nullable = true) UUID credentialId,
+      int shopCandidateCount,
+      int selectedShopCount,
+      @Schema(nullable = true) Instant expiresAt,
+      @Schema(nullable = true) Instant completedAt) {}
+
+  /** 2.2.1.2 第 5 步：账号下的店铺候选，用户勾选要纳管的那些。 */
+  public record OAuthShopCandidateView(
+      UUID id, String externalShopId, String shopName, String marketplaceCode, boolean selected) {}
+
+  /**
+   * 2.2.1.2 第 5、6 步输入：确认店铺范围并完成。
+   *
+   * <p>{@code shopIds} 为空表示"全部候选都要"，但必须至少确认一个店铺：授权成功却一个店铺
+   * 都不纳管，会留下一条永远不参与同步的空连接，比直接失败更难排查。
+   */
+  public record OAuthConfirmInput(
+      @Schema(nullable = true) List<UUID> shopIds,
+      @Size(max = 100) String shopCodePrefix,
+      @NotBlank @Size(max = 128) String idempotencyKey) {}
+
+  /**
+   * 2.2.1.2 第 6 步结果。
+   *
+   * <p>{@code shopIds} 指向新建的 2.3.1.1 店铺档案，前端据此跳转"店铺配置"。
+   * {@code connectionId} / {@code credentialId} 让页面能立刻回连到 2.2.1.1 连接列表。
+   */
+  public record OAuthCompletedView(
+      UUID sessionId, UUID connectionId, UUID credentialId, List<UUID> shopIds, int shopCount, String nextRoute) {}
+
   /**
    * 2.2.1.3 凭据轮换：调用方只提交密钥管理器写入后的引用，绝不接受明文令牌。
    */
