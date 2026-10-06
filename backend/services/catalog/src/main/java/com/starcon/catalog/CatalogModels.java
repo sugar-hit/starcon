@@ -310,4 +310,150 @@ public final class CatalogModels {
       String reason,
       List<SkuBatchItem> items) {}
 
+  // ------------------------------------------------ 3.1.2.2 SKU 详情
+
+  /**
+   * 单个属性在某个 SKU 上的**有效值**解析结果。
+   *
+   * <p>{@code source} 区分「谁的值在生效」：SKU_OVERRIDE / SKU_CLEARED / SPU_COMMON / UNSET。
+   * 只回一个 values 数组的话，运营分不清"没填"和"被清空了"，这两种都要补。
+   */
+  public record SkuEffectiveAttribute(
+      UUID attributeId,
+      String code,
+      String name,
+      String dataType,
+      String valueMode,
+      String valueModeLabel,
+      boolean multiple,
+      boolean required,
+      boolean variantAxis,
+      String unit,
+      String groupName,
+      List<String> options,
+      String overrideState,
+      String source,
+      String sourceLabel,
+      List<String> rawValues,
+      List<String> effectiveValues,
+      boolean inherited,
+      boolean missingRequired) {}
+
+  /** 属性区的汇总：详情页顶部直接用它显示"这个 SKU 的档案完整度"。 */
+  public record SkuAttributeSummary(
+      int total,
+      int overridden,
+      int cleared,
+      int inherited,
+      int unset,
+      int variantAxes,
+      int missingRequired) {}
+
+  /** 包装尺寸重量。一行代表已维护；可空字段表示这一维度还没采集到，不是"等于 0"。 */
+  public record SkuPackaging(
+      long version,
+      @Schema(nullable = true) BigDecimal lengthMm,
+      @Schema(nullable = true) BigDecimal widthMm,
+      @Schema(nullable = true) BigDecimal heightMm,
+      @Schema(nullable = true) BigDecimal netWeightG,
+      @Schema(nullable = true) BigDecimal grossWeightG,
+      String packagingType,
+      @Schema(nullable = true) BigDecimal volumeCm3,
+      String updatedAt) {}
+
+  /** 单位换算的一行。quantityPerBase 是「1 个该单位 = 多少个基础单位」。 */
+  public record SkuUnitConversion(
+      String unitCode,
+      String role,
+      String roleLabel,
+      BigDecimal quantityPerBase,
+      boolean current,
+      String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo) {}
+
+  /** 条码区：内部条码 + 外部多 scheme 条码的归属说明。seller_sku 是平台属性，不在这里。 */
+  public record SkuBarcode(String primary, String identifierOwner, String identifierNote) {}
+
+  /** 媒体区的一行。只取 product_asset 现有可能的列，文件键缺失如实标在 limitation 里。 */
+  public record SkuAsset(
+      UUID id,
+      String title,
+      String notes,
+      String reference,
+      String status,
+      String locale,
+      String targetCountry,
+      @Schema(nullable = true) String expiresOn,
+      String updatedAt) {}
+
+  /** 状态变更历史（3.1.2.1 落的 sku_status_event，详情页可回溯）。 */
+  public record SkuStatusChange(
+      UUID id,
+      String fromStatus,
+      String toStatus,
+      String reason,
+      String source,
+      UUID actorId,
+      String occurredAt,
+      String createdAt) {}
+
+  /** 跨服务子分区的可用性声明，前端据此把整区标成「未接入」而不是显示 0。 */
+  public record SkuDetailSource(String code, String label, String owner, boolean available, String note) {}
+
+  /**
+   * SKU 详情聚合体。
+   *
+   * <p>{@code version} 是编辑入口的乐观锁凭据：任何分区写回都要带上读取时的 version，
+   * 版本不符直接 409，绝不覆盖别人的修改。
+   */
+  public record SkuDetail(
+      UUID id,
+      String code,
+      String name,
+      String status,
+      long version,
+      String variantSignature,
+      String createdAt,
+      String updatedAt,
+      UUID spuId,
+      String spuCode,
+      String spuName,
+      String brand,
+      String category,
+      String spuStatus,
+      List<SkuSpec> specs,
+      SkuAttributeSummary attributeSummary,
+      List<SkuEffectiveAttribute> attributes,
+      String baseUnit,
+      List<SkuUnitConversion> unitConversions,
+      SkuBarcode barcode,
+      @Schema(nullable = true) SkuPackaging packaging,
+      boolean mediaAvailable,
+      List<SkuAsset> media,
+      String mediaLimitation,
+      List<SkuDetailSource> sources,
+      List<SkuStatusChange> statusHistory) {}
+
+  /**
+   * SKU 详情编辑请求。
+   *
+   * <p>只覆盖本模块（3.1.2.2）拥有的档案字段：名称、条码、基础单位与包装尺寸重量。
+   * 属性覆写归 3.2.2.2、编码规则与外部条码归 3.1.2.3、单位版本维护归 3.1.2.4，
+   * 都在这里显式拒绝而不是偷偷代劳。
+   */
+  public record SkuDetailInput(
+      @NotBlank @Size(max = 200) String name,
+      @NotNull @Size(max = 128) String barcode,
+      @NotBlank @Size(max = 32) String baseUnit,
+      @Schema(nullable = true) @Size(max = 64) String packagingType,
+      @Schema(nullable = true) BigDecimal lengthMm,
+      @Schema(nullable = true) BigDecimal widthMm,
+      @Schema(nullable = true) BigDecimal heightMm,
+      @Schema(nullable = true) BigDecimal netWeightG,
+      @Schema(nullable = true) BigDecimal grossWeightG,
+      @PositiveOrZero long version) {}
+
+  /** 编辑结果：回传新的 version，前端据此继续编辑而不必重新拉整页。 */
+  public record SkuDetailSaved(UUID id, long version, boolean packagingChanged) {}
+
 }

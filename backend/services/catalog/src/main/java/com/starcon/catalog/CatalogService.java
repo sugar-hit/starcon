@@ -123,28 +123,29 @@ public class CatalogService {
                       attributes.stream()
                           .map(
                               a -> {
-                                var v =
+                                var common =
                                     sql.fetchOne(
-                                        "select * from attribute_value where attribute_id=? and sku_id=?",
+                                        "select id,state from attribute_value where attribute_id=? and sku_id is null",
+                                        a.id());
+                                var sku =
+                                    sql.fetchOne(
+                                        "select id,state from attribute_value where attribute_id=? and sku_id=?",
                                         a.id(),
                                         sid);
-                                String state = v == null ? "INHERIT" : v.get("state", String.class);
-                                var raw =
-                                    v == null ? List.<String>of() : items(v.get("id", UUID.class));
-                                var effective =
-                                    state.equals("SET")
-                                        ? raw
-                                        : state.equals("CLEAR") || a.valueMode().equals("SKU_ONLY")
-                                            ? List.<String>of()
-                                            : a.defaultValues();
+                                // 有效值解析走 EffectiveValues 这一个实现，3.1.2.2 的属性区
+                                // 与商品档案页共用，避免两处对「公共值 + SKU 覆写」的理解漂移。
+                                var resolved =
+                                    EffectiveValues.resolve(
+                                        a.valueMode(),
+                                        side(common),
+                                        side(sku),
+                                        a.required());
                                 return new EffectiveValue(
                                     a.id(),
-                                    state,
-                                    raw,
-                                    effective,
-                                    state.equals("SET")
-                                        ? "SKU"
-                                        : effective.isEmpty() ? "NONE" : "SPU");
+                                    resolved.overrideState(),
+                                    resolved.rawValues(),
+                                    resolved.effectiveValues(),
+                                    resolved.source().code());
                               })
                           .toList();
                   return new Sku(
@@ -158,6 +159,14 @@ public class CatalogService {
                       values);
                 });
     return new Detail(p, attributes, skus);
+  }
+
+  /** 把一行 attribute_value 转成解析器的输入；没有这一行就是「没有赋值」。 */
+  private EffectiveValues.Raw side(Record row) {
+    if (row == null) return new EffectiveValues.Raw(null, List.of());
+    var values =
+        items(row.get("id", UUID.class));
+    return new EffectiveValues.Raw(row.get("state", String.class), values);
   }
 
   /**
