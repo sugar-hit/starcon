@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 31 |
-| 进行中 | 2 |
+| 已交付 | 32 |
+| 进行中 | 1 |
 | **未开发** | **432** |
-| 完成率 | 6.7% |
+| 完成率 | 6.9% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 31 | 2 | 47 | 80 |
+| **D1–D2** | 32 | 1 | 47 | 80 |
 | **D3** | 0 | 0 | 40 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -33,7 +33,7 @@
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
-| 02 | 渠道与店铺系统 | D1–D2 / D5 | 19 | 25 |
+| 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 4 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
@@ -120,7 +120,7 @@
 | 2.1.1.3 | 站点与国家参数 | /channels/platforms | D1–D2 | 已交付 | marketplace 码表 + shop_marketplace 站点启停 + /channels 站点段 |
 | 2.1.2.1 | 平台枚举映射 | — | D1–D2 | 已交付 | platform_enum_mapping（全局只读码表，V3 收回运行角色写权限）+ platform_enum_override（租户覆盖，RLS）+ GET/POST/DELETE /channel/platforms/{code}/enums + 平台目录枚举映射面板 |
 | 2.2.1.1 | 连接列表 | /channels/connections | D1–D2 | 已交付 | channel_connection + GET /channel/connections + /channels 连接段 |
-| 2.2.1.2 | 授权向导 | /channels/connections | D1–D2 | 进行中 | POST /channel/connections 建连接 + 页面引导到写入凭据引用；平台 OAuth 跳转与回调校验未接（需平台应用凭据），页面不假装有跳转 |
+| 2.2.1.2 | 授权向导 | /channels/connections | D1–D2 | 已交付 | 迁移 V4__oauth_authorization_wizard.sql（platform_oauth_profile 端点配置表 + oauth_authorization_session 与 oauth_shop_candidate + oauth_callback_bootstrap 租户解析 + connection_account_owner 跨租户唯一索引）；端点 POST 与 GET /channel/oauth/sessions、GET .../shops、POST .../confirm、POST .../cancel、GET /channel/oauth/callback，vendor 适配器覆盖 amazon/ebay/shopee/shopify/temu/tiktok/walmart/lazada；页面 apps/web/src/components/channel/oauth-wizard.tsx 六步全部有真实后端支撑；测试 OAuthAuthorizationIntegrationTest 23 条，含本地 stub 授权服务器跑通发起→跳转→回调→换令牌→建店铺全链路 |
 | 2.2.1.3 | 凭据引用管理 | /channels/connections | D1–D2 | 已交付 | credential_ref + PUT /connections/{id}/credential；wire model 无明文令牌类型 |
 | 2.2.2.1 | 健康诊断 | — | D1–D2 | 已交付 | GET /connections/{id}/health 健康诊断 + /channels 诊断段 |
 | 2.2.2.2 | 重新授权提醒 | — | D1–D2 | 已交付 | GET /connections/reminders 到期提醒 + /channels 提醒展示 |
