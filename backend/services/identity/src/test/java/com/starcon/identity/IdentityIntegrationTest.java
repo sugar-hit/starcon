@@ -5,109 +5,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.DriverManager;
 import java.util.*;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.PostgreSQLContainer;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class IdentityIntegrationTest {
-  static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
-
-  static {
-    pg.start();
-    try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
-        var s = c.createStatement()) {
-      s.execute("create role starcon_app nologin");
-      s.execute("create role identity_app login password 'test-only' nosuperuser nobypassrls");
-    } catch (Exception e) {
-      throw new ExceptionInInitializerError(e);
-    }
-  }
-
-  @DynamicPropertySource
-  static void props(DynamicPropertyRegistry r) {
-    r.add("DB_URL", pg::getJdbcUrl);
-    r.add("DB_USER", () -> "identity_app");
-    r.add("DB_PASSWORD", () -> "test-only");
-    r.add("DB_MIGRATION_USER", pg::getUsername);
-    r.add("DB_MIGRATION_PASSWORD", pg::getPassword);
-    r.add("INTERNAL_KEY", () -> "test-key");
-    r.add("LOCAL_BOOTSTRAP_ENABLED", () -> "true");
-    r.add("LOCAL_ADMIN_PASSWORD", () -> "test-admin-password");
-    r.add("spring.datasource.hikari.maximum-pool-size", () -> 1);
-  }
-
-  @Autowired MockMvc http;
-  @Autowired ObjectMapper json;
-  @Autowired org.jooq.DSLContext sql;
-  @Autowired org.springframework.transaction.PlatformTransactionManager manager;
-
-  JsonNode request(String token, String method, String path, Object body, int expected)
-      throws Exception {
-    var builder =
-        org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request(
-                org.springframework.http.HttpMethod.valueOf(method), path)
-            .header("Authorization", "Bearer " + token)
-            .header("X-Tenant-Id", UUID.randomUUID())
-            .contentType("application/json");
-    if (body != null) builder.content(json.writeValueAsString(body));
-    var response = http.perform(builder).andExpect(status().is(expected)).andReturn().getResponse();
-    return response.getContentAsString().isEmpty()
-        ? json.getNodeFactory().nullNode()
-        : json.readTree(response.getContentAsString());
-  }
-
-  String loginUser(String username) throws Exception {
-    return request(
-            "",
-            "POST",
-            "/auth/login",
-            Map.of("username", username, "password", "test-member-password"),
-            200)
-        .get("token")
-        .asText();
-  }
-
-  String suffix() {
-    return UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-  }
-
-  Map<String, Object> memberInput(String username, String dept, List<?> assignments) {
-    var input = new HashMap<String, Object>();
-    input.put("username", username);
-    input.put("password", "test-member-password");
-    input.put("status", "ACTIVE");
-    input.put("departmentId", dept);
-    input.put("assignments", assignments);
-    return input;
-  }
-
-  String login() throws Exception {
-    var result =
-        http.perform(
-                post("/auth/login")
-                    .contentType("application/json")
-                    .content("{\"username\":\"local-admin\",\"password\":\"test-admin-password\"}"))
-            .andExpect(status().isOk())
-            .andReturn();
-    return json.readTree(result.getResponse().getContentAsString()).get("token").asText();
-  }
-
-  @AfterAll
-  static void stop() {
-    pg.stop();
-  }
+/**
+ * identity 服务集成测试（会话、角色成员、部门、法人、子租户）。
+ *
+ * <p>共享底座（真实 PostgreSQL 16 容器、登录与请求辅助）在 {@link IdentityIntegrationTestBase}；
+ * 审计日志的断言在 {@link AuditIntegrationTest}。两者共用同一个容器实例，靠随机编码隔开数据。
+ */
+class IdentityIntegrationTest extends IdentityIntegrationTestBase {
 
   @Test
   void sessionMembershipRoleAndLogoutAreReal() throws Exception {
@@ -502,22 +412,6 @@ class IdentityIntegrationTest {
   // 17.1.2 法人档案
   // ------------------------------------------------------------------
 
-  Map<String, Object> legalEntityInput(String code, String currency) {
-    var input = new HashMap<String, Object>();
-    input.put("code", code);
-    input.put("legalName", "测试法人 " + code);
-    input.put("registrationCountry", "US");
-    input.put("registrationNo", "REG-" + code);
-    input.put("taxNo", "TAX-" + code);
-    input.put("baseCurrency", currency);
-    input.put("address", "1 Test Street");
-    input.put("amountScale", 2);
-    input.put("quantityScale", 3);
-    input.put("rounding", "HALF_UP");
-    input.put("status", "ACTIVE");
-    return input;
-  }
-
   @Test
   void legalEntityCrudCarriesBaseCurrencyAndRounding() throws Exception {
     String token = login();
@@ -657,44 +551,8 @@ class IdentityIntegrationTest {
   // 17.2.1.1 部门树
   // ------------------------------------------------------------------
 
-  Map<String, Object> departmentInput(String code, String name) {
-    var input = new HashMap<String, Object>();
-    input.put("code", code);
-    input.put("name", name);
-    return input;
-  }
-
-  Map<String, Object> departmentInput(String code, String name, UUID parent) {
-    var input = departmentInput(code, name);
-    input.put("parentId", parent);
-    return input;
-  }
-
   /** 部门输入 + 可选引用（所属法人 / 负责人），避免每个断言都手搓 HashMap。 */
-  Map<String, Object> departmentInput(
-      String code, String name, UUID parent, UUID legalEntity, UUID leader) {
-    var input = departmentInput(code, name, parent);
-    input.put("legalEntityId", legalEntity);
-    input.put("leaderMembershipId", leader);
-    return input;
-  }
-
-  UUID createDepartment(String token, String code, String name, UUID parent) throws Exception {
-    return UUID.fromString(
-        request(token, "POST", "/identity/departments", departmentInput(code, name, parent), 200)
-            .asText());
-  }
-
   /** 树里按 code 找节点，找不到返回 null，方便断言里直接取 children。 */
-  JsonNode findNode(JsonNode nodes, String code) {
-    for (JsonNode node : nodes) {
-      if (code.equals(node.get("code").asText())) return node;
-      var deeper = findNode(node.get("children"), code);
-      if (deeper != null) return deeper;
-    }
-    return null;
-  }
-
   @Test
   void departmentTreeIsHierarchicalAndCarriesLegalEntityLeaderAndMemberCount() throws Exception {
     String token = login(), tag = suffix();
