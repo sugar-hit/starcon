@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Badge, Button } from '@starcon/ui';
 import { Download, Package, RefreshCw, Search, TriangleAlert } from 'lucide-react';
 import type {
@@ -101,7 +102,8 @@ export function SkuListWorkspace() {
   }, [readable]);
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const update = (patch: Partial<SkuFilters>) => setFilters((current) => ({ ...current, ...patch }));
+  const update = (patch: Partial<SkuFilters>) =>
+    setFilters((current) => ({ ...current, ...patch }));
   const allSelected = rows.length > 0 && selected.length === rows.length;
 
   const toggleStatus = (value: string) => {
@@ -119,9 +121,7 @@ export function SkuListWorkspace() {
 
   if (!readable)
     return (
-      <p className="rounded-lg border p-6 text-sm">
-        当前角色没有 SKU 查看权限，请联系租户管理员。
-      </p>
+      <p className="rounded-lg border p-6 text-sm">当前角色没有 SKU 查看权限，请联系租户管理员。</p>
     );
 
   return (
@@ -130,8 +130,8 @@ export function SkuListWorkspace() {
         <div>
           <h2 className="text-xl font-semibold">SKU 列表</h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            全租户 SKU 明细：编码、规格、条码与状态。库存、售价、成本与在售平台由 07 / 05 / 06 /
-            04 各自负责，未接入的列显示「未接入」而不是 0。
+            全租户 SKU 明细：编码、规格、条码与状态。库存、售价、成本与在售平台由 07 / 05 / 06 / 04
+            各自负责，未接入的列显示「未接入」而不是 0。
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -151,9 +151,7 @@ export function SkuListWorkspace() {
         </div>
       </div>
 
-      {capabilities && (
-        <UnwiredNotice capabilities={capabilities} />
-      )}
+      {capabilities && <UnwiredNotice capabilities={capabilities} />}
 
       <form
         className="bg-card space-y-3 rounded-lg border p-4"
@@ -346,9 +344,7 @@ export function SkuListWorkspace() {
         <>
           {writable && (
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-muted-foreground text-sm">
-                已选择 {selected.length} 项
-              </p>
+              <p className="text-muted-foreground text-sm">已选择 {selected.length} 项</p>
               <div className="flex flex-wrap items-center gap-2">
                 {skuBatchActions.map((action) => (
                   <Button
@@ -358,9 +354,7 @@ export function SkuListWorkspace() {
                     disabled={selected.length === 0}
                     onClick={() => setBatchOpen(true)}
                     title={
-                      action.listing
-                        ? '依赖 04 刊登服务，尚未接入；提交后端会明确拒绝'
-                        : undefined
+                      action.listing ? '依赖 04 刊登服务，尚未接入；提交后端会明确拒绝' : undefined
                     }
                   >
                     {action.label}
@@ -384,13 +378,18 @@ export function SkuListWorkspace() {
                       />
                     </th>
                   )}
-                  {['SKU / 编码', '所属 SPU / 分类', '规格', '条码', '状态', ...PROJECTION_COLUMNS.map((c) => c.fallbackLabel)].map(
-                    (h) => (
-                      <th key={h} className="whitespace-nowrap px-4 py-3 font-medium">
-                        {h}
-                      </th>
-                    ),
-                  )}
+                  {[
+                    'SKU / 编码',
+                    '所属 SPU / 分类',
+                    '规格',
+                    '条码',
+                    '状态',
+                    ...PROJECTION_COLUMNS.map((c) => c.fallbackLabel),
+                  ].map((h) => (
+                    <th key={h} className="whitespace-nowrap px-4 py-3 font-medium">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -407,7 +406,13 @@ export function SkuListWorkspace() {
                       </td>
                     )}
                     <td className="px-4 py-3">
-                      <p className="font-medium">{row.name}</p>
+                      {/* 编码点进 3.1.2.2 详情：列表是共用的事实入口，详情才是完整档案。 */}
+                      <Link
+                        href={`/products/sku/${row.id}`}
+                        className="font-medium hover:underline"
+                      >
+                        {row.name}
+                      </Link>
                       <p className="text-muted-foreground text-xs">{row.code}</p>
                     </td>
                     <td className="px-4 py-3">
@@ -417,12 +422,8 @@ export function SkuListWorkspace() {
                       </p>
                     </td>
                     <td className="px-4 py-3">{specText(row.specs, row.variantSignature)}</td>
-                    <td className="px-4 py-3 tabular-nums">
-                      {row.barcode || '—'}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3">
-                      {skuStatusLabel(row.status)}
-                    </td>
+                    <td className="px-4 py-3 tabular-nums">{row.barcode || '—'}</td>
+                    <td className="whitespace-nowrap px-4 py-3">{skuStatusLabel(row.status)}</td>
                     {PROJECTION_COLUMNS.map((column) => {
                       const cell = row.projections.find((p) => p.field === column.code);
                       return (
@@ -431,10 +432,7 @@ export function SkuListWorkspace() {
                             cell.available ? (
                               projectionText(cell)
                             ) : (
-                              <span
-                                className="text-muted-foreground"
-                                title={cell.note}
-                              >
+                              <span className="text-muted-foreground" title={cell.note}>
                                 未接入
                               </span>
                             )
@@ -495,8 +493,7 @@ export function SkuListWorkspace() {
 
 function skuStatusLabel(status: string) {
   // 状态与语气挂钩而不是颜色：启用=成功，停用/归档=中性，草稿=信息。
-  const tone =
-    status === 'ACTIVE' ? 'success' : status === 'DRAFT' ? 'info' : 'neutral';
+  const tone = status === 'ACTIVE' ? 'success' : status === 'DRAFT' ? 'info' : 'neutral';
   return <Badge tone={tone}>{skuStatuses[status] ?? status}</Badge>;
 }
 
@@ -565,7 +562,7 @@ function ProjectedFilter({
           className={control}
         />
       )}
-      {!available && <span className="block text-xs text-warning">{note}</span>}
+      {!available && <span className="text-warning block text-xs">{note}</span>}
     </label>
   );
 }
@@ -597,7 +594,8 @@ function BatchDialog({
   const [result, setResult] = useState<SkuBatchResult | null>(null);
 
   const listing = skuBatchActions.find((a) => a.value === action)?.listing ?? false;
-  const listingAvailable = capabilities === null || isFieldAvailable(capabilities, 'LISTED_PLATFORMS');
+  const listingAvailable =
+    capabilities === null || isFieldAvailable(capabilities, 'LISTED_PLATFORMS');
 
   const submit = async (dryRun: boolean) => {
     setBusy(true);

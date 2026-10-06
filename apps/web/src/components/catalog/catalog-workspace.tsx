@@ -334,12 +334,14 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
                               {a.unit}
                             </p>
                             <span className="text-muted-foreground text-xs">
-                              {v?.source === 'SPU'
-                                ? '继承自 SPU'
-                                : v?.state === 'CLEAR'
-                                  ? '已清空'
-                                  : v?.source === 'SKU'
-                                    ? 'SKU 独立值'
+                              {/* 有效值来源与 3.1.2.2 详情页共用同一套 code：
+                                  SKU 覆写 / SKU 已清空 / SPU 公共值 / 未赋值。 */}
+                              {v?.source === 'SKU_OVERRIDE'
+                                ? 'SKU 覆写值'
+                                : v?.source === 'SKU_CLEARED'
+                                  ? 'SKU 已清空'
+                                  : v?.source === 'SPU_COMMON'
+                                    ? '继承自 SPU'
                                     : '未设置'}
                             </span>
                           </td>
