@@ -228,6 +228,58 @@ it('catalog/categories 的全部路由被放行且转发到 catalog 服务', asy
   }
 });
 
+it('catalog/brands 的全部路由被放行且转发到 catalog 服务（3.3.2.1 品牌管理）', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const brand = '11111111-1111-1111-1111-111111111111';
+  const credential = '22222222-2222-2222-2222-222222222222';
+  for (const path of [
+    'catalog/brands',
+    'catalog/brands/overview',
+    'catalog/brands/candidates',
+    'catalog/brands/listing-eligibility',
+    `catalog/brands/${brand}`,
+    `catalog/brands/${brand}/listing-eligibility`,
+    `catalog/brands/${brand}/authorizations`,
+    `catalog/brands/${brand}/authorizations/${credential}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8082/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 建品牌 / 登记凭证 / 批量刊登判定是 POST；批量判定的 id 列表放请求体而不是 URL。
+  for (const path of [
+    'catalog/brands',
+    `catalog/brands/${brand}/authorizations`,
+    'catalog/brands/listing-eligibility',
+  ]) {
+    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(
+      200,
+    );
+  }
+  for (const path of [
+    `catalog/brands/${brand}`,
+    `catalog/brands/${brand}/enabled`,
+    `catalog/brands/${brand}/authorizations/${credential}`,
+    `catalog/brands/${brand}/authorizations/${credential}/enabled`,
+  ]) {
+    expect((await PUT(request(path, 'PUT'), { params: { path: path.split('/') } })).status).toBe(
+      200,
+    );
+  }
+  expect(
+    (
+      await DELETE(request(`catalog/brands/${brand}`, 'DELETE'), {
+        params: { path: ['catalog', 'brands', brand] },
+      })
+    ).status,
+  ).toBe(200);
+});
+
 it('catalog/categories/attribute-requirements 的全部路由被放行（3.3.1.2 类目属性要求）', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
   vi.stubGlobal('fetch', fetcher);
