@@ -2,6 +2,13 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    /**
+     * Parsed response body, kept so callers can read structured detail.
+     *
+     * <p>3.1.3.2 组合唯一性校验要靠它：后端在 409 的 ProblemDetail 上挂 `conflicts` 结构化清单，
+     * 只留一句 message 的话界面就退化成"有重复"三个字，运营没法按条改。
+     */
+    public body: unknown = null,
   ) {
     super(message);
   }
@@ -53,6 +60,7 @@ export async function api<T>(path: string, method = 'GET', data?: unknown): Prom
     throw new ApiError(
       response.status,
       body?.detail ?? body?.message ?? '保存失败，请检查输入后重试',
+      result,
     );
   }
   return result as T;
