@@ -34,6 +34,7 @@ import type {
 } from '../../../../../packages/api-contracts/src/catalog';
 import { api, ApiError } from '@/lib/api';
 import { EnumMappingPanel } from './enum-mapping-panel';
+import { OAuthWizard } from './oauth-wizard';
 import { useIdentity } from '../iam/identity-shell';
 
 type Section = 'platforms' | 'connections' | 'shops' | 'sync' | 'operations';
@@ -467,7 +468,10 @@ function ConnectionList({
   onError: (e: unknown) => void;
   onNotice: (v: string) => void;
 }) {
-  const [creating, setCreating] = useState(false);
+  // 2.2.1.2：授权向导取代原来"建连接 + 再手填凭据"的两步式表单。
+  // 旧流程要运营自己跳平台、自己把令牌写进密钥管理器再回来登记引用，漏一步就留下永不参与
+  // 同步的连接；向导把跳转、换令牌、建店铺都收在一个流程里。
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [rotating, setRotating] = useState<ConnectionView | null>(null);
   const [health, setHealth] = useState<{ id: string; diagnosis: string; recommendation: string; canSync: boolean } | null>(null);
 
@@ -502,7 +506,7 @@ function ConnectionList({
     }
   }
 
-  if (!can('channel.connection.create') && !creating) {
+  if (!can('channel.connection.create')) {
     return filtered.length === 0 ? (
       <Empty text="还没有授权连接" />
     ) : (
@@ -518,27 +522,15 @@ function ConnectionList({
 
   return (
     <div className="space-y-3">
-      {creating && (
-        <ConnectionForm
+      {wizardOpen && (
+        <OAuthWizard
           platforms={platforms}
-          busy={busy}
-          onCancel={() => setCreating(false)}
-          onSubmit={async (input) => {
-            setBusy(true);
-            try {
-              await api('channel/connections', 'POST', input);
-              setCreating(false);
-              onNotice('连接已创建，接下来请完成授权并写入凭据引用');
-              await onDone();
-            } catch (e) {
-              onError(e);
-            } finally {
-              setBusy(false);
-            }
-          }}
+          can={can}
+          onDone={onDone}
+          onError={onError}
         />
       )}
-      {filtered.length === 0 && !creating ? (
+      {filtered.length === 0 && !wizardOpen ? (
         <Empty text="还没有授权连接" />
       ) : (
         <ul className="space-y-2">
@@ -579,10 +571,10 @@ function ConnectionList({
           ))}
         </ul>
       )}
-      {!creating && (
-        <Button size="sm" onClick={() => setCreating(true)}>
+      {!wizardOpen && (
+        <Button size="sm" onClick={() => setWizardOpen(true)}>
           <Plus className="h-4 w-4" />
-          新建连接
+          授权新平台账号
         </Button>
       )}
       {rotating && (
@@ -635,69 +627,6 @@ function ConnectionRow({
           诊断
         </Button>
         {actions}
-      </div>
-    </div>
-  );
-}
-
-function ConnectionForm({
-  platforms,
-  busy,
-  onCancel,
-  onSubmit,
-}: {
-  platforms: PlatformView[];
-  busy: boolean;
-  onCancel: () => void;
-  onSubmit: (input: { platformCode: string; authorizedAccount: string; displayName: string }) => Promise<void>;
-}) {
-  const [platformCode, setPlatformCode] = useState(platforms[0]?.code ?? '');
-  const [authorizedAccount, setAuthorizedAccount] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const available = platforms.filter((p) => p.supportStatus === 'AVAILABLE');
-  return (
-    <div className="bg-card space-y-3 rounded-md border p-4">
-      <p className="text-copy-14 font-medium">新建连接</p>
-      <div className="grid gap-3 md:grid-cols-3">
-        <Field label="平台">
-          <select
-            value={platformCode}
-            onChange={(e) => setPlatformCode(e.target.value)}
-            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2"
-          >
-            {(available.length > 0 ? available : platforms).map((p) => (
-              <option key={p.id} value={p.code}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="平台账号" hint="邮箱或店铺账号">
-          <input
-            value={authorizedAccount}
-            onChange={(e) => setAuthorizedAccount(e.target.value)}
-            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2"
-          />
-        </Field>
-        <Field label="备注名称" hint="便于团队识别">
-          <input
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2"
-          />
-        </Field>
-      </div>
-      <div className="flex gap-2">
-        <Button
-          size="sm"
-          disabled={busy || !platformCode || !authorizedAccount}
-          onClick={() => void onSubmit({ platformCode, authorizedAccount, displayName })}
-        >
-          创建
-        </Button>
-        <Button size="sm" variant="ghost" onClick={onCancel}>
-          取消
-        </Button>
       </div>
     </div>
   );
