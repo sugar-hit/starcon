@@ -20,11 +20,13 @@ public class AdministrationController {
   private final DSLContext sql;
   private final IdentityController identity;
   private final TenantTransactions tenants;
+  private final AuditLog audit;
 
   public AdministrationController(
       DSLContext sql, IdentityController identity, PlatformTransactionManager manager) {
     this.sql = sql;
     this.identity = identity;
+    this.audit = new AuditLog(sql, identity);
     tenants = new TenantTransactions(sql, new TransactionTemplate(manager));
   }
 
@@ -185,14 +187,147 @@ public class AdministrationController {
     throw IdentityController.error(HttpStatus.CONFLICT, message);
   }
 
-  private void audit(IdentityController.Access a, UUID id, String action) {
-    sql.execute(
-        "insert into identity_audit(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(),
-        a.tenantId(),
-        a.userId(),
-        id,
-        action);
+  /**
+   * 记录一条审计。
+   *
+   * <p>资源类型 + 可读标题 + 变更前后值 + 授权上下文都经 {@link AuditLog} 落库，
+   * 且在写入侧脱敏（见 {@link AuditRedactor}）。三个参数任一为 null 都合法：
+   * 新建没有 before，删除没有 after。
+   */
+  private void audit(
+      IdentityController.Access a,
+      String auth,
+      String resourceType,
+      UUID id,
+      String label,
+      String action,
+      Map<String, Object> before,
+      Map<String, Object> after) {
+    audit.record(a, auth, resourceType, id, label, action, before, after);
+    // 事件外发与审计落库在同一事务里：下游收到的变更必然有一条对应的审计行。
+    emitOutbox(a, id, action);
+  }
+
+  /** 角色快照：权限集必须进审计，否则事后无法解释「当时到底给了什么权限」。 */
+  private Map<String, Object> roleSnapshot(UUID id) {
+    var row = sql.fetchOne("select * from role where id=?", id);
+    if (row == null) return null;
+    var snapshot = new LinkedHashMap<String, Object>();
+    snapshot.put("code", row.get("code", String.class));
+    snapshot.put("name", row.get("name", String.class));
+    snapshot.put("status", row.get("status", String.class));
+    snapshot.put(
+        "permissions",
+        sql.fetch(
+                "select permission_code from role_permission where role_id=? order by permission_code",
+                id)
+            .getValues("permission_code", String.class));
+    return snapshot;
+  }
+
+  /**
+   * 成员快照。
+   *
+   * <p>刻意不含密码或密码哈希：凭证在 app_user，identity_audit 不该、也不需要看到它。
+   * 这里同时依赖 {@link AuditRedactor} 做第二道拦截——即使将来有人把 password 字段
+   * 加进快照，写入侧也会把它打成 {@code ***}。
+   *
+   * <p>用户名经 {@code member_names(hash)} 解析：它以会话成员关系为条件解析，不采信调用方
+   * 传入的 tenant 头，所以伪造 {@code X-Tenant-Id} 拿不到别人的用户名。
+   */
+  private Map<String, Object> memberSnapshot(UUID id, String auth) {
+    var row = sql.fetchOne("select * from membership where id=?", id);
+    if (row == null) return null;
+    var snapshot = new LinkedHashMap<String, Object>();
+    snapshot.put("userId", row.get("user_id", UUID.class).toString());
+    snapshot.put("status", row.get("status", String.class));
+    snapshot.put("departmentId", str(row.get("department_id", UUID.class)));
+    snapshot.put(
+        "assignments",
+        sql.fetch(
+                "select r.code,ra.scope_mode from role_assignment ra join role r"
+                    + " on r.id=ra.role_id and r.tenant_id=ra.tenant_id"
+                    + " where ra.membership_id=? order by r.code",
+                id)
+            .map(x -> x.get("code", String.class) + ":" + x.get("scope_mode", String.class)));
+    var names =
+        sql.fetch(
+            "select username from member_names(?) n join membership m on m.id=n.id where n.id=?",
+            hash(auth),
+            id);
+    snapshot.put("username", names.isEmpty() ? null : names.get(0).get("username", String.class));
+    return snapshot;
+  }
+
+  /** 成员可读名，用于审计标题；解析不出来就留空，不拿别的东西顶替。 */
+  private String username(UUID id, String auth) {
+    var names =
+        sql.fetch(
+            "select username from member_names(?) n join membership m on m.id=n.id where n.id=?",
+            hash(auth),
+            id);
+    return names.isEmpty() ? null : names.get(0).get("username", String.class);
+  }
+
+  /** 部门快照：层级与归属引用都要留痕，跨租户挂靠排查依赖这些字段。 */
+  private Map<String, Object> departmentSnapshot(UUID id) {
+    var row = sql.fetchOne("select * from department where id=?", id);
+    if (row == null) return null;
+    var snapshot = new LinkedHashMap<String, Object>();
+    snapshot.put("code", row.get("code", String.class));
+    snapshot.put("name", row.get("name", String.class));
+    snapshot.put("parentId", str(row.get("parent_id", UUID.class)));
+    snapshot.put("legalEntityId", str(row.get("legal_entity_id", UUID.class)));
+    snapshot.put("leaderMembershipId", str(row.get("leader_membership_id", UUID.class)));
+    return snapshot;
+  }
+
+  /** 法人快照：金额/数量口径（amountScale / quantityScale）改动必须可追溯。 */
+  private Map<String, Object> legalEntitySnapshot(UUID id) {
+    var row = sql.fetchOne("select * from legal_entity where id=?", id);
+    if (row == null) return null;
+    var snapshot = new LinkedHashMap<String, Object>();
+    snapshot.put("code", row.get("code", String.class));
+    snapshot.put("legalName", row.get("legal_name", String.class));
+    snapshot.put("registrationCountry", row.get("registration_country", String.class));
+    snapshot.put("registrationNo", row.get("registration_no", String.class));
+    snapshot.put("taxNo", row.get("tax_no", String.class));
+    snapshot.put("baseCurrency", row.get("base_currency", String.class));
+    // address 会被 AuditRedactor 按「完整客户地址」口径打码：审计需要知道它变了，不需要原文。
+    snapshot.put("address", row.get("address", String.class));
+    snapshot.put("amountScale", row.get("amount_scale", Integer.class));
+    snapshot.put("quantityScale", row.get("quantity_scale", Integer.class));
+    snapshot.put("rounding", row.get("rounding", String.class));
+    snapshot.put("status", row.get("status", String.class));
+    snapshot.put("version", row.get("version", Long.class));
+    return snapshot;
+  }
+
+  /**
+   * 子租户快照。
+   *
+   * <p>刻意不直接查 {@code tenant} 表：identity_app 对它没有 GRANT（V3 只给了
+   * {@code child_tenants} 这个 SECURITY DEFINER 函数），直查会以 42501 失败，
+   * 连带整个「创建子租户」操作失败。审计快照不是绕过授权边界的理由。
+   *
+   * <p>{@code child_tenants(hash)} 以会话成员关系为条件解析租户，不采信调用方传入的 tenant 头。
+   */
+  private Map<String, Object> childSnapshot(UUID id, String auth) {
+    var row =
+        sql.fetchOne("select code,name,status from child_tenants(?) where id=?", hash(auth), id);
+    if (row == null) return null;
+    var snapshot = new LinkedHashMap<String, Object>();
+    snapshot.put("code", row.get("code", String.class));
+    snapshot.put("name", row.get("name", String.class));
+    snapshot.put("status", row.get("status", String.class));
+    return snapshot;
+  }
+
+  private static String str(Object value) {
+    return value == null ? null : String.valueOf(value);
+  }
+
+  private void emitOutbox(IdentityController.Access a, UUID id, String action) {
     sql.execute(
         "insert into identity_outbox(id,tenant_id,resource_id,event_type) values(?,?,?,?)",
         Ids.next(),
@@ -277,8 +412,10 @@ public class AdministrationController {
     }
   }
 
-  private UUID saveRole(IdentityController.Access a, UUID id, RoleInput input) {
+  private UUID saveRole(String auth, IdentityController.Access a, UUID id, RoleInput input) {
     validatePermissions(input);
+    // 先取变更前快照：更新与删除都会改掉 role / role_permission，取晚了就只剩新值。
+    var before = id == null ? null : roleSnapshot(id);
     if (id == null) {
       id = Ids.next();
       sql.execute(
@@ -305,7 +442,15 @@ public class AdministrationController {
           "管理权限只能绑定租户内全部范围");
     for (String p : input.permissions())
       sql.execute("insert into role_permission values(?,?,?)", a.tenantId(), id, p);
-    audit(a, id, "RoleSaved");
+    audit(
+        a,
+        auth,
+        "identity.role",
+        id,
+        input.code(),
+        "RoleSaved",
+        before,
+        roleSnapshot(id));
     return id;
   }
 
@@ -313,7 +458,7 @@ public class AdministrationController {
   public UUID createRole(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @Valid @RequestBody RoleInput input) {
-    return call(auth, "identity.role.create", true, a -> saveRole(a, null, input));
+    return call(auth, "identity.role.create", true, a -> saveRole(auth, a, null, input));
   }
 
   @PutMapping("/roles/{id}")
@@ -321,7 +466,7 @@ public class AdministrationController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID id,
       @Valid @RequestBody RoleInput input) {
-    return call(auth, "identity.role.update", true, a -> saveRole(a, id, input));
+    return call(auth, "identity.role.update", true, a -> saveRole(auth, a, id, input));
   }
 
   @DeleteMapping("/roles/{id}")
@@ -334,10 +479,19 @@ public class AdministrationController {
         true,
         a -> {
           require(!role(id).get("code", String.class).equals("OWNER"), "所有者角色受保护");
+          var before = roleSnapshot(id);
           sql.execute("delete from role_assignment where role_id=?", id);
           sql.execute("delete from role_permission where role_id=?", id);
           sql.execute("delete from role where id=?", id);
-          audit(a, id, "RoleDeleted");
+          audit(
+              a,
+              auth,
+              "identity.role",
+              id,
+              str(before.get("code")),
+              "RoleDeleted",
+              before,
+              null);
           return null;
         });
   }
@@ -428,7 +582,15 @@ public class AdministrationController {
               input.status(),
               input.departmentId());
           assignments(a, id, input.departmentId(), input.assignments());
-          audit(a, id, "MemberCreated");
+          audit(
+              a,
+              auth,
+              "identity.member",
+              id,
+              input.username().trim(),
+              "MemberCreated",
+              null,
+              memberSnapshot(id, auth));
           return id;
         });
   }
@@ -444,6 +606,7 @@ public class AdministrationController {
         true,
         a -> {
           member(id);
+          var before = memberSnapshot(id, auth);
           if (owner(id)) {
             check(input.status().equals("ACTIVE"), "所有者必须保持启用");
             var existing =
@@ -463,7 +626,15 @@ public class AdministrationController {
               input.status(),
               input.departmentId(),
               id);
-          audit(a, id, "MemberUpdated");
+          audit(
+              a,
+              auth,
+              "identity.member",
+              id,
+              username(id, auth),
+              "MemberUpdated",
+              before,
+              memberSnapshot(id, auth));
           return null;
         });
   }
@@ -479,11 +650,20 @@ public class AdministrationController {
         a -> {
           member(id);
           require(!owner(id), "不能移除所有者");
+          var before = memberSnapshot(id, auth);
           sql.execute("delete from role_assignment where membership_id=?", id);
           // Removing the identity also releases its department, otherwise the department could
           // never be deleted again.
           sql.execute("update membership set status='INACTIVE',department_id=null where id=?", id);
-          audit(a, id, "MemberRemoved");
+          audit(
+              a,
+              auth,
+              "identity.member",
+              id,
+              username(id, auth),
+              "MemberRemoved",
+              before,
+              memberSnapshot(id, auth));
           return null;
         });
   }
@@ -510,7 +690,15 @@ public class AdministrationController {
               "delete from role_assignment where membership_id=? and role_id=?",
               a.membershipId(),
               rid);
-          audit(a, input.membershipId(), "OwnerTransferred");
+          audit(
+              a,
+              auth,
+              "identity.member",
+              input.membershipId(),
+              username(input.membershipId(), auth),
+              "OwnerTransferred",
+              null,
+              memberSnapshot(input.membershipId(), auth));
           return null;
         });
   }
@@ -641,7 +829,15 @@ public class AdministrationController {
               input.parentId(),
               input.legalEntityId(),
               input.leaderMembershipId());
-          audit(a, id, "DepartmentCreated");
+          audit(
+              a,
+              auth,
+              "identity.department",
+              id,
+              input.code().trim(),
+              "DepartmentCreated",
+              null,
+              departmentSnapshot(id));
           return id;
         });
   }
@@ -659,6 +855,7 @@ public class AdministrationController {
           // parentId 在这里被忽略：层级调整是独立的 DepartmentMoved 动作，
           // 防环校验只存在于那一处，不重复实现。
           references(null, input.legalEntityId(), input.leaderMembershipId());
+          var before = departmentSnapshot(id);
           check(
               sql.execute(
                       "update department set code=?, name=?, legal_entity_id=?, leader_membership_id=?"
@@ -670,7 +867,15 @@ public class AdministrationController {
                       id)
                   == 1,
               "部门不存在");
-          audit(a, id, "DepartmentUpdated");
+          audit(
+              a,
+              auth,
+              "identity.department",
+              id,
+              input.code().trim(),
+              "DepartmentUpdated",
+              before,
+              departmentSnapshot(id));
           return null;
         });
   }
@@ -688,6 +893,7 @@ public class AdministrationController {
         a -> {
           check(exists("select 1 from department where id=?", id), "部门不存在");
           references(input.parentId(), null, null);
+          var before = departmentSnapshot(id);
           // 成环的条件是「新父节点在当前节点的子树内」，等价于「当前节点是新父节点的祖先」。
           // 所以这里沿 parent_id 向上走新父节点的祖先链，看是否碰到自己——
           // 直接把父挂到自己也算：新父节点的祖先链第一个就是它自己。
@@ -705,7 +911,15 @@ public class AdministrationController {
                     .get("cycle", Boolean.class),
                 "不能把部门移动到自身或自己的下级部门下");
           sql.execute("update department set parent_id=? where id=?", input.parentId(), id);
-          audit(a, id, "DepartmentMoved");
+          audit(
+              a,
+              auth,
+              "identity.department",
+              id,
+              (String) before.get("code"),
+              "DepartmentMoved",
+              before,
+              departmentSnapshot(id));
           return null;
         });
   }
@@ -724,6 +938,7 @@ public class AdministrationController {
         true,
         a -> {
           check(exists("select 1 from department where id=?", id), "部门不存在");
+          var before = departmentSnapshot(id);
           int children =
               sql.fetchOne("select count(*) from department where parent_id=?", id)
                   .get(0, Integer.class);
@@ -734,7 +949,15 @@ public class AdministrationController {
                   .get(0, Integer.class);
           if (members > 0) reject("该部门仍挂靠 " + members + " 名成员，请先调整成员归属");
           check(sql.execute("delete from department where id=?", id) == 1, "部门不存在");
-          audit(a, id, "DepartmentDeleted");
+          audit(
+              a,
+              auth,
+              "identity.department",
+              id,
+              (String) before.get("code"),
+              "DepartmentDeleted",
+              before,
+              null);
           return null;
         });
   }
@@ -777,7 +1000,15 @@ public class AdministrationController {
               Ids.next(),
               Ids.next(),
               5);
-          audit(a, id, "ChildCreated");
+          audit(
+              a,
+              auth,
+              "tenant.child",
+              id,
+              input.code(),
+              "ChildCreated",
+              null,
+              childSnapshot(id, auth));
           return id;
         });
   }
@@ -792,9 +1023,18 @@ public class AdministrationController {
         "tenant.child.update",
         true,
         a -> {
+          var before = childSnapshot(id, auth);
           sql.fetch(
               "select update_child(?,?,?,?)", hash(auth), id, input.name().trim(), input.status());
-          audit(a, id, "ChildUpdated");
+          audit(
+              a,
+              auth,
+              "tenant.child",
+              id,
+              (String) before.get("code"),
+              "ChildUpdated",
+              before,
+              childSnapshot(id, auth));
           return null;
         });
   }
@@ -867,7 +1107,15 @@ public class AdministrationController {
               input.quantityScale() == null ? 3 : input.quantityScale(),
               input.rounding() == null ? "HALF_UP" : input.rounding(),
               input.status());
-          audit(a, id, "LegalEntityCreated");
+          audit(
+              a,
+              auth,
+              "identity.legal_entity",
+              id,
+              input.code().trim(),
+              "LegalEntityCreated",
+              null,
+              legalEntitySnapshot(id));
           return id;
         });
   }
@@ -882,6 +1130,7 @@ public class AdministrationController {
         "identity.legal_entity.update",
         true,
         a -> {
+          var before = legalEntitySnapshot(id);
           int updated =
               sql.execute(
                   "update legal_entity set code=?,legal_name=?,registration_country=?,registration_no=?,"
@@ -901,7 +1150,15 @@ public class AdministrationController {
                   a.tenantId(),
                   id);
           check(updated == 1, "法人不存在或不属于当前租户");
-          audit(a, id, "LegalEntityUpdated");
+          audit(
+              a,
+              auth,
+              "identity.legal_entity",
+              id,
+              input.code().trim(),
+              "LegalEntityUpdated",
+              before,
+              legalEntitySnapshot(id));
           return null;
         });
   }
@@ -920,6 +1177,7 @@ public class AdministrationController {
         "identity.legal_entity.delete",
         true,
         a -> {
+          var before = legalEntitySnapshot(id);
           try {
             int deleted = sql.execute("delete from legal_entity where tenant_id=? and id=?", a.tenantId(), id);
             check(deleted == 1, "法人不存在或不属于当前租户");
@@ -927,7 +1185,15 @@ public class AdministrationController {
             throw IdentityController.error(
                 HttpStatus.CONFLICT, "该法人仍被业务对象引用，请先停用而不是删除");
           }
-          audit(a, id, "LegalEntityDeleted");
+          audit(
+              a,
+              auth,
+              "identity.legal_entity",
+              id,
+              (String) before.get("code"),
+              "LegalEntityDeleted",
+              before,
+              null);
           return null;
         });
   }
