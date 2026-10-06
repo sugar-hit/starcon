@@ -1,6 +1,7 @@
 package com.starcon.catalog;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.util.*;
@@ -992,4 +993,178 @@ public final class CatalogModels {
   /** 各轴被 SPU 复用的次数，用于概览里看"哪些轴真正在用"。 */
   public record SpecAxisUsageCount(
       UUID specAxisId, String code, String name, long boundSpuCount, long optionCount) {}
+
+  // ------------------------------------------------ 3.1.3.2 组合唯一性校验
+
+  /** 组合里的一对「规格轴 + 取值」输入。取值最终落到 spec_axis_option 里的真实取值上。 */
+  public record CombinationValueInput(
+      @NotNull UUID specAxisId, @NotBlank @Size(max = 100) String value) {}
+
+  /** 一个待建组合：必须给本 SPU 每条已绑定轴各一个取值。 */
+  public record CombinationInput(@NotEmpty @Size(max = 100) List<@Valid CombinationValueInput> values) {}
+
+  /** 批量校验请求。整批要么全部通过、要么给出完整冲突清单，不做部分成功。 */
+  public record CombinationCheckInput(
+      @NotEmpty @Size(max = 2000) List<@Valid CombinationInput> combinations) {}
+
+  /**
+   * 生成待建 SKU 草稿的请求。
+   *
+   * <p>{@code mode=MATRIX} 时按各轴启用选项展开笛卡尔积，{@code combinations} 留空；
+   * {@code mode=EXPLICIT} 时按提交的组合集合生成。两种模式都先过同一套预校验。
+   */
+  public record VariantDraftInput(
+      @NotBlank String mode,
+      @Schema(nullable = true) @Size(max = 2000) List<@Valid CombinationInput> combinations,
+      @Schema(nullable = true) @Size(max = 500) String notes,
+      @Schema(nullable = true) String occurredAt) {}
+
+  /**
+   * 组合里的一对「轴 + 取值」，已解析出轴编码与轴名称。
+   *
+   * <p>{@code specAxisId} 可空：按 SKU 轴值实时解析出来的组合（来源 {@code source=SKU}）
+   * 只能定位到轴编码——那个 SKU 的属性值行上并没有规格轴的 id，硬凑一个会骗人。
+   */
+  public record CombinationValue(
+      @Schema(nullable = true) UUID specAxisId,
+      String axisCode,
+      String axisName,
+      String value,
+      int position) {}
+
+  /** 某条轴上的一个取值。停用取值仍在列里——历史组合要能解析出来。 */
+  public record AxisOption(String value, int position, boolean enabled) {}
+
+  /** 本 SPU 绑定的一条轴，连同它的取值集合。预校验就是拿它当基准。 */
+  public record BoundAxis(
+      UUID specAxisId,
+      String code,
+      String name,
+      int position,
+      boolean enabled,
+      List<AxisOption> options) {}
+
+  /** 预校验通过的组合：签名 + 轴值。生成草稿时按它落库。 */
+  public record PlannedCombination(String signature, List<CombinationValue> values) {}
+
+  /**
+   * 一条冲突。
+   *
+   * <p>蓝图要求输出是**结构化冲突清单**而不是一个布尔值，理由很实际：
+   * 运营看到"重复 3 个组合"没法干活，他需要知道是哪几个组合、分别撞了谁
+   * （撞已存在的 SKU？撞上一次生成的草稿？同一批里自己撞自己？）、出现在第几条。
+   */
+  public record CombinationConflict(
+      String reasonCode,
+      String reason,
+      String message,
+      @Schema(nullable = true) String signature,
+      @Schema(nullable = true) List<CombinationValue> values,
+      List<Integer> occurrenceIndexes,
+      @Schema(nullable = true) UUID existingCombinationId,
+      @Schema(nullable = true) UUID existingSkuId,
+      @Schema(nullable = true) UUID existingDraftId) {}
+
+  /**
+   * 校验结果。
+   *
+   * <p>{@code planned} 是**去重后**的合法组合，不是提交原样回显：
+   * "提交 10 条、其中 3 条自己撞自己、合法 7 条"这件事必须在结构里说清楚。
+   */
+  public record CombinationCheckResult(
+      boolean valid,
+      UUID spuId,
+      List<BoundAxis> axes,
+      long submittedCount,
+      long plannedCount,
+      long conflictCount,
+      List<CombinationConflict> conflicts,
+      List<PlannedCombination> planned,
+      List<String> notes) {}
+
+  /** 已存在的组合：来源是草稿占用（RESERVED）还是已兑现的真实 SKU（SKU）。 */
+  public record ExistingCombination(
+      String signature,
+      List<CombinationValue> values,
+      String source,
+      @Schema(nullable = true) UUID combinationId,
+      @Schema(nullable = true) UUID skuId,
+      @Schema(nullable = true) String skuCode,
+      @Schema(nullable = true) UUID draftId) {}
+
+  /** 草稿摘要（列表态）。明细在 {@link SkuMatrixDraft#combinations()}。 */
+  public record SkuMatrixDraftSummary(
+      UUID id,
+      UUID spuId,
+      String mode,
+      String status,
+      int axisCount,
+      int combinationCount,
+      @Schema(nullable = true) String notes,
+      String occurredAt,
+      String createdAt,
+      @Schema(nullable = true) String discardedAt) {}
+
+  /** 一份待建 SKU 草稿。它的组合已在组合台账里占住位——草稿就是"占位"的凭据。 */
+  public record SkuMatrixDraft(
+      UUID id,
+      UUID spuId,
+      String spuCode,
+      String spuName,
+      String mode,
+      String status,
+      int axisCount,
+      int combinationCount,
+      @Schema(nullable = true) String notes,
+      List<PlannedCombination> combinations,
+      String occurredAt,
+      String createdAt,
+      @Schema(nullable = true) String discardedAt) {}
+
+  public record SkuMatrixDraftDiscarded(UUID draftId, int releasedCombinationCount) {}
+
+  /**
+   * 单 SPU 的组合校验面板。
+   *
+   * <p>{@code availableMatrixCount} 是"矩阵里还没被占用的组合数"：
+   * 拿它减 {@code matrixRowCount} 就知道矩阵被占了多少，这是运营决定
+   * "还能不能再生成一批草稿"的唯一依据。
+   */
+  public record VariantCombinationPanel(
+      UUID spuId,
+      String spuCode,
+      String spuName,
+      List<BoundAxis> axes,
+      long matrixRowCount,
+      long reservedCombinationCount,
+      long existingSkuCount,
+      long conflictMatrixCount,
+      long availableMatrixCount,
+      boolean matrixTooLarge,
+      long matrixCap,
+      List<ExistingCombination> combinations,
+      List<SkuMatrixDraftSummary> drafts,
+      String note) {}
+
+  /**
+   * 组合唯一性概览。
+   *
+   * <p>{@code blockedMatrixSpuCount} 是治理缺口指标：有已存在 SKU 组合的 SPU 数量——
+   * 这些 SPU 再生成草稿时会与历史 SKU 逐条比对，缺口大说明历史 SKU 多，
+   * 拿它跟 {@code pendingDraftCount} 一起看才知道草稿这条路走不走得通。
+   */
+  public record VariantCombinationOverview(
+      long axisBoundSpuCount,
+      long reservedCombinationCount,
+      long draftCount,
+      long pendingDraftCount,
+      long discardedDraftCount,
+      long blockedSpuCount,
+      long blockedMatrixSpuCount,
+      List<CombinationBlockage> topBlockedSpus,
+      String note) {}
+
+  /** 被既有 SKU 组合卡住的 SPU（按组合数倒序）。 */
+  public record CombinationBlockage(
+      UUID spuId, String spuCode, String spuName, long existingSkuCombinationCount) {}
 }
