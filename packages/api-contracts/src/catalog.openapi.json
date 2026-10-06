@@ -1232,6 +1232,105 @@
         }
       }
     },
+    "/catalog/attributes/options/order": {
+      "put": {
+        "tags": [
+          "attribute-option-controller"
+        ],
+        "operationId": "reorder",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttributeOptionOrderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeOptionOrderSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/attributes/options/lifecycle": {
+      "put": {
+        "tags": [
+          "attribute-option-controller"
+        ],
+        "operationId": "toggle",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "attributeId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "value",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttributeOptionToggleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeOptionToggled"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/variant-combination/spus/{id}/drafts": {
       "get": {
         "tags": [
@@ -3884,6 +3983,98 @@
         }
       }
     },
+    "/catalog/attributes/options": {
+      "get": {
+        "tags": [
+          "attribute-option-controller"
+        ],
+        "operationId": "list_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attributeId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "referenced",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeOptionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/attributes/category-rules": {
       "get": {
         "tags": [
@@ -4786,6 +4977,93 @@
             "format": "int32"
           },
           "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AttributeOptionOrderInput": {
+        "required": [
+          "attributeId",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items": {
+            "maxItems": 50,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttributeOptionOrderItem"
+            }
+          }
+        }
+      },
+      "AttributeOptionOrderItem": {
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AttributeOptionOrderSaved": {
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "submitted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "applied": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AttributeOptionToggleInput": {
+        "required": [
+          "enabled"
+        ],
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AttributeOptionToggled": {
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "value": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "inUse": {
+            "type": "boolean"
+          },
+          "deletable": {
             "type": "boolean"
           }
         }
@@ -8127,6 +8405,82 @@
           "categoryRuleCount": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "AttributeOptionOverviewRow": {
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributeCode": {
+            "type": "string"
+          },
+          "attributeName": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "productValueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "categoryRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inUse": {
+            "type": "boolean"
+          },
+          "deletable": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "AttributeOptionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttributeOptionOverviewRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inUseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
           }
         }
       },
