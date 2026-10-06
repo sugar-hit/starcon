@@ -399,6 +399,161 @@
         }
       }
     },
+    "/catalog/sku-attribute-override/skus/{skuId}/attribute-overrides/{attributeId}": {
+      "put": {
+        "tags": [
+          "sku-attribute-override-controller"
+        ],
+        "operationId": "set",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "attributeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuOverrideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuOverrideView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "sku-attribute-override-controller"
+        ],
+        "operationId": "remove",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "attributeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuOverrideView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-attribute-override/skus/{skuId}/attribute-overrides/{attributeId}/clear": {
+      "put": {
+        "tags": [
+          "sku-attribute-override-controller"
+        ],
+        "operationId": "clear",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "attributeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuOverrideView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/records/{kind}/{id}": {
       "put": {
         "tags": [
@@ -3860,6 +4015,46 @@
         }
       }
     },
+    "/catalog/sku-attribute-override/skus/{skuId}": {
+      "get": {
+        "tags": [
+          "sku-attribute-override-controller"
+        ],
+        "operationId": "read",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuOverrideView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/lifecycle/rules/{id}/preview": {
       "get": {
         "tags": [
@@ -4513,6 +4708,190 @@
             "format": "int64"
           },
           "sampleCode": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuOverrideInput": {
+        "required": [
+          "values"
+        ],
+        "type": "object",
+        "properties": {
+          "values": {
+            "maxItems": 50,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "maxLength": 2000,
+              "minLength": 0,
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SkuOverrideAttribute": {
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "dataType": {
+            "type": "string"
+          },
+          "valueMode": {
+            "type": "string"
+          },
+          "valueModeLabel": {
+            "type": "string"
+          },
+          "multiple": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "categoryRequired": {
+            "type": "boolean"
+          },
+          "variantAxis": {
+            "type": "boolean"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "groupName": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "overrideState": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "rawValues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "effectiveValues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inherited": {
+            "type": "boolean"
+          },
+          "missingRequired": {
+            "type": "boolean"
+          },
+          "overridable": {
+            "type": "boolean"
+          },
+          "blockReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "overrideUpdatedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SkuOverrideSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "overridden": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cleared": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inherited": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unset": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingRequired": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blocked": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SkuOverrideView": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "skuStatus": {
+            "type": "string"
+          },
+          "skuVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "spuName": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuOverrideAttribute"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/SkuOverrideSummary"
+          },
+          "note": {
             "type": "string"
           }
         }
