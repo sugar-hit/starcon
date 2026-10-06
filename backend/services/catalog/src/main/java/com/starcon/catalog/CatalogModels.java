@@ -1282,6 +1282,97 @@ public final class CatalogModels {
 
   public record AttributeOptionSaved(UUID attributeId, String value, int position, boolean enabled) {}
 
+  // ============================================================ 3.2.1.2 属性选项管理
+
+  /**
+   * 跨属性的选项总览一行：把租户下所有枚举属性的选项拍平成一张可筛选、可排序、可分页的表。
+   *
+   * <p>3.2.1.1 只能按单个 attributeId 取选项，回答不了「哪些选项没人用」「哪些属性还没配值」。
+   * 本行因此额外带出归属信息（{@code attributeId} / {@code attributeCode} / {@code attributeName}），
+   * 让筛选、排序与批量操作都能在**不回到字典页**的前提下完成。
+   *
+   * <p>两个引用计数沿用 3.2.1.1 的口径，语义不变：
+   *
+   * <ul>
+   *   <li>{@code productValueCount} = 有多少处商品属性值取用了这个选项。
+   *       字典条目目前恒为 0——{@code attribute_value} 的复合外键仍锁在 SPU 作用域，
+   *       那是数据库现状而非 bug，本字段照实反映，不伪造。
+   *   <li>{@code categoryRuleCount} = 有多少条类目规则把它列为可选值。
+   *   <li>{@code deletable} = 「此刻能不能删」。它是上面两个计数的合成，与 inUse 同源，
+   *       单独给出是为了让界面不必自己重算一遍「删还是停用」。
+   * </ul>
+   */
+  public record AttributeOptionOverviewRow(
+      UUID attributeId,
+      String attributeCode,
+      String attributeName,
+      String value,
+      int position,
+      boolean enabled,
+      long productValueCount,
+      long categoryRuleCount,
+      boolean inUse,
+      boolean deletable,
+      String createdAt) {}
+
+  /**
+   * 跨属性选项总览的分页结果。
+   *
+   * <p>{@code enabledCount} 与 {@code inUseCount} 都**不受筛选条件影响**：
+   * 界面上把它们放在筛选结果旁边，用户才知道「筛出来的 3 条」之外还有多少停用/被引用的条目。
+   * 0 与「没查过」含义不同，所以单独返回而不是从当前页 items 推算。
+   */
+  public record AttributeOptionPage(
+      List<AttributeOptionOverviewRow> items,
+      long total,
+      int page,
+      int size,
+      long enabledCount,
+      long inUseCount,
+      String note) {}
+
+  /**
+   * 选项总览的筛选与排序条件。三个布尔用 {@link Boolean} 收参保持三态（不筛 / 只要满足 / 只要不满足）。
+   *
+   * <p>{@code referenced} 表达的是「有没有被引用」而不是引用来源——商品取用与类目规则两条来源
+   * 在 {@code productValueCount} / {@code categoryRuleCount} 上分别可见。
+   *
+   * <p>{@code sort} 是白名单值而不是任意列名：排序串直接拼进 SQL，
+   * 只有映射到固定片段的取值才允许出库（见 AttributeOptionService.ORDER_BY）。
+   */
+  public record AttributeOptionQuery(
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) UUID attributeId,
+      @Schema(nullable = true) Boolean enabled,
+      @Schema(nullable = true) Boolean referenced,
+      @Schema(nullable = true) @Size(max = 16) String sort,
+      int page,
+      int size) {}
+
+  /** 启用/停用切换请求。停用不删除：历史单据仍要能展示那个值。 */
+  public record AttributeOptionToggleInput(@NotNull Boolean enabled) {}
+
+  /** 启用/停用的结果，回带合成字段，界面不必为了判断状态再查一次列表。 */
+  public record AttributeOptionToggled(
+      UUID attributeId, String value, boolean enabled, boolean inUse, boolean deletable) {}
+
+  /** 批量重排的一行：某个选项该排到第几位。 */
+  public record AttributeOptionOrderItem(@NotBlank @Size(max = 100) String value, @PositiveOrZero int position) {}
+
+  /**
+   * 批量重排请求：一次提交某个属性的全部（或部分）选项及其新位置。
+   *
+   * <p>整体覆盖式提交而不是「逐条 update」：拖拽排序天然是一组位置，
+   * 逐条提交会在中途失败时留下半套顺序——那时用户看到的是一个既不是旧顺序也不是新顺序的列表，
+   * 比整批失败更难判断发生了什么。服务端在一个事务里逐条校验后统一写入。
+   */
+  public record AttributeOptionOrderInput(
+      @NotNull UUID attributeId,
+      @NotNull @Size(min = 1, max = 50) List<@Valid AttributeOptionOrderItem> items) {}
+
+  /** 批量重排结果。{@code applied} 是真正改动的行数，0 表示提交的位置与现状一致。 */
+  public record AttributeOptionOrderSaved(UUID attributeId, int submitted, int applied) {}
+
   /**
    * 类目属性规则一行：某类目对某属性的要求（必填 + 可选范围）。
    *
