@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 44 |
+| 已交付 | 45 |
 | 进行中 | 0 |
-| **未开发** | **421** |
-| 完成率 | 9.5% |
+| **未开发** | **420** |
+| 完成率 | 9.7% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 43 | 0 | 37 | 80 |
+| **D1–D2** | 44 | 0 | 36 | 80 |
 | **D3** | 1 | 0 | 39 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
-| 03 | 商品主数据系统 | D1–D2 | 14 | 40 |
+| 03 | 商品主数据系统 | D1–D2 | 15 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
@@ -154,7 +154,7 @@
 | 3.2.2.1 | SPU 公共属性 | — | D1–D2 | 已交付 | POST/PUT/DELETE /products/{id}/attributes + 属性录入与校验（OPTION/DECIMAL/BOOLEAN/DATE） |
 | 3.2.2.2 | SKU 属性覆写 | — | D1–D2 | 已交付 | V13__sku_attribute_override.sql（attribute_value 加 updated_at 系统时间 + sku_attribute_override_lookup 部分索引 + RLS/GRANT 复核；覆写行复用 V1 的 attribute_value(sku_id 非空) + state SET/CLEAR，不另建表）；GET/PUT/PUT clear/DELETE /catalog/sku-attribute-override/skus/{skuId}[/attribute-overrides/{attributeId}[/clear]]；/products/sku/[id]/attributes 工作区（加载/空/错误三态 + 四态来源标注 + 必填补全清单 + 不可改原因）；SkuAttributeOverrideIntegrationTest 14 例（四态解析与显式清空≠未设置、取消覆写回落且幂等、四类型与启用中选项校验、COMMON_LOCKED/已停用可改写性、类目必填阻止并回传清单、权限 403、审计与 sku.version 不变、租户隔离三断言） |
 | 3.3.1.1 | 分类树管理 | /products/categories | D1–D2 | 已交付 | V14__category_tree.sql（product_category_tree/product_category/product_category_name/spu_category，强制 RLS + GRANT；防环触发器 guard_product_category_cycle + 子树 path 同步；category_attribute_rule / category_attribute_option / category_spec_axis 加 category_id 并做自由文本数据迁移后收口 NOT NULL）+ GET /catalog/categories/overview、/trees、/trees/{treeId}/nodes，POST /trees、/trees/{treeId}/nodes，PUT /nodes/{id}、/nodes/{id}/move、/nodes/{id}/enabled、/spus/{spuId}，DELETE /trees/{id}、/nodes/{id} + /products/categories 页面（CategoryTreeWorkspace：树切换 / 概览 / 节点树 / 新建 / 编辑 / 移动 / 启用停用 / 删除，含加载态·空态·错误态）+ CategoryTreeIntegrationTest（15 例，含租户隔离三断言与防环断言）与 category-tree-model.test.ts（17 例）+ api-proxy 放行 categories 前缀（含放行/拒绝用例） |
-| 3.3.1.2 | 类目属性要求 | /products/categories | D1–D2 | 未开发 | — |
+| 3.3.1.2 | 类目属性要求 | /products/categories | D1–D2 | 已交付 | V15__category_attribute_requirements.sql（category_attribute_rule 加 requirement/condition_attribute_id/condition_operator/max_length/allow_free_text/enabled/version/updated_at；新建 category_attribute_condition_value；sync_category_attribute_rule_requirement 触发器让 requirement 为权威列、required 为派生列防两列漂移；guard_category_attribute_condition_value 拒绝条件取值挂错前置属性；(tenant_id,category_id,attribute_id) 唯一索引 + 强制 RLS/GRANT）；GET /catalog/categories/attribute-requirements/overview、/{categoryId}、/{categoryId}/effective，POST /{categoryId}、/{categoryId}/entry-form-schema、/{categoryId}/validate，PUT /{categoryId}/{attributeId}/enabled，DELETE /{categoryId}/{attributeId}；/products/categories/requirements 页面（CategoryRequirementsWorkspace：类目下拉 / 生效规则集含继承来源标注 / 新增·编辑·启停·删除 / 录入表单 schema 预览 / 保存前逐字段校验，加载·空·错误三态）+ 分类树页面入口链接；继承语义为「按属性逐条就近覆盖（nearest-wins），停用最近那条即豁免祖先要求」，表单 schema 与保存前校验共用同一条件求值器；CategoryAttributeRequirementIntegrationTest 12 例（含租户隔离三断言、继承与豁免语义、条件求值四分支、表单 schema 依赖排序、逐字段校验码、平台树拒绝、与 3.2.1.1 写入路径的列同步）+ CategoryAttributeRequirementRulesTest 11 例 + category-requirements-model.test.ts 15 例 + api-proxy 放行/拒绝 2 例 |
 | 3.3.2.1 | 品牌 | /products/brands | D1–D2 | 未开发 | — |
 | 3.3.3.1 | 计量单位 | /products/units | D1–D2 | 未开发 | — |
 | 3.4.1.1 | 媒体库 | /products/media | D1–D2 | 未开发 | 阻塞：product_asset 是 `LIKE product_research INCLUDING ALL` 的同构复制（catalog V1:77-80），装不了文件键/图片处理元数据。须先拆表。 |
