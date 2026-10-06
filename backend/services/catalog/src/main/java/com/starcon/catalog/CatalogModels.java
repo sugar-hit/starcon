@@ -647,4 +647,203 @@ public final class CatalogModels {
       List<SkuCodeBatchSummary> recentBatches,
       String sellerSkuNote) {}
 
+  // ------------------------------------------------ 3.1.2.4 单位与换算
+
+  /**
+   * 单位字典写入请求。
+   *
+   * <p>{@code code} 允许中文与拉丁字母数字：单位码不是 SKU 内部编码，历史数据里就是
+   * '件' / '箱' / '千克'，套 [A-Z0-9] 词表会把既有数据判成非法。
+   */
+  public record UnitOfMeasureInput(
+      @NotBlank @Size(max = 32) String code,
+      @NotBlank @Size(max = 100) String name,
+      @NotBlank String dimension,
+      @Min(0) @Max(6) int scale,
+      boolean allowPurchase,
+      boolean allowSale,
+      boolean allowStorage,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 单位字典一行。
+   *
+   * <p>{@code conversionCount} 是"有多少条换算版本引用了这个单位"，删除前必须看见它。
+   * {@code scale} 是数量精度：决定单据上该单位数量显示几位小数，与存储精度分开。
+   */
+  public record UnitOfMeasure(
+      UUID id,
+      String code,
+      String name,
+      String dimension,
+      String dimensionLabel,
+      int scale,
+      boolean allowPurchase,
+      boolean allowSale,
+      boolean allowStorage,
+      boolean enabled,
+      long conversionCount,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  public record UnitOfMeasureSaved(UUID id, long version) {}
+
+  /**
+   * 新增一条换算版本。
+   *
+   * <p>{@code quantityPerBase} 是「1 个该单位等于多少个基础单位」（1 箱 = 12 件 → 12）。
+   * 生效区间由 V6 的触发器保证不重叠：与已有版本重叠时由 DB 拒绝，应用层转成可读的 409。
+   */
+  public record UnitConversionInput(
+      @NotBlank @Size(max = 32) String unitCode,
+      @NotBlank String role,
+      @NotNull @DecimalMin(value = "0", inclusive = false) @Digits(integer = 13, fraction = 6)
+          BigDecimal quantityPerBase,
+      @NotBlank String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo) {}
+
+  public record UnitConversionSaved(
+      UUID id, UUID skuId, String unitCode, String role, String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo) {}
+
+  /** 换算表里的一行（一个生效版本）。 */
+  public record UnitConversionVersion(
+      UUID id,
+      String unitCode,
+      String role,
+      String roleLabel,
+      BigDecimal quantityPerBase,
+      String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo,
+      boolean current,
+      boolean registered,
+      boolean snapshotted,
+      String createdAt) {}
+
+  /**
+   * 一个「单位 + 角色」下的全部版本，按生效起始日倒序。
+   *
+   * <p>把版本聚成一组而不是拉平成一长串：运营问的是"箱这个采购单位现在几件一箱、
+   * 以前是几件"，聚在一起才看得出比例改过几次。
+   */
+  public record UnitConversionGroup(
+      String unitCode,
+      @Schema(nullable = true) String unitName,
+      String role,
+      String roleLabel,
+      boolean registered,
+      @Schema(nullable = true) UUID currentVersionId,
+      @Schema(nullable = true) BigDecimal currentQuantityPerBase,
+      List<UnitConversionVersion> versions) {}
+
+  /**
+   * 单个 SKU 的单位与换算面板。
+   *
+   * <p>{@code baseUnit} 来自 {@code sku.base_unit}（V1 的列），**不在换算表里**：
+   * 基础单位是 SKU 自身的属性，换算表只放其他单位相对它的比例。
+   * {@code baseUnitRegistered} 为 false 表示这个基础单位还没进字典——这是本模块要提示的治理缺口，
+   * 不是错误：换算与冻结仍可进行，只是量纲校验对它放行。
+   */
+  public record UnitPanel(
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      String baseUnit,
+      @Schema(nullable = true) String baseUnitName,
+      boolean baseUnitRegistered,
+      List<UnitConversionGroup> groups,
+      List<UnitSnapshotLine> snapshots,
+      long snapshotCount) {}
+
+  /** 换算计算请求。asOf 留空取今天；quantity 是单据上的原始数量。 */
+  public record UnitConvertInput(
+      @NotNull UUID skuId,
+      @NotNull @DecimalMin(value = "0", inclusive = false) @Digits(integer = 13, fraction = 6)
+          BigDecimal quantity,
+      @NotBlank @Size(max = 32) String unitCode,
+      @Schema(nullable = true) String role,
+      @Schema(nullable = true) String asOf) {}
+
+  /**
+   * 换算结果。
+   *
+   * <p>{@code conversionId} 为空表示命中的是基础单位本身（比例恒为 1）。
+   * {@code effectiveFrom}/{@code effectiveTo} 是这一版的生效区间——单据据此回显"用的是哪一版"。
+   */
+  public record UnitConvertResult(
+      UUID skuId,
+      String skuCode,
+      String unitCode,
+      @Schema(nullable = true) String unitName,
+      String role,
+      String roleLabel,
+      BigDecimal quantity,
+      BigDecimal quantityPerBase,
+      String baseUnit,
+      BigDecimal baseQuantity,
+      String asOf,
+      @Schema(nullable = true) UUID conversionId,
+      @Schema(nullable = true) String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo,
+      String note) {}
+
+  /** 冻结快照的一行。{@code created=false} 表示该单据行此前已冻结，本次返回原行未覆盖。 */
+  public record UnitSnapshotLine(
+      int lineNo,
+      UUID skuId,
+      String skuCode,
+      String role,
+      String roleLabel,
+      String unitCode,
+      String baseUnit,
+      BigDecimal quantity,
+      BigDecimal quantityPerBase,
+      BigDecimal baseQuantity,
+      @Schema(nullable = true) UUID sourceConversionId,
+      String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo,
+      boolean created,
+      String occurredAt) {}
+
+  /** 冻结快照请求。lines 一次提交一张单据的明细，行号由 lineNo 显式给出以便对齐单据。 */
+  public record UnitSnapshotLineInput(
+      @Positive int lineNo,
+      @NotNull UUID skuId,
+      @NotBlank @Size(max = 32) String unitCode,
+      @NotBlank String role,
+      @NotNull @DecimalMin(value = "0", inclusive = false) @Digits(integer = 13, fraction = 6)
+          BigDecimal quantity) {}
+
+  public record UnitSnapshotInput(
+      @NotBlank String documentType,
+      @NotBlank @Size(max = 100) String documentRef,
+      @Schema(nullable = true) String occurredAt,
+      @NotNull @Size(max = 500) List<@jakarta.validation.Valid UnitSnapshotLineInput> lines) {}
+
+  /** 一张单据的冻结快照。 */
+  public record UnitSnapshot(
+      UUID id,
+      String documentType,
+      String documentTypeLabel,
+      String documentRef,
+      String occurredAt,
+      String createdAt,
+      int requestedCount,
+      int createdCount,
+      int reusedCount,
+      List<UnitSnapshotLine> lines) {}
+
+  /** 各量纲下的单位数量，用于概览显示"字典覆盖了哪些量纲"。 */
+  public record UnitDimensionCount(String dimension, String dimensionLabel, long count) {}
+
+  public record UnitOverview(
+      long unitCount,
+      long enabledUnitCount,
+      long unregisteredUnitCount,
+      long conversionCount,
+      long snapshotCount,
+      List<UnitDimensionCount> dimensions,
+      String note) {}
 }
