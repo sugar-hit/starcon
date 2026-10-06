@@ -147,7 +147,7 @@ public class CategoryAttributeRequirementForms {
       boolean active =
           conditionHolds(
               rule.condition().operator(),
-              conditionValues(rule),
+              rule.conditionValues(),
               rule.condition().dataType(),
               dependencyValue);
       dependency =
@@ -156,7 +156,7 @@ public class CategoryAttributeRequirementForms {
               rule.condition().attributeCode(),
               rule.condition().attributeName(),
               rule.condition().operator(),
-              conditionValues(rule),
+              rule.conditionValues(),
               active);
       // 条件成立才必填——这是本模块「条件必填真正参与 schema 生成」的落点。
       required = active;
@@ -296,13 +296,13 @@ public class CategoryAttributeRequirementForms {
       boolean active =
           conditionHolds(
               rule.condition().operator(),
-              conditionValues(rule),
+              rule.conditionValues(),
               rule.condition().dataType(),
               dependencyValue);
       if (active && blank)
         return result(rule, "CONDITION_UNMET", active, value,
             "「" + rule.attributeName() + "」在「" + rule.condition().attributeName() + "」取 "
-                + String.join(" / ", conditionValues(rule)) + " 时必填，请补填");
+                + String.join(" / ", rule.conditionValues()) + " 时必填，请补填");
       if (blank) return result(rule, "PASSED", active, value, null);
       return checkValue(rule, value, active);
     }
@@ -437,23 +437,6 @@ public class CategoryAttributeRequirementForms {
   }
 
   // ============================================================ 工具
-
-  /**
-   * 从规则上取条件取值。
-   *
-   * <p>条件取值存在 {@code category_attribute_condition_value} 里，而
-   * {@link CategoryAttributeRequirement} 不重复携带它们（避免同一份数据在 DTO 里出现两处）。
-   * 这里按规则逐条取：表单生成与校验都会用到，而一份类目的规则数有限，
-   * 逐条查换来的是「规则 DTO 与条件取值表各自单一来源」。
-   */
-  private List<String> conditionValues(CategoryAttributeRequirement rule) {
-    if (rule.condition() == null) return List.of();
-    return sql.fetch(
-            "select condition_value from category_attribute_condition_value"
-                + " where category_id=? and attribute_id=? order by position",
-            rule.categoryId(), rule.attributeId())
-        .getValues("condition_value", String.class);
-  }
 
   /** 提交值取值：id 优先，其次 code（前端拿的是 schema，用 code 最顺手）。 */
   private static String submitted(Map<String, String> values, UUID attributeId, String attributeCode) {

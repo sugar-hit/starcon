@@ -217,16 +217,90 @@ it('catalog/categories 的全部路由被放行且转发到 catalog 服务', asy
     `catalog/categories/nodes/${id}/move`,
     `catalog/categories/nodes/${id}/enabled`,
   ]) {
-    expect((await PUT(request(path, 'PUT'), { params: { path: path.split('/') } })).status).toBe(200);
-  }
-  for (const path of [
-    `catalog/categories/trees/${tree}`,
-    `catalog/categories/nodes/${id}`,
-  ]) {
-    expect((await DELETE(request(path, 'DELETE'), { params: { path: path.split('/') } })).status).toBe(
+    expect((await PUT(request(path, 'PUT'), { params: { path: path.split('/') } })).status).toBe(
       200,
     );
   }
+  for (const path of [`catalog/categories/trees/${tree}`, `catalog/categories/nodes/${id}`]) {
+    expect(
+      (await DELETE(request(path, 'DELETE'), { params: { path: path.split('/') } })).status,
+    ).toBe(200);
+  }
+});
+
+it('catalog/categories/attribute-requirements 的全部路由被放行（3.3.1.2 类目属性要求）', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const category = '11111111-1111-1111-1111-111111111111';
+  const attribute = '22222222-2222-2222-2222-222222222222';
+  for (const path of [
+    'catalog/categories/attribute-requirements/overview',
+    `catalog/categories/attribute-requirements/${category}`,
+    `catalog/categories/attribute-requirements/${category}/effective`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8082/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 保存规则、生成录入表单 schema、保存前校验：三个都是 POST，且落在同一批路径上。
+  for (const path of [
+    `catalog/categories/attribute-requirements/${category}`,
+    `catalog/categories/attribute-requirements/${category}/entry-form-schema`,
+    `catalog/categories/attribute-requirements/${category}/validate`,
+  ]) {
+    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(
+      200,
+    );
+  }
+  expect(
+    (
+      await PUT(
+        request(`catalog/categories/attribute-requirements/${category}/${attribute}/enabled`),
+        {
+          params: {
+            path: [
+              'catalog',
+              'categories',
+              'attribute-requirements',
+              category,
+              attribute,
+              'enabled',
+            ],
+          },
+        },
+      )
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await DELETE(request(`catalog/categories/attribute-requirements/${category}/${attribute}`), {
+        params: {
+          path: ['catalog', 'categories', 'attribute-requirements', category, attribute],
+        },
+      })
+    ).status,
+  ).toBe(200);
+});
+
+it('attribute-requirements 放行不等于放行任意 attribute-requirements 子路径', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const category = '11111111-1111-1111-1111-111111111111';
+  const attribute = '22222222-2222-2222-2222-222222222222';
+  for (const path of [
+    // overview 是唯一的字面量第三段，其余第三段必须是 UUID。
+    'catalog/categories/attribute-requirements/unknown',
+    `catalog/categories/attribute-requirements/${category}/unknown`,
+    `catalog/categories/attribute-requirements/${category}/${attribute}/unknown`,
+    `catalog/categories/attribute-requirements/${category}/effective/extra`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
 });
 
 it('categories 放行不等于放行任意 catalog 子路径', async () => {

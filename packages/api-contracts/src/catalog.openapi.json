@@ -1480,6 +1480,66 @@
         }
       }
     },
+    "/catalog/categories/attribute-requirements/{categoryId}/{attributeId}/enabled": {
+      "put": {
+        "tags": [
+          "category-attribute-requirement-controller"
+        ],
+        "operationId": "setEnabled_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "attributeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/attributes/{id}": {
       "put": {
         "tags": [
@@ -3566,6 +3626,204 @@
         }
       }
     },
+    "/catalog/categories/attribute-requirements/{categoryId}": {
+      "get": {
+        "tags": [
+          "category-attribute-requirement-controller"
+        ],
+        "operationId": "requirements",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryRequirementsView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "category-attribute-requirement-controller"
+        ],
+        "operationId": "save",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryAttributeRequirementInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryAttributeRequirementSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/categories/attribute-requirements/{categoryId}/validate": {
+      "post": {
+        "tags": [
+          "category-attribute-requirement-controller"
+        ],
+        "operationId": "validate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttributeValidationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeValidationReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/categories/attribute-requirements/{categoryId}/entry-form-schema": {
+      "post": {
+        "tags": [
+          "category-attribute-requirement-controller"
+        ],
+        "operationId": "entryFormSchema",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "values",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "includeDisabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryFormSchema"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/attributes": {
       "get": {
         "tags": [
@@ -4740,12 +4998,86 @@
         }
       }
     },
+    "/catalog/categories/attribute-requirements/{categoryId}/effective": {
+      "get": {
+        "tags": [
+          "category-attribute-requirement-controller"
+        ],
+        "operationId": "effective",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryAttributeRequirement"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/categories/attribute-requirements/overview": {
+      "get": {
+        "tags": [
+          "category-attribute-requirement-controller"
+        ],
+        "operationId": "overview_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryRequirementsOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/attributes/overview": {
       "get": {
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_5",
+        "operationId": "overview_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -4993,6 +5325,58 @@
           },
           {
             "name": "identifierId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/categories/attribute-requirements/{categoryId}/{attributeId}": {
+      "delete": {
+        "tags": [
+          "category-attribute-requirement-controller"
+        ],
+        "operationId": "delete_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "attributeId",
             "in": "path",
             "required": true,
             "schema": {
@@ -7513,6 +7897,404 @@
           }
         }
       },
+      "CategoryAttributeCondition": {
+        "required": [
+          "attributeId",
+          "operator"
+        ],
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributeCode": {
+            "type": "string"
+          },
+          "attributeName": {
+            "type": "string"
+          },
+          "dataType": {
+            "type": "string"
+          },
+          "operator": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "nullable": true
+      },
+      "CategoryAttributeConditionValue": {
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "nullable": true
+      },
+      "CategoryAttributeRequirementInput": {
+        "required": [
+          "attributeId",
+          "requirement"
+        ],
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requirement": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxLength": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "allowFreeText": {
+            "type": "boolean"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allowedOptions": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "maxLength": 100,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          "condition": {
+            "$ref": "#/components/schemas/CategoryAttributeCondition"
+          },
+          "conditionValues": {
+            "maxItems": 20,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/CategoryAttributeConditionValue"
+            }
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CategoryAttributeRequirementSaved": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requirement": {
+            "type": "string"
+          },
+          "conditionValueCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AttributeValidationInput": {
+        "required": [
+          "values"
+        ],
+        "type": "object",
+        "properties": {
+          "values": {
+            "maxItems": 200,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttributeValueInput"
+            }
+          }
+        }
+      },
+      "AttributeValueInput": {
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "attributeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AttributeValidationReport": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "valid": {
+            "type": "boolean"
+          },
+          "checkedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttributeValidationResult"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AttributeValidationResult": {
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributeCode": {
+            "type": "string"
+          },
+          "attributeName": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "requirement": {
+            "type": "string"
+          },
+          "conditionActive": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "submittedValue": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "EntryFormConstraints": {
+        "type": "object",
+        "properties": {
+          "minValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxLength": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "allowFreeText": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "allowedOptions": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        }
+      },
+      "EntryFormDependency": {
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributeCode": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "nullable": true
+      },
+      "EntryFormField": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributeCode": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "dataType": {
+            "type": "string"
+          },
+          "control": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "requirement": {
+            "type": "string"
+          },
+          "dependency": {
+            "$ref": "#/components/schemas/EntryFormDependency"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntryFormOption"
+            }
+          },
+          "constraints": {
+            "$ref": "#/components/schemas/EntryFormConstraints"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inherited": {
+            "type": "boolean"
+          },
+          "sourceCategoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceCategoryName": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "EntryFormOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "EntryFormSchema": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "categoryCode": {
+            "type": "string"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "categoryPath": {
+            "type": "string"
+          },
+          "fieldCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requiredFieldCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "conditionalFieldCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntryFormField"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
       "CategoryAttributeRuleInput": {
         "required": [
           "category"
@@ -9555,6 +10337,196 @@
             "format": "int64"
           },
           "orphanedRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CategoryAttributeRequirement": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributeCode": {
+            "type": "string"
+          },
+          "attributeName": {
+            "type": "string"
+          },
+          "dataType": {
+            "type": "string"
+          },
+          "requirement": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "inherited": {
+            "type": "boolean"
+          },
+          "depth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sourceCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceCategoryName": {
+            "type": "string"
+          },
+          "minValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxLength": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "allowFreeText": {
+            "type": "boolean"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allowedOptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "condition": {
+            "$ref": "#/components/schemas/CategoryAttributeCondition"
+          },
+          "conditionValues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CategoryRequirementsSummary": {
+        "type": "object",
+        "properties": {
+          "effectiveCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requiredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "conditionalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "optionalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ownCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inheritedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disabledCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CategoryRequirementsView": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "categoryCode": {
+            "type": "string"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "categoryPath": {
+            "type": "string"
+          },
+          "effective": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryAttributeRequirement"
+            }
+          },
+          "own": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryAttributeRequirement"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/CategoryRequirementsSummary"
+          }
+        }
+      },
+      "CategoryRequirementsOverview": {
+        "type": "object",
+        "properties": {
+          "categoryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "categoriesWithRequirement": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "categoriesWithoutRequirement": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requirementCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "conditionalRequirementCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disabledRequirementCount": {
             "type": "integer",
             "format": "int64"
           },

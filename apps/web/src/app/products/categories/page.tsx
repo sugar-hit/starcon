@@ -9,9 +9,10 @@ import { CategoryTreeWorkspace } from '@/components/catalog/category-tree-worksp
  * /products/sku/spec-axis 同级思路：三者都是**租户级的字典/结构配置**，被所有商品共用，
  * 而不是某个商品的详情页。后端对应 /catalog/categories。
  *
- * <p>本模块只做 3.3.1.1 分类树本身。3.3.1.2 类目属性要求挂在 /products/attributes
- * （那是 3.2.1.1 的属性中心，按属性组织），本页面不重复做它——两个入口做同一件事，
- * 用户反而分不清该去哪配。
+ * <p>本模块只做 3.3.1.1 分类树本身（树结构、层级、防环、启用停用）。
+ * 3.3.1.2 类目属性要求是同一个类目中心的另一个页面：/products/categories/requirements。
+ * 之所以不塞进这个页面——「改类目名」和「改这个类目的必填项」是两件独立的事，
+ * 挤在一屏里编辑时会互相覆盖对方正在改的内容；拆开后由本页链过去。
  */
 export default function CategoriesPage() {
   return <CategoryTreeWorkspace />;

@@ -168,11 +168,15 @@ public class CategoryAttributeRequirementService {
     for (Record r : rows) {
       UUID categoryId = r.get("category_id", UUID.class);
       UUID attributeId = r.get("attribute_id", UUID.class);
+      List<CategoryAttributeConditionValue> conditionValues =
+          conditions.get(optionKey(categoryId, attributeId));
       list.add(
           toRequirement(
               r,
               options.get(optionKey(categoryId, attributeId)),
-              conditions.get(optionKey(categoryId, attributeId)),
+              conditionValues == null
+                  ? List.of()
+                  : conditionValues.stream().map(CategoryAttributeConditionValue::value).toList(),
               depthIn(targetPath, categoryId),
               targetPath.length - 1));
     }
@@ -195,7 +199,7 @@ public class CategoryAttributeRequirementService {
   }
 
   private CategoryAttributeRequirement toRequirement(
-      Record r, List<String> allowedOptions, List<CategoryAttributeConditionValue> conditionValues, int depth, int selfIndex) {
+      Record r, List<String> allowedOptions, List<String> conditionValues, int depth, int selfIndex) {
     UUID categoryId = r.get("category_id", UUID.class);
     UUID attributeId = r.get("attribute_id", UUID.class);
     UUID conditionAttributeId = r.get("condition_attribute_id", UUID.class);
@@ -239,6 +243,7 @@ public class CategoryAttributeRequirementService {
         r.get("position", Integer.class),
         allowedOptions == null ? List.of() : allowedOptions,
         condition,
+        conditionValues == null ? List.of() : conditionValues,
         r.get("version", Long.class),
         instant(r.get("updated_at", OffsetDateTime.class)));
   }

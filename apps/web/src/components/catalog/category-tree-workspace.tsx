@@ -6,6 +6,7 @@ import { Badge, Button, EmptyState, SectionCard, StatCard } from '@starcon/ui';
 import {
   ChevronDown,
   ChevronRight,
+  ClipboardCheck,
   Languages,
   Layers,
   Package,
@@ -132,6 +133,11 @@ export function CategoryTreeWorkspace() {
         description="分类是多棵独立的树：内部管理分类与各平台类目映射的维护节奏完全不同，不能混成一棵。"
         extra={
           <>
+            <Link href="/products/categories/requirements">
+              <Button variant="ghost">
+                <ClipboardCheck /> 类目属性要求
+              </Button>
+            </Link>
             <Button variant="ghost" onClick={() => void refresh()}>
               <RefreshCw /> 刷新
             </Button>
@@ -212,8 +218,8 @@ export function CategoryTreeWorkspace() {
       {overview && overview.uncategorizedSpuCount > 0 ? (
         <p className="text-muted-foreground bg-muted rounded-md px-3 py-2 text-xs">
           有 <b className="text-warning">{overview.uncategorizedSpuCount}</b> 件商品既没有主分类、
-          也没有历史类目文本。它们不会出现在任何类目的商品数统计里，
-          3.1.1.1 的类目筛选与 13 分析的品类口径都会漏掉它们。
+          也没有历史类目文本。它们不会出现在任何类目的商品数统计里， 3.1.1.1 的类目筛选与 13
+          分析的品类口径都会漏掉它们。
         </p>
       ) : null}
 
@@ -250,7 +256,10 @@ export function CategoryTreeWorkspace() {
             {nodeError}
           </p>
         ) : branches.length === 0 ? (
-          <EmptyState title="这棵树还没有分类" description={emptyHint(trees.length, current.treeKind as 'INTERNAL' | 'PLATFORM')} />
+          <EmptyState
+            title="这棵树还没有分类"
+            description={emptyHint(trees.length, current.treeKind as 'INTERNAL' | 'PLATFORM')}
+          />
         ) : (
           <ul className="space-y-1">
             {branches.map((branch) => (
@@ -325,7 +334,10 @@ function TreeForm({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  const problem = codeProblem(code) ?? nameProblem(name) ?? platformProblem(kind, kind === 'PLATFORM' ? platform : '');
+  const problem =
+    codeProblem(code) ??
+    nameProblem(name) ??
+    platformProblem(kind, kind === 'PLATFORM' ? platform : '');
 
   async function submit() {
     setBusy(true);
@@ -357,7 +369,10 @@ function TreeForm({
         <Field label="树名称">
           <input className={control} value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
-        <Field label="树种类" hint="平台类目映射树的节点供 04 刊登做类目映射，维护节奏与内部类目不同。">
+        <Field
+          label="树种类"
+          hint="平台类目映射树的节点供 04 刊登做类目映射，维护节奏与内部类目不同。"
+        >
           <select className={control} value={kind} onChange={(e) => setKind(e.target.value)}>
             {TREE_KINDS.map((k) => (
               <option key={k.value} value={k.value}>
@@ -368,7 +383,11 @@ function TreeForm({
         </Field>
         {kind === 'PLATFORM' ? (
           <Field label="所属平台" hint="平台树必须指明平台，否则刊登侧取不到这棵树。">
-            <select className={control} value={platform} onChange={(e) => setPlatform(e.target.value)}>
+            <select
+              className={control}
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+            >
               {PLATFORMS.map((p) => (
                 <option key={p} value={p}>
                   {p}
@@ -663,8 +682,8 @@ function NodeForm({
           多语言名称
         </p>
         <p className="text-muted-foreground text-xs">
-          基础名称在上面「分类名称」上，这里配的是补充：按语言给同一个类目另一个名字。
-          语言标识用 BCP 47 形式（zh-CN / en-US / ja）。
+          基础名称在上面「分类名称」上，这里配的是补充：按语言给同一个类目另一个名字。 语言标识用
+          BCP 47 形式（zh-CN / en-US / ja）。
         </p>
         {names.length > 0 ? (
           <ul className="flex flex-wrap gap-2">
@@ -697,7 +716,11 @@ function NodeForm({
             />
           </Field>
           <Field label="该语言的名称">
-            <input className={control} value={localeName} onChange={(e) => setLocaleName(e.target.value)} />
+            <input
+              className={control}
+              value={localeName}
+              onChange={(e) => setLocaleName(e.target.value)}
+            />
           </Field>
           <Button
             variant="ghost"
@@ -781,7 +804,11 @@ function MoveForm({
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="新的父分类" hint="留空即移到根层级。">
-          <select className={control} value={parentId} onChange={(e) => setParentId(e.target.value)}>
+          <select
+            className={control}
+            value={parentId}
+            onChange={(e) => setParentId(e.target.value)}
+          >
             <option value="">（根节点）</option>
             {branches
               .flatMap(flattenBranch)

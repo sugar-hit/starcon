@@ -1694,6 +1694,10 @@ public final class CatalogModels {
       int position,
       List<String> allowedOptions,
       @Schema(nullable = true) CategoryAttributeCondition condition,
+      // 条件取值的文本形式。与 condition 成对出现：非条件必填恒为空列表。
+      // 单列一份而不是让配置页再发一次请求，是因为「当【颜色】等于红色时必填」这句话
+      // 必须能在规则列表里直接看到——看不到就没法自查条件配对不对。
+      List<String> conditionValues,
       long version,
       @Schema(nullable = true) String updatedAt) {}
 
