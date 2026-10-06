@@ -245,13 +245,21 @@ export function SkuDetailWorkspace({ skuId }: { skuId: string }) {
           title="属性有效值"
           hint="显示的是有效值（SPU 公共值经 SKU 覆写 / 清空后的解析结果），不是原始存的两行值。"
         >
-          <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
-            <span>共 {detail.attributeSummary.total} 项</span>
-            <span>SKU 覆写 {detail.attributeSummary.overridden}</span>
-            <span>SKU 清空 {detail.attributeSummary.cleared}</span>
-            <span>继承公共值 {detail.attributeSummary.inherited}</span>
-            <span>未赋值 {detail.attributeSummary.unset}</span>
-            <span>规格轴 {detail.attributeSummary.variantAxes}</span>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
+              <span>共 {detail.attributeSummary.total} 项</span>
+              <span>SKU 覆写 {detail.attributeSummary.overridden}</span>
+              <span>SKU 清空 {detail.attributeSummary.cleared}</span>
+              <span>继承公共值 {detail.attributeSummary.inherited}</span>
+              <span>未赋值 {detail.attributeSummary.unset}</span>
+              <span>规格轴 {detail.attributeSummary.variantAxes}</span>
+            </div>
+            {/* 覆写与清空归 3.2.2.2：详情页只读有效值，改动在覆写工作区做。 */}
+            <Link href={`/products/sku/${detail.id}/attributes`}>
+              <Button variant="ghost" size="sm">
+                去覆写属性
+              </Button>
+            </Link>
           </div>
           {groups.length === 0 ? (
             <p className="text-muted-foreground mt-3 text-sm">
