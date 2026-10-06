@@ -220,3 +220,39 @@ it('attributes 放行不等于放行任意 catalog 子路径', async () => {
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
+
+/**
+ * 3.2.1.2 属性选项管理：跨属性聚合视图的三条路由必须放行。
+ *
+ * <p>要防的坑是 `attributes/options`（字面量，跨属性总览）与 `attributes/{uuid}/options`
+ * （单属性取值，3.2.1.1）被混为一谈：前者第一段是字面量 options，后者是 UUID。
+ * 只放行后者的话，聚合页只会一直进错误态，看起来像后端没实现。
+ */
+it('catalog/attributes/options 的三条路由被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  expect(
+    (
+      await GET(request('catalog/attributes/options'), {
+        params: { path: ['catalog', 'attributes', 'options'] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(fetcher).toHaveBeenLastCalledWith(
+    expect.stringContaining(':8082/catalog/attributes/options'),
+    expect.objectContaining({
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+    }),
+  );
+  for (const path of ['catalog/attributes/options/lifecycle', 'catalog/attributes/options/order']) {
+    expect((await PUT(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  // 放行 options 不等于放行 options 底下的任意子路径
+  expect(
+    (
+      await GET(request('catalog/attributes/options/unknown'), {
+        params: { path: ['catalog', 'attributes', 'options', 'unknown'] },
+      })
+    ).status,
+  ).toBe(404);
+});
