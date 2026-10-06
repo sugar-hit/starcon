@@ -5,36 +5,36 @@
 > 本脚本只负责同步。**「状态」「证据」两列是人工维护的，脚本按模块 ID 继承。**
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
-> `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（有分支在做，未收口）· `未开发`（未开工）。
+> `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
 
 ## 总览
 
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 33 |
-| 进行中 | 0 |
-| **未开发** | **432** |
-| 完成率 | 7.1% |
+| 已交付 | 29 |
+| 进行中 | 3 |
+| **未开发** | **433** |
+| 完成率 | 6.2% |
 
 ## 分阶段进度（交付顺序看这里）
 
-| 阶段 | 已交付 | 未开发 | 合计 |
-| --- | --- | --- | --- |
-| **D1–D2** | 33 | 47 | 80 |
-| **D3** | 0 | 40 | 40 |
-| **D4** | 0 | 60 | 60 |
-| **D5** | 0 | 52 | 52 |
-| **D6** | 0 | 78 | 78 |
-| **D7** | 0 | 155 | 155 |
+| 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
+| --- | --- | --- | --- | --- |
+| **D1–D2** | 29 | 3 | 48 | 80 |
+| **D3** | 0 | 0 | 40 | 40 |
+| **D4** | 0 | 0 | 60 | 60 |
+| **D5** | 0 | 0 | 52 | 52 |
+| **D6** | 0 | 0 | 78 | 78 |
+| **D7** | 0 | 0 | 155 | 155 |
 
 ## 分系统进度
 
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
-| 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
-| 03 | 商品主数据系统 | D1–D2 | 4 | 40 |
+| 02 | 渠道与店铺系统 | D1–D2 / D5 | 19 | 25 |
+| 03 | 商品主数据系统 | D1–D2 | 3 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
@@ -48,7 +48,7 @@
 | 14 | 广告与增长系统 | D7 | 0 | 22 |
 | 15 | 客户与客服系统 | D7 | 0 | 24 |
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 9 | 29 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 7 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
 
 ## 判定「已交付」的标准
@@ -118,19 +118,19 @@
 | 2.1.1.1 | 平台目录 | /channels/platforms | D1–D2 | 已交付 | channel V1 platform 码表 + GET /channel/platforms + /channels 平台目录段 |
 | 2.1.1.2 | 平台能力矩阵 | /channels/platforms | D1–D2 | 已交付 | platform.capabilities 跨系统能力矩阵 + 端点返回 + /channels 展示 |
 | 2.1.1.3 | 站点与国家参数 | /channels/platforms | D1–D2 | 已交付 | marketplace 码表 + shop_marketplace 站点启停 + /channels 站点段 |
-| 2.1.2.1 | 平台枚举映射 | — | D1–D2 | 已交付 | platform_enum_mapping + GET /channel/platforms/{code}/enums |
+| 2.1.2.1 | 平台枚举映射 | — | D1–D2 | 已交付 | platform_enum_mapping（全局只读码表，V3 收回运行角色写权限）+ platform_enum_override（租户覆盖，RLS）+ GET/POST/DELETE /channel/platforms/{code}/enums + 平台目录枚举映射面板 |
 | 2.2.1.1 | 连接列表 | /channels/connections | D1–D2 | 已交付 | channel_connection + GET /channel/connections + /channels 连接段 |
-| 2.2.1.2 | 授权向导 | /channels/connections | D1–D2 | 已交付 | POST /channel/connections 授权端点 + /channels 授权向导 |
+| 2.2.1.2 | 授权向导 | /channels/connections | D1–D2 | 进行中 | POST /channel/connections 建连接 + 页面引导到写入凭据引用；平台 OAuth 跳转与回调校验未接（需平台应用凭据），页面不假装有跳转 |
 | 2.2.1.3 | 凭据引用管理 | /channels/connections | D1–D2 | 已交付 | credential_ref + PUT /connections/{id}/credential；wire model 无明文令牌类型 |
 | 2.2.2.1 | 健康诊断 | — | D1–D2 | 已交付 | GET /connections/{id}/health 健康诊断 + /channels 诊断段 |
 | 2.2.2.2 | 重新授权提醒 | — | D1–D2 | 已交付 | GET /connections/reminders 到期提醒 + /channels 提醒展示 |
 | 2.3.1.1 | 店铺列表 | /channels/shops | D1–D2 | 已交付 | shop 表 + GET /channel/shops + /channels 店铺列表段 |
-| 2.3.1.2 | 店铺详情 | /channels/shops | D1–D2 | 已交付 | GET/PUT /channel/shops/{id} + /channels 店铺详情 |
+| 2.3.1.2 | 店铺详情 | /channels/shops | D1–D2 | 已交付 | GET/PUT /channel/shops/{id} + 站点启停 + /channels 店铺详情（可改名称、经营模式、绑定连接与法人，带版本号乐观锁） |
 | 2.3.2.1 | 经营模式（自发货/全托管/半托管） | — | D1–D2 | 已交付 | shop.operating_mode CHECK(SELF_FULFILLED/FULL_CONSIGNMENT/SEMI_CONSIGNMENT/…) + 页面展示 |
-| 2.3.2.2 | 负责人与数据范围 | — | D1–D2 | 已交付 | shop.owner_id/department_id + channel_scope RLS(scopeMode) + 转让走显式端点 |
-| 2.4.1.1 | 同步任务列表 | /channels/sync | D1–D2 | 已交付 | channel V2 sync_cursor + GET /sync-cursors + /channels 同步运行段 |
+| 2.3.2.2 | 负责人与数据范围 | — | D1–D2 | 已交付 | shop.owner_id/department_id + channel_scope RLS(scopeMode) + POST /shops/{id}/transfer 显式转让（触发器锁字段）+ 详情页转让表单 |
+| 2.4.1.1 | 同步任务列表 | /channels/sync | D1–D2 | 已交付 | channel V2 sync_cursor + GET/POST /sync-cursors + /channels 同步运行段（页面可按连接·站点·资源登记任务） |
 | 2.4.1.2 | 运行日志 | /channels/sync | D1–D2 | 已交付 | sync_run + GET /sync-runs 运行日志 + 失败原因分布 |
-| 2.4.1.3 | 断点续传 | /channels/sync | D1–D2 | 已交付 | 游标水位 + pause/resume/rewind 端点；游标仅 SUCCEEDED 推进 |
+| 2.4.1.3 | 断点续传 | /channels/sync | D1–D2 | 已交付 | 游标水位 + pause/resume/rewind 端点 + 页面暂停/恢复/回退；游标仅 SUCCEEDED 推进 |
 | 2.4.2.1 | 失败队列 | — | D1–D2 | 已交付 | sync_failure + GET /sync-failures + /sync-failures/summary |
 | 2.4.2.2 | 人工重放 | — | D1–D2 | 已交付 | POST /sync-failures/{id}/replay 人工重放（归属最初运行） |
 | 2.4.2.3 | 映射缺失队列 | — | D5 | 未开发 | — |
@@ -153,7 +153,7 @@
 | 3.2.1.2 | 属性选项管理 | /products/attributes | D1–D2 | 未开发 | — |
 | 3.2.2.1 | SPU 公共属性 | — | D1–D2 | 已交付 | POST/PUT/DELETE /products/{id}/attributes + 属性录入与校验（OPTION/DECIMAL/BOOLEAN/DATE） |
 | 3.2.2.2 | SKU 属性覆写 | — | D1–D2 | 未开发 | — |
-| 3.3.1.1 | 分类树管理 | /products/categories | D1–D2 | 已交付 | GET/POST/PUT /catalog/records/category 分类树 + 分类管理段 |
+| 3.3.1.1 | 分类树管理 | /products/categories | D1–D2 | 未开发 | 阻塞：无 product_category 表、CatalogService.table() 白名单只有 research/compliance/assets、api-proxy 未放行、前端无页面。此前误标已交付已撤回 |
 | 3.3.1.2 | 类目属性要求 | /products/categories | D1–D2 | 未开发 | — |
 | 3.3.2.1 | 品牌 | /products/brands | D1–D2 | 未开发 | — |
 | 3.3.3.1 | 计量单位 | /products/units | D1–D2 | 未开发 | — |
@@ -505,17 +505,17 @@
 | 16.6.1.1 | PII 管理 | — | D7 | 未开发 | — |
 | 16.6.2.1 | 数据出境与留存 | — | D7 | 未开发 | — |
 | 17.1.1.1 | 租户列表 | — | D1–D2 | 未开发 | — |
-| 17.1.1.2 | 子租户 | — | D1–D2 | 已交付 | child_tenants 表 + /children CRUD + /org/children 层级工作区 |
+| 17.1.1.2 | 子租户 | — | D1–D2 | 已交付 | tenant + tenant_closure 闭包表 + /children CRUD（含审计与 outbox）+ /org/children 层级工作区 |
 | 17.1.1.3 | 层级授权 | — | D1–D2 | 未开发 | — |
 | 17.1.2.1 | 法人档案 | — | D1–D2 | 已交付 | identity V5 legal_entity + CRUD + 删除保护触发器 + /org/legal-entities |
 | 17.1.2.2 | 本位币与账簿 | — | D1–D2 | 未开发 | — |
-| 17.2.1.1 | 部门树 | — | D1–D2 | 已交付 | department 表 + /departments CRUD + /org/departments 部门树 |
+| 17.2.1.1 | 部门树 | — | D1–D2 | 进行中 | department 表 + /departments CRUD + /org/departments 列表；注意建表无 parent_id、页面是平铺列表，层级能力未实现，部门负责人（17.2.1.2）也未做 |
 | 17.2.1.2 | 部门负责人 | — | D1–D2 | 未开发 | — |
-| 17.2.2.1 | 成员管理 | — | D1–D2 | 已交付 | member 表 + /members CRUD + /org/members 成员工作区 |
+| 17.2.2.1 | 成员管理 | — | D1–D2 | 已交付 | membership + app_user + role_assignment 表 + /members CRUD + /org/members 成员工作区 |
 | 17.2.2.2 | 成员开通与入职 | — | D1–D2 | 未开发 | — |
 | 17.2.2.3 | 离职与停用 | — | D1–D2 | 未开发 | — |
 | 17.3.1.1 | 角色管理 | — | D1–D2 | 已交付 | role 表 + /roles CRUD + /org/roles 角色管理 |
-| 17.3.1.2 | 页面权限矩阵 | — | D1–D2 | 已交付 | identity V1/V4 page_permission + GET /identity/permissions + 权限矩阵页 |
+| 17.3.1.2 | 页面权限矩阵 | — | D1–D2 | 已交付 | identity V1/V3/V4/V5 page_resource + permission + role_permission 表 + GET /identity/permissions + 权限矩阵页 |
 | 17.3.2.1 | 角色分配 | — | D1–D2 | 未开发 | — |
 | 17.3.2.2 | 数据范围 | — | D1–D2 | 已交付 | catalog V3 record_data_scopes + RLS scopeMode 数据范围隔离 |
 | 17.3.3.1 | 越权检测 | — | D1–D2 | 已交付 | RLS FORCE + isolation；三条断言实跑（互不可见/伪造头无效/归还不串租户） |
@@ -526,7 +526,7 @@
 | 17.5.1.1 | 业务参数 | — | D1–D2 | 未开发 | — |
 | 17.5.1.2 | 编号规则 | — | D1–D2 | 未开发 | — |
 | 17.5.2.1 | 数据字典 | — | D1–D2 | 未开发 | — |
-| 17.5.3.1 | 审计日志 | — | D1–D2 | 已交付 | identity_audit 表 + 索引 + GRANT INSERT + 关键动作审计 |
+| 17.5.3.1 | 审计日志 | — | D1–D2 | 进行中 | identity_audit 表 + 索引 + GRANT INSERT + 关键动作审计写入；查询端点与页面均未实现，运营目前查不到审计记录 |
 | 17.5.3.2 | 操作日志 | — | D1–D2 | 未开发 | — |
 | 17.6.1.1 | 账簿与本位币 | — | D6 | 未开发 | — |
 | 17.7.1.1 | 套餐与权益 | — | D7 | 未开发 | — |

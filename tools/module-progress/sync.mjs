@@ -19,7 +19,7 @@
  *
  * 状态词表（不要新增，统计逻辑依赖它）：
  *   已交付  迁移 + API + 页面 + 测试齐全，且无 TODO 残留
- *   进行中  已有分支在做，但未收口
+ *   进行中  部分交付、未收口：端点或页面只做了一半，证据列写清缺哪一块
  *   未开发  未开工
  */
 
@@ -248,10 +248,11 @@ function render({ rows, orphans }) {
   // 阶段汇总 —— 跨期卷（如 08 同时含 D3/D4）按卷聚合会失真，交付顺序看阶段
   const byPhase = new Map();
   for (const r of rows) {
-    if (!byPhase.has(r.phase)) byPhase.set(r.phase, { total: 0, done: 0 });
+    if (!byPhase.has(r.phase)) byPhase.set(r.phase, { total: 0, done: 0, wip: 0 });
     const b = byPhase.get(r.phase);
     b.total += 1;
     if (r.status === STATUS.DONE) b.done += 1;
+    if (r.status === STATUS.WIP) b.wip += 1;
   }
 
   const pct = (n) => (tally[STATUS.DONE] * 100) / rows.length;
@@ -273,7 +274,10 @@ function render({ rows, orphans }) {
 
   const phaseSummary = [...byPhase.entries()]
     .sort(([a], [b]) => a.localeCompare(b, 'en'))
-    .map(([p, b]) => `| **${p}** | ${b.done} | ${b.total - b.done} | ${b.total} |`)
+    .map(
+      // 三态分列：把「进行中」混进「未开发」会让排期以为那块完全没动过
+      ([p, b]) => `| **${p}** | ${b.done} | ${b.wip} | ${b.total - b.done - b.wip} | ${b.total} |`,
+    )
     .join('\n');
 
   return `# 功能蓝图交付进度台账
@@ -283,7 +287,7 @@ function render({ rows, orphans }) {
 > 本脚本只负责同步。**「状态」「证据」两列是人工维护的，脚本按模块 ID 继承。**
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
-> \`已交付\`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· \`进行中\`（有分支在做，未收口）· \`未开发\`（未开工）。
+> \`已交付\`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· \`进行中\`（部分交付、未收口，证据列写清缺哪一块）· \`未开发\`（未开工）。
 
 ## 总览
 
@@ -297,8 +301,8 @@ function render({ rows, orphans }) {
 
 ## 分阶段进度（交付顺序看这里）
 
-| 阶段 | 已交付 | 未开发 | 合计 |
-| --- | --- | --- | --- |
+| 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
+| --- | --- | --- | --- | --- |
 ${phaseSummary}
 
 ## 分系统进度
