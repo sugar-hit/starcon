@@ -13,7 +13,9 @@
   "paths": {
     "/catalog/records/{kind}/{id}": {
       "put": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "recordUpdate",
         "parameters": [
           {
@@ -68,7 +70,9 @@
         }
       },
       "delete": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "recordDelete",
         "parameters": [
           {
@@ -116,7 +120,9 @@
     },
     "/catalog/products/{id}": {
       "get": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "detail",
         "parameters": [
           {
@@ -152,7 +158,9 @@
         }
       },
       "put": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "update",
         "parameters": [
           {
@@ -199,7 +207,9 @@
         }
       },
       "delete": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "delete",
         "parameters": [
           {
@@ -239,7 +249,9 @@
     },
     "/catalog/products/{id}/skus/{sid}": {
       "put": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "skuUpdate",
         "parameters": [
           {
@@ -295,7 +307,9 @@
         }
       },
       "delete": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "skuDelete",
         "parameters": [
           {
@@ -344,7 +358,9 @@
     },
     "/catalog/products/{id}/attributes/{aid}": {
       "put": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "attributeUpdate",
         "parameters": [
           {
@@ -392,7 +408,9 @@
         }
       },
       "delete": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "attributeDelete",
         "parameters": [
           {
@@ -439,9 +457,102 @@
         }
       }
     },
+    "/catalog/lifecycle/rules/{id}": {
+      "put": {
+        "tags": [
+          "lifecycle-controller"
+        ],
+        "operationId": "ruleUpdate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "lifecycle-controller"
+        ],
+        "operationId": "ruleDelete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/catalog/records/{kind}": {
       "get": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "records",
         "parameters": [
           {
@@ -479,7 +590,9 @@
         }
       },
       "post": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "recordCreate",
         "parameters": [
           {
@@ -527,7 +640,9 @@
     },
     "/catalog/products": {
       "get": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "list",
         "parameters": [
           {
@@ -566,7 +681,9 @@
         }
       },
       "post": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "create",
         "parameters": [
           {
@@ -606,7 +723,9 @@
     },
     "/catalog/products/{id}/skus": {
       "post": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "skuCreate",
         "parameters": [
           {
@@ -653,9 +772,99 @@
         }
       }
     },
+    "/catalog/products/{id}/lifecycle": {
+      "get": {
+        "tags": [
+          "lifecycle-controller"
+        ],
+        "operationId": "view",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LifecycleView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "lifecycle-controller"
+        ],
+        "operationId": "transition",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LifecycleEvent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/products/{id}/attributes": {
       "post": {
-        "tags": ["catalog-controller"],
+        "tags": [
+          "catalog-controller"
+        ],
         "operationId": "attributeCreate",
         "parameters": [
           {
@@ -693,12 +902,235 @@
           }
         }
       }
+    },
+    "/catalog/lifecycle/rules": {
+      "get": {
+        "tags": [
+          "lifecycle-controller"
+        ],
+        "operationId": "rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LifecycleRule"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "lifecycle-controller"
+        ],
+        "operationId": "ruleCreate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/lifecycle/rules/{id}/run": {
+      "post": {
+        "tags": [
+          "lifecycle-controller"
+        ],
+        "operationId": "run",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleInputScope"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleRun"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/lifecycle/rules/{id}/preview": {
+      "get": {
+        "tags": [
+          "lifecycle-controller"
+        ],
+        "operationId": "preview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RulePreview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/lifecycle/metrics": {
+      "get": {
+        "tags": [
+          "lifecycle-controller"
+        ],
+        "operationId": "metrics",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MetricInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
       "RecordInput": {
-        "required": ["locale", "notes", "reference", "status", "targetCountry", "title"],
+        "required": [
+          "locale",
+          "notes",
+          "reference",
+          "status",
+          "targetCountry",
+          "title"
+        ],
         "type": "object",
         "properties": {
           "spuId": {
@@ -746,7 +1178,14 @@
         }
       },
       "SpuInput": {
-        "required": ["brand", "category", "code", "description", "name", "status"],
+        "required": [
+          "brand",
+          "category",
+          "code",
+          "description",
+          "name",
+          "status"
+        ],
         "type": "object",
         "properties": {
           "code": {
@@ -785,7 +1224,14 @@
         }
       },
       "SkuInput": {
-        "required": ["barcode", "baseUnit", "code", "name", "status", "values"],
+        "required": [
+          "barcode",
+          "baseUnit",
+          "code",
+          "name",
+          "status",
+          "values"
+        ],
         "type": "object",
         "properties": {
           "code": {
@@ -827,7 +1273,11 @@
         }
       },
       "ValueInput": {
-        "required": ["attributeId", "state", "values"],
+        "required": [
+          "attributeId",
+          "state",
+          "values"
+        ],
         "type": "object",
         "properties": {
           "attributeId": {
@@ -923,6 +1373,201 @@
           "version": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "RuleCondition": {
+        "required": [
+          "metric",
+          "operator",
+          "threshold"
+        ],
+        "type": "object",
+        "properties": {
+          "metric": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "operator": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RuleInput": {
+        "required": [
+          "code",
+          "conditions",
+          "description",
+          "name",
+          "reasonTemplate",
+          "targetStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "targetStatus": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reasonTemplate": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "conditions": {
+            "maxItems": 20,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleCondition"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TransitionInput": {
+        "required": [
+          "reason",
+          "toStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "toStatus": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LifecycleEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "RuleInputScope": {
+        "required": [
+          "ruleId"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RuleRun": {
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "targetStatus": {
+            "type": "string"
+          },
+          "matchedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "appliedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string"
           }
         }
       },
@@ -1147,6 +1792,170 @@
             "items": {
               "$ref": "#/components/schemas/EffectiveValue"
             }
+          }
+        }
+      },
+      "LifecycleView": {
+        "type": "object",
+        "properties": {
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransitionOption"
+            }
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LifecycleEvent"
+            }
+          }
+        }
+      },
+      "TransitionOption": {
+        "type": "object",
+        "properties": {
+          "toStatus": {
+            "type": "string"
+          },
+          "toLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "reasonRequired": {
+            "type": "boolean"
+          },
+          "requiresActiveSku": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LifecycleRule": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "targetStatus": {
+            "type": "string"
+          },
+          "reasonTemplate": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleCondition"
+            }
+          }
+        }
+      },
+      "RuleMatch": {
+        "type": "object",
+        "properties": {
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "currentStatus": {
+            "type": "string"
+          }
+        }
+      },
+      "RulePreview": {
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "targetStatus": {
+            "type": "string"
+          },
+          "scanned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "matchedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "matches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleMatch"
+            }
+          }
+        }
+      },
+      "MetricInfo": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
           }
         }
       }

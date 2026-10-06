@@ -32,17 +32,19 @@ public class CatalogService {
     return new ResponseStatusException(HttpStatus.NOT_FOUND, "记录不存在或没有访问权限");
   }
 
-  private static String code(String value) {
+  static String code(String value) {
     String normalized = value.trim().toUpperCase(Locale.ROOT);
     check(normalized.matches("[A-Z0-9][A-Z0-9_-]{0,63}"), "编码请使用英文字母、数字、下划线或短横线");
     return normalized;
   }
 
-  private static void status(String value) {
+  /** SKU 仍是四值状态域；SPU 已迁移到 3.1.1.3 的五态生命周期，见 {@link SpuLifecycle}。 */
+  private static void skuStatus(String value) {
     check(Set.of("DRAFT", "ACTIVE", "INACTIVE", "ARCHIVED").contains(value), "无效状态");
   }
 
-  private Record productRow(UUID id) {
+  /** 商品当前行；RLS 与数据范围策略在此生效，取不到即"不存在或无权限"。 */
+  Record productRow(UUID id) {
     var row = sql.fetchOne("select * from spu where id=?", id);
     if (row == null) throw missing();
     return row;
@@ -158,10 +160,13 @@ public class CatalogService {
     return new Detail(p, attributes, skus);
   }
 
+  /**
+   * SPU 资料保存。状态不是自由文本：新建固定为 DRAFT，更新时若携带不同状态一律拒绝，
+   * 状态只能经 {@code POST /products/{id}/lifecycle} 按合法矩阵流转。
+   */
   public UUID saveSpu(AccessService.Access access, UUID id, SpuInput input) {
-    status(input.status());
     if (id == null) {
-      check(input.status().equals("DRAFT"), "新商品先保存为草稿，补齐 SKU 后启用");
+      check(input.status().equals("DRAFT"), "新商品先保存为草稿，补齐 SKU 后再提交待上架");
       id = Ids.next();
       sql.execute(
           "insert into spu(id,tenant_id,code,name,description,brand,category) values(?,?,?,?,?,?,?)",
@@ -175,23 +180,15 @@ public class CatalogService {
     } else {
       lock(id, input.version());
       check(
-          productRow(id).get("status", String.class).equals("DRAFT")
-              || !input.status().equals("DRAFT"),
-          "已启用商品不能恢复草稿");
-      if (input.status().equals("ACTIVE")) {
-        var d = detail(id);
-        check(d.skus().stream().anyMatch(s -> s.status().equals("ACTIVE")), "启用 SPU 前至少启用一个完整 SKU");
-        for (var s : d.skus())
-          if (s.status().equals("ACTIVE")) validateEffective(d.attributes(), s);
-      }
+          productRow(id).get("status", String.class).equals(input.status()),
+          "商品状态只能在生命周期中按合法转换流转，并填写变更原因");
       sql.execute(
-          "update spu set code=?,name=?,description=?,brand=?,category=?,status=? where id=?",
+          "update spu set code=?,name=?,description=?,brand=?,category=? where id=?",
           code(input.code()),
           input.name().trim(),
           input.description(),
           input.brand(),
           input.category(),
-          input.status(),
           id);
     }
     event(access, id, "SpuSaved");
@@ -208,7 +205,7 @@ public class CatalogService {
 
   public void deleteSpu(AccessService.Access access, UUID id, long version) {
     lock(id, version);
-    check(productRow(id).get("status", String.class).equals("DRAFT"), "只能删除草稿，已启用商品请停用或归档");
+    check(productRow(id).get("status", String.class).equals("DRAFT"), "只能删除草稿，已提交或已上架商品请先停用或停产");
     check(
         sql.fetchCount(
                 sql.selectFrom(org.jooq.impl.DSL.table("sku"))
@@ -398,7 +395,7 @@ public class CatalogService {
     lock(spu, input.version());
     if (!permitted(productRow(spu), "catalog.attribute.read"))
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "编辑 SKU 需要此商品的属性查看权限");
-    status(input.status());
+    skuStatus(input.status());
     var attributes = attributes(spu);
     var supplied = new HashMap<UUID, ValueInput>();
     for (var v : input.values()) {
@@ -468,10 +465,10 @@ public class CatalogService {
       var v = supplied.getOrDefault(a.id(), new ValueInput(a.id(), "INHERIT", List.of()));
       writeValue(access.tenantId(), spu, a.id(), id, v.state(), v.values(), a.dataType());
     }
-    if (productRow(spu).get("status", String.class).equals("ACTIVE"))
+    if (productRow(spu).get("status", String.class).equals(SpuLifecycle.ON_SALE.name()))
       check(
           detail(spu).skus().stream().anyMatch(s -> s.status().equals("ACTIVE")),
-          "请先停用 SPU，再停用最后一个在用 SKU");
+          "请先把 SPU 转为停售，再停用最后一个在用 SKU");
     event(access, spu, "SkuSaved");
     return id;
   }

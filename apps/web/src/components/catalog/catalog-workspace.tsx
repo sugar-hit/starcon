@@ -8,6 +8,7 @@ import {
   Layers,
   SlidersHorizontal,
   Pencil,
+  ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@starcon/ui';
 import type {
@@ -20,6 +21,7 @@ import { api, ApiError } from './api';
 import { control, statuses, modes, types } from './fields';
 import { SpuEditor, AttributeEditor, SkuEditor } from './product-editors';
 import { ProductRecords } from './product-records';
+import { SpuLifecycle } from './spu-lifecycle';
 import { canAccessRecord } from '../iam/administration-model';
 import { useIdentity } from '../iam/identity-shell';
 
@@ -39,7 +41,7 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
   const [detail, setDetail] = useState<Detail | null>(null);
   const [search, setSearch] = useState('');
   const [editing, setEditing] = useState<Editing>(null);
-  const [section, setSection] = useState<'attributes' | 'skus'>('attributes');
+  const [section, setSection] = useState<'attributes' | 'skus' | 'lifecycle'>('attributes');
   const [notice, setNotice] = useState('');
   const can = (permission: string, record = detail?.product) =>
     session !== null && canAccessRecord(session, `catalog.${permission}`, record);
@@ -192,6 +194,13 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
                 <Layers className="h-4 w-4" />
                 SKU 完整属性 ({detail.skus.length})
               </Button>
+              <Button
+                variant={section === 'lifecycle' ? 'secondary' : 'ghost'}
+                onClick={() => setSection('lifecycle')}
+              >
+                <ShieldCheck className="h-4 w-4" />
+                生命周期与批量规则
+              </Button>
             </div>
             {section === 'attributes' && can('attribute.create') && (
               <Button onClick={() => setEditing({ kind: 'attribute' })}>
@@ -206,7 +215,19 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
               </Button>
             )}
           </div>
-          {section === 'attributes' ? (
+          {section === 'lifecycle' ? (
+            <SpuLifecycle
+              key={`${session.tenantId}:${detail.product.id}`}
+              spuId={detail.product.id}
+              spuCode={detail.product.code}
+              version={detail.product.version}
+              session={session}
+              onChanged={async () => {
+                await refresh(detail.product.id);
+              }}
+              onError={handleError}
+            />
+          ) : section === 'attributes' ? (
             <div className="bg-card overflow-x-auto rounded-lg border">
               <table className="w-full text-left text-sm">
                 <thead className="bg-muted/50">
@@ -374,7 +395,7 @@ export function CatalogWorkspace({ kind = 'products' }: { kind?: WorkspaceKind }
             {[
               ['SPU 商品', products.length],
               ['SKU 规格', products.reduce((sum, p) => sum + p.skuCount, 0)],
-              ['启用商品', products.filter((p) => p.status === 'ACTIVE').length],
+              ['在售商品', products.filter((p) => p.status === 'ON_SALE').length],
             ].map(([label, count]) => (
               <div key={label} className="bg-card rounded-lg border px-4 py-3">
                 <p className="text-muted-foreground text-xs">{label}</p>
