@@ -936,6 +936,302 @@
         }
       }
     },
+    "/catalog/attributes/{id}": {
+      "put": {
+        "tags": [
+          "attribute-dictionary-controller"
+        ],
+        "operationId": "update_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttributeDefinitionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeDefinitionSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "attribute-dictionary-controller"
+        ],
+        "operationId": "delete_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/attributes/{id}/options": {
+      "get": {
+        "tags": [
+          "attribute-dictionary-controller"
+        ],
+        "operationId": "options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AttributeOptionRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "attribute-dictionary-controller"
+        ],
+        "operationId": "updateOption",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "value",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttributeOptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeOptionSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "attribute-dictionary-controller"
+        ],
+        "operationId": "addOption",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttributeOptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeOptionSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "attribute-dictionary-controller"
+        ],
+        "operationId": "deleteOption",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "value",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/variant-combination/spus/{id}/drafts": {
       "get": {
         "tags": [
@@ -1594,7 +1890,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "options",
+        "operationId": "options_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1635,7 +1931,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "addOption",
+        "operationId": "addOption_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1683,7 +1979,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "deleteOption",
+        "operationId": "deleteOption_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -2454,6 +2750,243 @@
         }
       }
     },
+    "/catalog/attributes": {
+      "get": {
+        "tags": [
+          "attribute-dictionary-controller"
+        ],
+        "operationId": "list_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dataType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "usage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filterable",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "groupName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeDefinitionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "attribute-dictionary-controller"
+        ],
+        "operationId": "create_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttributeDefinitionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeDefinitionSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/attributes/{id}/category-rules": {
+      "post": {
+        "tags": [
+          "attribute-dictionary-controller"
+        ],
+        "operationId": "saveCategoryRule_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryAttributeRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryAttributeRuleSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "attribute-dictionary-controller"
+        ],
+        "operationId": "deleteCategoryRule_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/variant-combination/spus/{id}": {
       "get": {
         "tags": [
@@ -2814,7 +3347,7 @@
         "tags": [
           "sku-list-controller"
         ],
-        "operationId": "list_1",
+        "operationId": "list_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -3312,6 +3845,88 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/MetricInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/attributes/overview": {
+      "get": {
+        "tags": [
+          "attribute-dictionary-controller"
+        ],
+        "operationId": "overview_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttributeDictionaryOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/attributes/category-rules": {
+      "get": {
+        "tags": [
+          "attribute-dictionary-controller"
+        ],
+        "operationId": "categoryRules_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attributeId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryAttributeRule"
                   }
                 }
               }
@@ -4039,6 +4654,139 @@
           "version": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "AttributeDefinitionInput": {
+        "required": [
+          "code",
+          "dataType",
+          "name",
+          "usage",
+          "valueMode"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "dataType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "valueMode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "usage": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "multiple": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "filterable": {
+            "type": "boolean"
+          },
+          "variantAxis": {
+            "type": "boolean"
+          },
+          "unit": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "groupName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "options": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "maxLength": 100,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AttributeDefinitionSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "optionCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AttributeOptionInput": {
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AttributeOptionSaved": {
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "value": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
           }
         }
       },
@@ -5265,6 +6013,60 @@
           },
           "reason": {
             "type": "string"
+          }
+        }
+      },
+      "CategoryAttributeRuleInput": {
+        "required": [
+          "category"
+        ],
+        "type": "object",
+        "properties": {
+          "category": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "minValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allowedOptions": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "maxLength": 100,
+              "minLength": 0,
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CategoryAttributeRuleSaved": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allowedOptionCount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -7124,6 +7926,255 @@
             "type": "boolean"
           },
           "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AttributeDefinitionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttributeDefinitionRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabledCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AttributeDefinitionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "dataType": {
+            "type": "string"
+          },
+          "valueMode": {
+            "type": "string"
+          },
+          "usage": {
+            "type": "string"
+          },
+          "multiple": {
+            "type": "boolean"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "filterable": {
+            "type": "boolean"
+          },
+          "variantAxis": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "groupName": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "optionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabledOptionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "categoryRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "spuUsageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "AttributeOptionRow": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "productValueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "categoryRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inUse": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "AttributeDictionaryOverview": {
+        "type": "object",
+        "properties": {
+          "dictionaryAttributeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabledAttributeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "optionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disabledOptionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "categoryRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "spuLevelDefinitionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "filterableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "specUsageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "categoryWithoutRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "topUsedAttributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttributeUsageCount"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AttributeUsageCount": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "categoryRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CategoryAttributeRule": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "attributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributeCode": {
+            "type": "string"
+          },
+          "attributeName": {
+            "type": "string"
+          },
+          "dataType": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "minValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "productCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "allowedOptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
             "type": "string"
           }
         }
