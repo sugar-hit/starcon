@@ -374,7 +374,13 @@ public class CatalogService {
     event(access, spu, "AttributeDeleted");
   }
 
-  private void validateValues(Attribute a, List<String> values, boolean activation) {
+  /**
+   * 属性取值校验：数量、必填、类型与选项归属，四类数据类型的规则都在这里。
+   *
+   * <p>包可见且无实例状态，是为了让 3.2.2.2 的 SKU 覆写**走同一份规则**而不是另写一套——
+   * SPU 侧与 SKU 侧对「什么是合法的数值属性值」必须一致，两处各判一次迟早会漂移。
+   */
+  static void validateValues(Attribute a, List<String> values, boolean activation) {
     check(a.multiple() || values.size() <= 1, "属性「" + a.name() + "」只允许一个值");
     check(!activation || !a.required() || !values.isEmpty(), "请填写必填属性「" + a.name() + "」");
     check(values.size() <= 50, "多值属性最多 50 项");
@@ -497,7 +503,17 @@ public class CatalogService {
     event(access, spu, "SkuDeleted");
   }
 
-  private void writeValue(
+  /**
+   * 写入一侧的属性赋值行：覆盖式（先删后插），{@code INHERIT} 就是"删掉这一行"。
+   *
+   * <p>{@code sku} 传 {@code null} 写 SPU 公共侧（3.2.2.1），传 SKU id 写覆写侧（3.2.2.2）——
+   * 两侧是同一张表的同一份写入逻辑，所以「显式清空」在两侧的物理形态完全一致：
+   * 一行 {@code state='CLEAR'}，且不带任何 {@code attribute_value_item}
+   * （V1 的 validate_attribute_item 触发器会拒绝给 CLEAR 行写取值）。
+   *
+   * <p>包可见：3.2.2.2 的覆写写入复用它，保证覆写与已交付的 SKU 保存路径**逐字同构**。
+   */
+  void writeValue(
       UUID tenant,
       UUID spu,
       UUID attribute,
@@ -512,7 +528,15 @@ public class CatalogService {
     if (state.equals("INHERIT")) return;
     UUID vid = Ids.next();
     sql.execute(
-        "insert into attribute_value values(?,?,?,?,?,?)", vid, tenant, spu, attribute, sku, state);
+        // 列名必须显式列出：V13 给 attribute_value 加了 updated_at，
+        // 位置化插入会随列数变化而错位或直接报错（与 V11 的 attribute_option 同一个坑）。
+        "insert into attribute_value(tenant_id,id,spu_id,attribute_id,sku_id,state) values(?,?,?,?,?,?)",
+        tenant,
+        vid,
+        spu,
+        attribute,
+        sku,
+        state);
     for (int i = 0; i < values.size(); i++) {
       String v = values.get(i);
       sql.execute(
@@ -529,7 +553,13 @@ public class CatalogService {
     }
   }
 
-  private void event(AccessService.Access access, UUID spu, String action) {
+  /**
+   * 审计 + outbox 事件；aggregate 始终是 SPU。
+   *
+   * <p>包可见：3.2.2.2 的 SKU 属性覆写复用它，让覆写事件与已交付的属性 / SKU 变更
+   * 在同一条流上，下游不需要为覆写再开一路订阅。
+   */
+  void event(AccessService.Access access, UUID spu, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
         Ids.next(),

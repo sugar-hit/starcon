@@ -40,4 +40,31 @@ public class ApiErrorHandler {
     body.setProperty("conflictCount", result.conflictCount());
     return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
   }
+
+  /**
+   * 3.2.2.2 类目必填校验未通过。
+   *
+   * <p>蓝图要求输出是**缺失必填项时阻止保存**，并且要把缺失项说清楚：只回一句"必填未填"
+   * 的话，运营在有二十条属性的 SKU 上没法知道该去补哪几条。所以把 {@code missing} 清单
+   * 挂在 ProblemDetail 上，界面逐条显示「缺哪条 / 为什么算缺」——
+   * 其中「被显式清空」与「从未设置」必须分开说，因为这两者的下一步动作不一样：
+   * 前者要先取消类目必填，后者直接填值。
+   *
+   * <p>状态码用 400 而不是 409：请求本身合法，是当前商品档案不满足类目要求，
+   * 换成"冲突"会让人以为是并发写坏了。
+   */
+  @ExceptionHandler(SkuAttributeOverrideService.RequiredMissingException.class)
+  ResponseEntity<ProblemDetail> requiredMissing(
+      SkuAttributeOverrideService.RequiredMissingException e) {
+    var body =
+        ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST,
+            "该商品所属类目要求的必填属性没有生效值，本次修改未保存（已回滚）："
+                + "共 "
+                + e.missing().size()
+                + " 项");
+    body.setProperty("missing", e.missing());
+    body.setProperty("missingCount", e.missing().size());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+  }
 }

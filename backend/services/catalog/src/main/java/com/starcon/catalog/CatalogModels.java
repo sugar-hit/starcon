@@ -1438,4 +1438,95 @@ public final class CatalogModels {
 
   /** 按类目规则数倒序的属性，用来回答「哪些属性被最多类目要求了」。 */
   public record AttributeUsageCount(UUID id, String code, String name, long categoryRuleCount) {}
+
+  // ------------------------------------------------ 3.2.2.2 SKU 属性覆写
+
+  /**
+   * 设置一条 SKU 覆写的请求。
+   *
+   * <p>{@code values} 为空即拒绝，**不用空数组表达"清空"**：清空是一个有后果的动作
+   * （它会让这条属性不再退回 SPU 公共值），必须走独立的清空端点，否则界面上一个"保存空值"
+   * 的手滑就会静默改掉解析结果。删除覆写（取消覆写、回落公共值）则是第三个动作，同样独立。
+   */
+  public record SkuOverrideInput(
+      @NotNull @Size(min = 1, max = 50) List<@NotNull @Size(max = 2000) String> values) {}
+
+  /**
+   * 单个属性在某个 SKU 上的覆写视图。
+   *
+   * <p>{@code overrideState} 与 {@code source} 分开：前者是**操作事实**
+   * （SET / CLEAR / INHERIT，即 SKU 侧那一行现在是什么），后者是**生效值来源**
+   * （SPU_COMMON / SKU_OVERRIDE / SKU_CLEARED / UNSET，即解析结果是谁的值在起作用）。
+   * 两者在"覆写了一个与公共值相同的值"时仍然不同——那是 SKU_OVERRIDE，但语义上等于没改。
+   *
+   * <p>{@code effectiveValues} 就是界面上要显示的**最终有效值**；空数组与"值是空串"不是一回事，
+   * 界面据此显示"未设置 / 已显式清空"而不是留白。
+   *
+   * <p>{@code overridable=false} 时 {@code blockReason} 必非空，说明为什么这条属性改不动
+   * （公共固定 / 属性已停用 / 该 SKU 已停用）。界面据此禁用控件并显示原因，
+   * 而不是让人点了之后才吃一个 400。
+   */
+  public record SkuOverrideAttribute(
+      UUID attributeId,
+      String code,
+      String name,
+      String dataType,
+      String valueMode,
+      String valueModeLabel,
+      boolean multiple,
+      boolean required,
+      boolean categoryRequired,
+      boolean variantAxis,
+      String unit,
+      String groupName,
+      List<String> options,
+      String overrideState,
+      String source,
+      String sourceLabel,
+      List<String> rawValues,
+      List<String> effectiveValues,
+      boolean inherited,
+      boolean missingRequired,
+      boolean overridable,
+      @Schema(nullable = true) String blockReason,
+      @Schema(nullable = true) String overrideUpdatedAt) {}
+
+  /** 覆写面板顶部的汇总：四态各多少条，以及必填补全了几项。 */
+  public record SkuOverrideSummary(
+      int total,
+      int overridden,
+      int cleared,
+      int inherited,
+      int unset,
+      int missingRequired,
+      int blocked) {}
+
+  /**
+   * SKU 属性覆写面板的聚合体。
+   *
+   * <p>{@code skuVersion} 是 3.1.2.x 的乐观锁凭据，本模块**只读不改**它（见
+   * {@code SkuAttributeOverrideService} 的类注释），所以这里回传它只是为了让界面能显示
+   * 这个 SKU 的版本，不是给本模块做并发控制用的。
+   */
+  public record SkuOverrideView(
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      String skuStatus,
+      long skuVersion,
+      UUID spuId,
+      String spuCode,
+      String spuName,
+      String category,
+      List<SkuOverrideAttribute> attributes,
+      SkuOverrideSummary summary,
+      String note) {}
+
+  /** 必填校验里的一条缺失项：界面上按条显示"缺什么、为什么算缺"。 */
+  public record SkuOverrideMissing(
+      UUID attributeId,
+      String code,
+      String name,
+      String source,
+      String reason) {}
 }
