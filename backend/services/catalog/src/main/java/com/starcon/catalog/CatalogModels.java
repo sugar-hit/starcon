@@ -456,4 +456,195 @@ public final class CatalogModels {
   /** 编辑结果：回传新的 version，前端据此继续编辑而不必重新拉整页。 */
   public record SkuDetailSaved(UUID id, long version, boolean packagingChanged) {}
 
+  // ------------------------------------------------ 3.1.2.3 编码与条码
+
+  /** 编码规则定义。prefix/seqWidth/suffix 决定展开形状，scope 决定它管哪些 SKU。 */
+  public record SkuCodeRuleInput(
+      @NotBlank @Size(max = 64) String code,
+      @NotBlank @Size(max = 100) String name,
+      @NotNull @Size(max = 2000) String description,
+      @NotBlank String scope,
+      @Schema(nullable = true) UUID spuId,
+      @NotNull @Size(max = 32) String prefix,
+      @NotNull @Size(max = 32) String suffix,
+      @Positive @Max(12) int seqWidth,
+      @Positive long startFrom,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 规则视图。
+   *
+   * <p>{@code nextValue} 是下一个将被分配的序号，{@code sampleCode} 是用它展开的样例——
+   * 运营在保存前就能看到"这条规则会产出什么样的编码"，而不是先生成 500 个再看。
+   */
+  public record SkuCodeRule(
+      UUID id,
+      String code,
+      String name,
+      String description,
+      String scope,
+      String scopeLabel,
+      @Schema(nullable = true) UUID spuId,
+      @Schema(nullable = true) String spuCode,
+      String prefix,
+      String suffix,
+      int seqWidth,
+      long startFrom,
+      long nextValue,
+      String sampleCode,
+      boolean enabled,
+      long version,
+      String updatedAt) {}
+
+  public record SkuCodeRuleSaved(UUID id, long version, String sampleCode) {}
+
+  /** 手工输入内部编码。version 是乐观锁凭据，不符直接 409。 */
+  public record SkuCodeInput(@NotBlank @Size(max = 64) String code, @PositiveOrZero long version) {}
+
+  /** 编码变更结果：回传 fromCode 便于界面显示"从 X 改成 Y"。 */
+  public record SkuCodeSaved(UUID skuId, String fromCode, String toCode, long version) {}
+
+  /** 单个外部条码（sku_identifier 的一行）。 */
+  public record SkuIdentifier(
+      UUID id,
+      String scheme,
+      String schemeLabel,
+      String value,
+      boolean isPrimary,
+      String source,
+      String occurredAt,
+      String createdAt) {}
+
+  /** 编码分配留痕（sku_code_assignment 的一行）。 */
+  public record SkuCodeAssignment(
+      UUID id,
+      String fromCode,
+      String toCode,
+      String source,
+      String sourceLabel,
+      @Schema(nullable = true) String ruleCode,
+      UUID actorId,
+      String occurredAt,
+      String createdAt) {}
+
+  /**
+   * 单个 SKU 的编码与条码面板。
+   *
+   * <p>{@code internalRuleCode} 标出当前编码是哪条规则生成的；为空表示手工输入或历史数据。
+   */
+  public record SkuCodePanel(
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      String spuCode,
+      String internalCode,
+      String internalSource,
+      @Schema(nullable = true) String internalRuleCode,
+      long version,
+      List<SkuIdentifier> identifiers,
+      List<SkuCodeAssignment> assignments) {}
+
+  /** 录入/扫码一个外部条码。source 留空按 MANUAL 处理。 */
+  public record SkuIdentifierInput(
+      @NotBlank @Size(max = 24) String scheme,
+      @NotBlank @Size(max = 128) String value,
+      boolean isPrimary,
+      @Schema(nullable = true) String occurredAt,
+      @Schema(nullable = true) @Size(max = 24) String source) {}
+
+  public record SkuIdentifierSaved(UUID id, String scheme, String value, boolean isPrimary) {}
+
+  /**
+   * 批量补齐 / 按规则自动生成请求。
+   *
+   * <p>GENERATE 对 skuIds 指定的 SKU 逐个生成；BACKFILL 忽略 skuIds，扫该规则范围内的
+   * 「尚无编码」的 SKU 补齐。两者共用同一套拒绝清单与留痕。
+   */
+  public record SkuCodeBatchInput(
+      @NotBlank String action,
+      @NotNull UUID ruleId,
+      @Schema(nullable = true) @Size(max = 500) List<@NotNull UUID> skuIds,
+      @Schema(nullable = true) String occurredAt,
+      boolean dryRun) {}
+
+  /**
+   * 批量结果里的单行。
+   *
+   * <p>三个 outcome 必须分清：APPLIED 改成功；SKIPPED 跳过（如已有编码，规则不覆盖手工编码）；
+   * REJECTED 被拒（如展开编码越界或与既有编码冲突）——后两者都带原因，供用户改完重传。
+   */
+  public record SkuCodeBatchItem(
+      int rowNo,
+      @Schema(nullable = true) UUID skuId,
+      String skuCode,
+      String outcome,
+      String reason,
+      @Schema(nullable = true) String codeBefore,
+      @Schema(nullable = true) String codeAfter) {}
+
+  public record SkuCodeBatchResult(
+      UUID batchId,
+      String action,
+      String ruleCode,
+      boolean dryRun,
+      int requestedCount,
+      int matchedCount,
+      int appliedCount,
+      int skippedCount,
+      int rejectedCount,
+      List<SkuCodeBatchItem> items) {}
+
+  /** 条码批量导入的一行。skuId 指向条码归属的 SKU；冲突时进拒绝清单。 */
+  public record SkuIdentifierRow(
+      @NotNull UUID skuId,
+      @NotBlank @Size(max = 24) String scheme,
+      @NotBlank @Size(max = 128) String value,
+      boolean isPrimary,
+      @Schema(nullable = true) String occurredAt) {}
+
+  public record SkuIdentifierImportInput(
+      @NotNull @Size(max = 1000) List<@jakarta.validation.Valid SkuIdentifierRow> rows,
+      @Schema(nullable = true) String occurredAt,
+      boolean dryRun) {}
+
+  public record SkuIdentifierImportItem(
+      int rowNo, @Schema(nullable = true) UUID skuId, String scheme, String value, String outcome, String reason) {}
+
+  public record SkuIdentifierImportResult(
+      UUID batchId,
+      boolean dryRun,
+      int requestedCount,
+      int appliedCount,
+      int rejectedCount,
+      List<SkuIdentifierImportItem> items) {}
+
+  /** 各 scheme 的条码数量，用于概览页显示"我们都有什么条码"。 */
+  public record SkuIdentifierSchemeCount(String scheme, String schemeLabel, long count) {}
+
+  public record SkuCodeBatchSummary(
+      UUID batchId,
+      String action,
+      String status,
+      int requestedCount,
+      int appliedCount,
+      int skippedCount,
+      int rejectedCount,
+      String createdAt) {}
+
+  /**
+   * 编码与条码概览。
+   *
+   * <p>{@code sellerSkuNote} 显式写明边界：店铺 seller_sku 是 04 刊登的平台属性，不是内部编码。
+   */
+  public record SkuCodeOverview(
+      long totalSkus,
+      long uncodedSkus,
+      long identifierCount,
+      long ruleCount,
+      long enabledRuleCount,
+      List<SkuIdentifierSchemeCount> schemeCounts,
+      List<SkuCodeBatchSummary> recentBatches,
+      String sellerSkuNote) {}
+
 }
