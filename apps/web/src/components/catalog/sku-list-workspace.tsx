@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Badge, Button } from '@starcon/ui';
-import { Download, Package, RefreshCw, Search, TriangleAlert } from 'lucide-react';
+import { Barcode, Download, Package, RefreshCw, Search, TriangleAlert } from 'lucide-react';
 import type {
   SkuBatchResult,
   SkuFieldInfo,
@@ -135,6 +135,14 @@ export function SkuListWorkspace() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {/* 3.1.2.3 编码与条码：列表页只读编码与条码，维护入口在独立工作区。 */}
+          <Link
+            href="/products/sku/code"
+            className="border-border hover:bg-accent inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-sm"
+          >
+            <Barcode className="h-4 w-4" />
+            编码与条码
+          </Link>
           {/* 导出走普通链接下载，不走 api()：它是 CSV 而非 JSON。 */}
           <a
             href={skuExportUrl(applied)}
