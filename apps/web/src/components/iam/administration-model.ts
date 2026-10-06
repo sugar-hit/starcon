@@ -5,6 +5,7 @@ import type {
   MemberInput,
   MemberUpdate,
   DepartmentInput,
+  DepartmentView,
   ChildInput,
   ChildUpdate,
 } from '../../../../../packages/api-contracts/src/catalog';
@@ -33,6 +34,12 @@ export function canManage(session: Access, kind: AdministrationKind, action = 'r
   return (
     (action === 'read' || isOwner(session)) &&
     session.grants.some((g) => g.scopeMode === 'ALL' && g.permissions.includes(`${page}.${action}`))
+  );
+}
+/** 按权限码判断，用于部门表单要读法人档案这种跨页面资源的场景。 */
+export function hasPermission(session: Access, permission: string) {
+  return session.grants.some(
+    (g) => g.scopeMode === 'ALL' && g.permissions.includes(permission),
   );
 }
 export function togglePermission(values: string[], code: string, enabled: boolean) {
@@ -84,6 +91,30 @@ export function saveAdministration(
 export function removeAdministration(kind: Exclude<AdministrationKind, 'children'>, id: string) {
   return api(`identity/${kind}/${id}`, 'DELETE');
 }
+/** 拖拽移动只改层级，单独端点——防环校验只存在于后端那一处。 */
+export function moveDepartment(id: string, parentId: string | null) {
+  return api(`identity/departments/${id}/parent`, 'PUT', { parentId });
+}
+
+/** 树拍平成带缩进的行，供上级部门选择器使用。 */
+export type DepartmentRow = { node: DepartmentView; depth: number };
+export function flattenDepartments(nodes: DepartmentView[], depth = 0): DepartmentRow[] {
+  return nodes.flatMap((node) => [
+    { node, depth },
+    ...flattenDepartments(node.children, depth + 1),
+  ]);
+}
+
+/**
+ * 拖拽目标是否合法：不能落在自己或自己的子孙上。
+ * 后端会用递归查询再判一次，这里只是为了在放下瞬间给出反馈而不是等失败。
+ */
+export function canDropDepartment(nodes: DepartmentView[], draggedId: string, targetId: string) {
+  const dragged = flattenDepartments(nodes).find((row) => row.node.id === draggedId)?.node;
+  if (!dragged || dragged.id === targetId) return false;
+  return !flattenDepartments(dragged.children).some((row) => row.node.id === targetId);
+}
+
 export function transferOwner(membershipId: string) {
   return api('identity/owner-transfer', 'POST', { membershipId });
 }

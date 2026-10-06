@@ -1,16 +1,35 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Access } from '../../../../../packages/api-contracts/src/catalog';
+import type { Access, DepartmentView } from '../../../../../packages/api-contracts/src/catalog';
 import {
   assignRole,
   canManage,
   canAccessRecord,
+  canDropDepartment,
+  flattenDepartments,
   isOwner,
+  moveDepartment,
   removeAdministration,
   saveAdministration,
   switchTenant,
   togglePermission,
   transferOwner,
 } from './administration-model';
+
+/** 部门树节点；调用方按需补 children。 */
+function node(id: string, name: string, memberCount = 0): DepartmentView {
+  return {
+    id,
+    code: id.toUpperCase(),
+    name,
+    parentId: null,
+    legalEntityId: null,
+    legalEntityName: null,
+    leaderMembershipId: null,
+    leaderName: null,
+    memberCount,
+    children: [],
+  };
+}
 
 const access: Access = {
   userId: 'user',
@@ -128,12 +147,19 @@ describe('管理页真实 API 命令', () => {
   });
   it('部门增改和角色/成员/部门删除均提交后端', async () => {
     const fetcher = mockFetch();
-    await saveAdministration('departments', undefined, { name: '商品部' });
+    const department = {
+      code: 'GOODS',
+      name: '商品部',
+      parentId: null,
+      legalEntityId: null,
+      leaderMembershipId: null,
+    };
+    await saveAdministration('departments', undefined, department);
     expect(fetcher).toHaveBeenLastCalledWith(
       '/api/iam/identity/departments',
       expect.objectContaining({ method: 'POST' }),
     );
-    await saveAdministration('departments', 'department', { name: '运营部' });
+    await saveAdministration('departments', 'department', { ...department, name: '运营部' });
     expect(fetcher).toHaveBeenLastCalledWith(
       '/api/iam/identity/departments/department',
       expect.objectContaining({ method: 'PUT' }),
@@ -145,6 +171,45 @@ describe('管理页真实 API 命令', () => {
         expect.objectContaining({ method: 'DELETE' }),
       );
     }
+  });
+  it('拖拽移动只提交 parent_id，层级调整走独立端点', async () => {
+    const fetcher = mockFetch();
+    await moveDepartment('child', 'parent');
+    expect(fetcher).toHaveBeenLastCalledWith(
+      '/api/iam/identity/departments/child/parent',
+      expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify({ parentId: 'parent' }),
+      }),
+    );
+    await moveDepartment('child', null);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      '/api/iam/identity/departments/child/parent',
+      expect.objectContaining({ body: JSON.stringify({ parentId: null }) }),
+    );
+  });
+  it('部门树拍平保留层级缩进', () => {
+    const leaf = { ...node('c', 'C', 1), children: [] };
+    const mid = { ...node('b', 'B', 1), children: [leaf] };
+    const root = { ...node('a', 'A', 0), children: [mid] };
+    expect(flattenDepartments([root])).toEqual([
+      { node: root, depth: 0 },
+      { node: mid, depth: 1 },
+      { node: leaf, depth: 2 },
+    ]);
+  });
+  it('拖拽目标不能是自己或自己的子孙', () => {
+    const leaf = { ...node('c', 'C', 1), children: [] };
+    const mid = { ...node('b', 'B', 1), children: [leaf] };
+    const root = { ...node('a', 'A', 0), children: [mid] };
+    const tree = [root];
+    // 挂到父级或外部根节点合法
+    expect(canDropDepartment(tree, 'c', 'b')).toBe(true);
+    // 挂到自己、子孙都非法
+    expect(canDropDepartment(tree, 'a', 'a')).toBe(false);
+    expect(canDropDepartment(tree, 'a', 'b')).toBe(false);
+    expect(canDropDepartment(tree, 'a', 'c')).toBe(false);
+    expect(canDropDepartment(tree, 'c', 'c')).toBe(false);
   });
   it('子租户创建显式提交首位所有者，暂停与恢复只修改生命周期', async () => {
     const fetcher = mockFetch();
@@ -180,9 +245,15 @@ describe('管理页真实 API 命令', () => {
   });
   it('保存失败向页面传播错误，不伪造成功', async () => {
     mockFetch(false);
-    await expect(saveAdministration('departments', undefined, { name: '部门' })).rejects.toThrow(
-      '拒绝访问',
-    );
+    await expect(
+      saveAdministration('departments', undefined, {
+        code: 'DEPT',
+        name: '部门',
+        parentId: null,
+        legalEntityId: null,
+        leaderMembershipId: null,
+      }),
+    ).rejects.toThrow('拒绝访问');
   });
 });
 
