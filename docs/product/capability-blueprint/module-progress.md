@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 30 |
-| 进行中 | 3 |
+| 已交付 | 31 |
+| 进行中 | 2 |
 | **未开发** | **432** |
-| 完成率 | 6.5% |
+| 完成率 | 6.7% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 30 | 3 | 47 | 80 |
+| **D1–D2** | 31 | 2 | 47 | 80 |
 | **D3** | 0 | 0 | 40 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -48,7 +48,7 @@
 | 14 | 广告与增长系统 | D7 | 0 | 22 |
 | 15 | 客户与客服系统 | D7 | 0 | 24 |
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 7 | 29 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 8 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
 
 ## 判定「已交付」的标准
@@ -509,7 +509,7 @@
 | 17.1.1.3 | 层级授权 | — | D1–D2 | 未开发 | — |
 | 17.1.2.1 | 法人档案 | — | D1–D2 | 已交付 | identity V5 legal_entity + CRUD + 删除保护触发器 + /org/legal-entities |
 | 17.1.2.2 | 本位币与账簿 | — | D1–D2 | 未开发 | — |
-| 17.2.1.1 | 部门树 | — | D1–D2 | 进行中 | department 表 + /departments CRUD + /org/departments 列表；注意建表无 parent_id、页面是平铺列表，层级能力未实现，部门负责人（17.2.1.2）也未做 |
+| 17.2.1.1 | 部门树 | — | D1–D2 | 已交付 | 迁移 `backend/services/identity/src/main/resources/db/migration/V6__department_tree.sql`（code/parent_id/legal_entity_id/leader_membership_id + 自引用与法人/成员复合外键 + 树索引 + `department_tree()` SECURITY DEFINER 递归 CTE）；端点 `GET/POST/PUT/DELETE /identity/departments` + `PUT /identity/departments/{id}/parent`（防环校验、删除拒绝并回报具体数量）；页面 `apps/web/src/components/iam/department-tree.tsx` + `administration-panel.tsx`（真实树视图、HTML5 拖拽移动、成员分布计数）；测试 `IdentityIntegrationTest` 5 个部门专项用例（层级树/移动/防环/跨租户/删除保护） |
 | 17.2.1.2 | 部门负责人 | — | D1–D2 | 未开发 | — |
 | 17.2.2.1 | 成员管理 | — | D1–D2 | 已交付 | membership + app_user + role_assignment 表 + /members CRUD + /org/members 成员工作区 |
 | 17.2.2.2 | 成员开通与入职 | — | D1–D2 | 未开发 | — |
