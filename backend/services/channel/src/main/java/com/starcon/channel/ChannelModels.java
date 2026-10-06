@@ -1,6 +1,7 @@
 package com.starcon.channel;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -174,4 +175,164 @@ public final class ChannelModels {
 
   /** 2.3.2.2 负责人与数据范围：负责人用于业绩归属，可见性由 17 的数据范围单独控制。 */
   public record ShopOwnerTransferInput(@NotNull UUID newOwnerId, @NotNull UUID departmentId) {}
+
+  // ---- 2.4 同步运行 ----
+
+  /**
+   * 2.4.1.1 同步任务。
+   *
+   * <p>粒度固定为（连接, 站点, 资源类型, 分区）——不允许整店一把梭，否则部分失败无法续传。
+   */
+  public record SyncCursorView(
+      UUID id,
+      UUID connectionId,
+      String connectionAccount,
+      String platformCode,
+      @Schema(nullable = true) String marketplaceCode,
+      String resourceType,
+      String partitionKey,
+      String cursorValue,
+      String status,
+      int consecutiveFailures,
+      @Schema(nullable = true) String lastRunStatus,
+      int openFailures,
+      @Schema(nullable = true) Instant lastSuccessAt,
+      @Schema(nullable = true) Instant lastFailureAt,
+      long version) {}
+
+  public record SyncCursorInput(
+      @NotNull UUID connectionId,
+      @Schema(nullable = true) UUID marketplaceId,
+      @NotBlank String resourceType,
+      @Pattern(regexp = "[A-Za-z0-9_.:-]{0,64}") String partitionKey) {}
+
+  /** 2.4.1.2 运行日志。已结束的运行不可修改，只能创建新的重放运行。 */
+  public record SyncRunView(
+      UUID id,
+      UUID cursorId,
+      String platformCode,
+      @Schema(nullable = true) String marketplaceCode,
+      String resourceType,
+      String partitionKey,
+      String triggerSource,
+      String status,
+      Instant startedAt,
+      @Schema(nullable = true) Instant finishedAt,
+      int fetchedCount,
+      int writtenCount,
+      int skippedCount,
+      int failedCount,
+      String cursorAfter,
+      @Schema(nullable = true) Integer durationMs) {}
+
+  public record SyncRunResult(
+      String status,
+      int fetchedCount,
+      int writtenCount,
+      int skippedCount,
+      String cursorAfter,
+      @Schema(nullable = true) Integer durationMs) {}
+
+  /** 2.4.1.3 回退目标游标值。 */
+  public record CursorRewindInput(@NotBlank String cursorValue) {}
+
+  /** 结束一次运行：结果计数 + 本次失败明细。 */
+  public record SyncRunCompletionInput(
+      @NotNull @Valid SyncRunResult result, List<@Valid SyncFailureInput> failures) {}
+
+  /**
+   * 2.4.2.1 失败记录。
+   *
+   * <p>{@code externalKey} 是外部系统主键，重放去重靠它——同一 external_key 在同一游标下
+   * 只会有一条失败记录，因此重复重放不会产生第二张订单。
+   */
+  public record SyncFailureInput(
+      @NotBlank @Size(max = 200) String externalKey,
+      @NotBlank String resourceType,
+      @NotNull FailureReason reason,
+      @Size(max = 2000) String detail,
+      @Size(max = 64) String payloadDigest,
+      @Size(max = 500) String lastError) {}
+
+  public enum FailureReason {
+    /** 授权失效会导致持续漏单，必须升级为工作台待办。 */
+    AUTHORIZATION_EXPIRED,
+    FIELD_PARSE_FAILED,
+    MAPPING_MISSING,
+    RATE_LIMITED,
+    NETWORK_ERROR,
+    PLATFORM_ERROR
+  }
+
+  public record SyncFailureView(
+      UUID id,
+      UUID cursorId,
+      String platformCode,
+      @Schema(nullable = true) String marketplaceCode,
+      String externalKey,
+      String resourceType,
+      String reason,
+      String detail,
+      String payloadDigest,
+      int attempts,
+      String status,
+      String lastError,
+      Instant occurredAt) {}
+
+  /** 2.4.2.1 失败原因分布。 */
+  public record SyncFailureSummary(String reason, long total, @Schema(nullable = true) Instant oldest) {}
+
+  // ---- 2.5 平台回写 ----
+
+  /**
+   * 2.5.1.1 回写任务。
+   *
+   * <p>状态 UNKNOWN 表示"请求已发出但没收到明确结果"，它不是失败：
+   * 必须先核验平台实际状态再决定重发，否则会造成重复发货或库存错扣。
+   */
+  public record PlatformOperationView(
+      UUID id,
+      UUID shopId,
+      String shopName,
+      String platformCode,
+      @Schema(nullable = true) String marketplaceCode,
+      String operation,
+      String idempotencyKey,
+      String payload,
+      String status,
+      String platformRequestId,
+      String verification,
+      @Schema(nullable = true) Instant verifiedAt,
+      int attempts,
+      String lastError,
+      Instant occurredAt) {}
+
+  public record PlatformOperationInput(
+      @NotNull UUID shopId,
+      @Schema(nullable = true) UUID marketplaceId,
+      @NotNull OperationKind operation,
+      /** 业务幂等键：重发同一条回写不会产生第二次平台侧动作。 */
+      @NotBlank @Size(max = 128) String idempotencyKey,
+      @Size(max = 20000) String payload) {}
+
+  public enum OperationKind {
+    PUBLISH,
+    UPDATE_PRICE,
+    UPDATE_STOCK,
+    SHIP_UPDATE,
+    CANCEL_ORDER
+  }
+
+  /** 2.5.1.2 核验结论。 */
+  public enum Verification {
+    CONFIRMED_APPLIED,
+    CONFIRMED_NOT_APPLIED,
+    STILL_UNKNOWN
+  }
+
+  public record OperationAckInput(@Size(max = 128) String platformRequestId) {}
+
+  public record OperationFailInput(@NotBlank @Size(max = 500) String reason) {}
+
+  public record VerificationInput(@NotNull Verification verification) {}
 }

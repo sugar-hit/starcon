@@ -10,12 +10,21 @@
 INSERT INTO page_resource(code,name) VALUES
  ('channel.registry','平台目录'),
  ('channel.connection','授权连接'),
- ('channel.shop','店铺与站点')
+ ('channel.shop','店铺与站点'),
+ ('channel.sync','同步运行'),
+ ('channel.operation','平台回写')
 ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO permission SELECT 'channel.'||page||'.'||action,'channel.'||page,action
-FROM unnest(ARRAY['registry','connection','shop']) page
-CROSS JOIN unnest(ARRAY['read','create','update','delete']) action
+FROM unnest(ARRAY['registry','connection','shop','sync','operation']::text[]) page
+CROSS JOIN unnest(ARRAY['read','create','update','delete']::text[]) action
+ON CONFLICT (code) DO NOTHING;
+
+-- 02.4 把"触发同步"与"完成运行"分开授权：触发是发起一次拉取（read 级即可，
+-- 调度器与运营都需要），完成运行会写入业务结果并推进游标，必须是写权限。
+INSERT INTO permission VALUES
+ ('channel.sync.trigger','channel.sync','trigger'),
+ ('channel.sync.complete','channel.sync','complete')
 ON CONFLICT (code) DO NOTHING;
 
 -- 与 V3 同规则：租户所有者始终拥有全部页面权限，否则新接入的模块对既有租户不可见。

@@ -81,6 +81,46 @@ public class AdministrationController {
 
   public record OwnerTransfer(@NotNull UUID membershipId) {}
 
+  /**
+   * 17.1.2.1 法人档案。
+   *
+   * <p>法人是货权、收付款与记账主体，不等于租户。本位币与舍入规则挂在法人上，
+   * 决定 12 财务总账的记账基准——租户默认币种只是展示默认，两者不能混。
+   */
+  public record LegalEntityView(
+      UUID id,
+      String code,
+      String legalName,
+      String registrationCountry,
+      String registrationNo,
+      String taxNo,
+      String baseCurrency,
+      String address,
+      int amountScale,
+      int quantityScale,
+      String rounding,
+      String status,
+      long version,
+      int referenceCount) {}
+
+  public record LegalEntityInput(
+      @NotBlank @Pattern(regexp = "[A-Z0-9_-]{1,64}", message = "法人编码只允许大写字母数字下划线中划线")
+          String code,
+      @NotBlank @Size(max = 200) String legalName,
+      @Pattern(regexp = "[A-Z]{2}", message = "注册国家需为两位大写国家代码") String registrationCountry,
+      @Size(max = 64) String registrationNo,
+      @Size(max = 64) String taxNo,
+      @NotBlank @Pattern(regexp = "[A-Z]{3}", message = "本位币需为三位大写币种代码") String baseCurrency,
+      @Size(max = 500) String address,
+      @Min(0) @Max(6) Integer amountScale,
+      @Min(0) @Max(6) Integer quantityScale,
+      @Pattern(regexp = "HALF_UP|HALF_EVEN|DOWN|UP") String rounding,
+      @NotNull @Pattern(regexp = "ACTIVE|SUSPENDED") String status) {}
+
+  /** 引用登记：channel 等服务登记"这个法人被我用着"，让删除保护有真实依据。 */
+  public record LegalEntityReferenceInput(
+      @NotNull UUID legalEntityId, @NotBlank @Pattern(regexp = "[a-z_]{2,32}") String source, @NotNull UUID referenceId) {}
+
   private <T> T call(
       String auth,
       String permission,
@@ -565,5 +605,167 @@ public class AdministrationController {
           audit(a, id, "ChildUpdated");
           return null;
         });
+  }
+
+  // ------------------------------------------------------------------
+  // 17.1.2 法人档案与本位币
+  // ------------------------------------------------------------------
+
+  private static final String LEGAL_ENTITY_READ = "identity.legal_entity.read";
+
+  @GetMapping("/legal-entities")
+  public List<LegalEntityView> legalEntities(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
+    return call(
+        auth,
+        LEGAL_ENTITY_READ,
+        false,
+        a ->
+            sql.fetch(
+                    "select e.id,e.code,e.legal_name,e.registration_country,e.registration_no,e.tax_no,"
+                        + " e.base_currency,e.address,e.amount_scale,e.quantity_scale,e.rounding,e.status,e.version,"
+                        + " (select count(*) from legal_entity_reference r where r.tenant_id=e.tenant_id"
+                        + "  and r.legal_entity_id=e.id) reference_count"
+                        + " from legal_entity e order by e.status='ACTIVE' desc,e.code")
+                .stream()
+                .map(
+                    r ->
+                        new LegalEntityView(
+                            r.get("id", UUID.class),
+                            r.get("code", String.class),
+                            r.get("legal_name", String.class),
+                            r.get("registration_country", String.class),
+                            r.get("registration_no", String.class),
+                            r.get("tax_no", String.class),
+                            r.get("base_currency", String.class),
+                            r.get("address", String.class),
+                            r.get("amount_scale", Integer.class),
+                            r.get("quantity_scale", Integer.class),
+                            r.get("rounding", String.class),
+                            r.get("status", String.class),
+                            r.get("version", Long.class),
+                            r.get("reference_count", Integer.class)))
+                .toList());
+  }
+
+  @PostMapping("/legal-entities")
+  public UUID legalEntityCreate(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @Valid @RequestBody LegalEntityInput input) {
+    return call(
+        auth,
+        "identity.legal_entity.create",
+        true,
+        a -> {
+          UUID id = Ids.next();
+          sql.execute(
+              "insert into legal_entity(id,tenant_id,code,legal_name,registration_country,registration_no,"
+                  + " tax_no,base_currency,address,amount_scale,quantity_scale,rounding,status)"
+                  + " values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+              id,
+              a.tenantId(),
+              input.code().trim(),
+              input.legalName().trim(),
+              input.registrationCountry() == null ? "CN" : input.registrationCountry().trim(),
+              trim(input.registrationNo()),
+              trim(input.taxNo()),
+              input.baseCurrency().trim().toUpperCase(),
+              trim(input.address()),
+              input.amountScale() == null ? 2 : input.amountScale(),
+              input.quantityScale() == null ? 3 : input.quantityScale(),
+              input.rounding() == null ? "HALF_UP" : input.rounding(),
+              input.status());
+          audit(a, id, "LegalEntityCreated");
+          return id;
+        });
+  }
+
+  @PutMapping("/legal-entities/{id}")
+  public void legalEntityUpdate(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @Valid @RequestBody LegalEntityInput input) {
+    call(
+        auth,
+        "identity.legal_entity.update",
+        true,
+        a -> {
+          int updated =
+              sql.execute(
+                  "update legal_entity set code=?,legal_name=?,registration_country=?,registration_no=?,"
+                      + " tax_no=?,base_currency=?,address=?,amount_scale=?,quantity_scale=?,rounding=?,"
+                      + " status=?,version=version+1,updated_at=now() where tenant_id=? and id=?",
+                  input.code().trim(),
+                  input.legalName().trim(),
+                  input.registrationCountry() == null ? "CN" : input.registrationCountry().trim(),
+                  trim(input.registrationNo()),
+                  trim(input.taxNo()),
+                  input.baseCurrency().trim().toUpperCase(),
+                  trim(input.address()),
+                  input.amountScale() == null ? 2 : input.amountScale(),
+                  input.quantityScale() == null ? 3 : input.quantityScale(),
+                  input.rounding() == null ? "HALF_UP" : input.rounding(),
+                  input.status(),
+                  a.tenantId(),
+                  id);
+          check(updated == 1, "法人不存在或不属于当前租户");
+          audit(a, id, "LegalEntityUpdated");
+          return null;
+        });
+  }
+
+  /**
+   * 删除法人。
+   *
+   * <p>仍被业务对象引用时拒绝并提示先停用——货权与记账主体不能凭空消失，
+   * 而停用是可逆且不会破坏历史单据的处置方式。
+   */
+  @DeleteMapping("/legal-entities/{id}")
+  public void legalEntityDelete(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+    call(
+        auth,
+        "identity.legal_entity.delete",
+        true,
+        a -> {
+          try {
+            int deleted = sql.execute("delete from legal_entity where tenant_id=? and id=?", a.tenantId(), id);
+            check(deleted == 1, "法人不存在或不属于当前租户");
+          } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw IdentityController.error(
+                HttpStatus.CONFLICT, "该法人仍被业务对象引用，请先停用而不是删除");
+          }
+          audit(a, id, "LegalEntityDeleted");
+          return null;
+        });
+  }
+
+  /** 登记引用：让删除保护基于真实引用事实，而不是靠约定。 */
+  @PostMapping("/legal-entities/references")
+  public void legalEntityReference(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @Valid @RequestBody LegalEntityReferenceInput input) {
+    call(
+        auth,
+        "identity.legal_entity.update",
+        true,
+        a -> {
+          check(
+              sql.fetchExists(
+                  sql.selectOne()
+                      .from("legal_entity")
+                      .where("tenant_id=? and id=?", a.tenantId(), input.legalEntityId())),
+              "法人不存在或不属于当前租户");
+          // 显式 Object[]：UUID 参数与 execute(String, QueryPart...) 重载会产生歧义
+          sql.execute(
+              "insert into legal_entity_reference(tenant_id,legal_entity_id,source,reference_id)"
+                  + " values (?,?,?,?) on conflict do nothing",
+              new Object[] {a.tenantId(), input.legalEntityId(), input.source(), input.referenceId()});
+          return null;
+        });
+  }
+
+  private static String trim(String value) {
+    return value == null ? "" : value.trim();
   }
 }
