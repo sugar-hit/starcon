@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 36 |
+| 已交付 | 37 |
 | 进行中 | 0 |
-| **未开发** | **429** |
-| 完成率 | 7.7% |
+| **未开发** | **428** |
+| 完成率 | 8.0% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 36 | 0 | 44 | 80 |
+| **D1–D2** | 37 | 0 | 43 | 80 |
 | **D3** | 0 | 0 | 40 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
-| 03 | 商品主数据系统 | D1–D2 | 7 | 40 |
+| 03 | 商品主数据系统 | D1–D2 | 8 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
@@ -146,7 +146,7 @@
 | 3.1.2.1 | SKU 列表 | /products/sku | D1–D2 | 已交付 | V5__sku_list.sql（sku_status_event + sku_batch_operation/item，强制 RLS；列表/状态/条码/规格索引）+ GET /catalog/skus、/catalog/skus/capabilities、/catalog/skus/export（分批流式）+ POST /catalog/skus/batch（停售/改状态，预览+执行）+ /products/sku 工作区 + SkuListIntegrationTest（17 例，含租户隔离三断言） |
 | 3.1.2.2 | SKU 详情 | /products/sku | D1–D2 | 已交付 | V6__sku_detail.sql（sku_package + sku_unit_conversion 含生效区间不重叠触发器，强制 RLS + GRANT；attribute_value/product_asset/sku_batch_operation_item 详情查询索引）+ EffectiveValues.java（公共值经 SKU 覆写/清空的有效值解析纯函数，11 例单测）+ SkuDetailService/SkuDetailController/SkuDetailProjectionPort（库存/成本/售价/listing/单据引用一律未接入标记，不落库）+ GET /catalog/skus/{id}、PUT /catalog/skus/{id}（version 乐观锁 409）+ /products/sku/[id] 详情工作区（九分区 + 四种状态 + 编辑面板）+ SkuDetailIntegrationTest（22 例，含租户隔离三断言） |
 | 3.1.2.3 | 编码与条码 | /products/sku | D1–D2 | 已交付 | V7__sku_code_barcode.sql（sku_code_rule + sku_code_rule_seq 编码规则与序号分配、sku_identifier 外部条码含 UNIQUE(tenant_id,scheme,value) 与主条码部分唯一索引、sku_code_assignment 编码变更留痕、sku_code_batch/item 逐行拒绝清单；6 表强制 RLS + GRANT；触发器把主条码同步到 sku.barcode，删主条码时清空）+ SkuCodePattern/BarcodeScheme 纯规则（编码展开长度保存即校验、GTIN mod-10 校验位；seller_sku 不在 scheme 词表）+ SkuCodeService/SkuCodeController（GET/POST/PUT /catalog/sku-code/rules、overview、skus/{id}、skus/{id}/code、skus/{id}/identifiers、POST batch、GET batches/{id}、POST identifiers/import）+ /products/sku/code 工作区（概览/规则/批量/条码导入/单 SKU 条码，冲突清单逐行渲染）+ SkuCodePatternTest+BarcodeSchemeTest（14 例）+ SkuCodeIntegrationTest（28 例，含租户隔离三断言与冲突拒绝清单断言） |
-| 3.1.2.4 | 单位与换算 | /products/sku | D1–D2 | 未开发 | — |
+| 3.1.2.4 | 单位与换算 | /products/sku | D1–D2 | 已交付 | V8__unit_conversion.sql（unit_of_measure 单位字典含量纲/数量精度/可用场景，sku_unit_conversion_snapshot 单据冻结快照 + refuse_snapshot_mutation 触发器禁止改删 + GRANT 只授 SELECT/INSERT；guard_unit_conversion_dimension 量纲守卫；复用 V6 已有的 sku_unit_conversion 生效区间不重叠触发器；2 表强制 RLS）+ UnitRules 纯规则（量纲/角色/单据类型词表、中文单位码字符集、比例与数量校验、HALF_UP 换算精度、生效区间判定）+ UnitConversionService/UnitConversionController（GET/POST /catalog/unit-conversion/units、PUT/DELETE /units/{id}、GET /overview、GET /skus/{id}、POST /skus/{id}/conversions、POST /convert、POST/GET /snapshots）+ /products/sku/units 工作区（字典/换算版本分组/换算试算/单据冻结，四种状态）+ UnitRulesTest（12 例）+ UnitConversionIntegrationTest（22 例，含租户隔离三断言、快照不可变双层断言与量纲拒绝断言） |
 | 3.1.3.1 | 规格轴定义 | — | D1–D2 | 未开发 | — |
 | 3.1.3.2 | 组合唯一性校验 | — | D1–D2 | 未开发 | — |
 | 3.2.1.1 | 属性定义列表 | /products/attributes | D1–D2 | 未开发 | — |
