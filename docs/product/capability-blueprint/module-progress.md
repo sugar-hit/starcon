@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 42 |
+| 已交付 | 43 |
 | 进行中 | 0 |
-| **未开发** | **423** |
-| 完成率 | 9.0% |
+| **未开发** | **422** |
+| 完成率 | 9.2% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 41 | 0 | 39 | 80 |
+| **D1–D2** | 42 | 0 | 38 | 80 |
 | **D3** | 1 | 0 | 39 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
-| 03 | 商品主数据系统 | D1–D2 | 12 | 40 |
+| 03 | 商品主数据系统 | D1–D2 | 13 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
@@ -152,7 +152,7 @@
 | 3.2.1.1 | 属性定义列表 | /products/attributes | D1–D2 | 已交付 | V11__attribute_dictionary.sql（spu_id 可空 + usage/filterable/enabled + NULLS NOT DISTINCT 编码唯一 + category_attribute_rule/option + RLS）；/catalog/attributes 列表分页筛选 + 概览 + 增改删 + 选项集合增删改查与停用 + 类目规则增删查；/products/attributes 工作区；AttributeDictionaryIntegrationTest 26 例（含租户隔离三断言与 3.2.2.1 回归桩）+ AttributeDictionaryRulesTest 12 例 |
 | 3.2.1.2 | 属性选项管理 | /products/attributes | D1–D2 | 已交付 | V12__attribute_option_management.sql（attribute_option_enabled_list / attribute_option_attribute_lookup / attribute_option_created + category_attribute_option_reverse / attribute_value_item_option，仅索引不改列）；/catalog/attributes/options 跨属性聚合列表（按属性/启用/引用状态筛选 + 白名单排序 + 真实分页，含 deletable 合成字段与引用计数口径说明）+ PUT /catalog/attributes/options/lifecycle 启用停用 + PUT /catalog/attributes/options/order 批量重排（覆盖式、事务内逐条校验）；/products/attributes「选项管理」标签页；AttributeOptionIntegrationTest 24 例（含租户隔离三断言、引用计数如实性、排序白名单注入防护、批量重排原子性）+ attribute-option-model.test.ts 9 例 |
 | 3.2.2.1 | SPU 公共属性 | — | D1–D2 | 已交付 | POST/PUT/DELETE /products/{id}/attributes + 属性录入与校验（OPTION/DECIMAL/BOOLEAN/DATE） |
-| 3.2.2.2 | SKU 属性覆写 | — | D1–D2 | 未开发 | — |
+| 3.2.2.2 | SKU 属性覆写 | — | D1–D2 | 已交付 | V13__sku_attribute_override.sql（attribute_value 加 updated_at 系统时间 + sku_attribute_override_lookup 部分索引 + RLS/GRANT 复核；覆写行复用 V1 的 attribute_value(sku_id 非空) + state SET/CLEAR，不另建表）；GET/PUT/PUT clear/DELETE /catalog/sku-attribute-override/skus/{skuId}[/attribute-overrides/{attributeId}[/clear]]；/products/sku/[id]/attributes 工作区（加载/空/错误三态 + 四态来源标注 + 必填补全清单 + 不可改原因）；SkuAttributeOverrideIntegrationTest 14 例（四态解析与显式清空≠未设置、取消覆写回落且幂等、四类型与启用中选项校验、COMMON_LOCKED/已停用可改写性、类目必填阻止并回传清单、权限 403、审计与 sku.version 不变、租户隔离三断言） |
 | 3.3.1.1 | 分类树管理 | /products/categories | D1–D2 | 未开发 | 阻塞：无 product_category 表、CatalogService.table() 白名单只有 research/compliance/assets、api-proxy 未放行、前端无页面。此前误标已交付已撤回 |
 | 3.3.1.2 | 类目属性要求 | /products/categories | D1–D2 | 未开发 | — |
 | 3.3.2.1 | 品牌 | /products/brands | D1–D2 | 未开发 | — |
