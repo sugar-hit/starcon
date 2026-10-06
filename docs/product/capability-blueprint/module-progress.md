@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 33 |
+| 已交付 | 34 |
 | 进行中 | 0 |
-| **未开发** | **432** |
-| 完成率 | 7.1% |
+| **未开发** | **431** |
+| 完成率 | 7.3% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 33 | 0 | 47 | 80 |
+| **D1–D2** | 34 | 0 | 46 | 80 |
 | **D3** | 0 | 0 | 40 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
-| 03 | 商品主数据系统 | D1–D2 | 4 | 40 |
+| 03 | 商品主数据系统 | D1–D2 | 5 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
@@ -143,7 +143,7 @@
 | 3.1.1.1 | SPU 列表 | /products/spu | D1–D2 | 已交付 | spu 表 + GET /catalog/products + /products 商品工作区 |
 | 3.1.1.2 | SPU 详情 | /products/spu | D1–D2 | 已交付 | GET /catalog/products/{id} + PUT 更新 + 商品详情段 |
 | 3.1.1.3 | SPU 生命周期 | /products/spu | D1–D2 | 已交付 | V4__spu_lifecycle.sql（五态迁移 + spu_lifecycle_event/rule/rule_condition，强制 RLS）+ GET/POST /catalog/products/{id}/lifecycle、/catalog/lifecycle/rules CRUD、/preview、/run、/metrics + /products 商品详情「生命周期与批量规则」段 + SpuLifecycleIntegrationTest（11 例，含租户隔离三断言） |
-| 3.1.2.1 | SKU 列表 | /products/sku | D1–D2 | 未开发 | — |
+| 3.1.2.1 | SKU 列表 | /products/sku | D1–D2 | 已交付 | V5__sku_list.sql（sku_status_event + sku_batch_operation/item，强制 RLS；列表/状态/条码/规格索引）+ GET /catalog/skus、/catalog/skus/capabilities、/catalog/skus/export（分批流式）+ POST /catalog/skus/batch（停售/改状态，预览+执行）+ /products/sku 工作区 + SkuListIntegrationTest（17 例，含租户隔离三断言） |
 | 3.1.2.2 | SKU 详情 | /products/sku | D1–D2 | 未开发 | — |
 | 3.1.2.3 | 编码与条码 | /products/sku | D1–D2 | 未开发 | — |
 | 3.1.2.4 | 单位与换算 | /products/sku | D1–D2 | 未开发 | — |
