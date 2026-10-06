@@ -214,4 +214,100 @@ public final class CatalogModels {
       int matchedCount,
       int appliedCount,
       String reason) {}
+
+  // ------------------------------------------------ 3.1.2.1 SKU 列表
+
+  /**
+   * SKU 列表筛选条件。区间条件分 min/max，min 与 max 同时为空表示不筛。
+   *
+   * <p>依赖未接入投影的条件（库存区间、价格区间、是否缺货、是否在售）不会静默生效：
+   * {@link SkuListService} 在执行前显式拒绝并说明归哪个服务，见该类 {@code requireProjections}。
+   */
+  public record SkuListQuery(
+      @Schema(nullable = true) UUID spuId,
+      @Schema(nullable = true) String category,
+      @Schema(nullable = true) List<String> statuses,
+      @Schema(nullable = true) String keyword,
+      @Schema(nullable = true) String barcode,
+      @Schema(nullable = true) String spec,
+      @Schema(nullable = true) BigDecimal onHandMin,
+      @Schema(nullable = true) BigDecimal onHandMax,
+      @Schema(nullable = true) BigDecimal priceMin,
+      @Schema(nullable = true) BigDecimal priceMax,
+      @Schema(nullable = true) Boolean outOfStock,
+      @Schema(nullable = true) Boolean onSale,
+      @Schema(nullable = true) String platform,
+      String sort,
+      String order,
+      @PositiveOrZero int page,
+      @PositiveOrZero int size) {}
+
+  /** 一格投影字段的展示值：available=false 时界面显示"未接入"，绝不显示 0。 */
+  public record SkuProjectionCell(
+      String field,
+      String label,
+      String source,
+      @Schema(nullable = true) BigDecimal value,
+      @Schema(nullable = true) String text,
+      boolean available,
+      String note) {}
+
+  /** 规格轴上的一组取值展示，例如「颜色=黑色」。 */
+  public record SkuSpec(String axis, String value) {}
+
+  public record SkuListRow(
+      UUID id,
+      UUID spuId,
+      String spuCode,
+      String spuName,
+      String category,
+      String code,
+      String name,
+      String barcode,
+      String baseUnit,
+      String status,
+      long version,
+      String variantSignature,
+      List<SkuSpec> specs,
+      List<SkuProjectionCell> projections,
+      String updatedAt) {}
+
+  public record SkuPage(List<SkuListRow> items, long total, int page, int size) {}
+
+  /** 列表页顶部的能力声明：哪些筛选可用、哪些字段未接入，前端据此禁用控件而不是猜。 */
+  public record SkuListCapabilities(List<SkuFieldInfo> fields, List<String> availableFilters) {}
+
+  public record SkuFieldInfo(
+      String code,
+      String label,
+      String source,
+      String kind,
+      boolean available,
+      boolean rangeFilterable,
+      String note) {}
+
+  /** 批量操作请求。批量分配与批量生成刊登依赖 04 刊登，由端口范式显式拒绝，不假实现。 */
+  public record SkuBatchInput(
+      @NotBlank String action,
+      @NotNull @Size(max = 500) List<@NotNull UUID> skuIds,
+      @NotBlank @Size(max = 200) String targetStatus,
+      @NotNull @Size(max = 500) String reason,
+      @Schema(nullable = true) String occurredAt,
+      boolean dryRun) {}
+
+  /** 批量结果里的单个 SKU 条目；skipped 必须带原因，否则调用方无法判断该不该重试。 */
+  public record SkuBatchItem(UUID skuId, String code, String outcome, String reason) {}
+
+  public record SkuBatchResult(
+      UUID batchId,
+      String action,
+      String targetStatus,
+      boolean dryRun,
+      int requestedCount,
+      int matchedCount,
+      int appliedCount,
+      int skippedCount,
+      String reason,
+      List<SkuBatchItem> items) {}
+
 }
