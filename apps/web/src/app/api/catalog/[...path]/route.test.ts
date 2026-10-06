@@ -163,3 +163,60 @@ it('variant-combination 放行不等于放行任意 catalog 子路径', async ()
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
+
+/**
+ * 3.2.1.1 属性字典：catalog allowlist 必须放行 attributes 全路径。
+ *
+ * <p>同一个坑：allowlist 是锚定正则，没放进分支的路径一律 404，页面只会进错误态，
+ * 看起来像"后端没实现"。这里把每条路由钉住。
+ *
+ * <p>特别要防的是 `products/{id}/attributes`（3.2.2.1 的 SPU 属性）与顶层 `attributes`
+ * （本模块的租户级字典）被混为一谈：前者第一段是 UUID，后者第一段是字面量 attributes。
+ * 少写这一条会让整个字典页只进错误态，而 POST 依然被 405/404 拦掉。
+ */
+it('catalog/attributes 的全部路由被放行且转发到 catalog 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'catalog/attributes',
+    'catalog/attributes/overview',
+    'catalog/attributes/category-rules',
+    `catalog/attributes/${id}`,
+    `catalog/attributes/${id}/options`,
+    `catalog/attributes/${id}/category-rules`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8082/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  for (const path of ['catalog/attributes', `catalog/attributes/${id}/options`]) {
+    expect((await POST(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  expect(
+    (await PUT(request(`catalog/attributes/${id}`), { params: { path: [`catalog`, 'attributes', id] } }))
+      .status,
+  ).toBe(200);
+  const rule = `catalog/attributes/${id}/category-rules`;
+  expect(
+    (await DELETE(request(rule, 'DELETE'), { params: { path: rule.split('/') } })).status,
+  ).toBe(200);
+});
+
+it('attributes 放行不等于放行任意 catalog 子路径', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'catalog/attributes/unknown',
+    `catalog/attributes/${id}/options/extra`,
+    `catalog/attributes/${id}/category-rules/22222222-2222-2222-2222-222222222222`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});

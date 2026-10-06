@@ -12,6 +12,7 @@ import {
   RefreshCw,
   Scale,
   Search,
+  Tags,
   TriangleAlert,
 } from 'lucide-react';
 import type {
@@ -168,6 +169,14 @@ export function SkuListWorkspace() {
           >
             <GitBranch className="h-4 w-4" />
             规格轴定义
+          </Link>
+          {/* 3.2.1.1 属性定义：租户级属性字典与类目绑定规则，商品的属性值仍在商品档案里维护。 */}
+          <Link
+            href="/products/attributes"
+            className="border-border hover:bg-accent inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-sm"
+          >
+            <Tags className="h-4 w-4" />
+            属性定义
           </Link>
           {/* 3.1.3.2 组合唯一性校验：组合重复检测、矩阵预校验与待建 SKU 草稿，独立工作区。 */}
           <Link
