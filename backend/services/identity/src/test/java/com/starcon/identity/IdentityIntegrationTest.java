@@ -481,11 +481,166 @@ class IdentityIntegrationTest {
   void allTenantTablesForceRlsAndGlobalUsersRemainInaccessible() {
     assertThat(
             sql.fetch(
-                "select relname from pg_class join pg_namespace n on n.oid=relnamespace where n.nspname='public' and relkind='r' and relname in ('membership','role','role_permission','role_assignment','department','tenant_closure','identity_audit','identity_outbox') and (not relrowsecurity or not relforcerowsecurity)"))
+                "select relname from pg_class join pg_namespace n on n.oid=relnamespace where n.nspname='public' and relkind='r' and relname in ('membership','role','role_permission','role_assignment','department','tenant_closure','identity_audit','identity_outbox','legal_entity','legal_entity_reference') and (not relrowsecurity or not relforcerowsecurity)"))
         .isEmpty();
     var runtime =
         sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
     assertThat(runtime.get("rolsuper", Boolean.class)).isFalse();
     assertThat(runtime.get("rolbypassrls", Boolean.class)).isFalse();
+  }
+
+  // ------------------------------------------------------------------
+  // 17.1.2 法人档案
+  // ------------------------------------------------------------------
+
+  Map<String, Object> legalEntityInput(String code, String currency) {
+    var input = new HashMap<String, Object>();
+    input.put("code", code);
+    input.put("legalName", "测试法人 " + code);
+    input.put("registrationCountry", "US");
+    input.put("registrationNo", "REG-" + code);
+    input.put("taxNo", "TAX-" + code);
+    input.put("baseCurrency", currency);
+    input.put("address", "1 Test Street");
+    input.put("amountScale", 2);
+    input.put("quantityScale", 3);
+    input.put("rounding", "HALF_UP");
+    input.put("status", "ACTIVE");
+    return input;
+  }
+
+  @Test
+  void legalEntityCrudCarriesBaseCurrencyAndRounding() throws Exception {
+    String token = login();
+    String code = "LE" + suffix();
+    var created = request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "USD"), 200);
+    UUID id = UUID.fromString(created.asText());
+    var listed = request(token, "GET", "/identity/legal-entities", null, 200);
+    assertThat(listed.toString()).contains(code);
+    // 本位币与舍入规则属于法人，决定 12 财务总账的记账基准
+    assertThat(listed.findValuesAsText("baseCurrency")).contains("USD");
+    assertThat(listed.findValuesAsText("rounding")).contains("HALF_UP");
+
+    var edited = new HashMap<String, Object>(legalEntityInput(code, "EUR"));
+    edited.put("amountScale", 4);
+    request(token, "PUT", "/identity/legal-entities/" + id, edited, 200);
+    var after = request(token, "GET", "/identity/legal-entities", null, 200);
+    assertThat(after.findValuesAsText("baseCurrency")).contains("EUR");
+
+    request(token, "DELETE", "/identity/legal-entities/" + id, null, 200);
+    assertThat(request(token, "GET", "/identity/legal-entities", null, 200).toString())
+        .doesNotContain(code);
+  }
+
+  @Test
+  void legalEntityIsProtectedWhileBusinessObjectsReferenceIt() throws Exception {
+    String token = login();
+    String code = "LE" + suffix();
+    var created = request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "USD"), 200);
+    UUID id = UUID.fromString(created.asText());
+    UUID shop = UUID.randomUUID();
+    request(
+        token,
+        "POST",
+        "/identity/legal-entities/references",
+        Map.of("legalEntityId", id, "source", "channel_shop", "referenceId", shop),
+        200);
+    // 仍被引用时拒绝删除：货权与记账主体不能凭空消失，停用才是可逆的做法
+    request(token, "DELETE", "/identity/legal-entities/" + id, null, 409);
+    var suspended = new HashMap<String, Object>(legalEntityInput(code, "USD"));
+    suspended.put("status", "SUSPENDED");
+    request(token, "PUT", "/identity/legal-entities/" + id, suspended, 200);
+    request(token, "DELETE", "/identity/legal-entities/" + id, null, 409);
+  }
+
+  @Test
+  void legalEntityReferenceMustPointAtAnEntityOfTheSameTenant() throws Exception {
+    String token = login();
+    String code = "LE" + suffix();
+    var created = request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "USD"), 200);
+    request(
+        token,
+        "POST",
+        "/identity/legal-entities/references",
+        Map.of("legalEntityId", UUID.randomUUID(), "source", "channel_shop", "referenceId", UUID.randomUUID()),
+        400);
+    assertThat(created.asText()).isNotBlank();
+  }
+
+  @Test
+  void legalEntityIsReadableButOnlyOwnerMayMutateIt() throws Exception {
+    String owner = login(), tag = suffix();
+    // 只给读权限的财务角色：法人档案是记账基准，可以看，但改不动
+    String role =
+        request(
+                owner,
+                "POST",
+                "/identity/roles",
+                Map.of(
+                    "code",
+                    "FINANCE_" + tag,
+                    "name",
+                    "Finance",
+                    "status",
+                    "ACTIVE",
+                    "permissions",
+                    List.of("identity.legal_entity.read")),
+                200)
+            .asText();
+    String username = "le-member-" + tag.toLowerCase();
+    String member =
+        request(
+                owner,
+                "POST",
+                "/identity/members",
+                memberInput(
+                    username, null, List.of(Map.of("roleId", role, "scopeMode", "ALL"))),
+                200)
+            .asText();
+    try {
+      String finance = loginUser(username);
+      request(finance, "GET", "/identity/legal-entities", null, 200);
+      request(finance, "POST", "/identity/legal-entities", legalEntityInput("LE" + tag, "USD"), 403);
+      request(
+          finance,
+          "PUT",
+          "/identity/legal-entities/" + UUID.randomUUID(),
+          legalEntityInput("LE" + tag, "EUR"),
+          403);
+      request(finance, "DELETE", "/identity/legal-entities/" + UUID.randomUUID(), null, 403);
+      // 登记引用同样是组织变更动作
+      request(
+          finance,
+          "POST",
+          "/identity/legal-entities/references",
+          Map.of(
+              "legalEntityId", UUID.randomUUID(),
+              "source", "channel_shop",
+              "referenceId", UUID.randomUUID()),
+          403);
+      // 变更权随角色状态一起撤销：停用角色后读写都归零
+      request(
+          owner,
+          "PUT",
+          "/identity/roles/" + role,
+          Map.of(
+              "code", "FINANCE_" + tag,
+              "name", "Finance",
+              "status", "INACTIVE",
+              "permissions", List.of("identity.legal_entity.read")),
+          200);
+      request(finance, "GET", "/identity/legal-entities", null, 403);
+    } finally {
+      request(owner, "PUT", "/identity/members/" + member, Map.of("status", "INACTIVE", "assignments", List.of()), 200);
+      request(owner, "DELETE", "/identity/roles/" + role, null, 200);
+    }
+  }
+
+  @Test
+  void legalEntityCodeIsUniqueWithinTenant() throws Exception {
+    String token = login();
+    String code = "LE" + suffix();
+    request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "USD"), 200);
+    request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "EUR"), 409);
   }
 }
