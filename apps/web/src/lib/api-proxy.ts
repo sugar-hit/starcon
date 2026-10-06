@@ -40,7 +40,10 @@ const services: readonly {
     fallback: 'http://127.0.0.1:8082',
     pattern:
       // skus 是 3.1.2.1 SKU 列表：分页检索、能力声明、批量操作与 CSV 导出。
-      /^(products(?:\/[0-9a-f-]+(?:\/(?:attributes|skus)(?:\/[0-9a-f-]+)?)?)?|records\/(research|compliance|assets)(?:\/[0-9a-f-]+)?|skus(?:\/(?:capabilities|batch|export))?)$/,
+      // unit-conversion 是 3.1.2.4 单位与换算：单位字典、SKU 换算版本、基础数量换算与单据快照。
+      //   units 后面可选一段 id（字典行的更新/删除）；skus/{id} 取面板，skus/{id}/conversions 建换算版本；
+      //   snapshots 后面不接 id —— 按 ?documentRef= 查询，快照是按单据号寻址的不可变行。
+      /^(products(?:\/[0-9a-f-]+(?:\/(?:attributes|skus)(?:\/[0-9a-f-]+)?)?)?|records\/(research|compliance|assets)(?:\/[0-9a-f-]+)?|skus(?:\/(?:capabilities|batch|export))?|unit-conversion(?:\/(?:units(?:\/[0-9a-f-]+)?|overview|skus\/[0-9a-f-]+(?:\/conversions)?|convert|snapshots))?)$/,
   },
   {
     // 02 渠道与店铺：平台目录、授权连接、店铺与站点。
