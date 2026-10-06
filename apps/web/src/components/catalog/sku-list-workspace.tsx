@@ -3,7 +3,16 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Badge, Button } from '@starcon/ui';
-import { Barcode, Download, Package, RefreshCw, Scale, Search, TriangleAlert } from 'lucide-react';
+import {
+  Barcode,
+  Download,
+  GitBranch,
+  Package,
+  RefreshCw,
+  Scale,
+  Search,
+  TriangleAlert,
+} from 'lucide-react';
 import type {
   SkuBatchResult,
   SkuFieldInfo,
@@ -150,6 +159,14 @@ export function SkuListWorkspace() {
           >
             <Scale className="h-4 w-4" />
             单位与换算
+          </Link>
+          {/* 3.1.3.1 规格轴定义：租户级规格轴字典与 SPU 绑定，维护入口在独立工作区。 */}
+          <Link
+            href="/products/sku/spec-axis"
+            className="border-border hover:bg-accent inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-sm"
+          >
+            <GitBranch className="h-4 w-4" />
+            规格轴定义
           </Link>
           {/* 导出走普通链接下载，不走 api()：它是 CSV 而非 JSON。 */}
           <a
