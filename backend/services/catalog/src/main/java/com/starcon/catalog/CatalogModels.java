@@ -1657,4 +1657,253 @@ public final class CatalogModels {
       long uncategorizedSpuCount,
       long orphanedRuleCount,
       String note) {}
+
+  // ============================================================ 3.3.1.2 类目属性要求
+
+  /**
+   * 一条类目属性要求（V15 的 {@code category_attribute_rule} 读出口径）。
+   *
+   * <p>三个字段共同说明「这条要求来自哪里」，缺一个运营就无法自查继承：
+   * <ul>
+   *   <li>{@code sourceCategoryId} / {@code sourceCategoryName} —— 规则实际挂着的那个类目节点，
+   *       可能是祖先（继承而来），也可能是自己；
+   *   <li>{@code depth} —— 0 表示本节点自己配的；大于 0 是从第几层祖先继承来的。
+   *       页面据此把继承来的规则标注出来，并在「只显示本节点规则」与「显示全部生效规则」之间切换。
+   * </ul>
+   *
+   * <p>{@code allowedOptions} 为空表示「不限定子集，属性值源里的全部选项都可选」，
+   * 与 {@code allowFreeText}（允许提交不在选项集内的值）是两个不同方向的放宽，不要混用。
+   */
+  public record CategoryAttributeRequirement(
+      UUID categoryId,
+      String categoryName,
+      UUID attributeId,
+      String attributeCode,
+      String attributeName,
+      String dataType,
+      String requirement,
+      boolean enabled,
+      boolean inherited,
+      int depth,
+      UUID sourceCategoryId,
+      String sourceCategoryName,
+      @Schema(nullable = true) BigDecimal minValue,
+      @Schema(nullable = true) BigDecimal maxValue,
+      @Schema(nullable = true) Integer maxLength,
+      boolean allowFreeText,
+      int position,
+      List<String> allowedOptions,
+      @Schema(nullable = true) CategoryAttributeCondition condition,
+      long version,
+      @Schema(nullable = true) String updatedAt) {}
+
+  /**
+   * 条件必填依赖的前置属性。
+   *
+   * <p>存的是**属性 id + 算子**，取值另表存（{@link CategoryAttributeConditionValue}）——
+   * 与 V11 的 {@code category_attribute_option} 同一形态。id 而非 code 是权威：
+   * 属性改 code 时条件不会跟着断（code 是运营可改的展示标识，id 才是引用）。
+   */
+  public record CategoryAttributeCondition(
+      @NotNull UUID attributeId,
+      String attributeCode,
+      String attributeName,
+      String dataType,
+      @NotBlank String operator) {}
+
+  /** 条件必填的一个取值。 */
+  public record CategoryAttributeConditionValue(
+      @NotBlank @Size(max = 200) String value, @PositiveOrZero int position) {}
+
+  /**
+   * 类目属性要求写入请求。
+   *
+   * <p>{@code requirement} 与 {@code condition} / {@code conditionValues} 必须成套出现：
+   * 条件必填必须给出前置属性、算子与至少一个取值；非条件必填则三者都必须为空
+   * （一条永远不生效的条件留在配置里，比没有条件更危险——运营会以为它生效了）。
+   */
+  public record CategoryAttributeRequirementInput(
+      @NotNull UUID attributeId,
+      @NotBlank String requirement,
+      @Schema(nullable = true) BigDecimal minValue,
+      @Schema(nullable = true) BigDecimal maxValue,
+      @Schema(nullable = true) Integer maxLength,
+      boolean allowFreeText,
+      @PositiveOrZero int position,
+      @Size(max = 50) List<@Size(max = 100) String> allowedOptions,
+      @Schema(nullable = true) @Valid CategoryAttributeCondition condition,
+      @Schema(nullable = true) @Size(max = 20) List<@Valid CategoryAttributeConditionValue> conditionValues,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  public record CategoryAttributeRequirementSaved(
+      UUID categoryId, UUID attributeId, String requirement, int conditionValueCount) {}
+
+  /** 类目下的属性要求：生效规则集（默认）+ 本节点直接配置的规则，供配置页切换视图。 */
+  public record CategoryRequirementsView(
+      UUID categoryId,
+      String categoryCode,
+      String categoryName,
+      String categoryPath,
+      List<CategoryAttributeRequirement> effective,
+      List<CategoryAttributeRequirement> own,
+      CategoryRequirementsSummary summary) {}
+
+  /**
+   * 规则集统计。
+   *
+   * <p>{@code inheritedCount} 单独给出：祖先改了规则会同时影响这一层的所有子类目，
+   * 「有多少条是继承来的」决定了这个类目的配置自主度，也决定改祖先时要评估多大的影响面。
+   */
+  public record CategoryRequirementsSummary(
+      long effectiveCount,
+      long requiredCount,
+      long conditionalCount,
+      long optionalCount,
+      long ownCount,
+      long inheritedCount,
+      long enabledCount,
+      long disabledCount) {}
+
+  /**
+   * 录入表单 schema 的一个字段。
+   *
+   * <p>这是 3.3.1.2 交给 3.1.1.2 商品编辑与 04 刊登表单的**核心输出**，
+   * 字段设计目标是「前端不需要再问后端任何规则问题」：
+   *
+   * <ul>
+   *   <li>{@code control} —— 控件类型（TEXT / NUMBER / SELECT / BOOLEAN / DATE），
+   *       由属性数据类型 + 规则推导，前端不再自己映射一遍；
+   *   <li>{@code required} —— **求值之后**的必填性。条件必填在条件成立时为 {@code true}，
+   *       不成立时为 {@code false}，前端直接绑到控件的 required 属性上即可；
+   *   <li>{@code options} —— 可选值列表，每项带 {@code enabled}：
+   *       选项被 3.2.1.2 停用后前端要能显示为禁用而不是直接消失（消失会让运营以为自己配错了）；
+   *   <li>{@code constraints} —— 校验约束（数值区间 / 长度 / 选项白名单 / 自由填写）。
+   * </ul>
+   */
+  public record EntryFormField(
+      String key,
+      UUID attributeId,
+      String attributeCode,
+      String label,
+      String dataType,
+      String control,
+      boolean required,
+      String requirement,
+      @Schema(nullable = true) EntryFormDependency dependency,
+      List<EntryFormOption> options,
+      EntryFormConstraints constraints,
+      int position,
+      boolean inherited,
+      @Schema(nullable = true) UUID sourceCategoryId,
+      @Schema(nullable = true) String sourceCategoryName) {}
+
+  /**
+   * 条件必填在 schema 上的依赖声明。
+   *
+   * <p>{@code active} 是「按本次传入的当前值，条件是否已成立」。前端拿到这个就能
+   * 直接决定「字段要不要亮必填星号」，不需要自己实现一遍求值逻辑——
+   * 那正是「条件必填要真正参与 schema 生成」的落点。
+   */
+  public record EntryFormDependency(
+      UUID attributeId, String attributeCode, String label, String operator, List<String> values, boolean active) {}
+
+  /** 可选值。停用的选项仍然返回，由前端按 {@code enabled} 置灰。 */
+  public record EntryFormOption(String value, boolean enabled) {}
+
+  /**
+   * 取值约束。全部可空：非空字段的语义是「这条约束存在」，具体值看对应字段。
+   *
+   * <p>用嵌套 record 而不是把 5 个字段平铺进 {@link EntryFormField}：
+   * 前端 {@code field.constraints?.maxLength} 这种写法能一眼看出哪些约束可空，
+   * 平铺则要逐个判 null，写错一个就是「undefined 参与比较恒为 false」的静默漏校验。
+   */
+  public record EntryFormConstraints(
+      @Schema(nullable = true) BigDecimal minValue,
+      @Schema(nullable = true) BigDecimal maxValue,
+      @Schema(nullable = true) Integer maxLength,
+      @Schema(nullable = true) Boolean allowFreeText,
+      @Schema(nullable = true) List<String> allowedOptions) {}
+
+  /**
+   * 录入表单 schema 整体输出。
+   *
+   * <p>{@code requiredFieldCount} 与 {@code conditionalFieldCount} 让前端不必遍历就能
+   * 显示「共 N 项，其中 M 项必填」这类提示。
+   */
+  public record EntryFormSchema(
+      UUID categoryId,
+      String categoryCode,
+      String categoryName,
+      String categoryPath,
+      int fieldCount,
+      int requiredFieldCount,
+      int conditionalFieldCount,
+      List<EntryFormField> fields,
+      String note) {}
+
+  /**
+   * 提交的属性值（保存前校验的入参）。
+   *
+   * <p>一律按**字符串**收，而不是按属性数据类型分字段：提交来源是 HTTP 表单，
+   * JSON 里的 12 与 "12" 对 TEXT 属性都是合法输入。先按字符串到、再按目标数据类型解析，
+   * 类型不符才判 {@code TYPE_MISMATCH}——这比让前端按类型拼不同形状的载荷更贴合实际录入。
+   *
+   * <p>{@code attributeId} 与 {@code attributeCode} 二选一：前端拿到的是 schema，
+   * 用 key（= code）最顺手；批量脚本按 id 提交更稳。两者都给时以 id 为准。
+   */
+  public record AttributeValueInput(
+      @Schema(nullable = true) UUID attributeId,
+      @Schema(nullable = true) String attributeCode,
+      @Schema(nullable = true) String value) {}
+
+  /** 保存前校验请求。 */
+  public record AttributeValidationInput(
+      @NotNull @Size(min = 1, max = 200) List<@Valid AttributeValueInput> values) {}
+
+  /**
+   * 单个字段的校验结果。
+   *
+   * <p>{@code code} 用词表而不是自由文本：前端要按 code 决定提示位置与样式，
+   * 而 {@code message} 是人话、可以直接显示。这与 {@link ApiErrorHandler} 的错误口径一致。
+   *
+   * <p>词表：{@code PASSED} / {@code MISSING} / {@code TYPE_MISMATCH} / {@code OUT_OF_RANGE} /
+   * {@code LENGTH_EXCEEDED} / {@code OPTION_NOT_ALLOWED} / {@code CONDITION_UNMET} /
+   * {@code UNKNOWN_ATTRIBUTE}。
+   */
+  public record AttributeValidationResult(
+      UUID attributeId,
+      String attributeCode,
+      String attributeName,
+      String code,
+      String message,
+      boolean passed,
+      boolean required,
+      String requirement,
+      @Schema(nullable = true) Boolean conditionActive,
+      @Schema(nullable = true) String submittedValue) {}
+
+  /**
+   * 保存前校验报告。
+   *
+   * <p>{@code valid} 是整体结论：全部 {@code PASSED} 才为 true。
+   * {@code results} 按录入表单的字段顺序返回（含未被提交的字段，前端可据此逐项高亮）。
+   */
+  public record AttributeValidationReport(
+      UUID categoryId,
+      boolean valid,
+      int checkedCount,
+      int failedCount,
+      List<AttributeValidationResult> results,
+      String note) {}
+
+  /** 类目属性要求概览：规则覆盖率。 */
+  public record CategoryRequirementsOverview(
+      long categoryCount,
+      long categoriesWithRequirement,
+      long categoriesWithoutRequirement,
+      long requirementCount,
+      long conditionalRequirementCount,
+      long disabledRequirementCount,
+      String note) {}
 }

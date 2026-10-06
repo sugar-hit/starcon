@@ -665,20 +665,39 @@ public class AttributeDictionaryService {
     // 文本 → 类目主键的解析与按需建节点由 CategoryTreeService 承担，本模块是唯一写入口。
     UUID categoryId = categories.resolveOrCreateCategoryId(actor, category);
 
+    // V15 兑现点：requirement 成为要求形态的权威列，required 退化为派生列。
+    // 本端点的入参仍然只有 required 布尔（已交付 API 语义不变），所以这里**显式**把两列一起写：
+    // 只写 required 会让 V15 的触发器按旧 requirement 反推 required，把本端点刚改成必填的规则
+    // 又打回可选——3.2.1.1 的「改必填」当场失效。
+    //
+    // 同时把 condition_* 一并清空：本端点表达不出「条件必填」，而 V15 的 CHECK 要求
+    // requirement 与条件成套存在。留着旧条件会撞约束报 409，清空才是「退回普通必填/可选」
+    // 这个调用方真正要的语义。条件取值同删（规则没有条件了，取值就是死数据，
+    // V15 的 guard 触发器也会拒绝它们挂在没有条件的规则上）。
+    String requirement = input.required() ? "REQUIRED" : "OPTIONAL";
     sql.execute(
         "insert into category_attribute_rule(tenant_id,category,category_id,attribute_id,required,"
-            + "min_value,max_value,position) values(?,?,?,?,?,?,?,?)"
+            + "requirement,condition_attribute_id,condition_operator,min_value,max_value,position)"
+            + " values(?,?,?,?,?,?,null,null,?,?,?)"
             + " on conflict (tenant_id,category,attribute_id)"
-            + " do update set required=excluded.required,min_value=excluded.min_value,"
+            + " do update set required=excluded.required,requirement=excluded.requirement,"
+            + "condition_attribute_id=null,condition_operator=null,"
+            + "min_value=excluded.min_value,"
             + "max_value=excluded.max_value,position=excluded.position",
         actor.tenantId(),
         category,
         categoryId,
         attributeId,
         input.required(),
+        requirement,
         input.minValue(),
         input.maxValue(),
         input.position());
+    sql.execute(
+        "delete from category_attribute_condition_value where tenant_id=? and category_id=? and attribute_id=?",
+        actor.tenantId(),
+        categoryId,
+        attributeId);
     sql.execute(
         "delete from category_attribute_option where tenant_id=? and category=? and attribute_id=?",
         actor.tenantId(),
