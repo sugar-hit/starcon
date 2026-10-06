@@ -30,7 +30,9 @@ const services: readonly {
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
     pattern:
-      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/references|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?)$/,
+      // audit 是 17.5.3.1 审计日志：列表、变更详情与 CSV 导出。
+      // 导出走 GET + query（与列表同一套条件），所以 allowlist 只需放行读路径。
+      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/references|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|audit(?:\/(?:export|[0-9a-f-]+))?)$/,
   },
   {
     prefix: 'catalog/',

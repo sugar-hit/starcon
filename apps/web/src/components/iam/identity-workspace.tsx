@@ -4,13 +4,19 @@ import Link from 'next/link';
 import { Avatar, Button } from '@starcon/ui';
 import { useIdentity } from './identity-shell';
 import { AdministrationPanel } from './administration-panel';
-import { canManage, isOwner, type AdministrationKind } from './administration-model';
+import {
+  canManage,
+  hasPermission,
+  isOwner,
+  type AdministrationKind,
+} from './administration-model';
 
 const destinations = [
   ['members', '用户与成员', '管理本租户成员、启停状态和角色分配'],
   ['roles', '角色配置', '配置页面操作权限与数据范围'],
   ['departments', '部门管理', '维护成员归属与部门数据范围'],
   ['children', '子租户管理', '创建独立工作空间并指定所有者'],
+  ['audit', '审计日志', '检索关键操作留痕、变更详情与导出'],
 ] as const;
 export function IdentityWorkspace({
   kind,
@@ -126,7 +132,11 @@ export function IdentityWorkspace({
           </section>
           <div className="grid gap-4 sm:grid-cols-2">
             {destinations
-              .filter(([key]) => canManage(session, key))
+              .filter(([key]) =>
+                key === 'audit'
+                  ? hasPermission(session, 'identity.audit.read')
+                  : canManage(session, key),
+              )
               .map(([key, label, description]) => (
                 <Link
                   key={key}
