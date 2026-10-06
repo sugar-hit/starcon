@@ -1206,6 +1206,346 @@
         }
       }
     },
+    "/catalog/media/{id}": {
+      "get": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "detail_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "update_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "delete_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/{id}/enabled": {
+      "put": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "setEnabled_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/tags/{tagId}": {
+      "put": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "updateTag",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "tagId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaTagInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaTagSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "deleteTag",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "tagId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/tags/{tagId}/enabled": {
+      "put": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "setTagEnabled",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "tagId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/lifecycle/rules/{id}": {
       "put": {
         "tags": [
@@ -1640,7 +1980,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "setEnabled_1",
+        "operationId": "setEnabled_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -1691,7 +2031,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "setEnabled_2",
+        "operationId": "setEnabled_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -1751,7 +2091,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "detail_3",
+        "operationId": "detail_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -1789,7 +2129,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "update_3",
+        "operationId": "update_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -1837,7 +2177,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "delete_2",
+        "operationId": "delete_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -1889,7 +2229,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "setEnabled_3",
+        "operationId": "setEnabled_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -2056,7 +2396,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "update_4",
+        "operationId": "update_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -2104,7 +2444,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "delete_3",
+        "operationId": "delete_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -4045,6 +4385,502 @@
         }
       }
     },
+    "/catalog/media": {
+      "get": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "list_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mediaType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tagCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "integrityStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "referenced",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "upload",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "file",
+                  "meta"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "meta": {
+                    "$ref": "#/components/schemas/MediaUpload"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/{id}/versions": {
+      "get": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "versions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaVersion"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "addVersion",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "file",
+                  "meta"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "meta": {
+                    "$ref": "#/components/schemas/MediaVersionUpload"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/{id}/verify": {
+      "post": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "verify",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaIntegrityResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/{id}/references": {
+      "get": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "references",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaReference"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "addReference",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaReferenceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaReferenceSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/verify-sweep": {
+      "post": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "verifySweep",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaIntegritySweep"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/tags": {
+      "get": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "tags",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaTagRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "createTag",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaTagInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaTagSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/lifecycle/rules": {
       "get": {
         "tags": [
@@ -4545,7 +5381,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "list_2",
+        "operationId": "list_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -4811,7 +5647,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "list_3",
+        "operationId": "list_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -5434,7 +6270,7 @@
         "tags": [
           "sku-list-controller"
         ],
-        "operationId": "list_4",
+        "operationId": "list_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -5888,6 +6724,140 @@
         }
       }
     },
+    "/catalog/media/{id}/integrity-checks": {
+      "get": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "integrityChecks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaIntegrityCheck"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/references": {
+      "get": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "referencesOf",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ownerType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/overview": {
+      "get": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "overview_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/lifecycle/rules/{id}/preview": {
       "get": {
         "tags": [
@@ -5985,7 +6955,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "overview_5",
+        "operationId": "overview_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -6059,7 +7029,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "overview_6",
+        "operationId": "overview_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -6130,7 +7100,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "overview_7",
+        "operationId": "overview_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -6221,7 +7191,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_8",
+        "operationId": "overview_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -6252,7 +7222,7 @@
         "tags": [
           "attribute-option-controller"
         ],
-        "operationId": "list_5",
+        "operationId": "list_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -6546,12 +7516,61 @@
         }
       }
     },
+    "/catalog/media/{id}/references/{referenceId}": {
+      "delete": {
+        "tags": [
+          "media-controller"
+        ],
+        "operationId": "removeReference",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referenceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaReferenceSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/categories/attribute-requirements/{categoryId}/{attributeId}": {
       "delete": {
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "delete_4",
+        "operationId": "delete_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -7405,6 +8424,136 @@
             }
           },
           "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MediaUpdate": {
+        "required": [
+          "name",
+          "purpose"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "purpose": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "altText": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "tagCodes": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "minLength": 1,
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MediaSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currentVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deduplicated": {
+            "type": "boolean"
+          },
+          "referenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "integrityStatus": {
+            "type": "string"
+          },
+          "integrityLabel": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaTagInput": {
+        "required": [
+          "code",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MediaTagSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usageCount": {
             "type": "integer",
             "format": "int64"
           }
@@ -9447,6 +10596,221 @@
             "type": "string"
           },
           "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaUpload": {
+        "required": [
+          "mediaType",
+          "name",
+          "purpose"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "mediaType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "purpose": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "altText": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "tagCodes": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "minLength": 1,
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MediaVersionUpload": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MediaIntegrityCheck": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "integrityStatus": {
+            "type": "string"
+          },
+          "integrityLabel": {
+            "type": "string"
+          },
+          "byteSizeExpected": {
+            "type": "number",
+            "nullable": true
+          },
+          "byteSizeActual": {
+            "type": "number",
+            "nullable": true
+          },
+          "sha256Expected": {
+            "type": "string",
+            "nullable": true
+          },
+          "sha256Actual": {
+            "type": "string",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string"
+          },
+          "checkedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaIntegrityResult": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "integrityStatus": {
+            "type": "string"
+          },
+          "integrityLabel": {
+            "type": "string"
+          },
+          "referenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "healthy": {
+            "type": "boolean"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "check": {
+            "$ref": "#/components/schemas/MediaIntegrityCheck"
+          }
+        }
+      },
+      "MediaReferenceInput": {
+        "required": [
+          "ownerType"
+        ],
+        "type": "object",
+        "properties": {
+          "ownerType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MediaReferenceSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "deletable": {
+            "type": "boolean"
+          },
+          "deletableReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MediaIntegritySweep": {
+        "type": "object",
+        "properties": {
+          "checkedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "healthyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "missingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sizeMismatchCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "contentMismatchCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaIntegrityResult"
+            }
+          },
+          "note": {
             "type": "string"
           }
         }
@@ -12021,6 +13385,394 @@
           },
           "requiresActiveSku": {
             "type": "boolean"
+          }
+        }
+      },
+      "MediaPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "videoCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failingIntegrityCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unreferencedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disabledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "mediaTypeLabel": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "purposeLabel": {
+            "type": "string"
+          },
+          "fileFormat": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "number"
+          },
+          "widthPx": {
+            "type": "number",
+            "nullable": true
+          },
+          "heightPx": {
+            "type": "number",
+            "nullable": true
+          },
+          "durationSeconds": {
+            "type": "number",
+            "nullable": true
+          },
+          "contentSha256": {
+            "type": "string"
+          },
+          "storageKey": {
+            "type": "string"
+          },
+          "originalFilename": {
+            "type": "string"
+          },
+          "altText": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "versionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "referenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tagCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "integrityStatus": {
+            "type": "string"
+          },
+          "integrityLabel": {
+            "type": "string"
+          },
+          "integrityDetail": {
+            "type": "string",
+            "nullable": true
+          },
+          "integrityCheckedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaDetail": {
+        "type": "object",
+        "properties": {
+          "asset": {
+            "$ref": "#/components/schemas/MediaRow"
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaVersion"
+            }
+          },
+          "tags": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaReference"
+            }
+          },
+          "integrityChecks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaIntegrityCheck"
+            }
+          },
+          "deletable": {
+            "type": "boolean"
+          },
+          "deletableReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaReference": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerType": {
+            "type": "string"
+          },
+          "ownerTypeLabel": {
+            "type": "string"
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ownerCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaVersion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "storageKey": {
+            "type": "string"
+          },
+          "originalFilename": {
+            "type": "string"
+          },
+          "fileFormat": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "number"
+          },
+          "widthPx": {
+            "type": "number",
+            "nullable": true
+          },
+          "heightPx": {
+            "type": "number",
+            "nullable": true
+          },
+          "durationSeconds": {
+            "type": "number",
+            "nullable": true
+          },
+          "contentSha256": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "current": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaTagRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "usageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaOverview": {
+        "type": "object",
+        "properties": {
+          "assetCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disabledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "imageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "videoCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byteSizeTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "referenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "referencedAssetCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unreferencedAssetCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failingIntegrityCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "missingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tagCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "versionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "storageHealthy": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
           }
         }
       },
