@@ -112,3 +112,54 @@ it('spec-axis 放行不等于放行任意 catalog 子路径', async () => {
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
+
+/**
+ * 3.1.3.2 组合唯一性校验：catalog allowlist 必须放行 variant-combination 全路径。
+ *
+ * <p>同一个坑：allowlist 是锚定正则，没放进分支的路径一律 404，页面只会进错误态，
+ * 看起来像"后端没实现"。这里把每条路由钉住。
+ */
+it('catalog/variant-combination 的全部路由被放行且转发到 catalog 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const draftId = '22222222-2222-2222-2222-222222222222';
+  for (const path of [
+    'catalog/variant-combination/overview',
+    `catalog/variant-combination/spus/${id}`,
+    `catalog/variant-combination/spus/${id}/combinations`,
+    `catalog/variant-combination/spus/${id}/drafts`,
+    `catalog/variant-combination/spus/${id}/drafts/${draftId}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8082/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  for (const path of [
+    `catalog/variant-combination/spus/${id}/check`,
+    `catalog/variant-combination/spus/${id}/drafts`,
+  ]) {
+    expect((await POST(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  const discard = `catalog/variant-combination/spus/${id}/drafts/${draftId}`;
+  expect(
+    (await DELETE(request(discard, 'DELETE'), { params: { path: discard.split('/') } })).status,
+  ).toBe(200);
+});
+
+it('variant-combination 放行不等于放行任意 catalog 子路径', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'catalog/variant-combination/unknown',
+    `catalog/variant-combination/spus/${id}/drafts/22222222-2222-2222-2222-222222222222/extra`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});

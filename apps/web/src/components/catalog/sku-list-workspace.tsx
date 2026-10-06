@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Badge, Button } from '@starcon/ui';
 import {
   Barcode,
+  Boxes,
   Download,
   GitBranch,
   Package,
@@ -167,6 +168,14 @@ export function SkuListWorkspace() {
           >
             <GitBranch className="h-4 w-4" />
             规格轴定义
+          </Link>
+          {/* 3.1.3.2 组合唯一性校验：组合重复检测、矩阵预校验与待建 SKU 草稿，独立工作区。 */}
+          <Link
+            href="/products/sku/variant-combination"
+            className="border-border hover:bg-accent inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-sm"
+          >
+            <Boxes className="h-4 w-4" />
+            组合唯一性校验
           </Link>
           {/* 导出走普通链接下载，不走 api()：它是 CSV 而非 JSON。 */}
           <a
