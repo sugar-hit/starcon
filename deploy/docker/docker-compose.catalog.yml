@@ -79,6 +79,27 @@ services:
       DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
       IDENTITY_URL: http://identity:8081
       INTERNAL_KEY: ${INTERNAL_KEY}
+  warehouse:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.backend
+      args:
+        SERVICE: warehouse
+        HTTP_PROXY: ${BUILD_HTTP_PROXY:-}
+        HTTPS_PROXY: ${BUILD_HTTPS_PROXY:-}
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+      identity: { condition: service_started }
+    ports: ['127.0.0.1:8084:8084']
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/starcon_warehouse
+      DB_USER: warehouse_app
+      DB_PASSWORD: ${APP_DB_PASSWORD}
+      DB_MIGRATION_USER: starcon_migrator
+      DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
+      IDENTITY_URL: http://identity:8081
+      INTERNAL_KEY: ${INTERNAL_KEY}
   migrate-identity:
     image: starcon-catalog-dev-identity
     profiles: [tools]
@@ -116,6 +137,21 @@ services:
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/starcon_channel
       DB_USER: channel_app
+      DB_PASSWORD: ${APP_DB_PASSWORD}
+      DB_MIGRATION_USER: starcon_migrator
+      DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
+      IDENTITY_URL: http://identity:8081
+      INTERNAL_KEY: ${INTERNAL_KEY}
+      LOCAL_BOOTSTRAP_ENABLED: 'false'
+  migrate-warehouse:
+    image: starcon-catalog-dev-warehouse
+    profiles: [tools]
+    command: ['--spring.main.web-application-type=none']
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/starcon_warehouse
+      DB_USER: warehouse_app
       DB_PASSWORD: ${APP_DB_PASSWORD}
       DB_MIGRATION_USER: starcon_migrator
       DB_MIGRATION_PASSWORD: ${PG_PASSWORD}

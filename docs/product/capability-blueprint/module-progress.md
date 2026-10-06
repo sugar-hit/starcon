@@ -12,17 +12,17 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 39 |
+| 已交付 | 40 |
 | 进行中 | 0 |
-| **未开发** | **426** |
-| 完成率 | 8.4% |
+| **未开发** | **425** |
+| 完成率 | 8.6% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 39 | 0 | 41 | 80 |
-| **D3** | 0 | 0 | 40 | 40 |
+| **D3** | 1 | 0 | 39 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
@@ -38,7 +38,7 @@
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
-| 07 | 库存核算系统 | D3 | 0 | 31 |
+| 07 | 库存核算系统 | D3 | 1 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 0 | 27 |
@@ -251,7 +251,7 @@
 | 6.6.1.2 | 打样与样品管理 | — | D6 | 未开发 | — |
 | 6.6.2.1 | 试产单 | — | D6 | 未开发 | — |
 | 6.6.2.2 | 转量产与建档 | — | D6 | 未开发 | — |
-| 7.1.1.1 | 库存总览 | /inventory | D3 | 未开发 | — |
+| 7.1.1.1 | 库存总览 | /inventory | D3 | 已交付 | 迁移 warehouse V1__warehouse_inventory_core.sql（inventory_balance 生成列 available + RLS/GRANT、inventory_quality_status、inventory_transaction/entry append-only、inventory_transfer、inventory_policy）+ identity V8__warehouse_page_permissions + GET /warehouse/inventory/overview 与 /inventory/capabilities、阈值 CRUD /warehouse/inventory/policies + 下拉参照数据 /warehouse/{warehouses,legal-entities,skus,quality-statuses} + 页面 /inventory（总览工作区：合计卡 + 分布图 + 汇总表 + 行内展开 + 阈值维护）+ 测试 InventoryOverviewIntegrationTest 30 例（含总览合计==明细逐行求和、守恒式、租户隔离三断言）+ inventory-model.test.ts 15 例 |
 | 7.1.1.2 | 库存明细 | /inventory | D3 | 未开发 | — |
 | 7.1.1.3 | 可用量计算 | /inventory | D3 | 未开发 | — |
 | 7.1.2.1 | 库存流水台账 | — | D3 | 未开发 | — |

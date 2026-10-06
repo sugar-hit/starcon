@@ -61,6 +61,16 @@ const services: readonly {
     pattern:
       /^(platforms(?:\/[A-Za-z0-9_]+\/enums(?:\/[0-9a-f-]+)?)?|connections(?:\/(?:reminders|[0-9a-f-]+(?:\/(?:credential|health|revoke))?))?|shops(?:\/[0-9a-f-]+(?:\/(?:marketplaces(?:\/[0-9a-f-]+)?|transfer))?)?|sync-cursors(?:\/[0-9a-f-]+(?:\/(?:pause|resume|rewind|trigger))?)?|sync-runs(?:\/[0-9a-f-]+(?:\/(?:complete|resolve))?)?|sync-failures(?:\/summary|[0-9a-f-]+\/replay)?|platform-operations(?:\/[0-9a-f-]+(?:\/(?:start|succeed|fail|unknown|verify))?)?|oauth\/(?:callback|sessions(?:\/[0-9a-f-]+(?:\/(?:shops|confirm|cancel))?)?))$/,
   },
+  {
+    // 07 库存：库存总览（7.1.1.1）、筛选下拉参照数据与超储阈值。
+    // overview/capabilities/policies 是总览本身；warehouses/legal-entities/skus/quality-statuses
+    // 是筛选下拉项。policies/{id} 后面接一段 id（更新与删除）。
+    prefix: 'warehouse/',
+    env: 'WAREHOUSE_URL',
+    fallback: 'http://127.0.0.1:8084',
+    pattern:
+      /^(inventory\/(?:overview|capabilities|policies(?:\/[0-9a-f-]+)?)|warehouses|legal-entities|skus|quality-statuses)$/,
+  },
 ];
 
 function resolve(path: string) {

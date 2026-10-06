@@ -26,6 +26,7 @@ const backends: readonly { prefix: string; route: string }[] = [
   { prefix: 'identity/', route: 'iam' },
   { prefix: 'catalog/', route: 'catalog' },
   { prefix: 'channel/', route: 'channel' },
+  { prefix: 'warehouse/', route: 'warehouse' },
 ];
 
 let workspaceBlocked = false;
