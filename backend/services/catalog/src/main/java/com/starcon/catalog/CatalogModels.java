@@ -1910,4 +1910,196 @@ public final class CatalogModels {
       long conditionalRequirementCount,
       long disabledRequirementCount,
       String note) {}
+
+  // ============================================================ 3.3.2.1 品牌管理
+
+  /** 单条多语言品牌名。基础名在 {@code brand.name}，这里存的是补充。 */
+  public record BrandNameInput(
+      @NotBlank @Size(max = 16) String locale, @NotBlank @Size(max = 200) String name) {}
+
+  /** 品牌关联的一个类目（写入用）。 */
+  public record BrandCategoryLinkInput(@NotNull UUID categoryId, @PositiveOrZero Integer position) {}
+
+  /**
+   * 建 / 改品牌的请求。
+   *
+   * <p>{@code categories} 是**整体替换**语义（提交什么就等于什么，不是增量追加）：
+   * 关联类目是「这个品牌属于哪几个类目」的一组完整描述，增量语义下
+   * 前端必须先取回当前全集再算差集，少发一条就是静默的关联丢失。
+   *
+   * <p>{@code authorizationStatus} 与凭证的关系不在这里校验成「必须同时有凭证」：
+   * 允许「先登记成需授权、凭证稍后补」是正常业务流（见 V16 迁移第 6 节），
+   * 被拒的应该是刊登而不是建档。
+   */
+  public record BrandInput(
+      @NotBlank @Size(max = 64) String code,
+      @NotBlank @Size(max = 100) String name,
+      @Schema(nullable = true) @Size(max = 500) String logoUri,
+      @NotBlank String authorizationStatus,
+      boolean enabled,
+      @Schema(nullable = true) @Valid List<BrandNameInput> names,
+      @Schema(nullable = true) @Size(max = 50) List<@Valid BrandCategoryLinkInput> categories,
+      @PositiveOrZero long version) {}
+
+  /** 品牌保存结果。带刊登判定，前端不必为了刷新状态再打一次判定端点。 */
+  public record BrandSaved(
+      UUID id, long version, String authorizationStatus, boolean publishable, String publishBlockCode) {}
+
+  /** 一条授权凭证的读出口径。 */
+  public record BrandAuthorization(
+      UUID id,
+      UUID brandId,
+      String certificateNo,
+      String grantor,
+      String validFrom,
+      @Schema(nullable = true) String validTo,
+      @Schema(nullable = true) String evidenceUri,
+      String note,
+      boolean enabled,
+      boolean validOn,
+      int daysToExpiry,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /**
+   * 凭证写入请求。
+   *
+   * <p>{@code validTo} 可空 = 长期有效（不是漏填）；{@code enabled=false} 是撤销，
+   * 行仍在——删了就查不到「曾经有过授权、后来被撤销」，而 16 侵权检测要这个事实。
+   */
+  public record BrandAuthorizationInput(
+      @NotBlank @Size(max = 64) String certificateNo,
+      @NotBlank @Size(max = 150) String grantor,
+      @NotNull String validFrom,
+      @Schema(nullable = true) String validTo,
+      @Schema(nullable = true) @Size(max = 500) String evidenceUri,
+      @Schema(nullable = true) @Size(max = 2000) String note,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  /** 品牌关联的一个类目（读出口径，带路径串方便界面上直接显示）。 */
+  public record BrandCategoryLink(UUID categoryId, String categoryCode, String categoryName, String categoryPath, int position) {}
+
+  /**
+   * 品牌详情：品牌本体 + 多语言名 + 关联类目 + 凭证 + 刊登判定。
+   *
+   * <p>合成在一个 record 里而不是拆成四个端点：详情页要显示的就是这四块的**同一瞬间**，
+   * 拆开的话运营在「凭证刚被别人撤销」之后看到的页面会是拼接出来的旧数据，
+   * 而「凭证还在但已过期」这种状态恰恰是靠页面当场发现才不至于误刊登。
+   */
+  public record BrandDetail(
+      UUID id,
+      String code,
+      String name,
+      @Schema(nullable = true) String logoUri,
+      String authorizationStatus,
+      boolean enabled,
+      long version,
+      Map<String, String> names,
+      List<BrandCategoryLink> categories,
+      List<BrandAuthorization> authorizations,
+      boolean publishable,
+      @Schema(nullable = true) String publishBlockCode,
+      @Schema(nullable = true) String publishBlockMessage,
+      int validAuthorizationCount,
+      String asOf,
+      String createdAt,
+      String updatedAt) {}
+
+  /**
+   * 刊登判定结果（蓝图点名的业务规则）。
+   *
+   * <p>04 刊登与 16 侵权检测消费这个形状：{@code publishable} 是能不能发，
+   * {@code blockCode} 是机器可读的原因码（两者处理动作不同：等生效 vs 续约），
+   * {@code blockMessage} 是可以直接显示的人话。
+   */
+  public record BrandPublishEligibility(
+      UUID brandId,
+      String brandName,
+      String authorizationStatus,
+      boolean enabled,
+      boolean publishable,
+      @Schema(nullable = true) String blockCode,
+      @Schema(nullable = true) String blockLabel,
+      @Schema(nullable = true) String blockMessage,
+      int authorizationCount,
+      int validAuthorizationCount,
+      String asOf) {}
+
+  /**
+   * 列表页的一行。
+   *
+   * <p>{@code publishable} / {@code publishBlockCode} 在**列表查询里就一起算出来**，
+   * 不是让前端点开详情才知道：列表页的用途就是「找出不能刊登的品牌」，
+   * 要逐个点开才知道的话这个筛选就没有意义了。
+   */
+  public record BrandRow(
+      UUID id,
+      String code,
+      String name,
+      @Schema(nullable = true) String logoUri,
+      String authorizationStatus,
+      boolean enabled,
+      boolean publishable,
+      @Schema(nullable = true) String publishBlockCode,
+      @Schema(nullable = true) String publishBlockLabel,
+      int authorizationCount,
+      int validAuthorizationCount,
+      long categoryCount,
+      String categoryNames,
+      Map<String, String> names,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /**
+   * 品牌列表的分页结果。
+   *
+   * <p>三个统计都**不受筛选条件影响**：界面上把它们放在筛选结果旁边，
+   * 用户才知道「筛出来的 3 条」之外还有多少停用 / 被阻止刊登的条目。
+   * 0 与「没查过」含义不同，所以单独返回而不是从当前页 items 推算。
+   */
+  public record BrandPage(
+      List<BrandRow> items, long total, int page, int size, long enabledCount, long blockedCount, String note) {}
+
+  /** 列表页筛选条件。null 表示不筛；空串按「不过滤」处理。 */
+  public record BrandQuery(
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) @Size(max = 16) String authorizationStatus,
+      @Schema(nullable = true) Boolean enabled,
+      @Schema(nullable = true) Boolean publishable,
+      @Schema(nullable = true) UUID categoryId,
+      int page,
+      int size) {}
+
+  /**
+   * 批量刊登判定的请求。
+   *
+   * <p>上限 500 是服务层的硬约束（{@code BrandService.eligibility}）：一次判定几千个品牌
+   * 会把结果行数推到不可控，而刊登侧真正要判的是「这批货涉及的品牌」，
+   * 那个集合天然在几十的量级。
+   */
+  public record BrandEligibilityBatchInput(
+      @NotNull @Size(min = 1, max = 500) List<@NotNull UUID> brandIds) {}
+
+  /**
+   * 品牌概览：规模与几个治理缺口指标。
+   *
+   * <p>{@code blockedListingCount} 是本模块最该被盯住的数字——它就是
+   * 「现在有多少品牌处于不能刊登状态」。{@code licensedWithoutCredentialCount}
+   * 是更窄的一个：需授权却一条凭证都没有，属于「必然登不了」的那一类。
+   */
+  public record BrandOverview(
+      long brandCount,
+      long enabledCount,
+      long disabledCount,
+      long ownedCount,
+      long agencyCount,
+      long licensedCount,
+      long blockedListingCount,
+      long licensedWithoutCredentialCount,
+      long expiringWithin30DaysCount,
+      long categoryLinkCount,
+      String note) {}
 }
