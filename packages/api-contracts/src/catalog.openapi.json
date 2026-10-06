@@ -111,6 +111,106 @@
         }
       }
     },
+    "/catalog/spec-axis/axes/{id}": {
+      "put": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "updateAxis",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpecAxisInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpecAxisSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "deleteAxis",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/skus/{id}": {
       "get": {
         "tags": [
@@ -1086,6 +1186,408 @@
         }
       }
     },
+    "/catalog/spec-axis/spus/{id}/axes": {
+      "post": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "bindAxis",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpecAxisBindingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpecAxisBindingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/spec-axis/category-rules": {
+      "get": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "categoryRules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategorySpecAxisRule"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "saveCategoryRule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "specAxisId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategorySpecAxisInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategorySpecAxisSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "deleteCategoryRule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "specAxisId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/spec-axis/axes": {
+      "get": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "axes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SpecAxis"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "createAxis",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpecAxisInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpecAxisSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/spec-axis/axes/{id}/options": {
+      "get": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SpecAxisOption"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "addOption",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpecAxisOptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpecAxisOptionSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "deleteOption",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "value",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/skus/batch": {
       "post": {
         "tags": [
@@ -1882,6 +2384,77 @@
         }
       }
     },
+    "/catalog/spec-axis/spus/{id}": {
+      "get": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "panel_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpecAxisPanel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/spec-axis/overview": {
+      "get": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "overview_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpecAxisOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/skus": {
       "get": {
         "tags": [
@@ -2195,7 +2768,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "panel_1",
+        "operationId": "panel_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -2235,7 +2808,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "overview_1",
+        "operationId": "overview_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -2393,6 +2966,58 @@
         }
       }
     },
+    "/catalog/spec-axis/spus/{id}/axes/{axisId}": {
+      "delete": {
+        "tags": [
+          "spec-axis-controller"
+        ],
+        "operationId": "unbindAxis",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "axisId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/sku-code/skus/{id}/identifiers/{identifierId}": {
       "delete": {
         "tags": [
@@ -2495,6 +3120,45 @@
         }
       },
       "UnitOfMeasureSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SpecAxisInput": {
+        "required": [
+          "code",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SpecAxisSaved": {
         "type": "object",
         "properties": {
           "id": {
@@ -3332,6 +3996,124 @@
           }
         }
       },
+      "SpecAxisBindingInput": {
+        "required": [
+          "specAxisId"
+        ],
+        "type": "object",
+        "properties": {
+          "specAxisId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createAttribute": {
+            "type": "boolean"
+          },
+          "attributeName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SpecAxisBindingSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "specAxisId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributeDefinitionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CategorySpecAxisInput": {
+        "required": [
+          "category"
+        ],
+        "type": "object",
+        "properties": {
+          "category": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CategorySpecAxisSaved": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "specAxisId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "SpecAxisOptionInput": {
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SpecAxisOptionSaved": {
+        "type": "object",
+        "properties": {
+          "specAxisId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "value": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "SkuBatchInput": {
         "required": [
           "action",
@@ -4035,6 +4817,256 @@
             }
           },
           "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SpecAxisBinding": {
+        "type": "object",
+        "properties": {
+          "specAxisId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "specAxisCode": {
+            "type": "string"
+          },
+          "specAxisName": {
+            "type": "string"
+          },
+          "attributeDefinitionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributeCode": {
+            "type": "string"
+          },
+          "attributeName": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabledOptionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalOptionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpecAxisOption"
+            }
+          }
+        }
+      },
+      "SpecAxisOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "sourceAttributeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceAttributeCode": {
+            "type": "string"
+          },
+          "sourceAttributeName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "SpecAxisPanel": {
+        "type": "object",
+        "properties": {
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "spuName": {
+            "type": "string"
+          },
+          "spuCategory": {
+            "type": "string"
+          },
+          "axes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpecAxisBinding"
+            }
+          },
+          "matrixRowCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "boundAxisCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "missingRequiredAxisCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requiredAxisNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SpecAxisOverview": {
+        "type": "object",
+        "properties": {
+          "axisCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabledAxisCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "optionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "boundSpuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "categoryRuleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unboundVariantAxisAttributes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "topAxes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpecAxisUsageCount"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SpecAxisUsageCount": {
+        "type": "object",
+        "properties": {
+          "specAxisId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "boundSpuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "optionCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CategorySpecAxisRule": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "specAxisId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "specAxisCode": {
+            "type": "string"
+          },
+          "specAxisName": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "boundSpuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "SpecAxis": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "optionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabledOptionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "boundSpuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
             "type": "string"
           }
         }
