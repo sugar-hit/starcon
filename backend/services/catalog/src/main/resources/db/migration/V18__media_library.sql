@@ -215,8 +215,12 @@ CREATE TABLE media_tag (
   version bigint NOT NULL DEFAULT 0,
   created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE(tenant_id,id),
-  UNIQUE(tenant_id,code),
-  CHECK(btrim(code)<>'' AND btrim(name)<'')
+  UNIQUE(tenant_id,code)
+  -- 这里**不**重复写 CHECK(btrim(code)<>'' AND btrim(name)<>'')：
+  -- 两列已经各自带 NOT NULL CHECK(btrim(x)<>'')，重复那条会把 `btrim(name)<>''`
+  -- 解析成「小于一个 varchar(100) 的字面量」——PG 拿 100 个空格当右侧操作数，
+  -- 于是**任何名字都通不过**。列上的 CHECK 已经是这里想要的语义。
+  -- （这条是实测出来的：重复 CHECK 让 media_tag 的插入全部失败。）
 );
 
 -- 素材与标签的多对多。一个标签在一个素材上只能有一条。

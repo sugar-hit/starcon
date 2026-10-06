@@ -2285,4 +2285,248 @@ public final class CatalogModels {
       long incompleteGroupCount,
       List<UnitGroupDimensionCount> dimensions,
       String note) {}
+
+  // ============================================================ 3.4.1.1 媒体库
+
+  /**
+   * 上传媒体的**元数据**部分（文件本体走 multipart 的 file 字段）。
+   *
+   * <p>这里刻意**没有** format / mimeType / byteSize / width / height / duration / sha256：
+   * 那些是「这份文件是什么」的客观事实，由 {@code MediaRules.probe} 从字节里探测。
+   * 让调用方填就等于允许它声称「一个 1KB 的 jpg 有 4000×3000」，而刊登侧会拿这个尺寸
+   * 去校验平台规格（3.4.1.2 的职责），错的尺寸会静默导致刊登失败。
+   */
+  public record MediaUpload(
+      @NotBlank @Size(max = 200) String name,
+      @NotBlank String mediaType,
+      @NotBlank String purpose,
+      @Schema(nullable = true) @Size(max = 2000) String description,
+      @Schema(nullable = true) @Size(max = 500) String altText,
+      /** 标签编码列表（整体替换语义，与 BrandInput.names 同口径）。 */
+      @Schema(nullable = true) @Size(max = 50) List<@NotBlank String> tagCodes,
+      boolean enabled) {}
+
+  /** 新增一个版本的元数据。文件本体同样是 multipart。 */
+  public record MediaVersionUpload(@Schema(nullable = true) @Size(max = 2000) String note) {}
+
+  /** 改素材：名称 / 用途 / 描述 / 替代文本 / 标签 / 启停（媒体类型与文件本体建后不可改）。 */
+  public record MediaUpdate(
+      @NotBlank @Size(max = 200) String name,
+      @NotBlank String purpose,
+      @Schema(nullable = true) @Size(max = 2000) String description,
+      @Schema(nullable = true) @Size(max = 500) String altText,
+      @Schema(nullable = true) @Size(max = 50) List<@NotBlank String> tagCodes,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 上传 / 保存结果。
+   *
+   * <p>{@code deduplicated=true} 表示这份字节在当前租户已经有一份素材，
+   * 这次没有新建行、也没有再写一份对象——返回的是既有素材。
+   * 「素材库复用」的字面含义就在这里：重复上传同一张图不会让库多一条。
+   */
+  public record MediaSaved(
+      UUID id,
+      long version,
+      int currentVersion,
+      boolean deduplicated,
+      long referenceCount,
+      String integrityStatus,
+      String integrityLabel) {}
+
+  /** 一条版本记录。{@code current} 标记它是不是当前版本。 */
+  public record MediaVersion(
+      UUID id,
+      int versionNo,
+      String storageKey,
+      String originalFilename,
+      String fileFormat,
+      String mimeType,
+      java.math.BigDecimal byteSize,
+      @Schema(nullable = true) java.math.BigDecimal widthPx,
+      @Schema(nullable = true) java.math.BigDecimal heightPx,
+      @Schema(nullable = true) java.math.BigDecimal durationSeconds,
+      String contentSha256,
+      String note,
+      boolean current,
+      String createdAt) {}
+
+  /** 一条引用（被哪个 SPU / SKU 用着）。删除保护与「谁在用」都靠它。 */
+  public record MediaReference(
+      UUID id,
+      UUID assetId,
+      String ownerType,
+      String ownerTypeLabel,
+      @Schema(nullable = true) UUID spuId,
+      @Schema(nullable = true) UUID skuId,
+      @Schema(nullable = true) String ownerCode,
+      @Schema(nullable = true) String ownerName,
+      String note,
+      String createdAt) {}
+
+  /** 素材详情：本体 + 版本 + 标签 + 引用 + 完整性历史，同一时刻的一致快照。 */
+  public record MediaDetail(
+      MediaRow asset,
+      List<MediaVersion> versions,
+      Map<String, String> tags,
+      List<MediaReference> references,
+      List<MediaIntegrityCheck> integrityChecks,
+      /** 可删除 = 没有引用且未停用之外的额外条件；false 时给出 deletableReason。 */
+      boolean deletable,
+      @Schema(nullable = true) String deletableReason,
+      String note) {}
+
+  /** 一次完整性校验的记录。哈希只在真的重算过才有值。 */
+  public record MediaIntegrityCheck(
+      UUID id,
+      UUID assetId,
+      String integrityStatus,
+      String integrityLabel,
+      @Schema(nullable = true) java.math.BigDecimal byteSizeExpected,
+      @Schema(nullable = true) java.math.BigDecimal byteSizeActual,
+      @Schema(nullable = true) String sha256Expected,
+      @Schema(nullable = true) String sha256Actual,
+      String detail,
+      String checkedAt) {}
+
+  /**
+   * 列表页的一行。
+   *
+   * <p>{@code referenceCount} / {@code tagCodes} / {@code integrityStatus} 在**列表查询里
+   * 就一起算出来**：删除保护要让人在列表上就看见「这个素材被引用着、删不掉」，
+   * 逐个点开详情才知道的话，用户会先点删除、再吃一个 409。
+   */
+  public record MediaRow(
+      UUID id,
+      String name,
+      String description,
+      String mediaType,
+      String mediaTypeLabel,
+      String purpose,
+      String purposeLabel,
+      String fileFormat,
+      String mimeType,
+      java.math.BigDecimal byteSize,
+      @Schema(nullable = true) java.math.BigDecimal widthPx,
+      @Schema(nullable = true) java.math.BigDecimal heightPx,
+      @Schema(nullable = true) java.math.BigDecimal durationSeconds,
+      String contentSha256,
+      String storageKey,
+      String originalFilename,
+      @Schema(nullable = true) String altText,
+      int currentVersion,
+      int versionCount,
+      long referenceCount,
+      List<String> tagCodes,
+      String integrityStatus,
+      String integrityLabel,
+      @Schema(nullable = true) String integrityDetail,
+      @Schema(nullable = true) String integrityCheckedAt,
+      boolean enabled,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /** 分页结果。统计数不受筛选影响，用户才知道筛选之外还有什么。 */
+  public record MediaPage(
+      List<MediaRow> items,
+      long total,
+      int page,
+      int size,
+      long imageCount,
+      long videoCount,
+      long failingIntegrityCount,
+      long unreferencedCount,
+      long disabledCount,
+      String note) {}
+
+  /** 列表筛选条件。null 表示不筛；空串按不过滤处理。 */
+  public record MediaQuery(
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) @Size(max = 16) String mediaType,
+      @Schema(nullable = true) @Size(max = 16) String purpose,
+      @Schema(nullable = true) @Size(max = 32) String tagCode,
+      @Schema(nullable = true) @Size(max = 16) String integrityStatus,
+      /** true=只看还被引用着的，false=只看无引用（可清理的），null=全部。 */
+      @Schema(nullable = true) Boolean referenced,
+      @Schema(nullable = true) Boolean enabled,
+      int page,
+      int size) {}
+
+  /** 标签写入（新建或改，id 为空即新建）。 */
+  public record MediaTagInput(
+      @NotBlank @Size(max = 32) String code,
+      @NotBlank @Size(max = 100) String name,
+      @Schema(nullable = true) @Size(max = 500) String note,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 标签保存结果。
+   *
+   * <p>回带 {@code code}：上传/编辑素材时提交的是**编码**而不是 id，
+   * 存完立刻就能拿它继续打标签，不必再查一次字典。
+   */
+  public record MediaTagSaved(UUID id, String code, long version, long usageCount) {}
+
+  /** 标签字典一行，带使用数（按标签筛素材的候选来源）。 */
+  public record MediaTagRow(
+      UUID id,
+      String code,
+      String name,
+      String note,
+      boolean enabled,
+      long usageCount,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /** 新增引用的请求。listing 引用刻意不在这里：04 刊登交付后走 event 写入。 */
+  public record MediaReferenceInput(
+      @NotBlank String ownerType,
+      @Schema(nullable = true) UUID spuId,
+      @Schema(nullable = true) UUID skuId,
+      @Schema(nullable = true) @Size(max = 500) String note) {}
+
+  /** 引用保存结果（带删除保护要用的计数）。 */
+  public record MediaReferenceSaved(UUID id, UUID assetId, long referenceCount, boolean deletable, @Schema(nullable = true) String deletableReason) {}
+
+  /** 完整性校验结果：一次探测的结论 + 新记录。 */
+  public record MediaIntegrityResult(
+      UUID assetId,
+      String integrityStatus,
+      String integrityLabel,
+      long referenceCount,
+      boolean healthy,
+      String detail,
+      MediaIntegrityCheck check) {}
+
+  /** 批量校验的汇总结果（素材库巡检）。 */
+  public record MediaIntegritySweep(
+      long checkedCount,
+      long healthyCount,
+      long missingCount,
+      long sizeMismatchCount,
+      long contentMismatchCount,
+      List<MediaIntegrityResult> results,
+      String note) {}
+
+  /** 媒体概览：规模 + 治理缺口指标。 */
+  public record MediaOverview(
+      long assetCount,
+      long enabledCount,
+      long disabledCount,
+      long imageCount,
+      long videoCount,
+      long byteSizeTotal,
+      long referenceCount,
+      long referencedAssetCount,
+      long unreferencedAssetCount,
+      long failingIntegrityCount,
+      long missingCount,
+      long tagCount,
+      long versionCount,
+      long storageHealthy,
+      String note) {}
 }
