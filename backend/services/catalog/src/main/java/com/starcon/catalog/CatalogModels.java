@@ -1529,4 +1529,132 @@ public final class CatalogModels {
       String name,
       String source,
       String reason) {}
+
+  // ============================================================ 3.3.1.1 分类树管理
+
+  /**
+   * 一棵分类树。
+   *
+   * <p>{@code treeKind} 区分「内部管理分类」与「平台类目映射」——蓝图明确要求这是**多棵独立的树**：
+   * 两者的维护节奏完全不同（平台类目跟着平台改版走，内部类目跟着商品结构走），
+   * 混成一棵会让任一方改动都牵动另一方。
+   */
+  public record CategoryTree(
+      UUID id,
+      String code,
+      String name,
+      String treeKind,
+      @Schema(nullable = true) String platformCode,
+      boolean enabled,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /** 建树 / 改树的请求。treeKind 建后不可改——它决定这棵树能不能当内部类目用。 */
+  public record CategoryTreeInput(
+      @NotBlank @Size(max = 64) String code,
+      @NotBlank @Size(max = 100) String name,
+      @NotBlank String treeKind,
+      @Schema(nullable = true) @Size(max = 32) String platformCode,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  /** 单条多语言分类名。基础名在 {@code product_category.name}，这里存的是补充。 */
+  public record CategoryNameInput(
+      @NotBlank @Size(max = 16) String locale, @NotBlank @Size(max = 200) String name) {}
+
+  /**
+   * 分类树上的一个节点。
+   *
+   * <p>{@code path} 是从根到自己的名称路径串（"服饰 / 上装 / T恤"），供 13 分析按层级下钻；
+   * {@code directProductCount} 是**直接**挂在这一节点上的商品数，
+   * {@code subtreeProductCount} 含所有子孙——两者含义不同，界面上分开显示，
+   * 否则「把商品挂到子类目」会让父类目的数字看起来莫名变少。
+   */
+  public record CategoryNode(
+      UUID id,
+      UUID treeId,
+      String treeCode,
+      String treeKind,
+      @Schema(nullable = true) String platformCode,
+      @Schema(nullable = true) UUID parentId,
+      String code,
+      String name,
+      int position,
+      boolean enabled,
+      int depth,
+      String path,
+      long directProductCount,
+      long subtreeProductCount,
+      long secondaryProductCount,
+      long attributeRuleCount,
+      long specAxisRuleCount,
+      Map<String, String> names,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /**
+   * 建 / 改分类的请求。
+   *
+   * <p>{@code parentId} 为空即根节点。拖拽改层级走 {@code CategoryMoveInput}（单独的端点），
+   * 不混在这个保存里——保存表单顺手把层级改了，用户很难察觉自己动到了整棵子树的位置。
+   */
+  public record CategoryInput(
+      @NotBlank @Size(max = 64) String code,
+      @NotBlank @Size(max = 100) String name,
+      @Schema(nullable = true) UUID parentId,
+      @PositiveOrZero Integer position,
+      boolean enabled,
+      @Valid @Schema(nullable = true) List<CategoryNameInput> names,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 拖拽落点：新的父节点与同级位置。
+   *
+   * <p>单独一个 record 而不是复用 {@code CategoryInput}：拖拽只关心落点，
+   * 不该顺带把名称、启用状态一起提交（那两个字段可能正在被别人编辑）。
+   */
+  public record CategoryMoveInput(
+      @Schema(nullable = true) UUID parentId,
+      @PositiveOrZero Integer position,
+      @PositiveOrZero long version) {}
+
+  /** 分类树保存结果。 */
+  public record CategorySaved(UUID id, long version, int depth, String path) {}
+
+  /** SPU 的主分类与辅助分类。 */
+  public record SpuCategoryAssignment(
+      UUID spuId, UUID primaryCategoryId, String primaryCategoryName, List<SpuCategoryLink> secondary) {}
+
+  /** 一个辅助分类。 */
+  public record SpuCategoryLink(UUID categoryId, String code, String name, int position) {}
+
+  /** 写入 SPU 分类关联的请求：主分类 + 辅助分类。 */
+  public record SpuCategoryInput(
+      @Schema(nullable = true) UUID primaryCategoryId,
+      @Schema(nullable = true) @Valid List<SpuCategoryLinkInput> secondary) {}
+
+  /** 单个辅助分类的写入项。 */
+  public record SpuCategoryLinkInput(@NotNull UUID categoryId, @PositiveOrZero Integer position) {}
+
+  /**
+   * 分类树概览：规模与几个治理缺口指标。
+   *
+   * <p>{@code uncategorizedSpuCount} 是「有商品但既没有主分类也没有历史类目文本」的 SPU 数——
+   * 0 与「没查过」含义不同，所以单独返回（与 V8 的 unregisteredSkus 同一口径）。
+   */
+  public record CategoryOverview(
+      long treeCount,
+      long internalTreeCount,
+      long platformTreeCount,
+      long disabledTreeCount,
+      long categoryCount,
+      long disabledCategoryCount,
+      long maxDepth,
+      long productCount,
+      long categorizedSpuCount,
+      long uncategorizedSpuCount,
+      long orphanedRuleCount,
+      String note) {}
 }

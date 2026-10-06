@@ -49,9 +49,11 @@ public class AttributeDictionaryService {
       " from attribute_definition d where d.spu_id is null";
 
   private final DSLContext sql;
+  private final CategoryTreeService categories;
 
-  public AttributeDictionaryService(DSLContext sql) {
+  public AttributeDictionaryService(DSLContext sql, CategoryTreeService categories) {
     this.sql = sql;
+    this.categories = categories;
   }
 
   // ============================================================ 列表
@@ -659,13 +661,19 @@ public class AttributeDictionaryService {
           exists, "可选值「" + option + "」不在该属性的选项集合里，请先在选项集合中登记它");
     }
 
+    // V14 兑现点：category_id 是 NOT NULL 外键，而本方法的入参仍是类目**文本**（已交付 API 语义不变）。
+    // 文本 → 类目主键的解析与按需建节点由 CategoryTreeService 承担，本模块是唯一写入口。
+    UUID categoryId = categories.resolveOrCreateCategoryId(actor, category);
+
     sql.execute(
-        "insert into category_attribute_rule(tenant_id,category,attribute_id,required,min_value,"
-            + "max_value,position) values(?,?,?,?,?,?,?) on conflict (tenant_id,category,attribute_id)"
+        "insert into category_attribute_rule(tenant_id,category,category_id,attribute_id,required,"
+            + "min_value,max_value,position) values(?,?,?,?,?,?,?,?)"
+            + " on conflict (tenant_id,category,attribute_id)"
             + " do update set required=excluded.required,min_value=excluded.min_value,"
             + "max_value=excluded.max_value,position=excluded.position",
         actor.tenantId(),
         category,
+        categoryId,
         attributeId,
         input.required(),
         input.minValue(),
@@ -678,10 +686,11 @@ public class AttributeDictionaryService {
         attributeId);
     for (String option : allowed)
       sql.execute(
-          "insert into category_attribute_option(tenant_id,category,attribute_id,option_value)"
-              + " values(?,?,?,?)",
+          "insert into category_attribute_option(tenant_id,category,category_id,attribute_id,option_value)"
+              + " values(?,?,?,?,?)",
           actor.tenantId(),
           category,
+          categoryId,
           attributeId,
           option);
     audit(actor, attributeId, "CategoryAttributeRuleSaved");

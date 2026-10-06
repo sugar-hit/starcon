@@ -42,10 +42,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class SpecAxisService {
   private final DSLContext sql;
   private final AccessService access;
+  private final CategoryTreeService categories;
 
-  public SpecAxisService(DSLContext sql, AccessService access) {
+  public SpecAxisService(DSLContext sql, AccessService access, CategoryTreeService categories) {
     this.sql = sql;
     this.access = access;
+    this.categories = categories;
   }
 
   // ============================================================ 规格轴字典
@@ -639,11 +641,14 @@ public class SpecAxisService {
     CatalogService.check(
         category.length() <= 100, "类目名称最多 100 个字符");
     try {
+      // V14 兑现点：category_id 是 NOT NULL 外键，入参仍是类目文本（已交付 API 语义不变），
+      // 解析与按需建节点统一走 CategoryTreeService，本模块是唯一写入口。
+      UUID categoryId = categories.resolveOrCreateCategoryId(actor, category);
       sql.execute(
-          "insert into category_spec_axis(tenant_id,category,spec_axis_id,required,position)"
-              + " values(?,?,?,?,?) on conflict (tenant_id,category,spec_axis_id)"
+          "insert into category_spec_axis(tenant_id,category,category_id,spec_axis_id,required,position)"
+              + " values(?,?,?,?,?,?) on conflict (tenant_id,category,spec_axis_id)"
               + " do update set required=excluded.required,position=excluded.position",
-          actor.tenantId(), category, axisId, input.required(), input.position());
+          actor.tenantId(), category, categoryId, axisId, input.required(), input.position());
     } catch (DataAccessException e) {
       throw conflict("类目规则写入失败，请刷新后重试");
     }

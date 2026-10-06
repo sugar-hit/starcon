@@ -123,6 +123,7 @@ class SkuAttributeOverrideIntegrationTest {
   }
 
   @Autowired CatalogService catalog;
+  @Autowired CategoryTreeService categories;
   @Autowired SkuAttributeOverrideService overrides;
   @Autowired AccessService access;
   @Autowired DSLContext sql;
@@ -284,10 +285,14 @@ class SkuAttributeOverrideIntegrationTest {
         actor,
         () ->
             sql.execute(
-                "insert into category_attribute_rule(tenant_id,category,attribute_id,required)"
-                    + " values(?,?,?,true)",
+                "insert into category_attribute_rule(tenant_id,category,category_id,attribute_id,required)"
+                    + " values(?,?,?,?,true)",
                 actor.tenantId(),
                 category,
+                // V14 之后 category_id 是 NOT NULL 外键：规则必须锚在一个真实类目上。
+                // 解析走 CategoryTreeService（3.3.1.1 交付的唯一写入口），语义与
+                // AttributeDictionaryService.saveCategoryRule 里那次调用完全一致。
+                categories.resolveOrCreateCategoryId(actor, category),
                 attributeId));
   }
 
