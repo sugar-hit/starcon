@@ -846,4 +846,150 @@ public final class CatalogModels {
       long snapshotCount,
       List<UnitDimensionCount> dimensions,
       String note) {}
+
+  // ------------------------------------------------ 3.1.3.1 规格轴定义
+
+  /**
+   * 规格轴字典写入请求。
+   *
+   * <p>{@code code} 是轴的机器标识，且**必须与承载它的 variant_axis 属性定义同 code**
+   * （V9 的 guard_spu_spec_axis 触发器强制）：两边各叫各的会让值源永远对不齐。
+   */
+  public record SpecAxisInput(
+      @NotBlank @Size(max = 64) String code,
+      @NotBlank @Size(max = 100) String name,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 规格轴字典一行。
+   *
+   * <p>{@code optionCount} 是可用选项数（不含停用），{@code boundSpuCount} 是引用它的 SPU 数。
+   * 两个计数都是"删除前必须看见"的信息：被引用时删轴会让那些 SPU 的规格凭空消失。
+   */
+  public record SpecAxis(
+      UUID id,
+      String code,
+      String name,
+      boolean enabled,
+      long optionCount,
+      long enabledOptionCount,
+      long boundSpuCount,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  public record SpecAxisSaved(UUID id, long version) {}
+
+  /**
+   * 规格轴的一个选项。
+   *
+   * <p>{@code sourceAttributeCode} 是**这个值在属性选项值源里的承载属性**：
+   * 规格选项不得独立于属性选项存在（蓝图硬约束），所以界面上必须把"它同时也是一个属性选项"
+   * 讲出来，而不是让人以为规格轴自己存了一份值。
+   */
+  public record SpecAxisOption(
+      String value,
+      int position,
+      boolean enabled,
+      UUID sourceAttributeId,
+      String sourceAttributeCode,
+      String sourceAttributeName,
+      String createdAt) {}
+
+  /** 规格轴选项写入请求。value 会同时落到属性选项值源与规格轴选项，两处同事务。 */
+  public record SpecAxisOptionInput(
+      @NotBlank @Size(max = 100) String value,
+      @PositiveOrZero int position,
+      boolean enabled) {}
+
+  public record SpecAxisOptionSaved(UUID specAxisId, String value, int position) {}
+
+  /**
+   * 绑定请求。
+   *
+   * <p>{@code createAttribute=true} 允许在 SPU 上还没有同 code 的 variant_axis 属性时自动建一条
+   * 承载属性——3.2.1.1 属性定义列表未开发，规格轴必须能在自己的端点里自洽地走完，
+   * 不能因为"属性管理页面不存在"就让链路断掉。
+   */
+  public record SpecAxisBindingInput(
+      @NotNull UUID specAxisId,
+      @PositiveOrZero int position,
+      boolean createAttribute,
+      @Schema(nullable = true) @Size(max = 100) String attributeName) {}
+
+  public record SpecAxisBindingSaved(
+      UUID id, UUID spuId, UUID specAxisId, UUID attributeDefinitionId, int position) {}
+
+  /** 类目允许的规格轴规则写入请求。category 是 spu.category 的自由文本（3.3.1.1 未开发）。 */
+  public record CategorySpecAxisInput(
+      @NotBlank @Size(max = 100) String category,
+      boolean required,
+      @PositiveOrZero int position) {}
+
+  /** 一条类目规则。{@code boundSpuCount} 让运营看见这条规则实际覆盖了多少 SPU。 */
+  public record CategorySpecAxisRule(
+      String category,
+      UUID specAxisId,
+      String specAxisCode,
+      String specAxisName,
+      boolean required,
+      int position,
+      long boundSpuCount,
+      String createdAt) {}
+
+  public record CategorySpecAxisSaved(String category, UUID specAxisId) {}
+
+  /**
+   * 单个 SPU 的规格轴面板。
+   *
+   * <p>{@code matrixRowCount} 是各轴可用选项的笛卡尔积行数——即"按当前规格轴展开能生成多少个 SKU"。
+   * 它是 {@code long}：四条各 50 个选项已经是 6.25M 行，{@code int} 会溢出成负数。
+   */
+  public record SpecAxisPanel(
+      UUID spuId,
+      String spuCode,
+      String spuName,
+      String spuCategory,
+      List<SpecAxisBinding> axes,
+      long matrixRowCount,
+      long boundAxisCount,
+      long missingRequiredAxisCount,
+      List<String> requiredAxisNotes) {}
+
+  /** SPU 上一条已绑定的规格轴，连同它的选项与承载属性。 */
+  public record SpecAxisBinding(
+      UUID specAxisId,
+      String specAxisCode,
+      String specAxisName,
+      UUID attributeDefinitionId,
+      String attributeCode,
+      String attributeName,
+      int position,
+      long skuCount,
+      long enabledOptionCount,
+      long totalOptionCount,
+      List<SpecAxisOption> options) {}
+
+  /**
+   * 规格轴概览。
+   *
+   * <p>{@code unboundVariantAxisAttributes} 是本模块的治理缺口指标：V1 允许
+   * {@code variant_axis=true} 的属性定义独立存在（3.1.1/3.1.2 的既有测试就这么写），
+   * 本迁移**不加"必须挂到轴上"的触发器**（那会打碎已交付模块的写入口），改为把缺口显式暴露出来。
+   * 0 与"没查过"含义不同，界面上要分开写。
+   */
+  public record SpecAxisOverview(
+      long axisCount,
+      long enabledAxisCount,
+      long optionCount,
+      long boundSpuCount,
+      long categoryRuleCount,
+      long unboundVariantAxisAttributes,
+      List<SpecAxisUsageCount> topAxes,
+      String note) {}
+
+  /** 各轴被 SPU 复用的次数，用于概览里看"哪些轴真正在用"。 */
+  public record SpecAxisUsageCount(
+      UUID specAxisId, String code, String name, long boundSpuCount, long optionCount) {}
 }
