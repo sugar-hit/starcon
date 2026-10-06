@@ -39,7 +39,8 @@ const services: readonly {
     env: 'CATALOG_URL',
     fallback: 'http://127.0.0.1:8082',
     pattern:
-      /^(products(?:\/[0-9a-f-]+(?:\/(?:attributes|skus)(?:\/[0-9a-f-]+)?)?)?|records\/(research|compliance|assets)(?:\/[0-9a-f-]+)?)$/,
+      // skus 是 3.1.2.1 SKU 列表：分页检索、能力声明、批量操作与 CSV 导出。
+      /^(products(?:\/[0-9a-f-]+(?:\/(?:attributes|skus)(?:\/[0-9a-f-]+)?)?)?|records\/(research|compliance|assets)(?:\/[0-9a-f-]+)?|skus(?:\/(?:capabilities|batch|export))?)$/,
   },
   {
     // 02 渠道与店铺：平台目录、授权连接、店铺与站点。
@@ -90,6 +91,22 @@ export async function proxy(request: NextRequest, context: { params: { path: str
       signal: AbortSignal.timeout(15_000),
     });
     const text = await upstream.text();
+    const contentType = upstream.headers.get('content-type') ?? '';
+    // CSV 导出必须原样透传：走 JSON.parse 会把 CSV 解析失败变成 503，而且即使解析成功
+    // 也会被重新序列化成 JSON，下载到的是一串引号转义的文本。
+    // 只认 text/csv：JSON 接口一律走下面的正常分支，不受这里影响。
+    if (text && contentType.includes('text/csv')) {
+      const raw = new NextResponse(text, { status: upstream.status, headers: {} });
+      raw.headers.set('Content-Type', contentType);
+      const disposition = upstream.headers.get('content-disposition');
+      if (disposition) raw.headers.set('Content-Disposition', disposition);
+      raw.headers.set('Cache-Control', 'no-store');
+      if (upstream.status === 401) {
+        raw.cookies.delete(cookieName);
+        raw.cookies.delete(legacyCookieName);
+      }
+      return raw;
+    }
     const data = text ? JSON.parse(text) : null;
     let token: string | undefined;
     if (path === 'auth/login' && upstream.ok && data?.token) {
