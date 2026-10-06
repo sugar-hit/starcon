@@ -194,6 +194,17 @@ public class UnitConversionService {
             .get(0, Long.class);
     CatalogService.check(
         snapshots == 0, "单位「" + code + "」已被 " + snapshots + " 条单据快照引用，不能删除");
+    // 3.3.3.1 补的：单位组（V17 的 unit_group_member）引用着它。
+    // 删掉单位会经外键 ON DELETE CASCADE 连带删掉它在所有组里的成员行与组内换算版本——
+    // 那是静默的数据丢失，运营根本不知道自己刚删掉了什么。与上面两条同一口径：被引用就拒绝。
+    long groups =
+        sql.fetchOne("select count(*) from unit_group_member where unit_code=?", code)
+            .get(0, Long.class);
+    CatalogService.check(
+        groups == 0,
+        "单位「" + code + "」已被 " + groups + " 个单位组引用，不能删除；"
+            + "请先到计量单位（/products/units）把它移出这些组，或改为停用——"
+            + "停用只挡住新建，历史换算与已冻结快照仍可读");
     sql.execute("delete from unit_of_measure where id=?", id);
     audit(actor, id, "UnitOfMeasureDeleted");
   }

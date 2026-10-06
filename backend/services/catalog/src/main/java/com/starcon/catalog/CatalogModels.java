@@ -2102,4 +2102,187 @@ public final class CatalogModels {
       long expiringWithin30DaysCount,
       long categoryLinkCount,
       String note) {}
+
+  // ============================================================ 3.3.3.1 计量单位（字典视角）
+
+  /** 单位组成员的写入（整体替换用）。position 决定组内展示顺序。 */
+  public record UnitGroupMemberInput(@NotBlank @Size(max = 32) String unitCode, @PositiveOrZero Integer position) {}
+
+  /**
+   * 建 / 改单位组的请求。
+   *
+   * <p>{@code members} 是**整体替换**语义（提交什么就等于什么），与 {@link BrandInput} 的
+   * {@code categories} 同一口径：成员关系是「这个组有哪些单位」的完整描述，
+   * 增量语义下前端必须先取回当前全集再算差集，少发一条就是静默的成员丢失。
+   *
+   * <p>{@code baseUnitCode} 必须是本次提交成员里的一个：组基础单位不占换算行，
+   * 移出组会让已配置的换算版本失去基准。
+   */
+  public record UnitGroupInput(
+      @NotBlank @Size(max = 32) String code,
+      @NotBlank @Size(max = 100) String name,
+      @NotBlank String dimension,
+      @NotBlank @Size(max = 32) String baseUnitCode,
+      @Schema(nullable = true) @Size(max = 500) String note,
+      boolean enabled,
+      @Schema(nullable = true) @Size(max = 50) List<@Valid UnitGroupMemberInput> members,
+      @PositiveOrZero long version) {}
+
+  /** 单位组保存结果。带成员数，前端不必为了刷新计数再打一次详情。 */
+  public record UnitGroupSaved(UUID id, long version, int memberCount) {}
+
+  /**
+   * 组内换算版本的写入。
+   *
+   * <p>{@code quantityPerBase} 是「1 个该单位等于多少个**组基础单位**」
+   * （组基础单位为克时，1 千克 → 1000）。区间不重叠由 V17 触发器保证，
+   * 与已有版本重叠时由 DB 拒绝，应用层转成可读的 409。
+   */
+  public record UnitGroupConversionInput(
+      @NotBlank @Size(max = 32) String unitCode,
+      @NotNull @DecimalMin(value = "0", inclusive = false) @Digits(integer = 13, fraction = 6)
+          BigDecimal quantityPerBase,
+      @NotBlank String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo,
+      @Schema(nullable = true) @Size(max = 500) String note) {}
+
+  /** 组内换算版本保存结果。 */
+  public record UnitGroupConversionSaved(
+      UUID id, UUID groupId, String unitCode, BigDecimal quantityPerBase,
+      String effectiveFrom, @Schema(nullable = true) String effectiveTo) {}
+
+  /** 单位组一行。列表页每行自带成员数与当前生效版本数，不点开详情也看得出行不行。 */
+  public record UnitGroupRow(
+      UUID id,
+      String code,
+      String name,
+      String dimension,
+      String dimensionLabel,
+      String baseUnitCode,
+      @Schema(nullable = true) String baseUnitName,
+      int memberCount,
+      long conversionVersionCount,
+      long openConversionCount,
+      /** 组内至少有一个成员缺当前生效换算版本 → 换算查询会报 NO_EFFECTIVE_VERSION。 */
+      boolean allMembersConvertible,
+      String note,
+      boolean enabled,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /** 组内一个成员的当前状态。{@code currentQuantityPerBase} 为空表示这一天没有生效版本。 */
+  public record UnitGroupMember(
+      String unitCode,
+      @Schema(nullable = true) String unitName,
+      int scale,
+      int position,
+      /** 是否是组基础单位：基础单位比例恒为 1，不占换算行。 */
+      boolean base,
+      boolean unitEnabled,
+      @Schema(nullable = true) BigDecimal currentQuantityPerBase,
+      @Schema(nullable = true) String currentEffectiveFrom,
+      @Schema(nullable = true) String currentEffectiveTo,
+      long versionCount) {}
+
+  /** 某个成员单位的一条换算版本。 */
+  public record UnitGroupConversionVersion(
+      UUID id,
+      String unitCode,
+      BigDecimal quantityPerBase,
+      String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo,
+      boolean current,
+      String note,
+      String createdAt) {}
+
+  /**
+   * 单位组详情：组本体 + 成员 + 组内换算版本。
+   *
+   * <p>{@code asOf} 是这批「当前生效」标记的基准日，按它求值而不是按服务器当天——
+   * 补录一条 2024 年的比例时，"哪一版当时生效"与"今天哪一版生效"必须能分开看。
+   */
+  public record UnitGroupDetail(
+      UnitGroupRow group,
+      String asOf,
+      List<UnitGroupMember> members,
+      List<UnitGroupConversionVersion> conversions,
+      long conversionVersionCount) {}
+
+  /** 单位组分页结果。三个统计不受筛选影响，让用户知道筛出来的之外还有什么。 */
+  public record UnitGroupPage(
+      List<UnitGroupRow> items, long total, int page, int size,
+      long enabledCount, long disabledCount, String note) {}
+
+  /** 单位组列表筛选条件。null 表示不筛；空串按不过滤处理。 */
+  public record UnitGroupQuery(
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) @Size(max = 16) String dimension,
+      @Schema(nullable = true) Boolean enabled,
+      int page,
+      int size) {}
+
+  /**
+   * 换算查询的请求（蓝图的输出「换算查询能力」）。
+   *
+   * <p>{@code asOf} 留空取 UTC 当天。它决定用哪一版比例，也决定"这一版生效了吗"。
+   */
+  public record UnitGroupConvertInput(
+      @NotBlank @Size(max = 32) String fromUnitCode,
+      @NotBlank @Size(max = 32) String toUnitCode,
+      @NotNull @DecimalMin(value = "0", inclusive = false) @Digits(integer = 13, fraction = 6)
+          BigDecimal quantity,
+      @Schema(nullable = true) String asOf) {}
+
+  /**
+   * 换算查询的结果。
+   *
+   * <p>换不动时 {@code denied=true} + {@code denyCode} + {@code denyMessage}，**不**是 HTTP 错误：
+   * 「件换算不成千克」是业务判定不是调用失败，调用方要拿到结构化结果去提示用户，
+   * 而不是接一个异常。同一条 SQL 一次算完，不在应用层拼。
+   */
+  public record UnitGroupConvertResult(
+      boolean denied,
+      @Schema(nullable = true) String denyCode,
+      @Schema(nullable = true) String denyMessage,
+      String fromUnitCode,
+      @Schema(nullable = true) String fromUnitName,
+      String toUnitCode,
+      @Schema(nullable = true) String toUnitName,
+      BigDecimal quantity,
+      @Schema(nullable = true) BigDecimal convertedQuantity,
+      @Schema(nullable = true) String fromDimension,
+      @Schema(nullable = true) String toDimension,
+      @Schema(nullable = true) UUID groupId,
+      @Schema(nullable = true) String groupCode,
+      @Schema(nullable = true) String groupName,
+      @Schema(nullable = true) String baseUnitCode,
+      @Schema(nullable = true) BigDecimal fromQuantityPerBase,
+      @Schema(nullable = true) BigDecimal toQuantityPerBase,
+      String asOf,
+      String note) {}
+
+  /** 各量纲下的单位组数与成员数，用于概览显示"换算组覆盖了哪些量纲"。 */
+  public record UnitGroupDimensionCount(String dimension, String dimensionLabel, long groupCount, long memberCount) {}
+
+  /**
+   * 计量单位概览：字典规模 + 组规模 + 治理缺口指标。
+   *
+   * <p>{@code unregisteredUnitCount} 是「有多少单位还没进任何单位组」——
+   * 这些单位能配 SKU 换算，但组级换算查不到它们。0 与"没查过"含义不同，界面上要分开写。
+   * {@code incompleteGroupCount} 是「有多少组存在没有当前生效换算版本的成员」，
+   * 这类组在换算查询里会直接报 NO_EFFECTIVE_VERSION。
+   */
+  public record UnitGroupOverview(
+      long unitCount,
+      long enabledUnitCount,
+      long groupCount,
+      long enabledGroupCount,
+      long memberCount,
+      long conversionVersionCount,
+      long openConversionCount,
+      long ungroupedUnitCount,
+      long incompleteGroupCount,
+      List<UnitGroupDimensionCount> dimensions,
+      String note) {}
 }
