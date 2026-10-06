@@ -11,6 +11,106 @@
     }
   ],
   "paths": {
+    "/catalog/unit-conversion/units/{id}": {
+      "put": {
+        "tags": [
+          "unit-conversion-controller"
+        ],
+        "operationId": "updateUnit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitOfMeasureInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitOfMeasureSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "unit-conversion-controller"
+        ],
+        "operationId": "deleteUnit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/skus/{id}": {
       "get": {
         "tags": [
@@ -732,6 +832,256 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/catalog/unit-conversion/units": {
+      "get": {
+        "tags": [
+          "unit-conversion-controller"
+        ],
+        "operationId": "units",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UnitOfMeasure"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "unit-conversion-controller"
+        ],
+        "operationId": "createUnit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitOfMeasureInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitOfMeasureSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/unit-conversion/snapshots": {
+      "get": {
+        "tags": [
+          "unit-conversion-controller"
+        ],
+        "operationId": "snapshot",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "documentRef",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitSnapshot"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "unit-conversion-controller"
+        ],
+        "operationId": "freeze",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitSnapshotInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitSnapshot"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/unit-conversion/skus/{id}/conversions": {
+      "post": {
+        "tags": [
+          "unit-conversion-controller"
+        ],
+        "operationId": "addConversion",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitConversionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitConversionSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/unit-conversion/convert": {
+      "post": {
+        "tags": [
+          "unit-conversion-controller"
+        ],
+        "operationId": "convert",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnitConvertInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitConvertResult"
+                }
+              }
+            }
           }
         }
       }
@@ -1461,6 +1811,77 @@
         }
       }
     },
+    "/catalog/unit-conversion/skus/{id}": {
+      "get": {
+        "tags": [
+          "unit-conversion-controller"
+        ],
+        "operationId": "panel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitPanel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/unit-conversion/overview": {
+      "get": {
+        "tags": [
+          "unit-conversion-controller"
+        ],
+        "operationId": "overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnitOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/skus": {
       "get": {
         "tags": [
@@ -1774,7 +2195,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "panel",
+        "operationId": "panel_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1814,7 +2235,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "overview",
+        "operationId": "overview_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -2027,6 +2448,65 @@
   },
   "components": {
     "schemas": {
+      "UnitOfMeasureInput": {
+        "required": [
+          "code",
+          "dimension",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "dimension": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "scale": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "allowPurchase": {
+            "type": "boolean"
+          },
+          "allowSale": {
+            "type": "boolean"
+          },
+          "allowStorage": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "UnitOfMeasureSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "SkuDetailInput": {
         "required": [
           "barcode",
@@ -2544,6 +3024,314 @@
           }
         }
       },
+      "UnitSnapshotInput": {
+        "required": [
+          "documentRef",
+          "documentType",
+          "lines"
+        ],
+        "type": "object",
+        "properties": {
+          "documentType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "documentRef": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "lines": {
+            "maxItems": 500,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnitSnapshotLineInput"
+            }
+          }
+        }
+      },
+      "UnitSnapshotLineInput": {
+        "required": [
+          "quantity",
+          "role",
+          "skuId",
+          "unitCode"
+        ],
+        "type": "object",
+        "properties": {
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "role": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          }
+        }
+      },
+      "UnitSnapshot": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentType": {
+            "type": "string"
+          },
+          "documentTypeLabel": {
+            "type": "string"
+          },
+          "documentRef": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "requestedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reusedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnitSnapshotLine"
+            }
+          }
+        }
+      },
+      "UnitSnapshotLine": {
+        "type": "object",
+        "properties": {
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "roleLabel": {
+            "type": "string"
+          },
+          "unitCode": {
+            "type": "string"
+          },
+          "baseUnit": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "quantityPerBase": {
+            "type": "number"
+          },
+          "baseQuantity": {
+            "type": "number"
+          },
+          "sourceConversionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "created": {
+            "type": "boolean"
+          },
+          "occurredAt": {
+            "type": "string"
+          }
+        }
+      },
+      "UnitConversionInput": {
+        "required": [
+          "effectiveFrom",
+          "quantityPerBase",
+          "role",
+          "unitCode"
+        ],
+        "type": "object",
+        "properties": {
+          "unitCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "role": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "quantityPerBase": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UnitConversionSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitCode": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UnitConvertInput": {
+        "required": [
+          "quantity",
+          "skuId",
+          "unitCode"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "unitCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "nullable": true
+          },
+          "asOf": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UnitConvertResult": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "unitCode": {
+            "type": "string"
+          },
+          "unitName": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "type": "string"
+          },
+          "roleLabel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "quantityPerBase": {
+            "type": "number"
+          },
+          "baseUnit": {
+            "type": "string"
+          },
+          "baseQuantity": {
+            "type": "number"
+          },
+          "asOf": {
+            "type": "string"
+          },
+          "conversionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "nullable": true
+          },
+          "effectiveTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
       "SkuBatchInput": {
         "required": [
           "action",
@@ -3030,6 +3818,223 @@
             "format": "int32"
           },
           "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "UnitOfMeasure": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "scale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allowPurchase": {
+            "type": "boolean"
+          },
+          "allowSale": {
+            "type": "boolean"
+          },
+          "allowStorage": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "conversionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "UnitConversionGroup": {
+        "type": "object",
+        "properties": {
+          "unitCode": {
+            "type": "string"
+          },
+          "unitName": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "type": "string"
+          },
+          "roleLabel": {
+            "type": "string"
+          },
+          "registered": {
+            "type": "boolean"
+          },
+          "currentVersionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "currentQuantityPerBase": {
+            "type": "number",
+            "nullable": true
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnitConversionVersion"
+            }
+          }
+        }
+      },
+      "UnitConversionVersion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitCode": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "roleLabel": {
+            "type": "string"
+          },
+          "quantityPerBase": {
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "current": {
+            "type": "boolean"
+          },
+          "registered": {
+            "type": "boolean"
+          },
+          "snapshotted": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "UnitPanel": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "baseUnit": {
+            "type": "string"
+          },
+          "baseUnitName": {
+            "type": "string",
+            "nullable": true
+          },
+          "baseUnitRegistered": {
+            "type": "boolean"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnitConversionGroup"
+            }
+          },
+          "snapshots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnitSnapshotLine"
+            }
+          },
+          "snapshotCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "UnitDimensionCount": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "UnitOverview": {
+        "type": "object",
+        "properties": {
+          "unitCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabledUnitCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unregisteredUnitCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "conversionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "snapshotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnitDimensionCount"
+            }
+          },
+          "note": {
             "type": "string"
           }
         }
