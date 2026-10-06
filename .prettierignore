@@ -1,0 +1,6 @@
+# 代码生成物：不参与 prettier 格式化
+# 格式化会改动它们的排版，导致与生成器输出漂移、CI 校验失败。
+# 要改内容就去改生成源，然后重新生成。
+packages/api-contracts/
+packages/sdk/
+docs/product/capability-blueprint/module-progress.md

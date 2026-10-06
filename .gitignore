@@ -94,3 +94,6 @@ test-results/
 
 # Java/Maven generated output
 backend/**/target/
+
+# 定时开发任务的互斥锁与运行痕迹 — 本机状态，不进版本库
+.dev-agent/
