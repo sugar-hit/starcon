@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 34 |
+| 已交付 | 35 |
 | 进行中 | 0 |
-| **未开发** | **431** |
-| 完成率 | 7.3% |
+| **未开发** | **430** |
+| 完成率 | 7.5% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 34 | 0 | 46 | 80 |
+| **D1–D2** | 35 | 0 | 45 | 80 |
 | **D3** | 0 | 0 | 40 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
-| 03 | 商品主数据系统 | D1–D2 | 5 | 40 |
+| 03 | 商品主数据系统 | D1–D2 | 6 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
@@ -144,7 +144,7 @@
 | 3.1.1.2 | SPU 详情 | /products/spu | D1–D2 | 已交付 | GET /catalog/products/{id} + PUT 更新 + 商品详情段 |
 | 3.1.1.3 | SPU 生命周期 | /products/spu | D1–D2 | 已交付 | V4__spu_lifecycle.sql（五态迁移 + spu_lifecycle_event/rule/rule_condition，强制 RLS）+ GET/POST /catalog/products/{id}/lifecycle、/catalog/lifecycle/rules CRUD、/preview、/run、/metrics + /products 商品详情「生命周期与批量规则」段 + SpuLifecycleIntegrationTest（11 例，含租户隔离三断言） |
 | 3.1.2.1 | SKU 列表 | /products/sku | D1–D2 | 已交付 | V5__sku_list.sql（sku_status_event + sku_batch_operation/item，强制 RLS；列表/状态/条码/规格索引）+ GET /catalog/skus、/catalog/skus/capabilities、/catalog/skus/export（分批流式）+ POST /catalog/skus/batch（停售/改状态，预览+执行）+ /products/sku 工作区 + SkuListIntegrationTest（17 例，含租户隔离三断言） |
-| 3.1.2.2 | SKU 详情 | /products/sku | D1–D2 | 未开发 | — |
+| 3.1.2.2 | SKU 详情 | /products/sku | D1–D2 | 已交付 | V6__sku_detail.sql（sku_package + sku_unit_conversion 含生效区间不重叠触发器，强制 RLS + GRANT；attribute_value/product_asset/sku_batch_operation_item 详情查询索引）+ EffectiveValues.java（公共值经 SKU 覆写/清空的有效值解析纯函数，11 例单测）+ SkuDetailService/SkuDetailController/SkuDetailProjectionPort（库存/成本/售价/listing/单据引用一律未接入标记，不落库）+ GET /catalog/skus/{id}、PUT /catalog/skus/{id}（version 乐观锁 409）+ /products/sku/[id] 详情工作区（九分区 + 四种状态 + 编辑面板）+ SkuDetailIntegrationTest（22 例，含租户隔离三断言） |
 | 3.1.2.3 | 编码与条码 | /products/sku | D1–D2 | 未开发 | — |
 | 3.1.2.4 | 单位与换算 | /products/sku | D1–D2 | 未开发 | — |
 | 3.1.3.1 | 规格轴定义 | — | D1–D2 | 未开发 | — |
