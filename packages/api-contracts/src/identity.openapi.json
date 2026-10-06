@@ -13,7 +13,9 @@
   "paths": {
     "/identity/roles/{id}": {
       "put": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "updateRole",
         "parameters": [
           {
@@ -60,7 +62,9 @@
         }
       },
       "delete": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "deleteRole",
         "parameters": [
           {
@@ -91,7 +95,9 @@
     },
     "/identity/members/{id}": {
       "put": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "updateMember",
         "parameters": [
           {
@@ -130,7 +136,9 @@
         }
       },
       "delete": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "removeMember",
         "parameters": [
           {
@@ -161,7 +169,9 @@
     },
     "/identity/legal-entities/{id}": {
       "put": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "legalEntityUpdate",
         "parameters": [
           {
@@ -200,7 +210,9 @@
         }
       },
       "delete": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "legalEntityDelete",
         "parameters": [
           {
@@ -231,7 +243,9 @@
     },
     "/identity/departments/{id}": {
       "put": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "updateDepartment",
         "parameters": [
           {
@@ -270,7 +284,9 @@
         }
       },
       "delete": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "deleteDepartment",
         "parameters": [
           {
@@ -301,7 +317,9 @@
     },
     "/identity/children/{id}": {
       "put": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "updateChild",
         "parameters": [
           {
@@ -342,7 +360,9 @@
     },
     "/identity/roles": {
       "get": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "roles",
         "parameters": [
           {
@@ -372,7 +392,9 @@
         }
       },
       "post": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "createRole",
         "parameters": [
           {
@@ -412,7 +434,9 @@
     },
     "/identity/owner-transfer": {
       "post": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "transfer",
         "parameters": [
           {
@@ -444,7 +468,9 @@
     },
     "/identity/members": {
       "get": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "members",
         "parameters": [
           {
@@ -474,7 +500,9 @@
         }
       },
       "post": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "createMember",
         "parameters": [
           {
@@ -514,7 +542,9 @@
     },
     "/identity/legal-entities": {
       "get": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "legalEntities",
         "parameters": [
           {
@@ -544,7 +574,9 @@
         }
       },
       "post": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "legalEntityCreate",
         "parameters": [
           {
@@ -584,7 +616,9 @@
     },
     "/identity/legal-entities/references": {
       "post": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "legalEntityReference",
         "parameters": [
           {
@@ -616,7 +650,9 @@
     },
     "/identity/departments": {
       "get": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "departments",
         "parameters": [
           {
@@ -646,7 +682,9 @@
         }
       },
       "post": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "createDepartment",
         "parameters": [
           {
@@ -686,7 +724,9 @@
     },
     "/identity/children": {
       "get": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "children",
         "parameters": [
           {
@@ -716,7 +756,9 @@
         }
       },
       "post": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "createChild",
         "parameters": [
           {
@@ -756,7 +798,9 @@
     },
     "/auth/switch": {
       "post": {
-        "tags": ["identity-controller"],
+        "tags": [
+          "identity-controller"
+        ],
         "operationId": "switchMembership",
         "parameters": [
           {
@@ -788,7 +832,9 @@
     },
     "/auth/logout": {
       "post": {
-        "tags": ["identity-controller"],
+        "tags": [
+          "identity-controller"
+        ],
         "operationId": "logout",
         "parameters": [
           {
@@ -810,7 +856,9 @@
     },
     "/auth/login": {
       "post": {
-        "tags": ["identity-controller"],
+        "tags": [
+          "identity-controller"
+        ],
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -838,7 +886,9 @@
     },
     "/internal/access": {
       "get": {
-        "tags": ["identity-controller"],
+        "tags": [
+          "identity-controller"
+        ],
         "operationId": "access",
         "parameters": [
           {
@@ -874,7 +924,9 @@
     },
     "/identity/permissions": {
       "get": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "permissions",
         "parameters": [
           {
@@ -906,7 +958,9 @@
     },
     "/auth/session": {
       "get": {
-        "tags": ["identity-controller"],
+        "tags": [
+          "identity-controller"
+        ],
         "operationId": "session",
         "parameters": [
           {
@@ -935,7 +989,9 @@
     },
     "/auth/memberships": {
       "get": {
-        "tags": ["identity-controller"],
+        "tags": [
+          "identity-controller"
+        ],
         "operationId": "memberships",
         "parameters": [
           {
@@ -969,7 +1025,12 @@
   "components": {
     "schemas": {
       "RoleInput": {
-        "required": ["code", "name", "permissions", "status"],
+        "required": [
+          "code",
+          "name",
+          "permissions",
+          "status"
+        ],
         "type": "object",
         "properties": {
           "code": {
@@ -996,7 +1057,10 @@
         }
       },
       "AssignmentInput": {
-        "required": ["roleId", "scopeMode"],
+        "required": [
+          "roleId",
+          "scopeMode"
+        ],
         "type": "object",
         "properties": {
           "roleId": {
@@ -1010,7 +1074,10 @@
         }
       },
       "MemberUpdate": {
-        "required": ["assignments", "status"],
+        "required": [
+          "assignments",
+          "status"
+        ],
         "type": "object",
         "properties": {
           "status": {
@@ -1031,7 +1098,12 @@
         }
       },
       "LegalEntityInput": {
-        "required": ["baseCurrency", "code", "legalName", "status"],
+        "required": [
+          "baseCurrency",
+          "code",
+          "legalName",
+          "status"
+        ],
         "type": "object",
         "properties": {
           "code": {
@@ -1091,7 +1163,9 @@
         }
       },
       "DepartmentInput": {
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "type": "object",
         "properties": {
           "name": {
@@ -1102,7 +1176,10 @@
         }
       },
       "ChildUpdate": {
-        "required": ["name", "status"],
+        "required": [
+          "name",
+          "status"
+        ],
         "type": "object",
         "properties": {
           "name": {
@@ -1117,7 +1194,9 @@
         }
       },
       "OwnerTransfer": {
-        "required": ["membershipId"],
+        "required": [
+          "membershipId"
+        ],
         "type": "object",
         "properties": {
           "membershipId": {
@@ -1127,7 +1206,11 @@
         }
       },
       "MemberInput": {
-        "required": ["assignments", "status", "username"],
+        "required": [
+          "assignments",
+          "status",
+          "username"
+        ],
         "type": "object",
         "properties": {
           "username": {
@@ -1159,7 +1242,11 @@
         }
       },
       "LegalEntityReferenceInput": {
-        "required": ["legalEntityId", "referenceId", "source"],
+        "required": [
+          "legalEntityId",
+          "referenceId",
+          "source"
+        ],
         "type": "object",
         "properties": {
           "legalEntityId": {
@@ -1178,7 +1265,11 @@
         }
       },
       "ChildInput": {
-        "required": ["code", "name", "ownerUsername"],
+        "required": [
+          "code",
+          "name",
+          "ownerUsername"
+        ],
         "type": "object",
         "properties": {
           "code": {
@@ -1205,7 +1296,9 @@
         }
       },
       "SwitchMembership": {
-        "required": ["membershipId"],
+        "required": [
+          "membershipId"
+        ],
         "type": "object",
         "properties": {
           "membershipId": {
@@ -1215,7 +1308,10 @@
         }
       },
       "Login": {
-        "required": ["password", "username"],
+        "required": [
+          "password",
+          "username"
+        ],
         "type": "object",
         "properties": {
           "username": {

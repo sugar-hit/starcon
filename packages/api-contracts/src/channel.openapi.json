@@ -702,6 +702,105 @@
         }
       }
     },
+    "/channel/platforms/{platformCode}/enums": {
+      "get": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "enumMappings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumMappingView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "enumOverrideCreate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnumOverrideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/platform-operations": {
       "get": {
         "tags": [
@@ -1336,57 +1435,6 @@
         }
       }
     },
-    "/channel/platforms/{platformCode}/enums": {
-      "get": {
-        "tags": [
-          "channel-controller"
-        ],
-        "operationId": "enumMappings",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "platformCode",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "kind",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/EnumMappingView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/channel/connections/{id}/health": {
       "get": {
         "tags": [
@@ -1498,6 +1546,47 @@
           },
           {
             "name": "marketplaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/platforms/{platformCode}/enums/{id}": {
+      "delete": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "enumOverrideDelete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -1740,6 +1829,31 @@
             "type": "string"
           },
           "status": {
+            "type": "string"
+          }
+        }
+      },
+      "EnumOverrideInput": {
+        "required": [
+          "enumKind",
+          "externalValue",
+          "internalValue"
+        ],
+        "type": "object",
+        "properties": {
+          "enumKind": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "externalValue": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "internalValue": {
+            "maxLength": 64,
+            "minLength": 0,
             "type": "string"
           }
         }
@@ -2212,6 +2326,9 @@
             "type": "string"
           },
           "internalValue": {
+            "type": "string"
+          },
+          "source": {
             "type": "string"
           }
         }

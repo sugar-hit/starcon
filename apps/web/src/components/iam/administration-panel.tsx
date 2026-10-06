@@ -49,9 +49,11 @@ export function AdministrationPanel({
   const [editing, setEditing] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [notice, setNotice] = useState('');
   const load = useCallback(async () => {
     setLoaded(false);
+    setLoadFailed(false);
     try {
       if (canManage(session, 'roles')) {
         setRoles(await api<RoleView[]>('identity/roles'));
@@ -61,9 +63,13 @@ export function AdministrationPanel({
       if (canManage(session, 'departments'))
         setDepartments(await api<DepartmentView[]>('identity/departments'));
       if (canManage(session, 'children')) setChildren(await api<ChildView[]>('identity/children'));
-      setLoaded(true);
     } catch (e) {
+      // 加载失败必须落到「失败 + 重试」，不能停在"正在加载…"：串行 await 里第一个失败
+      // 后面的请求根本没发出去，页面会永远转圈，看起来像慢而不是坏。
       onError(e);
+      setLoadFailed(true);
+    } finally {
+      setLoaded(true);
     }
   }, [session, onError]);
   useEffect(() => {
@@ -124,6 +130,14 @@ export function AdministrationPanel({
       )}
       {!loaded ? (
         <p role="status">正在加载…</p>
+      ) : loadFailed ? (
+        // 失败和"没有数据"必须能分辨，否则管理员会把接口故障当成"租户里一个人都没有"
+        <div className="space-y-2 rounded-lg border border-destructive/40 p-6 text-sm">
+          <p className="text-destructive">数据加载失败，上方横幅是具体原因。</p>
+          <Button size="sm" variant="outline" disabled={busy} onClick={() => void load()}>
+            重试
+          </Button>
+        </div>
       ) : rows.length === 0 ? (
         <p className="rounded-lg border p-6 text-sm">暂无记录</p>
       ) : (
@@ -246,6 +260,7 @@ export function AdministrationPanel({
             <MemberForm
               member={members.find((m) => m.id === editing)}
               roles={roles}
+              canReadRoles={canManage(session, 'roles')}
               departments={departments}
               busy={busy}
               save={(input) =>
@@ -419,12 +434,14 @@ function Status({
 function MemberForm({
   member,
   roles,
+  canReadRoles,
   departments,
   busy,
   save,
 }: {
   member: MemberView | undefined;
   roles: RoleView[];
+  canReadRoles: boolean;
   departments: DepartmentView[];
   busy: boolean;
   save: (
@@ -476,34 +493,49 @@ function MemberForm({
       </Field>
       <fieldset disabled={member?.owner ?? false} className="space-y-3">
         <legend className="mb-2 text-sm font-medium">角色与数据范围</legend>
-        {roles
-          .filter(
-            (r) =>
-              !r.system && (r.status === 'ACTIVE' || assignments.some((a) => a.roleId === r.id)),
-          )
-          .map((r) => (
-            <Field key={r.id} label={r.name}>
-              <select
-                className={control}
-                value={assignments.find((a) => a.roleId === r.id)?.scopeMode ?? ''}
-                onChange={(e) =>
-                  setAssignments(assignRole(assignments, r.id, e.target.value || null))
-                }
-              >
-                <option value="">不分配</option>
-                {Object.entries(scopeLabels)
-                  .filter(
-                    ([scope]) =>
-                      scope === 'ALL' || r.permissions.every((p) => p.startsWith('catalog.')),
-                  )
-                  .map(([scope, label]) => (
-                    <option key={scope} value={scope}>
-                      {label}
-                    </option>
-                  ))}
-              </select>
-            </Field>
-          ))}
+        {/* 角色列表读不到时必须说出来：空 fieldset 看起来像"没有可分配的角色"，
+            实际是该管理员缺 identity.role.read，成员会被建成没有角色的裸账号。 */}
+        {!canReadRoles && (
+          <p role="alert" className="text-warning rounded-md border p-3 text-xs">
+            当前角色没有「角色配置」查看权限，读不到可分配的角色列表。这位成员将只能保存账号与部门，
+            角色需要由租户所有者另行分配。
+          </p>
+        )}
+        {canReadRoles &&
+          roles
+            .filter(
+              (r) =>
+                !r.system && (r.status === 'ACTIVE' || assignments.some((a) => a.roleId === r.id)),
+            )
+            .map((r) => (
+              <Field key={r.id} label={r.name}>
+                <select
+                  className={control}
+                  value={assignments.find((a) => a.roleId === r.id)?.scopeMode ?? ''}
+                  onChange={(e) =>
+                    setAssignments(assignRole(assignments, r.id, e.target.value || null))
+                  }
+                >
+                  <option value="">不分配</option>
+                  {Object.entries(scopeLabels)
+                    .filter(
+                      ([scope]) =>
+                        scope === 'ALL' || r.permissions.every((p) => p.startsWith('catalog.')),
+                    )
+                    .map(([scope, label]) => (
+                      <option key={scope} value={scope}>
+                        {label}
+                      </option>
+                    ))}
+                </select>
+              </Field>
+            ))}
+        {canReadRoles &&
+          roles.filter((r) => !r.system).length === 0 && (
+            <p className="text-muted-foreground text-xs">
+              租户内还没有可分配的自定义角色，请先到「角色配置」新建。
+            </p>
+          )}
       </fieldset>
     </Form>
   );

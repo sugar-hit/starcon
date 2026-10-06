@@ -28,19 +28,25 @@ export function LegalEntityWorkspace() {
     (permission: string) => session.permissions.includes(permission),
     [session.permissions],
   );
+  const readable = can('identity.legal_entity.read');
 
   const load = useCallback(async () => {
     setError('');
     setNotice('');
+    if (!readable) {
+      // 没有读权限就不去请求：拿到空数组后显示「还没有法人档案」是在骗人，
+      // 用户会以为公司没建法人，反复去建（而建法人同样会被 403）。
+      setReady(true);
+      return;
+    }
     try {
-      if (can('identity.legal_entity.read'))
-        setEntities(await api<LegalEntityView[]>('identity/legal-entities'));
+      setEntities(await api<LegalEntityView[]>('identity/legal-entities'));
     } catch (e) {
       setError(e instanceof Error ? e.message : '请求失败，请重试');
     } finally {
       setReady(true);
     }
-  }, [can]);
+  }, [readable]);
 
   useEffect(() => {
     void load();
@@ -64,6 +70,13 @@ export function LegalEntityWorkspace() {
     return (
       <p role="status" className="text-muted-foreground p-6 text-sm">
         正在加载法人档案…
+      </p>
+    );
+
+  if (!readable)
+    return (
+      <p className="rounded-lg border p-6 text-sm">
+        当前角色没有法人档案查看权限，请联系租户所有者开通。
       </p>
     );
 

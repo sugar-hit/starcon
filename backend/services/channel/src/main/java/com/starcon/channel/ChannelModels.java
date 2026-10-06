@@ -47,15 +47,31 @@ public final class ChannelModels {
       int currencyScale,
       boolean vatRequired) {}
 
-  /** 2.1.2.1 平台枚举映射：平台枚举 → 内部枚举。映射缺失必须显式暴露，不落兜底。 */
+  /**
+   * 2.1.2.1 平台枚举映射：平台枚举 → 内部枚举。映射缺失必须显式暴露，不落兜底。
+   *
+   * <p>一条记录是"平台默认"还是"本租户覆盖"由 {@code source} 说清：平台默认来自全局码表
+   * {@code platform_enum_mapping}，所有租户一致且不可改写；租户覆盖来自
+   * {@code platform_enum_override}，只有本租户可见可改。前端据此决定能不能删。
+   * {@code id} 是这条记录来源行的 id——平台默认行删不掉，它的 id 只能用于定位。
+   */
   public record EnumMappingView(
-      UUID id, String platformCode, String enumKind, String externalValue, String internalValue) {}
+      UUID id,
+      String platformCode,
+      String enumKind,
+      String externalValue,
+      String internalValue,
+      /** {@code PLATFORM} = 平台默认（全局只读）；{@code TENANT} = 本租户覆盖。 */
+      String source) {}
 
-  public record EnumMappingInput(
-      @NotBlank String platformCode,
-      @NotBlank String enumKind,
-      @NotBlank String externalValue,
-      @NotBlank String internalValue) {}
+  /**
+   * 2.1.2.1 登记租户覆盖。平台由路径上的 {@code platformCode} 决定，不在 body 里重复传，
+   * 避免两处写不一致。
+   */
+  public record EnumOverrideInput(
+      @NotBlank @Size(max = 64) String enumKind,
+      @NotBlank @Size(max = 128) String externalValue,
+      @NotBlank @Size(max = 64) String internalValue) {}
 
   // ---- 2.2 授权与连接 ----
 

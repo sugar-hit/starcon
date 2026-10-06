@@ -46,13 +46,40 @@ public class ChannelController {
     return call(auth, "channel.registry.read", a -> service.platforms());
   }
 
-  /** 2.1.2.1 平台枚举映射。 */
+  /** 2.1.2.1 生效枚举映射：平台默认 + 本租户覆盖。 */
   @GetMapping("/platforms/{platformCode}/enums")
   public List<EnumMappingView> enumMappings(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable String platformCode,
       @RequestParam(defaultValue = "") String kind) {
-    return call(auth, "channel.registry.read", a -> service.enumMappings(platformCode, kind));
+    return call(auth, "channel.registry.read", a -> service.enumMappings(a.tenantId(), platformCode, kind));
+  }
+
+  /**
+   * 2.1.2.1 登记本租户映射覆盖。
+   *
+   * <p>平台默认表 {@code platform_enum_mapping} 是全局只读码表，故意不给写端点：租户改它
+   * 会污染别的租户的订单状态机。要改口径只能写自己的覆盖层。
+   */
+  @PostMapping("/platforms/{platformCode}/enums")
+  public UUID enumOverrideCreate(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable String platformCode,
+      @Valid @RequestBody EnumOverrideInput input) {
+    return call(
+        auth, "channel.registry.update", a -> service.putEnumOverride(a, platformCode, input));
+  }
+
+  /** 删除覆盖后回落平台默认。 */
+  @DeleteMapping("/platforms/{platformCode}/enums/{id}")
+  public void enumOverrideDelete(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable String platformCode,
+      @PathVariable UUID id) {
+    callVoid(
+        auth,
+        "channel.registry.delete",
+        a -> service.deleteEnumOverride(a, platformCode, id));
   }
 
   // ---- 2.2 授权与连接 ----

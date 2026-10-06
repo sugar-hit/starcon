@@ -10,6 +10,7 @@ import {
   Plus,
   RefreshCw,
   RefreshCcw,
+  Rewind,
   Search,
   Send,
   Store,
@@ -17,17 +18,22 @@ import {
 import type {
   ConnectionView,
   CredentialRotateInput,
+  DepartmentView,
+  LegalEntityView,
+  MemberView,
   PlatformOperationView,
   PlatformView,
   ReauthorizationReminderView,
   ShopInput,
   ShopView,
+  SyncCursorInput,
   SyncCursorView,
   SyncFailureSummary,
   SyncFailureView,
   SyncRunView,
 } from '../../../../../packages/api-contracts/src/catalog';
 import { api, ApiError } from '@/lib/api';
+import { EnumMappingPanel } from './enum-mapping-panel';
 import { useIdentity } from '../iam/identity-shell';
 
 type Section = 'platforms' | 'connections' | 'shops' | 'sync' | 'operations';
@@ -116,6 +122,12 @@ export function ChannelWorkspace() {
   const [runs, setRuns] = useState<SyncRunView[]>([]);
   const [operations, setOperations] = useState<PlatformOperationView[]>([]);
   const [runCursorId, setRunCursorId] = useState<string | null>(null);
+  // 店铺要绑连接与法人、负责人要选成员与部门：这些字典在 identity 服务，权限不足时保持空数组，
+  // 对应控件会明说"没有权限"，而不是渲染一个看起来能选、其实选不了的下拉。
+  const [legalEntities, setLegalEntities] = useState<LegalEntityView[]>([]);
+  const [members, setMembers] = useState<MemberView[]>([]);
+  const [departments, setDepartments] = useState<DepartmentView[]>([]);
+  const [dictionaryError, setDictionaryError] = useState('');
 
   const can = useCallback(
     (permission: string) => session.permissions.includes(permission),
@@ -153,6 +165,17 @@ export function ChannelWorkspace() {
       handleError(e);
     } finally {
       setReady(true);
+    }
+    // 字典单独兜底：identity 不可用不该让渠道数据一起消失，失败原因要显示在店铺区里
+    try {
+      if (can('identity.legal_entity.read'))
+        setLegalEntities(await api<LegalEntityView[]>('identity/legal-entities'));
+      if (can('identity.member.read')) setMembers(await api<MemberView[]>('identity/members'));
+      if (can('identity.department.read'))
+        setDepartments(await api<DepartmentView[]>('identity/departments'));
+      setDictionaryError('');
+    } catch (e) {
+      setDictionaryError(e instanceof Error ? e.message : '关联数据加载失败');
     }
   }, [can, handleError, runCursorId]);
 
@@ -267,6 +290,8 @@ export function ChannelWorkspace() {
           runCursorId={runCursorId}
           onSelectRun={setRunCursorId}
           can={can}
+          connections={connections}
+          platforms={platforms}
           busy={busy}
           setBusy={setBusy}
           onDone={load}
@@ -286,7 +311,7 @@ export function ChannelWorkspace() {
         />
       )}
       {section === 'platforms' && (
-        <PlatformDirectory platforms={platforms} term={term} />
+        <PlatformDirectory platforms={platforms} term={term} can={can} />
       )}
       {section === 'connections' && (
         <ConnectionList
@@ -301,39 +326,62 @@ export function ChannelWorkspace() {
           onNotice={setNotice}
         />
       )}
-      {section === 'shops' &&
-        (detail ? (
-          <ShopDetail
-            shop={detail}
-            platforms={platforms}
-            can={can}
-            busy={busy}
-            setBusy={setBusy}
-            onBack={() => setDetail(null)}
-            onDone={load}
-            onError={handleError}
-            onNotice={setNotice}
-          />
-        ) : (
-          <ShopList
-            shops={shops}
-            term={term}
-            can={can}
-            platforms={platforms}
-            busy={busy}
-            setBusy={setBusy}
-            onOpen={setDetail}
-            onDone={load}
-            onError={handleError}
-            onNotice={setNotice}
-          />
-        ))}
+      {section === 'shops' && (
+        <>
+          {dictionaryError && (
+            <p role="alert" className="text-warning text-copy-13">
+              关联数据（法人、成员、部门）加载失败：{dictionaryError}。店铺仍可维护，只是暂时无法选择这些关联项。
+            </p>
+          )}
+          {detail ? (
+            <ShopDetail
+              shop={detail}
+              platforms={platforms}
+              connections={connections}
+              legalEntities={legalEntities}
+              members={members}
+              departments={departments}
+              can={can}
+              busy={busy}
+              setBusy={setBusy}
+              onBack={() => setDetail(null)}
+              onDone={load}
+              onError={handleError}
+              onNotice={setNotice}
+            />
+          ) : (
+            <ShopList
+              shops={shops}
+              term={term}
+              can={can}
+              platforms={platforms}
+              connections={connections}
+              legalEntities={legalEntities}
+              members={members}
+              busy={busy}
+              setBusy={setBusy}
+              onOpen={setDetail}
+              onDone={load}
+              onError={handleError}
+              onNotice={setNotice}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }
 
-/** 2.1.1.1 平台目录 / 2.1.1.2 能力矩阵 / 2.1.1.3 站点与国家参数 */
-function PlatformDirectory({ platforms, term }: { platforms: PlatformView[]; term: string }) {
+/** 2.1.1.1 平台目录 / 2.1.1.2 能力矩阵 / 2.1.1.3 站点与国家参数 / 2.1.2.1 枚举映射 */
+function PlatformDirectory({
+  platforms,
+  term,
+  can,
+}: {
+  platforms: PlatformView[];
+  term: string;
+  can: (p: string) => boolean;
+}) {
   const filtered = platforms.filter((p) => `${p.code} ${p.name}`.toLowerCase().includes(term));
   if (filtered.length === 0) return <Empty text="没有匹配的平台" />;
   return (
@@ -371,6 +419,11 @@ function PlatformDirectory({ platforms, term }: { platforms: PlatformView[]; ter
                 .join(' / ')}
             </p>
           )}
+          {/* 映射影响订单、售后、物流的落库口径，只读角色也必须看得见；
+              写操作在面板内部按权限收起。 */}
+          <div className="mt-3 border-t pt-3">
+            <EnumMappingPanel platform={p} can={can} />
+          </div>
         </li>
       ))}
     </ul>
@@ -712,12 +765,15 @@ function CredentialForm({
   );
 }
 
-/** 2.3.1.1 店铺列表 / 2.3.2.1 经营模式 */
+/** 2.3.1.1 店铺列表 / 2.3.2.1 经营模式 / 2.3.2.2 负责人 */
 function ShopList({
   shops,
   term,
   can,
   platforms,
+  connections,
+  legalEntities,
+  members,
   busy,
   setBusy,
   onOpen,
@@ -729,6 +785,9 @@ function ShopList({
   term: string;
   can: (p: string) => boolean;
   platforms: PlatformView[];
+  connections: ConnectionView[];
+  legalEntities: LegalEntityView[];
+  members: MemberView[];
   busy: boolean;
   setBusy: (v: boolean) => void;
   onOpen: (s: ShopView) => void;
@@ -738,6 +797,9 @@ function ShopList({
 }) {
   const [creating, setCreating] = useState(false);
   const filtered = shops.filter((s) => `${s.code} ${s.name} ${s.platformName}`.toLowerCase().includes(term));
+  const canReadMembers = can('identity.member.read');
+  const ownerLabel = (userId: string | null) =>
+    linkedName(userId, members, (m) => m.userId, (m) => m.username, canReadMembers, '未指定');
 
   async function remove(s: ShopView) {
     if (!window.confirm(`删除店铺「${s.name}」？此操作不可撤销。`)) return;
@@ -758,7 +820,9 @@ function ShopList({
       {creating && (
         <ShopForm
           platforms={platforms}
-          connections={[]}
+          connections={connections}
+          legalEntities={legalEntities}
+          can={can}
           busy={busy}
           onCancel={() => setCreating(false)}
           onSubmit={async (input: ShopInput) => {
@@ -792,6 +856,7 @@ function ShopList({
                   <p className="text-copy-12 text-muted-foreground mt-1 break-all">
                     {s.platformName} · {s.code} · 启用站点 {s.marketplaceCount} 个
                     {s.connectionAccount ? ` · 连接 ${s.connectionAccount}` : ' · 未绑定连接'}
+                    {` · 负责人 ${ownerLabel(s.ownerId)}`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -819,10 +884,14 @@ function ShopList({
   );
 }
 
-/** 2.3.1.2 店铺详情：启用站点、编辑基础信息 */
+/** 2.3.1.2 店铺详情：启用站点、编辑基础信息 / 2.3.2.2 负责人与部门 */
 function ShopDetail({
   shop,
   platforms,
+  connections,
+  legalEntities,
+  members,
+  departments,
   can,
   busy,
   setBusy,
@@ -833,6 +902,10 @@ function ShopDetail({
 }: {
   shop: ShopView;
   platforms: PlatformView[];
+  connections: ConnectionView[];
+  legalEntities: LegalEntityView[];
+  members: MemberView[];
+  departments: DepartmentView[];
   can: (p: string) => boolean;
   busy: boolean;
   setBusy: (v: boolean) => void;
@@ -842,8 +915,13 @@ function ShopDetail({
   onNotice: (v: string) => void;
 }) {
   const editable = can('channel.shop.update');
+  const [editing, setEditing] = useState(false);
+  const [transferring, setTransferring] = useState(false);
   const available = platforms.find((p) => p.code === shop.platformCode)?.marketplaces ?? [];
   const enabled = new Set(shop.marketplaces.map((m) => m.marketplaceId));
+  const canReadMembers = can('identity.member.read');
+  const canReadDepartments = can('identity.department.read');
+  const canReadLegalEntity = can('identity.legal_entity.read');
 
   async function toggleMarketplace(code: string, isOn: boolean) {
     setBusy(true);
@@ -872,10 +950,70 @@ function ShopDetail({
             {shop.platformName} · {shop.code} · {modeLabel(shop.operatingMode)}
           </p>
         </div>
-        <Button size="sm" variant="ghost" onClick={onBack}>
-          返回列表
-        </Button>
+        <div className="flex items-center gap-2">
+          {editable && !editing && (
+            <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>
+              编辑
+            </Button>
+          )}
+          {editable && !transferring && (
+            <Button size="sm" variant="ghost" onClick={() => setTransferring(true)}>
+              转让负责人
+            </Button>
+          )}
+          <Button size="sm" variant="ghost" onClick={onBack}>
+            返回列表
+          </Button>
+        </div>
       </div>
+
+      {editing && (
+        <ShopEditForm
+          shop={shop}
+          connections={connections}
+          legalEntities={legalEntities}
+          can={can}
+          busy={busy}
+          onCancel={() => setEditing(false)}
+          onSubmit={async (input) => {
+            setBusy(true);
+            try {
+              // 版本号随行带回：服务端据此拒绝"别人已经改过"的提交
+              await api(`channel/shops/${shop.id}`, 'PUT', input);
+              setEditing(false);
+              onNotice('店铺已更新');
+              await onDone();
+            } catch (e) {
+              onError(e);
+            } finally {
+              setBusy(false);
+            }
+          }}
+        />
+      )}
+
+      {transferring && (
+        <OwnerTransferForm
+          shop={shop}
+          members={members}
+          departments={departments}
+          busy={busy}
+          onCancel={() => setTransferring(false)}
+          onSubmit={async (input) => {
+            setBusy(true);
+            try {
+              await api(`channel/shops/${shop.id}/transfer`, 'POST', input);
+              setTransferring(false);
+              onNotice('负责人已转让');
+              await onDone();
+            } catch (e) {
+              onError(e);
+            } finally {
+              setBusy(false);
+            }
+          }}
+        />
+      )}
 
       <dl className="bg-card grid gap-4 rounded-md border p-4 md:grid-cols-3">
         <div>
@@ -890,6 +1028,45 @@ function ShopDetail({
         <div>
           <dt className="text-copy-12 text-muted-foreground">授权连接</dt>
           <dd className="text-copy-14 mt-1 break-all">{shop.connectionAccount ?? '未绑定'}</dd>
+        </div>
+        <div>
+          <dt className="text-copy-12 text-muted-foreground">结算法人</dt>
+          <dd className="text-copy-14 mt-1 break-all">
+            {linkedName(
+              shop.legalEntityId,
+              legalEntities,
+              (e) => e.id,
+              (e) => e.legalName,
+              canReadLegalEntity,
+              '未关联',
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-copy-12 text-muted-foreground">负责人（业绩归属）</dt>
+          <dd className="text-copy-14 mt-1 break-all">
+            {linkedName(
+              shop.ownerId,
+              members,
+              (m) => m.userId,
+              (m) => m.username,
+              canReadMembers,
+              '未指定',
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-copy-12 text-muted-foreground">所属部门</dt>
+          <dd className="text-copy-14 mt-1 break-all">
+            {linkedName(
+              shop.departmentId,
+              departments,
+              (d) => d.id,
+              (d) => d.name,
+              canReadDepartments,
+              '未指定',
+            )}
+          </dd>
         </div>
       </dl>
 
@@ -939,15 +1116,220 @@ function ShopDetail({
   );
 }
 
+/** 店铺编辑：名称、经营模式、连接、法人。编码与平台建档后不可改。 */
+function ShopEditForm({
+  shop,
+  connections,
+  legalEntities,
+  can,
+  busy,
+  onCancel,
+  onSubmit,
+}: {
+  shop: ShopView;
+  connections: ConnectionView[];
+  legalEntities: LegalEntityView[];
+  can: (p: string) => boolean;
+  busy: boolean;
+  onCancel: () => void;
+  onSubmit: (input: ShopInput) => Promise<void>;
+}) {
+  const [name, setName] = useState(shop.name);
+  const [operatingMode, setOperatingMode] = useState(shop.operatingMode);
+  const [connectionId, setConnectionId] = useState(shop.connectionId ?? '');
+  const [legalEntityId, setLegalEntityId] = useState(shop.legalEntityId ?? '');
+  const connectionOptions = connections.filter((c) => c.platformCode === shop.platformCode);
+  const canReadLegalEntity = can('identity.legal_entity.read');
+
+  return (
+    <div className="bg-card space-y-3 rounded-md border p-4">
+      <p className="text-copy-14 font-medium">编辑店铺</p>
+      <div className="grid gap-3 md:grid-cols-2">
+        <Field label="店铺名称">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2"
+          />
+        </Field>
+        <Field label="经营模式" hint="决定订单货权、成本构成与利润口径">
+          <select
+            value={operatingMode}
+            onChange={(e) => setOperatingMode(e.target.value)}
+            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2"
+          >
+            {operatingModes.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field
+          label="授权连接"
+          hint={
+            connectionOptions.length === 0
+              ? '该平台还没有授权连接'
+              : '换连接会立即影响同步与回写走哪条凭据'
+          }
+        >
+          <select
+            value={connectionId}
+            onChange={(e) => setConnectionId(e.target.value)}
+            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2"
+          >
+            <option value="">不绑定</option>
+            {connectionOptions.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.displayName || c.authorizedAccount}（{statusLabel[c.status] ?? c.status}）
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field
+          label="结算法人"
+          hint={!canReadLegalEntity ? '当前角色没有法人档案查看权限' : '决定收入记到哪个法人主体'}
+        >
+          <select
+            value={legalEntityId}
+            disabled={!canReadLegalEntity}
+            onChange={(e) => setLegalEntityId(e.target.value)}
+            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2 disabled:opacity-60"
+          >
+            <option value="">不关联</option>
+            {legalEntities.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.legalName}（{e.code}）
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+      <p className="text-copy-12 text-muted-foreground">{modeHint(operatingMode)}</p>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          disabled={busy || !name}
+          onClick={() =>
+            void onSubmit({
+              code: shop.code,
+              name,
+              platformCode: shop.platformCode,
+              operatingMode,
+              connectionId: connectionId || null,
+              legalEntityId: legalEntityId || null,
+              version: shop.version,
+            })
+          }
+        >
+          保存
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onCancel}>
+          取消
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/** 2.3.2.2 转让负责人：库里 owner_id 由触发器锁为不可变，只能走这个显式动作。 */
+function OwnerTransferForm({
+  shop,
+  members,
+  departments,
+  busy,
+  onCancel,
+  onSubmit,
+}: {
+  shop: ShopView;
+  members: MemberView[];
+  departments: DepartmentView[];
+  busy: boolean;
+  onCancel: () => void;
+  onSubmit: (input: { newOwnerId: string; departmentId: string }) => Promise<void>;
+}) {
+  const candidates = members.filter((m) => m.status === 'ACTIVE' && m.userId !== shop.ownerId);
+  const [newOwnerId, setNewOwnerId] = useState('');
+  const [departmentId, setDepartmentId] = useState(shop.departmentId ?? '');
+
+  if (candidates.length === 0)
+    return (
+      <div className="bg-card space-y-2 rounded-md border p-4">
+        <p className="text-copy-14 font-medium">转让负责人</p>
+        <p className="text-copy-13 text-muted-foreground">
+          租户内没有其他启用中的成员可作为负责人，无法转让。
+        </p>
+        <Button size="sm" variant="ghost" onClick={onCancel}>
+          返回
+        </Button>
+      </div>
+    );
+
+  return (
+    <div className="bg-card space-y-3 rounded-md border p-4">
+      <p className="text-copy-14 font-medium">转让负责人</p>
+      <p className="text-copy-12 text-muted-foreground">
+        负责人用于业绩归属与绩效；数据可见范围由「角色配置」里的数据范围单独控制，两者互不替代。
+      </p>
+      <div className="grid gap-3 md:grid-cols-2">
+        <Field label="新负责人">
+          <select
+            value={newOwnerId}
+            onChange={(e) => setNewOwnerId(e.target.value)}
+            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2"
+          >
+            <option value="">请选择</option>
+            {candidates.map((m) => (
+              <option key={m.id} value={m.userId}>
+                {m.username}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="归属部门">
+          <select
+            value={departmentId}
+            onChange={(e) => setDepartmentId(e.target.value)}
+            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2"
+          >
+            <option value="">未设置部门</option>
+            {departments.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          disabled={busy || !newOwnerId}
+          onClick={() => void onSubmit({ newOwnerId, departmentId })}
+        >
+          确认转让
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onCancel}>
+          取消
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function ShopForm({
   platforms,
   connections,
+  legalEntities,
+  can,
   busy,
   onCancel,
   onSubmit,
 }: {
   platforms: PlatformView[];
-  connections: never[];
+  connections: ConnectionView[];
+  legalEntities: LegalEntityView[];
+  can: (p: string) => boolean;
   busy: boolean;
   onCancel: () => void;
   onSubmit: (input: ShopInput) => Promise<void>;
@@ -957,6 +1339,18 @@ function ShopForm({
   const [name, setName] = useState('');
   const [platformCode, setPlatformCode] = useState(available[0]?.code ?? '');
   const [operatingMode, setOperatingMode] = useState('SELF_FULFILLED');
+  const [connectionId, setConnectionId] = useState('');
+  const [legalEntityId, setLegalEntityId] = useState('');
+
+  // 连接只在同平台内可选：换平台后原来选中的连接会变成非法组合，先清掉
+  const connectionOptions = connections.filter((c) => c.platformCode === platformCode);
+  useEffect(() => {
+    setConnectionId('');
+  }, [platformCode]);
+
+  const canReadLegalEntity = can('identity.legal_entity.read');
+  const canReadConnection = can('channel.connection.read');
+
   return (
     <div className="bg-card space-y-3 rounded-md border p-4">
       <p className="text-copy-14 font-medium">新建店铺</p>
@@ -1001,6 +1395,52 @@ function ShopForm({
             ))}
           </select>
         </Field>
+        <Field
+          label="授权连接"
+          hint={
+            !canReadConnection
+              ? '当前角色没有连接查看权限，店铺可先不绑定连接'
+              : connectionOptions.length === 0
+                ? '该平台还没有授权连接，可先建档、稍后在详情页绑定'
+                : '绑定后同步与回写都走这条连接'
+          }
+        >
+          <select
+            value={connectionId}
+            disabled={!canReadConnection}
+            onChange={(e) => setConnectionId(e.target.value)}
+            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2 disabled:opacity-60"
+          >
+            <option value="">暂不绑定</option>
+            {connectionOptions.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.displayName || c.authorizedAccount}（{statusLabel[c.status] ?? c.status}）
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field
+          label="结算法人"
+          hint={
+            !canReadLegalEntity
+              ? '当前角色没有法人档案查看权限，店铺可先不关联法人'
+              : '决定这家店铺的收入记到哪个法人主体'
+          }
+        >
+          <select
+            value={legalEntityId}
+            disabled={!canReadLegalEntity}
+            onChange={(e) => setLegalEntityId(e.target.value)}
+            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2 disabled:opacity-60"
+          >
+            <option value="">暂不关联</option>
+            {legalEntities.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.legalName}（{e.code}）
+              </option>
+            ))}
+          </select>
+        </Field>
       </div>
       <p className="text-copy-12 text-muted-foreground">{modeHint(operatingMode)}</p>
       <div className="flex gap-2">
@@ -1013,9 +1453,8 @@ function ShopForm({
               name,
               platformCode,
               operatingMode,
-              // 新建场景下连接与法人尚未选定；连接可稍后在店铺详情里绑定
-              connectionId: null,
-              legalEntityId: null,
+              connectionId: connectionId || null,
+              legalEntityId: legalEntityId || null,
               version: 0,
             })
           }
@@ -1056,6 +1495,26 @@ function Empty({ text }: { text: string }) {
   );
 }
 
+/**
+ * 关联项的显示口径。
+ *
+ * <p>字典读不到时不能直接显示"未设置"——那是在骗人：库里明明有值，用户会以为没绑、反复去重建。
+ * 读得到就显示名字，读不到就说"已设置但当前角色无查看权限"；确实没值才显示 empty。
+ */
+function linkedName<T>(
+  value: string | null | undefined,
+  items: T[],
+  idOf: (item: T) => string,
+  nameOf: (item: T) => string,
+  readable: boolean,
+  empty: string,
+) {
+  if (!value) return empty;
+  const hit = items.find((item) => idOf(item) === value);
+  if (hit) return nameOf(hit);
+  return readable ? value : '已设置（当前角色无查看权限）';
+}
+
 function modeLabel(value: string) {
   return operatingModes.find((m) => m.value === value)?.label ?? value;
 }
@@ -1075,6 +1534,8 @@ function SyncRuntime({
   runCursorId,
   onSelectRun,
   can,
+  connections,
+  platforms,
   busy,
   setBusy,
   onDone,
@@ -1088,16 +1549,21 @@ function SyncRuntime({
   runCursorId: string | null;
   onSelectRun: (id: string | null) => void;
   can: (p: string) => boolean;
+  connections: ConnectionView[];
+  platforms: PlatformView[];
   busy: boolean;
   setBusy: (v: boolean) => void;
   onDone: () => Promise<void>;
   onError: (e: unknown) => void;
   onNotice: (v: string) => void;
 }) {
-  async function act(path: string, message: string) {
+  const [creating, setCreating] = useState(false);
+  const [rewinding, setRewinding] = useState<string | null>(null);
+
+  async function act(path: string, message: string, data?: unknown) {
     setBusy(true);
     try {
-      await api(path, 'POST');
+      await api(path, 'POST', data);
       onNotice(message);
       await onDone();
     } catch (e) {
@@ -1128,12 +1594,34 @@ function SyncRuntime({
       )}
 
       <div className="bg-card rounded-md border p-4">
-        <p className="text-copy-14 font-medium">同步任务</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-copy-14 font-medium">同步任务</p>
+          {can('channel.sync.create') && !creating && (
+            <Button size="sm" onClick={() => setCreating(true)}>
+              <Plus className="h-4 w-4" />
+              新建同步任务
+            </Button>
+          )}
+        </div>
         <p className="text-copy-12 text-muted-foreground mt-1">
           按「连接 · 站点 · 资源」拆分。游标只在处理全部成功后推进，失败时停在原处等待重试。
         </p>
+        {creating && (
+          <SyncCursorForm
+            connections={connections}
+            platforms={platforms}
+            busy={busy}
+            onCancel={() => setCreating(false)}
+            onSubmit={async (input: SyncCursorInput) => {
+              setCreating(false);
+              await act('channel/sync-cursors', '同步任务已创建', input);
+            }}
+          />
+        )}
         {cursors.length === 0 ? (
-          <p className="text-copy-13 text-muted-foreground mt-3">还没有同步任务</p>
+          <p className="text-copy-13 text-muted-foreground mt-3">
+            还没有同步任务。没有游标就没有同步入口，需要先按「连接 · 站点 · 资源」登记一个。
+          </p>
         ) : (
           <ul className="mt-3 space-y-2">
             {cursors.map((c) => (
@@ -1195,6 +1683,17 @@ function SyncRuntime({
                         恢复
                       </Button>
                     )}
+                    {can('channel.sync.update') && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={busy}
+                        onClick={() => setRewinding(rewinding === c.id ? null : c.id)}
+                      >
+                        <Rewind className="h-4 w-4" />
+                        回退游标
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant="ghost"
@@ -1204,6 +1703,21 @@ function SyncRuntime({
                     </Button>
                   </div>
                 </div>
+                {rewinding === c.id && (
+                  <RewindForm
+                    current={c.cursorValue}
+                    busy={busy}
+                    onCancel={() => setRewinding(null)}
+                    onSubmit={async (cursorValue) => {
+                      setRewinding(null);
+                      await act(
+                        `channel/sync-cursors/${c.id}/rewind`,
+                        '游标已回退，下次同步会从该位置重拉',
+                        { cursorValue },
+                      );
+                    }}
+                  />
+                )}
               </li>
             ))}
           </ul>
@@ -1406,6 +1920,173 @@ function OperationQueue({
             ))}
           </ul>
         )}
+      </div>
+    </div>
+  );
+}
+
+const resourceTypes: readonly { value: string; label: string }[] = [
+  { value: 'ORDER', label: '订单' },
+  { value: 'LISTING', label: '商品' },
+  { value: 'INVENTORY', label: '库存' },
+  { value: 'SETTLEMENT', label: '结算' },
+  { value: 'PRODUCT', label: '商品资料' },
+];
+
+/** 2.4.1.1 登记同步任务：没有游标就没有同步入口，所以必须能从页面建。 */
+function SyncCursorForm({
+  connections,
+  platforms,
+  busy,
+  onCancel,
+  onSubmit,
+}: {
+  connections: ConnectionView[];
+  platforms: PlatformView[];
+  busy: boolean;
+  onCancel: () => void;
+  onSubmit: (input: SyncCursorInput) => Promise<void>;
+}) {
+  const usable = connections.filter((c) => c.status === 'ACTIVE');
+  const [connectionId, setConnectionId] = useState(usable[0]?.id ?? '');
+  const [marketplaceId, setMarketplaceId] = useState('');
+  const [resourceType, setResourceType] = useState('ORDER');
+  const [partitionKey, setPartitionKey] = useState('');
+
+  const connection = usable.find((c) => c.id === connectionId);
+  const sites = connection
+    ? (platforms.find((p) => p.code === connection.platformCode)?.marketplaces ?? [])
+    : [];
+
+  useEffect(() => {
+    setMarketplaceId('');
+  }, [connectionId]);
+
+  if (usable.length === 0)
+    return (
+      <div className="border-border bg-muted/40 mt-3 space-y-2 rounded-md border p-3">
+        <p className="text-copy-13 text-muted-foreground">
+          没有启用中的授权连接，无法登记同步任务。请先到「授权连接」建一条连接并写入凭据引用。
+        </p>
+        <Button size="sm" variant="ghost" onClick={onCancel}>
+          返回
+        </Button>
+      </div>
+    );
+
+  return (
+    <div className="border-border bg-muted/40 mt-3 space-y-3 rounded-md border p-3">
+      <p className="text-copy-13 font-medium">新建同步任务</p>
+      <div className="grid gap-3 md:grid-cols-2">
+        <Field label="授权连接" hint="同步数据从哪条凭据拉取">
+          <select
+            value={connectionId}
+            onChange={(e) => setConnectionId(e.target.value)}
+            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2"
+          >
+            {usable.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.platformName} · {c.displayName || c.authorizedAccount}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="站点" hint="留空表示该连接下所有站点">
+          <select
+            value={marketplaceId}
+            onChange={(e) => setMarketplaceId(e.target.value)}
+            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2"
+          >
+            <option value="">全部站点</option>
+            {sites.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}（{m.code}）
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="资源类型">
+          <select
+            value={resourceType}
+            onChange={(e) => setResourceType(e.target.value)}
+            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2"
+          >
+            {resourceTypes.map((r) => (
+              <option key={r.value} value={r.value}>
+                {r.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="分区键" hint="同一连接 + 站点 + 资源下唯一，用于区分多条并行任务">
+          <input
+            value={partitionKey}
+            onChange={(e) => setPartitionKey(e.target.value)}
+            className="border-border bg-background text-copy-13 h-9 rounded-md border px-2"
+          />
+        </Field>
+      </div>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          disabled={busy || !connectionId || !resourceType}
+          onClick={() =>
+            void onSubmit({
+              connectionId,
+              marketplaceId: marketplaceId || null,
+              resourceType,
+              partitionKey: partitionKey.trim(),
+            })
+          }
+        >
+          创建
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onCancel}>
+          取消
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/** 2.4.1.3 断点续传：回退游标以重拉一段时间窗，重放幂等由 external_key 保证。 */
+function RewindForm({
+  current,
+  busy,
+  onCancel,
+  onSubmit,
+}: {
+  current: string;
+  busy: boolean;
+  onCancel: () => void;
+  onSubmit: (cursorValue: string) => Promise<void>;
+}) {
+  const [value, setValue] = useState(current);
+  return (
+    <div className="border-border bg-muted/40 mt-3 space-y-2 rounded-md border p-3">
+      <p className="text-copy-12 text-muted-foreground">
+        回退后下一次同步会从这个位置重新拉取。重放按外部单号去重，不会产生第二张单据。
+      </p>
+      <div className="flex flex-wrap items-end gap-2">
+        <div className="min-w-48 flex-1">
+          <Field label="目标游标值" hint={`当前 ${current || '（初始位置）'}`}>
+            <input
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              className="border-border bg-background text-copy-13 h-9 rounded-md border px-2"
+            />
+          </Field>
+        </div>
+        <Button
+          size="sm"
+          disabled={busy || !value.trim()}
+          onClick={() => void onSubmit(value.trim())}
+        >
+          回退
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onCancel}>
+          取消
+        </Button>
       </div>
     </div>
   );
