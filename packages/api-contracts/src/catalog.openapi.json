@@ -936,6 +936,147 @@
         }
       }
     },
+    "/catalog/variant-combination/spus/{id}/drafts": {
+      "get": {
+        "tags": [
+          "variant-combination-controller"
+        ],
+        "operationId": "listDrafts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SkuMatrixDraftSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "variant-combination-controller"
+        ],
+        "operationId": "generateDraft",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VariantDraftInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuMatrixDraft"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/variant-combination/spus/{id}/check": {
+      "post": {
+        "tags": [
+          "variant-combination-controller"
+        ],
+        "operationId": "check",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CombinationCheckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CombinationCheckResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/unit-conversion/units": {
       "get": {
         "tags": [
@@ -2313,12 +2454,225 @@
         }
       }
     },
+    "/catalog/variant-combination/spus/{id}": {
+      "get": {
+        "tags": [
+          "variant-combination-controller"
+        ],
+        "operationId": "panel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VariantCombinationPanel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/variant-combination/spus/{id}/drafts/{draftId}": {
+      "get": {
+        "tags": [
+          "variant-combination-controller"
+        ],
+        "operationId": "draft",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuMatrixDraft"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "variant-combination-controller"
+        ],
+        "operationId": "discardDraft",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "draftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/variant-combination/spus/{id}/combinations": {
+      "get": {
+        "tags": [
+          "variant-combination-controller"
+        ],
+        "operationId": "combinations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExistingCombination"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/variant-combination/overview": {
+      "get": {
+        "tags": [
+          "variant-combination-controller"
+        ],
+        "operationId": "overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VariantCombinationOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/unit-conversion/skus/{id}": {
       "get": {
         "tags": [
           "unit-conversion-controller"
         ],
-        "operationId": "panel",
+        "operationId": "panel_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -2358,7 +2712,7 @@
         "tags": [
           "unit-conversion-controller"
         ],
-        "operationId": "overview",
+        "operationId": "overview_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -2389,7 +2743,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "panel_1",
+        "operationId": "panel_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -2429,7 +2783,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "overview_1",
+        "operationId": "overview_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -2768,7 +3122,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "panel_2",
+        "operationId": "panel_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -2808,7 +3162,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "overview_2",
+        "operationId": "overview_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -3685,6 +4039,316 @@
           "version": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "CombinationInput": {
+        "required": [
+          "values"
+        ],
+        "type": "object",
+        "properties": {
+          "values": {
+            "maxItems": 100,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CombinationValueInput"
+            }
+          }
+        },
+        "nullable": true
+      },
+      "CombinationValueInput": {
+        "required": [
+          "specAxisId",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "specAxisId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "value": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "VariantDraftInput": {
+        "required": [
+          "mode"
+        ],
+        "type": "object",
+        "properties": {
+          "mode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "combinations": {
+            "maxItems": 2000,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/CombinationInput"
+            }
+          },
+          "notes": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CombinationValue": {
+        "type": "object",
+        "properties": {
+          "specAxisId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "axisCode": {
+            "type": "string"
+          },
+          "axisName": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PlannedCombination": {
+        "type": "object",
+        "properties": {
+          "signature": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CombinationValue"
+            }
+          }
+        }
+      },
+      "SkuMatrixDraft": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "spuName": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "axisCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "combinationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "combinations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlannedCombination"
+            }
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "discardedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CombinationCheckInput": {
+        "required": [
+          "combinations"
+        ],
+        "type": "object",
+        "properties": {
+          "combinations": {
+            "maxItems": 2000,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CombinationInput"
+            }
+          }
+        }
+      },
+      "AxisOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "BoundAxis": {
+        "type": "object",
+        "properties": {
+          "specAxisId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AxisOption"
+            }
+          }
+        }
+      },
+      "CombinationCheckResult": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean"
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "axes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoundAxis"
+            }
+          },
+          "submittedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "plannedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "conflictCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "conflicts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CombinationConflict"
+            }
+          },
+          "planned": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlannedCombination"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CombinationConflict": {
+        "type": "object",
+        "properties": {
+          "reasonCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string",
+            "nullable": true
+          },
+          "values": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/CombinationValue"
+            }
+          },
+          "occurrenceIndexes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "existingCombinationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "existingSkuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "existingDraftId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
           }
         }
       },
@@ -4600,6 +5264,207 @@
             "format": "int32"
           },
           "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ExistingCombination": {
+        "type": "object",
+        "properties": {
+          "signature": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CombinationValue"
+            }
+          },
+          "source": {
+            "type": "string"
+          },
+          "combinationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "draftId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "SkuMatrixDraftSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "axisCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "combinationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "discardedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "VariantCombinationPanel": {
+        "type": "object",
+        "properties": {
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "spuName": {
+            "type": "string"
+          },
+          "axes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoundAxis"
+            }
+          },
+          "matrixRowCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reservedCombinationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "existingSkuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "conflictMatrixCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "availableMatrixCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "matrixTooLarge": {
+            "type": "boolean"
+          },
+          "matrixCap": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "combinations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExistingCombination"
+            }
+          },
+          "drafts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuMatrixDraftSummary"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CombinationBlockage": {
+        "type": "object",
+        "properties": {
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "spuName": {
+            "type": "string"
+          },
+          "existingSkuCombinationCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "VariantCombinationOverview": {
+        "type": "object",
+        "properties": {
+          "axisBoundSpuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reservedCombinationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingDraftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "discardedDraftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "blockedSpuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "blockedMatrixSpuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "topBlockedSpus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CombinationBlockage"
+            }
+          },
+          "note": {
             "type": "string"
           }
         }
