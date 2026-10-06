@@ -416,6 +416,15 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['邀请成员', '分配角色', '定期复核'],
   },
   {
+    href: '/org/legal-entities',
+    implemented: true,
+    domain: 'org',
+    label: '法人档案',
+    description: '维护法人主体、注册信息、本位币与账簿舍入规则。',
+    fields: ['法人编码', '法定名称', '本位币', '注册国家', '登记号', '状态'],
+    workflow: ['新增法人', '维护资料', '店铺绑定'],
+  },
+  {
     href: '/org/stores',
     implemented: false,
     domain: 'org',
@@ -595,6 +604,7 @@ export const ACCOUNT_MENU_ORDER = [
   '/org/roles',
   '/org/departments',
   '/org/children',
+  '/org/legal-entities',
   '/org/stores',
   '/org/permissions',
   '/org/audit',

@@ -92,6 +92,7 @@ export type CredentialRotateInput = {
   authorizedAt: string;
   expiresAt: string;
 };
+export type CursorRewindInput = { cursorValue: string };
 export type DepartmentInput = { name: string };
 export type DepartmentView = { id: string; name: string };
 export type Detail = { product: Product; attributes: Array<Attribute>; skus: Array<Sku> };
@@ -114,6 +115,40 @@ export type Grant = {
   roleCode: string;
   scopeMode: string;
   permissions: Array<string>;
+};
+export type LegalEntityInput = {
+  code: string;
+  legalName: string;
+  registrationCountry: string;
+  registrationNo: string;
+  taxNo: string;
+  baseCurrency: string;
+  address: string;
+  amountScale: number;
+  quantityScale: number;
+  rounding: string;
+  status: string;
+};
+export type LegalEntityReferenceInput = {
+  legalEntityId: string;
+  source: string;
+  referenceId: string;
+};
+export type LegalEntityView = {
+  id: string;
+  code: string;
+  legalName: string;
+  registrationCountry: string;
+  registrationNo: string;
+  taxNo: string;
+  baseCurrency: string;
+  address: string;
+  amountScale: number;
+  quantityScale: number;
+  rounding: string;
+  status: string;
+  version: number;
+  referenceCount: number;
 };
 export type Login = { username: string; password: string; membershipId: string | null };
 export type LoginResult = { token: string | null; memberships: Array<Membership> };
@@ -150,8 +185,34 @@ export type MemberView = {
   owner: boolean;
 };
 export type Membership = { id: string; tenantId: string; name: string };
+export type OperationAckInput = { platformRequestId: string };
+export type OperationFailInput = { reason: string };
 export type OwnerTransfer = { membershipId: string };
 export type PermissionView = { code: string; pageCode: string; pageName: string; action: string };
+export type PlatformOperationInput = {
+  shopId: string;
+  marketplaceId: string | null;
+  operation: 'PUBLISH' | 'UPDATE_PRICE' | 'UPDATE_STOCK' | 'SHIP_UPDATE' | 'CANCEL_ORDER';
+  idempotencyKey: string;
+  payload: string;
+};
+export type PlatformOperationView = {
+  id: string;
+  shopId: string;
+  shopName: string;
+  platformCode: string;
+  marketplaceCode: string | null;
+  operation: string;
+  idempotencyKey: string;
+  payload: string;
+  status: string;
+  platformRequestId: string;
+  verification: string;
+  verifiedAt: string | null;
+  attempts: number;
+  lastError: string;
+  occurredAt: string;
+};
 export type PlatformView = {
   id: string;
   code: string;
@@ -283,4 +344,87 @@ export type SpuInput = {
   version: number;
 };
 export type SwitchMembership = { membershipId: string };
+export type SyncCursorInput = {
+  connectionId: string;
+  marketplaceId: string | null;
+  resourceType: string;
+  partitionKey: string;
+};
+export type SyncCursorView = {
+  id: string;
+  connectionId: string;
+  connectionAccount: string;
+  platformCode: string;
+  marketplaceCode: string | null;
+  resourceType: string;
+  partitionKey: string;
+  cursorValue: string;
+  status: string;
+  consecutiveFailures: number;
+  lastRunStatus: string | null;
+  openFailures: number;
+  lastSuccessAt: string | null;
+  lastFailureAt: string | null;
+  version: number;
+};
+export type SyncFailureInput = {
+  externalKey: string;
+  resourceType: string;
+  reason:
+    | 'AUTHORIZATION_EXPIRED'
+    | 'FIELD_PARSE_FAILED'
+    | 'MAPPING_MISSING'
+    | 'RATE_LIMITED'
+    | 'NETWORK_ERROR'
+    | 'PLATFORM_ERROR';
+  detail: string;
+  payloadDigest: string;
+  lastError: string;
+};
+export type SyncFailureSummary = { reason: string; total: number; oldest: string | null };
+export type SyncFailureView = {
+  id: string;
+  cursorId: string;
+  platformCode: string;
+  marketplaceCode: string | null;
+  externalKey: string;
+  resourceType: string;
+  reason: string;
+  detail: string;
+  payloadDigest: string;
+  attempts: number;
+  status: string;
+  lastError: string;
+  occurredAt: string;
+};
+export type SyncRunCompletionInput = { result: SyncRunResult; failures: Array<SyncFailureInput> };
+export type SyncRunResult = {
+  status: string;
+  fetchedCount: number;
+  writtenCount: number;
+  skippedCount: number;
+  cursorAfter: string;
+  durationMs: number | null;
+};
+export type SyncRunView = {
+  id: string;
+  cursorId: string;
+  platformCode: string;
+  marketplaceCode: string | null;
+  resourceType: string;
+  partitionKey: string;
+  triggerSource: string;
+  status: string;
+  startedAt: string;
+  finishedAt: string | null;
+  fetchedCount: number;
+  writtenCount: number;
+  skippedCount: number;
+  failedCount: number;
+  cursorAfter: string;
+  durationMs: number | null;
+};
 export type ValueInput = { attributeId: string; state: string; values: Array<string> };
+export type VerificationInput = {
+  verification: 'CONFIRMED_APPLIED' | 'CONFIRMED_NOT_APPLIED' | 'STILL_UNKNOWN';
+};

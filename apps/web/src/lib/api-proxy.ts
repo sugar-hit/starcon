@@ -30,7 +30,7 @@ const services: readonly {
     env: 'IDENTITY_URL',
     fallback: 'http://127.0.0.1:8081',
     pattern:
-      /^(permissions|owner-transfer|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?)$/,
+      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/references|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?)$/,
   },
   {
     prefix: 'catalog/',
@@ -46,7 +46,7 @@ const services: readonly {
     env: 'CHANNEL_URL',
     fallback: 'http://127.0.0.1:8083',
     pattern:
-      /^(platforms(?:\/[A-Za-z0-9_]+\/enums)?|connections(?:\/(?:reminders|[0-9a-f-]+(?:\/(?:credential|health|revoke))?))?|shops(?:\/[0-9a-f-]+(?:\/(?:marketplaces(?:\/[0-9a-f-]+)?|transfer))?)?)$/,
+      /^(platforms(?:\/[A-Za-z0-9_]+\/enums)?|connections(?:\/(?:reminders|[0-9a-f-]+(?:\/(?:credential|health|revoke))?))?|shops(?:\/[0-9a-f-]+(?:\/(?:marketplaces(?:\/[0-9a-f-]+)?|transfer))?)?|sync-cursors(?:\/[0-9a-f-]+(?:\/(?:pause|resume|rewind|trigger))?)?|sync-runs(?:\/[0-9a-f-]+(?:\/(?:complete|resolve))?)?|sync-failures(?:\/summary|[0-9a-f-]+\/replay)?|platform-operations(?:\/[0-9a-f-]+(?:\/(?:start|succeed|fail|unknown|verify))?)?)$/,
   },
 ];
 

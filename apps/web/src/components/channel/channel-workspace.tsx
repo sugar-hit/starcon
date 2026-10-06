@@ -2,24 +2,42 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge, Button } from '@starcon/ui';
-import { AlertTriangle, CheckCircle2, Globe2, Link2, Plus, RefreshCw, Search, Store } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Globe2,
+  Link2,
+  Plus,
+  RefreshCw,
+  RefreshCcw,
+  Search,
+  Send,
+  Store,
+} from 'lucide-react';
 import type {
   ConnectionView,
   CredentialRotateInput,
+  PlatformOperationView,
   PlatformView,
   ReauthorizationReminderView,
   ShopInput,
   ShopView,
+  SyncCursorView,
+  SyncFailureSummary,
+  SyncFailureView,
+  SyncRunView,
 } from '../../../../../packages/api-contracts/src/catalog';
 import { api, ApiError } from '@/lib/api';
 import { useIdentity } from '../iam/identity-shell';
 
-type Section = 'platforms' | 'connections' | 'shops';
+type Section = 'platforms' | 'connections' | 'shops' | 'sync' | 'operations';
 
 const sections: readonly { id: Section; label: string; permission: string; icon: typeof Globe2 }[] = [
-  { id: 'platforms', label: '平台目录', permission: 'channel.registry.read', icon: Globe2 },
-  { id: 'connections', label: '授权连接', permission: 'channel.connection.read', icon: Link2 },
   { id: 'shops', label: '店铺与站点', permission: 'channel.shop.read', icon: Store },
+  { id: 'connections', label: '授权连接', permission: 'channel.connection.read', icon: Link2 },
+  { id: 'sync', label: '同步运行', permission: 'channel.sync.read', icon: RefreshCw },
+  { id: 'operations', label: '平台回写', permission: 'channel.operation.read', icon: Send },
+  { id: 'platforms', label: '平台目录', permission: 'channel.registry.read', icon: Globe2 },
 ];
 
 const operatingModes: readonly { value: string; label: string; hint: string }[] = [
@@ -34,6 +52,14 @@ const statusTone: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> =
   ACTIVE: 'success',
   EXPIRING: 'warning',
   EXPIRED: 'danger',
+  BROKEN: 'danger',
+  SUCCEEDED: 'success',
+  PARTIAL: 'warning',
+  FAILED: 'danger',
+  RUNNING: 'warning',
+  UNKNOWN: 'danger',
+  CONFIRMED_APPLIED: 'success',
+  STILL_UNKNOWN: 'danger',
   REVOKED: 'neutral',
   SUSPENDED: 'warning',
   ARCHIVED: 'neutral',
@@ -43,8 +69,27 @@ const statusLabel: Record<string, string> = {
   ACTIVE: '正常',
   EXPIRING: '即将到期',
   EXPIRED: '已失效',
-  REVOKED: '已撤销',
+  // 02.4 同步运行
   PAUSED: '已暂停',
+  BROKEN: '游标异常',
+  RUNNING: '运行中',
+  SUCCEEDED: '成功',
+  PARTIAL: '部分失败',
+  FAILED: '失败',
+  CANCELLED: '已取消',
+  OPEN: '待处理',
+  REPLAYED: '已重放',
+  RESOLVED: '已解决',
+  IGNORED: '已忽略',
+  // 02.5 平台回写
+  PENDING: '待发送',
+  SENDING: '发送中',
+  UNKNOWN: '结果未知',
+  NOT_REQUIRED: '无需核验',
+  CONFIRMED_APPLIED: '已确认执行',
+  CONFIRMED_NOT_APPLIED: '已确认未执行',
+  STILL_UNKNOWN: '仍不确定',
+  REVOKED: '已撤销',
   SUSPENDED: '已停用',
   ARCHIVED: '已归档',
   AVAILABLE: '可用',
@@ -65,6 +110,12 @@ export function ChannelWorkspace() {
   const [reminders, setReminders] = useState<ReauthorizationReminderView[]>([]);
   const [shops, setShops] = useState<ShopView[]>([]);
   const [detail, setDetail] = useState<ShopView | null>(null);
+  const [cursors, setCursors] = useState<SyncCursorView[]>([]);
+  const [failures, setFailures] = useState<SyncFailureView[]>([]);
+  const [failureSummary, setFailureSummary] = useState<SyncFailureSummary[]>([]);
+  const [runs, setRuns] = useState<SyncRunView[]>([]);
+  const [operations, setOperations] = useState<PlatformOperationView[]>([]);
+  const [runCursorId, setRunCursorId] = useState<string | null>(null);
 
   const can = useCallback(
     (permission: string) => session.permissions.includes(permission),
@@ -86,12 +137,24 @@ export function ChannelWorkspace() {
         setReminders(await api<ReauthorizationReminderView[]>('channel/connections/reminders?withinDays=7'));
       }
       if (can('channel.shop.read')) setShops(await api<ShopView[]>('channel/shops'));
+      if (can('channel.sync.read')) {
+        setCursors(await api<SyncCursorView[]>('channel/sync-cursors'));
+        setFailures(await api<SyncFailureView[]>('channel/sync-failures?limit=50'));
+        setFailureSummary(
+          await api<SyncFailureSummary[]>('channel/sync-failures/summary'),
+        );
+        setRuns(await api<SyncRunView[]>(
+          `channel/sync-runs?limit=30${runCursorId ? `&cursorId=${runCursorId}` : ''}`,
+        ));
+      }
+      if (can('channel.operation.read'))
+        setOperations(await api<PlatformOperationView[]>('channel/platform-operations?limit=50'));
     } catch (e) {
       handleError(e);
     } finally {
       setReady(true);
     }
-  }, [can, handleError]);
+  }, [can, handleError, runCursorId]);
 
   useEffect(() => {
     void load();
@@ -195,6 +258,33 @@ export function ChannelWorkspace() {
         </div>
       )}
 
+      {section === 'sync' && (
+        <SyncRuntime
+          cursors={cursors}
+          failures={failures}
+          summary={failureSummary}
+          runs={runs}
+          runCursorId={runCursorId}
+          onSelectRun={setRunCursorId}
+          can={can}
+          busy={busy}
+          setBusy={setBusy}
+          onDone={load}
+          onError={handleError}
+          onNotice={setNotice}
+        />
+      )}
+      {section === 'operations' && (
+        <OperationQueue
+          operations={operations}
+          can={can}
+          busy={busy}
+          setBusy={setBusy}
+          onDone={load}
+          onError={handleError}
+          onNotice={setNotice}
+        />
+      )}
       {section === 'platforms' && (
         <PlatformDirectory platforms={platforms} term={term} />
       )}
@@ -975,3 +1065,391 @@ function modeHint(value: string) {
 }
 
 export { ApiError };
+
+/** 02.4 同步运行：游标 / 运行日志 / 失败队列与重放。 */
+function SyncRuntime({
+  cursors,
+  failures,
+  summary,
+  runs,
+  runCursorId,
+  onSelectRun,
+  can,
+  busy,
+  setBusy,
+  onDone,
+  onError,
+  onNotice,
+}: {
+  cursors: SyncCursorView[];
+  failures: SyncFailureView[];
+  summary: SyncFailureSummary[];
+  runs: SyncRunView[];
+  runCursorId: string | null;
+  onSelectRun: (id: string | null) => void;
+  can: (p: string) => boolean;
+  busy: boolean;
+  setBusy: (v: boolean) => void;
+  onDone: () => Promise<void>;
+  onError: (e: unknown) => void;
+  onNotice: (v: string) => void;
+}) {
+  async function act(path: string, message: string) {
+    setBusy(true);
+    try {
+      await api(path, 'POST');
+      onNotice(message);
+      await onDone();
+    } catch (e) {
+      onError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      {summary.length > 0 && (
+        <div className="bg-card rounded-md border p-4">
+          <p className="text-copy-14 font-medium">待处理失败</p>
+          <p className="text-copy-12 text-muted-foreground mt-1">
+            授权失效会导致持续漏单，优先处理；其余原因重放前先看明细。
+          </p>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {summary.map((s) => (
+              <li key={s.reason}>
+                <Badge tone={s.reason === 'AUTHORIZATION_EXPIRED' ? 'danger' : 'warning'}>
+                  {failureReasonLabel(s.reason)} {s.total}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="bg-card rounded-md border p-4">
+        <p className="text-copy-14 font-medium">同步任务</p>
+        <p className="text-copy-12 text-muted-foreground mt-1">
+          按「连接 · 站点 · 资源」拆分。游标只在处理全部成功后推进，失败时停在原处等待重试。
+        </p>
+        {cursors.length === 0 ? (
+          <p className="text-copy-13 text-muted-foreground mt-3">还没有同步任务</p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {cursors.map((c) => (
+              <li key={c.id} className="border-border rounded-md border p-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-copy-14 flex flex-wrap items-center gap-2 font-medium">
+                      {c.platformCode}
+                      {c.marketplaceCode ? ` · ${c.marketplaceCode}` : ' · 全站点'}
+                      <span className="text-muted-foreground font-normal">
+                        {resourceLabel(c.resourceType)}
+                      </span>
+                      <Badge tone={statusTone[c.status] ?? 'neutral'}>
+                        {statusLabel[c.status] ?? c.status}
+                      </Badge>
+                      {c.openFailures > 0 && (
+                        <Badge tone="warning">{c.openFailures} 条失败</Badge>
+                      )}
+                    </p>
+                    <p className="text-copy-12 text-muted-foreground mt-1 break-all">
+                      游标 {c.cursorValue || '（初始位置）'} · 账号 {c.connectionAccount}
+                      {c.consecutiveFailures > 0 ? ` · 连续失败 ${c.consecutiveFailures} 次` : ''}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {can('channel.sync.trigger') && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={busy || c.status !== 'ACTIVE'}
+                        onClick={() =>
+                          void act(
+                            `channel/sync-cursors/${c.id}/trigger`,
+                            '已触发同步，处理完成后游标才会推进',
+                          )
+                        }
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                        立即同步
+                      </Button>
+                    )}
+                    {can('channel.sync.update') && c.status === 'ACTIVE' && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={busy}
+                        onClick={() => void act(`channel/sync-cursors/${c.id}/pause`, '同步已暂停')}
+                      >
+                        暂停
+                      </Button>
+                    )}
+                    {can('channel.sync.update') && c.status === 'PAUSED' && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={busy}
+                        onClick={() => void act(`channel/sync-cursors/${c.id}/resume`, '同步已恢复')}
+                      >
+                        恢复
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onSelectRun(runCursorId === c.id ? null : c.id)}
+                    >
+                      {runCursorId === c.id ? '隐藏日志' : '运行日志'}
+                    </Button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {runs.length > 0 && (
+        <div className="bg-card rounded-md border p-4">
+          <p className="text-copy-14 font-medium">运行日志</p>
+          <ul className="mt-3 space-y-2">
+            {runs.map((r) => (
+              <li key={r.id} className="border-border flex flex-wrap items-center gap-2 rounded-md border p-2 text-copy-13">
+                <Badge tone={statusTone[r.status] ?? 'neutral'}>
+                  {statusLabel[r.status] ?? r.status}
+                </Badge>
+                <span>
+                  {r.platformCode} · {resourceLabel(r.resourceType)}
+                  {r.marketplaceCode ? ` · ${r.marketplaceCode}` : ''}
+                </span>
+                <span className="text-muted-foreground">
+                  拉取 {r.fetchedCount} · 写入 {r.writtenCount} · 跳过 {r.skippedCount} · 失败{' '}
+                  {r.failedCount}
+                </span>
+                <span className="text-muted-foreground">{formatTime(r.startedAt)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="bg-card rounded-md border p-4">
+        <p className="text-copy-14 font-medium">失败队列</p>
+        <p className="text-copy-12 text-muted-foreground mt-1">
+          重放按外部单号去重，重复处理不会产生第二张订单。
+        </p>
+        {failures.length === 0 ? (
+          <p className="text-copy-13 text-muted-foreground mt-3">没有待处理的失败记录</p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {failures.map((f) => (
+              <li key={f.id} className="border-border rounded-md border p-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-copy-14 flex flex-wrap items-center gap-2 font-medium">
+                      <Badge tone={f.reason === 'AUTHORIZATION_EXPIRED' ? 'danger' : 'warning'}>
+                        {failureReasonLabel(f.reason)}
+                      </Badge>
+                      <span className="break-all">{f.externalKey}</span>
+                    </p>
+                    <p className="text-copy-12 text-muted-foreground mt-1">
+                      {resourceLabel(f.resourceType)} · 已尝试 {f.attempts} 次 ·{' '}
+                      {formatTime(f.occurredAt)}
+                      {f.lastError ? ` · ${f.lastError}` : ''}
+                    </p>
+                  </div>
+                  {can('channel.sync.trigger') && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={busy}
+                      onClick={() =>
+                        void act(
+                          `channel/sync-failures/${f.id}/replay`,
+                          '已加入重放队列，处理完成后失败记录会自动关闭',
+                        )
+                      }
+                    >
+                      <RefreshCcw className="h-4 w-4" />
+                      重放
+                    </Button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** 02.5 平台回写：任务队列与未知结果核验。 */
+function OperationQueue({
+  operations,
+  can,
+  busy,
+  setBusy,
+  onDone,
+  onError,
+  onNotice,
+}: {
+  operations: PlatformOperationView[];
+  can: (p: string) => boolean;
+  busy: boolean;
+  setBusy: (v: boolean) => void;
+  onDone: () => Promise<void>;
+  onError: (e: unknown) => void;
+  onNotice: (v: string) => void;
+}) {
+  async function verify(id: string, conclusion: string, message: string) {
+    setBusy(true);
+    try {
+      await api(`channel/platform-operations/${id}/verify`, 'POST', {
+        verification: conclusion,
+      });
+      onNotice(message);
+      await onDone();
+    } catch (e) {
+      onError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const unknown = operations.filter((o) => o.status === 'UNKNOWN');
+
+  return (
+    <div className="space-y-4">
+      {unknown.length > 0 && (
+        <div className="border-warning/40 bg-warning/5 rounded-md border p-4">
+          <p className="text-copy-14 flex items-center gap-2 font-medium">
+            <AlertTriangle className="text-warning h-4 w-4" />
+            {unknown.length} 条回写结果未知，需先核验再决定是否重发
+          </p>
+          <p className="text-copy-12 text-muted-foreground mt-1">
+            平台可能已经执行过这些操作。直接重试会造成重复发货或库存错扣。
+          </p>
+        </div>
+      )}
+
+      <div className="bg-card rounded-md border p-4">
+        <p className="text-copy-14 font-medium">回写任务</p>
+        <p className="text-copy-12 text-muted-foreground mt-1">
+          每条任务带业务幂等键，重发不会造成平台侧重复动作。
+        </p>
+        {operations.length === 0 ? (
+          <p className="text-copy-13 text-muted-foreground mt-3">没有回写记录</p>
+        ) : (
+          <ul className="mt-3 space-y-2">
+            {operations.map((o) => (
+              <li key={o.id} className="border-border rounded-md border p-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-copy-14 flex flex-wrap items-center gap-2 font-medium">
+                      {operationLabel(o.operation)}
+                      <Badge tone={statusTone[o.status] ?? 'neutral'}>
+                        {statusLabel[o.status] ?? o.status}
+                      </Badge>
+                      {o.status === 'UNKNOWN' && (
+                        <Badge tone="neutral">{statusLabel[o.verification] ?? o.verification}</Badge>
+                      )}
+                    </p>
+                    <p className="text-copy-12 text-muted-foreground mt-1 break-all">
+                      {o.shopName} · {o.platformCode}
+                      {o.marketplaceCode ? ` · ${o.marketplaceCode}` : ''} · 幂等键 {o.idempotencyKey}
+                      {o.platformRequestId ? ` · 平台请求 ${o.platformRequestId}` : ''}
+                    </p>
+                    {o.lastError && (
+                      <p className="text-copy-12 text-muted-foreground mt-1 break-all">{o.lastError}</p>
+                    )}
+                  </div>
+                  {o.status === 'UNKNOWN' && can('channel.operation.update') && (
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={busy}
+                        onClick={() =>
+                          void verify(
+                            o.id,
+                            'CONFIRMED_APPLIED',
+                            '已确认平台执行成功，不会重复发送',
+                          )
+                        }
+                      >
+                        已执行
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={busy}
+                        onClick={() =>
+                          void verify(o.id, 'CONFIRMED_NOT_APPLIED', '已确认未执行，可以重新发起')
+                        }
+                      >
+                        未执行
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={busy}
+                        onClick={() => void verify(o.id, 'STILL_UNKNOWN', '保持待核验状态')}
+                      >
+                        仍不确定
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function resourceLabel(value: string) {
+  return (
+    {
+      ORDER: '订单',
+      LISTING: '商品',
+      INVENTORY: '库存',
+      SETTLEMENT: '结算',
+      PRODUCT: '商品资料',
+    }[value] ?? value
+  );
+}
+
+function failureReasonLabel(value: string) {
+  return (
+    {
+      AUTHORIZATION_EXPIRED: '授权失效',
+      FIELD_PARSE_FAILED: '字段解析失败',
+      MAPPING_MISSING: '映射缺失',
+      RATE_LIMITED: '平台限流',
+      NETWORK_ERROR: '网络异常',
+      PLATFORM_ERROR: '平台错误',
+    }[value] ?? value
+  );
+}
+
+function operationLabel(value: string) {
+  return (
+    {
+      PUBLISH: '上架',
+      UPDATE_PRICE: '改价',
+      UPDATE_STOCK: '改库存',
+      SHIP_UPDATE: '回传物流',
+      CANCEL_ORDER: '取消订单',
+    }[value] ?? value
+  );
+}
+
+function formatTime(value: string | null) {
+  if (!value) return '—';
+  const at = new Date(value);
+  return Number.isNaN(at.getTime()) ? value : at.toLocaleString('zh-CN');
+}

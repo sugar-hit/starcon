@@ -159,6 +159,76 @@
         }
       }
     },
+    "/identity/legal-entities/{id}": {
+      "put": {
+        "tags": ["administration-controller"],
+        "operationId": "legalEntityUpdate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["administration-controller"],
+        "operationId": "legalEntityDelete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/departments/{id}": {
       "put": {
         "tags": ["administration-controller"],
@@ -438,6 +508,108 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/identity/legal-entities": {
+      "get": {
+        "tags": ["administration-controller"],
+        "operationId": "legalEntities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LegalEntityView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["administration-controller"],
+        "operationId": "legalEntityCreate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/legal-entities/references": {
+      "post": {
+        "tags": ["administration-controller"],
+        "operationId": "legalEntityReference",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityReferenceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -858,6 +1030,66 @@
           }
         }
       },
+      "LegalEntityInput": {
+        "required": ["baseCurrency", "code", "legalName", "status"],
+        "type": "object",
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "pattern": "[A-Z0-9_-]{1,64}",
+            "type": "string"
+          },
+          "legalName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "registrationCountry": {
+            "pattern": "[A-Z]{2}",
+            "type": "string"
+          },
+          "registrationNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "taxNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "baseCurrency": {
+            "minLength": 1,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "address": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "amountScale": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantityScale": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "rounding": {
+            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
+            "type": "string"
+          },
+          "status": {
+            "pattern": "ACTIVE|SUSPENDED",
+            "type": "string"
+          }
+        }
+      },
       "DepartmentInput": {
         "required": ["name"],
         "type": "object",
@@ -923,6 +1155,25 @@
             "items": {
               "$ref": "#/components/schemas/AssignmentInput"
             }
+          }
+        }
+      },
+      "LegalEntityReferenceInput": {
+        "required": ["legalEntityId", "referenceId", "source"],
+        "type": "object",
+        "properties": {
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "minLength": 1,
+            "pattern": "[a-z_]{2,32}",
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -1145,6 +1396,58 @@
           },
           "owner": {
             "type": "boolean"
+          }
+        }
+      },
+      "LegalEntityView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "registrationCountry": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "taxNo": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "amountScale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantityScale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rounding": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "referenceCount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
