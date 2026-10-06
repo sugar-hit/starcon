@@ -302,7 +302,13 @@ public class CatalogService {
           input.groupName(),
           current.size());
       for (String option : input.options())
-        sql.execute("insert into attribute_option values(?,?,?)", access.tenantId(), id, option);
+        // 列名必须显式列出：V11 给 attribute_option 加了 position/enabled/created_at，
+        // 位置化插入会随列数变化而错位或直接报错。
+        sql.execute(
+            "insert into attribute_option(tenant_id,attribute_id,value) values(?,?,?)",
+            access.tenantId(),
+            id,
+            option);
     } else {
       UUID aid = id;
       var old =

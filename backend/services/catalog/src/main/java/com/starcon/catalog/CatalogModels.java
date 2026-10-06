@@ -1167,4 +1167,184 @@ public final class CatalogModels {
   /** 被既有 SKU 组合卡住的 SPU（按组合数倒序）。 */
   public record CombinationBlockage(
       UUID spuId, String spuCode, String spuName, long existingSkuCombinationCount) {}
+
+  // ------------------------------------------------ 3.2.1.1 属性定义列表（租户级属性字典）
+
+  /**
+   * 属性定义写入请求（租户级字典条目）。
+   *
+   * <p>对应 {@code attribute_definition} 里 {@code spu_id IS NULL} 的那些行。SPU 级定义
+   * （{@code spu_id IS NOT NULL}）由 3.2.2.1 的商品属性端点维护，两者在同一张表里但作用域不同，
+   * 见 V11 迁移注释里的模型决策。
+   *
+   * <p>{@code dataType} 决定 {@code options} 与类目规则的形态：只有 OPTION 能配选项集合，
+   * 只有 DECIMAL 能配 {@code minValue}/{@code maxValue} 范围。服务层会拒绝不匹配的组合。
+   *
+   * <p>{@code variantAxis} 沿用 V1 的蕴含式（规格轴必须是按 SKU 填写的必填单选枚举属性），
+   * V11 追加了一条 `variant_axis → usage='SPECIFICATION'`，让蓝图里的「用途=规格」真的生效。
+   */
+  public record AttributeDefinitionInput(
+      @NotBlank @Size(max = 64) String code,
+      @NotBlank @Size(max = 100) String name,
+      @NotBlank String dataType,
+      @NotBlank String valueMode,
+      @NotBlank String usage,
+      boolean multiple,
+      boolean required,
+      boolean filterable,
+      boolean variantAxis,
+      @Size(max = 32) String unit,
+      @Size(max = 100) String groupName,
+      @PositiveOrZero int position,
+      boolean enabled,
+      @Size(max = 50) List<@Size(max = 100) String> options,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 列表页的一行。
+   *
+   * <p>三个计数是「删除或停用前必须看见」的信息：选项数、类目规则数（这条属性被哪些类目要求了）、
+   * 以及 {@code spuUsageCount}（有多少 SPU 已经有同 code 的属性定义在用这个编码）。
+   * 最后一个不是外键计数——字典条目与 SPU 级定义不在同一个命名空间里，只能按 code 对齐统计。
+   */
+  public record AttributeDefinitionRow(
+      UUID id,
+      String code,
+      String name,
+      String dataType,
+      String valueMode,
+      String usage,
+      boolean multiple,
+      boolean required,
+      boolean filterable,
+      boolean variantAxis,
+      boolean enabled,
+      String unit,
+      String groupName,
+      int position,
+      long optionCount,
+      long enabledOptionCount,
+      long categoryRuleCount,
+      long spuUsageCount,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  public record AttributeDefinitionPage(
+      List<AttributeDefinitionRow> items, long total, int page, int size, long enabledCount) {}
+
+  /** 保存结果。{@code optionCount} 让前端不必为了刷新计数再打一次详情接口。 */
+  public record AttributeDefinitionSaved(UUID id, long version, int optionCount) {}
+
+  /** 列表页筛选条件。null 表示不筛；空串按「不过滤」处理。 */
+  public record AttributeDefinitionQuery(
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) @Size(max = 16) String dataType,
+      @Schema(nullable = true) @Size(max = 24) String usage,
+      @Schema(nullable = true) Boolean filterable,
+      @Schema(nullable = true) Boolean enabled,
+      @Schema(nullable = true) @Size(max = 50) String groupName,
+      @PositiveOrZero int page,
+      @Positive int size) {}
+
+  /**
+   * 属性选项（枚举取值）。
+   *
+   * <p>三个计数字段都是「删除或停用前必须看见」的信息：
+   *
+   * <ul>
+   *   <li>{@code productValueCount} = 已有多少处商品属性值取用了它（命中
+   *       {@code attribute_value_item}）。蓝图要求「有商品引用的选项只能停用」，
+   *       所以这个数 &gt; 0 时删除会被拒。
+   *   <li>{@code categoryRuleCount} = 有多少条类目规则把它列为可选值。删掉它会连带改掉那些规则，
+   *       所以同样先拒，并提示先改规则。
+   *   <li>{@code inUse} 是上面两者的合成，界面上用它决定给「删除」还是给「停用」。
+   * </ul>
+   *
+   * <p>字典条目目前还不会被赋属性值（{@code attribute_value} 的复合外键仍锁在 SPU 作用域，
+   * 那是下游 3.2.2.x 的接线），所以 {@code productValueCount} 现在恒为 0——
+   * 它照实反映数据库现状，接上赋值链路后会自动开始计数，界面上不需要改。
+   */
+  public record AttributeOptionRow(
+      String value,
+      int position,
+      boolean enabled,
+      long productValueCount,
+      long categoryRuleCount,
+      boolean inUse,
+      String createdAt) {}
+
+  /** 选项写入请求。value 落在 {@code attribute_option}，也就是规格轴共享的那个值源。 */
+  public record AttributeOptionInput(
+      @NotBlank @Size(max = 100) String value,
+      @PositiveOrZero int position,
+      boolean enabled) {}
+
+  public record AttributeOptionSaved(UUID attributeId, String value, int position, boolean enabled) {}
+
+  /**
+   * 类目属性规则一行：某类目对某属性的要求（必填 + 可选范围）。
+   *
+   * <p>{@code allowedOptionCount} 与 {@code allowedOptions} 只对枚举属性有意义；
+   * {@code minValue}/{@code maxValue} 只对数值属性有意义。两者互斥由服务层校验。
+   */
+  public record CategoryAttributeRule(
+      String category,
+      UUID attributeId,
+      String attributeCode,
+      String attributeName,
+      String dataType,
+      boolean required,
+      // 数字属性的上下限；非数字属性恒为 null。注解标注可空，否则生成的前端契约
+      // 会把它们写成非空 number，界面上读 null.minValue 直接崩。
+      @Schema(nullable = true) java.math.BigDecimal minValue,
+      @Schema(nullable = true) java.math.BigDecimal maxValue,
+      int position,
+      long productCount,
+      List<String> allowedOptions,
+      String createdAt) {}
+
+  /**
+   * 类目属性规则写入请求。
+   *
+   * <p>{@code category} 是 {@code spu.category} 的自由文本（3.3.1.1 分类树未开发，无可引用的主键），
+   * 与 V9 的 {@code category_spec_axis} 同一口径。
+   *
+   * <p>{@code allowedOptions} 是该类目允许取用的枚举值子集，必须是属性值源里已有的值
+   * （复合外键兜底）。传空数组表示「不设子集，全部选项都允许」。
+   */
+  public record CategoryAttributeRuleInput(
+      @NotBlank @Size(max = 100) String category,
+      boolean required,
+      @Schema(nullable = true) java.math.BigDecimal minValue,
+      @Schema(nullable = true) java.math.BigDecimal maxValue,
+      @PositiveOrZero int position,
+      @Size(max = 50) List<@Size(max = 100) String> allowedOptions) {}
+
+  public record CategoryAttributeRuleSaved(String category, UUID attributeId, int allowedOptionCount) {}
+
+  /**
+   * 属性字典概览。
+   *
+   * <p>{@code dictionaryAttributeCount} 与 SPU 级定义分开统计：V11 之后两者同表，
+   * 不分开就会把「这个租户定义了几条属性字典」与「有多少商品各自建了属性」混成一个数。
+   *
+   * <p>{@code categoryWithoutRuleCount} 是治理缺口：已有商品的类目里，
+   * 一个属性要求都没配的类目数——这些类目的录入表单不会做必填校验。
+   */
+  public record AttributeDictionaryOverview(
+      long dictionaryAttributeCount,
+      long enabledAttributeCount,
+      long optionCount,
+      long disabledOptionCount,
+      long categoryRuleCount,
+      long spuLevelDefinitionCount,
+      long filterableCount,
+      long specUsageCount,
+      long categoryWithoutRuleCount,
+      List<AttributeUsageCount> topUsedAttributes,
+      String note) {}
+
+  /** 按类目规则数倒序的属性，用来回答「哪些属性被最多类目要求了」。 */
+  public record AttributeUsageCount(UUID id, String code, String name, long categoryRuleCount) {}
 }
