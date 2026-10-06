@@ -20,7 +20,10 @@ services:
     build:
       context: ../..
       dockerfile: deploy/docker/Dockerfile.backend
-      args: { SERVICE: identity }
+      args:
+        SERVICE: identity
+        HTTP_PROXY: ${BUILD_HTTP_PROXY:-}
+        HTTPS_PROXY: ${BUILD_HTTPS_PROXY:-}
     restart: unless-stopped
     depends_on:
       postgres: { condition: service_healthy }
@@ -38,7 +41,10 @@ services:
     build:
       context: ../..
       dockerfile: deploy/docker/Dockerfile.backend
-      args: { SERVICE: catalog }
+      args:
+        SERVICE: catalog
+        HTTP_PROXY: ${BUILD_HTTP_PROXY:-}
+        HTTPS_PROXY: ${BUILD_HTTPS_PROXY:-}
     restart: unless-stopped
     depends_on:
       postgres: { condition: service_healthy }
@@ -56,7 +62,10 @@ services:
     build:
       context: ../..
       dockerfile: deploy/docker/Dockerfile.backend
-      args: { SERVICE: channel }
+      args:
+        SERVICE: channel
+        HTTP_PROXY: ${BUILD_HTTP_PROXY:-}
+        HTTPS_PROXY: ${BUILD_HTTPS_PROXY:-}
     restart: unless-stopped
     depends_on:
       postgres: { condition: service_healthy }
