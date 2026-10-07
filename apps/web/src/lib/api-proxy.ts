@@ -293,11 +293,15 @@ const services: readonly {
     // {id}/lines/{lineId}/count / {id}/tasks / {id}/tasks/{taskId}/assign。
     // 盘点路径上同样**没有** DELETE：账面数是冻结快照，删一张盘点单等于让这次盘从未发生过。
     // capabilities 是字面量，排在 {id} 之前判别。
+    // stocktake-variances 是 7.4.2.2 盘点差异处理：capabilities / sheets/{sheetId}/
+    // lines|report|audit|adjustments / adjustments/{id}(+submit|approve|reject|cancel|post)。
+    // 同样**没有** DELETE：差异处理全程只追加审计，归因/调整单/审计行都不可删，
+    // 放行一个删除形状会让「能不能把一条差异的痕迹抹掉」看起来是能。
     prefix: 'warehouse/',
     env: 'WAREHOUSE_URL',
     fallback: 'http://127.0.0.1:8084',
     pattern:
-      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?|calculation)|[0-9a-f-]+(?:\/(?:versions|retire))?)?)|stocktakes(?:\/capabilities|[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
+      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?|calculation)|[0-9a-f-]+(?:\/(?:versions|retire))?)?)|stocktakes(?:\/capabilities|[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)|stocktake-variances(?:\/capabilities|sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
   },
 ];
 

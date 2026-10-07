@@ -12,17 +12,17 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 86 |
+| 已交付 | 87 |
 | 进行中 | 0 |
-| **未开发** | **379** |
-| 完成率 | 18.5% |
+| **未开发** | **378** |
+| 完成率 | 18.7% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
-| **D3** | 8 | 0 | 32 | 40 |
+| **D3** | 9 | 0 | 31 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
@@ -38,7 +38,7 @@
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
-| 07 | 库存核算系统 | D3 | 8 | 31 |
+| 07 | 库存核算系统 | D3 | 9 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 0 | 27 |
@@ -268,7 +268,7 @@
 | 7.4.1.1 | 调整单管理 | /inventory/adjustments | D3 | 未开发 | — |
 | 7.4.1.2 | 调整审批 | /inventory/adjustments | D3 | 未开发 | — |
 | 7.4.2.1 | 盘点单 | /inventory/count | D3 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V59__warehouse_stocktake_sheet.sql`（stocktake_sheet / stocktake_task / stocktake_line 三表，tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT + 索引；版本按调度器预分配取 V59）；**冻结落成数据而不是查询**（本模块唯一红线「盘点时点必须冻结账面数，否则边盘边卖产生虚假差异」）：发起盘点那一刻把范围内 stock_bucket.on_hand 复制成 stocktake_line.book_on_hand，并由 DB 触发器 `stocktake_line_frozen` 把账面数与八个维度列钉成不可更新（拿到连接直接 UPDATE 也改不动，冻结是数据库不变量而非应用层承诺）；差异列是 generated column `counted_qty - book_on_hand`，人工赋值被 PG 直接拒绝；`stocktake_line_no_delete` 挡住删除（删一行等于让这张单从未盘过它）；进度三计数、三列合计与任务状态全部**由明细行派生**、表里无对应列（另存就要每次同步，漏同步一次会出现「任务显示已完成但还有行没盘」）；范围（哪些 bucket 进这次盘）与任务单元（怎么切任务）是**两个独立维度**，可组合出「按仓库盘 + 按库位发任务」；端点 8 个挂在 `/warehouse/inventory/stocktakes` 下：`GET /stocktakes` 列表（真分页）、`GET /stocktakes/capabilities` 范围维度接入情况、`GET /stocktakes/{id}` 详情+三列合计、`POST /stocktakes` 发起（冻结，拒绝空范围以免留下「盘过了没差异」的假单）、`GET /stocktakes/{id}/lines` 明细分页（PENDING/MATCH/GAIN/LOSS 四口径）、`POST /stocktakes/{id}/lines/{lineId}/count` 录入实盘（传 null 即撤销录入）、`GET /stocktakes/{id}/tasks` 任务列表、`POST /stocktakes/{id}/tasks/{taskId}/assign` 派工；写动作走 warehouse.inventory.update（冻结账面与录实盘都是写）；**盘点范围只给三种并如实说明另两种**：按仓库/按库位可筛出真正不同的任务集合；按类目在枚举里保留但**显式拒绝 422**（sku_ref 刻意不存类目、catalog 读取投影未接入，沿用 7.1.1.1 已建立的未接入维度约定：拒绝而不是返回空集）；**ABC 分类连枚举都不给** —— 全库 warehouse 与 catalog 两侧迁移加 db/schemas 均无任何 ABC 字段、也无动销率等可推导列，不臆造分位算法冒充已有数据，改由 capabilities 端点报 available=false 并在页面折叠区向用户讲清原因；不接受 frozenAt 请求参数（允许指定时刻等于允许「盘三天前的账」）；扫码做成手工录入加条码字段、不伪造扫码流程；集成测试 `StocktakeIntegrationTest` 19 例实跑 Testcontainers PostgreSQL 16（连接池压到 1），核心用例「冻结的账面数不被后续出入库改写」真的在发起盘点后出了一笔 −30 的出库，逐列断言账面合计纹丝不动、实盘 95、差异 −5，并核对当前余额确实已变成 70（证明那笔出入库真的发生了而非空转）；另有账面数/维度列直改被 DB 拒绝、差异列生成列被拒、明细行删除被拒、未录入差异为 NULL 而非 0、录入推进状态且可撤销后状态重算、四种差异筛选互斥、冻结时点连可读名一起冻结（之后 sku_ref 改名盘点单仍读得懂）、frozen_at 与 counted_at 零漂移（OffsetDateTime 绑定）、负实盘被 CHECK 拒绝、租户隔离三断言（两租户互不可见含列表/详情/明细/任务/录入全隔离、伪造 X-Tenant-Id 无效、A→B→A→B 交替复用同一条物理连接不串租户并逐张表确认 relforcerowsecurity）；页面 `/inventory/count` 工作区（stocktake-workspace.tsx + 纯函数 stocktake-model.ts 与 21 例单测）：冻结时刻与账面合计摆在第一屏 StatCard、账面/实盘/差异三列表格、未录入显破折号且差异只读、录入框含实盘数与可选条码、撤销录入、按任务进度表与取消派工、发起盘点表单按可用范围过滤并附不可用原因说明、加载态/错误态/无权限态/空态/搜索无结果态/分页俱全；api-proxy 白名单登记盘点全部形状（capabilities 排在 {id} 之前判别、路径上刻意没有 DELETE） |
-| 7.4.2.2 | 盘点差异处理 | /inventory/count | D3 | 未开发 | — |
+| 7.4.2.2 | 盘点差异处理 | /inventory/count | D3 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V62__stocktake_variance_handling.sql`（stocktake_variance_attribution 归因 / stocktake_variance_adjustment 调整单 / stocktake_variance_adjustment_line 调整单行 / stocktake_variance_audit 审计 四表，tenant_id NOT NULL + ENABLE/FORCE RLS + GRANT + REVOKE DELETE + REVOKE ALL FROM starcon_app；版本按调度器预分配取 V62；额外建 `stocktake_line_sheet_identity` 唯一索引以支持复合外键）；**蓝图红线「差异不直接改余额，必须经调整单与审批」做成 DB 不变量而不是应用层自觉**，共 9 组保护：inventory_entry 入账闸门（ref_type='STOCKTAKE_VARIANCE' 时调整单必须处于 APPROVED/POSTED）+ 延迟约束触发器校验 Σ分录=Σ调整单行 + 状态机白名单（POSTED 只能从 APPROVED 转到）+ 调整单禁删 + 已过账调整单行不可改 + 已过账行部分唯一索引 + IGNORE 终态不可翻案 + 归因结案后内容不可改 + 审计 append-only；刻意**没有**在 inventory_balance 上加全局触发器，那会打掉既有模块与其直写测试夹具，属跨车道回归，改为只封堵「差异改账的唯一合法通道」；**差异只有一份真相且不在本模块**：不重算差异，直接读 7.4.2.1 的 stocktake_line.variance 生成列，否则库里就有两份差异且无法判断该信谁；**五原因 × 三决定**：SHRINKAGE 损耗 / MISSHIP 错发 / THEFT 偷盗 / UNRECORDED 未入账 / TIMING 时点差，决定 ADJUST 调整 / RECOUNT 复盘 / IGNORE 忽略；末两类原因必须分开，因为「账错了」（UNRECORDED）与「账没错」（TIMING）对应完全相反的处置，合并成「其他差异」等于把「这条差异要不要动账」这个问题提前绕过去；RECOUNT 结案会清空 counted_qty、counted_at、counted_barcode 并把单据状态退回 COUNTING 以便重新归因，IGNORE 与 POSTED 是 DB 拒绝翻案的终态，REJECTED/CANCELLED 释放归因可重来，一行至多一条未结归因（部分唯一索引）；**入账用带符号增量而非覆盖 bucket**：on_hand_delta = variance 逐行写 inventory_entry(kind='ADJUSTMENT')，冻结之后仓库照常收发，覆盖式写回会把盘点期间的真实交易抹掉；调整单自落地（7.4.1.1 调整单与 17.4 审批均未交付，本模块落自己的调整单实体走完闭环，capabilities 端点与报告中如实声明「不是 7.4.1.1 的实现」），交接靠 V1 既有定位键 inventory_transaction(ref_type='STOCKTAKE_VARIANCE', ref_id=调整单 id)，跨模块不建 FK 不查对方表（AGENTS.md）；审批以 DB 级状态机 + 提交人≠审批人职责分离 + append-only 审计替代，未谎称已接入审批中心；端点 13 个挂 `/warehouse/inventory/stocktake-variances`：GET /capabilities（报出未接入能力与原因）、GET /sheets/{sheetId}/lines（差异明细分页，五种归因状态筛选 ALL/UNATTRIBUTED/IN_ADJUSTMENT/POSTED/RECOUNTED）、GET /sheets/{sheetId}/report（盘点完成报告）、GET /sheets/{sheetId}/audit（审计时间线）、POST /sheets/{sheetId}/lines/{lineId}/attribute（归因）、POST /sheets/{sheetId}/adjustments（按显式 lineIds 或 allAttributed 建单）、GET /adjustments 列表分页、GET /adjustments/{adjustmentId} 详情、POST /adjustments/{adjustmentId}/submit、/approve、/reject、/cancel、/post；新起 StocktakeVarianceController，不动 7.4.2.1 车道的 InventoryController.java；**报告率值在 Java 端 BigDecimal 计算**（4 位小数 HALF_UP，分母 0 返回 null 而非 0，「没有盘盈」与「盘盈率 0%」不是一回事），SQL 侧只出真算聚合并显式 ::numeric(19,4)；口径为行差异率=差异行数÷已盘行数、数量差异率=(盘盈+盘亏)÷账面合计、盘盈率=盘盈量÷账面合计、盘亏率=盘亏量÷账面合计、归因完成度=已归因÷差异行数，账面合计取 V59 冻结值；原因与决定枚举在报告中恒定各占一行（values 左连接，缺类目显示 0 而非从报告里消失）；**金额口径如实报 amountBasisAvailable=false**：全库 warehouse 与 catalog 两侧迁移加 db/schemas 均无库存成本列（catalog 侧仅跨服务的 supplier_quote_price_tier，不可用于库存计价），只出数量口径率不臆造金额；IGNORE 理由至少 4 字符（后端 CHECK + 服务校验 + 前端校验三层一致）；跨租户读差异明细返回 404 而非空集（requireSheet 先执行，比返回空集更强）；集成测试 `StocktakeVarianceIntegrationTest` 20 例实跑 Testcontainers PostgreSQL 16（连接池压到 1），覆盖 post 后 inventory_balance 与 stock_bucket 真实变化、状态机非法跳转被 DB 拒绝、Σ分录≠Σ行被延迟约束触发器拒绝、伪造 X-Tenant-Id 无效、A→B→A→B 复用同一条物理连接不串租户并逐张表确认 relforcerowsecurity；契约 codegen 新增 17 类型、消失 0、既有类型零变化；页面工作区 `/inventory/variance`（stocktake-variance-workspace.tsx + 纯函数 stocktake-variance-model.ts 与 14 例单测）：归因抽屉（五原因 × 三决定 + 理由必填 + 条码留痕）、调整单建单与提交审批过账流转、差异明细五状态筛选与分页、报告页指标卡与原因/决定分布、审计时间线、加载态/错误态/无权限态/空态/搜索无结果态/分页俱全；api-proxy 白名单登记差异处理全部形状（路径上刻意没有 DELETE）；导航不加条目与 7.4.2.1 保持一致（nav 由 IMPLEMENTED_TASK_PAGES 驱动，避免改共享文件产生跨车道冲突） |
 | 7.5.1.1 | 调拨单 | — | D3 | 未开发 | — |
 | 7.5.1.2 | 在途库存 | — | D3 | 未开发 | — |
 | 7.5.2.1 | 跨法人调拨 | — | D3 | 未开发 | — |
