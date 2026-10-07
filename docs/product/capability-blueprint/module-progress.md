@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 64 |
+| 已交付 | 65 |
 | 进行中 | 0 |
-| **未开发** | **401** |
-| 完成率 | 13.8% |
+| **未开发** | **400** |
+| 完成率 | 14.0% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 62 | 0 | 18 | 80 |
+| **D1–D2** | 63 | 0 | 17 | 80 |
 | **D3** | 2 | 0 | 38 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -48,7 +48,7 @@
 | 14 | 广告与增长系统 | D7 | 0 | 22 |
 | 15 | 客户与客服系统 | D7 | 0 | 24 |
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 9 | 29 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 10 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
 
 ## 判定「已交付」的标准
@@ -504,7 +504,7 @@
 | 16.5.2.2 | 关联风险 | — | D7 | 未开发 | — |
 | 16.6.1.1 | PII 管理 | — | D7 | 未开发 | — |
 | 16.6.2.1 | 数据出境与留存 | — | D7 | 未开发 | — |
-| 17.1.1.1 | 租户列表 | — | D1–D2 | 未开发 | — |
+| 17.1.1.1 | 租户列表 | — | D1–D2 | 已交付 | V40__tenant_list_context.sql（membership 加 last_login_at timestamptz，**挂在 membership 而不是 app_user**：它回答「我上次进入**这个**租户是什么时候」，同一个人在 3 个租户各有各的时刻，挂在用户上会把三者显示成同一个时间；login 与 switch 两处都打点，漏掉切换就会让「只切换不重新登录」的用户永远为空；两个索引 membership_user 供 memberships_for(uid) 走索引、membership_tenant_status 供成员计数；四个 SECURITY DEFINER 函数 switchable_tenants / tenant_context / update_tenant_profile 全部只收会话令牌哈希，**签名里没有任何 tenant_id 参数**，改的是 create_session 与 switch_membership 让它们打点）+ /identity/tenants 列表 + /identity/tenants/current 档案与基本信息维护 + /org/tenants 工作区（窄权限路径见下）；**窄权限语义由三层保证**：① 函数签名只有 hash，客户端想传租户也无处可传，不是「不校验」而是结构上无落点；② 集合一律从 memberships_for(user_id) 起算再按 membership 聚合角色，没有成员关系的租户进不了 FROM，而不是靠租户表 join 出去再在前端过滤；③ 运行时角色 identity_app 是 nosuperuser nobypassrls，membership/role/role_assignment 全部 FORCE RLS，且**运行时角色对 tenant 表连读权限都没有**——租户快照只能经 tenant_context 这条窄路径读，租户目录无法被枚举（这正是实现中撞到的真问题：直查 tenant 快照会 permission denied）；管理员同样只能看到自己有 membership 的租户，**刻意不提供按 tenant_id 任意查询的端点**，api-proxy 白名单也只放行 tenants 与 tenants/current 两个形状、不接 {uuid} 段，用例同时钉住正反两面；基本信息维护复用 administration_tenant（Owner + ALL）这道既有闸，与成员管理/子租户同口径，code 不可改（全局唯一且被外部集成引用）；**踩到并修掉一个自引入的真问题**：变更后快照原本再查一次 tenant_context，但把本租户停用会让会话当场失效，于是「停用」永远存不下来（事务回滚 + 403），改为直接由入参拼出 after 快照，这也正是停用不可逆、界面必须二次确认的原因；集成测试 10 项实跑 Testcontainers PostgreSQL 16（连接池压到 1），覆盖：子租户对父租户不可见、伪造 X-Tenant-Id 不能扩大范围、无 tenant id 端点、无 membership 会话失效、最后登录断言写回的值（漂移 8 小时即失败）、切换只刷新新进入的租户、Owner 可改非 Owner 403（403/400 真校验）、停用后父租户不受影响、租户隔离三断言、运行时角色不可绕过 RLS |
 | 17.1.1.2 | 子租户 | — | D1–D2 | 已交付 | tenant + tenant_closure 闭包表 + /children CRUD（含审计与 outbox）+ /org/children 层级工作区 |
 | 17.1.1.3 | 层级授权 | — | D1–D2 | 未开发 | — |
 | 17.1.2.1 | 法人档案 | — | D1–D2 | 已交付 | identity V5 legal_entity + CRUD + 删除保护触发器 + /org/legal-entities |
