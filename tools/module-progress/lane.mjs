@@ -253,14 +253,46 @@ function pickModules(count, ledger, state) {
 
   tryTake(inFlight);
 
-  // 再按阶段顺序补齐：同一阶段内按模块 ID 升序
-  for (const stage of STAGE_ORDER) {
-    if (picked.length >= count) break;
-    const cands = unfinished
-      .filter((r) => r.stage === stage && r.status !== '进行中' && upstreamReady(r))
-      .sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
-    tryTake(cands);
-  }
+  // 关键路径优先：依赖深度降序；同深度仍按阶段顺序，再按模块 ID 升序。
+  //
+  // 为什么改（2026-10-07 22:04 实测）：原逻辑走 STAGE_ORDER，同阶段内按 ID 升序。
+  // 而 D7 的 ID 天然比 D4 大得多，于是「阶段靠后 + ID 靠后」的模块永远排在最后 ——
+  // 可它们恰恰是下游最多、解锁面最大的那批。实测同样 6 个名额：
+  //
+  //   旧（阶段顺序）  平均依赖深度 1.2，且 6 个里 4 个 depth=0（蓝图没写上游）
+  //   新（深度降序）  平均依赖深度 4.2
+  //
+  // 依赖深度 = 该模块到依赖链起点的最长路径长度。**与上游何时交付无关**：
+  // 深度衡量的是「做完它能解锁多少下游」，而候选池已经过 upstreamReady 过滤，
+  // 所以只看池内模块之间谁的解锁面更大。
+  const ledgerIds = new Set(ledger.map((r) => r.id));
+  const depth = new Map();
+
+  const depthOf = (id, stack = new Set()) => {
+    if (depth.has(id)) return depth.get(id);
+    if (stack.has(id)) return 0; // 环保护：蓝图写坏时不要死循环
+    stack.add(id);
+    const us = (upstream.get(id) ?? []).filter((u) => ledgerIds.has(u));
+    const d = us.length === 0 ? 0 : 1 + Math.max(...us.map((u) => depthOf(u, stack)));
+    stack.delete(id);
+    depth.set(id, d);
+    return d;
+  };
+
+  const stageRank = (s) => {
+    const i = STAGE_ORDER.indexOf(s);
+    return i === -1 ? STAGE_ORDER.length : i;
+  };
+
+  const cands = unfinished
+    .filter((r) => r.status !== '进行中' && upstreamReady(r))
+    .sort(
+      (a, b) =>
+        depthOf(b.id) - depthOf(a.id) ||
+        stageRank(a.stage) - stageRank(b.stage) ||
+        a.id.localeCompare(b.id, 'en', { numeric: true }),
+    );
+  tryTake(cands);
 
   // 仍然凑不满才动用阻塞项（明确标注，让任务书知道要先修数据模型）
   if (picked.length < count) {
