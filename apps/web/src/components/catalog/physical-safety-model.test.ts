@@ -65,7 +65,6 @@ function draft(patch: Partial<SafetyDraft> = {}): SafetyDraft {
     safetyNote: '',
     safetyVersion: 0,
     packagingVersion: 0,
-    packagingVersion: 0,
     ...patch,
   };
 }

@@ -1,43 +1,24 @@
 # 3.7.2.1 物理与安全属性（D1–D2）
 
+> **本文档跨两轮。** 第一轮交付了表、端点、规则、前端页面与契约；第二轮补齐了
+> **DB 层一致性约束**并修掉两个前端缺陷。**实际交付以第二轮的 `land` 为准**
+> （原因见文末「编排事故记录」）。
+
 ## 做了什么
 
-交付能力蓝图 3.7.2.1「物理与安全属性」：裸品物理参数（长宽高、净重、毛重、包装方式）
-与安全属性（带电 / 液体 / 危险品 / 磁性）的完整读写、体积重与体积的派生计算、
-按安全属性的筛选查询、体积核算能力，以及「决定可走哪些物流渠道与是否需要特殊申报」
-对应的可查询判定接口。
-
-基线 `integration/module-dev`（`fa8dee8`），车道分支 `feat/3-7-2-1`，迁移版本 **V28**（编排器预分配）。
-
-蓝图职责逐条对应：
-
-| 蓝图要求                       | 落地                                                       | 归属                    |
-| ------------------------------ | ---------------------------------------------------------- | ----------------------- |
-| 物理参数（长宽高/净重/毛重/包装方式） | 读写既有 `sku_package`（V6 建，3.1.2.2 详情页在用）      | catalog，**不另建表**   |
-| 安全属性（带电/液体/危险品/磁性） | 新表 `sku_safety_attribute`                                | catalog（V28）          |
-| 体积、体积重、计费重           | `PhysicalSafetyRules` 纯函数现算                            | 派生值**一律不落表**    |
-| 供 10 物流渠道筛选             | `GET /catalog/physical-safety/profiles`                     | catalog（渠道规则属 10） |
-| 供 8 拣货装箱体积核算          | `POST /catalog/physical-safety/carton-calc`                 | catalog（箱规由调用方给） |
-| 决定渠道可用性与特殊申报        | `POST /catalog/physical-safety/skus/{id}/channel-verdict`    | catalog（渠道表不建）   |
+维护 SKU 裸品物理参数与安全属性，决定可走哪些物流渠道、是否需要特殊申报；
+派生体积/体积重/计费重/渠道判定/装箱件数供 10 物流与 8 拣货调用。
+上游 = —，下游 = 10 物流（渠道适配、体积重）、16 合规（危险品与认证）。
 
 ## 关键 trade-off
 
 ### 1. 物理参数复用 `sku_package`，不另建表（最重要的一条）
 
-蓝图把「长宽高、净重、毛重、包装方式」写进本模块职责，但 **V6 早已把这些列建在
-`sku_package` 上**，且 3.1.2.2 的详情页已经在读写它们。**没有另建一张表抄一遍**。
-
-理由是 V5/V6 自己在文件头立下的纪律：catalog 一旦把同一个数字存成第二个本地列，
-它就成了第二个事实来源。同一张 SKU 出现两个不同答案的毛重时，「10 物流按哪个算体积重」
-这个问题没人答得上来，而算错的那一次会变成一张**真实的面单**。
-
-V6 的文件头还直接把分工写死了：「**3.7.2.1 物理与安全属性在 sku_package 之上补
-是否带电/液体/危险品/磁性**」。本模块照这句话执行：物理参数读也读 `sku_package`、
-写也只写 `sku_package`（同一个 `ON CONFLICT (tenant_id,sku_id)` 目标）。
-
-代价是本模块的写端点要同时写两张表，测试里专门加了一条
-「`sku_package` 的 NUMERIC(19,6) 精度未被本模块改坏」的回归断言 ——
-复用而不复制，靠这条断言钉住「别哪天顺手把列类型改了」。
+蓝图的职责句把「长宽高、净重、毛重、包装方式」写进本模块，但 V6 早已把这些列建在
+`sku_package` 上并让 3.1.2.2 的详情页读写。本模块**读写同一张表**、不另建表抄一遍。
+理由是硬约束：一份 SKU 出现两个不同答案的毛重时，10 物流按哪个算体积重没人能回答，
+而算错的那一次会变成一张真实的面单。V6 的文件头本身也已把分工写死
+（「3.7.2.1 在 sku_package 之上补是否带电/液体/危险品/磁性」）。
 
 ### 2. 「未采集」与「都不带」是两件事
 
@@ -68,11 +49,50 @@ V6 的文件头还直接把分工写死了：「**3.7.2.1 物理与安全属性�
 危险品→危险品申报 / 磁性→磁性物申报）。用「特殊属性」枚举会把「带电且危险」这种
 真实存在的组合压成一行，而组合恰恰是渠道判定要用的东西。
 
-**不建 UN 编号 / 危险品类别 / 电池类型列** —— 那是 3.7.1.1「HS 编码与申报要素」的职责，
-该模块当前未开发且台账已记录它被 `product_compliance` 的表结构缺陷阻塞。
-本模块只回答「是否需要特殊申报」，**不回答「申报什么」**。
+### 5. 危险品类别必须有，但申报细节不做（规则 B3，第二轮修订）
 
-### 5. 装箱件数取两条约束里更紧的那个
+第一轮的文件头写「**不建** UN 编号 / 危险品类别 / 电池类型列，交给未开发的 3.7.1.1」。
+第二轮**推翻「危险品类别」这一条**：16 合规拿到 `dangerous_goods=true` 却不知道
+**按什么申报**时，只能把单子退回来。所以本表带一个**类别标识**
+（`dangerous_substance_class`：UN 编号 / IATA 类别代码 / 内部危险品编码），并**双向**钉死：
+
+- `dangerous_goods = true` → 类别非空
+- `dangerous_goods = false` → 类别必须为空
+
+反向同样要钉：否则「取消勾选但没清类别」会留下一行自相矛盾的安全属性 ——
+同一行同时告诉 10 物流「不危险」和 16 合规「有类别」，而筛选「非危险品」时它仍被放行。
+
+**边界没有因此越界**：UN 编号 / 电池类型 / HS 编码 / 原产地 / 申报品名 /
+完整申报要素 / 认证证书**一律不建**。本模块只回答「是否需要特殊申报」
+与「属于哪一类危险品」，**不回答「怎么申报」** —— 后者是 3.7.1.1（HS 编码与申报要素）
+与 3.7.1.2（目的地报关版本）的事实，两者**均未开发**，本迁移不引用它们的表与端点。
+
+### 6. 一致性约束用 ALTER TABLE 收紧 V6，而不是改 V6（第二轮新增）
+
+第一轮只建了表，**没有把蓝图要求的一致性约束落在 DB 上**。这是最要紧的缺口：
+Java 校验能被一条裸 SQL 绕开，而脏的毛重/净重会直接算出一张真实的错误面单。
+
+V6 的 `sku_package` 允许 `>= 0`（把「量到 0」与「没量到」分开），但本模块的体积口径是
+「缺一维不给体积」（规则 R1），而 **0 长宽高在业务上是脏数据**：0 长度的箱子不是
+「体积为 0」的箱子，而是「这一维没量到」—— 两者在页面上会导出完全不同的运费。
+所以第二轮用 `ALTER TABLE sku_package ADD CONSTRAINT` 把长宽高与净重**收紧为 > 0**，
+毛重仍由 V6 的「≥ 净重」兜底。
+
+**为什么不改 V6**：V6 已上线，改它的 CHECK 会让「已部署库」与「新迁移库」出现两种 schema，
+本文件就必须同时处理两种历史。加一条新约束是幂等的，且对已写进去的 0 值**如实报错**。
+
+**副作用（有意）**：收紧后 3.1.2.2 的 `SkuDetailService` 写入 0 也会被拒。
+这是**有意**的 —— 两个入口对 0 的口径必须一致，否则「详情页存 0、3.7.2.1 算不出体积」
+就成了一条绕过规则 R1 的路。已确认仓库内没有任何测试或代码写入 0 长度 / 0 净重。
+
+### 7. CHECK 与触发器互为纵深
+
+CHECK 在 PostgreSQL 里可被 `ALTER TABLE ... DROP CONSTRAINT` 或迁移脚本绕过，
+触发器不行（与 V21 / V22 / V23 同一纪律）。毛重 ≥ 净重是本模块对外最要紧的一条，
+所以除 CHECK 外另加 `guard_sku_package_weights`；危险品 ↔ 类别同理
+（`guard_sku_safety_dangerous_class`）。两者都给出可读的中文报错。
+
+### 8. 装箱件数取两条约束里更紧的那个
 
 体积与限重都算，逐条都比。同一 SKU 在一次核算里出现多行时**先合并再算** ——
 分两行各算一次会得到两个各自成立的箱数，而真实的拣货是把这几行装进同一批箱子。
@@ -82,18 +102,41 @@ V6 的文件头还直接把分工写死了：「**3.7.2.1 物理与安全属性�
 它会一路传到「需要几箱」而算出一个看似正常的 1 箱，把「算不出来」变成一个错的小数。
 改成 0 并在 `note` 里写明「算不出来」。
 
-### 6. 权限用 `catalog.compliance.*` 而不是 `catalog.sku.*`
+### 9. 权限用 `catalog.compliance.*` 而不是 `catalog.sku.*`
 
-3.7 在蓝图里是「商品合规属性」一级（identity 已有 `catalog.compliance` 页面资源
-「合规与资质」），而本页回答的是「能不能发、要不要申报」—— 这是合规判定而不是商品资料编辑。
-且物理参数与安全属性在**同一个端点**里写，用两套权限会出现「能改尺寸却改不了安全属性」的半截状态。
+3.7 在蓝图里是「商品合规属性」一级（identity 已有 `catalog.compliance` 页面资源），
+而本页回答的是「能不能发、要不要申报」—— 这是合规判定而不是商品资料编辑。
+物理参数与安全属性在**同一个端点**里写，所以两者用同一套权限，
+不出现「能改尺寸却改不了安全属性」的半截状态。
 
-### 7. records 单独成文件，避���并行车道的行级合并冲突
+### 10. records 单独成文件，避开并行车道的行级合并冲突
 
-`CatalogModels.java` 是所有车道都会追加的公共文件，且**不在** `merge-union` 驱动器的
-按键求并范围内（驱动器只覆盖 `packages/api-contracts` 与台账）。
-本模块的记录放进公共文件会让两条车道在同一处各追加一段，行级三方合并必然冲突。
-因此新建 `PhysicalSafetyModels.java`（与 `CategoryAttributeRequirementForms` 的做法一致）。
+`CatalogModels` 是并行车道都会追加的公共文件，且**不在** merge-union 驱动器的按键求并范围内。
+本模块的 record 放进公共文件会让两条车道在同一处各追加一段，行级三方合并必然冲突。
+模块自成一个文件则天然无交集。
+
+## 修掉的两个前端真实缺陷（第二轮）
+
+上一轮已交付的前端 `draftFrom` 有两处把服务端已回传的值丢掉 —— 这类缺陷**绿测盖不住**：
+
+1. **`safetyNote` 恒写成空串**：运营打开页面看一眼、没动备注就点保存，
+   已填的「磁性物已做衰减处理」被静默清空，且没有任何提示。
+2. **`packagingVersion` 恒写成 0**：第一次保存把 `sku_package.version` 写成 1，
+   此后每次提交都拿 0 去 CAS，UPDATE 匹配不到、INSERT 又被唯一约束挡住，
+   **从第二次保存起必然 409**，页面表现为「保存不了」而原因完全不可见。
+   配套修法：后端 `PhysicalSafetyProfile` 必须回传 `packagingVersion`。
+
+同时按规则 B3 接入危险品类别：勾了危险品才出现必填的类别输入框，
+校验与后端同一套双向判定，申报区回显实际类别。
+
+## 反向验证（绿测不等于有效断言）
+
+| 手法 | 预期 | 实测 |
+|---|---|---|
+| 删掉 `sku_package_dims_positive` | 零长宽高用例转红 | ✅ 转红 |
+| 只留触发器、删 B3 的 CHECK | 仍绿（触发器独立咬住） | ✅ 仍绿 |
+| 只留 CHECK、删触发器 | 仍绿（CHECK 独立咬住） | ✅ 仍绿 |
+| 体积重公式「÷ 除数」改「× 除数」 | 多例转红 | ✅ 6 例转红（跨集成层与纯规则层） |
 
 ## 文件清单
 
@@ -107,39 +150,48 @@ V6 的文件头还直接把分工写死了：「**3.7.2.1 物理与安全属性�
 - `PhysicalSafetyController.java` — 5 个端点，权限 `catalog.compliance.read/update`
 
 **测试**（`backend/services/catalog/src/test/java/com/starcon/catalog/`）
-- `PhysicalSafetyRulesTest.java` — 31 例纯规则
-- `PhysicalSafetyIntegrationTest.java` — 28 例，真实 PG16 Testcontainers + 强制 RLS
+- `PhysicalSafetyRulesTest.java` — 纯规则
+- `PhysicalSafetyIntegrationTest.java` — 真实 PG16 Testcontainers + 强制 RLS，
+  含**裸 SQL 绕开服务层写脏值**的约束用例
 
 **前端**
-- `apps/web/src/app/products/sku/[id]/physical/page.tsx`
+- `apps/web/src/app/products/sku/[id]/physical/page.tsx`（与 `attributes/` tab 并列）
 - `apps/web/src/components/catalog/physical-safety-model.ts`
-- `apps/web/src/components/catalog/physical-safety-model.test.ts` — 27 例
+- `apps/web/src/components/catalog/physical-safety-model.test.ts`
 - `apps/web/src/components/catalog/physical-safety-workspace.tsx`
-- `apps/web/src/components/catalog/sku-detail-workspace.tsx` — 包装卡加「去维护物理与安全属性」入口（仅加链接）
+- `apps/web/src/components/catalog/sku-detail-workspace.tsx` — 包装卡加入口（仅加链接）
 
 **生成物 / 台账**
-- `packages/api-contracts/src/catalog.ts`、`catalog.openapi.json`（codegen 产物，+11 DTO）
-- `docs/product/capability-blueprint/module-progress.md` — 仅 3.7.2.1 那一行 + 自动计数
+- `packages/api-contracts/src/catalog.ts`、`catalog.openapi.json`（codegen 产物，禁止手改）
+- `docs/product/capability-blueprint/module-progress.md` — 仅 3.7.2.1 那一行
 
 ## 验证
 
-```bash
-cd backend && ./mvnw verify                      # BUILD SUCCESS，6 模块全绿
-pnpm typecheck && pnpm lint && pnpm test          # 628 例全绿（含新增 27）
-NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build   # 含 /products/sku/[id]/physical
-node tools/module-progress/sync.mjs --check       # ✓ 台账与蓝图一致
-```
+见交付报告。集成测试**实跑租户隔离三断言**：两租户互不可见（含读/写/装箱/渠道判定
+四种跨租户调用）、伪造 `X-Tenant-Id` 头无效、单连接反复交替 5 轮不串租户。
 
-后端新增 59 例（28 集成 + 31 单测）。集成测试**实跑租户隔离三断言**：
-两租户互不可见（含读/写/装箱/渠道判定四种跨租户调用）、伪造 `X-Tenant-Id` 头无效、
-单连接反复交替 5 轮不串租户。
+## 编排事故记录
+
+本车道被**提前并入两次**，两次未提交改动均被销毁：
+
+1. 14:29:59 另一个 tick 的 `merge-ready` 把刚 land 的车道 sweep 并入集成头
+   （`a8d78e5`），并删除了 worktree。
+2. lane 状态停留在 `merged`，后续 gc 按状态判定可回收，继续回收**仍在使用中**的
+   worktree，第二次删除发生在验证阶段，契约重新生成与前端验证成果一并丢失。
+
+根因：`lane.mjs land` 只校验「工作区干净 + 有新提交」，**不知道 worker 是否还在跑**，
+无法区分「交付完成」与「刚 land 完还在继续干活」。这是编排器的竞态缺陷（调度侧已记录）。
+
+**规避手段**：第二次重建 worktree 后改为「每完成一个可验证增量就立刻 commit 到分支」——
+分支存在于 `.git` 而非 worktree，即使 worktree 被删除成果也不会丢。
 
 ## 后续待办
 
-- **3.7.1.1 / 3.7.1.2 未开发**：本模块只回答「是否需要特殊申报」，不回答「申报什么」。
-  两者的 UN 编号 / 危险品类别 / 认证要素需要先拆 `product_compliance` 表（台账已记录该阻塞）。
-- **下游未开发**：10 物流（渠道表、渠道规则、面单）与 16 合规（危险品与认证）都不在本模块范围。
-  本模块提供的是档案读取、按属性筛选、渠道判定与装箱核算四个口子。
+- **3.7.1.1 / 3.7.1.2 未开发**：本模块只回答「是否需要特殊申报」「属于哪一类危险品」，
+  **不回答「怎么申报」**。同商品在不同目的地的申报差异属于 3.7.1.2 的版本化职责。
+- **下游未开发**：10 物流（渠道表、渠道规则、面单）与 16 合规（危险品与认证）。
+  本模块提供档案读取、按属性筛选、渠道判定与装箱核算四个口子；
+  16 合规按 `dangerous_substance_class` 取该类别需要的证书与申报路径。
 - **页面落点**：蓝图 L3 锚点路由是 `—`，按职责句「采集时点应尽量前置到 SKU 建档」放在
   `/products/sku/[id]/physical`。若后续 3.7.1.x 交付后需要一个统一的合规入口，
-  可以再在 `/products/compliance` 下做聚合页，届时本页作为其数据来源保持不变。
+  可再在 `/products/compliance` 下做聚合页，届时本页作为其数据来源保持不变。
