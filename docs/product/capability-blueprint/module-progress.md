@@ -12,17 +12,17 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 79 |
+| 已交付 | 80 |
 | 进行中 | 0 |
-| **未开发** | **386** |
-| 完成率 | 17.0% |
+| **未开发** | **385** |
+| 完成率 | 17.2% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 76 | 0 | 4 | 80 |
-| **D3** | 3 | 0 | 37 | 40 |
+| **D3** | 4 | 0 | 36 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
@@ -38,7 +38,7 @@
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
-| 07 | 库存核算系统 | D3 | 3 | 31 |
+| 07 | 库存核算系统 | D3 | 4 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 0 | 27 |
@@ -255,7 +255,7 @@
 | 7.1.1.2 | 库存明细 | /inventory | D3 | 已交付 | 迁移 warehouse V2__warehouse_inventory_bucket.sql（stock_bucket 六维最小事实单位 + 复合外键锁定归属 balance + 延迟约束触发器守恒 + guard_bucket_movement_time 版本/业务时间 + RLS/GRANT，warehouse_location 库位档案、inventory_lot 批次档案）+ GET /warehouse/inventory/buckets（法人→仓库→库位→SKU→批次逐级下钻，含 summary/reconciliation/actions）、GET /warehouse/inventory/bucket-actions、下拉 /warehouse/{locations,lots} + 页面 /inventory（总览 ↔ 库位明细双视图，总览行按 detailHref 契约下钻，明细含加载/空/错误态、账实核对告警、未分解提示、行内操作入口）+ 测试 InventoryBucketIntegrationTest 31 例（六维形状、DB 级守恒与不平拒绝、版本与业务时间口径、逐级下钻真实生效、租户隔离三断言） |
 | 7.1.1.3 | 可用量计算 | /inventory | D3 | 未开发 | — |
 | 7.1.2.1 | 库存流水台账 | — | D3 | 已交付 | 迁移 warehouse V51__warehouse_inventory_ledger.sql（**不建新表**：台账是 append-only 台账的只读面，事实表与 append-only 触发器、RLS、REVOKE 在 V1 已成立；只补台账查询路径索引：occurred_at 倒序翻页、kind 与 ref_type 两个低基数字段的时间复合索引、entry 带 INCLUDE 的聚合索引）+ 端点 GET /warehouse/inventory/ledger（时间范围左闭右开、SKU、仓库、业务类型、来源单据类型、关键字、排序、分页；返回行口径与分录口径**两套净变动**并在无维度筛选时恒等，即 7.1.2.2 核对基线）、GET /warehouse/inventory/ledger/{id} 分录下钻（跨仓户 404 不泄露存在性）、GET /warehouse/inventory/ledger/ref-types 来源单据类型词表 + 页面 /inventory/ledger（7.1.1.2「查看流水」入口契约地址）与 /inventory 页内第三个页签（筛选、期间净变动、按类型分组、列表、下钻分录、空分录告警、数据范围 SELF 提示、加载/空/错误三态）+ 测试 InventoryLedgerIntegrationTest 21 例（数量符号正负、跨仓一笔不被维度筛选切成半个数、时间范围左闭右开与 +08:00 时区零漂移、非法业务类型与排序键 400、翻页决胜键不重不漏、流水与分录 UPDATE/DELETE 被 DB 拒绝、空分录业务单独计数、租户隔离三断言）+ inventory-model.test.ts 16 例 |
-| 7.1.2.2 | 账实核对 | — | D3 | 未开发 | — |
+| 7.1.2.2 | 账实核对 | — | D3 | 已交付 | 迁移 warehouse V54__warehouse_inventory_reconciliation.sql（**不建累计值表**：核对两侧都现算，Σ 分录与余额快照各只有一个真相来源，再存一份累计值会让核对时无法判断该信谁；只落核对**结论**：inventory_reconciliation_run 批次头 + inventory_reconciliation_finding 发现表，两表 tenant_id NOT NULL、ENABLE+FORCE RLS isolation 策略、GRANT SELECT/INSERT 给 warehouse_app、REVOKE UPDATE/DELETE 并挂 V1 的 append-only 触发器，结论写下即不可改、只能重跑并存新旧两批）+ 端点 POST /warehouse/inventory/reconciliation 发起核对（**写权限 warehouse.inventory.update**，因为它落不可变结论；区间左闭右开，范围仓库/SKU/货权法人三选一，缺省近 30 天）、GET 同路径批次列表（真分页、按结论筛）、GET /{runId} 结论加可疑区间排名、GET /{runId}/findings 差异明细与可疑流水分页（跨租户 404 不泄露存在性）+ 页面 /inventory 工作区第四个页签「账实核对」（发起核对、结论条含期初+区间内+区间后=应等于快照的口径公式、按天分桶的可疑区间排名、差异明细、可疑流水定位，点可疑流水经 /inventory/ledger?transactionId= 直达那笔分录；加载/空/错误三态，差异为零也占满版面并写明核了哪个区间多少笔分录）+ 测试 InventoryReconciliationIntegrationTest 30 例实跑 Testcontainers PG16（账实一致也出可追溯结论、三桶恰好分完全部历史、差异等于累计减快照、漏记 transactionId 必为 null、重复记与并发丢失成对给出另一笔流水与相差秒数、超过 60 秒窗口不算重复/并发、迟到补记未到一天不报、一笔可同时命中多类信号、结论不可改删且超级用户也改不动、+08:00 时间零漂移、范围三选一与倒置区间 400、租户隔离三断言） |
 | 7.1.3.1 | 多仓分布视图 | — | D3 | 未开发 | — |
 | 7.2.1.1 | 预占需求列表 | /inventory/reservation | D3 | 未开发 | — |
 | 7.2.1.2 | 预占分配明细 | /inventory/reservation | D3 | 未开发 | — |
