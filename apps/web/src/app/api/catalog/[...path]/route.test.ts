@@ -14,6 +14,10 @@ function request(path: string, method = 'GET', origin = 'http://localhost:3000')
     ...(method === 'GET' ? {} : { body: '{}' }),
   });
 }
+/** 路由参数只吃路径段；带查询串（`?a=b`）的用例先剥离查询串再拆段。 */
+function segments(path: string) {
+  return (path.split('?')[0] ?? path).split('/');
+}
 it('管理 API 与租户切换路由转发 identity，仅传服务端 cookie 身份', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
   vi.stubGlobal('fetch', fetcher);
@@ -725,7 +729,7 @@ it('catalog/boms、catalog/bom-versions 与 catalog/bom-components 的全部路�
     `catalog/bom-versions/${version}/requirement?outputQuantity=100`,
     `catalog/bom-components/usage?skuId=${sku}`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('?')[0].split('/') } })).status).toBe(200);
+    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(200);
     expect(fetcher).toHaveBeenLastCalledWith(
       expect.stringContaining(`:8082/${path}`),
       expect.objectContaining({
@@ -740,7 +744,7 @@ it('catalog/boms、catalog/bom-versions 与 catalog/bom-components 的全部路�
     `catalog/bom-versions/${version}/publish`,
     `catalog/bom-versions/${version}/copy?versionNo=v2`,
   ]) {
-    expect((await POST(request(path, 'POST'), { params: { path: path.split('?')[0].split('/') } })).status).toBe(
+    expect((await POST(request(path, 'POST'), { params: { path: segments(path) } })).status).toBe(
       200,
     );
   }
@@ -752,12 +756,12 @@ it('catalog/boms、catalog/bom-versions 与 catalog/bom-components 的全部路�
     `catalog/bom-versions/${version}/close?effectiveTo=2026-04-01T00:00:00Z`,
     `catalog/bom-versions/${version}/components`,
   ]) {
-    expect((await PUT(request(path, 'PUT'), { params: { path: path.split('?')[0].split('/') } })).status).toBe(200);
+    expect((await PUT(request(path, 'PUT'), { params: { path: segments(path) } })).status).toBe(200);
   }
   // DELETE：删 BOM、删草稿版本。
   for (const path of [`catalog/boms/${bom}`, `catalog/bom-versions/${version}`]) {
     expect(
-      (await DELETE(request(path, 'DELETE'), { params: { path: path.split('?')[0].split('/') } })).status,
+      (await DELETE(request(path, 'DELETE'), { params: { path: segments(path) } })).status,
     ).toBe(200);
   }
   // 不在白名单里的相邻路径仍然 404：放行不能是前缀通配。
@@ -769,11 +773,11 @@ it('catalog/boms、catalog/bom-versions 与 catalog/bom-components 的全部路�
     'catalog/bom-components',
     `catalog/bom-components/${sku}`,
   ]) {
-    expect((await GET(request(path), { params: { path: path.split('?')[0].split('/') } })).status).toBe(404);
+    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(404);
   }
   // 与 3.5.1.1 并列而不合并：放行 boms 绝不代表放行 bundles（反之亦然）。
   for (const path of ['catalog/bundles', `catalog/versions/${version}`]) {
-    expect((await GET(request(path), { params: { path: path.split('?')[0].split('/') } })).status).toBe(200);
+    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(200);
   }
   expect(
     (await GET(request('catalog/bomsx'), { params: { path: ['catalog', 'bomsx'] } })).status,
