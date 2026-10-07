@@ -101,6 +101,15 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['创建子租户', '指定所有者', '切换租户'],
   },
   {
+    href: '/org/hierarchy',
+    implemented: true,
+    domain: 'org',
+    label: '层级授权',
+    description: '父租户访问子租户数据的显式授权：数据域、只读可写、有效期与撤销。',
+    fields: ['子租户', '数据域', '权限级别', '有效期', '状态'],
+    workflow: ['新增授权', '调整范围', '撤销授权'],
+  },
+  {
     href: '/listings',
     implemented: true,
     domain: 'listings',
@@ -606,6 +615,7 @@ export const ACCOUNT_MENU_ORDER = [
   '/org/roles',
   '/org/departments',
   '/org/children',
+  '/org/hierarchy',
   '/org/legal-entities',
   '/org/stores',
   '/org/permissions',

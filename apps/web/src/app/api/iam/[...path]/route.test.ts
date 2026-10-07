@@ -91,3 +91,54 @@ it('identity/tenants 的两个形状被放行，按 uuid 读取仍被拒绝', as
     expect.anything(),
   );
 });
+
+/**
+ * 17.1.1.3 层级授权：identity allowlist 必须放行授权记录的读、判定与撤销三种形状。
+ *
+ * <p>判定端点 `check` 的第一段是字面量、`{id}` 那一支是 UUID，两者在正则里靠
+ * `/check|\/[0-9a-f-]+` 的先后判别；这里把三种放行与一条反向断言一起钉住，
+ * 少一条就等于白名单退化成了前缀匹配。
+ *
+ * <p>反向断言是 `hierarchy-authorizations/{uuid}/anything`：撤销只有 `/revoke`
+ * 一个合法后缀，多一段必须仍然 404，否则代理层就成了一个能往任意子路径发 POST 的通道。
+ */
+it('identity/hierarchy-authorizations 的读、判定、撤销被放行，多余子路径仍被拒绝', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'identity/hierarchy-authorizations',
+    'identity/hierarchy-authorizations/check',
+    `identity/hierarchy-authorizations/${id}`,
+    `identity/hierarchy-authorizations/${id}/revoke`,
+  ]) {
+    const method = path.endsWith('/revoke') || path.endsWith('/check') ? 'POST' : 'GET';
+    const response =
+      method === 'POST'
+        ? await POST(request(path, 'POST'), { params: { path: path.split('/') } })
+        : await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8081/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer real-session' },
+      }),
+    );
+  }
+  // 更新授权走 PUT，和读取同一个 {id} 形状。
+  expect(
+    (
+      await PUT(request(`identity/hierarchy-authorizations/${id}`, 'PUT'), {
+        params: { path: ['identity', 'hierarchy-authorizations', id] },
+      })
+    ).status,
+  ).toBe(200);
+  // 反向：撤销之外的后缀不放行。
+  for (const path of [
+    `identity/hierarchy-authorizations/${id}/restore`,
+    'identity/hierarchy-authorizations/check/extra',
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalledWith(expect.stringContaining(`/restore`), expect.anything());
+});
