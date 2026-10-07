@@ -2229,6 +2229,439 @@
           }
         }
       }
+    },
+    "/warehouse/inventory/stocktakes": {
+      "get": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "stocktakeSheets",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeSheetPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "createStocktake",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktakes/{id}/tasks/{taskId}/assign": {
+      "post": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "assignStocktakeTask",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeAssignInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktakes/{id}/lines/{lineId}/count": {
+      "post": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "countStocktakeLine",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeCountInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeLine"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktakes/{id}": {
+      "get": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "stocktakeSheet",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktakes/{id}/tasks": {
+      "get": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "stocktakeTasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "onlyOpen",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StocktakeTask"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktakes/{id}/lines": {
+      "get": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "stocktakeLines",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeLinePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktakes/capabilities": {
+      "get": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "stocktakeCapabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StocktakeScopeCapability"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5145,6 +5578,389 @@
           "locationCount": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "StocktakeRequest": {
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "type": "string"
+          },
+          "scopeKey": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "taskUnit": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "StocktakeSaved": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "$ref": "#/components/schemas/StocktakeSheet"
+          },
+          "taskCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "StocktakeSheet": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string",
+            "enum": [
+              "WAREHOUSE",
+              "LOCATION",
+              "CATEGORY"
+            ]
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "taskUnit": {
+            "type": "string",
+            "enum": [
+              "BY_LOCATION",
+              "BY_SKU"
+            ]
+          },
+          "frozenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "COUNTING",
+              "COUNTED"
+            ]
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "countedLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "varianceLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bookTotal": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "StocktakeAssignInput": {
+        "type": "object",
+        "properties": {
+          "assigneeUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "StocktakeTask": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sheetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskUnit": {
+            "type": "string",
+            "enum": [
+              "BY_LOCATION",
+              "BY_SKU"
+            ]
+          },
+          "taskKey": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskCode": {
+            "type": "string"
+          },
+          "taskName": {
+            "type": "string"
+          },
+          "assignedToUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "COUNTING",
+              "DONE"
+            ]
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "countedLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bookTotal": {
+            "type": "number"
+          },
+          "countedTotal": {
+            "type": "number"
+          },
+          "varianceTotal": {
+            "type": "number"
+          }
+        }
+      },
+      "StocktakeCountInput": {
+        "type": "object",
+        "properties": {
+          "countedQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "barcode": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "StocktakeLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sheetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bucketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotCode": {
+            "type": "string"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "bookOnHand": {
+            "type": "number"
+          },
+          "countedQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "variance": {
+            "type": "number",
+            "nullable": true
+          },
+          "countedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "countedByUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "countedBarcode": {
+            "type": "string",
+            "nullable": true
+          },
+          "countedNote": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "StocktakeSheetPage": {
+        "type": "object",
+        "properties": {
+          "sheets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StocktakeSheet"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "StocktakeDetail": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "$ref": "#/components/schemas/StocktakeSheet"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/StocktakeSummary"
+          }
+        }
+      },
+      "StocktakeSummary": {
+        "type": "object",
+        "properties": {
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "countedLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "varianceLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bookTotal": {
+            "type": "number"
+          },
+          "countedTotal": {
+            "type": "number"
+          },
+          "varianceTotal": {
+            "type": "number"
+          }
+        }
+      },
+      "StocktakeLinePage": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StocktakeLine"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "StocktakeScopeCapability": {
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
           }
         }
       }

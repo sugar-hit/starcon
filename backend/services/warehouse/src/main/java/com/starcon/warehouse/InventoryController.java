@@ -5,6 +5,7 @@ import static com.starcon.warehouse.InventoryBucketModels.*;
 import static com.starcon.warehouse.InventoryLedgerModels.*;
 import static com.starcon.warehouse.InventoryReconciliationModels.*;
 import static com.starcon.warehouse.SellablePolicyModels.*;
+import static com.starcon.warehouse.StocktakeModels.*;
 import static com.starcon.warehouse.WarehouseModels.*;
 
 import jakarta.validation.Valid;
@@ -44,6 +45,7 @@ public class InventoryController {
   private final InventoryReconciliationService reconciliation;
   private final SellablePolicyService sellablePolicies;
   private final InventoryDistributionService distributionService;
+  private final StocktakeService stocktakes;
 
   public InventoryController(
       AccessService access,
@@ -54,7 +56,8 @@ public class InventoryController {
       InventoryLedgerService ledger,
       InventoryReconciliationService reconciliation,
       SellablePolicyService sellablePolicies,
-      InventoryDistributionService distributionService) {
+InventoryDistributionService distributionService,
+      StocktakeService stocktakes) {
     this.access = access;
     this.overview = overview;
     this.buckets = buckets;
@@ -64,6 +67,7 @@ public class InventoryController {
     this.reconciliation = reconciliation;
     this.sellablePolicies = sellablePolicies;
     this.distributionService = distributionService;
+    this.stocktakes = stocktakes;
   }
 
   /**
@@ -624,5 +628,129 @@ public class InventoryController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestBody SellableQuantityRequest request) {
     return call(auth, "inventory.read", a -> sellablePolicies.calculate(request));
+  }
+
+  // ------------------------------------------------------------ 7.4.2.1 盘点单
+
+  /**
+   * 7.4.2.1 盘点单列表（真分页；进度三计数与三列合计由明细现算）。
+   *
+   * <p>读权限沿用 {@code warehouse.inventory.read}：读盘点单不改任何库存。
+   */
+  @GetMapping("/inventory/stocktakes")
+  public StocktakeSheetPage stocktakeSheets(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestParam(required = false) String status,
+      @RequestParam(required = false) String scopeType,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false, defaultValue = "0") int page,
+      @RequestParam(required = false, defaultValue = "20") int size) {
+    return call(auth, "inventory.read", a -> stocktakes.page(status, scopeType, keyword, page, size));
+  }
+
+  /**
+   * 盘点范围维度接入情况（仓库 / 库位 / 类目 / ABC 分类）。
+   *
+   * <p>前端据此**禁用**不可用的范围选项，而不是让用户填完收 422。
+   * ABC 分类在这里被如实报成「库里没有这个字段」—— 界面必须能对用户讲清楚，
+   * 而不是让一个选项凭空消失。
+   */
+  @GetMapping("/inventory/stocktakes/capabilities")
+  public List<StocktakeScopeCapability> stocktakeCapabilities(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
+    return call(auth, "inventory.read", a -> stocktakes.capabilities());
+  }
+
+  /** 盘点单详情 + 账面/实盘/差异三列合计。跨租户在 RLS 下查不到 → 404，不泄露存在性。 */
+  @GetMapping("/inventory/stocktakes/{id}")
+  public StocktakeDetail stocktakeSheet(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
+    return call(auth, "inventory.read", a -> stocktakes.detail(id));
+  }
+
+  /**
+   * 发起盘点：冻结时点快照 + 生成盘点任务。
+   *
+   * <p>权限码是 {@code warehouse.inventory.update} 而不是 read：它把范围内的账面数**复制成行**
+   * 冻结下来（一种写库存事实的动作），并生成一堆要人去现场执行的任务。
+   * 把「冻结账面」挂在读权限上，那道闸门等于没有。
+   *
+   * <p>刻意**没有** {@code frozenAt} 请求参数：冻结时刻就是发起的那一刻。
+   * 允许调用方指定时刻等于允许「盘三天前的账」，而账面数与三天前那一刻的库存无从对齐。
+   */
+  @PostMapping("/inventory/stocktakes")
+  public StocktakeSaved createStocktake(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestBody StocktakeRequest request) {
+    return call(auth, "inventory.update", a -> stocktakes.create(request, a.userId()));
+  }
+
+  /**
+   * 盘点明细（三列：账面 / 实盘 / 差异）。
+   *
+   * <p>{@code filter} 四个互斥口径：ALL / PENDING（未录入）/ MATCH（账实相符）/ GAIN（盘盈）/
+   * LOSS（盘亏）。筛选与展示走的是同一个 {@code variance} 列，所以界面上算的差异与库里存的
+   * 差异永远是同一个数。
+   */
+  @GetMapping("/inventory/stocktakes/{id}/lines")
+  public StocktakeLinePage stocktakeLines(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @RequestParam(required = false) String filter,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false, defaultValue = "0") int page,
+      @RequestParam(required = false, defaultValue = "50") int size) {
+    return call(auth, "inventory.read", a -> stocktakes.lines(id, filter, keyword, page, size));
+  }
+
+  /**
+   * 录入实盘数（或撤销录入：{@code countedQty} 传 null）。
+   *
+   * <p>权限码是 update：它写盘点明细。**但它不直接改库存余额** —— 差异要走 7.4.2.2 生成
+   * 调整单再经 7.4.1.2 审批（蓝图红线：「差异不直接改余额」）。
+   *
+   * <p>录完这一行之后盘点单状态会**重算**（而不是往前推一格），因此复盘、撤销录入都能
+   * 自然落回正确的状态，不需要额外分支。
+   */
+  @PostMapping("/inventory/stocktakes/{id}/lines/{lineId}/count")
+  public StocktakeLine countStocktakeLine(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @PathVariable UUID lineId,
+      @RequestBody StocktakeCountInput input) {
+    return call(auth, "inventory.update", a -> stocktakes.count(id, lineId, input, a.userId()));
+  }
+
+  /**
+   * 盘点任务列表（按库位或按 SKU）。
+   *
+   * <p>任务状态与三个进度计数全部**由明细行派生**，表里没有对应列 —— 另存一份就要在每次
+   * 录入后同步它，而漏同步一次就会出现「任务显示已完成但还有行没盘」。
+   *
+   * <p>{@code onlyOpen=true} 时未盘完的任务排在最前：派工时先看谁还没干完。
+   */
+  @GetMapping("/inventory/stocktakes/{id}/tasks")
+  public List<StocktakeTask> stocktakeTasks(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @RequestParam(required = false) Boolean onlyOpen) {
+    return call(auth, "inventory.read", a -> stocktakes.tasks(id, onlyOpen));
+  }
+
+  /**
+   * 派工：把一个盘点任务指给某个已认证用户（传 null 即取消派工）。
+   *
+   * <p>本服务无法校验目标用户是否真是本租户成员 —— identity 才是成员关系的所有者，
+   * 跨服务不建 FK 也不查对方的表（与 7.2.2.1 的 reference_id 同一理由）。
+   * 代价：派错人只影响派工，不会越权读写别人的盘点单（读写仍由 RLS 按租户强制）。
+   */
+  @PostMapping("/inventory/stocktakes/{id}/tasks/{taskId}/assign")
+  public StocktakeTask assignStocktakeTask(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @PathVariable UUID taskId,
+      @RequestBody StocktakeAssignInput input) {
+    return call(auth, "inventory.update", a -> stocktakes.assign(id, taskId, input));
   }
 }
