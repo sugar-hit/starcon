@@ -2,6 +2,7 @@ package com.starcon.catalog;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -68,12 +69,20 @@ public final class ZombieCandidateRules {
     }
   }
 
-  /** 单个维度的判定明细。界面逐条渲染"凭什么"用的就是它。 */
+  /**
+   * 单个维度的判定明细。界面逐条渲染"凭什么"用的就是它。
+   *
+   * <p>三个可空列都标了 {@code @Schema(nullable = true)}，否则生成的 TS 类型会说它们非空 ——
+   * 那样前端就会开始相信「未观测的维度取值是 0」，而那正是本模块最要避免的错误（规则 Z1）。
+   *
+   * <p>{@code metric} 为 null 表示这一行不是某个引用维度，而是「状态」「维护期」这类
+   * 前提条件的判定（见 {@link #evaluate} 里的两处）。
+   */
   public record ZombieDimensionStatus(
-      ZombieMetric metric,
+      @Schema(nullable = true) ZombieMetric metric,
       String state,
-      BigDecimal value,
-      OffsetDateTime observedAt,
+      @Schema(nullable = true) BigDecimal value,
+      @Schema(nullable = true) OffsetDateTime observedAt,
       boolean stale,
       String note) {
 

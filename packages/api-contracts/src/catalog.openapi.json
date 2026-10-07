@@ -27718,11 +27718,13 @@
           },
           "lastMaintainedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "daysSinceMaintained": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "nullable": true
           },
           "verdict": {
             "type": "string"
@@ -27794,6 +27796,7 @@
         "properties": {
           "metric": {
             "type": "string",
+            "nullable": true,
             "enum": [
               "ORDER_LINE_COUNT",
               "INVENTORY_ON_HAND",
@@ -27805,11 +27808,13 @@
             "type": "string"
           },
           "value": {
-            "type": "number"
+            "type": "number",
+            "nullable": true
           },
           "observedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "stale": {
             "type": "boolean"
@@ -27854,7 +27859,8 @@
           },
           "lastMaintainedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "affectedCount": {
             "type": "integer",
@@ -27902,10 +27908,12 @@
             "type": "string"
           },
           "value": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "observedAt": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "stale": {
             "type": "boolean"
@@ -28136,11 +28144,13 @@
           },
           "lastMaintainedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "daysSinceMaintained": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "nullable": true
           },
           "verdict": {
             "type": "string"

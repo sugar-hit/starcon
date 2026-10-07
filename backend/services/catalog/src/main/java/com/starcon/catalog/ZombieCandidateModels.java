@@ -1,5 +1,6 @@
 package com.starcon.catalog;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
@@ -83,19 +84,7 @@ public final class ZombieCandidateModels {
       boolean enabled,
       String deactivateNote,
       long version,
-      boolean configured) {
-    public ZombieCleanupRuleView {}
-
-    /** 该规则依赖几个上游维度 —— 界面上提示"还差几个事件源"的依据。 */
-    public int requiredDimensionCount() {
-      int n = 0;
-      if (requireZeroOrderReference) n++;
-      if (requireZeroInventory) n++;
-      if (requireZeroListing) n++;
-      if (requireZeroCost) n++;
-      return n;
-    }
-  }
+      boolean configured) {}
 
   // ------------------------------------------------------------ 候选清单
 
@@ -108,8 +97,8 @@ public final class ZombieCandidateModels {
       String code,
       String name,
       String status,
-      OffsetDateTime lastMaintainedAt,
-      Long daysSinceMaintained,
+      @Schema(nullable = true) OffsetDateTime lastMaintainedAt,
+      @Schema(nullable = true) Long daysSinceMaintained,
       String verdict,
       String verdictLabel,
       List<String> reasons,
@@ -125,13 +114,7 @@ public final class ZombieCandidateModels {
       String entityType,
       long candidateCount,
       long inUseCount,
-      long incompleteCount) {
-
-    /** 三个判定计数逐项相加必须等于 total —— 集成测试钉死这条，分页漏算会立刻暴露。 */
-    public boolean countsConsistent() {
-      return candidateCount + inUseCount + incompleteCount == total;
-    }
-  }
+      long incompleteCount) {}
 
   public record ZombieCandidateOverview(
       List<ZombieOverviewRow> rows,
@@ -205,7 +188,7 @@ public final class ZombieCandidateModels {
       String newStatus,
       UUID decidedBy,
       String reason,
-      OffsetDateTime lastMaintainedAt,
+      @Schema(nullable = true) OffsetDateTime lastMaintainedAt,
       int affectedCount,
       ZombieRuleSnapshot ruleSnapshot,
       ZombieEvidenceSnapshot evidence,
@@ -239,7 +222,10 @@ public final class ZombieCandidateModels {
       ZombieDimensionEvidence unitCost) {}
 
   public record ZombieDimensionEvidence(
-      String state, String value, String observedAt, boolean stale) {}
+      String state,
+      @Schema(nullable = true) String value,
+      @Schema(nullable = true) String observedAt,
+      boolean stale) {}
 
   public record ZombieCleanupRecordPage(
       List<ZombieCleanupRecord> items, long total, int page, int size) {}
@@ -251,8 +237,8 @@ public final class ZombieCandidateModels {
       String code,
       String name,
       String status,
-      OffsetDateTime lastMaintainedAt,
-      Long daysSinceMaintained,
+      @Schema(nullable = true) OffsetDateTime lastMaintainedAt,
+      @Schema(nullable = true) Long daysSinceMaintained,
       String verdict,
       List<ZombieCandidateRules.ZombieDimensionStatus> dimensions,
       List<ZombieCleanupRecord> recentRecords) {}

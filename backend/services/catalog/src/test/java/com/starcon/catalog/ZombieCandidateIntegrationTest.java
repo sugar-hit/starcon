@@ -277,7 +277,12 @@ new ZombieCleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "
     var rules = call(actor, "catalog.spu.read", () -> zombies.rules());
     assertThat(rules).hasSize(3);
     for (var rule : rules) {
-      assertThat(rule.requiredDimensionCount()).isZero();
+      // 后端视图不再暴露 requiredDimensionCount（record 之外的便利方法不会被契约导出），
+      // 这里直接断言四个开关本身都为 false —— 那才是契约里的事实。
+      assertThat(rule.requireZeroOrderReference()).isFalse();
+      assertThat(rule.requireZeroInventory()).isFalse();
+      assertThat(rule.requireZeroListing()).isFalse();
+      assertThat(rule.requireZeroCost()).isFalse();
       assertThat(rule.snapshotStaleDays()).isEqualTo(90);
     }
   }
@@ -326,7 +331,9 @@ new ZombieCleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "
     backdate("sku", a, fresh, 3);
 
     var page = list(a, "SKU", null, null, 0, 50);
-    assertThat(page.countsConsistent()).isTrue();
+    // 三个判定计数逐项相加必须等于 total：分页漏算会立刻暴露。
+    assertThat(page.candidateCount() + page.inUseCount() + page.incompleteCount())
+        .isEqualTo(page.total());
     // 候选清单的时间窗口只看「超出维护阈值」的：FRESH 才维护过 3 天，
     // 它连 scored CTE 都进不去（而不是"进去了被标成在用"）——
     // 两种口径在计数上等价，但后者会让运营以为刚维护过的也要逐条复核。
