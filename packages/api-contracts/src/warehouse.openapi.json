@@ -10032,7 +10032,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_4",
+        "operationId": "detail_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -11000,7 +11000,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_5",
+        "operationId": "detail_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -11771,7 +11771,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "detail_5",
+        "operationId": "detail_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -11811,7 +11811,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -11987,7 +11987,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -12413,7 +12413,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -12475,7 +12475,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -12732,7 +12732,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "detail_3",
+        "operationId": "detail_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -13271,7 +13271,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "detail_5",
+        "operationId": "detail_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -13311,7 +13311,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
