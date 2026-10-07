@@ -238,6 +238,54 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "bundle-component-controller"
+        ],
+        "operationId": "addComponent",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BundleComponentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleComponentItem"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/catalog/versions/{id}/close": {
@@ -3201,6 +3249,144 @@
         }
       }
     },
+    "/catalog/components/{id}": {
+      "get": {
+        "tags": [
+          "bundle-component-controller"
+        ],
+        "operationId": "component",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleComponentItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "bundle-component-controller"
+        ],
+        "operationId": "editComponent",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BundleComponentEditInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleComponentItem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "bundle-component-controller"
+        ],
+        "operationId": "deleteComponent",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "rowVersion",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/categories/trees/{id}": {
       "put": {
         "tags": [
@@ -3829,6 +4015,106 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/BundleRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/bundle-skus/{id}": {
+      "put": {
+        "tags": [
+          "bundle-component-controller"
+        ],
+        "operationId": "updateLink",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BundleSkuInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleSkuRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "bundle-component-controller"
+        ],
+        "operationId": "deleteLink",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "rowVersion",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
                 }
               }
             }
@@ -8925,6 +9211,104 @@
         }
       }
     },
+    "/catalog/bundle-skus": {
+      "get": {
+        "tags": [
+          "bundle-component-controller"
+        ],
+        "operationId": "links",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleSkuPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "bundle-component-controller"
+        ],
+        "operationId": "createLink",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BundleSkuInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleSkuRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/brands": {
       "get": {
         "tags": [
@@ -9497,6 +9881,46 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/BundleVersionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/versions/{id}/component-check": {
+      "get": {
+        "tags": [
+          "bundle-component-controller"
+        ],
+        "operationId": "check_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleComponentCheck"
                 }
               }
             }
@@ -11920,12 +12344,128 @@
         }
       }
     },
+    "/catalog/components": {
+      "get": {
+        "tags": [
+          "bundle-component-controller"
+        ],
+        "operationId": "components_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "bundleId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "nested",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleComponentPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/components/overview": {
+      "get": {
+        "tags": [
+          "bundle-component-controller"
+        ],
+        "operationId": "overview_10",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleComponentOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/categories/overview": {
       "get": {
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "overview_10",
+        "operationId": "overview_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -11999,7 +12539,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "overview_11",
+        "operationId": "overview_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -12078,7 +12618,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "overview_12",
+        "operationId": "overview_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -12149,7 +12689,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "overview_13",
+        "operationId": "overview_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -12240,7 +12780,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_14",
+        "operationId": "overview_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -14758,6 +15298,105 @@
           }
         }
       },
+      "BundleComponentEditInput": {
+        "required": [
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "role": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "rowVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BundleComponentItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bundleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bundleCode": {
+            "type": "string"
+          },
+          "versionNo": {
+            "type": "string"
+          },
+          "versionName": {
+            "type": "string"
+          },
+          "versionStatus": {
+            "type": "string"
+          },
+          "versionStatusLabel": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "role": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "nested": {
+            "type": "boolean"
+          },
+          "linkedBundleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "linkedBundleCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "rowVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "CategoryTreeInput": {
         "required": [
           "code",
@@ -15077,6 +15716,79 @@
           "effectiveVersionNo": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "BundleSkuInput": {
+        "required": [
+          "bundleId",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "bundleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "rowVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BundleSkuRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bundleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bundleCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "usedByComponentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usedByPublished": {
+            "type": "boolean"
+          },
+          "rowVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
           }
         }
       },
@@ -18314,6 +19026,78 @@
           "totalPages": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "BundleComponentCheck": {
+        "type": "object",
+        "properties": {
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bundleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bundleCode": {
+            "type": "string"
+          },
+          "versionNo": {
+            "type": "string"
+          },
+          "versionStatus": {
+            "type": "string"
+          },
+          "versionStatusLabel": {
+            "type": "string"
+          },
+          "componentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "problems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BundleComponentProblem"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BundleComponentProblem": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "componentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
           }
         }
       },
@@ -22607,6 +23391,69 @@
           }
         }
       },
+      "BundleComponentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BundleComponentItem"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "BundleComponentOverview": {
+        "type": "object",
+        "properties": {
+          "componentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "versionWithComponentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "distinctSkuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "linkedSkuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nestedComponentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "selfReferencingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nonPositiveQuantityCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
       "CategoryNode": {
         "type": "object",
         "properties": {
@@ -23102,6 +23949,33 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "BundleSkuPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BundleSkuRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
