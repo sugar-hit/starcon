@@ -151,6 +151,22 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(access.get("grants").get(0).get("scopeMode").asText()).isEqualTo("DEPARTMENT");
     request(memberToken, "GET", "/identity/onboardings", null, 403);
 
+    // V47「有角色必有范围」：DEPARTMENT 分配必须真的挂上一条对象范围，落在本人所属部门上。
+    // 这条断言钉住的是 V50：V47 之前根本不存在这道闸，入职写下的 DEPARTMENT 分配是
+    // 「声明了范围却没有任何范围对象」的残缺记录，靠 V47 的延迟约束触发器才终于被挡住。
+    UUID memberId = UUID.fromString(access.get("membershipId").asText());
+    var scopes =
+        tx()
+            .run(
+                UUID.fromString(accessTenant(token)),
+                () ->
+                    sql.fetch(
+                        "select scope_type,scope_id from role_assignment_scope"
+                            + " where membership_id=? and scope_type='DEPARTMENT'",
+                        memberId));
+    assertThat(scopes).hasSize(1);
+    assertThat(scopes.get(0).get("scope_id", UUID.class)).isEqualTo(department);
+
     // 列表里再取一次：明文已经不存在，只剩一个「发过没有」的布尔位。
     var listed = request(token, "GET", "/identity/onboardings", null, 200);
     var row = findOnboarding(listed, created.get("onboardingId").asText());
@@ -187,6 +203,87 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     }
   }
 
+  /**
+   * 三种范围各自在库里留下什么形状：ALL / SELF 不带对象范围，DEPARTMENT 带且只带本人部门。
+   *
+   * <p>SELF 单独点出来是因为它最容易在后来的重构里被改坏：它属于「非 ALL」，
+   * 一条「非 ALL 就必须补一条范围对象」的误解就会给 SELF 挂上对象，
+   * 而 V47 明确判定那是自相矛盾的记录（既声明仅本人、又声明限死在某个部门）。
+   * 这里是直接读库，不是看接口回显——回显只会告诉你请求被接受了。
+   */
+  @Test
+  void everyScopeModeLeavesACompleteAssignmentRow() throws Exception {
+    String token = login(), tag = suffix();
+    UUID role = roleId(token, tag);
+    UUID department = createDepartment(token, "ONBS" + tag, "范围形态部门", null);
+    UUID tenant = UUID.fromString(accessTenant(token));
+
+    var self = "onb-shape-self-" + tag;
+    request(token, "POST", "/identity/onboardings", onboardingInput(self, null, scope(role, "SELF")), 200);
+    UUID selfMember =
+        UUID.fromString(
+            findOnboarding(request(token, "GET", "/identity/onboardings", null, 200), onboardingIdOf(self, token))
+                .get("membershipId")
+                .asText());
+    // SELF：行级范围（仅本人数据），没有对象可列，因此一条范围对象都不该有。
+    assertThat(
+            tx()
+                .run(
+                    tenant,
+                    () ->
+                        sql.fetchValue(
+                            "select count(*) from role_assignment_scope where membership_id=?",
+                            selfMember)))
+        .isEqualTo(0L);
+
+    var dept = "onb-shape-dept-" + tag;
+    request(
+        token,
+        "POST",
+        "/identity/onboardings",
+        onboardingInput(dept, department, scope(role, "DEPARTMENT")),
+        200);
+    UUID deptMember =
+        UUID.fromString(
+            findOnboarding(request(token, "GET", "/identity/onboardings", null, 200), onboardingIdOf(dept, token))
+                .get("membershipId")
+                .asText());
+    var deptScopes =
+        tx()
+            .run(
+                tenant,
+                () ->
+                    sql.fetch(
+                        "select scope_type,scope_id from role_assignment_scope where membership_id=?",
+                        deptMember));
+    assertThat(deptScopes).hasSize(1);
+    assertThat(deptScopes.get(0).get("scope_type", String.class)).isEqualTo("DEPARTMENT");
+    assertThat(deptScopes.get(0).get("scope_id", UUID.class)).isEqualTo(department);
+
+    // 全库不留残缺分配：两条分配要么是 ALL/SELF（无对象），要么挂了对象，没有中间态。
+    // 这条断言直接对应 V47 延迟约束触发器要挡的东西。
+    assertThat(
+            tx()
+                .run(
+                    tenant,
+                    () ->
+                        sql.fetchValue(
+                            "select count(*) from role_assignment ra where ra.tenant_id=?::uuid"
+                                + " and ra.scope_mode not in ('ALL','SELF') and not exists("
+                                + "select 1 from role_assignment_scope s where s.membership_id=ra.membership_id"
+                                + " and s.role_id=ra.role_id)",
+                            tenant)))
+        .isEqualTo(0L);
+  }
+
+  /** 用用户名在入职记录列表里定位 id。 */
+  private String onboardingIdOf(String username, String token) throws Exception {
+    JsonNode rows = request(token, "GET", "/identity/onboardings", null, 200);
+    for (JsonNode row : rows)
+      if (username.equals(row.get("username").asText())) return row.get("id").asText();
+    throw new AssertionError("找不到入职记录：" + username);
+  }
+
   /** 审计里不能出现凭据，也不能出现任何长得像凭据的字段。 */
   @Test
   void auditRecordsOnboardingWithoutAnyCredential() throws Exception {
@@ -202,6 +299,24 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
                 200);
     String credential = created.get("initialCredential").asText();
     UUID onboardingId = UUID.fromString(created.get("onboardingId").asText());
+
+    // ALL 范围：V47 判定它自带完整范围，因此**不该**有任何范围对象行。
+    // 这条同时钉住 V50 补上的 assigned_by——该列自 V47 起 NOT NULL，
+    // 而入职写入路径一度没有它，导致连全量范围的开通都撞约束（V47 之前它还不存在，所以看不出来）。
+    var allAssignment =
+        tx()
+            .run(
+                UUID.fromString(accessTenant(token)),
+                () ->
+                    sql.fetch(
+                        "select assigned_by,(select count(*) from role_assignment_scope s"
+                            + " where s.membership_id=ra.membership_id and s.role_id=ra.role_id) as objects"
+                            + " from role_assignment ra where membership_id=?",
+                        UUID.fromString(created.get("membershipId").asText())));
+    assertThat(allAssignment).hasSize(1);
+    // assigned_by 是操作人本人（放人进来的是他，不是系统），不能是空。
+    assertThat(allAssignment.get(0).get("assigned_by", UUID.class)).isNotNull();
+    assertThat(allAssignment.get(0).get("objects", Integer.class)).isZero();
 
     var audit =
         tx()
