@@ -97,7 +97,12 @@ public class AccountingBookController {
       String status,
       long version,
       OffsetDateTime createdAt,
-      OffsetDateTime updatedAt) {}
+      OffsetDateTime updatedAt,
+      // ---- 17.6.1.1 账簿与本位币：跨币种多账簿 ----
+      String bookCategory,
+      String baseCurrencyMode,
+      String chartOfAccountsSource,
+      boolean defaultBook) {}
 
   /**
    * 账簿配置输入。
@@ -124,7 +129,15 @@ public class AccountingBookController {
       @NotNull @Pattern(regexp = "MONTH|WEEK|QUARTER") String periodType,
       @Min(1) @Max(12) Integer fiscalYearStartMonth,
       @NotNull OffsetDateTime firstPeriodStart,
-      @NotNull @Pattern(regexp = "ACTIVE|SUSPENDED") String status) {}
+      @NotNull @Pattern(regexp = "ACTIVE|SUSPENDED") String status,
+      // ---- 17.6.1.1 新增入参，全部可空且缺省与 17.1.2.2 行为一致 ----
+      @Pattern(regexp = "BUSINESS|STATUTORY", message = "账簿分类只能是业务账或法定账")
+          String bookCategory,
+      @Pattern(regexp = "INHERIT|OWN", message = "本位币来源只能是 INHERIT（继承法人）或 OWN（账簿自定）")
+          String baseCurrencyMode,
+      @Pattern(regexp = "STANDARD|LOCAL|GROUP", message = "科目体系来源只能是 STANDARD、LOCAL 或 GROUP")
+          String chartOfAccountsSource,
+      Boolean defaultBook) {}
 
   private static final String BOOK_READ = "identity.accounting_book.read";
   private static final String BOOK_CREATE = "identity.accounting_book.create";
@@ -221,8 +234,10 @@ public class AccountingBookController {
         a -> {
           var entity = legalEntity(a.tenantId(), legalEntityId);
           String currency = input.baseCurrency().trim().toUpperCase();
-          // 本位币归法人：账簿上的币种必须与法人一致，否则"这个法人按哪个币记账"就有两个答案。
-          checkBaseCurrency(currency, entity.get("base_currency", String.class));
+          // 本位币归法人：INHERIT 模式下账簿上的币种必须与法人一致，否则"这个法人按哪个币记账"
+          // 就有了两个答案；OWN 模式下账簿自己决定本位币（跨境多币种记账，见 17.6.1.1）。
+          String currencyMode = currencyMode(input.baseCurrencyMode());
+          checkBaseCurrency(currencyMode, currency, entity.get("base_currency", String.class));
           int startMonth = input.fiscalYearStartMonth() == null ? 1 : input.fiscalYearStartMonth();
           String periodType = input.periodType();
           checkPeriodAlignment(periodType, startMonth, input.firstPeriodStart());
@@ -232,8 +247,9 @@ public class AccountingBookController {
             sql.execute(
                 "insert into accounting_book(id,tenant_id,legal_entity_id,code,name,book_type,"
                     + " base_currency,amount_scale,amount_rounding,quantity_scale,quantity_rounding,"
-                    + " period_type,fiscal_year_start_month,first_period_start,base_currency_changed_at,status)"
-                    + " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?::timestamptz,?::timestamptz,?)",
+                    + " period_type,fiscal_year_start_month,first_period_start,base_currency_changed_at,status,"
+                    + " book_category,base_currency_mode,chart_of_accounts_source,is_default)"
+                    + " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?::timestamptz,?::timestamptz,?,?,?,?,?)",
                 id,
                 a.tenantId(),
                 legalEntityId,
@@ -249,7 +265,11 @@ public class AccountingBookController {
                 startMonth,
                 input.firstPeriodStart(),
                 input.firstPeriodStart(),
-                input.status());
+                input.status(),
+                bookCategory(input.bookCategory()),
+                currencyMode,
+                chartOfAccountsSource(input.chartOfAccountsSource()),
+                input.defaultBook() != null && input.defaultBook());
           } catch (org.springframework.dao.DataIntegrityViolationException e) {
             throw duplicate(e);
           }
@@ -278,7 +298,8 @@ public class AccountingBookController {
                   sql.fetchOne("select legal_entity_id from accounting_book where tenant_id=? and id=?", a.tenantId(), id)
                       .get("legal_entity_id", UUID.class));
           String currency = input.baseCurrency().trim().toUpperCase();
-          checkBaseCurrency(currency, entity.get("base_currency", String.class));
+          String currencyMode = currencyMode(input.baseCurrencyMode());
+          checkBaseCurrency(currencyMode, currency, entity.get("base_currency", String.class));
           int startMonth = input.fiscalYearStartMonth() == null ? 1 : input.fiscalYearStartMonth();
           checkPeriodAlignment(input.periodType(), startMonth, input.firstPeriodStart());
 
@@ -289,6 +310,7 @@ public class AccountingBookController {
                   "update accounting_book set code=?,name=?,book_type=?,base_currency=?,"
                       + " amount_scale=?,amount_rounding=?,quantity_scale=?,quantity_rounding=?,"
                       + " period_type=?,fiscal_year_start_month=?,first_period_start=?::timestamptz,status=?,"
+                      + " book_category=?,base_currency_mode=?,chart_of_accounts_source=?,is_default=?,"
                       + " base_currency_changed_at=case when base_currency=? then base_currency_changed_at"
                       + " else ?::timestamptz end,"
                       + " version=version+1,updated_at=now() where tenant_id=? and id=?",
@@ -304,6 +326,10 @@ public class AccountingBookController {
                   startMonth,
                   input.firstPeriodStart(),
                   input.status(),
+                  bookCategory(input.bookCategory()),
+                  currencyMode,
+                  chartOfAccountsSource(input.chartOfAccountsSource()),
+                  input.defaultBook() != null && input.defaultBook(),
                   currency,
                   utcNow(),
                   a.tenantId(),
@@ -342,13 +368,34 @@ public class AccountingBookController {
   // 校验与快照
   // ------------------------------------------------------------------
 
-  /** 本位币必须等于所属法人的本位币——租户默认币种只是展示默认，两者不能混。 */
-  private void checkBaseCurrency(String currency, String entityCurrency) {
+  /**
+   * 本位币必须等于所属法人的本位币——租户默认币种只是展示默认，两者不能混。
+   *
+   * <p>17.6.1.1 起这条只在 INHERIT 模式下生效：跨境常见同一主体同时用人民币与美元记账，
+   * OWN 模式下账簿自己决定本位币（"海外账 USD"），再拿法人本位币去卡它就把多账簿堵死了。
+   * 两种模式都在同一列上留痕，所以事后能回答"这本账的币是继承来的还是自定的"。
+   */
+  private void checkBaseCurrency(String mode, String currency, String entityCurrency) {
+    if ("OWN".equals(mode)) return;
     if (!currency.equals(entityCurrency))
       reject(
           "账簿本位币必须等于所属法人的本位币（法人本位币为 "
               + entityCurrency
-              + "）；本位币归法人，请先在法人档案中调整，而不是在本账上单独改");
+              + "）；本位币归法人，请先在法人档案中调整，而不是在本账上单独改。"
+              + "若这本账确需用与法人不同的币（如海外账 USD），请把本位币来源改为 OWN。");
+  }
+
+  /** 17.6.1.1 新字段缺省值：与 17.1.2.2 已交付行为一致，不因为没传就改变既有语义。 */
+  private static String currencyMode(String value) {
+    return value == null || value.isBlank() ? "INHERIT" : value.trim();
+  }
+
+  private static String bookCategory(String value) {
+    return value == null || value.isBlank() ? "BUSINESS" : value.trim();
+  }
+
+  private static String chartOfAccountsSource(String value) {
+    return value == null || value.isBlank() ? "STANDARD" : value.trim();
   }
 
   /**
@@ -383,7 +430,16 @@ public class AccountingBookController {
     String detail = String.valueOf(e.getMessage() == null ? "" : e.getMessage());
     if (detail.contains("accounting_book_main"))
       return IdentityController.error(
-          HttpStatus.CONFLICT, "该法人已有一本总账（BOOK），需要第二本请用现金账簿或银行账簿");
+          HttpStatus.CONFLICT,
+          "该法人在该本位币下已有一本总账（BOOK）；另一本请换一个本位币（如海外账 USD 走 OWN 模式）"
+              + "或改用现金账簿/银行账簿");
+    if (detail.contains("accounting_book_default"))
+      return IdentityController.error(
+          HttpStatus.CONFLICT, "该法人已有默认账簿，请先取消原默认账簿或改选其他账簿作为默认账簿");
+    // 默认账簿必须启用：触发器抛的 23514 别被误报成"编码重复"，那会把人引向错误方向
+    if (detail.contains("默认账簿必须处于启用状态"))
+      return IdentityController.error(
+          HttpStatus.CONFLICT, "默认账簿必须处于启用状态，请先启用该账簿或改选其他账簿作为默认账簿");
     return IdentityController.error(HttpStatus.CONFLICT, "该法人下已存在同编码的账簿，请更换编码");
   }
 
@@ -412,6 +468,10 @@ public class AccountingBookController {
     snap.put("firstPeriodStart", str(row.get("first_period_start", OffsetDateTime.class)));
     snap.put("baseCurrencyChangedAt", str(row.get("base_currency_changed_at", OffsetDateTime.class)));
     snap.put("status", row.get("status", String.class));
+    snap.put("bookCategory", row.get("book_category", String.class));
+    snap.put("baseCurrencyMode", row.get("base_currency_mode", String.class));
+    snap.put("chartOfAccountsSource", row.get("chart_of_accounts_source", String.class));
+    snap.put("defaultBook", row.get("is_default", Boolean.class) != null && row.get("is_default", Boolean.class));
     snap.put("version", row.get("version", Long.class));
     return snap;
   }
@@ -437,6 +497,7 @@ public class AccountingBookController {
     return "select b.id,b.code,b.name,b.book_type,b.base_currency,b.amount_scale,b.amount_rounding,"
         + " b.quantity_scale,b.quantity_rounding,b.period_type,b.fiscal_year_start_month,"
         + " b.first_period_start,b.base_currency_changed_at,b.status,b.version,b.created_at,b.updated_at,"
+        + " b.book_category,b.base_currency_mode,b.chart_of_accounts_source,b.is_default,"
         + " e.id as legal_entity_id,e.code as legal_entity_code,e.legal_name as legal_entity_name,"
         + " e.base_currency as legal_entity_currency"
         + " from accounting_book b"
@@ -474,7 +535,11 @@ public class AccountingBookController {
         r.get("status", String.class),
         r.get("version", Long.class),
         r.get("created_at", OffsetDateTime.class),
-        r.get("updated_at", OffsetDateTime.class));
+        r.get("updated_at", OffsetDateTime.class),
+        r.get("book_category", String.class),
+        r.get("base_currency_mode", String.class),
+        r.get("chart_of_accounts_source", String.class),
+        r.get("is_default", Boolean.class) != null && r.get("is_default", Boolean.class));
   }
 
   private record FiscalYearSpan(String year, String start, String end) {}
