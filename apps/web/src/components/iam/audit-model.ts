@@ -25,6 +25,13 @@ export const actionLabels: Record<string, string> = {
   LegalEntityCreated: '新增法人',
   LegalEntityUpdated: '修改法人',
   LegalEntityDeleted: '删除法人',
+  DepartmentLeaderAssigned: '指定部门负责人',
+  DepartmentLeaderChanged: '调整负责人授权',
+  DepartmentLeaderCleared: '撤销部门负责人',
+  DepartmentLeaderProxyCreated: '新增代管',
+  DepartmentLeaderProxyDeleted: '撤销代管',
+  DepartmentLeaderGrantCreated: '新增临时授权',
+  DepartmentLeaderGrantDeleted: '撤销临时授权',
 };
 
 /** 资源类型 → 中文。同样对未知类型回落，不吞掉信息。 */
@@ -33,6 +40,9 @@ export const resourceLabels: Record<string, string> = {
   'identity.member': '成员',
   'identity.department': '部门',
   'identity.legal_entity': '法人',
+  'identity.department_leader': '部门负责人',
+  'identity.department_leader_proxy': '部门代管',
+  'identity.department_leader_grant': '临时授权',
   'tenant.child': '子租户',
 };
 

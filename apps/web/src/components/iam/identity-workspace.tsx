@@ -4,18 +4,14 @@ import Link from 'next/link';
 import { Avatar, Button } from '@starcon/ui';
 import { useIdentity } from './identity-shell';
 import { AdministrationPanel } from './administration-panel';
-import {
-  canManage,
-  hasPermission,
-  isOwner,
-  type AdministrationKind,
-} from './administration-model';
+import { canManage, hasPermission, isOwner, type AdministrationKind } from './administration-model';
 
 const destinations = [
   ['tenants', '租户列表', '查看你可进入的租户、切换工作空间并维护本租户基本信息'],
   ['members', '用户与成员', '管理本租户成员、启停状态和角色分配'],
   ['roles', '角色配置', '配置页面操作权限与数据范围'],
   ['departments', '部门管理', '维护成员归属与部门数据范围'],
+  ['department-leaders', '部门负责人', '指定各部门负责人、管理范围与审批权限，支持代管与临时授权'],
   ['children', '子租户管理', '创建独立工作空间并指定所有者'],
   ['audit', '审计日志', '检索关键操作留痕、变更详情与导出'],
 ] as const;
@@ -135,12 +131,15 @@ export function IdentityWorkspace({
             {destinations
               // 租户列表对每个成员都开放：不知道自己属于哪些租户的人没法切换工作空间，
               // 所以它不受页面权限码过滤（服务端仍按成员关系裁剪，见 17.1.1.1）。
+              // 部门负责人（17.2.1.2）是独立页面权限码，不走 canManage 的页面映射。
               .filter(([key]) =>
                 key === 'tenants'
                   ? true
                   : key === 'audit'
                     ? hasPermission(session, 'identity.audit.read')
-                    : canManage(session, key),
+                    : key === 'department-leaders'
+                      ? hasPermission(session, 'identity.department_leader.read')
+                      : canManage(session, key),
               )
               .map(([key, label, description]) => (
                 <Link

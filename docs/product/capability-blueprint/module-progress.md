@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 69 |
+| 已交付 | 70 |
 | 进行中 | 0 |
-| **未开发** | **396** |
-| 完成率 | 14.8% |
+| **未开发** | **395** |
+| 完成率 | 15.1% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 67 | 0 | 13 | 80 |
+| **D1–D2** | 68 | 0 | 12 | 80 |
 | **D3** | 2 | 0 | 38 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -48,7 +48,7 @@
 | 14 | 广告与增长系统 | D7 | 0 | 22 |
 | 15 | 客户与客服系统 | D7 | 0 | 24 |
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 10 | 29 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 11 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
 
 ## 判定「已交付」的标准
@@ -510,7 +510,7 @@
 | 17.1.2.1 | 法人档案 | — | D1–D2 | 已交付 | identity V5 legal_entity + CRUD + 删除保护触发器 + /org/legal-entities |
 | 17.1.2.2 | 本位币与账簿 | — | D1–D2 | 未开发 | — |
 | 17.2.1.1 | 部门树 | — | D1–D2 | 已交付 | 迁移 `backend/services/identity/src/main/resources/db/migration/V6__department_tree.sql`（code/parent_id/legal_entity_id/leader_membership_id + 自引用与法人/成员复合外键 + 树索引 + `department_tree()` SECURITY DEFINER 递归 CTE）；端点 `GET/POST/PUT/DELETE /identity/departments` + `PUT /identity/departments/{id}/parent`（防环校验、删除拒绝并回报具体数量）；页面 `apps/web/src/components/iam/department-tree.tsx` + `administration-panel.tsx`（真实树视图、HTML5 拖拽移动、成员分布计数）；测试 `IdentityIntegrationTest` 5 个部门专项用例（层级树/移动/防环/跨租户/删除保护） |
-| 17.2.1.2 | 部门负责人 | — | D1–D2 | 未开发 | — |
+| 17.2.1.2 | 部门负责人 | — | D1–D2 | 已交付 | 迁移 `backend/services/identity/src/main/resources/db/migration/V44__department_leader.sql`（department_leader 负责人记录含 scope_mode 管理范围与 approval_limit/approval_currency 审批额度，唯一键 tenant+department 使「一个部门一个负责人」；department_leader_proxy 代管带可空 ends_at 长期代管；department_leader_grant 临时授权额度必填且区间必填；三个表 tenant_id NOT NULL + FORCE RLS + 复合外键；department.leader_membership_id 由双向触发器与负责人记录保持同源——部门表单换人只改 membership_id、**保留**既有范围与额度，两个方向都带 IS DISTINCT FROM 守卫所以互触发一轮后收敛；两个 SECURITY DEFINER 函数 department_leaders(hash) 与 department_approval_chain(hash,dept,as_of)，与 17.2.1.1 的 department_tree 同一套约定：用户名经 member_names 解析、租户由 session_access 推导）；端点 `GET /identity/department-leaders`、`PUT/DELETE /identity/departments/{id}/leader`、`POST/DELETE /identity/departments/{id}/leader/proxies[/{proxyId}]`、`POST/DELETE /identity/departments/{id}/leader/grants[/{grantId}]`、`GET /identity/departments/{id}/approval-chain?asOf=`（**输出=负责人记录 + 审批链引用**，asOf 可查历史归属，供下游 17.4 审批流按时刻取数）；页面 `apps/web/src/app/org/department-leaders/page.tsx` + `components/iam/department-leader-workspace.tsx`（真实工作区：负责人清单、代管与临时授权面板、审批链面板、加载态/空态/失败重试）；测试 `DepartmentLeaderIntegrationTest` 10 项实跑 Testcontainers PostgreSQL 16（连接池压到 1），覆盖双向同源与 upsert、负责人可为空 + requiresFallback、额度与币种成对/停用成员拒绝、撤销连带作废代管与授权、代管继承全口径 vs 临时授权收敛、额度不得超负责人与币种须一致、**断言 timestamptz 写回值含 +08:00 偏移**（漂移 −28800s 即失败）、停用成员退出审批链、租户隔离三断言、OWNER + identity.department_leader 权限码闸、三新表 FORCE RLS |
 | 17.2.2.1 | 成员管理 | — | D1–D2 | 已交付 | membership + app_user + role_assignment 表 + /members CRUD + /org/members 成员工作区 |
 | 17.2.2.2 | 成员开通与入职 | — | D1–D2 | 未开发 | — |
 | 17.2.2.3 | 离职与停用 | — | D1–D2 | 未开发 | — |

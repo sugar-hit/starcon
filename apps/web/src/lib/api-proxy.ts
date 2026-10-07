@@ -35,7 +35,11 @@ const services: readonly {
       // tenants 是 17.1.1.1 租户列表：只有 tenants 与 tenants/current 两个形状，
       //   **刻意不接 {uuid} 段** —— 按任意 tenant id 读取租户不是这个模块该有的能力，
       //   可切换集合只能由服务端从成员关系推导（实体目录 §4 的窄权限路径）。
-      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/references|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?)$/,
+      // department-leaders 是 17.2.1.2 部门负责人：负责人清单（没有负责人的部门也在列，
+      //   因为它们要在审批流里配兜底）。departments/{id}/leader 下面挂 leader、proxies、
+      //   grants 与 approval-chain 四类**已实现**的子资源：多放一段会让一个还不存在的
+      //   路径看起来像已交付，所以逐段列出而不是一条通配。
+      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/references|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|department-leaders|departments\/[0-9a-f-]+\/(?:leader(?:\/(?:proxies|grants)(?:\/[0-9a-f-]+)?)?|approval-chain))$/,
   },
   {
     prefix: 'catalog/',
