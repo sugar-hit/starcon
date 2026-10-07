@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **363** |
 | 完成率 | 21.9% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 20 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -279,7 +262,7 @@
 | 7.7.2.1 | VMI 供应商管理库存 | — | D3 | 未开发 | — |
 | 7.7.2.2 | 平台托管与全托管备货 | — | D3 | 未开发 | — |
 | 7.8.1.1 | 分配策略配置 | — | D3 | 已交付 | 前端类型修复（`fix/7-8-1-1-typecheck`）· `AllocationOutcome` 不是漏 import，而是 codegen 把 Java 枚举**内联**成 `AllocationLine.outcome` 的字符串联合、枚举不单独生成 TS 类型，故原文末尾是**无绑定悬空 re-export**；改为 `AllocationOutcome = AllocationLine['outcome']` 从契约反推，不手写联合以免与后端漂移 · `skuList[0].id` 在 `noUncheckedIndexedAccess` 下改 `?.`（未用 `!` 断言）· `referenceLabel` 在 `exactOptionalPropertyTypes` 下改条件展开（对齐 `lib/api.ts:47` 既有写法）· typecheck `allocation-policy-*` 3→0（全量 29→26，余 26 处属 7.7.1.1 的 `stock-ownership-*`）· vitest 1341 passed 与基线一致 · 遗留：`allocation-policy-model.test.ts:179` 既有失败（`notNull` 是类型谓词返回 boolean，测试按归一化函数断言），未修· **状态由「未开发」改判「已交付」**：fix worker 只被授权改 3 处类型错误，交付完成后把状态留在「未开发」，导致 `lane.mjs plan` 把已完整交付的模块重新排队。判定依据（本轮实测）：后端 AllocationPolicyController/Models/Service + 迁移 V68 已并入且 `./mvnw verify` BUILD SUCCESS；前端 /inventory/allocation 页面 + model + workspace + 单测齐全；契约 20 个 Allocation* 类型；白名单 allocation-policies / allocation-sales 已放行且反向用例被拒；前端 77 文件 1353 例全绿。 |
-| 7.8.1.2 | 优先级与保底 | — | D3 | 未开发 | — |
+| 7.8.1.2 | 优先级与保底 | — | D3 | 已交付 | V76__warehouse_allocation_priority_floor.sql（warehouse，两张新表 allocation_floor + allocation_priority_resolution）· **为什么不并进 7.8.1.1 的 member 加一列**：member.priority 回答的是「余量按什么次序分」，本模块回答的是「货不够时先保住谁」；两个次序会打架（销量高但优先级低的店在余量里排最后，而它的保底必须被满足），共用一个数字就表达不出来 · **保底 = 两遍分配**（划保底池 → 一次只给「未被足额满足」的店铺分余量、份额在参与者之间重新归一化）：先划池让每一步上界静态、可复现；反过来「先分余量再补差」要判断「补到多少算够」，那个判断依赖已分出去的结果，补超了又要从别人身上拿回来，拿回来又让别人不够格 · **不自己写第二份分档解析器**：直接注入 AllocationPolicyService 调它 public 的 effective()（SKU>SHOP>DEFAULT、左闭右开、区间不重叠那套约定已被 V68 触发器钉住），成员与销量只读不写 · **余量分配仍是自己算一遍**：它跑在 residual = 可分配量 − 保底池 上、且只在参与者之间归一化，7.8.1.1 的 allocate() 无参可表达；代价是两处算式形状相同、必须同步演进，本轮按「只碰自己新增的文件」没有去改它的文件，统一成共享计算器是后续该做的事 · **DB 层 6 道约束**：保底内容写定后不可改（只能收 effective_to，触发器逐列比对）/ 同店同策略生效区间不得重叠 / 保底生效记录 append-only / 保底必须挂在未作废策略上 / **保底必须挂在同策略的成员名册上**（给不在名册里的店配保底，货一多就会凭空抢走别人的货，而界面上查不到是谁拿走的）/ 延迟约束触发器守「Σ保底发放 ≤ 该次分摊的可分配量」—— 保底是在分摊**之前**先发的，V68 那条延迟触发器管的是「Σ分摊行 == 头」，管不到这一层 · **floor_order 每个成员都有**（含没配保底的），留 0 会让「排在最后」与「压根不在这次裁决里」长得一样；它回答的是「它本该排第几却没货保」· **不夹请求量到可分配量**：一夹，「要 6 件、货只有 0 件」就变成「要 0 件、给了 0 件、欠账 0」，承诺明明存在过却看不出没兑现；超发由保底池上界 min(可分配量, Σ请求) 与逐店从池里拿保证 · **被压低提示落到数据**（base_allocated_qty 与 allocated_qty 的差 + suppressed + suppression_reason）：只显示最终分摊额的话运营看到「这家店今天只有 3 件」，但答不出「被谁挤下去」，而那正是本模块存在的意义；RESERVED_FOR_FLOOR（被别家保底挤下去）与 POOL_EXHAUSTED（货被别人分满）是两种病，处置不同，所以是显式一条判断而不是 else 兜底 · **落库写的是 7.8.1.1 的 allocation_run / allocation_run_line**（下游 7.8.2.1 要读的正是那一张），本模块不发明第二种「分摊」概念、不另建分摊头；额外写逐店 resolution · **未交付的上游如实标注**：① 店铺绩效（17 绩效域）未交付，仓库服务里既无表也无授权 API → capabilities 恒报 performanceBasisAvailable=false 并写明「保底是人为承诺的底线，不是系统按绩效算出来的下限」，不接绩效、不算绩效分 · ② availableQuantity **必填**：7.2.2.1 的池容量口径是 7.8.1.1 服务里的私有实现，复制一份只会得到一个迟早漂移的副本，改为要求调用方传入并在 capabilities 说明 · ③ 分摊头/行的 outcome 词表里没有「被保底挤下去」这一项（那是 7.8.1.1 的表与 CHECK），复用最接近的 OK/DEMAND_EXHAUSTED，精细原因在 resolution 表里逐店留痕 · 前端 /inventory/allocation-priority 工作区（model + workspace + 单测 27 例）· 契约重新生成：新增 11 个 DTO（AllocationFloorInput/Page/Row/Saved、FloorCapabilityOption、PriorityAllocationLine/Request/Result、PriorityCapabilities、ResolutionPage/Row），消失 0 · 白名单登记 allocation-priority 七个形状并**从本模块源码反向抽取真实调用点**逐条断言放行（8 条全通）+ POST 裸路径 `…/floors` + 未交付路径（starved/warnings/resolutions/{id}/runs/{id}）仍 404；**过程中查出一处认知错误并已改正**：白名单是**按路径**登记、不区分方法，同一路径的 DELETE 会被转发到后端，所以「不能删」的防线在服务端无 DELETE 端点（405）+ V76 的 REVOKE DELETE + append-only 触发器，不在白名单 —— 注释与用例都已按事实重写 · 后端 `./mvnw -pl services/warehouse -am verify` BUILD SUCCESS 669 例全绿（新增纯函数单测 14 例 + Testcontainers 集成测试 22 例，含多租户三断言）· `pnpm typecheck` 3/3 · `pnpm lint` 3/3 无新增 error（余 4 条 warning 属别的文件的既有 exhaustive-deps）· `npx vitest run` 79 文件 1385 例全绿（基线 77 文件 1353 例，+32 无回归）· 遗留：① 与 7.8.1.1 的算式尚未抽成共享计算器（需改它的文件，越界）② 本模块未登记进导航，与 7.8.1.1 一致（两者都不在 nav 里）③ 换版入口按行挂在列表上，草稿状态提到父层共享，尚未做成「按行预填原值」的交互 |
 | 7.8.2.1 | 分摊结果查看 | — | D3 | 未开发 | — |
 | 7.8.2.2 | 缺货与饥饿预警 | — | D3 | 未开发 | — |
 | 8.1.1.1 | 仓库列表 | — | D3 | 已交付 | V69__warehouse_list_facilities.sql（warehouse）+ V69__warehouse_facilities_page_permissions.sql（identity，两个服务同取预分配 V69；**刻意不建新表**——warehouse 表要展示的列 V1/V55 都已存在，剩下两个缺口都不是加一列能解决的；① kind 放宽：蓝图点名自营/三方/海外仓/平台仓/**监管仓**五类，V55 只落了四种，新增 BONDED——监管仓（保税仓）货是自有货只是海关监管，记自有账本；V55 两道触发器自动兑现「BONDED 不写观测值」与「BONDED 允许账本余额」，本迁移不另写触发器；不用新开「是否保税」标记列是因为 kind 已是 7.1.3.1 矩阵的行分组轴、分组轴必须单值；存量行**不回填**——系统无从判断某仓是否保税，猜值即伪造；② 补 warehouse_country_list 与 warehouse_legal_entity_list 两条索引：类型/法人/国家三个筛选维度里法人与国家都不在任何现有索引前缀上；③ warehouse 的 tenant_id NOT NULL + ENABLE/FORCE RLS 由 V1 建立，V69 **不重复写** ENABLE（Flyway 幂等但归属写错更糟），测试逐张断言 relforcerowsecurity）；WarehouseFacilityModels（WarehouseKind 五值词表含 platformObserved()、WorkVolumeCapability 带 available+ownerModule+note、WarehouseRow 的 stock 与 platformStock **两个字段不相加**、localTime 与 timezone 两个字段）；WarehouseFacilityService（jOOQ 显式 SQL：列表四个**标量子查询**聚合而非 join 展开——库位/批次维度 join 会成笛卡尔积互相放大；合计不受分页与筛选影响；筛选与排序**双白名单**（非法排序键 400 而非静默忽略）；真分页 MAX_PAGE_SIZE=200；下拉项只列本租户真实在用的国家，**不内置国别表**（会与法务/海关口径漂移且无人维护）；时区存 IANA ID，新增用 ZoneId.of 拒绝 +08:00 这类偏移量，库存 JDK 不认识的时区时 localTime 返 null 而非静默退化成 UTC（退化成 UTC 会显示一个错 8 小时却看起来正常的时刻）；新增校验：所属法人**必填**（蓝图红线「仓库绑定法人是财务前提」，存量行可空是历史事实、新建一律要填）、法人须存在且启用、每租户至多一个启用中默认仓（与 uq_warehouse_default 一致）、仓库编码租户内唯一）；WarehouseFacilityController（GET /warehouse/facilities、POST /warehouse/facilities、GET /facilities/options、GET /facilities/capabilities；权限 warehouse.facilities.read/create —— **刻意不复用 warehouse.inventory**：新增仓库是主数据写入、7.1.x 是库存聚合只读，风险面不同，共用会让「能改库存的人也能建仓」；**只注册 read+create 不注册 update/delete**（改属性属 8.1.1.2、参数属 8.1.1.3，先放行只会让人以为能改能删，与 identity V53「无端点不注册权限码」同一纪律）；路由 /warehouse/facilities 与 7.1.x 的 /warehouse/warehouses 刻意分开——后者是各页共用的下拉参照项，前者是列表本体，混用会让筛选下拉退化成全量传输）；**作业量只用已交付的真实作业单据**：盘点任务 stocktake_task（按仓范围与按该仓库位范围都计入）+ 调拨 transfer_order（调入/调出**两个独立子查询**相加，join 会让一张单同时命中 from 与 to 而翻倍）+ 库存变动 inventory_entry 分录条数；收货(8.2)/拣货出库(8.3)/组装(8.4) 三表不存在 → capabilities 显式 available=false + ownerModule + 具体原因，**没有**算成 0 冒充「这个仓不作业」；平台仓观测取 distinct on (sku_id,source) 最新一条——platform_stock_observation 是 append-only 历史序列，直接求和会把 300+310 算成 610 这个不存在的数；自有仓 platformStock 恒为 null 而非 0（null 是「这个来源不存在」、0 是「观测到 0 件」）；测试 WarehouseFacilityIntegrationTest 29 例（Testcontainers 真实 PG16、连接池固定 1 条、租户隔离三断言实跑：两租户互不可见 / 伪造 X-Tenant-Id 无效且伪造头下 B 建不出挂 A 法人的仓 / 连接池归还后不串租户并逐张断言 FORCE RLS，另加平台仓不相加、时区双向折算断言（同一时刻在 America/New_York 与 Asia/Shanghai 各算一次当地时间不同，写死 UTC 的实现会露馅）、采集时刻断言**同一个瞬间**（Timestamp.valueOf(LocalDateTime) 会静默偏 −28800s）、五类词表、排序白名单、默认仓唯一、平台仓记自有账本被 DB 拒）；前端 /warehouse/facilities（真实工作区非 DomainPlaceholder：筛选 5 维 + 关键字 + 真分页 + 合计卡 + 平台仓观测值单独成列 + 未接入作业维度显示成「未接入」并写明归哪个模块 + 未绑定法人显示成「未绑定法人」而不是法人数 0 + 当地时间带 IANA ID + 归档仓负向色调 + 新增表单（IANA 时区与货权法人前端预校验）+ 加载态/空态/错误态分开渲染）；warehouse-facility-model.test.ts 23 例（rate 无关，钉住平台仓与自有仓不相加、未绑定法人三态、填偏移量时区被拦、归档仓色调、momentText 按自带偏移渲染不猜时区）；api-proxy 放行 facilities 与 facilities/{options,capabilities} 三个读形状与 POST 同路径，并**刻意不放行** facilities/{uuid}（详情属 8.1.1.2）；route.test.ts 新增 2 例反向断言（四个真实调用形状放行、详情/改删形状 404 且不发请求）；导航：SYSTEMS 的 children 由 IMPLEMENTED_TASK_PAGES 派生，故只登记 task-pages.ts 一条任务页即可，**不改共享的 nav-config.ts**；**跨车道回归**：V69 对既有表只做「放宽 CHECK + 新增索引」，无 ADD COLUMN / 无 SET NOT NULL / 无新增触发器 —— 静态判据逐条对过，不存在让别的车道违约的形状，identity 侧是纯 INSERT；**边界**：不改 8.1.1.2 详情 / 8.1.1.3 配置 / 8.1.2.1 库位树；不建 goods_receipt/outbound_order 等作业单表；legal_entity_ref 与 identity 法人主数据是两条腿，两腿对账属 12/17 范畴本车道不越界 |
@@ -557,3 +540,9 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 100 |
+| 进行中 | 1 |
+| **未开发** | **364** |
+| 完成率 | 21.5% |
+| **D3** | 19 | 1 | 20 | 40 |
+| 07 | 库存核算系统 | D3 | 17 | 31 |
