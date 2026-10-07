@@ -1,7 +1,6 @@
 import type {
   AllocationCapabilities,
   AllocationLine,
-  AllocationOutcome,
   AllocationPolicyDetail,
   AllocationPolicyEffective,
   AllocationPolicyInput,
@@ -172,10 +171,14 @@ function query(params: object): string {
 
 /**
  * codegen 约定：只要 schema 里有任何一个可空字段，整个类型别名就会生成成 `T | null`，
- * 所以每个解码入口都要先把整体判空，否则类型上撒谎。
+ * 所以列表元素也要先过这道关。
+ *
+ * <p>刻意写成**类型谓词**而不是普通函数：写成 `<T>(v: T | null) => T | null` 时
+ * `Array.filter(notNull)` 不会收窄元素类型，于是 map 里每个字段访问都要再补一次判空，
+ * 而漏一处就是一个「可能为 null」的运行时崩溃点。
  */
-export function notNull<T>(v: T | null | undefined): T | null {
-  return v ?? null;
+export function notNull<T>(v: T | null | undefined): v is T {
+  return v !== null && v !== undefined;
 }
 
 /** 数量口径：DB 是 numeric(19,6)，而**分摊额必须是整件**，所以这里不补小数位。 */
@@ -228,7 +231,8 @@ export const operatingModeLabels: Record<string, string> = {
 };
 
 /** 分摊结果里每行的色调：只有「分到 0 件」才需要被看见。 */
-export function outcomeTone(outcome: AllocationOutcome | null | undefined): string {
+// outcome 是 codegen 内联的字符串联合（枚举不单独生成类型），所以这里收 string。
+export function outcomeTone(outcome: string | null | undefined): string {
   switch (outcome) {
     case 'OK':
       return 'text-emerald-600 dark:text-emerald-400';
