@@ -163,6 +163,49 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
   // 刻意**不在这里**断言 DELETE 被代理拒绝：代理只按路径形状放行、不看方法，
   // 「策略行不可删除」的两道真实防线是后端控制器没有 DELETE 形状（返回 405）
   // 与迁移里的 REVOKE DELETE，两者都由 InventoryExpiryIntegrationTest 实跑证明。
+  // 7.5.1.2 在途库存：六个真实调用点逐个钉住。
+  // 路径是从 inventory-in-transit-model.ts 里反向抽取的，不是照着正则抄的 ——
+  // 少放行一个，前端就只在浏览器里静默 404（pnpm test 直连服务层测不出漏登记）。
+  for (const path of [
+    'warehouse/inventory/in-transit',
+    'warehouse/inventory/in-transit/alerts',
+    'warehouse/inventory/in-transit/netting',
+    `warehouse/inventory/in-transit/${id}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  // 登记与两个写动作走 POST：同一路径两种方法，白名单只看路径形状不看方法，
+  // 所以这里显式跑 POST 以证明写动作也真的被转发（而不是只放行了读）。
+  for (const path of [
+    'warehouse/inventory/in-transit',
+    `warehouse/inventory/in-transit/${id}/arrive`,
+    `warehouse/inventory/in-transit/${id}/discrepancy`,
+  ]) {
+    expect(
+      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+    ).toBe(200);
+  }
+});
+
+it('在途库存白名单：未交付的子路径仍被拒绝', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  // 刻意**不**放行的形状：后端 InventoryInTransitController 只有上面那六个端点。
+  // 多一段 / 少一个动作后缀、以及看起来合理的推导路径（audit / reconcile / forecast）
+  // 在后端都不存在，放行它们等于让界面以为已交付 —— 放行不该存在的路径比 404 更糟。
+  for (const path of [
+    `warehouse/inventory/in-transit/${'11111111-1111-1111-1111-111111111111'}/cancel`,
+    `warehouse/inventory/in-transit/${'11111111-1111-1111-1111-111111111111'}/arrive/reverse`,
+    'warehouse/inventory/in-transit/audit',
+    'warehouse/inventory/in-transit/forecast',
+    // alerts / netting 是字面量子路径，不能再往下挂一段。
+    `warehouse/inventory/in-transit/alerts/${'11111111-1111-1111-1111-111111111111'}`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+    ).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
 });
 
 /**
