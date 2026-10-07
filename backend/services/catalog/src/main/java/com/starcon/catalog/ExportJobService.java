@@ -85,6 +85,7 @@ public class ExportJobService {
                         source.columns().stream().map(ExportColumn::info).toList(),
                         source.sorts().stream().map(ExportSort::info).toList(),
                         source.filters(),
+                        source.defaultSortKey(),
                         source.maxRows(),
                         downloadTtlHours))
             .toList();

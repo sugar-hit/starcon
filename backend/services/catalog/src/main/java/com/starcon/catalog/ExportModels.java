@@ -1,5 +1,6 @@
 package com.starcon.catalog;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -29,7 +30,8 @@ public final class ExportModels {
    * 并写明理由（蓝图对 16.6.1 的要求在本模块内自行落地）。PII 标记来自字段定义本身，
    * 不接受客户端自称——否则「导出含 PII」这件事就成了客户端可以填的一个布尔值。
    */
-  public record ExportFieldInfo(String key, String label, boolean pii, String note) {}
+  public record ExportFieldInfo(
+      String key, String label, boolean pii, @Schema(nullable = true) String note) {}
 
   /** 一个可排序键。与字段白名单同理，排序键也是服务端声明的闭集。 */
   public record ExportSortInfo(String key, String label) {}
@@ -55,6 +57,8 @@ public final class ExportModels {
       List<ExportFieldInfo> fields,
       List<ExportSortInfo> sorts,
       List<ExportFilterInfo> filters,
+      /** 默认排序键。与列表页一致；由后端声明，前端不自己挑第一个。 */
+      String defaultSortKey,
       int maxRows,
       int downloadTtlHours) {}
 
@@ -76,27 +80,28 @@ public final class ExportModels {
    * 处置同一条纪律：不静默忽略一个用户填了的条件（那会让他以为筛过了，其实没筛）。
    */
   public record ExportFilterInput(
-      UUID spuId,
-      String category,
-      List<String> status,
-      String q,
-      String barcode,
-      String spec,
-      String brand,
-      UUID partyId,
-      String partyType,
-      Boolean primary,
-      String roleType,
-      BigDecimal onHandMin,
-      BigDecimal onHandMax,
-      BigDecimal priceMin,
-      BigDecimal priceMax,
-      Boolean outOfStock,
-      Boolean onSale,
-      String platform) {}
+      @Schema(nullable = true) UUID spuId,
+      @Schema(nullable = true) String category,
+      @Schema(nullable = true) List<String> status,
+      @Schema(nullable = true) String q,
+      @Schema(nullable = true) String barcode,
+      @Schema(nullable = true) String spec,
+      @Schema(nullable = true) String brand,
+      @Schema(nullable = true) UUID partyId,
+      @Schema(nullable = true) String partyType,
+      @Schema(nullable = true) Boolean primary,
+      @Schema(nullable = true) String roleType,
+      @Schema(nullable = true) BigDecimal onHandMin,
+      @Schema(nullable = true) BigDecimal onHandMax,
+      @Schema(nullable = true) BigDecimal priceMin,
+      @Schema(nullable = true) BigDecimal priceMax,
+      @Schema(nullable = true) Boolean outOfStock,
+      @Schema(nullable = true) Boolean onSale,
+      @Schema(nullable = true) String platform) {}
 
   /** 排序还原：把列表页当时的排序原样带过来，导出行的顺序才与用户看到的一致。 */
-  public record ExportSortInput(String key, String order) {}
+  public record ExportSortInput(
+      @Schema(nullable = true) String key, @Schema(nullable = true) String order) {}
 
   /**
    * 发起一次导出。
@@ -106,9 +111,9 @@ public final class ExportModels {
   public record ExportJobInput(
       @NotBlank String sourceKey,
       @NotEmpty List<String> fields,
-      @Valid ExportFilterInput filters,
-      @Valid ExportSortInput sort,
-      String piiPurpose) {}
+      @Schema(nullable = true) @Valid ExportFilterInput filters,
+      @Schema(nullable = true) @Valid ExportSortInput sort,
+      @Schema(nullable = true) String piiPurpose) {}
 
   // ================================================================ 输出
 
@@ -139,18 +144,20 @@ public final class ExportModels {
       String sortKey,
       String sortOrder,
       int rowCount,
-      String fileName,
-      BigDecimal byteSize,
-      String contentSha256,
+      // 下面若干列在「还没跑出文件 / 还没起止时间」时为 null，契约必须如实标成可空，
+      // 否则前端 TS 会把 null 当成 string 用，运行时炸在一个看似无关的地方。
+      @Schema(nullable = true) String fileName,
+      @Schema(nullable = true) BigDecimal byteSize,
+      @Schema(nullable = true) String contentSha256,
       boolean includesPii,
       List<String> piiFields,
       String piiPurpose,
       UUID actorId,
-      UUID departmentId,
+      @Schema(nullable = true) UUID departmentId,
       String requestedAt,
-      String startedAt,
-      String finishedAt,
-      String expiresAt,
+      @Schema(nullable = true) String startedAt,
+      @Schema(nullable = true) String finishedAt,
+      @Schema(nullable = true) String expiresAt,
       boolean downloadable,
       String downloadNote,
       String error) {}
