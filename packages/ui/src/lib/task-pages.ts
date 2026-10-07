@@ -581,7 +581,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/inventory/ledger',
-    implemented: false,
+    implemented: true,
     domain: 'inventory',
     label: '库存流水',
     description: '逐笔核对出入库、调拨和调整的库存变化。',

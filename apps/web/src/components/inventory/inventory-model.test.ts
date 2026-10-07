@@ -4,16 +4,23 @@ import {
   bucketPlacement,
   bucketQuery,
   errorText,
+  grainNote,
   groupByDimension,
   groupLabel,
+  ledgerKindLabels,
+  ledgerKindOptions,
+  ledgerQuery,
   lotLabel,
   parseDetailHref,
+  parseLedgerHref,
   pickableNote,
   qty,
   query,
   roleLabels,
   rowComposition,
   scopeLabels,
+  signed,
+  signedTone,
   type OverviewParams,
 } from './inventory-model';
 import type {
@@ -323,5 +330,115 @@ describe('7.1.1.1 → 7.1.1.2 下钻契约', () => {
   it('非 /inventory 的 href 不解析，且不抛异常', () => {
     expect(parseDetailHref('/somewhere-else?skuId=s1')).toBeNull();
     expect(parseDetailHref('/inventory')).toBeNull();
+  });
+});
+
+// ================================================================ 7.1.2.1 库存流水台账
+
+describe('7.1.2.1 台账查询串', () => {
+  it('空值不拼进去：后端把"未传"与"传空串"当成两种含义', () => {
+    expect(ledgerQuery({})).toBe('');
+    expect(ledgerQuery({ from: '', skuId: '', keyword: '   ' })).toBe('');
+  });
+
+  it('时间参数原样发出并带时区偏移', () => {
+    // 服务端按 timestamptz 的绝对时刻筛选，偏移量必须一起发出去
+    expect(ledgerQuery({ from: '2026-10-01T00:00:00+08:00' })).toBe(
+      '?from=2026-10-01T00%3A00%3A00%2B08%3A00',
+    );
+  });
+
+  it('业务类型与来源单据类型用重复参数表示多选', () => {
+    expect(ledgerQuery({ kinds: ['RECEIPT', 'SHIPMENT'] })).toBe('?kinds=RECEIPT&kinds=SHIPMENT');
+    expect(ledgerQuery({ refTypes: ['ORDER'] })).toBe('?refTypes=ORDER');
+  });
+
+  it('分页与排序按固定顺序拼接', () => {
+    expect(ledgerQuery({ sort: 'OCCURRED_AT', page: 2, size: 50 })).toBe(
+      '?sort=OCCURRED_AT&page=2&size=50',
+    );
+  });
+});
+
+describe('7.1.2.1 数量符号', () => {
+  it('正数显式加 +、负数用真正的减号、零不带符号', () => {
+    // 台账的方向就是入库/出库，只靠颜色区分在灰度和色觉障碍下不可读
+    expect(signed(40)).toBe('+40.00');
+    expect(signed(-15)).toBe('−15.00');
+    expect(signed(0)).toBe('0.00');
+  });
+
+  it('空值显示破折号而不是 0，避免"没有数据"被读成"数量为零"', () => {
+    expect(signed(null)).toBe('—');
+    expect(signed(undefined)).toBe('—');
+  });
+
+  it('颜色只是辅助：符号方向与文本一致', () => {
+    expect(signedTone(40)).toContain('emerald');
+    expect(signedTone(-15)).toContain('rose');
+    expect(signedTone(0)).toContain('muted');
+  });
+});
+
+describe('7.1.2.1 业务类型标签', () => {
+  it('八个码与 inventory_transaction.kind 的 CHECK 约束一一对应', () => {
+    expect(Object.keys(ledgerKindLabels).sort()).toEqual([
+      'ADJUSTMENT',
+      'RECEIPT',
+      'RELEASE',
+      'RESERVE',
+      'RETURN',
+      'SHIPMENT',
+      'TRANSFER_IN',
+      'TRANSFER_OUT',
+    ]);
+  });
+
+  it('调整这一类显式写明同时承载盘点与组装', () => {
+    // 蓝图列了盘点与组装，但 V1 的 CHECK 只有八个码：界面不能造出筛不出来的类型
+    expect(ledgerKindLabels.ADJUSTMENT).toContain('盘点');
+    expect(ledgerKindLabels.ADJUSTMENT).toContain('组装');
+  });
+
+  it('下拉选项与标签表同源，不在第二处重写一份', () => {
+    expect(ledgerKindOptions).toHaveLength(Object.keys(ledgerKindLabels).length);
+    expect(ledgerKindOptions.every((o) => o.label === ledgerKindLabels[o.value])).toBe(true);
+  });
+});
+
+describe('7.1.2.1 粒度口径说明', () => {
+  it('带维度筛选时说明行上的量是整笔净变动', () => {
+    expect(grainNote(true)).toContain('整笔业务');
+    expect(grainNote(true)).toContain('差额');
+  });
+
+  it('无维度筛选时说明两个口径恒等', () => {
+    expect(grainNote(false)).toContain('恒等');
+  });
+});
+
+describe('7.1.1.2 → 7.1.2.1 下钻契约', () => {
+  it('解析「查看流水」的 href，取出台账接得住的两个维度', () => {
+    expect(
+      parseLedgerHref('/inventory/ledger?skuId=s1&warehouseId=w1&locationId=l1&lotId=t1'),
+    ).toEqual({ skuId: 's1', warehouseId: 'w1' });
+  });
+
+  it('bucket 级的库位与批次维度被丢弃：台账读的是 balance 口径', () => {
+    const parsed = parseLedgerHref('/inventory/ledger?locationId=l1&lotId=t1');
+    expect(parsed).toBeNull();
+  });
+
+  it('只带一个维度也能下钻（不要求成对）', () => {
+    expect(parseLedgerHref('/inventory/ledger?skuId=s1')).toEqual({
+      skuId: 's1',
+      warehouseId: '',
+    });
+  });
+
+  it('非台账路由的 href 不解析，且不抛异常', () => {
+    expect(parseLedgerHref('/inventory/adjustments?skuId=s1')).toBeNull();
+    expect(parseLedgerHref('')).toBeNull();
+    expect(parseLedgerHref(null)).toBeNull();
   });
 });

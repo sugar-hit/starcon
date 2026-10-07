@@ -658,9 +658,13 @@ class InventoryBucketIntegrationTest {
     assertThat(actions).hasSize(3);
     assertThat(actions).extracting(BucketAction::action)
         .containsExactly("ADJUST", "TRANSFER", "LEDGER");
-    // 三个目标模块（7.4.1.1 / 7.5.1.1 / 7.1.2.1）都未交付 → 如实标 false 并说明原因，
-    // 而不是给一个点下去 404 的按钮
-    assertThat(actions).allMatch(a -> !a.available());
+    // 7.1.2.1 库存流水台账已交付 → 「查看流水」这条入口现在真的点得动，必须翻成 true，
+    // 否则页面上会出现一个已经交付却标着"未交付"的入口。7.4.1.1 调整与 7.5.1.1 调拨仍未交付，
+    // 继续如实标 false 并说明原因，而不是给一个点下去 404 的按钮。
+    assertThat(actions).filteredOn(a -> a.action().equals("LEDGER")).singleElement()
+        .satisfies(a -> assertThat(a.available()).isTrue());
+    assertThat(actions).filteredOn(a -> a.action().equals("ADJUST") || a.action().equals("TRANSFER"))
+        .allMatch(a -> !a.available());
     assertThat(actions).allMatch(a -> a.ownerModule() != null && !a.ownerModule().isBlank());
     assertThat(actions).allMatch(a -> a.note().contains(a.ownerModule()));
     // href 带齐 bucket 定位参数：目标模块落地后入口能直接定位到这一行

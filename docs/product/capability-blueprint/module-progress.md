@@ -12,17 +12,17 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 76 |
+| 已交付 | 77 |
 | 进行中 | 0 |
-| **未开发** | **389** |
-| 完成率 | 16.3% |
+| **未开发** | **388** |
+| 完成率 | 16.6% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 74 | 0 | 6 | 80 |
-| **D3** | 2 | 0 | 38 | 40 |
+| **D3** | 3 | 0 | 37 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
@@ -38,7 +38,7 @@
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
-| 07 | 库存核算系统 | D3 | 2 | 31 |
+| 07 | 库存核算系统 | D3 | 3 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 0 | 27 |
@@ -254,7 +254,7 @@
 | 7.1.1.1 | 库存总览 | /inventory | D3 | 已交付 | 迁移 warehouse V1__warehouse_inventory_core.sql（inventory_balance 生成列 available + RLS/GRANT、inventory_quality_status、inventory_transaction/entry append-only、inventory_transfer、inventory_policy）+ identity V8__warehouse_page_permissions + GET /warehouse/inventory/overview 与 /inventory/capabilities、阈值 CRUD /warehouse/inventory/policies + 下拉参照数据 /warehouse/{warehouses,legal-entities,skus,quality-statuses} + 页面 /inventory（总览工作区：合计卡 + 分布图 + 汇总表 + 行内展开 + 阈值维护）+ 测试 InventoryOverviewIntegrationTest 30 例（含总览合计==明细逐行求和、守恒式、租户隔离三断言）+ inventory-model.test.ts 15 例 |
 | 7.1.1.2 | 库存明细 | /inventory | D3 | 已交付 | 迁移 warehouse V2__warehouse_inventory_bucket.sql（stock_bucket 六维最小事实单位 + 复合外键锁定归属 balance + 延迟约束触发器守恒 + guard_bucket_movement_time 版本/业务时间 + RLS/GRANT，warehouse_location 库位档案、inventory_lot 批次档案）+ GET /warehouse/inventory/buckets（法人→仓库→库位→SKU→批次逐级下钻，含 summary/reconciliation/actions）、GET /warehouse/inventory/bucket-actions、下拉 /warehouse/{locations,lots} + 页面 /inventory（总览 ↔ 库位明细双视图，总览行按 detailHref 契约下钻，明细含加载/空/错误态、账实核对告警、未分解提示、行内操作入口）+ 测试 InventoryBucketIntegrationTest 31 例（六维形状、DB 级守恒与不平拒绝、版本与业务时间口径、逐级下钻真实生效、租户隔离三断言） |
 | 7.1.1.3 | 可用量计算 | /inventory | D3 | 未开发 | — |
-| 7.1.2.1 | 库存流水台账 | — | D3 | 未开发 | — |
+| 7.1.2.1 | 库存流水台账 | — | D3 | 已交付 | 迁移 warehouse V51__warehouse_inventory_ledger.sql（**不建新表**：台账是 append-only 台账的只读面，事实表与 append-only 触发器、RLS、REVOKE 在 V1 已成立；只补台账查询路径索引：occurred_at 倒序翻页、kind 与 ref_type 两个低基数字段的时间复合索引、entry 带 INCLUDE 的聚合索引）+ 端点 GET /warehouse/inventory/ledger（时间范围左闭右开、SKU、仓库、业务类型、来源单据类型、关键字、排序、分页；返回行口径与分录口径**两套净变动**并在无维度筛选时恒等，即 7.1.2.2 核对基线）、GET /warehouse/inventory/ledger/{id} 分录下钻（跨仓户 404 不泄露存在性）、GET /warehouse/inventory/ledger/ref-types 来源单据类型词表 + 页面 /inventory/ledger（7.1.1.2「查看流水」入口契约地址）与 /inventory 页内第三个页签（筛选、期间净变动、按类型分组、列表、下钻分录、空分录告警、数据范围 SELF 提示、加载/空/错误三态）+ 测试 InventoryLedgerIntegrationTest 21 例（数量符号正负、跨仓一笔不被维度筛选切成半个数、时间范围左闭右开与 +08:00 时区零漂移、非法业务类型与排序键 400、翻页决胜键不重不漏、流水与分录 UPDATE/DELETE 被 DB 拒绝、空分录业务单独计数、租户隔离三断言）+ inventory-model.test.ts 16 例 |
 | 7.1.2.2 | 账实核对 | — | D3 | 未开发 | — |
 | 7.1.3.1 | 多仓分布视图 | — | D3 | 未开发 | — |
 | 7.2.1.1 | 预占需求列表 | /inventory/reservation | D3 | 未开发 | — |
