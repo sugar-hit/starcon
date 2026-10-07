@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 90 |
+| 已交付 | 91 |
 | 进行中 | 0 |
-| **未开发** | **375** |
-| 完成率 | 19.4% |
+| **未开发** | **374** |
+| 完成率 | 19.6% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -23,7 +23,7 @@
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
 | **D3** | 12 | 0 | 28 | 40 |
-| **D4** | 0 | 0 | 60 | 60 |
+| **D4** | 1 | 0 | 59 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
@@ -39,7 +39,7 @@
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
 | 07 | 库存核算系统 | D3 | 12 | 31 |
-| 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
+| 08 | 仓储作业系统 | D3 / D4 | 1 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 0 | 27 |
 | 11 | 售后与退货系统 | D4 / D7 | 0 | 22 |
@@ -291,7 +291,7 @@
 | 8.2.1.2 | 收货差异 | — | D3 | 未开发 | — |
 | 8.2.2.1 | 上架任务 | — | D3 | 未开发 | — |
 | 8.2.2.2 | 待检处理 | — | D3 | 未开发 | — |
-| 8.3.1.1 | 出库单列表 | — | D4 | 未开发 | — |
+| 8.3.1.1 | 出库单列表 | /warehouse/outbound | D4 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V72__outbound_order_list.sql`（outbound_order 单头 / outbound_order_line 明细计划快照 / outbound_pick_request 拣货交接请求 / outbound_order_event 作业留痕 四表，tenant_id NOT NULL + ENABLE/FORCE RLS + GRANT + REVOKE DELETE/UPDATE + REVOKE ALL FROM starcon_app；版本按调度器预分配取 V72；**纯新建表、不 ALTER 任何既有表，无跨车道回归面**）；**8.3 的第一块地基**：8.3 此前无任何出库单/拣货/打包/发货表，本模块建并拥有 outbound_order / outbound_order_line，后续 8.3.2.1 拣货、8.3.3.x 复核打包、8.3.4.1 发货交接都引用这两张表；**「出库单 ≠ 销售订单」做进数据形状**：外部单号存 varchar(64) 且**刻意不加** (tenant_id, source_external_ref) 唯一索引 —— 加了就等于把「分仓/分批拆多张出库单」在数据上禁掉了，集成测试实跑同一外部单号下并排挂两张单；**四类来源按可信度分三种表达**：SALES/PURCHASE_RETURN/PRODUCTION（9 订单 / 6 采购 / 10 加工均未交付）只存外部单号字符串、跨服务不建 FK；TRANSFER（7.5.1.1 已交付且同服务）走真复合外键到 transfer_order，建单时校验发货仓 = 调拨单 from_warehouse_id 且每个明细 SKU 都在该调拨单明细里，CHECK 钉死两者互斥；**七态状态机 Java 枚举 + V72 触发器双实现**：PENDING_PICKING 待拣 → PICKING 拣货中 → PENDING_RECHECK 待复核 → PENDING_PACKING 待打包 → PENDING_SHIPMENT 待发货 → SHIPPED 已发货，另有 CANCELLED 取消；两条返工边 PENDING_RECHECK→PICKING（复核不通过退回重做）与 PENDING_PACKING→PENDING_RECHECK（打包缺件回复核），复核不通过**不**退回待拣（待拣含义是「一件都没拣」，退回会让待拣同时表达「没开始」与「拣错重来」）；SHIPPED/CANCELLED 终态在 DB 层冻结来源/发货仓/承运渠道/创建人；集成测试逐条比对 Java 转换矩阵与触发器白名单没有分叉（7 态 × 6 目标 = 42 个组合全部实测，**每个探测开独立事务** —— PostgreSQL 任何报错都会中止整个事务，把探测与复位放同事务会让测试因错误原因永远绿）；**「生成拣货任务」只做到交接为止且不假数据**：不建 picking_task（归 8.3.2.1），真实做三件事 —— 校验待拣、落一行 outbound_pick_request（含行数与件数快照）、状态推进到拣货中并留审计，一张单只交接一次（UNIQUE(tenant_id,order_id)）；**SKU 行数与件数现算不存列**（LATERAL 派生表会让 jOOQ 无法为列命名而抛 "Field is not contained in row type"，改用相关标量子查询），避免与明细漂移 —— 这两个数恰恰是作业员最先会对着明细核对的；**打印返回真正要印的内容**（单头 + 明细行）而非「已提交打印」空壳，只支持出库单与拣货单两种，面单/箱唛/标签属 8.3.4.2 并行车道故一个不列；**批量操作逐单独立处理**，成功与失败逐条回报原因，不做「部分成功」这种含糊表达；**用户数据范围**按已认证身份生效（SELF 收窄到本人创建），复用 InventoryController.selfOnly 且必须传完整 `warehouse.` 前缀权限码；**刻意没有 GET /{id} 详情**（属 8.3.1.2）与**没有 DELETE**（出库单是履约凭证只能取消留痕）；端点 7 个挂 `/warehouse/inventory/outbound-orders`：GET /capabilities（报出未接入能力与原因）、GET /（四维度真分页真筛选：仓库/来源/状态/时间 + 关键字跨五处）、POST /（建单，含零行/重复 SKU/数量非正/调拨对不上的拒绝）、POST /pick-requests、POST /print、POST /cancel、POST /{id}/transition；页面 `/outbound` 为真实工作区（筛选 / 批量操作 / 打印预览 / 状态推进 + 加载态、空态、错误态、逐条失败提示），路由白名单在 api-proxy.ts 只追加 `outbound-orders` 一支未重写整段正则；集成测试 `OutboundOrderIntegrationTest` 32 项真实 PostgreSQL 16 + Testcontainers（池容量 1）+ 租户隔离三断言全跑，含 timestamptz 写回断言与 numeric(19,6) 口径断言；验证：`cd backend && ./mvnw verify` 全绿、`pnpm typecheck` / `pnpm lint` / `pnpm test`(1169) 全绿、`NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` 成功、`node tools/module-progress/sync.mjs --check` 通过 |
 | 8.3.1.2 | 出库单详情 | — | D4 | 未开发 | — |
 | 8.3.2.1 | 拣货任务 | — | D4 | 未开发 | — |
 | 8.3.2.2 | 波次与合并拣货 | — | D4 | 未开发 | — |
