@@ -2716,4 +2716,262 @@ public final class CatalogModels {
       long outputCount,
       long outputByteSize,
       String note) {}
+
+  // ============================================================ 3.4.2.1 标题库
+
+  /**
+   * 模板的一个变量占位（「品牌 + 品类 + 核心词 + 卖点」的其中一格）。
+   *
+   * <p>{@code source} 决定它取自 SPU/SKU 事实字段还是三类词池：
+   * 事实字段那一批是「这条标题里必须出现的商品事实」，
+   * 词池那一批是「可以在批次之间换着来的差异化素材」。
+   */
+  public record TitleTemplateVariable(
+      UUID id, String name, String source, String sourceLabel, int slotNo) {}
+
+  /** 变量输入（新建或改模板时）。整体替换语义，与 3.4.1.2 的比例档一致。 */
+  public record TitleTemplateVariableInput(
+      @NotBlank @Size(max = 32) String name,
+      @NotBlank String source,
+      @Schema(nullable = true) Integer slotNo) {}
+
+  /** 模板的一个平台长度上限。平台没配的批次会被拒，而不是悄悄用默认值。 */
+  public record TitleTemplatePlatform(
+      UUID id, String platform, int maxLength) {}
+
+  /** 平台长度上限输入。 */
+  public record TitleTemplatePlatformInput(
+      @NotBlank @Size(max = 64) String platform, @NotNull @Positive Integer maxLength) {}
+
+  /** 标题模板写入（新建或改，id 为空即新建）。变量与平台上限整体替换。 */
+  public record TitleTemplateInput(
+      @NotBlank @Size(max = 32) String code,
+      @NotBlank @Size(max = 100) String name,
+      @Schema(nullable = true) @Size(max = 2000) String note,
+      @NotBlank @Size(max = 2000) String pattern,
+      @Schema(nullable = true) @PositiveOrZero Integer maxSimilarityPermille,
+      @Schema(nullable = true) @PositiveOrZero Integer candidateCount,
+      @Schema(nullable = true) @Size(max = 12) List<@Valid TitleTemplateVariableInput> variables,
+      @Schema(nullable = true) @Size(max = 12) List<@Valid TitleTemplatePlatformInput> platforms,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  /** 模板一行（含变量与平台上限）。 */
+  public record TitleTemplateRow(
+      UUID id,
+      String code,
+      String name,
+      String note,
+      String pattern,
+      int maxSimilarityPermille,
+      int candidateCount,
+      boolean enabled,
+      List<TitleTemplateVariable> variables,
+      List<TitleTemplatePlatform> platforms,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  public record TitleTemplateSaved(
+      UUID id,
+      String code,
+      long version,
+      int variableCount,
+      int platformCount,
+      long generationCount) {}
+
+  /** 词根写入。 */
+  public record TitleKeywordInput(
+      @NotBlank @Size(max = 32) String code,
+      @NotBlank @Size(max = 60) String text,
+      @NotBlank String keywordType,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  /** 词根一行。 */
+  public record TitleKeywordRow(
+      UUID id,
+      String code,
+      String text,
+      String keywordType,
+      String keywordTypeLabel,
+      boolean enabled,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /** 词根列表页的一行：多带一个「被多少条标题引用」，删除保护在列表上就看得见。 */
+  public record TitleKeywordListRow(TitleKeywordRow keyword, long referenceCount) {}
+
+  public record TitleKeywordPage(
+      List<TitleKeywordListRow> items,
+      long total,
+      int page,
+      int size,
+      long coreCount,
+      long sellingCount,
+      long modifierCount,
+      String note) {}
+
+  /** 词库筛选条件。null 表示不筛。 */
+  public record TitleKeywordQuery(
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) @Size(max = 16) String keywordType,
+      int page,
+      int size) {}
+
+  /**
+   * 批量生成提交。
+   *
+   * <p>skuIds 放请求体而不是 URL（一次可能 200 个）。{@code keywordCodes} 是「词根」这个
+   * 蓝图点名的批量参数：限定本次只用这几个核心词，留空表示用全部启用的核心词。
+   */
+  public record TitleGenerationInput(
+      @NotNull UUID templateId,
+      @NotNull @Size(max = 200) List<@NotNull UUID> skuIds,
+      @NotNull @Size(max = 5) List<@NotBlank @Size(max = 64) String> platforms,
+      @Schema(nullable = true) @Size(max = 20) List<@NotBlank @Size(max = 32) String> keywordCodes) {}
+
+  /** 提交结果：同步生成已完成，进度与候选从批次详情查。 */
+  public record TitleGeneration(
+      UUID id,
+      UUID templateId,
+      String templateName,
+      String status,
+      String statusLabel,
+      int skuCount,
+      int candidateCount,
+      int rejectedCount,
+      String error,
+      String note) {}
+
+  /** 批次列表的一行（含模板名，省一次查询）。 */
+  public record TitleGenerationRow(
+      UUID id,
+      UUID templateId,
+      String templateName,
+      String templateCode,
+      String status,
+      String statusLabel,
+      int skuCount,
+      int candidateCount,
+      int rejectedCount,
+      String keywordFilter,
+      String error,
+      String createdAt,
+      @Schema(nullable = true) String finishedAt,
+      long version) {}
+
+  /** 逐 SKU 结果：产出了几条、被拒了几条、为什么。 */
+  public record TitleGenerationSkuRow(
+      UUID id,
+      UUID generationId,
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      String spuName,
+      String brand,
+      String category,
+      String outcome,
+      String outcomeLabel,
+      int candidateCount,
+      int rejectedCount,
+      String reason) {}
+
+  /**
+   * 一条生成的标题候选。
+   *
+   * <p>{@code similarityPermille} 是这一行存在的关键：它记着「这条标题与本 SKU 已有
+   * 标题的最大相似度」，所以重复度控制不是一个看不见的内部过程，而是一条可查、可导出、
+   * 可被 04 刊登拿去复核的事实。
+   */
+  public record TitleRecord(
+      UUID id,
+      UUID generationId,
+      UUID templateId,
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      String spuName,
+      String brand,
+      String category,
+      String platform,
+      int variantNo,
+      String title,
+      int charLength,
+      boolean truncated,
+      int rotation,
+      int similarityPermille,
+      String coreKeyword,
+      String sellingKeyword,
+      String modifierKeyword,
+      String status,
+      String statusLabel,
+      String createdAt,
+      String updatedAt,
+      long version) {}
+
+  /** 批次详情：批次 + 逐 SKU 结果 + 全部候选。 */
+  public record TitleGenerationDetail(
+      TitleGenerationRow generation,
+      List<TitleGenerationSkuRow> skus,
+      List<TitleRecord> records,
+      long selectedCount,
+      String note) {}
+
+  /** 候选列表筛选条件。 */
+  public record TitleRecordQuery(
+      @Schema(nullable = true) UUID skuId,
+      @Schema(nullable = true) @Size(max = 64) String platform,
+      @Schema(nullable = true) @Size(max = 16) String status,
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) UUID generationId,
+      int page,
+      int size) {}
+
+  public record TitleRecordPage(
+      List<TitleRecord> items,
+      long total,
+      int page,
+      int size,
+      long candidateCount,
+      long selectedCount,
+      long rejectedCount,
+      long truncatedCount,
+      int maxSimilarityPermille,
+      String note) {}
+
+  /** 选用 / 取消选用的结果。 */
+  public record TitleRecordSelected(
+      UUID id, String status, String statusLabel, String title, String platform, long version) {}
+
+  /** 列表筛选条件。null 表示不筛。 */
+  public record TitleGenerationQuery(
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) @Size(max = 16) String status,
+      int page,
+      int size) {}
+
+  public record TitleGenerationPage(
+      List<TitleGenerationRow> items,
+      long total,
+      int page,
+      int size,
+      long succeededCount,
+      long partialCount,
+      long failedCount,
+      String note) {}
+
+  public record TitleOverview(
+      long templateCount,
+      long enabledTemplateCount,
+      long keywordCount,
+      long coreKeywordCount,
+      long modifierKeywordCount,
+      long generationCount,
+      long recordCount,
+      long selectedCount,
+      long truncatedCount,
+      int maxSimilarityPermille,
+      String note) {}
 }
