@@ -30,6 +30,8 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
   const id = '11111111-1111-1111-1111-111111111111';
   for (const path of [
     'warehouse/inventory/overview',
+    'warehouse/inventory/buckets',
+    'warehouse/inventory/bucket-actions',
     'warehouse/inventory/capabilities',
     'warehouse/inventory/policies',
     `warehouse/inventory/policies/${id}`,
@@ -37,6 +39,8 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
     'warehouse/legal-entities',
     'warehouse/skus',
     'warehouse/quality-statuses',
+    'warehouse/locations',
+    'warehouse/lots',
   ]) {
     const response = await GET(request(path), { params: { path: path.split('/') } });
     expect(response.status).toBe(200);
@@ -63,10 +67,15 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
 it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
-  // 库存流水/预占属 7.1.2 与 7.2.1，尚未交付，不应被代理放行
+  // 库存流水/预占属 7.1.2 与 7.2.1，尚未交付，不应被代理放行。
+  // 7.1.1.2 的明细只读端点已在白名单里，但它的行内操作入口指向的路由
+  // （adjustments / transfer / ledger）仍**不**放行 —— 入口契约就位，
+  // 目标模块交付后再加，否则就是一个点下去 404 的死链。
   for (const path of [
     'warehouse/inventory/ledger',
     'warehouse/inventory/reservations',
+    'warehouse/inventory/adjustments',
+    'warehouse/inventory/transfer',
     'warehouse/internal/access',
   ]) {
     expect(

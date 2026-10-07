@@ -133,14 +133,18 @@ const services: readonly {
       /^(platforms(?:\/[A-Za-z0-9_]+\/enums(?:\/[0-9a-f-]+)?)?|connections(?:\/(?:reminders|[0-9a-f-]+(?:\/(?:credential|health|revoke))?))?|shops(?:\/[0-9a-f-]+(?:\/(?:marketplaces(?:\/[0-9a-f-]+)?|transfer))?)?|sync-cursors(?:\/[0-9a-f-]+(?:\/(?:pause|resume|rewind|trigger))?)?|sync-runs(?:\/[0-9a-f-]+(?:\/(?:complete|resolve))?)?|sync-failures(?:\/summary|[0-9a-f-]+\/replay)?|platform-operations(?:\/[0-9a-f-]+(?:\/(?:start|succeed|fail|unknown|verify))?)?|oauth\/(?:callback|sessions(?:\/[0-9a-f-]+(?:\/(?:shops|confirm|cancel))?)?))$/,
   },
   {
-    // 07 库存：库存总览（7.1.1.1）、筛选下拉参照数据与超储阈值。
+    // 07 库存：库存总览（7.1.1.1）、库存明细 bucket（7.1.1.2）、筛选下拉参照数据与超储阈值。
     // overview/capabilities/policies 是总览本身；warehouses/legal-entities/skus/quality-statuses
     // 是筛选下拉项。policies/{id} 后面接一段 id（更新与删除）。
+    // buckets/bucket-actions 是 7.1.1.2 的明细读端点（纯读，不需要写权限）；
+    // locations/lots 是逐级下钻的库位与批次下拉项，与其余参照数据同形。
+    // 注意 7.1.2 流水（ledger）、7.2 预占、7.4 调整、7.5 调拨仍未交付，
+    // 前端拿到的行内操作入口 available=false，这里**不**放行它们的路径。
     prefix: 'warehouse/',
     env: 'WAREHOUSE_URL',
     fallback: 'http://127.0.0.1:8084',
     pattern:
-      /^(inventory\/(?:overview|capabilities|policies(?:\/[0-9a-f-]+)?)|warehouses|legal-entities|skus|quality-statuses)$/,
+      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
   },
 ];
 
