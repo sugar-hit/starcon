@@ -1462,7 +1462,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities",
+        "operationId": "capabilities_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -4341,6 +4341,696 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/TransferMovements"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktake-variances/sheets/{sheetId}/lines/{lineId}/attribute": {
+      "post": {
+        "tags": [
+          "stocktake-variance-controller"
+        ],
+        "operationId": "attribute",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "sheetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lineId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeVarianceAttributionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeVarianceLine"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktake-variances/sheets/{sheetId}/adjustments": {
+      "post": {
+        "tags": [
+          "stocktake-variance-controller"
+        ],
+        "operationId": "createAdjustment",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "sheetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeVarianceAdjustCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeVarianceAdjustmentDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktake-variances/adjustments/{adjustmentId}/submit": {
+      "post": {
+        "tags": [
+          "stocktake-variance-controller"
+        ],
+        "operationId": "submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "adjustmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeVarianceDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeVarianceAdjustment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktake-variances/adjustments/{adjustmentId}/reject": {
+      "post": {
+        "tags": [
+          "stocktake-variance-controller"
+        ],
+        "operationId": "reject",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "adjustmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeVarianceDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeVarianceAdjustment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktake-variances/adjustments/{adjustmentId}/post": {
+      "post": {
+        "tags": [
+          "stocktake-variance-controller"
+        ],
+        "operationId": "post",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "adjustmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeVarianceDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeVariancePostResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktake-variances/adjustments/{adjustmentId}/cancel": {
+      "post": {
+        "tags": [
+          "stocktake-variance-controller"
+        ],
+        "operationId": "cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "adjustmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeVarianceDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeVarianceAdjustment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktake-variances/adjustments/{adjustmentId}/approve": {
+      "post": {
+        "tags": [
+          "stocktake-variance-controller"
+        ],
+        "operationId": "approve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "adjustmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeVarianceDecisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeVarianceAdjustment"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktake-variances/sheets/{sheetId}/report": {
+      "get": {
+        "tags": [
+          "stocktake-variance-controller"
+        ],
+        "operationId": "report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "sheetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeVarianceReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktake-variances/sheets/{sheetId}/lines": {
+      "get": {
+        "tags": [
+          "stocktake-variance-controller"
+        ],
+        "operationId": "lines",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "sheetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "decision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeVarianceLinePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktake-variances/sheets/{sheetId}/audit": {
+      "get": {
+        "tags": [
+          "stocktake-variance-controller"
+        ],
+        "operationId": "audit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "sheetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StocktakeVarianceAuditEntry"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktake-variances/capabilities": {
+      "get": {
+        "tags": [
+          "stocktake-variance-controller"
+        ],
+        "operationId": "capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeVarianceCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktake-variances/adjustments": {
+      "get": {
+        "tags": [
+          "stocktake-variance-controller"
+        ],
+        "operationId": "adjustments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sheetId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeVarianceAdjustmentPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/stocktake-variances/adjustments/{adjustmentId}": {
+      "get": {
+        "tags": [
+          "stocktake-variance-controller"
+        ],
+        "operationId": "adjustment",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "adjustmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocktakeVarianceAdjustmentDetail"
                 }
               }
             }
@@ -9744,6 +10434,737 @@
           },
           "movements": {
             "$ref": "#/components/schemas/InventoryLedgerPage"
+          }
+        }
+      },
+      "StocktakeVarianceAttributionInput": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "StocktakeVarianceLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sheetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bucketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotCode": {
+            "type": "string"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "bookOnHand": {
+            "type": "number"
+          },
+          "countedQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "variance": {
+            "type": "number",
+            "nullable": true
+          },
+          "countedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "countedByUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "varianceReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "varianceDecision": {
+            "type": "string",
+            "nullable": true
+          },
+          "varianceNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "attributedByUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "attributedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "adjustmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "adjustmentStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolvedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "postedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "StocktakeVarianceAdjustCreateInput": {
+        "type": "object",
+        "properties": {
+          "lineIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "allAttributed": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "StocktakeVarianceAdjustment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sheetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sheetCode": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PENDING_APPROVAL",
+              "APPROVED",
+              "REJECTED",
+              "POSTED",
+              "CANCELLED"
+            ]
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gainLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lossLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gainQty": {
+            "type": "number"
+          },
+          "lossQty": {
+            "type": "number"
+          },
+          "netQty": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "submittedByUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decidedByUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "decisionNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "postedByUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "postedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "StocktakeVarianceAdjustmentDetail": {
+        "type": "object",
+        "properties": {
+          "adjustment": {
+            "$ref": "#/components/schemas/StocktakeVarianceAdjustment"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StocktakeVarianceAdjustmentLine"
+            }
+          },
+          "auditTrail": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StocktakeVarianceAuditEntry"
+            }
+          }
+        }
+      },
+      "StocktakeVarianceAdjustmentLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bucketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "lotCode": {
+            "type": "string"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "qtyDelta": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "SHRINKAGE",
+              "MISSHIP",
+              "THEFT",
+              "UNRECORDED",
+              "TIMING"
+            ]
+          },
+          "note": {
+            "type": "string"
+          },
+          "attributedByUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "attributedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "postedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "transactionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "StocktakeVarianceAuditEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "adjustmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "action": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "actorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "StocktakeVarianceDecisionInput": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "StocktakeVariancePostResult": {
+        "type": "object",
+        "properties": {
+          "adjustment": {
+            "$ref": "#/components/schemas/StocktakeVarianceAdjustment"
+          },
+          "transactionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "balanceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "postedQty": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "StocktakeVarianceDecisionBreakdown": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "ADJUST",
+              "RECOUNT",
+              "IGNORE"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openLineCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "StocktakeVarianceMetrics": {
+        "type": "object",
+        "properties": {
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "countedLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "varianceLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "matchLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bookTotal": {
+            "type": "number"
+          },
+          "countedTotal": {
+            "type": "number"
+          },
+          "gainQty": {
+            "type": "number"
+          },
+          "lossQty": {
+            "type": "number"
+          },
+          "netVarianceQty": {
+            "type": "number"
+          },
+          "lineVarianceRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "qtyVarianceRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "gainRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "lossRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "attributedLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "attributionProgress": {
+            "type": "number",
+            "nullable": true
+          },
+          "pendingAdjustmentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "postedLineCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "StocktakeVarianceReasonBreakdown": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "SHRINKAGE",
+              "MISSHIP",
+              "THEFT",
+              "UNRECORDED",
+              "TIMING"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gainLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lossLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gainQty": {
+            "type": "number"
+          },
+          "lossQty": {
+            "type": "number"
+          },
+          "netQty": {
+            "type": "number"
+          },
+          "inAdjustmentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "postedCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "StocktakeVarianceReport": {
+        "type": "object",
+        "properties": {
+          "sheetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sheetCode": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "frozenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sheetStatus": {
+            "type": "string"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/StocktakeVarianceMetrics"
+          },
+          "byReason": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StocktakeVarianceReasonBreakdown"
+            }
+          },
+          "byDecision": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StocktakeVarianceDecisionBreakdown"
+            }
+          },
+          "rateBasis": {
+            "type": "string"
+          },
+          "amountBasisAvailable": {
+            "type": "boolean"
+          },
+          "amountBasisNote": {
+            "type": "string"
+          },
+          "approvalNote": {
+            "type": "string"
+          },
+          "adjustmentHandoffNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "StocktakeVarianceLinePage": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StocktakeVarianceLine"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "StocktakeVarianceCapabilities": {
+        "type": "object",
+        "properties": {
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VarianceHandlingOption"
+            }
+          },
+          "decisions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VarianceHandlingOption"
+            }
+          },
+          "lineFilters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "amountBasisAvailable": {
+            "type": "boolean"
+          },
+          "amountBasisNote": {
+            "type": "string"
+          },
+          "approvalNote": {
+            "type": "string"
+          },
+          "adjustmentHandoffNote": {
+            "type": "string"
+          }
+        }
+      },
+      "VarianceHandlingOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "noteRequired": {
+            "type": "boolean"
+          },
+          "changesBalance": {
+            "type": "boolean"
+          }
+        }
+      },
+      "StocktakeVarianceAdjustmentPage": {
+        "type": "object",
+        "properties": {
+          "adjustments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StocktakeVarianceAdjustment"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       }
