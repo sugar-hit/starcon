@@ -1350,6 +1350,144 @@
         }
       }
     },
+    "/catalog/supplier-quotes/{id}": {
+      "get": {
+        "tags": [
+          "supplier-quote-controller"
+        ],
+        "operationId": "detail_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierQuote"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "supplier-quote-controller"
+        ],
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierQuoteInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierQuote"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "supplier-quote-controller"
+        ],
+        "operationId": "delete_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/spec-axis/axes/{id}": {
       "put": {
         "tags": [
@@ -1455,7 +1593,7 @@
         "tags": [
           "sku-detail-controller"
         ],
-        "operationId": "detail_1",
+        "operationId": "detail_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -1493,7 +1631,7 @@
         "tags": [
           "sku-detail-controller"
         ],
-        "operationId": "update_1",
+        "operationId": "update_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -1905,7 +2043,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "detail_2",
+        "operationId": "detail_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -1943,7 +2081,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "update_2",
+        "operationId": "update_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -1992,7 +2130,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "delete_1",
+        "operationId": "delete_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -2340,7 +2478,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "detail_3",
+        "operationId": "detail_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -2378,7 +2516,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "update_3",
+        "operationId": "update_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -2426,7 +2564,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "delete_2",
+        "operationId": "delete_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -2819,7 +2957,7 @@
         "tags": [
           "party-contact-controller"
         ],
-        "operationId": "detail_4",
+        "operationId": "detail_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -2866,7 +3004,7 @@
         "tags": [
           "party-contact-controller"
         ],
-        "operationId": "update_4",
+        "operationId": "update_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -2923,7 +3061,7 @@
         "tags": [
           "party-contact-controller"
         ],
-        "operationId": "delete_3",
+        "operationId": "delete_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -3131,7 +3269,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "detail_5",
+        "operationId": "detail_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -3178,7 +3316,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "update_5",
+        "operationId": "update_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -3235,7 +3373,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "delete_4",
+        "operationId": "delete_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -3414,7 +3552,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "detail_6",
+        "operationId": "detail_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -3452,7 +3590,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "update_6",
+        "operationId": "update_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -3500,7 +3638,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "delete_5",
+        "operationId": "delete_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -5476,7 +5614,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "detail_7",
+        "operationId": "detail_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -5514,7 +5652,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "update_7",
+        "operationId": "update_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -5562,7 +5700,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "delete_6",
+        "operationId": "delete_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -6244,7 +6382,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "update_8",
+        "operationId": "update_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -6292,7 +6430,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "delete_7",
+        "operationId": "delete_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -8270,6 +8408,171 @@
         }
       }
     },
+    "/catalog/supplier-quotes": {
+      "get": {
+        "tags": [
+          "supplier-quote-controller"
+        ],
+        "operationId": "list_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "supplierId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "purchaseUnitCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "effectiveOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ambiguousOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierQuotePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "supplier-quote-controller"
+        ],
+        "operationId": "create_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierQuoteInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierQuote"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/spec-axis/spus/{id}/axes": {
       "post": {
         "tags": [
@@ -9013,7 +9316,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "list_1",
+        "operationId": "list_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -9054,7 +9357,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "create_1",
+        "operationId": "create_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -9369,7 +9672,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "list_2",
+        "operationId": "list_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -9474,7 +9777,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "create_2",
+        "operationId": "create_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -9606,7 +9909,7 @@
         "tags": [
           "party-contact-controller"
         ],
-        "operationId": "list_3",
+        "operationId": "list_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -9663,7 +9966,7 @@
         "tags": [
           "party-contact-controller"
         ],
-        "operationId": "create_3",
+        "operationId": "create_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -9713,7 +10016,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "list_4",
+        "operationId": "list_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -9803,7 +10106,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "create_4",
+        "operationId": "create_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -9853,7 +10156,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "list_5",
+        "operationId": "list_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -10798,7 +11101,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "list_6",
+        "operationId": "list_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -12145,7 +12448,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "list_7",
+        "operationId": "list_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -12235,7 +12538,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "create_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -12812,7 +13115,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "list_8",
+        "operationId": "list_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -12909,7 +13212,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "create_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -14247,6 +14550,243 @@
         }
       }
     },
+    "/catalog/supplier-quotes/{id}/tiers": {
+      "get": {
+        "tags": [
+          "supplier-quote-controller"
+        ],
+        "operationId": "tiers",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/supplier-quotes/overview": {
+      "get": {
+        "tags": [
+          "supplier-quote-controller"
+        ],
+        "operationId": "overview_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierQuoteOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/supplier-quotes/options": {
+      "get": {
+        "tags": [
+          "supplier-quote-controller"
+        ],
+        "operationId": "options_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierQuoteOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/supplier-quotes/effective": {
+      "get": {
+        "tags": [
+          "supplier-quote-controller"
+        ],
+        "operationId": "effective",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "supplierId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "quantity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierQuoteEffectiveResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/supplier-quotes/effective/resolve": {
+      "get": {
+        "tags": [
+          "supplier-quote-controller"
+        ],
+        "operationId": "resolve",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "supplierId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "quantity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupplierQuoteEffectiveResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/spec-axis/spus/{id}": {
       "get": {
         "tags": [
@@ -14292,7 +14832,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "overview_5",
+        "operationId": "overview_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -14323,7 +14863,7 @@
         "tags": [
           "sku-list-controller"
         ],
-        "operationId": "list_9",
+        "operationId": "list_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -14671,7 +15211,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "overview_6",
+        "operationId": "overview_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -14782,7 +15322,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "list_10",
+        "operationId": "list_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -14897,7 +15437,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "overview_7",
+        "operationId": "overview_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -14928,7 +15468,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "options_2",
+        "operationId": "options_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -15448,7 +15988,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "overview_8",
+        "operationId": "overview_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -15641,7 +16181,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "overview_9",
+        "operationId": "overview_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -15798,7 +16338,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "overview_10",
+        "operationId": "overview_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -16523,7 +17063,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "overview_11",
+        "operationId": "overview_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -16639,7 +17179,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "overview_12",
+        "operationId": "overview_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -16670,7 +17210,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "overview_13",
+        "operationId": "overview_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -16701,7 +17241,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "effective",
+        "operationId": "effective_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -16744,7 +17284,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "overview_14",
+        "operationId": "overview_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -16823,7 +17363,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "overview_15",
+        "operationId": "overview_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -16894,7 +17434,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "overview_16",
+        "operationId": "overview_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -17033,7 +17573,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "overview_17",
+        "operationId": "overview_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -17304,7 +17844,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_18",
+        "operationId": "overview_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -17335,7 +17875,7 @@
         "tags": [
           "attribute-option-controller"
         ],
-        "operationId": "list_11",
+        "operationId": "list_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -17634,7 +18174,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "delete_8",
+        "operationId": "delete_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -17838,7 +18378,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "delete_9",
+        "operationId": "delete_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -18648,6 +19188,265 @@
           },
           "updatedAt": {
             "type": "string"
+          }
+        }
+      },
+      "SupplierQuoteInput": {
+        "required": [
+          "currency",
+          "purchaseUnitCode",
+          "skuId",
+          "supplierId",
+          "supplierSkuCode",
+          "tiers",
+          "validFrom"
+        ],
+        "type": "object",
+        "properties": {
+          "supplierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierSkuCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "purchaseUnitCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string"
+          },
+          "moqQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "leadTimeDays": {
+            "maximum": 365,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "priority": {
+            "maximum": 99,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "tiers": {
+            "maxItems": 50,
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierQuotePriceTierInput"
+            }
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SupplierQuotePriceTierInput": {
+        "type": "object",
+        "properties": {
+          "minQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "unitPrice": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SupplierQuote": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierRoleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "supplierRoleStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "supplierSkuCode": {
+            "type": "string"
+          },
+          "purchaseUnitCode": {
+            "type": "string"
+          },
+          "purchaseUnitName": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "moqQuantity": {
+            "type": "number"
+          },
+          "moqLabel": {
+            "type": "string"
+          },
+          "leadTimeDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "leadTimeLabel": {
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "validityLabel": {
+            "type": "string"
+          },
+          "daysToExpiry": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "priorityLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "selectionState": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectionStateLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "effective": {
+            "type": "boolean"
+          },
+          "tiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierQuotePriceTier"
+            }
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SupplierQuotePriceTier": {
+        "type": "object",
+        "properties": {
+          "minQuantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "tierRangeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -27341,6 +28140,148 @@
             "format": "int32"
           },
           "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierQuotePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierQuote"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierQuoteOverview": {
+        "type": "object",
+        "properties": {
+          "totalQuotes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "effectiveQuotes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ambiguousQuotes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disabledQuotes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "supplierCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiringSoonQuotes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierQuoteOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "selectionStates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SupplierQuoteEffectiveResult": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "at": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "selected": {
+            "$ref": "#/components/schemas/SupplierQuote"
+          },
+          "selectedTier": {
+            "$ref": "#/components/schemas/SupplierQuotePriceTier"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierQuote"
+            }
+          },
+          "ambiguous": {
+            "type": "boolean"
+          },
+          "ambiguityProblem": {
+            "type": "string",
+            "nullable": true
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
             "type": "string"
           }
         }
