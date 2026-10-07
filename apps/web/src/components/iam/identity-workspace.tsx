@@ -2,28 +2,38 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Avatar, Button } from '@starcon/ui';
+import type { Access } from '../../../../../packages/api-contracts/src/catalog';
 import { useIdentity } from './identity-shell';
 import { AdministrationPanel } from './administration-panel';
-import {
-  canManage,
-  hasPermission,
-  isOwner,
-  type AdministrationKind,
-} from './administration-model';
+import { MemberOnboardingWorkspace } from './member-onboarding-workspace';
+import { canManage, hasPermission, isOwner, type AdministrationKind } from './administration-model';
 
 const destinations = [
   ['tenants', '租户列表', '查看你可进入的租户、切换工作空间并维护本租户基本信息'],
+  ['onboarding', '成员开通', '为新成员开通账号、接入成员关系并设定初始部门与角色'],
   ['members', '用户与成员', '管理本租户成员、启停状态和角色分配'],
   ['roles', '角色配置', '配置页面操作权限与数据范围'],
   ['departments', '部门管理', '维护成员归属与部门数据范围'],
   ['children', '子租户管理', '创建独立工作空间并指定所有者'],
   ['audit', '审计日志', '检索关键操作留痕、变更详情与导出'],
 ] as const;
+/** 17.2.2.2 成员开通有自己的页面权限码，不与成员管理共用一组。 */
+type WorkspaceKind = AdministrationKind | 'onboarding';
+
+function visible(session: Access, key: string) {
+  if (key === 'tenants') return true;
+  if (key === 'audit') return hasPermission(session, 'identity.audit.read');
+  if (key === 'onboarding')
+    return session.grants.some(
+      (g) => g.scopeMode === 'ALL' && g.permissions.includes('identity.onboarding.read'),
+    );
+  return canManage(session, key as AdministrationKind);
+}
 export function IdentityWorkspace({
   kind,
   account = false,
 }: {
-  kind?: AdministrationKind;
+  kind?: WorkspaceKind;
   account?: boolean;
 }) {
   const { session, reload } = useIdentity();
@@ -49,7 +59,9 @@ export function IdentityWorkspace({
           {error}
         </p>
       )}
-      {kind ? (
+      {kind === 'onboarding' ? (
+        <MemberOnboardingWorkspace session={session} onError={onError} />
+      ) : kind ? (
         <AdministrationPanel
           key={`${session.tenantId}:${kind}`}
           kind={kind}
@@ -135,13 +147,7 @@ export function IdentityWorkspace({
             {destinations
               // 租户列表对每个成员都开放：不知道自己属于哪些租户的人没法切换工作空间，
               // 所以它不受页面权限码过滤（服务端仍按成员关系裁剪，见 17.1.1.1）。
-              .filter(([key]) =>
-                key === 'tenants'
-                  ? true
-                  : key === 'audit'
-                    ? hasPermission(session, 'identity.audit.read')
-                    : canManage(session, key),
-              )
+              .filter(([key]) => visible(session, key))
               .map(([key, label, description]) => (
                 <Link
                   key={key}
