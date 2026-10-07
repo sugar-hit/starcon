@@ -434,6 +434,15 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['新增法人', '维护资料', '店铺绑定'],
   },
   {
+    href: '/org/accounting-books',
+    implemented: true,
+    domain: 'org',
+    label: '会计账簿',
+    description: '为法人配置会计账簿、本位币与记账规则（精度、舍入、期间设置）。',
+    fields: ['所属法人', '账簿类型', '本位币', '金额/数量精度', '期间粒度', '会计年度起始月'],
+    workflow: ['新增账簿', '设置记账规则', '核对会计年度'],
+  },
+  {
     href: '/org/stores',
     implemented: false,
     domain: 'org',
@@ -617,6 +626,7 @@ export const ACCOUNT_MENU_ORDER = [
   '/org/children',
   '/org/hierarchy',
   '/org/legal-entities',
+  '/org/accounting-books',
   '/org/stores',
   '/org/permissions',
   '/org/audit',

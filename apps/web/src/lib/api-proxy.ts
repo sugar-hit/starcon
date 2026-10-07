@@ -38,7 +38,10 @@ const services: readonly {
       // hierarchy-authorizations 是 17.1.1.3 层级授权：授权记录的增改查与判定。
       //   check 放在 {uuid} 之前判别（第一段是字面量，不是 UUID），两条不冲突；
       //   {id}/revoke 是撤销（POST，见下），撤销是审计事件所以不是 DELETE。
-      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/references|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?)$/,
+      // accounting-books 是 17.1.2.2 本位币与账簿：账簿挂在**法人**上，所以写入形状是
+      //   legal-entities/{uuid}/accounting-books（POST 新建），而更新/删除按账簿自身 id 寻址：
+      //   accounting-books/{uuid}。两个前缀第一段不同，不会互相吃掉。
+      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?)$/,
   },
   {
     prefix: 'catalog/',
