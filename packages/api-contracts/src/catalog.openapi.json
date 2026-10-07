@@ -2244,7 +2244,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "detail_3",
+        "operationId": "detail_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -2282,7 +2282,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "update_3",
+        "operationId": "update_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -2330,7 +2330,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "delete_2",
+        "operationId": "delete_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -4306,7 +4306,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "detail_4",
+        "operationId": "detail_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -4344,7 +4344,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "update_4",
+        "operationId": "update_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -4392,7 +4392,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "delete_3",
+        "operationId": "delete_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -5074,7 +5074,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "update_5",
+        "operationId": "update_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -5122,7 +5122,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "delete_4",
+        "operationId": "delete_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -8108,7 +8108,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "list_2",
+        "operationId": "list_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -9945,7 +9945,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "save",
+        "operationId": "save_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -10490,7 +10490,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "create_2",
+        "operationId": "create_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -11164,7 +11164,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "create_3",
+        "operationId": "create_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -13140,7 +13140,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "overview_7",
+        "operationId": "overview_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -13297,7 +13297,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "overview_8",
+        "operationId": "overview_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -14022,7 +14022,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "overview_9",
+        "operationId": "overview_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -14138,7 +14138,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "overview_10",
+        "operationId": "overview_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -14169,7 +14169,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "overview_11",
+        "operationId": "overview_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -14243,7 +14243,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "overview_12",
+        "operationId": "overview_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -14322,7 +14322,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "overview_13",
+        "operationId": "overview_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -14393,7 +14393,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "overview_14",
+        "operationId": "overview_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -14424,7 +14424,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "candidates",
+        "operationId": "candidates_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -14532,7 +14532,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "overview_15",
+        "operationId": "overview_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -14803,7 +14803,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_16",
+        "operationId": "overview_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -15277,7 +15277,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "delete_5",
+        "operationId": "delete_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -15317,6 +15317,938 @@
                   "additionalProperties": {
                     "type": "boolean"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}": {
+      "get": {
+        "tags": [
+          "party-controller"
+        ],
+        "operationId": "detail_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "party-controller"
+        ],
+        "operationId": "update_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartySaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "party-controller"
+        ],
+        "operationId": "delete_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/status": {
+      "put": {
+        "tags": [
+          "party-controller"
+        ],
+        "operationId": "setStatus",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/roles/{roleId}": {
+      "put": {
+        "tags": [
+          "party-controller"
+        ],
+        "operationId": "updateRole",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyRoleEditInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartySaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "party-controller"
+        ],
+        "operationId": "removeRole",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties": {
+      "get": {
+        "tags": [
+          "party-controller"
+        ],
+        "operationId": "list_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "partyType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "usable",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "party-controller"
+        ],
+        "operationId": "create_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/roles": {
+      "get": {
+        "tags": [
+          "party-controller"
+        ],
+        "operationId": "roles",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartyRole"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "party-controller"
+        ],
+        "operationId": "createRole",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyRoleEditInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/overview": {
+      "get": {
+        "tags": [
+          "party-controller"
+        ],
+        "operationId": "overview_7",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/candidates": {
+      "get": {
+        "tags": [
+          "party-controller"
+        ],
+        "operationId": "candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "roleType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeBlocked",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartyRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/physical-safety/skus/{skuId}": {
+      "get": {
+        "tags": [
+          "physical-safety-controller"
+        ],
+        "operationId": "profile",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "divisorCm3PerKg",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhysicalSafetyProfile"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "physical-safety-controller"
+        ],
+        "operationId": "save",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PhysicalSafetyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhysicalSafetySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/physical-safety/skus/{skuId}/channel-verdict": {
+      "post": {
+        "tags": [
+          "physical-safety-controller"
+        ],
+        "operationId": "verdict",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelVerdictInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelVerdictView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/physical-safety/carton-calc": {
+      "post": {
+        "tags": [
+          "physical-safety-controller"
+        ],
+        "operationId": "cartonCalc",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartonCalcInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartonCalcView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/physical-safety/profiles": {
+      "get": {
+        "tags": [
+          "physical-safety-controller"
+        ],
+        "operationId": "profiles",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "containsBattery",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "containsLiquid",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "dangerousGoods",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "isMagnetic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "safetyCollected",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "requiresDeclaration",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "packagingType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhysicalSafetyPage"
                 }
               }
             }
@@ -28224,6 +29156,972 @@
             }
           },
           "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyInput": {
+        "required": [
+          "code",
+          "name",
+          "partyType",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "partyType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "maxLength": 254,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "website": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PartyRoleInput"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PartyRoleInput": {
+        "required": [
+          "roleType",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "roleType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "PartySaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "roleTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "activeRoleCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PartyStatusInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PartyRoleEditInput": {
+        "required": [
+          "roleType",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "roleType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PartyPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartyRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "activeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "blacklistedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noRoleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "partyType": {
+            "type": "string"
+          },
+          "partyTypeLabel": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "roleSummary": {
+            "type": "string"
+          },
+          "roleCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "activeRoleCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "usable": {
+            "type": "boolean"
+          },
+          "usableBlockCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "usableBlockMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "partyType": {
+            "type": "string"
+          },
+          "partyTypeLabel": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "website": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "statusReason": {
+            "type": "string"
+          },
+          "statusChangedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartyRole"
+            }
+          },
+          "roleSummary": {
+            "type": "string"
+          },
+          "activeRoleCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "usable": {
+            "type": "boolean"
+          },
+          "usableBlockCode": {
+            "type": "string"
+          },
+          "usableBlockMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyRole": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roleType": {
+            "type": "string"
+          },
+          "roleLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyOverview": {
+        "type": "object",
+        "properties": {
+          "partyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inactiveCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "blacklistedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "deletedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "organizationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "individualCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "supplierCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "customerCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "carrierCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "multiRoleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noRoleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PhysicalSafetyInput": {
+        "type": "object",
+        "properties": {
+          "lengthMm": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "widthMm": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "heightMm": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "netWeightG": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "grossWeightG": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "packagingType": {
+            "type": "string",
+            "nullable": true
+          },
+          "safetyCollected": {
+            "type": "boolean"
+          },
+          "containsBattery": {
+            "type": "boolean"
+          },
+          "containsLiquid": {
+            "type": "boolean"
+          },
+          "dangerousGoods": {
+            "type": "boolean"
+          },
+          "isMagnetic": {
+            "type": "boolean"
+          },
+          "dangerousSubstanceClass": {
+            "type": "string",
+            "nullable": true
+          },
+          "safetyNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "safetyVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "packagingVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PhysicalSafetyProfile": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "lengthMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "widthMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "heightMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "netWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "packagingType": {
+            "type": "string"
+          },
+          "safetyCollected": {
+            "type": "boolean"
+          },
+          "containsBattery": {
+            "type": "boolean"
+          },
+          "containsLiquid": {
+            "type": "boolean"
+          },
+          "dangerousGoods": {
+            "type": "boolean"
+          },
+          "isMagnetic": {
+            "type": "boolean"
+          },
+          "dangerousSubstanceClass": {
+            "type": "string"
+          },
+          "safetyNote": {
+            "type": "string"
+          },
+          "safetyVersion": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "packagingVersion": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "volumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "divisorCm3PerKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "volumetricWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "chargeableWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "activeFlags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requiredDeclarations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hasVolume": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PhysicalSafetySaved": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/PhysicalSafetyProfile"
+          },
+          "packagingChanged": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ChannelVerdictInput": {
+        "required": [
+          "allowBattery",
+          "allowDangerousGoods",
+          "allowLiquid",
+          "allowMagnetic",
+          "channelCode",
+          "requirePhysicalParameters"
+        ],
+        "type": "object",
+        "properties": {
+          "channelCode": {
+            "type": "string"
+          },
+          "allowBattery": {
+            "type": "boolean"
+          },
+          "allowLiquid": {
+            "type": "boolean"
+          },
+          "allowDangerousGoods": {
+            "type": "boolean"
+          },
+          "allowMagnetic": {
+            "type": "boolean"
+          },
+          "requirePhysicalParameters": {
+            "type": "boolean"
+          },
+          "divisorCm3PerKg": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "ChannelVerdictView": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "shippable": {
+            "type": "boolean"
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blockerLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "declarations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "declarationLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "volumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "divisorCm3PerKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "volumetricWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "chargeableWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CartonCalcInput": {
+        "required": [
+          "cartonMaxGrossWeightG",
+          "cartonVolumeCm3",
+          "lines"
+        ],
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartonLineInput"
+            }
+          },
+          "cartonVolumeCm3": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "cartonMaxGrossWeightG": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          }
+        }
+      },
+      "CartonLineInput": {
+        "required": [
+          "quantity",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          }
+        }
+      },
+      "CartonCalcView": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartonLineView"
+            }
+          },
+          "cartonVolumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "cartonMaxGrossWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalCartons": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalVolumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "volumeUtilizationPercent": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CartonLineView": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitVolumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "netWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitsPerCartonByVolume": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unitsPerCartonByWeight": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unitsPerCarton": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limitedByWeight": {
+            "type": "boolean"
+          },
+          "cartonsNeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalVolumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PhysicalSafetyPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhysicalSafetyRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PhysicalSafetyRow": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "safetyCollected": {
+            "type": "boolean"
+          },
+          "containsBattery": {
+            "type": "boolean"
+          },
+          "containsLiquid": {
+            "type": "boolean"
+          },
+          "dangerousGoods": {
+            "type": "boolean"
+          },
+          "isMagnetic": {
+            "type": "boolean"
+          },
+          "dangerousSubstanceClass": {
+            "type": "string"
+          },
+          "flagsText": {
+            "type": "string"
+          },
+          "volumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "packagingType": {
+            "type": "string"
+          },
+          "requiredDeclarations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updatedAt": {
             "type": "string"
           }
         }

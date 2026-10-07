@@ -4412,4 +4412,203 @@ public final class CatalogModels {
 
   /** 展开运行记录列表筛选条件。 */
   public record BomExplosionRunQuery(UUID bomId, UUID skuId, int page, int size) {}
+
+  // ================================================================ 3.6.1.1 往来单位档案
+
+  /**
+   * 角色指派（写入用，**整体替换**语义）。
+   *
+   * <p>一个主体可以同时是供应商、客户与承运商，所以角色是<b>一组</b>而不是单个字段。
+   * 整体替换而不是增量追加：角色集合是「这个主体扮演哪些身份」的完整描述，
+   * 增量语义下前端必须先取回当前全集再算差集，少发一条就是静默的身份丢失。
+   *
+   * <p>本 record 里**没有**任何角色特有字段（账期、MOQ、客户分级、信用额度、接口类型…）——
+   * 那是 3.6.1.2 的职责，它按蓝图要求「每个角色一张 1:1 档案表」落地。
+   * 理由见 {@code V27__party_profile.sql} 第三节：塞在这里就是蓝图点名否决的
+   * 「一个巨大可空字段表」。
+   */
+  public record PartyRoleInput(
+      @NotBlank String roleType, @NotBlank String status, @Schema(nullable = true) @Size(max = 2000) String note) {}
+
+  /**
+   * 单条角色指派的保存请求（{@code POST /{id}/roles} 与 {@code PUT /{id}/roles/{roleId}} 共用）。
+   *
+   * <p>与 {@link PartyRoleInput} 分成两个 record 是因为整体替换的嵌套列表里
+   * {@code version} 没有意义（那些行由主体那次保存整体接管），而单条端点需要行级乐观锁
+   * —— 与 {@code BundleComponentInput} / {@code BundleComponentEditInput} 同一个理由。
+   *
+   * <p>创建时 {@code version} 不传（默认 0），更新时必须回传详情里拿到的版本号。
+   */
+  public record PartyRoleEditInput(
+      @NotBlank String roleType,
+      @NotBlank String status,
+      @Schema(nullable = true) @Size(max = 2000) String note,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 建 / 改往来单位的请求。
+   *
+   * <p>{@code roles} 是整体替换语义（见 {@link PartyRoleInput}）。
+   * {@code status} 在这里是**首次设定**用的；已有主体的状态变更走
+   * {@code PUT /{id}/status} 端点而不是这里 —— 因为变更要带理由（规则 P4），
+   * 混在保存里的话「改个名字」也会被迫填理由。
+   *
+   * <p>{@code version} 是行级乐观锁：编辑时必须回传详情里拿到的版本号。
+   */
+  public record PartyInput(
+      @NotBlank @Size(max = 64) String code,
+      @NotBlank @Size(max = 200) String name,
+      @NotBlank String partyType,
+      @Schema(nullable = true) @Size(max = 2) String countryCode,
+      @Schema(nullable = true) @Size(max = 254) String email,
+      @Schema(nullable = true) @Size(max = 64) String phone,
+      @Schema(nullable = true) @Size(max = 500) String website,
+      @NotBlank String status,
+      @Schema(nullable = true) @Valid List<PartyRoleInput> roles,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 状态流转的请求。
+   *
+   * <p>独立成一个 record 而不是复用 {@link PartyInput}：流转只改状态，
+   * 走保存路径会让人以为「改状态要重传全部字段」，而那正好是并发覆盖的来源。
+   */
+  public record PartyStatusInput(
+      @NotBlank String status, @Schema(nullable = true) @Size(max = 500) String reason, @PositiveOrZero long version) {}
+
+  /**
+   * 往来单位保存结果。
+   *
+   * <p>带角色指派结果与状态，前端不必为了刷新状态再打一次详情端点。
+   */
+  public record PartySaved(
+      UUID id, long version, String status, String statusLabel, List<String> roleTypes, int activeRoleCount) {}
+
+  /** 一条角色指派的读出口径。 */
+  public record PartyRole(
+      UUID id,
+      UUID partyId,
+      String roleType,
+      String roleLabel,
+      String status,
+      String statusLabel,
+      @Schema(nullable = true) String note,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /**
+   * 往来单位详情：主体 + 角色指派，同一时刻的一致快照。
+   *
+   * <p>合成一个 record 而不是拆成两个端点：详情页要显示的就是这两块的<b>同一瞬间</b>。
+   * 拆开的话，运营在「角色刚被别人解掉」之后看到的页面会是拼接出来的旧数据，
+   * 而「主体已停用但还挂着供应商角色」这种状态恰恰要靠页面当场发现才不至于下错单。
+   */
+  public record PartyDetail(
+      UUID id,
+      String code,
+      String name,
+      String partyType,
+      String partyTypeLabel,
+      @Schema(nullable = true) String countryCode,
+      @Schema(nullable = true) String email,
+      @Schema(nullable = true) String phone,
+      @Schema(nullable = true) String website,
+      String status,
+      String statusLabel,
+      String statusReason,
+      @Schema(nullable = true) String statusChangedAt,
+      long version,
+      List<PartyRole> roles,
+      String roleSummary,
+      int activeRoleCount,
+      /**
+       * 是否已软删除。
+       *
+       * <p>已删除的主体<b>详情仍可读</b>（而不是 404）：行还在，运营删完想回头看一眼时
+       * 会看到「已删除」而不是一个凭空消失的条目。列表默认不显示它，
+       * {@code usable} 恒为 false，{@code usableBlockCode} 恒为 {@code PARTY_DELETED}。
+       */
+      boolean deleted,
+      /** 主体是否「可用」：ACTIVE 且至少一个 ACTIVE 角色。06/11/12 的下拉默认只取这些。 */
+      boolean usable,
+      String usableBlockCode,
+      @Schema(nullable = true) String usableBlockMessage,
+      String createdAt,
+      String updatedAt) {}
+
+  /**
+   * 列表页的一行。
+   *
+   * <p>{@code roles} / {@code roleSummary} / {@code usable} 在<b>列表查询里就一起算出来</b>，
+   * 不是让前端点开详情才知道：蓝图的整条要点就是「同一主体可同时是供应商和客户」，
+   * 如果列表上看不出来，运营就会去建第二条记录 —— 那正是本模块要消灭的形态。
+   */
+  public record PartyRow(
+      UUID id,
+      String code,
+      String name,
+      String partyType,
+      String partyTypeLabel,
+      @Schema(nullable = true) String countryCode,
+      @Schema(nullable = true) String email,
+      @Schema(nullable = true) String phone,
+      String status,
+      String statusLabel,
+      List<String> roles,
+      String roleSummary,
+      int roleCount,
+      int activeRoleCount,
+      boolean usable,
+      @Schema(nullable = true) String usableBlockCode,
+      @Schema(nullable = true) String usableBlockMessage,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /**
+   * 往来单位列表的分页结果。
+   *
+   * <p>三个统计都<b>不受筛选条件影响</b>：界面上把它们放在筛选结果旁边，
+   * 用户才知道「筛出来的 3 条」之外还有多少停用 / 被拉黑的条目。
+   */
+  public record PartyPage(
+      List<PartyRow> items, long total, int page, int size, long activeCount, long blacklistedCount, long noRoleCount, String note) {}
+
+  /** 列表页筛选条件。null 表示不筛；空串按「不过滤」处理。 */
+  public record PartyQuery(
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) @Size(max = 16) String partyType,
+      @Schema(nullable = true) @Size(max = 16) String status,
+      @Schema(nullable = true) @Size(max = 16) String roleType,
+      @Schema(nullable = true) @Size(max = 2) String countryCode,
+      @Schema(nullable = true) Boolean includeDeleted,
+      /** 可用性三态筛选：true 只看可用，false 只看不可用，null 不筛。与 PartyRules.usableBlock 同一口径。 */
+      @Schema(nullable = true) Boolean usable,
+      int page,
+      int size) {}
+
+  /**
+   * 往来单位概览：规模与几个治理缺口指标。
+   *
+   * <p>{@code noRoleCount} 是本模块最该被盯住的数字之一 ——
+   * 它就是「多少条往来单位既没有可用状态、又没挂任何角色」，也就是
+   * 3.9.2.2 僵尸主数据清理的候选来源。
+   */
+  public record PartyOverview(
+      long partyCount,
+      long activeCount,
+      long inactiveCount,
+      long blacklistedCount,
+      long deletedCount,
+      long organizationCount,
+      long individualCount,
+      long supplierCount,
+      long customerCount,
+      long carrierCount,
+      long multiRoleCount,
+      long usableCount,
+      long noRoleCount,
+      String note) {}
 }
+

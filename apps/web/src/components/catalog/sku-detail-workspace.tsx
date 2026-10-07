@@ -285,6 +285,14 @@ export function SkuDetailWorkspace({ skuId }: { skuId: string }) {
           title="包装尺寸重量"
           hint="决定 10 物流的体积重与 08 拣货的装箱体积核算。缺一维就不给体积，不用 0 顶替。"
         >
+          <div className="mb-3 flex justify-end">
+            {/* 物理参数 + 安全属性（3.7.2.1）：本页只读展示，编辑在工作区做。 */}
+            <Link href={`/products/sku/${detail.id}/physical`}>
+              <Button variant="ghost" size="sm">
+                去维护物理与安全属性
+              </Button>
+            </Link>
+          </div>
           {detail.packaging === null ? (
             <p className="text-muted-foreground text-sm">
               还没有维护包装尺寸重量。留空时各物流渠道拿不到体积重，只能按件计费。
