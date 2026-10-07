@@ -7,15 +7,23 @@ import type {
   OwnershipRulePage,
   OwnershipRuleSaved,
   OwnerInventoryReport,
-  OwnerRefType,
   StockOwnerInput,
-  StockOwnerKind,
   StockOwnerPage,
   StockOwnerSaved,
   StockOwnershipCapabilities,
   StockOwnershipResolved,
 } from '../../../../../packages/api-contracts/src/catalog';
 import { ApiError, api } from './api';
+
+/**
+ * 所有权类型与指向类型 —— 取值与后端 `StockOwnershipModels` 的同名枚举一字不差。
+ *
+ * <p>刻意**不从契约导入**：后端把这两个字段暴露成普通字符串（spec 里就是
+ * `{"type":"string"}`），枚举本体只存在于 Java 侧，所以 codegen 永远不会生成这两个类型 ——
+ * 去契约里 import 只会得到「无此导出成员」的编译错误。
+ */
+export type StockOwnerKind = 'SELF' | 'SUPPLIER_CONSIGNMENT' | 'PLATFORM' | 'CONSIGNEE';
+export type OwnerRefType = 'LEGAL_ENTITY' | 'SUPPLIER' | 'PLATFORM' | 'INTERNAL';
 
 /**
  * 7.7.1.1 货主与所有权前端模型。
@@ -299,5 +307,3 @@ export function errorText(error: unknown): string {
   if (error instanceof Error) return error.message;
   return '请求失败，请稍后重试';
 }
-
-export type { StockOwnerKind };
