@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { GET, POST, PUT } from './route';
+import { DELETE, GET, POST, PUT } from './route';
 afterEach(() => vi.unstubAllGlobals());
 function request(path: string, method = 'GET') {
   return new NextRequest(`http://localhost:3000/api/iam/${path}`, {
@@ -175,6 +175,67 @@ it('department-leaders 与 departments/{id}/leader 的四个子资源被放行�
     `identity/departments/${id}/leader/unknown`,
     `identity/departments/${id}/leader/proxies/${id}/unknown`,
     `identity/departments/${id}/approval-chain/unknown`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+  }
+});
+
+/**
+ * 17.6.1.1 账簿与本位币：identity allowlist 必须放行三段新路径。
+ *
+ * <p>同一个坑：allowlist 是锚定正则，没放进分支的路径一律 404，页面只会进错误态，
+ * 看起来像「后端没实现」。这三条此前完全没登记，浏览器里 `/settings/books` 一个都打不通，
+ * 而 typecheck / lint / vitest / Playwright 全绿 —— 白名单只在浏览器端生效。
+ *
+ * <p>反向断言同样重要：`legal-entities/{uuid}/ledger-books/extra`、
+ * `fact-assignments/{id}/transfer` 这类**尚未实现**的子路径必须仍然 404。
+ * 放行它们等于让界面以为后端已交付，现场表现是代理把请求送出去再吃一个更难懂的 405。
+ */
+it('identity 的三段账簿路径被放行，多一层子路径仍被拒绝', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    `identity/legal-entities/${id}/ledger-books`,
+    `identity/legal-entities/${id}/default-book`,
+    `identity/accounting-books/${id}/fact-assignments`,
+    `identity/accounting-books/${id}/fact-assignments/${id}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8081/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer real-session' },
+      }),
+    );
+  }
+  // 设定默认账簿（PUT）、登记归属（POST）与解除归属（DELETE）都走已登记的同一条路径，
+  // 按方法透传。白名单是**路径**白名单而不是方法白名单，所以方法差异这里不体现。
+  expect(
+    (
+      await PUT(request(`identity/legal-entities/${id}/default-book`, 'PUT'), {
+        params: { path: ['identity', 'legal-entities', id, 'default-book'] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await POST(request(`identity/accounting-books/${id}/fact-assignments`, 'POST'), {
+        params: { path: ['identity', 'accounting-books', id, 'fact-assignments'] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await DELETE(request(`identity/accounting-books/${id}/fact-assignments/${id}`, 'DELETE'), {
+        params: { path: ['identity', 'accounting-books', id, 'fact-assignments', id] },
+      })
+    ).status,
+  ).toBe(200);
+  for (const path of [
+    `identity/legal-entities/${id}/ledger-books/extra`,
+    `identity/legal-entities/${id}/default-books`,
+    `identity/accounting-books/${id}/fact-assignments/${id}/transfer`,
   ]) {
     expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
   }
