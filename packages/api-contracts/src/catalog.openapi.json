@@ -4427,6 +4427,469 @@
         }
       }
     },
+    "/catalog/boms/{id}": {
+      "get": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "bom",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "updateBom",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BomInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "deleteBom",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/boms/{id}/status": {
+      "put": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "setBomStatus",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/bom-versions/{id}": {
+      "get": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "version_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomVersionDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "updateVersion_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BomVersionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomVersionRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "deleteVersion_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/bom-versions/{id}/components": {
+      "get": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "components_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BomComponentRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "replaceComponents_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BomComponentsInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomVersionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/bom-versions/{id}/close": {
+      "put": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "closeVersion_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "effectiveTo",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomVersionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/attributes/{id}": {
       "put": {
         "tags": [
@@ -9575,6 +10038,299 @@
         }
       }
     },
+    "/catalog/boms": {
+      "get": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "boms",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "saveBom",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BomInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/boms/{id}/versions": {
+      "get": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "versionsOf_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BomVersionSummary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "createVersion_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BomVersionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomVersionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/bom-versions/{id}/publish": {
+      "post": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "publishVersion_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomVersionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/bom-versions/{id}/copy": {
+      "post": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "copyVersion",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "versionNo",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "effectiveFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomVersionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/attributes": {
       "get": {
         "tags": [
@@ -12349,7 +13105,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "components_1",
+        "operationId": "components_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -12775,12 +13531,291 @@
         }
       }
     },
+    "/catalog/boms/{id}/effective": {
+      "get": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "effectiveVersion_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomEffectiveView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/boms/overview": {
+      "get": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "overview_15",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/bom-versions": {
+      "get": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "versions_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bomId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomVersionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/bom-versions/{id}/requirement": {
+      "get": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "requirement",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "outputQuantity",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomRequirement"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/bom-components/usage": {
+      "get": {
+        "tags": [
+          "bom-version-controller"
+        ],
+        "operationId": "usage",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onlyEffective",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomUsagePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/attributes/overview": {
       "get": {
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_15",
+        "operationId": "overview_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -15947,6 +16982,334 @@
           "version": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "BomInput": {
+        "required": [
+          "code",
+          "outputSkuId"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "outputSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BomRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "outputSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outputSkuCode": {
+            "type": "string"
+          },
+          "outputSkuName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "versionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "publishedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "effectiveVersionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "effectiveVersionNo": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "BomVersionInput": {
+        "required": [
+          "effectiveFrom",
+          "name",
+          "versionNo"
+        ],
+        "type": "object",
+        "properties": {
+          "versionNo": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BomVersionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomCode": {
+            "type": "string"
+          },
+          "outputSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outputSkuCode": {
+            "type": "string"
+          },
+          "outputSkuName": {
+            "type": "string"
+          },
+          "versionNo": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "publishedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "publishedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "componentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalUnitQuantity": {
+            "type": "number"
+          },
+          "scrapPercent": {
+            "type": "number",
+            "nullable": true
+          },
+          "effective": {
+            "type": "boolean"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "BomComponentInput": {
+        "required": [
+          "skuId",
+          "unitQuantity"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "scrapRate": {
+            "maximum": 100,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "role": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "BomComponentsInput": {
+        "required": [
+          "components"
+        ],
+        "type": "object",
+        "properties": {
+          "components": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BomComponentInput"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BomComponentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "unitQuantity": {
+            "type": "number"
+          },
+          "scrapRate": {
+            "type": "number"
+          },
+          "role": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BomVersionDetail": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "$ref": "#/components/schemas/BomVersionRow"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BomComponentRow"
+            }
+          },
+          "totalUnitQuantity": {
+            "type": "number"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "editHint": {
+            "type": "string"
           }
         }
       },
@@ -24271,6 +25634,362 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "BomPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BomRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "BomDetail": {
+        "type": "object",
+        "properties": {
+          "bom": {
+            "$ref": "#/components/schemas/BomRow"
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BomVersionSummary"
+            }
+          },
+          "effectiveVersionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "effectiveVersionNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BomVersionSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "componentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "effective": {
+            "type": "boolean"
+          }
+        }
+      },
+      "BomEffectiveView": {
+        "type": "object",
+        "properties": {
+          "bomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomCode": {
+            "type": "string"
+          },
+          "outputSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outputSkuCode": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string"
+          },
+          "effective": {
+            "type": "boolean"
+          },
+          "versionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "versionNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BomComponentRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BomOverview": {
+        "type": "object",
+        "properties": {
+          "bomCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "archivedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "versionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "publishedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "effectiveNowCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openEndedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draftWithoutComponentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "publishedWithoutComponentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BomVersionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BomVersionRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "BomRequirement": {
+        "type": "object",
+        "properties": {
+          "bomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "type": "string"
+          },
+          "outputSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outputSkuCode": {
+            "type": "string"
+          },
+          "outputQuantity": {
+            "type": "number"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BomRequirementLine"
+            }
+          },
+          "totalRequiredQuantity": {
+            "type": "number"
+          },
+          "singleLevel": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BomRequirementLine": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "unitQuantity": {
+            "type": "number"
+          },
+          "scrapRate": {
+            "type": "number"
+          },
+          "requiredQuantity": {
+            "type": "number"
+          }
+        }
+      },
+      "BomUsagePage": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BomUsageRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "BomUsageRow": {
+        "type": "object",
+        "properties": {
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomCode": {
+            "type": "string"
+          },
+          "versionNo": {
+            "type": "string"
+          },
+          "versionStatus": {
+            "type": "string"
+          },
+          "versionStatusLabel": {
+            "type": "string"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "unitQuantity": {
+            "type": "number"
+          },
+          "scrapRate": {
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "effective": {
+            "type": "boolean"
           }
         }
       },
