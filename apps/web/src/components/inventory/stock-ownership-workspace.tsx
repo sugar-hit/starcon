@@ -575,7 +575,7 @@ export function StockOwnershipWorkspace() {
   async function doReassign(
     fromOwnerId: string,
     toOwnerId: string,
-    scope: { warehouseId?: string | undefined; legalEntityId?: string | undefined; skuId?: string },
+    scope: { warehouseId?: string | undefined; legalEntityId?: string | undefined; skuId?: string | undefined },
   ) {
     setSaving(true);
     setError('');
@@ -633,8 +633,8 @@ function ScopeFilter({
   onChange,
 }: {
   options: OwnershipReferenceOptions | null;
-  filter: { warehouseId?: string | undefined; legalEntityId?: string | undefined; skuId?: string };
-  onChange: (next: { warehouseId?: string | undefined; legalEntityId?: string | undefined; skuId?: string }) => void;
+  filter: { warehouseId?: string | undefined; legalEntityId?: string | undefined; skuId?: string | undefined };
+  onChange: (next: { warehouseId?: string | undefined; legalEntityId?: string | undefined; skuId?: string | undefined }) => void;
 }) {
   const warehouses = (options?.warehouses ?? []).filter(notNull);
   const entities = (options?.legalEntities ?? []).filter(notNull);

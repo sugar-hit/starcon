@@ -108,7 +108,7 @@ export function AllocationPolicyWorkspace() {
       setPolicies(policyPage);
       setRuns(runList);
       setSkus(skuList);
-      if (skuList.length > 0 && !skuId) setSkuId(skuList[0].id ?? '');
+      if (skuList.length > 0 && !skuId) setSkuId(skuList[0]?.id ?? '');
     } catch (e) {
       setError(errorText(e));
     } finally {
@@ -778,7 +778,7 @@ function SalesSection({
       const saved = await recordSales({
         sourceSystem: 'CHANNEL',
         referenceId: shopId.trim(),
-        referenceLabel: shopLabel.trim() || undefined,
+        ...(shopLabel.trim() ? { referenceLabel: shopLabel.trim() } : {}),
         skuId,
         periodStart: from.toISOString().slice(0, 10),
         periodEnd: today.toISOString().slice(0, 10),
