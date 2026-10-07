@@ -1,5 +1,6 @@
 package com.starcon.warehouse;
 
+import static com.starcon.warehouse.InventoryBucketModels.*;
 import static com.starcon.warehouse.WarehouseModels.*;
 
 import jakarta.validation.Valid;
@@ -31,12 +32,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class InventoryController {
   private final AccessService access;
   private final InventoryOverviewService overview;
+  private final InventoryBucketService buckets;
   private final WarehouseReferenceService references;
 
   public InventoryController(
-      AccessService access, InventoryOverviewService overview, WarehouseReferenceService references) {
+      AccessService access,
+      InventoryOverviewService overview,
+      InventoryBucketService buckets,
+      WarehouseReferenceService references) {
     this.access = access;
     this.overview = overview;
+    this.buckets = buckets;
     this.references = references;
   }
 
@@ -89,6 +95,52 @@ public class InventoryController {
                     size)));
   }
 
+  /**
+   * 7.1.1.2 库存明细：bucket 级的最细粒度行 + 与余额的核对结果。
+   *
+   * <p>一行 = 法人货权 × SKU × 仓库 × 库位 × 批次 × 质量状态，正是蓝图定义的最小事实单位。
+   * 读权限与总览同为 {@code warehouse.inventory.read}：明细不写任何数据，与总览同源同权。
+   */
+  @GetMapping("/inventory/buckets")
+  public InventoryBucketDetail buckets(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestParam(required = false) UUID warehouseId,
+      @RequestParam(required = false) UUID legalEntityId,
+      @RequestParam(required = false) UUID locationId,
+      @RequestParam(required = false) UUID skuId,
+      @RequestParam(required = false) UUID lotId,
+      @RequestParam(required = false) UUID qualityStatusId,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false) Boolean onlyPickable,
+      @RequestParam(required = false) String sort,
+      @RequestParam(required = false, defaultValue = "0") int page,
+      @RequestParam(required = false, defaultValue = "50") int size) {
+    return call(
+        auth,
+        "inventory.read",
+        a ->
+            buckets.detail(
+                new BucketDetailQuery(
+                    legalEntityId,
+                    warehouseId,
+                    locationId,
+                    skuId,
+                    lotId,
+                    qualityStatusId,
+                    keyword,
+                    onlyPickable,
+                    sort,
+                    page,
+                    size)));
+  }
+
+  /** 行内操作入口（发起调整 / 发起调拨 / 查看流水）。目标模块未交付时 available=false。 */
+  @GetMapping("/inventory/bucket-actions")
+  public List<BucketAction> bucketActions(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
+    return call(auth, "inventory.read", a -> buckets.actions());
+  }
+
   /** 跨服务筛选维度接入情况：前端据此禁用不可用的筛选项，而不是让用户填完收 422。 */
   @GetMapping("/inventory/capabilities")
   public List<DimensionCapability> capabilities(
@@ -113,6 +165,28 @@ public class InventoryController {
   @GetMapping("/skus")
   public List<SkuRef> skus(@RequestHeader(value = "Authorization", defaultValue = "") String auth) {
     return call(auth, "inventory.read", a -> references.skus());
+  }
+
+  /**
+   * 库位下拉（7.1.1.2 的逐级下钻第二级）。
+   *
+   * <p>按仓库过滤，让"先选仓、再选库位"这条下钻路径在 UI 上成立，而不是全租户库位混在一起。
+   */
+  @GetMapping("/locations")
+  public List<LocationRef> locations(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestParam(required = false) UUID warehouseId,
+      @RequestParam(required = false) String type) {
+    return call(auth, "inventory.read", a -> buckets.locations(warehouseId, type));
+  }
+
+  /** 批次下拉（7.1.1.2 的逐级下钻最末一级）。 */
+  @GetMapping("/lots")
+  public List<LotRef> lots(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestParam(required = false) UUID skuId,
+      @RequestParam(required = false) String keyword) {
+    return call(auth, "inventory.read", a -> buckets.lots(skuId, keyword));
   }
 
   @GetMapping("/quality-statuses")
