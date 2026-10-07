@@ -4002,4 +4002,278 @@ public final class CatalogModels {
       @NotNull UUID skuId,
       @Schema(nullable = true) @Size(max = 200) String note,
       @PositiveOrZero long rowVersion) {}
+
+  // ================================================================ 3.5.2.1 BOM 版本管理
+
+  /**
+   * BOM 档案输入。
+   *
+   * <p><b>有 outputSkuId，套装档案没有</b>（V25 文件头「差异 1」）：BOM 产出的是实物成品，
+   * 成品必须是一个真实存在的 SKU；虚拟套装不占 SKU 行，所以 bundle 表里没有任何 sku 外键。
+   *
+   * <p><b>没有 versionNo、没有 name、没有生效区间</b>：编码与备注是 BOM 自己的属性，
+   * 名称/版本号/生效区间全在版本上（V25 第一节）。
+   */
+  public record BomInput(
+      @NotBlank @Size(max = 64) String code,
+      @NotNull UUID outputSkuId,
+      @Schema(nullable = true) @Size(max = 500) String note,
+      @PositiveOrZero long version) {}
+
+  /** BOM 列表行。每行自带版本存量与「此刻生效的是哪一版」，不另开一次查询。 */
+  public record BomRow(
+      UUID id,
+      String code,
+      UUID outputSkuId,
+      String outputSkuCode,
+      String outputSkuName,
+      String status,
+      String statusLabel,
+      String note,
+      long version,
+      String createdAt,
+      String updatedAt,
+      long versionCount,
+      long draftCount,
+      long publishedCount,
+      @Schema(nullable = true) UUID effectiveVersionId,
+      @Schema(nullable = true) String effectiveVersionNo) {}
+
+  /** BOM 列表页。{@code total} 是真实 count，不是「这页有多少行」。 */
+  public record BomPage(List<BomRow> items, int page, int size, long total, int totalPages) {}
+
+  /** 版本摘要（BOM 详情页里的版本列表用，避免把组件清单也塞进来）。 */
+  public record BomVersionSummary(
+      UUID id,
+      String versionNo,
+      String name,
+      String status,
+      String statusLabel,
+      String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo,
+      long componentCount,
+      boolean effective) {}
+
+  /** BOM 详情。{@code effectiveVersionNo} 是「此刻」的答案；查别的时刻走 effective 端点。 */
+  public record BomDetail(
+      BomRow bom,
+      List<BomVersionSummary> versions,
+      @Schema(nullable = true) UUID effectiveVersionId,
+      @Schema(nullable = true) String effectiveVersionNo,
+      String note) {}
+
+  /**
+   * BOM 版本输入（建草稿与改草稿共用）。
+   *
+   * <p>{@code effectiveFrom} / {@code effectiveTo} 收 ISO-8601（带时区偏移）；
+   * {@code effectiveTo} 为 null 表示「此后一直有效」。半开区间语义见 V25 规则 R1。
+   */
+  public record BomVersionInput(
+      @NotBlank @Size(max = 32) String versionNo,
+      @NotBlank @Size(max = 200) String name,
+      @NotBlank String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo,
+      @Schema(nullable = true) @Size(max = 500) String note,
+      @PositiveOrZero long version) {}
+
+  /**
+   * BOM 版本行。
+   *
+   * <p>{@code scrapPercent} 是「本版本里损耗率最高的那一行」，用来在列表上一眼看出
+   * 「这一版比上一版费料多少」—— 它是 BOM 独有的列，套装版本行没有对应字段。
+   * {@code editable} 是「现在能不能改」：已发布为 false（整版冻结，例外只有向前关闭生效区间）。
+   */
+  public record BomVersionRow(
+      UUID id,
+      UUID bomId,
+      String bomCode,
+      UUID outputSkuId,
+      String outputSkuCode,
+      String outputSkuName,
+      String versionNo,
+      String name,
+      String status,
+      String statusLabel,
+      String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo,
+      @Schema(nullable = true) UUID publishedBy,
+      @Schema(nullable = true) String publishedAt,
+      String note,
+      long componentCount,
+      BigDecimal totalUnitQuantity,
+      @Schema(nullable = true) BigDecimal scrapPercent,
+      boolean effective,
+      boolean editable,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  public record BomVersionPage(
+      List<BomVersionRow> items, int page, int size, long total, int totalPages) {}
+
+  /**
+   * BOM 组件行。
+   *
+   * <p>{@code unitQuantity} 与 {@code scrapRate} 是 BOM 相对套装多出来的两个业务量：
+   * 「每 1 个成品要多少」与「会损耗百分之几」。数量是 {@code NUMERIC(19,6)}、
+   * 损耗率是百分数 {@code NUMERIC(7,4)}（规则 R6：{@code 5} = 5%）。
+   */
+  public record BomComponentRow(
+      UUID id,
+      UUID versionId,
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      BigDecimal unitQuantity,
+      BigDecimal scrapRate,
+      String role,
+      String note) {}
+
+  /** BOM 版本详情：版本 + 组件清单 + 现在能不能改以及为什么。 */
+  public record BomVersionDetail(
+      BomVersionRow version,
+      List<BomComponentRow> components,
+      BigDecimal totalUnitQuantity,
+      boolean editable,
+      String editHint) {}
+
+  /**
+   * BOM 组件行输入。
+   *
+   * <p>{@code scrapRate} 传 null 时按 0（无损耗）处理，页面上不用逼用户为「没有损耗」填一个 0。
+   * @Digits 与列精度逐字一致：用量 13+6 = numeric(19,6)，损耗率 3+4 = numeric(7,4)。
+   */
+  public record BomComponentInput(
+      @NotNull UUID skuId,
+      @NotNull @DecimalMin(value = "0", inclusive = false) @Digits(integer = 13, fraction = 6)
+          BigDecimal unitQuantity,
+      @Schema(nullable = true) @DecimalMin("0") @DecimalMax("100") @Digits(integer = 3, fraction = 4)
+          BigDecimal scrapRate,
+      @Schema(nullable = true) @Size(max = 32) String role,
+      @Schema(nullable = true) @Size(max = 200) String note) {}
+
+  /**
+   * BOM 组件清单整体替换输入。
+   *
+   * <p>整体替换而不是增删式：清单有「同版本内一个 SKU 只有一行」的约束，
+   * 增删式提交时前端必须自己算出最终集合，漏对账的表现是页面上剩一条幽灵组件。
+   */
+  public record BomComponentsInput(
+      @NotEmpty @Size(max = 50) List<@Valid BomComponentInput> components,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 当前生效 BOM 版本视图（规则 R4）。
+   *
+   * <p>{@code effective=false} 表示「这一刻这个 BOM 没有生效版本」——真实状态（草稿未发布、
+   * 区间有缝）而不是「查不到」，所以用显式布尔而不是 null 表达。
+   */
+  public record BomEffectiveView(
+      UUID bomId,
+      String bomCode,
+      UUID outputSkuId,
+      String outputSkuCode,
+      String at,
+      boolean effective,
+      @Schema(nullable = true) UUID versionId,
+      @Schema(nullable = true) String versionNo,
+      @Schema(nullable = true) String name,
+      List<BomComponentRow> components,
+      String note) {}
+
+  /**
+   * 单层需求量明细（规则 R7）。
+   *
+   * <p>这是本模块自己算的量：{@code requiredQuantity = unitQuantity × outputQuantity ×
+   * (1 + scrapRate/100)}，6 位小数 HALF_UP。
+   *
+   * <p><b>刻意不给「建议采购量」</b>：取整、补安全库存、判缺口是 3.5.2.2 与 06 的决定
+   * （蓝图原话「展开结果是建议不是事实」）。
+   */
+  public record BomRequirementLine(
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      BigDecimal unitQuantity,
+      BigDecimal scrapRate,
+      BigDecimal requiredQuantity) {}
+
+  /**
+   * 单层需求量：生产 {@code outputQuantity} 个成品需要哪些料。
+   *
+   * <p>{@code singleLevel=true} 是这个接口的自我说明：多级递归展开是 3.5.2.2 的职责，
+   * 本接口只把本版本直接列出的组件乘一遍，页面据此说明「这里不含子 BOM 里的料」。
+   */
+  public record BomRequirement(
+      UUID bomId,
+      UUID versionId,
+      String versionNo,
+      UUID outputSkuId,
+      String outputSkuCode,
+      BigDecimal outputQuantity,
+      List<BomRequirementLine> lines,
+      BigDecimal totalRequiredQuantity,
+      boolean singleLevel,
+      String note) {}
+
+  /**
+   * BOM 版本概览。
+   *
+   * <p>{@code openEndedCount} 是这个模块唯一需要每天盯的数字：一个开放区间（永远有效）的
+   * 已发布版本如果没有被接替，这个 BOM 会永远停在一个旧版本上。
+   * {@code zeroScrapPublishedCount} 是**必须恒为 0** 的体检指标
+   * （没有任何组件的已发布版本会让组装单领不出料）——写出来是为了让「一条都没坏」可核对。
+   */
+  public record BomOverview(
+      long bomCount,
+      long activeCount,
+      long archivedCount,
+      long versionCount,
+      long draftCount,
+      long publishedCount,
+      long effectiveNowCount,
+      long openEndedCount,
+      long draftWithoutComponentCount,
+      long publishedWithoutComponentCount,
+      String note) {}
+
+  /** BOM 列表筛选条件。 */
+  public record BomQuery(String keyword, String status, int page, int size) {}
+
+  /** BOM 版本列表筛选条件（跨 BOM）。 */
+  public record BomVersionQuery(
+      String keyword, String status, UUID bomId, int page, int size) {}
+
+  /**
+   * 倒排查询结果行：这个 SKU 被哪些 BOM 版本当组件用着。
+   *
+   * <p>改组件前要先看这个方向（改了用量会影响谁），06 采购建议算「这批料要买给谁」也读它。
+   */
+  public record BomUsageRow(
+      UUID versionId,
+      UUID bomId,
+      String bomCode,
+      String versionNo,
+      String versionStatus,
+      String versionStatusLabel,
+      boolean editable,
+      BigDecimal unitQuantity,
+      BigDecimal scrapRate,
+      String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo,
+      boolean effective) {}
+
+  /** 倒排查询结果页。{@code skuName} 随行带回，省得前端为了标题再查一次 SKU。 */
+  public record BomUsagePage(
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      List<BomUsageRow> items,
+      int page,
+      int size,
+      long total,
+      int totalPages) {}
+
+  /** 倒排查询筛选条件。 */
+  public record BomUsageQuery(UUID skuId, String keyword, Boolean onlyEffective, int page, int size) {}
 }
