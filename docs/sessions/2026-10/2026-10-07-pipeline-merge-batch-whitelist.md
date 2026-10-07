@@ -143,3 +143,54 @@ worker 在排查 catalog 的 503 时 `Connection error` 中断，worktree 里 15
    才找到 serials/lots 的缺口。**建议把这个扫描器落成仓库内的测试**，
    否则下一批车道仍要靠人工在合并现场发现。
 5. 7.5.1.2 在途库存仍是「进行中」：只交付了后端，前端页面与契约未做。
+## 追加（22:00 后）：两次接管半路撂下的合并 + 编排器根因修复
+
+### 8. `merge-ready` 冲突后不 abort —— 一晚被撂了两次
+
+22:00 后另一 cron 实例连续两次**释放了调度闸，却把合并撂在冲突上**：
+`MERGE_HEAD` 残留、`api-proxy.ts` 冲突未解、闸已空、主工作区脏。
+
+后果是双重堵死：下一个 tick 的 `merge-ready` 命中「主工作区不干净，拒绝切分支」
+直接 `exit(1)`，并入通道整个卡住；而同一个循环里紧接着的那条车道会在**同一棵冲突树**
+上再 merge，报出与它自身毫无关系的级联冲突 —— 看起来像两条车道撞了同一个文件，
+实际只有第一条真冲突。今晚我一度以为 8.1.1.2 和 7.8.1.2 都撞了 `api-proxy.ts`，
+真相是只有前者真冲突。
+
+根因在 `tools/module-progress/lane.mjs:776-787`：`git merge` 返回非零时只把车道标成
+`conflict` 就 `continue`，**没有 `git merge --abort`**。
+
+修复：冲突分支补 `git merge --abort`。新增回归测试
+`tools/module-progress/lane-merge-abort.itest.mjs` 断言两条不变式：
+① 合并失败后没有 `MERGE_HEAD`、没有冲突标记、工作区干净；
+② 真冲突的车道标 `conflict`，而**与之无关的车道仍能正常并入 merged**。
+
+已验证该测试能抓住这个 bug：把 abort 那行去掉后两条断言全红。
+为让整条流水线可在一次性仓库里端到端测试，`ROOT` 增加 `LANE_ROOT` 环境变量覆盖
+（不设时行为完全不变）。
+
+### 9. 并集解算器第三次证明了「先验 harness」的价值
+
+并入 7.8.1.2 后我写了两条断言，结果**两条都红了**：
+`inventory/allocation-priority/{id}/versions` 与 `inventory/labor/ranking`。
+查证后发现**两条都是我的探针写错了**，不是合并缺陷：
+
+- 真实形状是 `allocation-priority/floors/{id}/versions`（已放行），我探针少写了一段；
+- `labor` 在白名单里位于**顶层**而非 `inventory/` 组内，因为前端调的是
+  `warehouse/labor/ranking`（不带 `inventory/` 前缀）—— 与 `goods-receipts`/`facilities` 同构。
+
+这是今晚第三次「红的是探针不是代码」。如果当时直接改白名单，就会把两个正确放置的
+分支挪错位置 —— 而 `pnpm test` 未必抓得住。
+
+### 10. 全量 `./mvnw verify` 在并发负载下不可靠（不是缺陷，是 flake）
+
+本轮两次全量 verify 各红一次，但**失败集合完全落在没被本轮改动碰过的 catalog 上**：
+
+- `GoodsReceiptIntegrationTest` 29 例 → `PSQLException: 进行 SSL 连线时发生错误`
+  （Testcontainers 的 PG 在并发下握手失败），隔离重跑 29 例全绿；
+- `BundleComponentIntegrationTest` / `PhysicalSafetyIntegrationTest` 7 例 → 全部 `503`
+  （期望 200/401/403/404，实得 503），`ZombieCandidateIntegrationTest` 1 例
+  → timestamptz 往返 `.334` vs `.335` 差 1 毫秒。隔离重跑 78 例全绿。
+
+**结论如实记录**：集成头功能上是绿的，但「有 4 条车道在跑时跑全量 verify」会稳定地
+产生假红。CI 若在并发下跑同一套测试，需要么降低并发、么把这两类隔离/重跑。
+那个毫秒级往返尤其值得注意 —— 它是**真会抖**的，不是纯粹的环境问题。
