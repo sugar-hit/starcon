@@ -1241,3 +1241,82 @@ it('3.8.1.1 导入向导已有的路径没有被报告子段改坏', async () =>
     ).toBe(200);
   }
 });
+
+/**
+ * 3.9.1.1 重复 SKU 识别：catalog allowlist 必须放行 duplicate-scans / duplicate-candidates 全路径。
+ *
+ * <p>allowlist 是**锚定**正则，没放进分支的路径一律 404，页面只会进错误态，
+ * 看起来像「后端没实现」。这里把每条路由钉住，并钉住**不该**放行的近邻路径 ——
+ * 尤其是 merge（决定只登记，执行合并是 3.9.1.2，现在放行会让那个子路径看起来像已交付）。
+ */
+it('catalog/duplicate-* 的全部路由被放行且转发到 catalog 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const forGet = [
+    'catalog/duplicate-scans',
+    'catalog/duplicate-scans/overview',
+    `catalog/duplicate-scans/${id}`,
+    `catalog/duplicate-scans/${id}/candidates`,
+    `catalog/duplicate-candidates/${id}`,
+    `catalog/duplicate-candidates/${id}/decision`,
+  ];
+  for (const path of forGet) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 必须放行`,
+    ).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8082/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 发起扫描与登记决定都是 POST
+  expect((await POST(request('catalog/duplicate-scans'), { params: { path: ['catalog', 'duplicate-scans'] } })).status).toBe(200);
+  const decide = `catalog/duplicate-candidates/${id}/decision`;
+  expect((await POST(request(decide), { params: { path: decide.split('/') } })).status).toBe(200);
+});
+
+it('duplicate-* 放行不等于放行任意 catalog 子路径', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    // 决定只登记，执行合并是 3.9.1.2 —— 现在放行 merge 会让那个子路径看起来像已交付
+    `catalog/duplicate-candidates/${id}/merge`,
+    `catalog/duplicate-candidates/${id}/decision/extra`,
+    `catalog/duplicate-scans/${id}/candidates/extra`,
+    'catalog/duplicate-scans/unknown',
+    // 候选是与扫描平级的一级资源，没有 /duplicate-scans/{id}/duplicate-candidates
+    `catalog/duplicate-scans/${id}/duplicate-candidates`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 不该被放行`,
+    ).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it('3.9.1.1 的放行没有改坏相邻已交付模块的路径', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    `catalog/products/${id}`,
+    `catalog/products/${id}/skus`,
+    'catalog/skus',
+    'catalog/import-jobs',
+    `catalog/import-jobs/${id}/report`,
+    `catalog/import-jobs/${id}/report/issues`,
+    'catalog/supplier-quotes',
+    `catalog/supplier-quotes/${id}/tiers`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 必须仍然放行`,
+    ).toBe(200);
+  }
+});

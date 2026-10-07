@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 64 |
+| 已交付 | 65 |
 | 进行中 | 0 |
-| **未开发** | **401** |
-| 完成率 | 13.8% |
+| **未开发** | **400** |
+| 完成率 | 14.0% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 62 | 0 | 18 | 80 |
+| **D1–D2** | 63 | 0 | 17 | 80 |
 | **D3** | 2 | 0 | 38 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
-| 03 | 商品主数据系统 | D1–D2 | 33 | 40 |
+| 03 | 商品主数据系统 | D1–D2 | 34 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
@@ -176,7 +176,7 @@
 | 3.8.1.1 | 导入向导 | — | D1–D2 | 已交付 | V29__import_wizard.sql（import_template/import_template_column 模板字典与列定义（field_key 稳定标识 + header 可改 + data_type + required + match_key + sample_value + help，下载模板与字段映射共用同一份列定义）、import_field_mapping 可复用映射配置（mapping jsonb 存 {field_key: 上传文件列头}，名字租户内唯一）、import_job 异步任务（状态机 PENDING→PREVALIDATING→PREVALIDATED→RUNNING→SUCCEEDED/PARTIAL/FAILED/CANCELLED，mapping 快照冻结本次按哪几列解析、worker_claimed_at 领取标记由 DB 裁决一任务一主人、file_name/byte_size/content_sha256 记「导进去的是哪份文件」）、import_job_row 逐行（row_no 为文件物理行号表头=1、cells 存文件原样表头→单元格而非已映射值、改映射无需重传）、import_row_error 逐行错误明细（field_key 空串为整行级、code 机器码、severity ERROR=必须修正不落库 / WARNING=可跳过照常落库，UNIQUE(job,row_no,field_key,code) 让重跑预校验覆盖而非堆积）；**互斥由 DB 裁决**：部分唯一索引 import_job_one_active_per_entity UNIQUE(tenant_id,target_entity) WHERE status IN 活跃态 —— 不用「先查再插」（并发有窗口期），绕过服务层直连 SQL 也插不进去；guard_import_job_status 触发器钉死合法状态迁移 + 模板/目标对象/租户不可漂移 + 时间戳自动维护；refuse_import_template_column_delete 拒绝删被任务引用的列；6 表 ENABLE+FORCE RLS isolation + GRANT catalog_app/starcon_app；**报价（3.6.2.1）有意不含**：target_entity 的 CHECK 不含 QUOTE —— 价格的唯一写入所有者是定价服务，catalog 建报价表等于造出第二个价格事实来源；校验报告（3.8.1.2）只提供结构化落库与查询端点，报告页归其所有）；ImportCsvParser（纯 JDK 手写 RFC 4180：UTF-8 严格模式 + GBK 兜底、剥 UTF-8 BOM、CRLF/LF/CR 三种行尾、字段内换行与逗号、"" 字面引号、尾随逗号算列、被引号字段保留首尾空白；生成时加 BOM 供 Excel 直接打开；**只支持 CSV 不支持 xlsx** —— 仓库无 POI/EasyExcel/OpenCSV 依赖，手写半可靠的 OOXML 解析器只会得到「能读自己写的文件」，前端与本报告均已显式声明）；ImportRules（纯函数：必填/类型/枚举/长度/自然键重复（属性为 spu_code+attribute_code 复合键）/引用完整性/模式语义，ERROR-WARNING 分界即「这行落不落库」的单一判据 blocking()，预校验与执行共用同一判据）；ImportJobExecutor（固定线程池真异步，HTTP 只推进状态即返回；**以 AccessService.Access 而非裸 tenantId 开事务** —— 目标表 spu 被 V3 stamp_record_owner 与 data_scope 要求 app.actor/permission/grants，只绑租户会被逐行拒绝；分批 keyset 游标分页 row_no>? 而非 offset（判定后行离开 PENDING 结果集，offset 分页会每批跳过整段数据）；领取互斥由 worker_claimed_at 裁决；失败行单独事务不影响同批其它行）；五类对象执行写入：SPU（草稿才允许改状态，批量导入不是批量改状态）、SKU（variant_signature 用 IMPORT:编码 满足同 SPU 规格组合唯一）、ATTRIBUTE（只写值不新建属性定义、OPTION 校验选项字典、按 value_mode 决定公共/SKU 值）、PACKAGE（upsert、毛重不小于净重与 DB CHECK 同口径）、BARCODE（条码跨 SKU 占用检查、撤旧主条码、source=IMPORT，V7 触发器同步 sku.barcode）；ImportJobService/ImportTemplateService/ImportWizardController（GET /catalog/import-templates[/{id}[/file]]、POST/PUT/DELETE /import-templates、GET/POST/DELETE /import-field-mappings、POST /catalog/import-jobs（multipart，真文件通道带文件名与大小）、PUT /import-jobs/{id}/mapping、POST /{id}/prevalidate、POST /{id}/execute、POST /{id}/cancel、GET /import-jobs[/{id}[/rows |
 | 3.8.1.2 | 校验报告 | — | D1–D2 | 已交付 | V34__import_validation_report.sql + 合并 eddbdef + 前端校验报告页(593a9fa)；台账行曾被 1b94f62 去重误置为未开发，16:00 轮按集成头实际代码恢复 |
 | 3.8.2.1 | 导出 | — | D1–D2 | 未开发 | — |
-| 3.9.1.1 | 重复 SKU 识别 | — | D1–D2 | 未开发 | — |
+| 3.9.1.1 | 重复 SKU 识别 | — | D1–D2 | 已交付 | V36__sku_duplicate_candidate.sql（四张新表：sku_duplicate_scan 扫描运行 / sku_duplicate_candidate 候选（一对 SKU 一行）/ sku_duplicate_signal 逐维度得分与证据 / sku_duplicate_decision 人工决定 MERGE·KEEP；**候选粒度是「一对 SKU」而不是「一条线」**：蓝图输出点名的「重叠维度」要求同一对被多条线命中时仍能读出「中了几条」，按维度各存一行会让同一对散成四行、这一栏无处可查；left/right 按 uuid 字符串升序存放并用 CHECK 钉死，否则 (X,Y) 与 (Y,X) 能各插一行、候选数与决策数凭空翻倍；overlap_dimension_count 与信号行数跨表一致由服务层保证、集成测试逐候选断言；**决定只登记不执行**（执行归 3.9.1.2），同时记下登记那一刻两个 SKU 的 `sku.version` 作为 `expected_version` 留给下游比对，KEEP 时留 null（没有要执行的动作就不该留一个会过期的锁）；引用数按九类 catalog 自有引用**逐项拆分**（条码/属性值/素材/报价/套装/BOM/包装/安全属性/单位换算），04 映射·07 库存·09 订单在别的服务的库、不跨库读（模块边界纪律），那部分留给 3.9.1.2 走各自授权 API；相似度与阈值一律 NUMERIC(5,4)（禁浮点），四表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT catalog_app/starcon_app）；端点 GET /catalog/duplicate-scans/overview（概览 + 四维分布 + 三态计数）、POST /catalog/duplicate-scans（发起扫描，阈值 + 可选类目/品牌范围）、GET /catalog/duplicate-scans[/{id}[/candidates]]（扫描历史各自留档，治理前后可对比；候选清单分页 + dimension/decision/minSimilarity 三种筛选可组合，维度筛选用 exists 而不是 join，否则命中多条线时分页 total 与候选数对不上）、GET /catalog/duplicate-candidates/{id}（两侧身份 + 现算规格组合 + 全部条码 + 逐维度证据 + 引用逐项拆分 + 已登记决定）、POST |
 | 3.9.1.2 | SKU 合并 | — | D1–D2 | 未开发 | — |
 | 3.9.2.1 | 完整度评分 | — | D1–D2 | 未开发 | — |
 | 3.9.2.2 | 僵尸主数据清理 | — | D1–D2 | 未开发 | — |
