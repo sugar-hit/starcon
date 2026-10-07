@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 90 |
+| 已交付 | 91 |
 | 进行中 | 0 |
-| **未开发** | **375** |
-| 完成率 | 19.4% |
+| **未开发** | **374** |
+| 完成率 | 19.6% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -23,7 +23,7 @@
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
 | **D3** | 12 | 0 | 28 | 40 |
-| **D4** | 0 | 0 | 60 | 60 |
+| **D4** | 1 | 0 | 59 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
@@ -39,7 +39,7 @@
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
 | 07 | 库存核算系统 | D3 | 12 | 31 |
-| 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
+| 08 | 仓储作业系统 | D3 / D4 | 1 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 0 | 27 |
 | 11 | 售后与退货系统 | D4 / D7 | 0 | 22 |
@@ -301,7 +301,7 @@
 | 8.3.4.2 | 面单与标签打印 | — | D4 | 未开发 | — |
 | 8.4.1.1 | 组装单 | — | D4 | 未开发 | — |
 | 8.4.2.1 | 拆解单 | — | D4 | 未开发 | — |
-| 8.5.1.1 | 作业效率 | — | D4 | 未开发 | — |
+| 8.5.1.1 | 作业效率 | — | D4 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V74__warehouse_labor_efficiency.sql`（warehouse_work_task 作业任务人效事实主表 + warehouse_work_event append-only 事件表，两表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT + 事件表 REVOKE DELETE + REVOKE ALL FROM starcon_app；版本按调度器预分配取 V74）；**路线 A：本模块自己拥有「作业记录」这张事实表并自己写入** —— 蓝图上游「8.3 全部作业记录」在集成头里整块未交付（warehouse 33 张表无任何出库/拣货/复核/打包/发货表；V72 只建 outbound_order/outbound_order_line，不建作业记录表；8.3.2.1/8.3.3.1/8.3.3.2 尚未排上），故本模块落地人效事实并提供真实写入入口，而不是等上游空转；8.3 各车道落地后把作业事件投递到本服务端点（sourceModule 标明来源），**本车道是这两张表的唯一写入所有者**，不建也不读任何 picking_task/review_task/packing_task（那是 8.3.2.1/8.3.3.1/8.3.3.2 各自车道的事）；**「日」口径钉死在 SQL 表达式上**：聚合键 (completed_at at time zone 'Asia/Shanghai')::date，四个部分索引直接建在这个表达式上，刻意不用服务器本地时区（同一份报表在两台机器上跑出不同的「昨天」，绩效争议无从谈起）；**状态机与凭据稳定性做成 DB 不变量**（guard_work_task_transition）：身份定位列（单号/类型/来源/仓库/created_at）恒不可改；已开工不许换操作人（时长与行走距离归属不能在人之间漂移）；**状态未变时计量与时间一个字都不许动**（未开工不许手工填、已定稿不许擦掉重写，判据是「状态未变」而不是「已开工」——完成端点本来就要在同一条 UPDATE 里既写计量列又改状态，那是定稿不是改）；合法边只认 PENDING→RUNNING→COMPLETED/EXCEPTION 且终态不可回退；warehouse_work_event 由 guard_work_event_append_only 钉死只能追加，删除有两层防护（应用角色无 DELETE 权限 + 触发器，测试用超级用户直连验过第二层）；CHECK 钉死 error_piece_count ≤ piece_count 与 error_order_count ≤ order_count（超过它意味着口径本身错了，不是「这个人错得离谱」）；行走距离只有拣货任务可填（服务层拒绝其他类型带该字段，非拣货恒 NULL —— 0 会把「没记」和「走了 0 米」混成一条数）；单号 WT-<yyyyMMdd>-<8位uuid> 由服务端派生不接受自填；数量 NUMERIC(19,6)、行走距离 NUMERIC(12,3)、时间 timestamptz 一律 OffsetDateTime 绑定并写 ?::timestamptz（不用 Timestamp.valueOf，后者按 JVM 本地时区静默偏 −28800s）；**端点 11 个挂 /warehouse/labor**：GET /capabilities（**五个指标的精确口径随响应下发**：metricBasis 逐项写计算式与分母、dayBasisNote/packingEfficiencyBasisNote/reviewAccuracyBasisNote/errorBasisNote/perCapitaBasisNote/errorVsExceptionNote/upstreamNote/ownershipNote）、POST /work-tasks 派工（单号服务派生）、POST /work-tasks/{id}/assign 改派（仅未开工）、POST /work-tasks/{id}/start 开工（**开始时刻服务端取 now() 不接受请求参数**，否则等于允许「把昨天做的活记在今天」；未派工不允许开工）、POST /work-tasks/{id}/complete 完成（计量在此刻定稿）、POST /work-tasks/{id}/exception 异常上报（缺货/设备故障/单据取消/安全暂停/其他，原因至少 4 字）、GET /work-tasks 列表（真分页 + 状态/类型/仓库/操作人筛选 + 单号与上游单据号关键字真实 ilike 搜索）、GET /work-tasks/{id} 详情（头部 + 完整事件时间线）、GET /report 人效报表（按人按日分页 + 区间汇总含人均日）、GET /ranking 排名（metric 必填，一次只排一个指标）、GET /trend 趋势（**区间内无作业的日子也出现**，用 generate_series 出日历左连接聚合，空白日跳过会让「停了两天」看起来像「产量没变」）；写动作走 warehouse.inventory.update，读走 warehouse.inventory.read，与 8.5 其余仓库模块共用 07 库存 page_resource（另起权限码会让已配好角色的租户看不到人效页）；**人效聚合全部在 SQL 里算**（sum/count/avg/filter + 表达式算率），不在 Java 里全量捞出来内存聚合；五个指标口径（蓝图点名「需明确口径避免争议」，逐字写进 V74 注释、服务 javadoc、/capabilities 响应与页面）：①人均日拣货件数/单量 —— 区间内 PICKING 已定稿任务的 piece_count/order_count 合计 ÷ (人数 × **作业天数**)，作业天数 = 区间内出现过完成作业的自然日（**不用「人数 × 区间自然日数」**，否则停工休假日会把人均拉低，而停工不是任何一个人的效率问题；代价是首尾不完整日被当完整日，已在 perCapitaBasisNote 里写明该口径偏乐观）；②拣货行走距离 —— SUM(travel_distance_m)，只有拣货有值；③打包时效 —— **墙钟时长 completed_at − started_at，不是净作业时长**（净时长需另记暂停区间，本表没有那组数据，算出来的是假的；墙钟可复算，争议时能被采信），**分母是打包任务张数不是件数**，且显式排除 status='EXCEPTION' 与无 started_at 的补录任务（分子分母同时排除，不是算成 0）；④复核准确率 —— (复核件数 − 差错件数) ÷ 复核件数 × 100，分母是 work_type='REVIEW' 的 piece_count 合计而非单数或行数，差错记在**发现**它的那张任务上；**分母为 0 返回 null 不返回 0%**（0% 会被读成「复核全对」，真实含义是「今天没人复核」，前端 rateText/rateTone 同纪律）；⑤差错率 —— **两个口径并列给出且分母各自写明**：按件数 = Σ差错件数 ÷ Σ作业件数（跨三种类型统计）、按单量 = Σ差错单量 ÷ Σ涉及单量；**差错 ≠ 异常**是刻意分开的两个字段两套端点两套口径（缺货/设备/取消是「做不了」不是「做错了」，混在一起会让缺货的人被算成错得最离谱，这是排班时最不公平的一种算法）；只统计已定稿任务（未开工/作业中的没有产出，算成人效等于奖励「领了任务不干活」）；**排名方向由指标自带 higherIsBetter**（差错率/距离越低越好、准确率/件数越高越好），把方向相反的指标塞进同一个榜是绩效争议的标准起手式，排序按 SQL 里的未截断原值做、取整只发生在展示层；订单去重如实说明做不到（order_count 是该任务内去重后的张数，跨任务去重需要全量明细，不是这张汇总表的粒度能做的事）；集成测试 `LaborEfficiencyIntegrationTest` 23 例实跑 Testcontainers PostgreSQL 16（连接池压到 1），重点钉口径而非行数：打包时效分母是张数（600s+1200s÷2 张=900s，按件数会算成 400s）、异常终止与补录任务不计时效、复核准确率分母为 0 时是 null、人均日分母是 2 人 × 2 作业日（用区间自然日会得 66.67 而非 100）、Asia/Shanghai 归属日（今天 00:30 的拣货必须落在今天）、差错率两个口径（甲 10 件/5 单错 → 10% 与 40%；乙跨类型后 20÷300=6.67% 而非 20%，证明按件数口径真的跨类型统计）、排名方向（拣得多的行走距离榜垫底）、趋势补齐空白日、**真的去数据库里硬写**验证 DB 级约束（终态改件数/改完成时刻被拒、终态回退被拒、事件 UPDATE/DELETE 被拒、差错超件数被 CHECK 拒、**已开工硬改 operator 被拒**、未开工改派合法而手工填计量被拒）、时间写回零漂移（回查 started_at/completed_at 与服务端 now() 差 < 120s，抓 Timestamp.valueOf 的 −28800s 偏移）；租户隔离三断言（两租户互不可见含**跨租户看不到对方的人效排名与汇总**、伪造 X-Tenant-Id 无效、A→B→A→B 交替复用同一条物理连接不串租户并逐张表确认 relforcerowsecurity）；契约 codegen 新增 21 个 Labor* 类型、identity/catalog/channel 三份 spec 零变化；页面 `/inventory/labor`（labor-efficiency-workspace.tsx + 纯函数 labor-efficiency-model.ts 与 20 例单测）：区间与仓库/类型筛选、五个指标 StatCard（分母写在 comparisonLabel 里）、**口径卡片把七个 note 逐条显示**（口径只留在服务端注释里，绩效争议时没有人能查到；口径进了响应体，界面显示给用户，面谈时双方看的是同一段字）、按人按日报表、排名（方向箭头 ↑↓）、趋势（空白日显式写成「当天无作业」）、作业任务区（派工/开工/改派/完成/异常按钮 + 分页 + append-only 时间线）、完成表单按类型禁用行走距离字段、无权限态/错误态/加载态/空态（并写清「先派一张任务并完成，这里才会有数」）俱全；api-proxy 白名单登记 labor 全部形状（capabilities |
 | 8.5.2.1 | 库位利用率 | — | D4 | 未开发 | — |
 | 8.5.3.1 | 出库时效 | — | D4 | 未开发 | — |
 | 9.1.1.1 | 订单列表 | — | D4 | 未开发 | — |
