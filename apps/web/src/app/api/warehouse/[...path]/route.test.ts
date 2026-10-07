@@ -438,3 +438,58 @@ it('打印内容（ZPL / HTML）原样透传而不是被 JSON 解析吞成 503',
     expect(await response.text()).toBe(body);
   }
 });
+
+/**
+ * 8.2.1.1 收货单 + 8.2.1.2 收货差异：两组路径**逐条钉住放行**。
+ *
+ * <p>白名单是一条共享正则，多条车道各自往同一个组追加分支。这组用例的价值在于
+ * 它同时钉住了**上一条车道已交付的 goods-receipts 全路径** ——
+ * 取错一侧（整段替换而不是追加）会静默删掉已交付的路由，表现为页面 404，
+ * 而 typecheck / lint / vitest / Playwright 全绿，因为白名单只在浏览器端生效。
+ *
+ * <p>因此新增 8.2.1.2 的分支时，**不得覆盖或收窄**下面 goods-receipts 的任何一条。
+ */
+it('8.2.1.1 收货单与 8.2.1.2 收货差异的全部调用形状都被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+
+  // 8.2.1.1 收货单：读形状 + 详情 + 分录 + 三个动作。
+  for (const path of [
+    'warehouse/goods-receipts',
+    'warehouse/goods-receipts/capabilities',
+    `warehouse/goods-receipts/${id}`,
+    `warehouse/goods-receipts/${id}/movements`,
+    `warehouse/goods-receipts/${id}/receive`,
+    `warehouse/goods-receipts/${id}/close`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  expect(
+    (await POST(request('warehouse/goods-receipts', 'POST'), {
+      params: { path: ['warehouse', 'goods-receipts'] },
+    })).status,
+  ).toBe(200);
+
+  // 8.2.1.2 收货差异：集合读 + 接手 + 详情 + 留证 / 决定 / 索赔 / 提交 / 撤回 / 结案。
+  for (const path of [
+    'warehouse/goods-receipt-discrepancies',
+    'warehouse/goods-receipt-discrepancies/capabilities',
+    `warehouse/goods-receipt-discrepancies/${id}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  for (const path of [
+    'warehouse/goods-receipt-discrepancies',
+    `warehouse/goods-receipt-discrepancies/${id}/evidence`,
+    `warehouse/goods-receipt-discrepancies/${id}/decide`,
+    `warehouse/goods-receipt-discrepancies/${id}/claim`,
+    `warehouse/goods-receipt-discrepancies/${id}/claim/submit`,
+    `warehouse/goods-receipt-discrepancies/${id}/claim/withdraw`,
+    `warehouse/goods-receipt-discrepancies/${id}/close`,
+  ]) {
+    expect(
+      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+    ).toBe(200);
+  }
+});
