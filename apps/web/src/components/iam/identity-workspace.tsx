@@ -6,6 +6,7 @@ import type { Access } from '../../../../../packages/api-contracts/src/catalog';
 import { useIdentity } from './identity-shell';
 import { AdministrationPanel } from './administration-panel';
 import { MemberOnboardingWorkspace } from './member-onboarding-workspace';
+import { ApprovalFlowWorkspace } from './approval-flow-workspace';
 import { canManage, hasPermission, isOwner, type AdministrationKind } from './administration-model';
 
 const destinations = [
@@ -32,6 +33,11 @@ const destinations = [
   ['dictionary', '数据字典', '维护状态枚举、原因码、分类标签与单位类型，被引用的字典项只能停用不能删除'],
   ['numbering-rules', '编号规则', '配置单据编号规则（前缀 + 日期 + 序号 + 后缀），序号按实体与日期重置，支持多级嵌套与预览'],
   [
+    'approval-flows',
+    '审批流定义',
+    '按单据类型注册审批流程：审批节点（角色/岗位/指定人）、串行/并行/条件分支、金额阈值与超时升级规则',
+  ],
+  [
     'operation-log',
     '操作日志',
     '按用户、时间与请求 ID 检索登录、API 调用、任务执行与错误堆栈，用于运维排障',
@@ -41,7 +47,7 @@ const destinations = [
 // 'hierarchy' 只出现在导航目的地里（点击跳 /org/hierarchy 独立页面），
 // 不是 AdministrationPanel 的一种 kind，所以不进这个联合类型；
 // 它只需要在 visible() 里能被判出来（visible 的 key 是 string）。
-type WorkspaceKind = AdministrationKind | 'onboarding';
+type WorkspaceKind = AdministrationKind | 'onboarding' | 'approval-flows';
 
 function visible(session: Access, key: string) {
   if (key === 'tenants') return true;
@@ -72,6 +78,9 @@ function visible(session: Access, key: string) {
   // 少了这条会落到 canManage 兜底，而 AdministrationKind 里没有 'operation-log'，
   // 于是有 identity.operation_log.read 的人反而在导航里看不到入口。
   if (key === 'operation-log') return hasPermission(session, 'identity.operation_log.read');
+  // 审批流定义（17.4.1.1）是独立页面权限码，不走 AdministrationPanel 的四类管理，
+  // 也不走 canManage 的页面映射 —— AdministrationKind 里没有它，落到 canManage 会把入口藏掉。
+  if (key === 'approval-flows') return hasPermission(session, 'identity.approval_flow.read');
   return canManage(session, key as AdministrationKind);
 }
 export function IdentityWorkspace({
@@ -106,6 +115,8 @@ export function IdentityWorkspace({
       )}
       {kind === 'onboarding' ? (
         <MemberOnboardingWorkspace session={session} onError={onError} />
+      ) : kind === 'approval-flows' ? (
+        <ApprovalFlowWorkspace />
       ) : kind ? (
         <AdministrationPanel
           key={`${session.tenantId}:${kind}`}

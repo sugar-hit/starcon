@@ -58,6 +58,35 @@ g(['config', 'user.name', 'test'], SANDBOX);
 writeFileSync(join(SANDBOX, 'README.md'), 'base\n');
 g(['add', '-A'], SANDBOX);
 g(['commit', '-qm', 'base'], SANDBOX);
+
+/* ── 微服务闸的前置件（2026-10-07 23:xx 新增）───────────────────────────
+   `plan` 现在会先问「这个模块该落的微服务在不在集成头里」，
+   数据来自蓝图 README 的「后端主责服务」列，存在性来自
+   `git ls-tree <integrationBranch> backend/services/`。
+
+   所以沙箱必须**提交**这两样东西，否则闸门会 fail-loud 直接抛错，
+   排序逻辑一条断言都跑不到。真实仓库里 warehouse/catalog/identity/channel 都在，
+   这里统一用一个 warehouse 服务覆盖全部测试卷。 */
+const svcBp = join(SANDBOX, 'docs', 'product', 'capability-blueprint');
+mkdirSync(svcBp, { recursive: true });
+const volRow = (n, svc) => `| ${n}  | 卷${n} | 核心业务域 | 测试 | ${svc} | [${n}](x.md) |`;
+writeFileSync(
+  join(svcBp, 'README.md'),
+  [
+    '| # | 系统 | 层级归类 | 一句话职责 | 后端主责服务 | 卷 |',
+    '| --- | --- | --- | --- | --- | --- |',
+    ...['01', '02', '03', '04', '07', '08', '09'].map((n) => volRow(n, 'warehouse')),
+    '',
+  ].join('\n'),
+);
+const svcDir = join(SANDBOX, 'backend', 'services', 'warehouse');
+mkdirSync(svcDir, { recursive: true });
+writeFileSync(join(svcDir, 'pom.xml'), '<project/>\n');
+g(['add', '-A'], SANDBOX);
+g(['commit', '-qm', 'blueprint readme + warehouse service'], SANDBOX);
+
+// 必须在服务目录与 README 提交**之后**再建集成分支：
+// serviceInHead 读的是集成分支的已提交树，文件只躺在工作区会被判成「服务不存在」。
 g(['branch', 'integration/module-dev'], SANDBOX);
 
 /* ── 蓝图 ──────────────────────────────────────────────────────────
