@@ -1700,7 +1700,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "distribution",
+        "operationId": "distribution_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -3418,6 +3418,413 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/SerialMovementPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/expiry/policy": {
+      "post": {
+        "tags": [
+          "inventory-expiry-controller"
+        ],
+        "operationId": "upsertPolicy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExpiryPolicyUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpiryPolicySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/expiry/allocation": {
+      "post": {
+        "tags": [
+          "inventory-expiry-controller"
+        ],
+        "operationId": "recommend",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FefoAllocationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FefoAllocationPlan"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/expiry/warehouses": {
+      "get": {
+        "tags": [
+          "inventory-expiry-controller"
+        ],
+        "operationId": "warehouses_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExpiryWarehouseOption"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/expiry/policy/{skuId}": {
+      "get": {
+        "tags": [
+          "inventory-expiry-controller"
+        ],
+        "operationId": "policy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpiryPolicy"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/expiry/policies": {
+      "get": {
+        "tags": [
+          "inventory-expiry-controller"
+        ],
+        "operationId": "policies_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "strategy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpiryPolicyPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/expiry/lots/{skuId}": {
+      "get": {
+        "tags": [
+          "inventory-expiry-controller"
+        ],
+        "operationId": "lots_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExpiryLotOption"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/expiry/alerts": {
+      "get": {
+        "tags": [
+          "inventory-expiry-controller"
+        ],
+        "operationId": "alerts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "expiryStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "leadDays",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inStock",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpiryAlertPage"
                 }
               }
             }
@@ -7467,6 +7874,704 @@
           "size": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ExpiryPolicyUpsertRequest": {
+        "required": [
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "strategy": {
+            "type": "string",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "leadDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "specifiedLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "notes": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ExpiryPolicySaved": {
+        "type": "object",
+        "properties": {
+          "policyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "strategy": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "leadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "specifiedLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FefoAllocationRequest": {
+        "required": [
+          "quantity",
+          "skuId",
+          "warehouseId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "strategy": {
+            "type": "string",
+            "nullable": true
+          },
+          "specifiedLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "FefoAllocationBucketLine": {
+        "type": "object",
+        "properties": {
+          "bucketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "locationName": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "bucketAvailable": {
+            "type": "number"
+          }
+        }
+      },
+      "FefoAllocationIneligible": {
+        "type": "object",
+        "properties": {
+          "expiredAvailable": {
+            "type": "number"
+          },
+          "noExpiryAvailable": {
+            "type": "number"
+          },
+          "nonSellableAvailable": {
+            "type": "number"
+          },
+          "nonPickableAvailable": {
+            "type": "number"
+          },
+          "noLotAvailable": {
+            "type": "number"
+          }
+        }
+      },
+      "FefoAllocationLine": {
+        "type": "object",
+        "properties": {
+          "lotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotCode": {
+            "type": "string"
+          },
+          "producedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "receivedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "daysToExpiry": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sortBasis": {
+            "type": "string"
+          },
+          "sortBasisValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "buckets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FefoAllocationBucketLine"
+            }
+          }
+        }
+      },
+      "FefoAllocationPlan": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "strategy": {
+            "type": "string"
+          },
+          "strategyLabel": {
+            "type": "string"
+          },
+          "policyEnabled": {
+            "type": "boolean"
+          },
+          "strategySource": {
+            "type": "string"
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "shortfallQuantity": {
+            "type": "number"
+          },
+          "skuAvailableInWarehouse": {
+            "type": "number"
+          },
+          "earliestExpiry": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FefoAllocationLine"
+            }
+          },
+          "ineligible": {
+            "$ref": "#/components/schemas/FefoAllocationIneligible"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ExpiryWarehouseOption": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ExpiryPolicy": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "strategy": {
+            "type": "string"
+          },
+          "strategyLabel": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "leadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "specifiedLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "specifiedLotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "nearestExpiry": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ExpiryPolicyOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "policyCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ExpiryPolicyPage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/ExpiryPolicySummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpiryPolicyRow"
+            }
+          },
+          "strategyOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpiryPolicyOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ExpiryPolicyRow": {
+        "type": "object",
+        "properties": {
+          "policyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "strategy": {
+            "type": "string"
+          },
+          "strategyLabel": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "leadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "specifiedLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "specifiedLotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "lotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiringLotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiredLotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ExpiryPolicySummary": {
+        "type": "object",
+        "properties": {
+          "policyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fefoCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fifoCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "specifiedLotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disabledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuWithExpiryLotCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ExpiryLotOption": {
+        "type": "object",
+        "properties": {
+          "lotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotCode": {
+            "type": "string"
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "ExpiryAlertPage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/ExpiryAlertSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpiryAlertRow"
+            }
+          },
+          "statusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpiryStatusOption"
+            }
+          },
+          "leadDaysOverride": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "leadDaysNote": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ExpiryAlertRow": {
+        "type": "object",
+        "properties": {
+          "lotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "lotCode": {
+            "type": "string"
+          },
+          "producedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "receivedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "expiryStatus": {
+            "type": "string"
+          },
+          "expiryStatusLabel": {
+            "type": "string"
+          },
+          "daysToExpiry": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "leadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "leadDaysSource": {
+            "type": "string"
+          },
+          "lotStatus": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "warehouseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ExpiryAlertSummary": {
+        "type": "object",
+        "properties": {
+          "lotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiredLotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expiringLotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "healthyLotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "noExpiryLotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "expiredOnHand": {
+            "type": "number"
+          },
+          "expiringOnHand": {
+            "type": "number"
+          },
+          "distinctLeadDaysCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "earliestExpiry": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "latestExpiry": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "ExpiryStatusOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "lotCount": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       }

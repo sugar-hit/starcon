@@ -293,11 +293,12 @@ const services: readonly {
     // {id}/lines/{lineId}/count / {id}/tasks / {id}/tasks/{taskId}/assign。
     // 盘点路径上同样**没有** DELETE：账面数是冻结快照，删一张盘点单等于让这次盘从未发生过。
     // capabilities 是字面量，排在 {id} 之前判别。
-    prefix: 'warehouse/',
-    env: 'WAREHOUSE_URL',
-    fallback: 'http://127.0.0.1:8084',
-    pattern:
-      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?|calculation)|[0-9a-f-]+(?:\/(?:versions|retire))?)?)|stocktakes(?:\/capabilities|[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
+    // expiry 是 7.3.1.2 效期与先进先出：alerts / policies / allocation / policy[/{skuId}] /
+    // warehouses / lots/{skuId}。刻意**没有** DELETE 段：停用走 enabled=false，策略行是审计凭据。
+    // 下面同时补齐了此前漏登记的已交付模块路径（ledger / reconciliation / distribution /
+    // platform-observations / serials / lots / internal-access）—— 白名单只在浏览器端生效，
+    // 单测直连服务层发现不了，漏一条就等于该页面在浏览器里拿代理 404。
+      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement))?)|internal\/access|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
   },
 ];
 
