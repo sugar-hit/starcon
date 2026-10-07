@@ -624,7 +624,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/inventory/aging',
-    implemented: false,
+    implemented: true,
     domain: 'inventory',
     label: '库龄与预警',
     description: '识别断货、滞销和超龄库存并安排处理。',
