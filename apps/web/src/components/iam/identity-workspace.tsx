@@ -9,6 +9,11 @@ import { canManage, hasPermission, isOwner, type AdministrationKind } from './ad
 const destinations = [
   ['tenants', '租户列表', '查看你可进入的租户、切换工作空间并维护本租户基本信息'],
   ['members', '用户与成员', '管理本租户成员、启停状态和角色分配'],
+  [
+    'offboarding',
+    '离职与停用',
+    '停用离职成员、转移在办单据与审批责任、回收待办与任务，全程保留历史记录',
+  ],
   ['roles', '角色配置', '配置页面操作权限与数据范围'],
   ['departments', '部门管理', '维护成员归属与部门数据范围'],
   ['children', '子租户管理', '创建独立工作空间并指定所有者'],
@@ -136,6 +141,9 @@ export function IdentityWorkspace({
                 if (key === 'tenants') return true;
                 if (key === 'audit') return hasPermission(session, 'identity.audit.read');
                 if (key === 'hierarchy') return hasPermission(session, 'tenant.hierarchy.read');
+                // 离职与停用是独立页面权限码，不走 AdministrationPanel 的四类管理。
+                if (key === 'offboarding')
+                  return hasPermission(session, 'identity.offboarding.read');
                 return canManage(session, key as AdministrationKind);
               })
               .map(([key, label, description]) => (

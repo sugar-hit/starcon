@@ -142,3 +142,50 @@ it('identity/hierarchy-authorizations 的读、判定、撤销被放行，多余
   }
   expect(fetcher).not.toHaveBeenCalledWith(expect.stringContaining(`/restore`), expect.anything());
 });
+
+/**
+ * 17.2.2.3 离职与停用：identity allowlist 必须放行案卷、撤销与两张台账的动作形状。
+ *
+ * <p>这一支与其他前缀不同：它**没有**删除动作（停用而非删除），所以白名单里也刻意
+ * 不放行任何 DELETE 语义路径 —— 少一条比多一条安全，多了等于在浏览器侧开一个删档的口子。
+ *
+ * <p>四类形状都要钉住：案卷本身、撤销、责任转移（登记/执行转移）、回收（登记/执行回收）。
+ * 后两类各有一个动作后缀，多一层必须仍然 404，否则代理会退化成「往任意子路径发 POST」的通道。
+ */
+it('identity/offboarding 的案卷、撤销与两张台账形状被放行，其余后缀仍被拒绝', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const post = [
+    'identity/offboarding',
+    `identity/offboarding/${id}/revert`,
+    `identity/offboarding/${id}/responsibility-items`,
+    `identity/offboarding/${id}/responsibility-items/${id}/transfer`,
+    `identity/offboarding/${id}/reclaim-items`,
+    `identity/offboarding/${id}/reclaim-items/${id}/reclaim`,
+  ];
+  for (const path of post) {
+    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8081/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer real-session' },
+      }),
+    );
+  }
+  // 读形状：列表与详情
+  for (const path of ['identity/offboarding', `identity/offboarding/${id}`]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  // 反向：动作后缀之外一律 404
+  for (const path of [
+    `identity/offboarding/${id}/restore`,
+    `identity/offboarding/${id}/responsibility-items/${id}/restore`,
+    `identity/offboarding/${id}/reclaim-items/${id}/reclaim/extra`,
+    `identity/offboarding/${id}/responsibility-items/extra`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalledWith(expect.stringContaining('/restore'), expect.anything());
+});
