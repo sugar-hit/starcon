@@ -128,12 +128,16 @@ public final class MediaRules {
       String signature = imageSignature(content);
       // WEBP 的尺寸在 VP8/VP8L/VP8X 头里，位置随变体而变，JDK 的 ImageIO 也没有内置
       // WEBP 读取器。与其写一个只覆盖部分变体的半吊子解析器（错的宽高比不填还糟），
-      // 不如明确拒掉并说清要做什么——3.4.1.2 交付后由它转成 PNG/JPEG 再入库。
+      // 不如明确拒掉并说清要做什么。
+      // 注意：3.4.1.2 图片处理同样没有 WEBP 能力——它复用 JDK ImageIO 做解码，
+      // 读不了 WEBP 就进不了流水线，所以**不能**在这里承诺「处理上线后就能直传」。
+      // 要支持得先引第三方解码器（如 imageio-webp / libwebp），那是引入依赖的决策。
       if ("webp".equals(signature))
         throw bad(
             "暂不支持直接上传 WEBP：服务端无法从字节里可靠读出它的宽高"
                 + "（JDK 图片解码器不含 WEBP），而入库要求尺寸必须探测得出。"
-                + "请先转成 PNG 或 JPEG 再上传；3.4.1.2 图片处理交付后可直接上传并自动转码");
+                + "请先用任意工具转成 PNG 或 JPEG 再上传；图片处理模块同样读不了 WEBP，"
+                + "走那条路也绕不过去");
       try {
         var image = ImageIO.read(new ByteArrayInputStream(content));
         if (image == null)
@@ -166,10 +170,10 @@ public final class MediaRules {
           null,
           sha,
           "视频的宽高与时长不做探测（需要解容器），因此留空而不是填一个猜出来的值；"
-              + "处理与转码由 3.4.1.2 负责");
+              + "图片处理模块只处理静态图片，视频转码需要独立编解码器，尚未支持");
     }
     throw bad(
-        "只接受图片或视频（探测到的文件类型不支持）。支持：PNG / JPEG / GIF / BMP / WEBP，"
+        "只接受图片或视频（探测到的文件类型不支持）。支持：PNG / JPEG / GIF / BMP，"
             + "视频：MP4 / MOV / WEBM / AVI。当前文件名为 " + (filename == null ? "(未提供)" : filename));
   }
 
