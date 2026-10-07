@@ -412,8 +412,15 @@ if (cmd === 'plan') {
   const state = readState();
   const ledger = readLedger();
 
-  // 复用已分配但未使用的 Flyway 号段
+  // 版本号要同时避开「磁盘上已存在的迁移」和「其它车道已预分配但还没落盘的」。
+  // 只扫磁盘是不够的：车道刚排出来时文件还不存在，下一轮 plan 会把同一个号再发一遍，
+  // 两条车道交出 V27，Flyway 在合并后直接炸 —— 而且是在别人跑测试时才炸。
   const used = usedVersions();
+  for (const l of Object.values(state.lanes)) {
+    if (['abandoned', 'merged'].includes(l.state)) continue;
+    const n = Number(/^V(\d+)$/.exec(l.migrationVersion ?? '')?.[1]);
+    if (Number.isFinite(n)) used.add(n);
+  }
   const nextFree = () => {
     let n = Math.max(0, ...used);
     for (;;) {
@@ -425,12 +432,21 @@ if (cmd === 'plan') {
     }
   };
 
-  const picks = pickModules(count, ledger, state);
-  if (!picks.length) {
-    console.log(JSON.stringify({ ok: true, planned: [], note: '没有可并行的未开发模块' }, null, 2));
-    process.exit(0);
+  // 先把「排了车道但没真正派出去」的捞回来重派，再拿剩下的名额排新车道。
+  // 没有这一步就会丢车道：plan 只建车道不派发，若某个 tick 在建完车道之后、
+  // 派发之前崩了（或被会话上限挡住），这条车道会永远停在 running 且无人认领，
+  // 之后每一轮 plan 都因为「已被占用」跳过它 —— 既不开发也不回收，整条流水线静默少一条。
+  const session = flag('--session') === true ? null : (flag('--session') ?? null);
+  const orphaned = Object.values(state.lanes).filter(
+    (l) => l.state === 'running' && (!l.sessionId || laneIsStale(l)),
+  );
+  for (const l of orphaned) {
+    l.sessionId = session;
+    l.heartbeatAt = new Date().toISOString();
+    l.reDispatched = (l.reDispatched ?? 0) + 1;
   }
 
+  const picks = pickModules(count - orphaned.length, ledger, state);
   const base = git(['rev-parse', state.integrationBranch]);
   const planned = [];
 
@@ -464,7 +480,7 @@ if (cmd === 'plan') {
       worktree: wt,
       migrationVersion: `V${version}`,
       state: 'running',
-      sessionId: flag('--session') ?? null,
+      sessionId: session,
       baseSha: base.slice(0, 7),
       createdAt: new Date().toISOString(),
       heartbeatAt: new Date().toISOString(),
@@ -474,7 +490,29 @@ if (cmd === 'plan') {
   }
 
   writeState(state);
-  console.log(JSON.stringify({ ok: true, integration: state.integrationBranch, planned }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        integration: state.integrationBranch,
+        toDispatch: [...orphaned, ...planned].map((l) => ({
+          id: l.id,
+          name: l.name,
+          stage: l.stage,
+          l3: l.l3,
+          blueprint: l.blueprint,
+          branch: l.branch,
+          worktree: l.worktree,
+          migrationVersion: l.migrationVersion,
+          redispatched: l.reDispatched ?? 0,
+        })),
+        newlyPlanned: planned.map((l) => l.id),
+        note: planned.length === 0 && orphaned.length === 0 ? '没有可并行的未开发模块' : null,
+      },
+      null,
+      2,
+    ),
+  );
   process.exit(0);
 }
 
