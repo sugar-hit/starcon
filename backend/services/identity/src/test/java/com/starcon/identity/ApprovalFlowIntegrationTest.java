@@ -48,9 +48,12 @@ class ApprovalFlowIntegrationTest extends IdentityIntegrationTestBase {
     try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
         var s = c.createStatement()) {
       // 顺序按外键依赖：升级规则与金额分支都引用节点。
+      // approval_trigger_rule（17.4.1.2 审批规则）的 target_flow_id 也引用 approval_flow，
+      // 所以这里必须一起清空 —— 否则 TRUNCATE 会因外键被拒（PostgreSQL 要求被引用表与引用表同批清理）。
       s.execute(
           "truncate approval_flow_escalation, approval_flow_amount_branch,"
-              + " approval_flow_node, approval_flow, approval_position");
+              + " approval_flow_node, approval_trigger_rule, approval_rule_set,"
+              + " approval_flow, approval_position");
     }
   }
 
