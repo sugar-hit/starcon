@@ -7,6 +7,8 @@ import type {
   PermissionView,
   MemberView,
   DepartmentView,
+  DepartmentInput,
+  LegalEntityView,
   ChildView,
   AssignmentInput,
 } from '../../../../../packages/api-contracts/src/catalog';
@@ -16,13 +18,18 @@ import {
   actionLabels,
   assignRole,
   canManage,
+  hasPermission,
   scopeLabels,
   togglePermission,
   saveAdministration,
   removeAdministration,
   transferOwner,
+  moveDepartment,
+  flattenDepartments,
+  type DepartmentRow,
   type AdministrationKind,
 } from './administration-model';
+import { DepartmentTree } from './department-tree';
 
 const titles = {
   roles: '角色配置',
@@ -45,25 +52,36 @@ export function AdministrationPanel({
   const [permissions, setPermissions] = useState<PermissionView[]>([]);
   const [members, setMembers] = useState<MemberView[]>([]);
   const [departments, setDepartments] = useState<DepartmentView[]>([]);
+  const [legalEntities, setLegalEntities] = useState<LegalEntityView[]>([]);
   const [children, setChildren] = useState<ChildView[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [notice, setNotice] = useState('');
   const load = useCallback(async () => {
     setLoaded(false);
+    setLoadFailed(false);
     try {
       if (canManage(session, 'roles')) {
         setRoles(await api<RoleView[]>('identity/roles'));
         setPermissions(await api<PermissionView[]>('identity/permissions'));
       }
       if (canManage(session, 'members')) setMembers(await api<MemberView[]>('identity/members'));
-      if (canManage(session, 'departments'))
+      if (canManage(session, 'departments')) {
         setDepartments(await api<DepartmentView[]>('identity/departments'));
+        // 部门表单要选所属法人（17.1.2.1）与负责人，读权限就够
+        if (hasPermission(session, 'identity.legal_entity.read'))
+          setLegalEntities(await api<LegalEntityView[]>('identity/legal-entities'));
+      }
       if (canManage(session, 'children')) setChildren(await api<ChildView[]>('identity/children'));
-      setLoaded(true);
     } catch (e) {
+      // 加载失败必须落到「失败 + 重试」，不能停在"正在加载…"：串行 await 里第一个失败
+      // 后面的请求根本没发出去，页面会永远转圈，看起来像慢而不是坏。
       onError(e);
+      setLoadFailed(true);
+    } finally {
+      setLoaded(true);
     }
   }, [session, onError]);
   useEffect(() => {
@@ -96,8 +114,13 @@ export function AdministrationPanel({
       : kind === 'members'
         ? members
         : kind === 'departments'
-          ? departments
+          ? []
           : children;
+  // 成员人数只在节点上展示计数：identity/members 不支持按部门过滤，
+  // 展开列具体成员会变成假数据，这里不做。
+  const isTree = kind === 'departments';
+  // departments 现在是树（根节点 + 嵌套 children），按 id 找部门必须先拍平
+  const departmentRows = flattenDepartments(departments);
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -115,7 +138,7 @@ export function AdministrationPanel({
             ? '页面操作和数据范围由同一个角色分配共同决定。所有者负责授权变更。'
             : kind === 'members'
               ? '每个角色可分别选择租户内全部、本部门或仅本人范围。本部门按记录创建时的归属部门匹配。'
-              : '部门属于当前租户，用于成员归属和数据访问范围。已被成员引用的部门不能删除。'}
+              : '部门树属于当前租户，用于成员归属和数据访问范围；所属法人是法律主体，两者互相独立。有子部门或仍有成员挂靠的部门不能删除。'}
       </p>
       {notice && (
         <p role="status" className="text-sm">
@@ -124,6 +147,24 @@ export function AdministrationPanel({
       )}
       {!loaded ? (
         <p role="status">正在加载…</p>
+      ) : loadFailed ? (
+        // 失败和"没有数据"必须能分辨，否则管理员会把接口故障当成"租户里一个人都没有"
+        <div className="space-y-2 rounded-lg border border-destructive/40 p-6 text-sm">
+          <p className="text-destructive">数据加载失败，上方横幅是具体原因。</p>
+          <Button size="sm" variant="outline" disabled={busy} onClick={() => void load()}>
+            重试
+          </Button>
+        </div>
+      ) : isTree ? (
+        <DepartmentTree
+          nodes={departments}
+          busy={busy}
+          canUpdate={canManage(session, 'departments', 'update')}
+          canDelete={canManage(session, 'departments', 'delete')}
+          onMove={(id, parentId) => void mutate(() => moveDepartment(id, parentId))}
+          onEdit={(id) => setEditing(id)}
+          onDelete={(id) => void mutate(() => removeAdministration('departments', id))}
+        />
       ) : rows.length === 0 ? (
         <p className="rounded-lg border p-6 text-sm">暂无记录</p>
       ) : (
@@ -148,7 +189,7 @@ export function AdministrationPanel({
                   {member && (
                     <p className="text-muted-foreground text-xs">
                       {member.status === 'ACTIVE' ? '启用' : '停用'} ·{' '}
-                      {departments.find((d) => d.id === member.departmentId)?.name ?? '未设置部门'}{' '}
+                      {departmentRows.find((d) => d.node.id === member.departmentId)?.node.name ?? '未设置部门'}{' '}
                       ·{' '}
                       {member.assignments
                         .map(
@@ -246,6 +287,7 @@ export function AdministrationPanel({
             <MemberForm
               member={members.find((m) => m.id === editing)}
               roles={roles}
+              canReadRoles={canManage(session, 'roles')}
               departments={departments}
               busy={busy}
               save={(input) =>
@@ -266,15 +308,27 @@ export function AdministrationPanel({
             />
           ) : (
             <DepartmentForm
-              department={departments.find((d) => d.id === editing)}
+              department={departmentRows.find((d) => d.node.id === editing)?.node}
+              departmentRows={departmentRows}
+              legalEntities={legalEntities}
+              members={members}
               busy={busy}
-              save={(name) =>
-                mutate(() =>
-                  saveAdministration('departments', editing === 'new' ? undefined : editing, {
-                    name,
-                  }),
-                )
-              }
+              save={(input) => {
+                const editingDepartment = departmentRows.find(
+                  (d) => d.node.id === editing,
+                )?.node;
+                return mutate(async () => {
+                  if (editing === 'new') {
+                    await saveAdministration('departments', undefined, input);
+                    return;
+                  }
+                  // PUT 只改字段、不动层级（防环校验只在移动端点里），
+                  // 所以上级部门变了要额外调一次移动，否则这个选择框等于摆设。
+                  await saveAdministration('departments', editing, input);
+                  if ((input.parentId ?? null) !== (editingDepartment?.parentId ?? null))
+                    await moveDepartment(editing, input.parentId ?? null);
+                });
+              }}
             />
           )}
         </Editor>
@@ -419,12 +473,14 @@ function Status({
 function MemberForm({
   member,
   roles,
+  canReadRoles,
   departments,
   busy,
   save,
 }: {
   member: MemberView | undefined;
   roles: RoleView[];
+  canReadRoles: boolean;
   departments: DepartmentView[];
   busy: boolean;
   save: (
@@ -467,43 +523,59 @@ function MemberForm({
           required={assignments.some((a) => a.scopeMode === 'DEPARTMENT')}
         >
           <option value="">未设置部门</option>
-          {departments.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.name}
+          {flattenDepartments(departments).map((row) => (
+            <option key={row.node.id} value={row.node.id}>
+              {'　'.repeat(row.depth)}
+              {row.node.name}
             </option>
           ))}
         </select>
       </Field>
       <fieldset disabled={member?.owner ?? false} className="space-y-3">
         <legend className="mb-2 text-sm font-medium">角色与数据范围</legend>
-        {roles
-          .filter(
-            (r) =>
-              !r.system && (r.status === 'ACTIVE' || assignments.some((a) => a.roleId === r.id)),
-          )
-          .map((r) => (
-            <Field key={r.id} label={r.name}>
-              <select
-                className={control}
-                value={assignments.find((a) => a.roleId === r.id)?.scopeMode ?? ''}
-                onChange={(e) =>
-                  setAssignments(assignRole(assignments, r.id, e.target.value || null))
-                }
-              >
-                <option value="">不分配</option>
-                {Object.entries(scopeLabels)
-                  .filter(
-                    ([scope]) =>
-                      scope === 'ALL' || r.permissions.every((p) => p.startsWith('catalog.')),
-                  )
-                  .map(([scope, label]) => (
-                    <option key={scope} value={scope}>
-                      {label}
-                    </option>
-                  ))}
-              </select>
-            </Field>
-          ))}
+        {/* 角色列表读不到时必须说出来：空 fieldset 看起来像"没有可分配的角色"，
+            实际是该管理员缺 identity.role.read，成员会被建成没有角色的裸账号。 */}
+        {!canReadRoles && (
+          <p role="alert" className="text-warning rounded-md border p-3 text-xs">
+            当前角色没有「角色配置」查看权限，读不到可分配的角色列表。这位成员将只能保存账号与部门，
+            角色需要由租户所有者另行分配。
+          </p>
+        )}
+        {canReadRoles &&
+          roles
+            .filter(
+              (r) =>
+                !r.system && (r.status === 'ACTIVE' || assignments.some((a) => a.roleId === r.id)),
+            )
+            .map((r) => (
+              <Field key={r.id} label={r.name}>
+                <select
+                  className={control}
+                  value={assignments.find((a) => a.roleId === r.id)?.scopeMode ?? ''}
+                  onChange={(e) =>
+                    setAssignments(assignRole(assignments, r.id, e.target.value || null))
+                  }
+                >
+                  <option value="">不分配</option>
+                  {Object.entries(scopeLabels)
+                    .filter(
+                      ([scope]) =>
+                        scope === 'ALL' || r.permissions.every((p) => p.startsWith('catalog.')),
+                    )
+                    .map(([scope, label]) => (
+                      <option key={scope} value={scope}>
+                        {label}
+                      </option>
+                    ))}
+                </select>
+              </Field>
+            ))}
+        {canReadRoles &&
+          roles.filter((r) => !r.system).length === 0 && (
+            <p className="text-muted-foreground text-xs">
+              租户内还没有可分配的自定义角色，请先到「角色配置」新建。
+            </p>
+          )}
       </fieldset>
     </Form>
   );
@@ -615,16 +687,50 @@ function ChildForm({
 }
 function DepartmentForm({
   department,
+  departmentRows,
+  legalEntities,
+  members,
   busy,
   save,
 }: {
   department: DepartmentView | undefined;
+  departmentRows: DepartmentRow[];
+  legalEntities: LegalEntityView[];
+  members: MemberView[];
   busy: boolean;
-  save: (name: string) => Promise<void>;
+  save: (input: DepartmentInput) => Promise<void>;
 }) {
+  const [code, setCode] = useState(department?.code ?? '');
   const [name, setName] = useState(department?.name ?? '');
+  const [parentId, setParentId] = useState(department?.parentId ?? '');
+  const [legalEntityId, setLegalEntityId] = useState(department?.legalEntityId ?? '');
+  const [leaderMembershipId, setLeader] = useState(department?.leaderMembershipId ?? '');
+  // 编辑时不能把自己或自己的子孙选为上级，否则一次保存就会造成环
+  const candidates = departmentRows.filter((row) => row.node.id !== department?.id);
   return (
-    <Form busy={busy} submit={() => save(name)}>
+    <Form
+      busy={busy}
+      submit={() =>
+        save({
+          code: code.trim().toUpperCase(),
+          name: name.trim(),
+          // 层级调整走独立端点 PUT /departments/{id}/parent，这里只提交字段
+          parentId: parentId || null,
+          legalEntityId: legalEntityId || null,
+          leaderMembershipId: leaderMembershipId || null,
+        })
+      }
+    >
+      <Field label="部门编码" hint="租户内唯一，只允许大写字母、数字、下划线和中划线。">
+        <input
+          className={control}
+          required
+          maxLength={64}
+          pattern="[A-Z0-9_\-]{1,64}"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+        />
+      </Field>
       <Field label="部门名称">
         <input
           className={control}
@@ -633,6 +739,63 @@ function DepartmentForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+      </Field>
+      <Field label="上级部门" hint="留空表示根部门。层级也可以在树上拖拽调整。">
+        <select
+          className={control}
+          value={parentId}
+          onChange={(e) => setParentId(e.target.value)}
+        >
+          <option value="">（根部门）</option>
+          {candidates.map((row) => (
+            <option key={row.node.id} value={row.node.id}>
+              {'　'.repeat(row.depth)}
+              {row.node.name}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field
+        label="所属法人"
+        hint={
+          legalEntities.length === 0
+            ? '法人档案为空或当前角色没有法人查看权限；部门是组织维度，可以先不设法人。'
+            : '法人是法律主体，与部门这个组织维度互相独立。'
+        }
+      >
+        <select
+          className={control}
+          value={legalEntityId}
+          onChange={(e) => setLegalEntityId(e.target.value)}
+        >
+          <option value="">（不设所属法人）</option>
+          {legalEntities.map((entity) => (
+            <option key={entity.id} value={entity.id}>
+              {entity.legalName}（{entity.code}）
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field
+        label="部门负责人"
+        hint={
+          members.length === 0
+            ? '负责人需要成员查看权限才能选择；没有负责人的部门要在审批流里指定兜底人。'
+            : '负责人只是一个成员引用；代管与临时授权属于「部门负责人」模块，不在这里配置。'
+        }
+      >
+        <select
+          className={control}
+          value={leaderMembershipId}
+          onChange={(e) => setLeader(e.target.value)}
+        >
+          <option value="">（暂不指定负责人）</option>
+          {members.map((member) => (
+            <option key={member.id} value={member.id}>
+              {member.username}
+            </option>
+          ))}
+        </select>
       </Field>
     </Form>
   );

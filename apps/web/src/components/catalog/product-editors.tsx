@@ -120,18 +120,13 @@ export function SpuEditor({
           />
         </Field>
         {product && (
-          <Field label="SPU 状态" hint="启用前至少需要一个完整且已启用的 SKU。">
-            <select
-              className={control}
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value })}
-            >
-              {['DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED'].map((s) => (
-                <option key={s} value={s}>
-                  {statuses[s]}
-                </option>
-              ))}
-            </select>
+          <Field
+            label="SPU 状态"
+            hint="状态只能在「生命周期与批量规则」中按合法转换流转，并填写变更原因。"
+          >
+            <p className="bg-muted/40 rounded-md border px-3 py-2 text-sm">
+              {statuses[product.status] ?? product.status}
+            </p>
           </Field>
         )}
         <Submit {...state} close={close} />

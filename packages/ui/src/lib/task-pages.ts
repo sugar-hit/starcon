@@ -101,6 +101,15 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['创建子租户', '指定所有者', '切换租户'],
   },
   {
+    href: '/org/hierarchy',
+    implemented: true,
+    domain: 'org',
+    label: '层级授权',
+    description: '父租户访问子租户数据的显式授权：数据域、只读可写、有效期与撤销。',
+    fields: ['子租户', '数据域', '权限级别', '有效期', '状态'],
+    workflow: ['新增授权', '调整范围', '撤销授权'],
+  },
+  {
     href: '/listings',
     implemented: true,
     domain: 'listings',
@@ -416,6 +425,33 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['邀请成员', '分配角色', '定期复核'],
   },
   {
+    href: '/org/legal-entities',
+    implemented: true,
+    domain: 'org',
+    label: '法人档案',
+    description: '维护法人主体、注册信息、本位币与账簿舍入规则。',
+    fields: ['法人编码', '法定名称', '本位币', '注册国家', '登记号', '状态'],
+    workflow: ['新增法人', '维护资料', '店铺绑定'],
+  },
+  {
+    href: '/org/accounting-books',
+    implemented: true,
+    domain: 'org',
+    label: '会计账簿',
+    description: '为法人配置会计账簿、本位币与记账规则（精度、舍入、期间设置）。',
+    fields: ['所属法人', '账簿类型', '本位币', '金额/数量精度', '期间粒度', '会计年度起始月'],
+    workflow: ['新增账簿', '设置记账规则', '核对会计年度'],
+  },
+  {
+    href: '/org/business-parameters',
+    implemented: true,
+    domain: 'org',
+    label: '业务参数',
+    description: '配置全局与分场景业务参数默认值，按全局、法人、店铺三档解析生效值并保留变更历史。',
+    fields: ['参数', '出厂默认值', '生效范围', '生效值', '来源档位', '变更历史'],
+    workflow: ['新增覆盖配置', '核对生效值', '冻结单据参数'],
+  },
+  {
     href: '/org/stores',
     implemented: false,
     domain: 'org',
@@ -434,13 +470,26 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['定义范围', '审批授权', '定期审计'],
   },
   {
+    // 17.5.3.1 审计日志。只读：记录由各操作点追加，页面没有新建/编辑入口。
+    // 与 17.5.3.2 操作日志用途不同，这里不含登录流水、错误堆栈与请求 ID 链路。
     href: '/org/audit',
-    implemented: false,
+    implemented: true,
     domain: 'org',
-    label: '操作审计',
-    description: '检索关键操作、规则变更与授权记录。',
-    fields: ['操作时间', '操作人', '业务对象', '动作', '结果', '追踪编号'],
+    label: '审计日志',
+    description: '检索关键操作留痕、授权上下文与脱敏后的变更详情，并按条件导出。',
+    fields: ['发生时间', '操作人', '动作', '资源类型', '授权上下文', '变更详情'],
     workflow: ['检索记录', '核对变更', '导出审计'],
+  },
+  {
+    // 17.5.3.2 操作日志。排障用，含技术细节（耗时、状态码、错误堆栈）与请求 ID 链路。
+    // 与审计日志的分野是实的：这里可按留存期清理，审计不可篡改、长期留存。
+    href: '/org/operation-log',
+    implemented: true,
+    domain: 'org',
+    label: '操作日志',
+    description: '检索登录、API 调用、任务执行与错误堆栈，按请求 ID 查看完整链路。',
+    fields: ['发生时间', '事件类型', '级别', '请求 ID', '操作人', '摘要', '耗时'],
+    workflow: ['检索日志', '查看链路', '定位错误'],
   },
   {
     href: '/logistics',
@@ -497,6 +546,20 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['建立仓库', '划分库区', '维护库位'],
   },
   {
+    // 8.1.1.1 仓库列表：路由取蓝图 08 的 L3 锚点 /warehouse/facilities。
+    // 导航条目由 SYSTEMS 的 children 从 IMPLEMENTED_TASK_PAGES 派生（见 nav-config），
+    // 所以这里**只**登记任务页，不需要改共享的导航常量文件。
+    // 与上一条 /warehouse（L3「仓库与库位」入口，库位树属 8.1.2.x）并列而不同名：
+    // 两条都指向仓库域，但一个是 L3 伞页，一个是已交付的列表本体。
+    href: '/warehouse/facilities',
+    implemented: true,
+    domain: 'warehouse',
+    label: '仓库列表',
+    description: '查看仓库类型、货权法人、国家与时区、库存量与作业量，并新增仓库。',
+    fields: ['仓库', '类型', '所属法人', '国家地区', '时区', '库存量', '作业量', '状态'],
+    workflow: ['筛选仓库', '核对货权与库存', '新增仓库'],
+  },
+  {
     href: '/warehouse/inbound',
     implemented: false,
     domain: 'warehouse',
@@ -507,7 +570,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/warehouse/outbound',
-    implemented: false,
+    implemented: true,
     domain: 'warehouse',
     label: '拣货与出库',
     description: '按波次完成拣货、复核、包装和出库交接。',
@@ -552,7 +615,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/inventory/ledger',
-    implemented: false,
+    implemented: true,
     domain: 'inventory',
     label: '库存流水',
     description: '逐笔核对出入库、调拨和调整的库存变化。',
@@ -561,7 +624,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/inventory/aging',
-    implemented: false,
+    implemented: true,
     domain: 'inventory',
     label: '库龄与预警',
     description: '识别断货、滞销和超龄库存并安排处理。',
@@ -595,9 +658,14 @@ export const ACCOUNT_MENU_ORDER = [
   '/org/roles',
   '/org/departments',
   '/org/children',
+  '/org/hierarchy',
+  '/org/legal-entities',
+  '/org/accounting-books',
+  '/org/business-parameters',
   '/org/stores',
   '/org/permissions',
   '/org/audit',
+  '/org/operation-log',
 ];
 export function isAccountDomain(domain: string): boolean {
   return ACCOUNT_DOMAINS.has(domain);

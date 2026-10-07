@@ -135,14 +135,40 @@ public class ChannelService {
   // 2.1.2 平台枚举映射
   // ------------------------------------------------------------------
 
-  public List<EnumMappingView> enumMappings(String platformCode, String enumKind) {
-    Result<?> rows =
+  /**
+   * 2.1.2.1 生效映射：平台默认 + 租户覆盖，租户覆盖优先。
+   *
+   * <p>两条查询在 Java 里按 (enum_kind, external_value) 合并，而不是在 SQL 里做 full outer
+   * join：覆盖表与码表都是小表（每个平台几十行），可读性比省一次往返重要。合并键相同
+   * 时后写入的租户覆盖替换平台默认——这正是"平台默认 + 租户覆盖"的语义。
+   */
+  public List<EnumMappingView> enumMappings(UUID tenantId, String platformCode, String enumKind) {
+    boolean filtered = enumKind != null && !enumKind.isBlank();
+    String filter = filtered ? " and enum_kind=?" : "";
+    Map<String, EnumMappingView> merged = new LinkedHashMap<>();
+    for (Record r :
         sql.fetch(
-            "select m.id,m.platform_code,m.enum_kind,m.external_value,m.internal_value"
+            "select m.id,p.code platform_code,m.enum_kind,m.external_value,m.internal_value,'PLATFORM' source"
                 + " from platform_enum_mapping m join platform p on p.id=m.platform_id"
-                + " where p.code=? and (?='' or m.enum_kind=?) order by m.enum_kind,m.external_value",
-            platformCode, enumKind, enumKind);
-    return rows.stream().map(r -> mapEnum(r)).toList();
+                + " where p.code=?"
+                + filter
+                + " order by m.enum_kind,m.external_value",
+            filtered ? new Object[] {platformCode, enumKind} : new Object[] {platformCode}))
+      merged.put(enumKey(r.get("enum_kind", String.class), r.get("external_value", String.class)), mapEnum(r));
+    for (Record r :
+        sql.fetch(
+            "select o.id,p.code platform_code,o.enum_kind,o.external_value,o.internal_value,'TENANT' source"
+                + " from platform_enum_override o join platform p on p.id=o.platform_id"
+                + " where o.tenant_id=? and p.code=?"
+                + filter
+                + " order by o.enum_kind,o.external_value",
+            filtered ? new Object[] {tenantId, platformCode, enumKind} : new Object[] {tenantId, platformCode}))
+      merged.put(enumKey(r.get("enum_kind", String.class), r.get("external_value", String.class)), mapEnum(r));
+    return List.copyOf(merged.values());
+  }
+
+  private static String enumKey(String kind, String externalValue) {
+    return kind + " " + externalValue;
   }
 
   private static EnumMappingView mapEnum(Record r) {
@@ -151,20 +177,100 @@ public class ChannelService {
         r.get("platform_code", String.class),
         r.get("enum_kind", String.class),
         r.get("external_value", String.class),
-        r.get("internal_value", String.class));
+        r.get("internal_value", String.class),
+        r.get("source", String.class));
   }
 
   /**
-   * 解析平台枚举。
+   * 2.1.2.1 登记或改写本租户的映射覆盖。
+   *
+   * <p>同一个 (平台, 枚举种类, 外部值) 重复登记就是改写——用户改主意是正常操作，不该被
+   * 唯一约束挡成 500。全局默认表不碰。
+   */
+  public UUID putEnumOverride(AccessService.Access actor, String platformCode, EnumOverrideInput input) {
+    UUID platformId = requirePlatform(platformCode);
+    String kind = input.enumKind().trim();
+    String external = input.externalValue().trim();
+    String internal = input.internalValue().trim();
+    UUID id =
+        one(
+            UUID.class,
+            "select id from platform_enum_override where tenant_id=? and platform_id=? and enum_kind=? and external_value=?",
+            actor.tenantId(),
+            platformId,
+            kind,
+            external);
+    if (id == null) {
+      id = Ids.next();
+      sql.execute(
+          "insert into platform_enum_override(id,tenant_id,platform_id,enum_kind,external_value,internal_value)"
+              + " values (?,?,?,?,?,?)",
+          id,
+          actor.tenantId(),
+          platformId,
+          kind,
+          external,
+          internal);
+    } else {
+      sql.execute(
+          "update platform_enum_override set internal_value=? where tenant_id=? and id=?",
+          internal,
+          actor.tenantId(),
+          id);
+    }
+    audit(actor, id, "channel.registry.enum.override");
+    return id;
+  }
+
+  /**
+   * 删除覆盖后，该外部值回落到平台默认；平台默认本身没有删除入口。
+   *
+   * <p>平台码进 WHERE 而不是只做校验：路径与行对不上时返回同一个"不存在"，
+   * 避免调用方拿到"别人的 id 被删了"这种含混反馈。
+   */
+  public void deleteEnumOverride(AccessService.Access actor, String platformCode, UUID id) {
+    int deleted =
+        sql.execute(
+            "delete from platform_enum_override where tenant_id=? and id=?"
+                + " and platform_id=(select id from platform where code=?)",
+            actor.tenantId(),
+            id,
+            platformCode);
+    if (deleted == 0) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "映射覆盖不存在");
+    audit(actor, id, "channel.registry.enum.override.delete");
+  }
+
+  private UUID requirePlatform(String platformCode) {
+    UUID platformId = one(UUID.class, "select id from platform where code=?", platformCode);
+    if (platformId == null)
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "平台不存在：" + platformCode);
+    return platformId;
+  }
+
+  /**
+   * 解析平台枚举：租户覆盖优先，其次平台默认，都没有则返回 null。
    *
    * <p>2.1.2.1 铁律：映射缺失必须显式报"未映射"，绝不默认落到兜底状态——否则状态机被污染。
+   * 返回 {@code null} 就是"未映射"的信号，调用方必须自己报错，不许替换默认值。
    */
-  public String resolveEnum(UUID platformId, String enumKind, String externalValue) {
+  public String resolveEnum(UUID tenantId, UUID platformId, String enumKind, String externalValue) {
+    String overridden =
+        one(
+            String.class,
+            "select internal_value from platform_enum_override"
+                + " where tenant_id=? and platform_id=? and enum_kind=? and external_value=?",
+            tenantId,
+            platformId,
+            enumKind,
+            externalValue);
+    if (overridden != null) return overridden;
     return one(
         String.class,
-        "select m.internal_value from platform_enum_mapping m"
-            + " where m.platform_id=? and m.enum_kind=? and m.external_value=?",
-        platformId, enumKind, externalValue);
+        "select internal_value from platform_enum_mapping"
+            + " where platform_id=? and enum_kind=? and external_value=?",
+        platformId,
+        enumKind,
+        externalValue);
   }
 
   // ------------------------------------------------------------------

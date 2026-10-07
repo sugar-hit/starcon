@@ -140,10 +140,12 @@ export default function HomePage() {
 
       <SectionCard title="准备好你的业务空间" description="建议按以下顺序完成基础配置">
         <div className="grid gap-4 md:grid-cols-3">
+          {/* 这三步只指向已经能用的工作区。指向未开发的模块等于让用户点进去撞到
+              "规划中"，那是假承诺，不是引导。 */}
           {[
-            ['01', '连接销售渠道', '配置平台店铺与授权状态', '/org/stores'],
-            ['02', '整理商品资料', '建立 SKU 与平台商品对应关系', '/products'],
-            ['03', '配置仓库与库存', '明确可用库存、库位和履约范围', '/warehouse'],
+            ['01', '连接销售渠道', '授权平台连接，建店铺与站点', '/channels'],
+            ['02', '整理商品资料', '建立 SPU、分类与公共属性', '/products'],
+            ['03', '配置组织与权限', '部门、成员、角色与数据范围', '/org'],
           ].map(([step, title, description, href]) => (
             <Link
               key={step}

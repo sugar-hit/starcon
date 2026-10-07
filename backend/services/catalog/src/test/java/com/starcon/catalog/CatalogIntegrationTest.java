@@ -345,6 +345,7 @@ class CatalogIntegrationTest {
                     "S-" + UUID.randomUUID(),
                     List.of(new ValueInput(fixed.id(), "SET", List.of("4K")))))
         .hasMessageContaining("不能由 SKU 覆写");
+    // SPU 状态不再由资料更新接口改写，必须走生命周期。
     assertThatThrownBy(
             () ->
                 tx.run(
@@ -354,14 +355,14 @@ class CatalogIntegrationTest {
                             actor,
                             p,
                             new SpuInput(
-                                "ACTIVE",
+                                "PHONE",
                                 "Phone",
                                 "",
                                 "",
                                 "",
-                                "ACTIVE",
+                                "ON_SALE",
                                 detail(p).product().version()))))
-        .hasMessageContaining("至少启用一个");
+        .hasMessageContaining("生命周期");
   }
 
   @Test

@@ -11,9 +11,74 @@
     }
   ],
   "paths": {
+    "/identity/tenants/current": {
+      "get": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "tenantContext",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantContextView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "updateTenantProfile",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantProfileInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/roles/{id}": {
       "put": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "updateRole",
         "parameters": [
           {
@@ -60,7 +125,9 @@
         }
       },
       "delete": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "deleteRole",
         "parameters": [
           {
@@ -89,9 +156,175 @@
         }
       }
     },
+    "/identity/numbering/rules/{id}": {
+      "get": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "rule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NumberRuleView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NumberRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/members/{membershipId}/role-assignments/{roleId}": {
+      "put": {
+        "tags": [
+          "role-assignment-controller"
+        ],
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "membershipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberRoleAssignmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/members/{id}": {
       "put": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "updateMember",
         "parameters": [
           {
@@ -130,7 +363,9 @@
         }
       },
       "delete": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "removeMember",
         "parameters": [
           {
@@ -159,9 +394,209 @@
         }
       }
     },
+    "/identity/legal-entities/{id}": {
+      "put": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "legalEntityUpdate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "legalEntityDelete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/hierarchy-authorizations/{id}": {
+      "put": {
+        "tags": [
+          "hierarchy-authorization-controller"
+        ],
+        "operationId": "update_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HierarchyGrantUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/dict-items/{id}": {
+      "get": {
+        "tags": [
+          "dictionary-controller"
+        ],
+        "operationId": "item",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DictItemView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "dictionary-controller"
+        ],
+        "operationId": "update_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DictItemInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/departments/{id}": {
       "put": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "updateDepartment",
         "parameters": [
           {
@@ -200,8 +635,135 @@
         }
       },
       "delete": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "deleteDepartment",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/departments/{id}/parent": {
+      "put": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "moveDepartment",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DepartmentMove"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/departments/{id}/leader": {
+      "put": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "setDepartmentLeader",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DepartmentLeaderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "clearDepartmentLeader",
         "parameters": [
           {
             "name": "Authorization",
@@ -231,7 +793,9 @@
     },
     "/identity/children/{id}": {
       "put": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "updateChild",
         "parameters": [
           {
@@ -270,9 +834,159 @@
         }
       }
     },
+    "/identity/business-parameters/overrides/{id}": {
+      "put": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "update_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessParameterOverrideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "delete_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/accounting-books/{id}": {
+      "put": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "update_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountingBookInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "delete_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/roles": {
       "get": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "roles",
         "parameters": [
           {
@@ -302,7 +1016,9 @@
         }
       },
       "post": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "createRole",
         "parameters": [
           {
@@ -342,7 +1058,9 @@
     },
     "/identity/owner-transfer": {
       "post": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "transfer",
         "parameters": [
           {
@@ -372,9 +1090,657 @@
         }
       }
     },
+    "/identity/operation-log/purge": {
+      "post": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "purge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationLogPurge"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/onboardings": {
+      "get": {
+        "tags": [
+          "member-onboarding-controller"
+        ],
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OnboardingView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "member-onboarding-controller"
+        ],
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/onboardings/{id}/complete": {
+      "post": {
+        "tags": [
+          "member-onboarding-controller"
+        ],
+        "operationId": "complete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/offboarding": {
+      "get": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "cases",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OffboardingCaseView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "create_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OffboardingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/offboarding/{id}/revert": {
+      "post": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "revert",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/offboarding/{caseId}/responsibility-items": {
+      "post": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "addResponsibilityItem",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OffboardingResponsibilityInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/offboarding/{caseId}/responsibility-items/{itemId}/transfer": {
+      "post": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "transferResponsibility",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OffboardingTransferInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/offboarding/{caseId}/reclaim-items": {
+      "post": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "addReclaimItem",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OffboardingReclaimInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/offboarding/{caseId}/reclaim-items/{itemId}/reclaim": {
+      "post": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "reclaimItem",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OffboardingReclaimActionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/numbering/rules": {
+      "get": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ruleKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NumberRuleView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "create_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NumberRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/numbering/rules/{id}/next": {
+      "post": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "next",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NumberIssueInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NumberIssuedView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/numbering/preview": {
+      "post": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "preview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NumberPreviewInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NumberPreviewView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identity/members": {
       "get": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "members",
         "parameters": [
           {
@@ -404,7 +1770,9 @@
         }
       },
       "post": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "createMember",
         "parameters": [
           {
@@ -442,9 +1810,679 @@
         }
       }
     },
+    "/identity/members/{membershipId}/role-assignments": {
+      "post": {
+        "tags": [
+          "role-assignment-controller"
+        ],
+        "operationId": "create_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "membershipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberRoleAssignmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/members/{membershipId}/role-assignments/{roleId}/revoke": {
+      "post": {
+        "tags": [
+          "role-assignment-controller"
+        ],
+        "operationId": "revoke",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "membershipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/legal-entities": {
+      "get": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "legalEntities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LegalEntityView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "legalEntityCreate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/legal-entities/{legalEntityId}/accounting-books": {
+      "post": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "create_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountingBookInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/legal-entities/references": {
+      "post": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "legalEntityReference",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityReferenceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/hierarchy-authorizations": {
+      "get": {
+        "tags": [
+          "hierarchy-authorization-controller"
+        ],
+        "operationId": "grants",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HierarchyGrantView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "hierarchy-authorization-controller"
+        ],
+        "operationId": "create_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HierarchyGrantInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/hierarchy-authorizations/{id}/revoke": {
+      "post": {
+        "tags": [
+          "hierarchy-authorization-controller"
+        ],
+        "operationId": "revoke_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/hierarchy-authorizations/check": {
+      "post": {
+        "tags": [
+          "hierarchy-authorization-controller"
+        ],
+        "operationId": "check",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessCheckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessDecisionView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/dict-items": {
+      "get": {
+        "tags": [
+          "dictionary-controller"
+        ],
+        "operationId": "items",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dictCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DictItemView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "dictionary-controller"
+        ],
+        "operationId": "create_6",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DictItemInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/dict-items/{id}/usage": {
+      "get": {
+        "tags": [
+          "dictionary-controller"
+        ],
+        "operationId": "usages",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DictItemUsageView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "dictionary-controller"
+        ],
+        "operationId": "recordUsage",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DictItemUsageInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/dict-items/{id}/reactivate": {
+      "post": {
+        "tags": [
+          "dictionary-controller"
+        ],
+        "operationId": "reactivate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DictItemStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/dict-items/{id}/deactivate": {
+      "post": {
+        "tags": [
+          "dictionary-controller"
+        ],
+        "operationId": "deactivate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DictItemStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/departments": {
       "get": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "departments",
         "parameters": [
           {
@@ -474,7 +2512,9 @@
         }
       },
       "post": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "createDepartment",
         "parameters": [
           {
@@ -512,9 +2552,113 @@
         }
       }
     },
+    "/identity/departments/{id}/leader/proxies": {
+      "post": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "createLeaderProxy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaderProxyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/departments/{id}/leader/grants": {
+      "post": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "createLeaderGrant",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaderGrantInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identity/children": {
       "get": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "children",
         "parameters": [
           {
@@ -544,7 +2688,9 @@
         }
       },
       "post": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "createChild",
         "parameters": [
           {
@@ -582,9 +2728,143 @@
         }
       }
     },
+    "/identity/business-parameters/overrides": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "overrides",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "parameterCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessParameterOverrideView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "create_7",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessParameterOverrideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/freezes": {
+      "post": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "freeze",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessParameterFreezeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/switch": {
       "post": {
-        "tags": ["identity-controller"],
+        "tags": [
+          "identity-controller"
+        ],
         "operationId": "switchMembership",
         "parameters": [
           {
@@ -616,7 +2896,9 @@
     },
     "/auth/logout": {
       "post": {
-        "tags": ["identity-controller"],
+        "tags": [
+          "identity-controller"
+        ],
         "operationId": "logout",
         "parameters": [
           {
@@ -638,7 +2920,9 @@
     },
     "/auth/login": {
       "post": {
-        "tags": ["identity-controller"],
+        "tags": [
+          "identity-controller"
+        ],
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -666,7 +2950,9 @@
     },
     "/internal/access": {
       "get": {
-        "tags": ["identity-controller"],
+        "tags": [
+          "identity-controller"
+        ],
         "operationId": "access",
         "parameters": [
           {
@@ -700,9 +2986,122 @@
         }
       }
     },
+    "/identity/tenants": {
+      "get": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "tenants",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TenantSummaryView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/role-assignments": {
+      "get": {
+        "tags": [
+          "role-assignment-controller"
+        ],
+        "operationId": "assignments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "membershipId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoleAssignmentView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/role-assignment-scopes": {
+      "get": {
+        "tags": [
+          "role-assignment-controller"
+        ],
+        "operationId": "scopeOptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoleAssignmentScopeOption"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identity/permissions": {
       "get": {
-        "tags": ["administration-controller"],
+        "tags": [
+          "administration-controller"
+        ],
         "operationId": "permissions",
         "parameters": [
           {
@@ -732,9 +3131,1170 @@
         }
       }
     },
+    "/identity/operation-log": {
+      "get": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "search",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "actorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "eventType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationLogPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/operation-log/{id}": {
+      "get": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationLogDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/operation-log/trace/{requestId}": {
+      "get": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "trace",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationLogTrace"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/operation-log/export": {
+      "get": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "actorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "eventType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/offboarding/{id}": {
+      "get": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "detail_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OffboardingDetailView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/numbering/sequences": {
+      "get": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "sequences",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NumberSequenceView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/numbering/rules/conflicts": {
+      "get": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "conflicts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NumberRuleConflictView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/numbering/issued": {
+      "get": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "issued",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NumberIssuedView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/numbering/entities": {
+      "get": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "entities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NumberEntityView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/members/{membershipId}/effective-permissions": {
+      "get": {
+        "tags": [
+          "role-assignment-controller"
+        ],
+        "operationId": "effective",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "membershipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleAssignmentMergeView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/dict-items/options/{dictCode}": {
+      "get": {
+        "tags": [
+          "dictionary-controller"
+        ],
+        "operationId": "options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dictCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DictItemView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/dict-history": {
+      "get": {
+        "tags": [
+          "dictionary-controller"
+        ],
+        "operationId": "history",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dictCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DictHistoryView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/dict-catalog": {
+      "get": {
+        "tags": [
+          "dictionary-controller"
+        ],
+        "operationId": "catalog",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DictCatalogView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/departments/{id}/approval-chain": {
+      "get": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "approvalChain",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "asOf",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalChainView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/department-leaders": {
+      "get": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "departmentLeaders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DepartmentLeaderView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "definitions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessParameterDefinitionView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/history": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "history_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "parameterCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessParameterHistoryView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/freezes/{documentType}/{documentNo}": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "frozen",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "documentType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentNo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessParameterFreezeView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/effective": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "effective_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessParameterEffectiveView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/audit": {
+      "get": {
+        "tags": [
+          "audit-controller"
+        ],
+        "operationId": "search_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "resourceType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "actorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/audit/{id}": {
+      "get": {
+        "tags": [
+          "audit-controller"
+        ],
+        "operationId": "detail_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/audit/export": {
+      "get": {
+        "tags": [
+          "audit-controller"
+        ],
+        "operationId": "export_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "resourceType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "actorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/accounting-books": {
+      "get": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "accountingBooks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountingBookView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/session": {
       "get": {
-        "tags": ["identity-controller"],
+        "tags": [
+          "identity-controller"
+        ],
         "operationId": "session",
         "parameters": [
           {
@@ -763,7 +4323,9 @@
     },
     "/auth/memberships": {
       "get": {
-        "tags": ["identity-controller"],
+        "tags": [
+          "identity-controller"
+        ],
         "operationId": "memberships",
         "parameters": [
           {
@@ -792,12 +4354,119 @@
           }
         }
       }
+    },
+    "/identity/departments/{id}/leader/proxies/{proxyId}": {
+      "delete": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "deleteLeaderProxy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "proxyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/departments/{id}/leader/grants/{grantId}": {
+      "delete": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "deleteLeaderGrant",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "grantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "TenantProfileInput": {
+        "required": [
+          "name",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "pattern": "ACTIVE|SUSPENDED",
+            "type": "string"
+          }
+        }
+      },
       "RoleInput": {
-        "required": ["code", "name", "permissions", "status"],
+        "required": [
+          "code",
+          "name",
+          "permissions",
+          "status"
+        ],
         "type": "object",
         "properties": {
           "code": {
@@ -823,8 +4492,170 @@
           }
         }
       },
+      "NumberRuleInput": {
+        "required": [
+          "entityCode",
+          "ruleKind",
+          "ruleName",
+          "segments"
+        ],
+        "type": "object",
+        "properties": {
+          "entityCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ruleName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleKind": {
+            "pattern": "PRIMARY|COMPONENT",
+            "type": "string"
+          },
+          "status": {
+            "pattern": "ACTIVE|DISABLED",
+            "type": "string"
+          },
+          "timezone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "description": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "segments": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NumberRuleSegmentInput"
+            }
+          }
+        }
+      },
+      "NumberRuleSegmentInput": {
+        "required": [
+          "segmentType"
+        ],
+        "type": "object",
+        "properties": {
+          "segmentType": {
+            "pattern": "PREFIX|DATE|SEQUENCE|SUFFIX|LITERAL|NESTED",
+            "type": "string"
+          },
+          "literalText": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "dateFormat": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sequenceWidth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sequenceStart": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sequenceReset": {
+            "pattern": "NONE|DAILY|MONTHLY|YEARLY",
+            "type": "string"
+          },
+          "sequenceScope": {
+            "pattern": "ENTITY|RULE",
+            "type": "string"
+          },
+          "childRuleId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "MemberRoleAssignmentInput": {
+        "required": [
+          "effectiveFrom",
+          "roleId",
+          "scopeMode",
+          "scopes"
+        ],
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeMode": {
+            "pattern": "ALL|SELF|DEPARTMENT",
+            "type": "string"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentScopeInput"
+            }
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RoleAssignmentScopeInput": {
+        "required": [
+          "scopeId",
+          "scopeType"
+        ],
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "pattern": "LEGAL_ENTITY|SHOP|WAREHOUSE|DEPARTMENT",
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "范围名称；法人与部门由服务端覆写为真实编码，店铺与仓库必填",
+            "nullable": true
+          }
+        }
+      },
       "AssignmentInput": {
-        "required": ["roleId", "scopeMode"],
+        "required": [
+          "roleId",
+          "scopeMode"
+        ],
         "type": "object",
         "properties": {
           "roleId": {
@@ -838,7 +4669,10 @@
         }
       },
       "MemberUpdate": {
-        "required": ["assignments", "status"],
+        "required": [
+          "assignments",
+          "status"
+        ],
         "type": "object",
         "properties": {
           "status": {
@@ -858,19 +4692,225 @@
           }
         }
       },
-      "DepartmentInput": {
-        "required": ["name"],
+      "LegalEntityInput": {
+        "required": [
+          "baseCurrency",
+          "code",
+          "legalName",
+          "status"
+        ],
         "type": "object",
         "properties": {
+          "code": {
+            "minLength": 1,
+            "pattern": "[A-Z0-9_-]{1,64}",
+            "type": "string"
+          },
+          "legalName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "registrationCountry": {
+            "pattern": "[A-Z]{2}",
+            "type": "string"
+          },
+          "registrationNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "taxNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "baseCurrency": {
+            "minLength": 1,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "address": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "amountScale": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantityScale": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "rounding": {
+            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
+            "type": "string"
+          },
+          "status": {
+            "pattern": "ACTIVE|SUSPENDED",
+            "type": "string"
+          }
+        }
+      },
+      "HierarchyGrantUpdate": {
+        "required": [
+          "accessLevel",
+          "domains",
+          "validFrom"
+        ],
+        "type": "object",
+        "properties": {
+          "domains": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "maxLength": 64,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          "accessLevel": {
+            "pattern": "READ|WRITE",
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DictItemInput": {
+        "required": [
+          "dictCode",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "dictCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "itemCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
           "name": {
             "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DepartmentInput": {
+        "required": [
+          "code",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "pattern": "[A-Z0-9_-]{1,64}",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "leaderMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "DepartmentMove": {
+        "type": "object",
+        "properties": {
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "DepartmentLeaderInput": {
+        "required": [
+          "membershipId",
+          "scopeMode"
+        ],
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeMode": {
+            "pattern": "DEPARTMENT|SUBTREE|TENANT",
+            "type": "string"
+          },
+          "approvalLimit": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "approvalCurrency": {
+            "pattern": "[A-Z]{3}",
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
             "minLength": 0,
             "type": "string"
           }
         }
       },
       "ChildUpdate": {
-        "required": ["name", "status"],
+        "required": [
+          "name",
+          "status"
+        ],
         "type": "object",
         "properties": {
           "name": {
@@ -884,8 +4924,123 @@
           }
         }
       },
+      "BusinessParameterOverrideInput": {
+        "required": [
+          "parameterCode",
+          "scopeType",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "parameterCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "scopeType": {
+            "pattern": "GLOBAL|LEGAL_ENTITY|SHOP",
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopLabel": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "AccountingBookInput": {
+        "required": [
+          "baseCurrency",
+          "bookType",
+          "code",
+          "firstPeriodStart",
+          "name",
+          "periodType",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "pattern": "[A-Z0-9_-]{1,64}",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "bookType": {
+            "pattern": "BOOK|CASH|BANK",
+            "type": "string"
+          },
+          "baseCurrency": {
+            "minLength": 1,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "amountScale": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "amountRounding": {
+            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
+            "type": "string"
+          },
+          "quantityScale": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantityRounding": {
+            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
+            "type": "string"
+          },
+          "periodType": {
+            "pattern": "MONTH|WEEK|QUARTER",
+            "type": "string"
+          },
+          "fiscalYearStartMonth": {
+            "maximum": 12,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstPeriodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "pattern": "ACTIVE|SUSPENDED",
+            "type": "string"
+          }
+        }
+      },
       "OwnerTransfer": {
-        "required": ["membershipId"],
+        "required": [
+          "membershipId"
+        ],
         "type": "object",
         "properties": {
           "membershipId": {
@@ -894,8 +5049,422 @@
           }
         }
       },
+      "OperationLogPurge": {
+        "type": "object",
+        "properties": {
+          "removed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "before": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OnboardingInput": {
+        "required": [
+          "roles",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "departmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentInput"
+            }
+          }
+        }
+      },
+      "RoleAssignmentInput": {
+        "required": [
+          "roleId",
+          "scopeMode"
+        ],
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeMode": {
+            "pattern": "ALL|DEPARTMENT|SELF",
+            "type": "string"
+          }
+        }
+      },
+      "OnboardingResult": {
+        "type": "object",
+        "properties": {
+          "onboardingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountMode": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "initialCredential": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OffboardingInput": {
+        "required": [
+          "effectiveAt",
+          "membershipId",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "effectiveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "departmentLeaderSuccessorMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "responsibilityItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffboardingResponsibilityInput"
+            }
+          },
+          "reclaimItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffboardingReclaimInput"
+            }
+          }
+        }
+      },
+      "OffboardingReclaimInput": {
+        "required": [
+          "itemKind",
+          "referenceId",
+          "sourceSystem",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "itemKind": {
+            "pattern": "TODO|TASK",
+            "type": "string"
+          },
+          "sourceSystem": {
+            "minLength": 1,
+            "pattern": "[a-z_]{2,32}",
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "OffboardingResponsibilityInput": {
+        "required": [
+          "itemKind",
+          "referenceId",
+          "sourceSystem",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "itemKind": {
+            "pattern": "DOCUMENT|APPROVAL",
+            "type": "string"
+          },
+          "sourceSystem": {
+            "minLength": 1,
+            "pattern": "[a-z_]{2,32}",
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "successorMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "OffboardingTransferInput": {
+        "required": [
+          "successorMembershipId"
+        ],
+        "type": "object",
+        "properties": {
+          "successorMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "OffboardingReclaimActionInput": {
+        "type": "object",
+        "properties": {
+          "successorMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "NumberIssueInput": {
+        "type": "object",
+        "properties": {
+          "documentDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "documentType": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "documentNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "NumberIssuedView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "sequenceValue": {
+            "type": "number"
+          },
+          "resetKey": {
+            "type": "string"
+          },
+          "documentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NumberPreviewInput": {
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "NumberPreviewPartView": {
+        "type": "object",
+        "properties": {
+          "segmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "segmentType": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "depth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "NumberPreviewView": {
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "entityCode": {
+            "type": "string"
+          },
+          "documentDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "consumed": {
+            "type": "boolean"
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NumberPreviewPartView"
+            }
+          },
+          "sequences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NumberSequencePlanView"
+            }
+          }
+        }
+      },
+      "NumberSequencePlanView": {
+        "type": "object",
+        "properties": {
+          "segmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "segmentType": {
+            "type": "string"
+          },
+          "entityCode": {
+            "type": "string"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "resetKey": {
+            "type": "string"
+          },
+          "resetScope": {
+            "type": "string"
+          },
+          "nextValue": {
+            "type": "number"
+          },
+          "rendered": {
+            "type": "string"
+          }
+        }
+      },
       "MemberInput": {
-        "required": ["assignments", "status", "username"],
+        "required": [
+          "assignments",
+          "status",
+          "username"
+        ],
         "type": "object",
         "properties": {
           "username": {
@@ -926,8 +5495,235 @@
           }
         }
       },
+      "LegalEntityReferenceInput": {
+        "required": [
+          "legalEntityId",
+          "referenceId",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "minLength": 1,
+            "pattern": "[a-z_]{2,32}",
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "HierarchyGrantInput": {
+        "required": [
+          "accessLevel",
+          "childTenantId",
+          "domains",
+          "validFrom"
+        ],
+        "type": "object",
+        "properties": {
+          "childTenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "domains": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "maxLength": 64,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          "accessLevel": {
+            "pattern": "READ|WRITE",
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AccessCheckInput": {
+        "required": [
+          "domain"
+        ],
+        "type": "object",
+        "properties": {
+          "childTenantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "domain": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requireWrite": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AccessDecisionView": {
+        "type": "object",
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "accessLevel": {
+            "type": "string",
+            "nullable": true
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "grantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "DictItemUsageInput": {
+        "required": [
+          "sourceSystem"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceSystem": {
+            "minLength": 1,
+            "pattern": "[a-z_]{2,32}",
+            "type": "string"
+          },
+          "usageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DictItemStatusInput": {
+        "required": [
+          "reason",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "pattern": "ACTIVE|DISABLED",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "LeaderProxyInput": {
+        "required": [
+          "membershipId"
+        ],
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "LeaderGrantInput": {
+        "required": [
+          "approvalCurrency",
+          "approvalLimit",
+          "endsAt",
+          "membershipId",
+          "startsAt"
+        ],
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "approvalLimit": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "approvalCurrency": {
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
       "ChildInput": {
-        "required": ["code", "name", "ownerUsername"],
+        "required": [
+          "code",
+          "name",
+          "ownerUsername"
+        ],
         "type": "object",
         "properties": {
           "code": {
@@ -953,8 +5749,50 @@
           }
         }
       },
+      "BusinessParameterFreezeInput": {
+        "required": [
+          "documentNo",
+          "documentType"
+        ],
+        "type": "object",
+        "properties": {
+          "documentType": {
+            "minLength": 1,
+            "pattern": "[A-Z][A-Z0-9_]{1,31}",
+            "type": "string"
+          },
+          "documentNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopLabel": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
       "SwitchMembership": {
-        "required": ["membershipId"],
+        "required": [
+          "membershipId"
+        ],
         "type": "object",
         "properties": {
           "membershipId": {
@@ -964,7 +5802,10 @@
         }
       },
       "Login": {
-        "required": ["password", "username"],
+        "required": [
+          "password",
+          "username"
+        ],
         "type": "object",
         "properties": {
           "username": {
@@ -1071,6 +5912,81 @@
           }
         }
       },
+      "TenantSummaryView": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "current": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TenantContextView": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "parentTenantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "memberCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "childCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "managed": {
+            "type": "boolean"
+          }
+        }
+      },
       "RoleView": {
         "type": "object",
         "properties": {
@@ -1098,6 +6014,120 @@
           }
         }
       },
+      "RoleAssignmentScopeView": {
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "type": "string",
+            "description": "范围类型",
+            "enum": [
+              "LEGAL_ENTITY",
+              "SHOP",
+              "WAREHOUSE",
+              "DEPARTMENT"
+            ]
+          },
+          "scopeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeCode": {
+            "type": "string"
+          }
+        }
+      },
+      "RoleAssignmentView": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roleCode": {
+            "type": "string"
+          },
+          "roleName": {
+            "type": "string"
+          },
+          "roleStatus": {
+            "type": "string"
+          },
+          "scopeMode": {
+            "type": "string",
+            "description": "范围模式",
+            "enum": [
+              "ALL",
+              "SELF",
+              "DEPARTMENT"
+            ]
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentScopeView"
+            }
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "effectiveStatus": {
+            "type": "string"
+          },
+          "assignedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "revokedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "revokedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "RoleAssignmentScopeOption": {
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "PermissionView": {
         "type": "object",
         "properties": {
@@ -1111,6 +6141,659 @@
             "type": "string"
           },
           "action": {
+            "type": "string"
+          }
+        }
+      },
+      "OperationLogPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OperationLogView"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "OperationLogView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "traceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string"
+          },
+          "httpMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "durationMs": {
+            "type": "number",
+            "nullable": true
+          },
+          "taskName": {
+            "type": "string",
+            "nullable": true
+          },
+          "taskStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorClass": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OperationLogDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "traceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string"
+          },
+          "httpMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "durationMs": {
+            "type": "number",
+            "nullable": true
+          },
+          "taskName": {
+            "type": "string",
+            "nullable": true
+          },
+          "taskStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorClass": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "stackTrace": {
+            "type": "string",
+            "nullable": true
+          },
+          "stackTruncated": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "OperationLogTrace": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OperationLogView"
+            }
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "errorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalDurationMs": {
+            "type": "number"
+          },
+          "spanMs": {
+            "type": "number"
+          },
+          "firstAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "OnboardingView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountMode": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "departmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "departmentName": {
+            "type": "string",
+            "nullable": true
+          },
+          "roleCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "credentialIssued": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "OffboardingCaseView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "memberName": {
+            "type": "string"
+          },
+          "operatorMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operatorName": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "effectiveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          },
+          "previousStatus": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "responsibilityTotal": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "responsibilityPending": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reclaimTotal": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reclaimPending": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revertedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revertedByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "OffboardingDetailView": {
+        "type": "object",
+        "properties": {
+          "offboardingCase": {
+            "$ref": "#/components/schemas/OffboardingCaseView"
+          },
+          "responsibilityItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffboardingResponsibilityView"
+            }
+          },
+          "reclaimItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffboardingReclaimView"
+            }
+          }
+        }
+      },
+      "OffboardingReclaimView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemKind": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "holderMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "successorMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "successorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "reclaimedByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reclaimedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OffboardingResponsibilityView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemKind": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceNo": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "ownerMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "successorMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "successorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "transferredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NumberSequenceView": {
+        "type": "object",
+        "properties": {
+          "entityCode": {
+            "type": "string"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "resetKey": {
+            "type": "string"
+          },
+          "currentValue": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NumberRuleSegmentView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "segmentType": {
+            "type": "string"
+          },
+          "literalText": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateFormat": {
+            "type": "string",
+            "nullable": true
+          },
+          "sequenceWidth": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sequenceStart": {
+            "type": "number",
+            "nullable": true
+          },
+          "sequenceReset": {
+            "type": "string",
+            "nullable": true
+          },
+          "sequenceScope": {
+            "type": "string",
+            "nullable": true
+          },
+          "childRuleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "childRuleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "rendered": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "NumberRuleView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityCode": {
+            "type": "string"
+          },
+          "entityName": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "ruleKind": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "description": {
+            "type": "string"
+          },
+          "sampleNumber": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NumberRuleSegmentView"
+            }
+          }
+        }
+      },
+      "NumberRuleConflictView": {
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "overlaps": {
+            "type": "boolean"
+          }
+        }
+      },
+      "NumberEntityView": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
             "type": "string"
           }
         }
@@ -1148,6 +6831,421 @@
           }
         }
       },
+      "RoleAssignmentInactiveReason": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roleCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "description": "未参与合并的原因",
+            "enum": [
+              "PENDING",
+              "EXPIRED",
+              "REVOKED",
+              "ROLE_INACTIVE"
+            ]
+          }
+        }
+      },
+      "RoleAssignmentMergeView": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "assignmentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "effectiveCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mergeRule": {
+            "type": "string"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentMergedPermission"
+            }
+          },
+          "inactive": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentInactiveReason"
+            }
+          }
+        }
+      },
+      "RoleAssignmentMergedPermission": {
+        "type": "object",
+        "properties": {
+          "permissionCode": {
+            "type": "string"
+          },
+          "pageCode": {
+            "type": "string"
+          },
+          "pageName": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "mergedScopeMode": {
+            "type": "string",
+            "description": "合并后的范围模式",
+            "enum": [
+              "ALL",
+              "SELF",
+              "DEPARTMENT"
+            ]
+          },
+          "sourceRoles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scopeObjects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentScopeView"
+            }
+          },
+          "mergeRule": {
+            "type": "string",
+            "description": "合并规则",
+            "enum": [
+              "SINGLE",
+              "UNION",
+              "ABSORBED_BY_TENANT_SCOPE"
+            ]
+          }
+        }
+      },
+      "LegalEntityView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "registrationCountry": {
+            "type": "string"
+          },
+          "registrationNo": {
+            "type": "string"
+          },
+          "taxNo": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "amountScale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantityScale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rounding": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "referenceCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "HierarchyGrantView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "childTenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "childCode": {
+            "type": "string"
+          },
+          "childName": {
+            "type": "string"
+          },
+          "childStatus": {
+            "type": "string"
+          },
+          "domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "accessLevel": {
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "effectiveStatus": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revokedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "revokedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "DictItemView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dictCode": {
+            "type": "string"
+          },
+          "dictName": {
+            "type": "string"
+          },
+          "itemKind": {
+            "type": "string"
+          },
+          "itemCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "referenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "referencingSystems": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "referenced": {
+            "type": "boolean"
+          },
+          "codeLocked": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disabledReason": {
+            "type": "string"
+          },
+          "disabledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DictItemUsageView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "usageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          },
+          "firstReferencedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastReferencedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DictHistoryView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dictCode": {
+            "type": "string"
+          },
+          "itemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemCode": {
+            "type": "string"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "beforeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "beforeDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "afterName": {
+            "type": "string",
+            "nullable": true
+          },
+          "afterDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "beforeStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "afterStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DictCatalogView": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "itemKind": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "codeLocked": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeItemCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "DepartmentView": {
         "type": "object",
         "properties": {
@@ -1155,8 +7253,180 @@
             "type": "string",
             "format": "uuid"
           },
+          "code": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "leaderMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "leaderName": {
+            "type": "string",
+            "nullable": true
+          },
+          "memberCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DepartmentView"
+            }
+          }
+        }
+      },
+      "ApprovalChainEntry": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "source": {
+            "type": "string"
+          },
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "scopeMode": {
+            "type": "string"
+          },
+          "approvalLimit": {
+            "type": "number",
+            "nullable": true
+          },
+          "approvalCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ApprovalChainView": {
+        "type": "object",
+        "properties": {
+          "departmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "departmentCode": {
+            "type": "string"
+          },
+          "departmentName": {
+            "type": "string"
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "requiresFallback": {
+            "type": "boolean"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalChainEntry"
+            }
+          }
+        }
+      },
+      "DepartmentLeaderView": {
+        "type": "object",
+        "properties": {
+          "leaderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "departmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "departmentCode": {
+            "type": "string"
+          },
+          "departmentName": {
+            "type": "string"
+          },
+          "membershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "scopeMode": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvalLimit": {
+            "type": "number",
+            "nullable": true
+          },
+          "approvalCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "proxyIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "grantIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         }
       },
@@ -1175,6 +7445,557 @@
           },
           "status": {
             "type": "string"
+          }
+        }
+      },
+      "BusinessParameterDefinitionView": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "valueType": {
+            "type": "string"
+          },
+          "defaultValue": {
+            "type": "string"
+          },
+          "defaultValueNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "allowedValueCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "validationPattern": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "BusinessParameterOverrideView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parameterCode": {
+            "type": "string"
+          },
+          "parameterName": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "valueType": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string"
+          },
+          "valueNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "valueCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BusinessParameterHistoryView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parameterCode": {
+            "type": "string"
+          },
+          "parameterName": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "action": {
+            "type": "string"
+          },
+          "beforeValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "beforeValueNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "beforeValueCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "afterValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "afterValueNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "afterValueCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BusinessParameterFreezeValueView": {
+        "type": "object",
+        "properties": {
+          "parameterCode": {
+            "type": "string"
+          },
+          "parameterName": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "valueNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "valueCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sourceScope": {
+            "type": "string"
+          },
+          "sourceScopeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "BusinessParameterFreezeView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentType": {
+            "type": "string"
+          },
+          "documentNo": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "frozenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BusinessParameterFreezeValueView"
+            }
+          }
+        }
+      },
+      "BusinessParameterEffectiveView": {
+        "type": "object",
+        "properties": {
+          "parameterCode": {
+            "type": "string"
+          },
+          "parameterName": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "valueType": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "valueNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "valueCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "sourceScope": {
+            "type": "string"
+          },
+          "sourceScopeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "overrideId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "inherited": {
+            "type": "boolean"
+          },
+          "definitionDefault": {
+            "type": "string"
+          },
+          "definitionDefaultNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "definitionDefaultCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AuditPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditView"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AuditView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "resourceType": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resourceLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "owner": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AuditDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "resourceType": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resourceLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "owner": {
+            "type": "boolean"
+          },
+          "authorization": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "changes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "AccountingBookView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bookType": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "legalEntityCurrency": {
+            "type": "string"
+          },
+          "currencyAligned": {
+            "type": "boolean"
+          },
+          "amountScale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "amountRounding": {
+            "type": "string"
+          },
+          "quantityScale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantityRounding": {
+            "type": "string"
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "fiscalYearStartMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstPeriodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "baseCurrencyChangedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currentFiscalYear": {
+            "type": "string"
+          },
+          "fiscalYearStart": {
+            "type": "string"
+          },
+          "fiscalYearEnd": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }

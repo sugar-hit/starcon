@@ -32,17 +32,19 @@ public class CatalogService {
     return new ResponseStatusException(HttpStatus.NOT_FOUND, "记录不存在或没有访问权限");
   }
 
-  private static String code(String value) {
+  static String code(String value) {
     String normalized = value.trim().toUpperCase(Locale.ROOT);
     check(normalized.matches("[A-Z0-9][A-Z0-9_-]{0,63}"), "编码请使用英文字母、数字、下划线或短横线");
     return normalized;
   }
 
-  private static void status(String value) {
+  /** SKU 仍是四值状态域；SPU 已迁移到 3.1.1.3 的五态生命周期，见 {@link SpuLifecycle}。 */
+  private static void skuStatus(String value) {
     check(Set.of("DRAFT", "ACTIVE", "INACTIVE", "ARCHIVED").contains(value), "无效状态");
   }
 
-  private Record productRow(UUID id) {
+  /** 商品当前行；RLS 与数据范围策略在此生效，取不到即"不存在或无权限"。 */
+  Record productRow(UUID id) {
     var row = sql.fetchOne("select * from spu where id=?", id);
     if (row == null) throw missing();
     return row;
@@ -121,28 +123,29 @@ public class CatalogService {
                       attributes.stream()
                           .map(
                               a -> {
-                                var v =
+                                var common =
                                     sql.fetchOne(
-                                        "select * from attribute_value where attribute_id=? and sku_id=?",
+                                        "select id,state from attribute_value where attribute_id=? and sku_id is null",
+                                        a.id());
+                                var sku =
+                                    sql.fetchOne(
+                                        "select id,state from attribute_value where attribute_id=? and sku_id=?",
                                         a.id(),
                                         sid);
-                                String state = v == null ? "INHERIT" : v.get("state", String.class);
-                                var raw =
-                                    v == null ? List.<String>of() : items(v.get("id", UUID.class));
-                                var effective =
-                                    state.equals("SET")
-                                        ? raw
-                                        : state.equals("CLEAR") || a.valueMode().equals("SKU_ONLY")
-                                            ? List.<String>of()
-                                            : a.defaultValues();
+                                // 有效值解析走 EffectiveValues 这一个实现，3.1.2.2 的属性区
+                                // 与商品档案页共用，避免两处对「公共值 + SKU 覆写」的理解漂移。
+                                var resolved =
+                                    EffectiveValues.resolve(
+                                        a.valueMode(),
+                                        side(common),
+                                        side(sku),
+                                        a.required());
                                 return new EffectiveValue(
                                     a.id(),
-                                    state,
-                                    raw,
-                                    effective,
-                                    state.equals("SET")
-                                        ? "SKU"
-                                        : effective.isEmpty() ? "NONE" : "SPU");
+                                    resolved.overrideState(),
+                                    resolved.rawValues(),
+                                    resolved.effectiveValues(),
+                                    resolved.source().code());
                               })
                           .toList();
                   return new Sku(
@@ -158,10 +161,21 @@ public class CatalogService {
     return new Detail(p, attributes, skus);
   }
 
+  /** 把一行 attribute_value 转成解析器的输入；没有这一行就是「没有赋值」。 */
+  private EffectiveValues.Raw side(Record row) {
+    if (row == null) return new EffectiveValues.Raw(null, List.of());
+    var values =
+        items(row.get("id", UUID.class));
+    return new EffectiveValues.Raw(row.get("state", String.class), values);
+  }
+
+  /**
+   * SPU 资料保存。状态不是自由文本：新建固定为 DRAFT，更新时若携带不同状态一律拒绝，
+   * 状态只能经 {@code POST /products/{id}/lifecycle} 按合法矩阵流转。
+   */
   public UUID saveSpu(AccessService.Access access, UUID id, SpuInput input) {
-    status(input.status());
     if (id == null) {
-      check(input.status().equals("DRAFT"), "新商品先保存为草稿，补齐 SKU 后启用");
+      check(input.status().equals("DRAFT"), "新商品先保存为草稿，补齐 SKU 后再提交待上架");
       id = Ids.next();
       sql.execute(
           "insert into spu(id,tenant_id,code,name,description,brand,category) values(?,?,?,?,?,?,?)",
@@ -175,23 +189,15 @@ public class CatalogService {
     } else {
       lock(id, input.version());
       check(
-          productRow(id).get("status", String.class).equals("DRAFT")
-              || !input.status().equals("DRAFT"),
-          "已启用商品不能恢复草稿");
-      if (input.status().equals("ACTIVE")) {
-        var d = detail(id);
-        check(d.skus().stream().anyMatch(s -> s.status().equals("ACTIVE")), "启用 SPU 前至少启用一个完整 SKU");
-        for (var s : d.skus())
-          if (s.status().equals("ACTIVE")) validateEffective(d.attributes(), s);
-      }
+          productRow(id).get("status", String.class).equals(input.status()),
+          "商品状态只能在生命周期中按合法转换流转，并填写变更原因");
       sql.execute(
-          "update spu set code=?,name=?,description=?,brand=?,category=?,status=? where id=?",
+          "update spu set code=?,name=?,description=?,brand=?,category=? where id=?",
           code(input.code()),
           input.name().trim(),
           input.description(),
           input.brand(),
           input.category(),
-          input.status(),
           id);
     }
     event(access, id, "SpuSaved");
@@ -208,7 +214,7 @@ public class CatalogService {
 
   public void deleteSpu(AccessService.Access access, UUID id, long version) {
     lock(id, version);
-    check(productRow(id).get("status", String.class).equals("DRAFT"), "只能删除草稿，已启用商品请停用或归档");
+    check(productRow(id).get("status", String.class).equals("DRAFT"), "只能删除草稿，已提交或已上架商品请先停用或停产");
     check(
         sql.fetchCount(
                 sql.selectFrom(org.jooq.impl.DSL.table("sku"))
@@ -296,7 +302,13 @@ public class CatalogService {
           input.groupName(),
           current.size());
       for (String option : input.options())
-        sql.execute("insert into attribute_option values(?,?,?)", access.tenantId(), id, option);
+        // 列名必须显式列出：V11 给 attribute_option 加了 position/enabled/created_at，
+        // 位置化插入会随列数变化而错位或直接报错。
+        sql.execute(
+            "insert into attribute_option(tenant_id,attribute_id,value) values(?,?,?)",
+            access.tenantId(),
+            id,
+            option);
     } else {
       UUID aid = id;
       var old =
@@ -362,7 +374,13 @@ public class CatalogService {
     event(access, spu, "AttributeDeleted");
   }
 
-  private void validateValues(Attribute a, List<String> values, boolean activation) {
+  /**
+   * 属性取值校验：数量、必填、类型与选项归属，四类数据类型的规则都在这里。
+   *
+   * <p>包可见且无实例状态，是为了让 3.2.2.2 的 SKU 覆写**走同一份规则**而不是另写一套——
+   * SPU 侧与 SKU 侧对「什么是合法的数值属性值」必须一致，两处各判一次迟早会漂移。
+   */
+  static void validateValues(Attribute a, List<String> values, boolean activation) {
     check(a.multiple() || values.size() <= 1, "属性「" + a.name() + "」只允许一个值");
     check(!activation || !a.required() || !values.isEmpty(), "请填写必填属性「" + a.name() + "」");
     check(values.size() <= 50, "多值属性最多 50 项");
@@ -398,7 +416,7 @@ public class CatalogService {
     lock(spu, input.version());
     if (!permitted(productRow(spu), "catalog.attribute.read"))
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "编辑 SKU 需要此商品的属性查看权限");
-    status(input.status());
+    skuStatus(input.status());
     var attributes = attributes(spu);
     var supplied = new HashMap<UUID, ValueInput>();
     for (var v : input.values()) {
@@ -468,10 +486,10 @@ public class CatalogService {
       var v = supplied.getOrDefault(a.id(), new ValueInput(a.id(), "INHERIT", List.of()));
       writeValue(access.tenantId(), spu, a.id(), id, v.state(), v.values(), a.dataType());
     }
-    if (productRow(spu).get("status", String.class).equals("ACTIVE"))
+    if (productRow(spu).get("status", String.class).equals(SpuLifecycle.ON_SALE.name()))
       check(
           detail(spu).skus().stream().anyMatch(s -> s.status().equals("ACTIVE")),
-          "请先停用 SPU，再停用最后一个在用 SKU");
+          "请先把 SPU 转为停售，再停用最后一个在用 SKU");
     event(access, spu, "SkuSaved");
     return id;
   }
@@ -485,7 +503,17 @@ public class CatalogService {
     event(access, spu, "SkuDeleted");
   }
 
-  private void writeValue(
+  /**
+   * 写入一侧的属性赋值行：覆盖式（先删后插），{@code INHERIT} 就是"删掉这一行"。
+   *
+   * <p>{@code sku} 传 {@code null} 写 SPU 公共侧（3.2.2.1），传 SKU id 写覆写侧（3.2.2.2）——
+   * 两侧是同一张表的同一份写入逻辑，所以「显式清空」在两侧的物理形态完全一致：
+   * 一行 {@code state='CLEAR'}，且不带任何 {@code attribute_value_item}
+   * （V1 的 validate_attribute_item 触发器会拒绝给 CLEAR 行写取值）。
+   *
+   * <p>包可见：3.2.2.2 的覆写写入复用它，保证覆写与已交付的 SKU 保存路径**逐字同构**。
+   */
+  void writeValue(
       UUID tenant,
       UUID spu,
       UUID attribute,
@@ -500,7 +528,15 @@ public class CatalogService {
     if (state.equals("INHERIT")) return;
     UUID vid = Ids.next();
     sql.execute(
-        "insert into attribute_value values(?,?,?,?,?,?)", vid, tenant, spu, attribute, sku, state);
+        // 列名必须显式列出：V13 给 attribute_value 加了 updated_at，
+        // 位置化插入会随列数变化而错位或直接报错（与 V11 的 attribute_option 同一个坑）。
+        "insert into attribute_value(tenant_id,id,spu_id,attribute_id,sku_id,state) values(?,?,?,?,?,?)",
+        tenant,
+        vid,
+        spu,
+        attribute,
+        sku,
+        state);
     for (int i = 0; i < values.size(); i++) {
       String v = values.get(i);
       sql.execute(
@@ -517,7 +553,13 @@ public class CatalogService {
     }
   }
 
-  private void event(AccessService.Access access, UUID spu, String action) {
+  /**
+   * 审计 + outbox 事件；aggregate 始终是 SPU。
+   *
+   * <p>包可见：3.2.2.2 的 SKU 属性覆写复用它，让覆写事件与已交付的属性 / SKU 变更
+   * 在同一条流上，下游不需要为覆写再开一路订阅。
+   */
+  void event(AccessService.Access access, UUID spu, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
         Ids.next(),

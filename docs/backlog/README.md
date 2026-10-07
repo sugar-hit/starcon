@@ -65,3 +65,5 @@ docs/backlog/YYYY-MM/YYYY-MM-DD-<topic-slug>.md
 ## 索引
 
 - [`2026-09/`](2026-09/) — 2026 年 9 月
+- [`2026-10/`](2026-10/) — 2026 年 10 月
+  - [`2026-10-07-sku-code-api-proxy-allowlist.md`](2026-10/2026-10-07-sku-code-api-proxy-allowlist.md) — **P0** 3.1.2.3 前端白名单漏 `sku-code`，页面必然 404

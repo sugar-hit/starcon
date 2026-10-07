@@ -27,6 +27,7 @@
     <module>services/identity</module>
     <module>services/catalog</module>
     <module>services/channel</module>
+    <module>services/warehouse</module>
   </modules>
   <build>
     <plugins>

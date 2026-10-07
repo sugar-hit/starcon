@@ -28,7 +28,10 @@
     "test:unit": "vitest run",
     "dev:backend": "./deploy/scripts/catalog-dev.sh",
     "test:backend": "./deploy/scripts/backend-test.sh",
-    "contracts:generate": "python3 tools/codegen/catalog-contracts.py"
+    "contracts:generate": "python3 tools/codegen/catalog-contracts.py",
+    "progress:sync": "node tools/module-progress/sync.mjs",
+    "progress:check": "node tools/module-progress/sync.mjs --check",
+    "progress:lock": "node tools/module-progress/lock.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",

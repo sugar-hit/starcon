@@ -196,6 +196,151 @@ class ChannelIntegrationTest {
   }
 
   // ------------------------------------------------------------------
+  // 2.1.2 平台枚举映射
+  // ------------------------------------------------------------------
+
+  /**
+   * 平台默认是全局只读码表：随平台适配器发布，运行时角色写不了，所以只能用迁移账号落。
+   *
+   * <p>这正是"全局默认不可被租户改写"这条纪律的验证方式——如果哪天 V3 的 REVOKE 被去掉，
+   * {@link #globalEnumDefaultsAreNotWritableByTheRuntimeRole} 会先红。
+   */
+  private UUID seedPlatformDefault(String enumKind, String external, String internal) {
+    UUID platformId =
+        sql.fetchOne("select id from platform where code='AMAZON'").get("id", UUID.class);
+    UUID id = UUID.randomUUID();
+    try (var connection =
+            DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+        var statement =
+            connection.prepareStatement(
+                "insert into platform_enum_mapping(id,platform_id,enum_kind,external_value,internal_value)"
+                    + " values (?,?,?,?,?)")) {
+      statement.setObject(1, id);
+      statement.setObject(2, platformId);
+      statement.setString(3, enumKind);
+      statement.setString(4, external);
+      statement.setString(5, internal);
+      statement.executeUpdate();
+    } catch (Exception e) {
+      throw new IllegalStateException("平台默认映射落库失败", e);
+    }
+    return id;
+  }
+
+  @Test
+  void globalEnumDefaultsAreNotWritableByTheRuntimeRole() {
+    UUID platformId = sql.fetchOne("select id from platform where code='AMAZON'").get("id", UUID.class);
+    // 服务以 channel_app 运行；它必须改不了全局默认表，否则一个租户能污染所有租户的状态机
+    assertThatThrownBy(
+            () ->
+                sql.execute(
+                    "insert into platform_enum_mapping(id,platform_id,enum_kind,external_value,internal_value)"
+                        + " values (?,?,?,?,?)",
+                    UUID.randomUUID(),
+                    platformId,
+                    "ORDER_STATUS_" + UUID.randomUUID(),
+                    "x",
+                    "y"))
+        // Spring 会把权限错误翻译成 BadSqlGrammarException，真正的 PG 报错在 cause 里
+        .hasStackTraceContaining("permission denied for table platform_enum_mapping");
+  }
+
+  @Test
+  void enumOverrideBeatsPlatformDefaultAndDeletionFallsBack() {
+    String kind = "ORDER_STATUS_" + UUID.randomUUID();
+    UUID platformId = sql.fetchOne("select id from platform where code='AMAZON'").get("id", UUID.class);
+    seedPlatformDefault(kind, "Canceled", "CANCELLED");
+
+    // 默认命中：没有覆盖时解析到平台默认
+    assertThat(runA(() -> service.resolveEnum(a, platformId, kind, "Canceled"))).isEqualTo("CANCELLED");
+
+    // 登记覆盖：生效值改为租户口径，来源标记 TENANT
+    UUID override =
+        as(
+            actorA,
+            "channel.registry.update",
+            () -> service.putEnumOverride(actorA, "AMAZON", new EnumOverrideInput(kind, "Canceled", "USER_CANCELLED")));
+    assertThat(runA(() -> service.resolveEnum(a, platformId, kind, "Canceled"))).isEqualTo("USER_CANCELLED");
+
+    List<EnumMappingView> effective = runA(() -> service.enumMappings(a, "AMAZON", kind));
+    assertThat(effective).hasSize(1);
+    assertThat(effective.get(0).source()).isEqualTo("TENANT");
+    assertThat(effective.get(0).internalValue()).isEqualTo("USER_CANCELLED");
+    assertThat(effective.get(0).id()).isEqualTo(override);
+
+    // 删除覆盖后回落到平台默认，而不是变成"未映射"
+    as(
+            actorA,
+            "channel.registry.delete",
+            () -> {
+              service.deleteEnumOverride(actorA, "AMAZON", override);
+              return null;
+            });
+    assertThat(runA(() -> service.resolveEnum(a, platformId, kind, "Canceled"))).isEqualTo("CANCELLED");
+    assertThat(runA(() -> service.enumMappings(a, "AMAZON", kind)))
+        .singleElement()
+        .satisfies(m -> assertThat(m.source()).isEqualTo("PLATFORM"));
+  }
+
+  @Test
+  void unmappedEnumStaysUnmappedInsteadOfFallingBack() {
+    String kind = "RETURN_REASON_" + UUID.randomUUID();
+    UUID platformId = sql.fetchOne("select id from platform where code='AMAZON'").get("id", UUID.class);
+    // 2.1.2.1 铁律：没有映射就是 null，调用方必须显式报"未映射"，不许兜底
+    assertThat(runA(() -> service.resolveEnum(a, platformId, kind, "UNKNOWN_CODE"))).isNull();
+  }
+
+  @Test
+  void enumOverrideIsTenantScopedAndNeverLeaks() {
+    String kind = "ORDER_STATUS_" + UUID.randomUUID();
+    UUID platformId = sql.fetchOne("select id from platform where code='AMAZON'").get("id", UUID.class);
+    as(
+        actorA,
+        "channel.registry.update",
+        () -> service.putEnumOverride(actorA, "AMAZON", new EnumOverrideInput(kind, "Pending", "A_ONLY")));
+
+    // 租户 B 看不到 A 的覆盖，解析也不会命中
+    assertThat(runB(() -> service.enumMappings(b, "AMAZON", kind))).isEmpty();
+    assertThat(runB(() -> service.resolveEnum(b, platformId, kind, "Pending"))).isNull();
+
+    // B 不能删 A 的覆盖：删除带平台与租户双重条件
+    UUID override =
+        runA(
+            () ->
+                service.enumMappings(a, "AMAZON", kind).get(0).id());
+    assertThatThrownBy(
+            () ->
+                as(
+                    actorB,
+                    "channel.registry.delete",
+                    () -> {
+                      service.deleteEnumOverride(actorB, "AMAZON", override);
+                      return null;
+                    }))
+        .hasMessageContaining("不存在");
+    assertThat(runA(() -> service.resolveEnum(a, platformId, kind, "Pending"))).isEqualTo("A_ONLY");
+  }
+
+  @Test
+  void repeatingAnOverrideRewritesItInsteadOfFailing() {
+    String kind = "ORDER_STATUS_" + UUID.randomUUID();
+    UUID first =
+        as(
+            actorA,
+            "channel.registry.update",
+            () -> service.putEnumOverride(actorA, "AMAZON", new EnumOverrideInput(kind, "x", "FIRST")));
+    UUID second =
+        as(
+            actorA,
+            "channel.registry.update",
+            () -> service.putEnumOverride(actorA, "AMAZON", new EnumOverrideInput(kind, "x", "SECOND")));
+    assertThat(second).isEqualTo(first);
+    assertThat(runA(() -> service.enumMappings(a, "AMAZON", kind)))
+        .singleElement()
+        .satisfies(m -> assertThat(m.internalValue()).isEqualTo("SECOND"));
+  }
+
+  // ------------------------------------------------------------------
   // 2.2 授权与连接
   // ------------------------------------------------------------------
 
