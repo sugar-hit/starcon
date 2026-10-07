@@ -134,6 +134,27 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
       (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
     ).toBe(200);
   }
+  // 序列号与批次的**明细子路径**此前一个都没进白名单：只有集合读
+  // （serials / lots 各一条）被放行，而 inventory-lot-model.ts / serial-model.ts
+  // 实际在调 stats、{id}、{id}/movements、{id}/distribution —— 后端
+  // InventorySerialController / InventoryLotController 这些端点都真实存在。
+  // 白名单只在浏览器端生效，`pnpm test` 直连服务层，这类漏登记天然测不出来，
+  // 只能在这里钉住；少钉一条，那些页面就会在浏览器里静默 404。
+  for (const path of [
+    'warehouse/inventory/serials',
+    'warehouse/inventory/serials/stats',
+    'warehouse/inventory/serials/import',
+    'warehouse/inventory/serials/movements',
+    'warehouse/inventory/serials/validate-movement',
+    `warehouse/inventory/serials/${id}`,
+    `warehouse/inventory/serials/${id}/movements`,
+    'warehouse/inventory/lots',
+    `warehouse/inventory/lots/${id}`,
+    `warehouse/inventory/lots/${id}/distribution`,
+    `warehouse/inventory/lots/${id}/movements`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
   expect(
     (await POST(request('warehouse/inventory/expiry/policy', 'POST'), {
       params: { path: ['warehouse', 'inventory', 'expiry', 'policy'] },
