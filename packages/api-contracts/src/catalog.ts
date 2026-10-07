@@ -109,6 +109,7 @@ export type EnumMappingView = {
   externalValue: string;
   internalValue: string;
 };
+export type FailureClusterView = { reason: string; open: number; escalated: number; total: number };
 export type Grant = {
   roleId: string;
   roleCode: string;
@@ -283,4 +284,94 @@ export type SpuInput = {
   version: number;
 };
 export type SwitchMembership = { membershipId: string };
+export type SyncCursorRewindInput = { to: string; externalMarker: string };
+export type SyncCursorView = {
+  id: string;
+  task: SyncTaskKey;
+  watermark: SyncWatermark;
+  backlogCount: number;
+  consecutiveFailures: number;
+  lastRunStatus: string;
+  lastRunAt: string;
+  version: number;
+};
+export type SyncFailureRecordInput = {
+  runId: string;
+  failureReason:
+    | 'AUTH_EXPIRED'
+    | 'FIELD_PARSE_FAILED'
+    | 'MAPPING_MISSING'
+    | 'RATE_LIMITED'
+    | 'NETWORK_ERROR'
+    | 'UNKNOWN';
+  externalRecordKey: string;
+  externalPayloadRef: string;
+  lastError: string;
+};
+export type SyncFailureReplayInput = {
+  outcome: string;
+  lastError: string | null;
+  attemptCount: number;
+};
+export type SyncFailureView = {
+  id: string;
+  runId: string;
+  task: SyncTaskKey;
+  failureReason: string;
+  externalRecordKey: string;
+  externalPayloadRef: string;
+  attemptCount: number;
+  status: string;
+  escalated: boolean;
+  lastError: string;
+  createdAt: string;
+  resolvedAt: string;
+};
+export type SyncRunCommit = {
+  status: string;
+  fetchedCount: number;
+  writtenCount: number;
+  updatedCount: number;
+  skippedCount: number;
+  warningCount: number;
+  errorCount: number;
+  errorMessage: string;
+  cursorValue: string | null;
+  externalMarkerTo: string;
+};
+export type SyncRunInput = {
+  connectionId: string;
+  marketplaceId: string;
+  resourceType: 'ORDER' | 'LISTING' | 'INVENTORY' | 'SETTLEMENT';
+  partitionKey: string;
+  triggerKind: string;
+  from: string | null;
+  externalMarkerFrom: string | null;
+};
+export type SyncRunView = {
+  id: string;
+  task: SyncTaskKey;
+  triggerKind: string;
+  status: string;
+  startedAt: string;
+  finishedAt: string;
+  durationMs: number;
+  fetchedCount: number;
+  writtenCount: number;
+  updatedCount: number;
+  skippedCount: number;
+  warningCount: number;
+  errorCount: number;
+  errorMessage: string;
+  cursorBefore: SyncWatermark;
+  cursorAfter: SyncWatermark;
+  openFailureCount: number;
+};
+export type SyncTaskKey = {
+  connectionId: string;
+  marketplaceId: string;
+  resourceType: 'ORDER' | 'LISTING' | 'INVENTORY' | 'SETTLEMENT';
+  partitionKey: string;
+};
+export type SyncWatermark = { value: string; externalMarker: string } | null;
 export type ValueInput = { attributeId: string; state: string; values: Array<string> };
