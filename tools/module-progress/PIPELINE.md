@@ -25,7 +25,7 @@
 
 每次运行**第一步先看时间**：`date '+%H:%M'`
 
-- **时间 < 00:00** → 照常执行下面第 1–5 步，8 条车道继续跑。
+- **时间 < 00:00** → 照常执行下面第 1–5 步，车道继续跑。
 - **时间 >= 00:00** → 进入**收尾模式**，**绝对不要派发任何新车道**：
   1. `node tools/module-progress/lane.mjs merge-ready`（并进赶在零点前落地的车道）
   2. `node tools/module-progress/sync.mjs`
@@ -43,16 +43,28 @@
 
 ## 你的并发配额
 
-**本实例每次 `plan --lanes 4`。全局并发 8 条车道，由两个定时任务各管 4 条**，
-两个任务错开 7 分钟（A 组 `0,15,30,45`，B 组 `7,22,37,52`），调度闸几乎不会撞上。
+**本实例每次 `plan --lanes 2`。全局配额 6 条车道**（A 组 `0,15,30,45` / B 组 `7,22,37,52`
+错开 7 分钟）。A 组当前已暂停，实际只有单个 tick 在排车道。
 
-**为什么是 8**：单会话子 Agent 并发上限就是 4，要 8 条只能靠两个任务实例。
-实测过资源（2026-10-07 19:17）：3 条车道时 java+node 共 1.8GB、Docker 1.4GB / 11.67GB、
-load 2.55 / 10 核，**单个 Testcontainers PG 容器只占 ~40MB**。
-按 8 条外推约 4.8GB RAM、Docker 2.5GB —— 内存和磁盘都不是墙，**CPU 才是**。
-所以 tick 间隔同时从 20 分钟压到 15 分钟，让车道一落地就能被回收重派，不在空等里浪费产能。
+### 配额为什么从 8 降到 6（2026-10-07 21:34 实测）
 
-若 load 持续 > 8 或有车道报 `RESOURCE_BLOCKED`，把两组的 `--lanes` 降回 3。
+早先定 8 条的依据是 19:17 那次采样：3 条车道、java+node 1.8GB、Docker 1.4GB / 11.67GB、
+load **2.55** / 10 核，据此外推「内存和磁盘都不是墙，CPU 才是」。
+
+**那个外推是错的**，错在采样时机：19:17 那 3 条车道尚未进入构建高峰。
+21:34 只剩 **2 条车道**在跑 `mvnw verify`，load 就是 **22.06 / 9.93 / 11.53**（1min 在爬升）：
+
+- `java` (openjdk-25) **160% CPU**
+- `com.apple.Virtualization.VirtualMachine`（Docker VM）**56% CPU / 614MB RSS**
+- 同刻新起 **2 个 Testcontainers PostgreSQL 容器 + 2 个 ryuk**
+
+**单条车道并发 verify 的真实成本 = 1 个 maven JVM + N 个 surefire fork JVM + 1 个独立 PG 容器 + 1 个 ryuk。**
+load 不随车道数线性涨，而是随**同时处于构建高峰的车道数**阶跃涨 —— 这就是「单点采样不能当判据，看趋势」的来源。
+当初那句「单个 Testcontainers PG 容器只占 ~40MB」只对了内存，**漏掉了 Docker VM 的 CPU 和每个 ryuk 的开销**。
+
+所以调低的是**每 tick 的增量**（`--lanes` 4 → 2），闸的绝对阈值也一并下调（load 8 → 6）。
+
+若 load 持续 > 6 或有车道报 `RESOURCE_BLOCKED`，把两组的 `--lanes` 降回 1。
 
 ## 第 1 步：同步台账
 
@@ -96,7 +108,7 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs gc
 ## 第 4 步：排车道并派发
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs plan --lanes 4
+cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs plan --lanes 2
 ```
 
 它会：读台账 + 读蓝图「关系」字段 → 挑出**上游已交付且 L3 锚点互不相同**的模块 →
@@ -223,8 +235,8 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs plan --la
 - **本轮回收**：并入了哪些车道（模块 ID + 名称）；有冲突就点名冲突文件
 - **本轮派发**：派发了哪些车道（模块 ID + 名称 + 迁移版本号），或「车道全忙，本轮未派发」
 - **资源占用**：`uptime`、`docker stats --no-stream --format '{{.Name}} {{.MemUsage}}' | head -6`
-  的实际读数。判断要不要把全局并发从 6 提到 8 靠的就是这几个数，不要凭感觉。
-- **吞吐预期**：按「8 条车道 × 约 40 分钟/模块」估算，说明当前节奏下剩余模块需要多久
+  的实际读数。判断要不要把全局并发从 6 往上提靠的就是这几个数，不要凭感觉。
+- **吞吐预期**：按「6 条车道 × 约 40 分钟/模块」估算，说明当前节奏下剩余模块需要多久
 - **风险提示**（可选）：台账与代码实际不符、车道心跳失联、验证失败、内存吃紧等
 
 ## 禁止事项
