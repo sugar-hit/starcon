@@ -284,13 +284,16 @@ const services: readonly {
     // 是筛选下拉项。policies/{id} 后面接一段 id（更新与删除）。
     // buckets/bucket-actions 是 7.1.1.2 的明细读端点（纯读，不需要写权限）；
     // locations/lots 是逐级下钻的库位与批次下拉项，与其余参照数据同形。
-    // 注意 7.1.2 流水（ledger）、7.2 预占、7.4 调整、7.5 调拨仍未交付，
-    // 前端拿到的行内操作入口 available=false，这里**不**放行它们的路径。
+    // sellable-policies 是 7.2.2.1 可售量口径：列表 / effective / pools / pools/{poolKey} / {id}
+    // 五个读形状，calculation（POST 试算）、{id}/versions（换版）、{id}/retire（作废）三个动作。
+    // 口径路径上刻意**没有** DELETE 段：作废是审计事件，档位行永久保留，
+    // 放行一个删除形状会让"能不能物理删掉一条防超卖配置"看起来是能。
+    // effective / pools / pools/{poolKey} 是字面量，排在 {id} 之前判别，两者不会互相吃掉。
     prefix: 'warehouse/',
     env: 'WAREHOUSE_URL',
     fallback: 'http://127.0.0.1:8084',
     pattern:
-      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
+      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?|calculation)|[0-9a-f-]+(?:\/(?:versions|retire))?)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
   },
 ];
 
