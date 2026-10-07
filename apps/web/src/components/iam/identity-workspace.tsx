@@ -7,6 +7,7 @@ import { useIdentity } from './identity-shell';
 import { AdministrationPanel } from './administration-panel';
 import { MemberOnboardingWorkspace } from './member-onboarding-workspace';
 import { ApprovalFlowWorkspace } from './approval-flow-workspace';
+import { ApprovalRuleWorkspace } from './approval-rule-workspace';
 import { canManage, hasPermission, isOwner, type AdministrationKind } from './administration-model';
 
 const destinations = [
@@ -38,6 +39,11 @@ const destinations = [
     '按单据类型注册审批流程：审批节点（角色/岗位/指定人）、串行/并行/条件分支、金额阈值与超时升级规则',
   ],
   [
+    'approval-rules',
+    '审批规则',
+    '按金额区间、跨法人、跨部门、新供应商、高风险商品配置审批触发条件与小额免审规则，免审必须设上限金额',
+  ],
+  [
     'operation-log',
     '操作日志',
     '按用户、时间与请求 ID 检索登录、API 调用、任务执行与错误堆栈，用于运维排障',
@@ -47,7 +53,7 @@ const destinations = [
 // 'hierarchy' 只出现在导航目的地里（点击跳 /org/hierarchy 独立页面），
 // 不是 AdministrationPanel 的一种 kind，所以不进这个联合类型；
 // 它只需要在 visible() 里能被判出来（visible 的 key 是 string）。
-type WorkspaceKind = AdministrationKind | 'onboarding' | 'approval-flows';
+type WorkspaceKind = AdministrationKind | 'onboarding' | 'approval-flows' | 'approval-rules';
 
 function visible(session: Access, key: string) {
   if (key === 'tenants') return true;
@@ -81,6 +87,9 @@ function visible(session: Access, key: string) {
   // 审批流定义（17.4.1.1）是独立页面权限码，不走 AdministrationPanel 的四类管理，
   // 也不走 canManage 的页面映射 —— AdministrationKind 里没有它，落到 canManage 会把入口藏掉。
   if (key === 'approval-flows') return hasPermission(session, 'identity.approval_flow.read');
+  // 审批规则（17.4.1.2）是独立页面权限码：改「这次提交要不要走审批」能绕开 17.4.1.1 配好的流程，
+  // 所以不复用 identity.approval_flow.*，与 canManage 的页面映射也无关。
+  if (key === 'approval-rules') return hasPermission(session, 'identity.approval_rule.read');
   return canManage(session, key as AdministrationKind);
 }
 export function IdentityWorkspace({
@@ -117,6 +126,8 @@ export function IdentityWorkspace({
         <MemberOnboardingWorkspace session={session} onError={onError} />
       ) : kind === 'approval-flows' ? (
         <ApprovalFlowWorkspace />
+      ) : kind === 'approval-rules' ? (
+        <ApprovalRuleWorkspace />
       ) : kind ? (
         <AdministrationPanel
           key={`${session.tenantId}:${kind}`}

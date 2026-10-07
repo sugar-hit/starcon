@@ -77,12 +77,18 @@ const services: readonly {
       //   字面量段一律排在 [0-9a-f-]+ 之前判别：首段是字面量还是 UUID 两者不会互相吃掉。
       //   同样**没有**额外动作段：审批实例的发起与处理是 17.4.1.2 / 17.4.2.1 的职责，
       //   这里放行一个不存在的形状只会让界面以为已交付。
+      // approval-rules 是 17.4.1.2 审批规则：approval-rules 是规则集集合读 + POST 新建；
+      //   {uuid} 是规则集的 GET·PUT·DELETE，其下的 validation 是结构体检（GET）；
+      //   effective-policy 是某单据类型的生效策略读出口，evaluate 是对已保存规则的只读试算（POST）。
+      //   字面量段（effective-policy / evaluate）排在 [0-9a-f-]+ 之前判别，两类不会互相吃掉。
+      //   同样**没有**审批实例相关的动作段：触发规则只产出规则集与生效策略，
+      //   真正发起 / 处理审批是 17.4.2.1 的职责，放行一个不存在的形状只会让界面以为已交付。
       // onboardings 是 17.2.2.2 成员开通与入职：列表、开通（创建）与完成入职。
       //   形状逐字列出：onboardings 是集合读 + POST 开通；
       //   onboardings/{id}/complete 是完成入职的状态流转（POST）。
       //   **刻意不放行 onboardings/{id}**：后端没有「按 id 取单条入职记录」这个端点，
       //   放行它会让界面以为已交付——放行不该存在的路径比 404 更糟。
-      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|operation-log(?:\/(?:export|trace\/[0-9a-zA-Z-]+|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?|business-parameters(?:\/(?:effective|history|overrides(?:\/[0-9a-f-]+)?|freezes(?:\/[^/]+\/[^/]+)?))?|numbering(?:\/(?:entities|preview|sequences|issued|rules(?:\/conflicts|\/[0-9a-f-]+(?:\/next)?)?))?||approval-flows(?:\/(?:document-types|registrations|active|positions(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/validation)?))?|onboardings(?:\/[0-9a-f-]+\/complete)?|department-leaders|departments\/[0-9a-f-]+\/(?:leader(?:\/(?:proxies|grants)(?:\/[0-9a-f-]+)?)?|approval-chain)|offboarding(?:\/[0-9a-f-]+(?:\/revert|\/responsibility-items(?:\/[0-9a-f-]+(?:\/transfer)?)?|\/reclaim-items(?:\/[0-9a-f-]+(?:\/reclaim)?)?)?)?)$/,
+      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|operation-log(?:\/(?:export|trace\/[0-9a-zA-Z-]+|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?|business-parameters(?:\/(?:effective|history|overrides(?:\/[0-9a-f-]+)?|freezes(?:\/[^/]+\/[^/]+)?))?|numbering(?:\/(?:entities|preview|sequences|issued|rules(?:\/conflicts|\/[0-9a-f-]+(?:\/next)?)?))?||approval-flows(?:\/(?:document-types|registrations|active|positions(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/validation)?))?|approval-rules(?:\/(?:effective-policy|evaluate|[0-9a-f-]+(?:\/validation)?))?|onboardings(?:\/[0-9a-f-]+\/complete)?|department-leaders|departments\/[0-9a-f-]+\/(?:leader(?:\/(?:proxies|grants)(?:\/[0-9a-f-]+)?)?|approval-chain)|offboarding(?:\/[0-9a-f-]+(?:\/revert|\/responsibility-items(?:\/[0-9a-f-]+(?:\/transfer)?)?|\/reclaim-items(?:\/[0-9a-f-]+(?:\/reclaim)?)?)?)?)$/,
   },
   {
     prefix: 'catalog/',

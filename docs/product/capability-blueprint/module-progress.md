@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 109 |
+| 已交付 | 110 |
 | 进行中 | 1 |
-| **未开发** | **355** |
-| 完成率 | 23.4% |
+| **未开发** | **354** |
+| 完成率 | 23.7% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -23,7 +23,7 @@
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
 | **D3** | 24 | 0 | 16 | 40 |
-| **D4** | 5 | 0 | 55 | 60 |
+| **D4** | 6 | 0 | 54 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 1 | 77 | 78 |
 | **D7** | 2 | 0 | 153 | 155 |
@@ -48,7 +48,7 @@
 | 14 | 广告与增长系统 | D7 | 0 | 22 |
 | 15 | 客户与客服系统 | D7 | 0 | 24 |
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 21 | 29 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 22 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
 
 ## 判定「已交付」的标准
@@ -520,7 +520,7 @@
 | 17.3.2.2 | 数据范围 | — | D1–D2 | 已交付 | catalog V3 record_data_scopes + RLS scopeMode 数据范围隔离 |
 | 17.3.3.1 | 越权检测 | — | D1–D2 | 已交付 | RLS FORCE + isolation；三条断言实跑（互不可见/伪造头无效/归还不串租户） |
 | 17.4.1.1 | 审批流定义 | — | D4 | 已交付 | identity V83 approval_flow/node/amount_branch/escalation + /approval-flows CRUD + /org/approval-flows；角色/岗位/指定人三选一，阶段串行+条件分支+金额阈值+超时规则；一条单据类型只能一条生效流程（未注册=默认放行，registrations 可查）；27 集成测试含多租户三断言 |
-| 17.4.1.2 | 审批规则 | — | D4 | 未开发 | — |
+| 17.4.1.2 | 审批规则 | — | D4 | 已交付 | identity `V89__approval_trigger_rules.sql`（approval_rule_set 规则集+生效策略 + approval_trigger_rule 有序触发/免审规则，两表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + 部分唯一索引 approval_rule_set_active_document 保证同租户同单据类型只有一条生效规则集；金额一律 numeric(19,6)+BigDecimal，币种是三个大写字母的可读标识不建外键；approval_trigger_rule.target_flow_id 以 **(tenant_id,id) 复合外键 + ON DELETE RESTRICT** 指向 17.4.1.1 的 approval_flow——RESTRICT 而非 CASCADE，删掉正被规则引用的流程宁可失败，也不静默删掉管控规则让该单据类型无声掉回默认放行；**蓝图那句「免审要设上限金额」与「免审要设上限金额否则被用来绕过大额管控」落成一条数据库不变量 `approval_trigger_rule_decision_shape`**：EXEMPT 必须有币种与 `amount_max_amount NOT NULL 且 > 0`（无上限免审=取消管控），且四个高风险维度 cross_legal_entity / cross_department / new_vendor / high_risk_product **一律不接受 REQUIRED** —— 光卡金额不够，「1000 以内免审」再叠「REQUIRED 跨法人」就把跨法人小额也免掉了，那是绕过大额管控的第二种走法；四个布尔维度刻意用三态 ANY/REQUIRED/FORBIDDEN 而不是 boolean：布尔只有一个 false，无法区分「不约束」与「必须不命中」，把两者压成同一个 false 会让「小于 500 的普通采购单」莫名其妙要求本次提交**不得**跨部门）+ 端点 `ApprovalRuleController`（GET /approval-rules 列表、GET /approval-rules/{id} 详情、POST 新建、PUT 更新、DELETE 删除、GET /approval-rules/effective-policy 生效策略读出口、GET /approval-rules/{id}/validation 结构体检、POST /approval-rules/evaluate 只读试算；沿用 call() 的租户事务+会话锁+租户二次校验，变更均为当前租户所有者专属；写入校验覆盖免审上限、免审不得豁免高风险条件、送审必须指向**本单据类型**的生效流程、规则集生效要求上游先有生效流程、优先级唯一、同一单据类型生效唯一、以及**「默认免审 + 存在送审规则」= 未命中规则的提交被静默放行**这一配置期就拒；独立页面权限 identity.approval_rule.read/create/update/delete 只授 OWNER，不与 identity.approval_flow 共用——「配流程」与「决定这次提交要不要走流程」是两种风险，改后者能绕过前者）+ 页面 `/org/approval-rules` 工作区（approval-rule-workspace.tsx + 纯函数 approval-rule-model.ts 与 20 例单测）：生效策略面板（受管控状态 + 逐条列出当前生效的免审额度，停用规则不计入）、规则集卡片（按 priority 展示判定顺序、送审指向的流程失效时直接标红）、条件摘要（半开区间 [下限,上限)，免审上限即封顶）、**试算面板**（对已保存规则做只读判定，结论与真正提交一致，但**不建审批单、不出待办**，运行时是 17.4.2.1）、结构体检 findings、加载/失败重试/无权限/空态/搜索态俱全；api-proxy 白名单只放行 approval-rules、{uuid}、{uuid}/validation、effective-policy、evaluate 五个形状，**刻意不放行任何审批实例相关路径**——触发规则只产出规则集与生效策略）+ 测试 `ApprovalRuleIntegrationTest` 18 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）：五类触发条件逐条试算命中（金额区间/跨法人/跨部门/新供应商/高风险商品）、三态 FORBIDDEN 与 ANY 的判定差异、免审无上限/零额度/负额度三连 400、免审把四个高风险维度标 REQUIRED 各 400 而 FORBIDDEN 通过、小额免审与大额送审在上限边界（500 免审、500 起送审）分界且跨币种不套用、免审不得指向流程而送审必须指向本单据类型的生效流程（跨单据类型/悬空 id/草稿流程各 400）、规则集生效要求上游先有生效流程、默认免审与送审规则互斥、生效唯一与建后不可改单据类型、优先级与名称唯一、生效策略出口的受管控状态与免审额度清单、停用规则不参与判定、**被规则引用的流程删不掉（RESTRICT→409）**、金额 numeric(19,6) 与 timestamptz **写回值**断言（含直查库比对）、版本随保存 +1、结构体检能查出「指向的流程已被停用」这类事后才暴露的问题、审计留痕，以及多租户三断言（父/子租户规则集与免审额度互不可见、同金额在两租户下结论不同=子租户 400 送审而父租户 400 免审、伪造 X-Tenant-Id（含伪造成子租户真实租户 id）无效、连接池压到 1 时 A→B→A 交替三轮不串租户、无 app.current_tenant 时直查两表为空、两表 relforcerowsecurity 为真）；跨车道回归：`ApprovalFlowIntegrationTest` 27 例仍全绿（本模块的 target_flow_id 外键要求它的 @BeforeEach 与流程表同批 truncate） |
 | 17.4.2.1 | 待我审批 | — | D4 | 未开发 | — |
 | 17.4.2.2 | 审批记录 | — | D4 | 未开发 | — |
 | 17.5.1.1 | 业务参数 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V48__business_parameter.sql（business_parameter_definition 参数码表含 8 个出厂默认值 / business_parameter_override 全局·法人·店铺三档覆盖值 / business_parameter_history 追加不可改变更历史 / business_parameter_freeze 与 freeze_value 单据冻结快照，四张业务表 tenant_id NOT NULL + RLS FORCE isolation，码表按先例不带 tenant_id）· 端点 GET /identity/business-parameters、/business-parameters/effective、/overrides、/overrides/{id}、/history、/freezes、/freezes/{documentType}/{documentNo}（BusinessParameterController.java）· 页面 apps/web/src/app/org/business-parameters/page.tsx· 测试 BusinessParameterIntegrationTest.java（15 项：默认值与类型自洽、店铺大于法人大于全局大于默认的生效范围优先级、码表驱动取值校验、NUMERIC 与 timestamptz 按值往返、变更历史前后值与不可篡改、单据冻结后改参数不影响历史单据、租户隔离三断言实跑）与 business-parameter-model.test.ts（24 项前端口径与预校验） |
