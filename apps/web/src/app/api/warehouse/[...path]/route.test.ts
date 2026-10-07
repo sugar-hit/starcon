@@ -98,6 +98,54 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
   // 与迁移里的 REVOKE DELETE，两者都由 InventoryExpiryIntegrationTest 实跑证明。
 });
 
+/**
+ * 8.1.1.1 仓库列表：从 `components/warehouse/warehouse-facility-model.ts` **反向抽取**真实调用点。
+ *
+ * <p>四个形状（列表 GET / 新增 POST / 下拉项 GET / 能力声明 GET）逐条钉住。
+ * 白名单只在浏览器端生效，`pnpm test` 直连服务层发现不了漏登记 —— 漏一条就等于
+ * 该页面在浏览器里静默 404，看起来像「后端没实现」。
+ */
+it('8.1.1.1 仓库列表的四个调用形状都被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  for (const path of [
+    'warehouse/facilities',
+    'warehouse/facilities/options',
+    'warehouse/facilities/capabilities',
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行`).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 新增走 POST 同一路径
+  expect(
+    (await POST(request('warehouse/facilities', 'POST'), {
+      params: { path: ['warehouse', 'facilities'] },
+    })).status,
+  ).toBe(200);
+});
+
+it('8.1.1.1 刻意不放行仓库详情与改删形状', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // 详情属 8.1.1.2、改仓库属性属 8.1.1.2、行为参数属 8.1.1.3，三者都未交付。
+  // 放行这些形状会让界面以为「按 id 取单仓」「能改能删仓库」已经可用 ——
+  // 放行不该存在的路径比 404 更糟。
+  for (const path of [`warehouse/facilities/${id}`, 'warehouse/facilities/wrong-segment']) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 不应被放行`,
+    ).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
 it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
