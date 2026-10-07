@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Badge, Button } from '@starcon/ui';
 import { AlertTriangle, Building2, Check, RefreshCw } from 'lucide-react';
-import type { TenantContextView, TenantSummaryView } from '../../../../../packages/api-contracts/src/catalog';
+import type {
+  TenantContextView,
+  TenantSummaryView,
+} from '../../../../../packages/api-contracts/src/catalog';
 import { api, blockWorkspaceRequests } from '@/lib/api';
 import { Field, control } from '../common/fields';
 import { announceIdentityChange, useIdentity } from './identity-shell';
@@ -253,7 +256,9 @@ function TenantRow({
             </div>
             <div>
               <dt className="inline">角色：</dt>
-              <dd className="inline">{tenant.roles.length ? tenant.roles.join('、') : '未分配角色'}</dd>
+              <dd className="inline">
+                {tenant.roles.length ? tenant.roles.join('、') : '未分配角色'}
+              </dd>
             </div>
             <div>
               <dt className="inline">最后进入：</dt>
@@ -323,14 +328,15 @@ function TenantProfileForm({
       setInvalid('租户名称不能为空');
       return;
     }
-    if (status === 'SUSPENDED' && !window.confirm('停用本租户会让所有成员的现有会话立即失效，且无法自助恢复。确认停用？'))
+    if (
+      status === 'SUSPENDED' &&
+      !window.confirm('停用本租户会让所有成员的现有会话立即失效，且无法自助恢复。确认停用？')
+    )
       return;
     setInvalid('');
     await onSaved(
       { name: name.trim(), status },
-      status === 'SUSPENDED'
-        ? '本租户已停用，现有会话已失效'
-        : '租户基本信息已更新',
+      status === 'SUSPENDED' ? '本租户已停用，现有会话已失效' : '租户基本信息已更新',
     );
   };
 
@@ -353,7 +359,8 @@ function TenantProfileForm({
       </Field>
       <p className="text-copy-12 text-muted-foreground flex items-start gap-2">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-        标识 {context.code} 不可修改。停用会立即让本租户全部成员的现有会话失效，需要平台或上级租户介入才能恢复。
+        标识 {context.code}{' '}
+        不可修改。停用会立即让本租户全部成员的现有会话失效，需要平台或上级租户介入才能恢复。
       </p>
       {invalid && (
         <p role="alert" className="text-destructive text-sm">
