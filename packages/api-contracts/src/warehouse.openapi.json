@@ -10032,7 +10032,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_3",
+        "operationId": "detail_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -11000,7 +11000,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_4",
+        "operationId": "detail_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -12496,6 +12496,229 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/WorkVolumeCapability"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/facilities/{id}": {
+      "get": {
+        "tags": [
+          "warehouse-detail-controller"
+        ],
+        "operationId": "detail_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "warehouse-detail-controller"
+        ],
+        "operationId": "update_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseUpdated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/facilities/{id}/locations": {
+      "get": {
+        "tags": [
+          "warehouse-detail-controller"
+        ],
+        "operationId": "locations_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/facilities/{id}/entrypoints": {
+      "get": {
+        "tags": [
+          "warehouse-detail-controller"
+        ],
+        "operationId": "entryPoints",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DetailEntryPoint"
                   }
                 }
               }
@@ -27277,6 +27500,705 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "WarehouseUpdateInput": {
+        "required": [
+          "countryCode",
+          "name",
+          "timezone"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string"
+          },
+          "timezone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "addressLine1": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine2": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "region": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "postalCode": {
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "WarehouseUpdated": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DetailEntryPoint": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LaborResources": {
+        "type": "object",
+        "properties": {
+          "taskAvailable": {
+            "type": "boolean"
+          },
+          "taskOwnerModule": {
+            "type": "string"
+          },
+          "taskNote": {
+            "type": "string"
+          },
+          "taskTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unassignedTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "runningTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "exceptionTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "distinctOperatorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byWorkType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkTypeSlice"
+            }
+          },
+          "rosterAvailable": {
+            "type": "boolean"
+          },
+          "rosterOwnerModule": {
+            "type": "string"
+          },
+          "rosterNote": {
+            "type": "string"
+          },
+          "equipmentAvailable": {
+            "type": "boolean"
+          },
+          "equipmentOwnerModule": {
+            "type": "string"
+          },
+          "equipmentNote": {
+            "type": "string"
+          }
+        }
+      },
+      "LegalEntitySlice": {
+        "type": "object",
+        "properties": {
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LocationStructure": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "occupiedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "byType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationTypeSlice"
+            }
+          }
+        }
+      },
+      "LocationTypeSlice": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "typeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHand": {
+            "type": "number"
+          }
+        }
+      },
+      "QualitySlice": {
+        "type": "object",
+        "properties": {
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "StockDistribution": {
+        "type": "object",
+        "properties": {
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byQuality": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualitySlice"
+            }
+          },
+          "byLegalEntity": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntitySlice"
+            }
+          },
+          "byLocationType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationTypeSlice"
+            }
+          },
+          "platform": {
+            "$ref": "#/components/schemas/PlatformStock"
+          }
+        }
+      },
+      "StrategyBinding": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "facts": {
+            "$ref": "#/components/schemas/StrategyFacts"
+          }
+        }
+      },
+      "StrategyFacts": {
+        "type": "object",
+        "properties": {
+          "transferInCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transferOutCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inTransitLegCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "platformObservedOnHand": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformSourceCount": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAddress": {
+        "type": "object",
+        "properties": {
+          "line1": {
+            "type": "string",
+            "nullable": true
+          },
+          "line2": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "region": {
+            "type": "string",
+            "nullable": true
+          },
+          "postalCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "missingFields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "text": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "WarehouseBase": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "LOCAL",
+              "OVERSEAS",
+              "PLATFORM_FBA",
+              "THIRD_PARTY",
+              "BONDED"
+            ]
+          },
+          "kindLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "localTime": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "defaultWarehouse": {
+            "type": "boolean"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WarehouseDetail": {
+        "type": "object",
+        "properties": {
+          "base": {
+            "$ref": "#/components/schemas/WarehouseBase"
+          },
+          "address": {
+            "$ref": "#/components/schemas/WarehouseAddress"
+          },
+          "stock": {
+            "$ref": "#/components/schemas/StockDistribution"
+          },
+          "locations": {
+            "$ref": "#/components/schemas/LocationStructure"
+          },
+          "work": {
+            "$ref": "#/components/schemas/WorkStatistics"
+          },
+          "strategies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StrategyBinding"
+            }
+          },
+          "labor": {
+            "$ref": "#/components/schemas/LaborResources"
+          },
+          "entryPoints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DetailEntryPoint"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkStatistics": {
+        "type": "object",
+        "properties": {
+          "receiptTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receiptOpenCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receiptClosedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receiptReceivedQuantity": {
+            "type": "number"
+          },
+          "stocktakeTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transferInCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transferOutCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inventoryMovementCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "workOrderTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openWorkOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "WorkTypeSlice": {
+        "type": "object",
+        "properties": {
+          "workType": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "taskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LocationPage": {
+        "type": "object",
+        "properties": {
+          "totals": {
+            "$ref": "#/components/schemas/LocationTotals"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "typeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "pickable": {
+            "type": "boolean"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastMovementAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "LocationTotals": {
+        "type": "object",
+        "properties": {
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "occupiedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHand": {
+            "type": "number"
           }
         }
       }

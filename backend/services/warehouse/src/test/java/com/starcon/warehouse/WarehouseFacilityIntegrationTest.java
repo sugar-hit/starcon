@@ -698,7 +698,9 @@ class WarehouseFacilityIntegrationTest {
         .andExpect(jsonPath("$.total").value(2))
         .andExpect(jsonPath("$.rows[?(@.code=='WH-BONDED')].kind").value("BONDED"))
         .andExpect(jsonPath("$.rows[?(@.code=='WH-BONDED')].kindLabel").value("监管仓"))
-        .andExpect(jsonPath("$.detailUnavailable").value(true));
+        // detailUnavailable 是 8.1.1.1 → 8.1.1.2 的交接开关：详情已交付，所以这里是 false，
+        // 前端据此放行「进详情」而不是禁用按钮。
+        .andExpect(jsonPath("$.detailUnavailable").value(false));
     http.perform(get("/warehouse/facilities/options").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.kinds.length()").value(5));
