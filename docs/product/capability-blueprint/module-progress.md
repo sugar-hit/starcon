@@ -12,17 +12,17 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 82 |
+| 已交付 | 83 |
 | 进行中 | 0 |
-| **未开发** | **383** |
-| 完成率 | 17.6% |
+| **未开发** | **382** |
+| 完成率 | 17.8% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
-| **D3** | 4 | 0 | 36 | 40 |
+| **D3** | 5 | 0 | 35 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
@@ -38,7 +38,7 @@
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
-| 07 | 库存核算系统 | D3 | 4 | 31 |
+| 07 | 库存核算系统 | D3 | 5 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 0 | 27 |
@@ -260,7 +260,7 @@
 | 7.2.1.1 | 预占需求列表 | /inventory/reservation | D3 | 未开发 | — |
 | 7.2.1.2 | 预占分配明细 | /inventory/reservation | D3 | 未开发 | — |
 | 7.2.1.3 | 释放与过期 | /inventory/reservation | D3 | 未开发 | — |
-| 7.2.2.1 | 可售量口径 | — | D3 | 未开发 | — |
+| 7.2.2.1 | 可售量口径 | — | D3 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V56__warehouse_sellable_policy.sql`（sellable_policy 口径分档 + sellable_policy_warehouse 挂仓，两表 tenant_id NOT NULL + FORCE RLS isolation + GRANT 与 starcon_app REVOKE；**口径内容写定后不可改**由 guard_sellable_policy_immutable 触发器钉死，改口径只能收口旧档 + 开新档，与 17.5.1.1 业务参数的 effective_from 分档生效同一套约定 —— 因此刻意不建第二张变更历史表，已关区间的那些行就是历史，它永远是「当时真正生效的防线」的凭据；guard_sellable_policy_interval 触发器挡住同槽位生效区间重叠并报出冲突档 id（重叠的区间在解析时没有唯一答案）；缓冲比例 numeric(9,6) 且 CHECK 取值 0~1 落在 DB 层（禁浮点）；独占池键由服务按 EXCL-{referenceId} 派生并由 CHECK 钉死（人手填才可能把独占池写成共享池），共享池名不得占用 EXCL- 命名空间；REVOKE DELETE 挡住物理删除） · 端点 9 个挂在 `/warehouse/inventory/sellable-policies`：GET 列表（真分页 + effectiveOnly + 关键字）、GET `/effective`（按时刻解析生效档，SHOP > CHANNEL > DEFAULT 优先级，回退兜底与完全未配置都**如实报出**而不是静默按 0 处理）、GET `/pools`（池名册与安全判定）、GET `/pools/{poolKey}`（成员清单 + 仓构成 + 被平台口径排除掉的 FBA 量）、GET `/{id}` 详情、POST 新建、POST `/{id}/versions` 换版、POST `/{id}/retire` 作废、POST `/calculation` 按 SKU 试算（`InventoryController.java` + `SellablePolicyService.java` + `SellablePolicyModels.java`） · 页面 `/inventory/sellable-policies`（`apps/web/src/app/inventory/sellable-policies/page.tsx` + `components/inventory/sellable-policy-workspace.tsx` + `sellable-policy-model.ts`），api-proxy 放行 5 个读形状与 3 个动作、刻意不设 DELETE 段（能不能物理删掉一条防超卖配置的答案是不能） · 测试 `SellablePolicyIntegrationTest.java` 17 例实跑 Testcontainers PostgreSQL 16（连接池压到 1） **共享池与缓冲作为一组不可拆开测**：allocationRatio = 成员数 − 缓冲比例之和，两店铺各留 50% 缓冲时恰好为 1.0、余量为 0（判定 NO_HEADROOM），任一提到 80% 后回到 0.7、余量 30（GUARDED），各留 10% 时为 1.8、余量 −80（OVERSOLD）；超卖容忍额度内的负余量判 TOLERATED（有意为之）而不是配置错误。**口径逐项可计算**：仅自有仓时 FBA 的 60 件不进池容量且被排除量如实报出、改含 FBA 后容量变 160；include_in_transit 为真时发往该仓的在途 40 件计入、残次 500 件被**排除而不是扣减**（蓝图 7.1.1.3 原文）、buffer_ratio 边界 0/1/越界由 DB CHECK 拒；池容量按去重后的仓集合聚合（同一仓被两个共享成员引用只算一次）。其余用例覆盖分档生效（按时刻解析出不同档、旧档值原样保留）、未配置时拒绝回写、输入校验拒绝共享池名占用 EXCL- 命名空间与挂不存在的仓、effective_from 带 +08:00 偏移写入后断言读回 Instant 与偏移零漂移、端点权限码（改防超卖的最后一道防线挂 warehouse.inventory.update 而非 read，只有读权限返回 403）、逐张表断言 relforcerowsecurity 为真 · 跨服务边界（AGENTS.md 禁止跨服务 SQL/FK/视图）：店铺与渠道属 channel 服务，本模块只用 source_system + reference_id 逻辑定位键与写入时的可读名快照，不建外键也不查它的表；池容量所需的「哪些仓计入」挂在口径自己的挂仓表上，且 warehouse 没有 type 列（FBA 分类归 7.1.3.1 那条车道），因此 OWN/PLATFORM_FBA 分类标注在口径侧而不去改 warehouse 表语义 |
 | 7.2.2.2 | 安全库存 | — | D3 | 未开发 | — |
 | 7.3.1.1 | 批次管理 | /inventory/lots | D3 | 未开发 | — |
 | 7.3.1.2 | 效期与先进先出 | /inventory/lots | D3 | 未开发 | — |
