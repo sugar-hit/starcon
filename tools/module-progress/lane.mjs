@@ -636,9 +636,37 @@ if (cmd === 'merge-ready') {
     lane.landedBy = 'reap-legacy';
   }
 
+  // 上一轮 merge 冲突被人工（或调度器）解掉并提交之后，车道仍是 conflict：
+  // 脚本只在「本次 merge 失败」时写 conflict，从不回头确认「后来是否并进去了」。
+  // 后果是 gc 不清理它的 worktree，下一轮 plan 又把它当未解决的冲突重新报一遍。
+  // 判据：车道分支已经是集成分支的祖先 ⇒ 成果确实在集成头里，直接补记为 merged。
+  const conflictUnresolved = [];
+  for (const lane of Object.values(state.lanes)) {
+    if (lane.state !== 'conflict') continue;
+    const mergedAlready =
+      lane.headSha &&
+      git(['merge-base', '--is-ancestor', lane.headSha, state.integrationBranch], ROOT, true) === '';
+    if (mergedAlready) {
+      lane.state = 'merged';
+      lane.mergedAt = lane.mergedAt ?? new Date().toISOString();
+      lane.mergedBy = lane.mergedBy ?? 'reconcile-conflict-already-merged';
+      delete lane.conflicts;
+    } else {
+      conflictUnresolved.push(lane.id);
+    }
+  }
+  if (conflictUnresolved.length) {
+    console.error(
+      `⚠ 仍有未解决的并入冲突，请人工处理：${conflictUnresolved.join(', ')}` +
+        `（` + `解决并提交后，下一次 merge-ready 会自动把它们补记为 merged）`,
+    );
+  }
+
   const ready = Object.values(state.lanes).filter((l) => l.state === 'ready');
 
   if (!ready.length) {
+    // 补记改过状态就必须落盘，否则「没有待并入的车道」这条早退路径会把修正丢掉。
+    writeState(state);
     console.log(JSON.stringify({ ok: true, merged: [], note: '没有待并入的车道' }, null, 2));
     process.exit(0);
   }
