@@ -12,17 +12,17 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 85 |
+| 已交付 | 86 |
 | 进行中 | 0 |
-| **未开发** | **380** |
-| 完成率 | 18.3% |
+| **未开发** | **379** |
+| 完成率 | 18.5% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
-| **D3** | 7 | 0 | 33 | 40 |
+| **D3** | 8 | 0 | 32 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
@@ -38,7 +38,7 @@
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
-| 07 | 库存核算系统 | D3 | 7 | 31 |
+| 07 | 库存核算系统 | D3 | 8 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 0 | 27 |
@@ -269,7 +269,7 @@
 | 7.4.1.2 | 调整审批 | /inventory/adjustments | D3 | 未开发 | — |
 | 7.4.2.1 | 盘点单 | /inventory/count | D3 | 未开发 | — |
 | 7.4.2.2 | 盘点差异处理 | /inventory/count | D3 | 未开发 | — |
-| 7.5.1.1 | 调拨单 | — | D3 | 未开发 | — |
+| 7.5.1.1 | 调拨单 | — | D3 | 已交付 | 迁移 warehouse V61__warehouse_transfer_order.sql（transfer_order 调拨单头 + transfer_order_line 明细（SKU × 质量状态）+ transfer_shipment 发出动作 + transfer_receipt / transfer_receipt_line 收货与差异事件，五张表 tenant_id NOT NULL + FORCE RLS isolation + GRANT 与 starcon_app REVOKE，另 GRANT USAGE ON SEQUENCE 发号器；**调拨不是瞬时**由 guard_transfer_order_state 触发器钉死状态与三个时间戳自洽；**在途不丢账**由 guard_transfer_line_conservation 延迟约束触发器钉死「已发出 = 已实收 + 已确认差异 + 仍在途」；inventory_transfer 只加一列可空的 line_id，不改既有列语义与约束，部分收货走**拆行**（原行留未到剩余、另起一行记已收段）而不是把余量归零，因为 V1 的 CHECK(quantity>0) 不允许归零、且 CHECK((status='IN_TRANSIT')=(received_at IS NULL)) 要求非在途状态必须带了结时刻，拆行后四条既有模块的 sum(quantity) where status='IN_TRANSIT' 仍是精确未达量且无需改一行代码）· 端点 8 个挂在 /warehouse/inventory/transfers：GET 列表（真分页 + 全量汇总 + 六态与仓库下拉，筛选源仓/目标仓/SKU/状态/关键字，排序白名单 5 键）、GET /{id} 详情（头 + 明细 + 每次发出 + 每次收货与差异登记）、GET /{id}/movements（**复用 7.1.2.1 台账**，响应带 attribution=ORDER_GRANULAR 与口径说明）、POST 建单（草稿，不动库存，单号由 DB 序列生成）、PUT 改单（仅草稿，整份替换明细）、POST /{id}/confirm 草稿转待发、POST /{id}/ship 发出（**只减源仓、只挂在途，目的仓纹丝不动**）、POST /{id}/receive 实收（**分次**，转入目的仓并逐次冲减在途）、POST /{id}/close 结案（收不到的部分如实记 SHORTAGE、在途行转 CANCELLED、差异原因必填）—— 状态机只有 deriveStatus 一处真相，发出/收货/结案都改完数量后由它统一算状态，不在三个动作里各写一遍 if · 页面 /inventory/transfers（apps/web/src/app/inventory/transfers/page.tsx + components/inventory/inventory-transfer.tsx + inventory-transfer-model.ts）汇总卡与守恒式自检、筛选、列表、展开看明细与分录、建单与发货/收货/结案对话框、**仍在途独立成列且未发出量与差异量分列**（前者是还没走、后者是路上少了，混在一起会把发货计划误读成货损）、按钮按状态给（两个终态不再给发货收货）、分录归属口径常驻显示、加载/空/错误三态 · 测试 InventoryTransferIntegrationTest 20 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）覆盖**在途不丢账**（发出 60 后共享口径在途=60 且目的仓仍为 0、收 25 后=35、收满后=0）、分次收货三笔 25/20/15 逐笔留痕、部分收货拆行后已收段与未到段之和仍等于发出量、差异短少 10 件既不挪回源仓也不凭空进目的仓且在途归零、乐观锁版本不符与缺失都拒绝且失败请求不留库存痕迹、可用量不足拒绝发货、状态机拒绝草稿直接发货与已收后重复收货、timestamptz 带 +08:00 写入后断言读回偏移零漂移、分录符号出库为负入库为正且**不产生任何 SHIPMENT 事务**（与 7.1.3.1 多仓分布刻意把 TRANSFER_OUT 排除在周转速度之外的口径对齐）、逐张表断言 relforcerowsecurity、租户隔离三断言 + 端点 400/403/401 · warehouse 服务回归 209 例全绿 · **跨服务边界**：sku 属 catalog，只用 sku_ref 逻辑 ID + 可读名快照，不建外键不联查；源仓与目标仓都用复合外键 (tenant_id, warehouse_id) 指向本服务 warehouse，DB 层直接堵死「源仓指向别的租户」这个口子；7.5.2.1 跨法人调拨是另一条车道，本模块 legal_entity_id 只表示货权法人，不做跨法人定价与内部结算 · 已知边界：调拨按蓝图契约是 SKU × 数量、不按批次拆分，收货时批次由调用方给 lotId 可选（给了落该批次、不给落无批次 bucket），批次级拆分属 7.3.1.x 的演进范围 |
 | 7.5.1.2 | 在途库存 | — | D3 | 未开发 | — |
 | 7.5.2.1 | 跨法人调拨 | — | D3 | 未开发 | — |
 | 7.6.1.1 | 库龄与呆滞 | /inventory/aging | D3 | 未开发 | — |
