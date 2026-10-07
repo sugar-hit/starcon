@@ -2974,4 +2974,335 @@ public final class CatalogModels {
       long truncatedCount,
       int maxSimilarityPermille,
       String note) {}
+
+  // ============================================================ 3.4.2.2 描述与卖点库
+
+  /**
+   * 模板的一个变量占位。
+   *
+   * <p>{@code source} 决定它取自 SPU/SKU 事实字段、卖点短语池还是同 SPU 型号清单：
+   * 事实字段那一批是「这段文字里必须出现的商品事实」，
+   * 短语池那一批是「可以在批次之间换着来的可复用文案」。
+   */
+  public record ContentTemplateVariable(
+      UUID id, String name, String source, String sourceLabel, int slotNo) {}
+
+  /** 变量输入（新建或改模板时）。整体替换语义。 */
+  public record ContentTemplateVariableInput(
+      @NotBlank @Size(max = 32) String name,
+      @NotBlank String source,
+      @Schema(nullable = true) Integer slotNo) {}
+
+  /** 一个语言下的译文。 */
+  public record ContentTranslation(
+      UUID id,
+      UUID templateId,
+      String locale,
+      String name,
+      String body,
+      String origin,
+      String originLabel,
+      String status,
+      String statusLabel,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /** 译文写入（新建或改）。 */
+  public record ContentTranslationInput(
+      @NotBlank @Size(max = 16) String locale,
+      @NotBlank @Size(max = 100) String name,
+      @NotBlank @Size(max = 20000) String body,
+      @NotBlank @Size(max = 16) String origin,
+      @NotBlank @Size(max = 16) String status,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 译文完整度：某一批语言里，哪些有译文、哪些还没有。
+   *
+   * <p>「缺译文」是一等公民而不是错误：多语言版本本来就是逐语言补的，
+   * 而缺了译文时填充会被报成 {@code TRANSLATION_MISSING}，所以这里提前答
+   * 「这几种语言能不能直接填」。
+   */
+  public record ContentTranslationCoverage(
+      List<ContentTranslation> translations, List<String> locales, List<String> missingLocales, String note) {}
+
+  /** 内容模板写入（新建或改，id 为空即新建）。变量整体替换。 */
+  public record ContentTemplateInput(
+      @NotBlank @Size(max = 32) String code,
+      @NotBlank @Size(max = 100) String name,
+      @Schema(nullable = true) String note,
+      @NotBlank @Size(max = 16) String contentType,
+      @NotBlank @Size(max = 20000) String body,
+      @NotBlank @Size(max = 16) String sourceLocale,
+      @Schema(nullable = true) @Size(max = 16) List<@Valid ContentTemplateVariableInput> variables,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  /** 模板一行（含变量）。译文按需另查，避免列表页把四种语言全带出来。 */
+  public record ContentTemplateRow(
+      UUID id,
+      String code,
+      String name,
+      String note,
+      String contentType,
+      String contentTypeLabel,
+      String body,
+      String sourceLocale,
+      boolean enabled,
+      List<ContentTemplateVariable> variables,
+      List<String> locales,
+      long renderCount,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /** 模板保存结果。 */
+  public record ContentTemplateSaved(
+      UUID id, String code, long version, int variableCount, int localeCount, long renderCount) {}
+
+  /** 短语写入。 */
+  public record ContentPhraseInput(
+      @NotBlank @Size(max = 32) String code,
+      @NotBlank @Size(max = 2000) String text,
+      @NotBlank @Size(max = 16) String phraseType,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  /** 短语一行。 */
+  public record ContentPhraseRow(
+      UUID id,
+      String code,
+      String text,
+      String phraseType,
+      String phraseTypeLabel,
+      boolean enabled,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /** 短语列表页的一行：多带一个「被多少段填充结果引用」，删除保护在列表上就看得见。 */
+  public record ContentPhraseListRow(ContentPhraseRow phrase, long referenceCount) {}
+
+  public record ContentPhrasePage(
+      List<ContentPhraseListRow> items,
+      long total,
+      int page,
+      int size,
+      long sellingCount,
+      long featureCount,
+      long sceneCount,
+      long cautionCount,
+      String note) {}
+
+  /** 短语库筛选条件。null 表示不筛。 */
+  public record ContentPhraseQuery(
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) @Size(max = 16) String phraseType,
+      @Schema(nullable = true) @Size(max = 16) String enabled,
+      int page,
+      int size) {}
+
+  /**
+   * 批量填充提交。
+   *
+   * <p>skuIds 放请求体而不是 URL（一次可能 200 个）。
+   * {@code locale} 是本批次的输出语言：等于模板源语言时直接用 body 渲染，
+   * 否则必须已有译文，否则整批报 {@code TRANSLATION_MISSING}。
+   */
+  public record ContentRenderInput(
+      @NotNull UUID templateId,
+      @NotNull @Size(max = 200) List<@NotNull UUID> skuIds,
+      @NotBlank @Size(max = 16) String locale) {}
+
+  /** 提交结果：同步填充已完成，段落与缺失报告从批次详情查。 */
+  public record ContentRender(
+      UUID id,
+      UUID templateId,
+      String templateName,
+      String contentType,
+      String contentTypeLabel,
+      String locale,
+      String status,
+      String statusLabel,
+      int skuCount,
+      int sectionCount,
+      int completeCount,
+      int incompleteCount,
+      int issueCount,
+      String error,
+      String note) {}
+
+  /** 批次列表的一行（含模板名，省一次查询）。 */
+  public record ContentRenderRow(
+      UUID id,
+      UUID templateId,
+      String templateName,
+      String templateCode,
+      String contentType,
+      String contentTypeLabel,
+      String locale,
+      String status,
+      String statusLabel,
+      int skuCount,
+      int sectionCount,
+      int completeCount,
+      int incompleteCount,
+      int issueCount,
+      String error,
+      String createdAt,
+      @Schema(nullable = true) String finishedAt,
+      long version) {}
+
+  /**
+   * 逐 SKU 结果：填好了几段、缺了几段、缺了什么。
+   *
+   * <p>{@code reason} 是把该 SKU 的多条缺失报告压成一句可读的话（列表上要显示），
+   * 逐变量的明细在 {@link ContentRenderIssue} 上。
+   */
+  public record ContentRenderSkuRow(
+      UUID id,
+      UUID renderId,
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      String spuName,
+      String brand,
+      String category,
+      String outcome,
+      String outcomeLabel,
+      int completeCount,
+      int incompleteCount,
+      int issueCount,
+      String reason) {}
+
+  /**
+   * 一段填充结果：蓝图点名的输出「填充后的描述文本（分语言）」。
+   *
+   * <p>{@code complete=false} 时正文里**不会有任何占位符**——缺变量的位置被剥空了，
+   * 缺了什么在 {@code issues} 上逐条列出来（V21 的 CHECK 与触发器钉死了这条）。
+   */
+  public record ContentSection(
+      UUID id,
+      UUID renderId,
+      UUID renderSkuId,
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      String spuName,
+      String contentType,
+      String contentTypeLabel,
+      String locale,
+      String text,
+      int charLength,
+      String status,
+      String statusLabel,
+      boolean complete,
+      List<ContentRenderIssue> issues,
+      List<String> usedPhrases,
+      String createdAt) {}
+
+  /**
+   * 一条缺失变量报告 —— 蓝图「变量缺失必须在填充时报告」的那个「报告」。
+   *
+   * <p>{@code issueKind} 四值分别对应四种完全不同的修法：
+   * {@code EMPTY_FACT} 去补商品字段，{@code EMPTY_PHRASE_POOL} 去建短语，
+   * {@code TRANSLATION_MISSING} 去补译文，{@code UNBOUND_PLACEHOLDER} 去补变量绑定。
+   * 混成一句话的话，运营看到「填充有问题」却不知道该改哪。
+   */
+  public record ContentRenderIssue(
+      UUID id,
+      UUID sectionId,
+      UUID skuId,
+      String skuCode,
+      String variableName,
+      String issueKind,
+      String issueKindLabel,
+      String detail) {}
+
+  /** 批次详情：批次 + 逐 SKU 结果 + 全部段落（含缺失报告）+ 缺失变量汇总。 */
+  public record ContentRenderDetail(
+      ContentRenderRow render,
+      List<ContentRenderSkuRow> skus,
+      List<ContentSection> sections,
+      List<ContentMissingVariable> missingVariables,
+      String note) {}
+
+  /**
+   * 按变量汇总的缺失情况。
+   *
+   * <p>逐变量加总而不是逐段落罗列：200 个 SKU 各缺 brand 时，
+   * 「brand 缺 200 次」比 200 行「brand 缺了」有用得多，
+   * 而且它直接对应「该去补品牌字段还是该去补短语库」这个决定。
+   */
+  public record ContentMissingVariable(
+      String variableName, String issueKind, String issueKindLabel, long occurrences, String detail) {}
+
+  /** 段落列表筛选条件。 */
+  public record ContentSectionQuery(
+      @Schema(nullable = true) UUID skuId,
+      @Schema(nullable = true) @Size(max = 16) String locale,
+      @Schema(nullable = true) @Size(max = 16) String contentType,
+      @Schema(nullable = true) @Size(max = 16) String status,
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) UUID renderId,
+      int page,
+      int size) {}
+
+  /** 04 刊登与 15 客服取「这个 SKU 的这段描述」的主查询形状。 */
+  public record ContentSectionPage(
+      List<ContentSection> items,
+      long total,
+      int page,
+      int size,
+      long completeCount,
+      long incompleteCount,
+      long issueCount,
+      String note) {}
+
+  /** 批次列表筛选条件。 */
+  public record ContentRenderQuery(
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) @Size(max = 16) String status,
+      int page,
+      int size) {}
+
+  public record ContentRenderPage(
+      List<ContentRenderRow> items,
+      long total,
+      int page,
+      int size,
+      long succeededCount,
+      long partialCount,
+      long failedCount,
+      long issueCount,
+      String note) {}
+
+  /**
+   * 描述与卖点库概览。
+   *
+   * <p>{@code incompleteSectionCount} 与 {@code issueCount} 放在最前面：
+   * 「有多少段落还没填好」是这个库唯一需要每天盯的数字，
+   * 它藏在概览里是刻意的 —— 模板配得不全时它是唯一能提醒运营去补的信号。
+   */
+  public record ContentOverview(
+      long templateCount,
+      long enabledTemplateCount,
+      long descriptionTemplateCount,
+      long instructionTemplateCount,
+      long cautionTemplateCount,
+      long sellingPointTemplateCount,
+      long translationCount,
+      long draftTranslationCount,
+      long phraseCount,
+      long sellingPhraseCount,
+      long featurePhraseCount,
+      long scenePhraseCount,
+      long cautionPhraseCount,
+      long renderCount,
+      long sectionCount,
+      long completeSectionCount,
+      long incompleteSectionCount,
+      long issueCount,
+      String note) {}
 }
