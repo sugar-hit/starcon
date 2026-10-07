@@ -4610,5 +4610,195 @@ public final class CatalogModels {
       long usableCount,
       long noRoleCount,
       String note) {}
+
+  // ================================================================ 3.6.3.1 地址与联系人
+  //
+  // 蓝图：维护往来单位的收发货地址与联系人；地址变更留历史版本。
+  // 上游 = 3.6.1.1（party / party_role，V27），下游 = 06 采购（发货地址）、10 物流（提货地址）。
+  //
+  // 「单据上的地址是冻结快照」这条硬约束在本模块这一侧的形状见
+  // V31__party_addresses_contacts.sql 第四节（为什么是「可变当前态 + append-only 版本链」
+  // 而不是「地址行不可变」，以及三层读取里哪一层才是权威）。
+
+  /**
+   * 地址用途：收货 / 发货 / 提货。
+   *
+   * <p>三个值与蓝图点名的三个下游用途一一对应，刻意不合并：{@code SHIP_FROM}（06 的发货地址）
+   * 与 {@code PICKUP}（10 的提货地址）在多数场景是同一个物理地点，但它们在单据上
+   * 各自带理由，而「每个用途各有一个默认」要在数据上落得下（V31 第六节的部分唯一索引）。
+   */
+  public record PartyAddressUsageInput(
+      @NotBlank String usage, boolean isDefault) {}
+
+  /**
+   * 建 / 改地址的请求。
+   *
+   * <p>{@code usages} 是整体替换语义（与 {@link PartyInput#roles()} 同一约定）：
+   * 提交什么就等于什么，{@code null} 等价于「这条地址不承担任何用途」。
+   *
+   * <p>把用途放进同一个请求而不是只留一个 {@code /usages} 端点，是为了「新建地址时顺手标用途」
+   * 少一次往返；而<b>只</b>改用途 / 默认标记时应该走 {@code PUT /{id}/usages} ——
+   * 那条路径不碰地址内容，因此不会产生一条内容没变的版本行（规则 A3）。
+   */
+  public record PartyAddressInput(
+      @NotBlank @Size(max = 2) String countryCode,
+      @Schema(nullable = true) @Size(max = 100) String stateProvince,
+      @NotBlank @Size(max = 100) String city,
+      @Schema(nullable = true) @Size(max = 100) String district,
+      @Schema(nullable = true) @Size(max = 32) String postalCode,
+      @NotBlank @Size(max = 200) String streetLine1,
+      @Schema(nullable = true) @Size(max = 200) String streetLine2,
+      @Schema(nullable = true) @Size(max = 100) String label,
+      @Schema(nullable = true) @Size(max = 200) String changeNote,
+      @Schema(nullable = true) @Valid List<PartyAddressUsageInput> usages,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 只改用途与默认标记的请求（{@code PUT /{id}/usages}）。
+   *
+   * <p>独立成一个 record 与一个端点，而不是让运营为了换个默认地址去重填整个地址：
+   * 用途与默认是**标签**，地址内容才是**快照**，两者混在一个保存动作里会让版本链
+   * 记下一条内容没变的版本（规则 A3）。
+   *
+   * <p>{@code version} 是地址行的乐观锁，不是历史序号（{@link PartyAddressVersion#versionNo()}）。
+   */
+  public record PartyAddressUsageSaveInput(
+      @NotNull @Size(min = 0, max = 3) @Valid List<PartyAddressUsageInput> usages,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 设 / 取消某个用途的默认地址（{@code PUT /{id}/default}）。
+   *
+   * <p>「默认」按用途分别设，所以要带 {@code usage}；{@code isDefault=false} 是显式取消
+   * （不是「传空就好」—— 空值分不清是取消默认还是忘了填）。
+   */
+  public record PartyAddressDefaultInput(
+      @NotBlank String usage, boolean isDefault, @PositiveOrZero long version) {}
+
+  /**
+   * 地址保存结果：带最新版本号，前端不必为了拿「刚才是第几版」再打一次版本列表。
+   */
+  public record PartyAddressSaved(
+      UUID id,
+      long version,
+      List<String> usages,
+      List<String> defaultUsages,
+      int latestVersionNo,
+      String oneLine) {}
+
+  /**
+   * 一条地址的读出口径（列表行与详情共用同一个 record）。
+   *
+   * <p>共用而不是拆两个 record，是因为详情页要显示的就是列表行那一套字段
+   * 加上「历史版本」。拆开会让「列表里的默认标记」与「详情里的默认标记」有两次实现。
+   *
+   * <p>{@code oneLine} 是服务端拼好的单行地址（面单与列表都用它），
+   * 前端不自己拼 —— 各家地址的拼接顺序不一样，浏览器里拼出来的结果
+   * 与 10 物流打印出来的对不上是最难查的一类问题。
+   */
+  public record PartyAddress(
+      UUID id,
+      UUID partyId,
+      @Schema(nullable = true) String label,
+      String countryCode,
+      @Schema(nullable = true) String stateProvince,
+      String city,
+      @Schema(nullable = true) String district,
+      @Schema(nullable = true) String postalCode,
+      String streetLine1,
+      @Schema(nullable = true) String streetLine2,
+      String oneLine,
+      List<String> usages,
+      List<String> defaultUsages,
+      String usageSummary,
+      int latestVersionNo,
+      int versionCount,
+      long version,
+      @Schema(nullable = true) String selectionBlockCode,
+      @Schema(nullable = true) String selectionBlockMessage,
+      boolean deleted,
+      String createdAt,
+      String updatedAt) {}
+
+  /**
+   * 地址的一个历史版本 —— <b>冻结快照的载体</b>。
+   *
+   * <p>内容列与 {@link PartyAddress} 的地址列一一对应（同宽），所以「当时长什么样」
+   * 可以直接读出来，而不需要从当前行回放差异。
+   *
+   * <p>{@link #versionNo()} 是**历史序号**（只在内容真的变了时 +1），
+   * 与 {@link PartyAddress#version()}（乐观锁，每次保存都 +1）是两个数。
+   * 下游单据存的是 {@code (addressId, versionNo)} 指路牌。
+   */
+  public record PartyAddressVersion(
+      UUID addressId,
+      int versionNo,
+      boolean current,
+      @Schema(nullable = true) String label,
+      String countryCode,
+      @Schema(nullable = true) String stateProvince,
+      String city,
+      @Schema(nullable = true) String district,
+      @Schema(nullable = true) String postalCode,
+      String streetLine1,
+      @Schema(nullable = true) String streetLine2,
+      String oneLine,
+      String changeNote,
+      String changedAt,
+      UUID changedBy,
+      String createdAt) {}
+
+  /** 地址列表的分页结果。 */
+  public record PartyAddressPage(
+      List<PartyAddress> items,
+      long total,
+      int page,
+      int size,
+      long defaultCount,
+      long unassignedCount,
+      String note) {}
+
+  /** 列表页筛选条件。null / 空串表示不筛。 */
+  public record PartyAddressQuery(
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) @Size(max = 16) String usage,
+      @Schema(nullable = true) @Size(max = 2) String countryCode,
+      @Schema(nullable = true) Boolean includeDeleted,
+      int page,
+      int size) {}
+
+  /** 建 / 改联系人的请求。 */
+  public record PartyContactInput(
+      @NotBlank @Size(max = 100) String name,
+      @Schema(nullable = true) @Size(max = 100) String position,
+      @Schema(nullable = true) @Size(max = 254) String email,
+      @Schema(nullable = true) @Size(max = 64) String phone,
+      @Schema(nullable = true) @Size(max = 64) String mobile,
+      boolean isPrimary,
+      @Schema(nullable = true) @Size(max = 2000) String note,
+      @PositiveOrZero long version) {}
+
+  /** 设 / 取消默认联系人（{@code PUT /{id}/primary}）。 */
+  public record PartyContactPrimaryInput(boolean isPrimary, @PositiveOrZero long version) {}
+
+  /** 联系人保存结果。 */
+  public record PartyContactSaved(UUID id, long version, boolean isPrimary) {}
+
+  /** 一条联系人的读出口径。 */
+  public record PartyContact(
+      UUID id,
+      UUID partyId,
+      String name,
+      @Schema(nullable = true) String position,
+      @Schema(nullable = true) String email,
+      @Schema(nullable = true) String phone,
+      @Schema(nullable = true) String mobile,
+      boolean isPrimary,
+      @Schema(nullable = true) String note,
+      @Schema(nullable = true) String selectionBlockCode,
+      @Schema(nullable = true) String selectionBlockMessage,
+      long version,
+      String createdAt,
+      String updatedAt) {}
 }
 
