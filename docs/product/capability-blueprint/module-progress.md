@@ -12,17 +12,17 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 82 |
+| 已交付 | 83 |
 | 进行中 | 0 |
-| **未开发** | **383** |
-| 完成率 | 17.6% |
+| **未开发** | **382** |
+| 完成率 | 17.8% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
-| **D3** | 4 | 0 | 36 | 40 |
+| **D3** | 5 | 0 | 35 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
@@ -38,7 +38,7 @@
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
-| 07 | 库存核算系统 | D3 | 4 | 31 |
+| 07 | 库存核算系统 | D3 | 5 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 0 | 27 |
@@ -264,7 +264,7 @@
 | 7.2.2.2 | 安全库存 | — | D3 | 未开发 | — |
 | 7.3.1.1 | 批次管理 | /inventory/lots | D3 | 未开发 | — |
 | 7.3.1.2 | 效期与先进先出 | /inventory/lots | D3 | 未开发 | — |
-| 7.3.2.1 | 序列号 | /inventory/serials | D3 | 未开发 | — |
+| 7.3.2.1 | 序列号 | /inventory/serials | D3 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V58__warehouse_inventory_serial.sql` 三张表，全部 tenant_id NOT NULL + FORCE RLS + isolation 策略 + 显式 GRANT：`inventory_serial` 序列号档案（UNIQUE(tenant_id,serial_number) 是整个模块的地基 —— 同一个号出现两次，「每件只在一个位置」就无从谈起）、`inventory_serial_movement` 位置流转历史（append-only）、`inventory_serial_operation` 出入库操作头。**「数量为 1 必须恰好 1 个序列号」这条蓝图硬约束被拆成四层，只靠应用层 if 等于没说**：① 服务在校验阶段逐条比对 declaredQuantity 与 serialNumbers.size()，不等则**一条都不写**并逐号回错；② 落库前再校验一次「可操作条数 == 声明数量」（逐号校验可能因撞号/SKU 不符把某些号排除，等到 COMMIT 才被触发器发现会伪装成一次随机的提交失败）；③ 操作头 CHECK(serial_count = declared_quantity) + CHECK(declared_quantity = trunc(...)) 让「声明自相矛盾」与「带小数的离散件数量」无法落库；④ DEFERRABLE INITIALLY DEFERRED 约束触发器 guard_inventory_serial_operation 在 COMMIT 时数一遍真正写入的流转行，挡住「数量对得上、实际少写两件」这种应用层验不出来的半成品。另有两处永久不变式写进触发器而不只是 Java：序列号与 SKU 的绑定不可改、**报废是终态**（V58 的 guard_inventory_serial_identity）；状态与位置配套也由 CHECK 兜住（在库/维修必须有库位、已售/在途/报废必须无库位，「已售的货还挂在库位上」与「在库的货没有库位」这两类现场事故在 INSERT 那一刻就失败）。「录错了要删」走 SECURITY DEFINER 函数 `discard_unused_serial`：流转表是 append-only、应用角色连 DELETE 都没有，该函数是数据库里唯一被允许删序列号历史的入口，并把守卫重新校验一遍；守卫判据是共享函数 `inventory_serial_unreferenced`（最多一条流转且那条必须是建档时那次纯入库 —— 只判「条数 <= 1」会让「录错后又挪过一次位」的号被误删），触发器与该函数各调一处，不让两条守卫漂移。+ 模型 `InventorySerialModels`（DTO 一律加 `Serial` 前缀：四份 OpenAPI schema 被 codegen 拍平进同一个 TS 命名空间）+ 服务 `InventorySerialService`（jOOQ 显式 SQL，真分页，排序白名单）+ 端点 `InventorySerialController` 12 个：GET /inventory/serials（含 stats、{id}、{id}/movements、serial-movements、serial-operations、serial-vocabularies 词表）、POST /inventory/serials（扫码）、/serials/import（批量，可 dryRun）、/serials/validate-movement（只算不写，读权限即可）、/serials/movements（出入库/库位转移/状态流转/批次改绑），PUT/DELETE /serials/{id}。**位置与状态是两条正交的轴**（INBOUND→落位库位 / OUTBOUND→摘掉库位且必须说清去向 / RELOCATION→换库位 / STATUS_CHANGE 与 REBIND→库位不变），报废只能走 OUTBOUND：V58 的 CHECK 规定报废的号不能挂在库位上，而货报废时确实已从货架上被拿走，硬造一个「状态流转」把它留在库位上只会让约束与现实两头不讨好。**校验错误逐条按号归因**（错误码枚举 15 个：SERIAL_COUNT_MISMATCH / TRANSITION_NOT_ALLOWED / LOCATION_MISMATCH / NO_CHANGE 等），只回一句「校验不通过」等于把定位的活儿全推给拿着上百个号的操作员。+ 页面 `apps/web/src/components/inventory/inventory-serial.tsx` + `serial-model.ts` + `/inventory/serials` 真实工作区：档案 / 流转历史 / 出入库操作三个页签，状态分布守恒式显式画出来（不守恒时每个单独数字都不可信），空库位显式写成「不在任何库位」而不是留白，流转历史 from/to 成对显示，扫码录入 / 批量导入 / 出入库三块写入口都带**先试跑后提交**，提交前本地就把「数量写了 3、扫到 2 个」说清（后端仍然独立校验，这道只是让人当场就知道，不用离开货架再回来）。租户不来自任何客户端头：由 AccessService 从已认证成员关系解析并绑定 app.current_tenant，写入时用 current_setting(...) 取值而非从参数传。+ 测试 `InventorySerialIntegrationTest` 30 个用例实跑 Testcontainers PostgreSQL 16（连接池压到 1）；**硬约束在数据库层被证明而不是只在应用层**：三处直接绕过服务用裸 SQL 写 —— 操作头声明与条数不符被 CHECK 拒绝、声明 2/2/2 但只写 1 条流转被延迟触发器整笔回滚、报废的号用 UPDATE 复活被 identity 触发器拒绝；时区用 `+05:30` 这个既非本地也非整点的偏移写入，取 `extract(epoch ...)` 逐字比对瞬间，证明没有发生「按服务器本地时区静默偏 8 小时」；另有扫描/删除边界/批次外键/排序白名单/统计守恒/只读角色能校验不能写入等用例。租户隔离三断言实跑（两租户档案与历史互不可见、拿对方 id 直接查得到 404 而不是泄露存在性、伪造 X-Tenant-Id 指向真实存在的对方租户也换不来记录且写入不会落到对方号上、连接池 1 条连接 A→B 交替 20 轮不串租户）。**跨车道回归自查**：V58 只 CREATE TABLE / CREATE FUNCTION / 只在自己三张新表上 ENABLE+FORCE RLS 与 GRANT REVOKE，**没有 ADD COLUMN、没有 SET NOT NULL、没有触碰任何既有表或既有函数**，因此不存在「无 DEFAULT 兜底的新列 / 无触发器兜底的 NOT NULL」这类会让早并入车道 INSERT 违约的改动；全量 verify 已覆盖既有 6 个 warehouse 集成测试类全绿。未交付（不在本任务书范围）：7.3.1.1 批次管理（V57，另一条车道，本迁移只读引用 V2 已有的 inventory_lot 做复合外键）、7.3.1.2 效期与 FEFO（蓝图标明可延后）。 |
 | 7.4.1.1 | 调整单管理 | /inventory/adjustments | D3 | 未开发 | — |
 | 7.4.1.2 | 调整审批 | /inventory/adjustments | D3 | 未开发 | — |
 | 7.4.2.1 | 盘点单 | /inventory/count | D3 | 未开发 | — |
