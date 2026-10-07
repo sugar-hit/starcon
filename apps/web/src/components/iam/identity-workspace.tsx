@@ -12,6 +12,7 @@ import {
 } from './administration-model';
 
 const destinations = [
+  ['tenants', '租户列表', '查看你可进入的租户、切换工作空间并维护本租户基本信息'],
   ['members', '用户与成员', '管理本租户成员、启停状态和角色分配'],
   ['roles', '角色配置', '配置页面操作权限与数据范围'],
   ['departments', '部门管理', '维护成员归属与部门数据范围'],
@@ -132,10 +133,14 @@ export function IdentityWorkspace({
           </section>
           <div className="grid gap-4 sm:grid-cols-2">
             {destinations
+              // 租户列表对每个成员都开放：不知道自己属于哪些租户的人没法切换工作空间，
+              // 所以它不受页面权限码过滤（服务端仍按成员关系裁剪，见 17.1.1.1）。
               .filter(([key]) =>
-                key === 'audit'
-                  ? hasPermission(session, 'identity.audit.read')
-                  : canManage(session, key),
+                key === 'tenants'
+                  ? true
+                  : key === 'audit'
+                    ? hasPermission(session, 'identity.audit.read')
+                    : canManage(session, key),
               )
               .map(([key, label, description]) => (
                 <Link

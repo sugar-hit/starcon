@@ -11,6 +11,69 @@
     }
   ],
   "paths": {
+    "/identity/tenants/current": {
+      "get": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "tenantContext",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantContextView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "updateTenantProfile",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantProfileInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/roles/{id}": {
       "put": {
         "tags": [
@@ -965,6 +1028,40 @@
         }
       }
     },
+    "/identity/tenants": {
+      "get": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "tenants",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TenantSummaryView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identity/permissions": {
       "get": {
         "tags": [
@@ -1290,6 +1387,24 @@
   },
   "components": {
     "schemas": {
+      "TenantProfileInput": {
+        "required": [
+          "name",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "pattern": "ACTIVE|SUSPENDED",
+            "type": "string"
+          }
+        }
+      },
       "RoleInput": {
         "required": [
           "code",
@@ -1712,6 +1827,81 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "TenantSummaryView": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "current": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TenantContextView": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "parentTenantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "memberCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "childCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "managed": {
+            "type": "boolean"
           }
         }
       },
