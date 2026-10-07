@@ -68,6 +68,36 @@
 - RLS 三条断言在**新表**上实跑，不是从店铺表继承：两租户互不可见、伪造 `X-Tenant-Id` 无效、
   连接池归还后不串租户（池大小设为 1，使下一个借用者拿到同一条物理会话）。
 
+## GitHub Actions 现状：红是既有状态，与本切片无关
+
+本切片 push 后 CI 7 个 job 里 6 个红。逐条查过，**没有一条是本切片造成的**：
+
+| Job | 失败原因 | 归属 |
+|---|---|---|
+| Lint / Typecheck / Unit / Catalog Browser（4 个） | `pnpm/action-setup@v4` 报 `Multiple versions of pnpm specified`：workflow 里 `version: 9`，`package.json#packageManager` 又写了 `pnpm@9.0.0`。在任何脚本执行前就挂 | 既有 |
+| Java 21 & PostgreSQL Integration | **57 个测试全部通过**（含本切片新增的 18 个），只挂在 `spotless:check` | 既有 |
+| Security Scan | 未细查 | — |
+
+`gh run list --branch main` 显示 **main 上连续 5 次 push 全红**（从仓库 bootstrap 起），
+说明 CI 从未绿过。作业手册第 6 节记录的门禁是**本地**门禁，本地三项全绿，符合"门禁不过就不 push"的约束。
+
+`spotless:check` 的违规覆盖几乎整个仓库（`ApiErrorHandler` / `ChannelController` / `ChannelService` /
+`ChannelModels` / `ChannelIntegrationTest` / identity+catalog 的 `OpenApiContractTest`），
+**不包含本切片新增的 4 个文件**——用 JDK 21 跑 `spotless:apply` 验证过，改动只落在这 5 个既有文件上，
+已全部 revert 以免把无关格式化混进切片。
+
+### 待人工决策（不在本切片范围）
+
+1. **pnpm 版本双重声明**：workflow 去掉 `version:`，或 `package.json` 去掉 `packageManager`。
+   这是 4 个前端 job 全红的唯一原因，改一行即可。
+2. **仓库整体未跑过 `spotless:apply`**：要么一次性格式化全仓并单独提 MR，要么在 CI 里先关掉
+   `spotless:check`。
+3. **作业手册需要修正一条结论**：手册记「`spotless:apply` 在 Java 25 上崩溃（`NoSuchMethodError`），
+   是仓库既有问题，不要跑」。实际是**本机默认 JDK 25** 导致 google-java-format 崩溃；
+   用 `JAVA_HOME=/Users/guan/Library/Java/JavaVirtualMachines/openjdk-21/Contents/Home ./mvnw spotless:apply`
+   可正常运行（CI 用的就是 Java 21）。真正的既有问题是全仓从未格式化过，不是工具不可用。
+4. **Security Scan** 失败原因未查。
+
 ## 后续待办
 
 - 队列 #2 `d5-channel-webhook-receipt`：`webhook_receipt` / `external_snapshot`，与本切片的
