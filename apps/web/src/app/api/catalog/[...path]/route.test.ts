@@ -1241,3 +1241,82 @@ it('3.8.1.1 导入向导已有的路径没有被报告子段改坏', async () =>
     ).toBe(200);
   }
 });
+
+it('3.9.2.1 完整度评分的路径逐条放行且未实现的子路径仍被拒', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const uuid = 'abcdef01-2345-6789-abcd-ef0123456789';
+  const seg = (...parts: string[]) => ['catalog', 'completeness', ...parts];
+  const at = (path: string) => ['catalog', ...path.split('/')];
+
+  // 放行的路径逐条断言真实响应码，而不是数括号 / 猜正则是否完整 ——
+  // 白名单是一行几千字符的正则字面量，数括号只能证明括号配对，证明不了它放行了什么。
+  for (const path of [
+    'completeness',
+    'completeness/overview',
+    'completeness/options',
+    'completeness/gaps',
+    'completeness/gaps/summary',
+    'completeness/evaluations',
+    `completeness/evaluations/${uuid}`,
+    `completeness/customs/skus/${uuid}`,
+    `completeness/certifications/skus/${uuid}`,
+    `completeness/certifications/skus/${uuid}/${uuid}`,
+    `completeness/SPU/${uuid}`,
+    `completeness/SKU/${uuid}`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: at(path) } })).status,
+      `${path} 必须放行`,
+    ).toBe(200);
+  }
+
+  // 预检是 POST（清单放请求体而不是拼 URL），仍要放行
+  for (const [path, method] of [
+    ['completeness/precheck/listing', POST],
+    ['completeness/precheck/customs', POST],
+    ['completeness/evaluations', POST],
+  ] as const) {
+    expect(
+      (await method(request(path, 'POST'), { params: { path: at(path) } })).status,
+      `${path} 必须放行 POST`,
+    ).toBe(200);
+  }
+  expect(
+    (await PUT(request(`completeness/customs/skus/${uuid}`, 'PUT'), {
+      params: { path: seg('customs', 'skus', uuid) },
+    })).status,
+  ).toBe(200);
+  expect(
+    (await PUT(request(`completeness/certifications/skus/${uuid}/${uuid}`, 'PUT'), {
+      params: { path: seg('certifications', 'skus', uuid, uuid) },
+    })).status,
+  ).toBe(200);
+
+  // 已被放行的请求都会真的转发到上游一次，记下当前调用数，
+  // 后面用它证明"被拒的路径一个请求都没发出去"（而不是只看响应码）。
+  const forwardedAfterAllowed = fetcher.mock.calls.length;
+
+  // 未实现的子路径仍要 404：放行「不该存在的路径」比 404 更糟，
+  // 界面会以为功能已交付。主体类型也刻意只认 SPU / SKU 两个字面量。
+  for (const path of [
+    'completeness/SPU',
+    'completeness/unknown',
+    'completeness/gaps/other',
+    'completeness/certifications',
+    'completeness/certifications/skus',
+    'completeness/precheck',
+    'completeness/precheck/other',
+    `completeness/SKU/${uuid}/extra`,
+    `completeness/WIDGET/${uuid}`,
+    'completenessx',
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: at(path) } })).status,
+      `${path} 必须仍然被拒`,
+    ).toBe(404);
+  }
+  // 白名单是 allowlist：不在名单里的路径必须在这里 404 **且不发出请求** ——
+  // 转发出去等于让上游去猜这个路径该不该存在。
+  expect(fetcher.mock.calls.length, '被拒的路径不许发出任何请求').toBe(forwardedAfterAllowed);
+});
