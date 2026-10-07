@@ -443,6 +443,15 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['新增账簿', '设置记账规则', '核对会计年度'],
   },
   {
+    href: '/org/business-parameters',
+    implemented: true,
+    domain: 'org',
+    label: '业务参数',
+    description: '配置全局与分场景业务参数默认值，按全局、法人、店铺三档解析生效值并保留变更历史。',
+    fields: ['参数', '出厂默认值', '生效范围', '生效值', '来源档位', '变更历史'],
+    workflow: ['新增覆盖配置', '核对生效值', '冻结单据参数'],
+  },
+  {
     href: '/org/stores',
     implemented: false,
     domain: 'org',
@@ -627,6 +636,7 @@ export const ACCOUNT_MENU_ORDER = [
   '/org/hierarchy',
   '/org/legal-entities',
   '/org/accounting-books',
+  '/org/business-parameters',
   '/org/stores',
   '/org/permissions',
   '/org/audit',

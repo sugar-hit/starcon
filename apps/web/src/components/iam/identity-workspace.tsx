@@ -28,6 +28,7 @@ const destinations = [
   ['children', '子租户管理', '创建独立工作空间并指定所有者'],
   ['hierarchy', '层级授权', '显式开通父租户对子租户数据的访问范围与有效期'],
   ['audit', '审计日志', '检索关键操作留痕、变更详情与导出'],
+  ['business-parameters', '业务参数', '配置审单、库存、售后、成本与展示默认值，并按全局/法人/店铺分档生效'],
 ] as const;
 /** 17.2.2.2 成员开通有自己的页面权限码，不与成员管理共用一组。 */
 // 'hierarchy' 只出现在导航目的地里（点击跳 /org/hierarchy 独立页面），
@@ -38,6 +39,9 @@ type WorkspaceKind = AdministrationKind | 'onboarding';
 function visible(session: Access, key: string) {
   if (key === 'tenants') return true;
   if (key === 'audit') return hasPermission(session, 'identity.audit.read');
+  // 17.5.1.1 业务参数是独立页面权限码，不走 canManage 的页面映射。
+  if (key === 'business-parameters')
+    return hasPermission(session, 'identity.business_parameter.read');
   // 层级授权是独立页面（不在 AdministrationPanel 的四类管理里），走自己的页面权限码。
   // 17.2.2.2 把内联 filter 抽成 visible() 时漏了这条，hierarchy 会落到 canManage 兜底 ——
   // 而 AdministrationKind 里根本没有 'hierarchy'，于是有 tenant.hierarchy.read 的人反而看不到入口。

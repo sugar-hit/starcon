@@ -687,7 +687,7 @@
         "tags": [
           "accounting-book-controller"
         ],
-        "operationId": "delete",
+        "operationId": "delete_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1488,7 +1488,7 @@
         "tags": [
           "accounting-book-controller"
         ],
-        "operationId": "create_3",
+        "operationId": "create_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -1605,7 +1605,7 @@
         "tags": [
           "hierarchy-authorization-controller"
         ],
-        "operationId": "create_4",
+        "operationId": "create_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -2811,6 +2811,395 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/overrides/{id}": {
+      "put": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessParameterOverrideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/overrides": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "overrides",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "parameterCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessParameterOverrideView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "create_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessParameterOverrideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/freezes": {
+      "post": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "freeze",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessParameterFreezeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "definitions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessParameterDefinitionView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/history": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "history",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "parameterCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessParameterHistoryView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/freezes/{documentType}/{documentNo}": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "frozen",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "documentType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentNo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessParameterFreezeView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/effective": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "effective",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessParameterEffectiveView"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -4987,6 +5376,438 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "BusinessParameterOverrideInput": {
+        "required": [
+          "parameterCode",
+          "scopeType",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "parameterCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "scopeType": {
+            "pattern": "GLOBAL|LEGAL_ENTITY|SHOP",
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopLabel": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "BusinessParameterFreezeInput": {
+        "required": [
+          "documentNo",
+          "documentType"
+        ],
+        "type": "object",
+        "properties": {
+          "documentType": {
+            "minLength": 1,
+            "pattern": "[A-Z][A-Z0-9_]{1,31}",
+            "type": "string"
+          },
+          "documentNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopLabel": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "BusinessParameterDefinitionView": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "valueType": {
+            "type": "string"
+          },
+          "defaultValue": {
+            "type": "string"
+          },
+          "defaultValueNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "allowedValueCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "validationPattern": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "BusinessParameterOverrideView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parameterCode": {
+            "type": "string"
+          },
+          "parameterName": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "valueType": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string"
+          },
+          "valueNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "valueCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BusinessParameterHistoryView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parameterCode": {
+            "type": "string"
+          },
+          "parameterName": {
+            "type": "string"
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "action": {
+            "type": "string"
+          },
+          "beforeValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "beforeValueNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "beforeValueCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "afterValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "afterValueNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "afterValueCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BusinessParameterFreezeValueView": {
+        "type": "object",
+        "properties": {
+          "parameterCode": {
+            "type": "string"
+          },
+          "parameterName": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "valueNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "valueCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sourceScope": {
+            "type": "string"
+          },
+          "sourceScopeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "BusinessParameterFreezeView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentType": {
+            "type": "string"
+          },
+          "documentNo": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "frozenAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BusinessParameterFreezeValueView"
+            }
+          }
+        }
+      },
+      "BusinessParameterEffectiveView": {
+        "type": "object",
+        "properties": {
+          "parameterCode": {
+            "type": "string"
+          },
+          "parameterName": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "valueType": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "valueNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "valueCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "sourceScope": {
+            "type": "string"
+          },
+          "sourceScopeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "overrideId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "inherited": {
+            "type": "boolean"
+          },
+          "definitionDefault": {
+            "type": "string"
+          },
+          "definitionDefaultNumeric": {
+            "type": "number",
+            "nullable": true
+          },
+          "definitionDefaultCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }
