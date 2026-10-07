@@ -12,6 +12,11 @@ const destinations = [
   ['tenants', '租户列表', '查看你可进入的租户、切换工作空间并维护本租户基本信息'],
   ['onboarding', '成员开通', '为新成员开通账号、接入成员关系并设定初始部门与角色'],
   ['members', '用户与成员', '管理本租户成员、启停状态和角色分配'],
+  [
+    'offboarding',
+    '离职与停用',
+    '停用离职成员、转移在办单据与审批责任、回收待办与任务，全程保留历史记录',
+  ],
   ['roles', '角色配置', '配置页面操作权限与数据范围'],
   ['departments', '部门管理', '维护成员归属与部门数据范围'],
   ['department-leaders', '部门负责人', '指定各部门负责人、管理范围与审批权限，支持代管与临时授权'],
@@ -34,6 +39,8 @@ function visible(session: Access, key: string) {
   if (key === 'hierarchy') return hasPermission(session, 'tenant.hierarchy.read');
   // 部门负责人同样是独立页面权限码，不走 canManage 的页面映射（17.2.1.2）。
   if (key === 'department-leaders') return hasPermission(session, 'identity.department_leader.read');
+  // 离职与停用同样是独立页面权限码，不走 AdministrationPanel 的四类管理（17.2.2.3）。
+  if (key === 'offboarding') return hasPermission(session, 'identity.offboarding.read');
   if (key === 'onboarding')
     return session.grants.some(
       (g) => g.scopeMode === 'ALL' && g.permissions.includes('identity.onboarding.read'),
