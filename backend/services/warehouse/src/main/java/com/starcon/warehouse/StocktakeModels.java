@@ -204,6 +204,8 @@ public final class StocktakeModels {
    * @param lineCount 冻结的明细行数（= 冻结时刻落在范围内的 bucket 行数）
    * @param countedLineCount 已录实盘的行数；进度由这三个计数派生，不另存一列进度
    * @param varianceLineCount 有差异（实盘≠账面）的行数
+   * @param bookTotal 账面合计（冻结值合计）。列表页要能直接看到它，否则用户会以为
+   *     账面数等于当前库存余额 —— 它不是，它只回答「冻结那一刻有多少」
    */
   public record StocktakeSheet(
       UUID id,
@@ -216,6 +218,7 @@ public final class StocktakeModels {
       long lineCount,
       long countedLineCount,
       long varianceLineCount,
+      BigDecimal bookTotal,
       String note,
       UUID createdByUserId,
       OffsetDateTime createdAt) {}

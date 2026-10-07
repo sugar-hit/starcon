@@ -633,6 +633,7 @@ public class StocktakeService {
         r.get("line_count", Long.class),
         r.get("counted_line_count", Long.class),
         r.get("variance_line_count", Long.class),
+        scale(r.get("book_total", BigDecimal.class)),
         r.get("note", String.class),
         r.get("created_by_user_id", UUID.class),
         r.get("created_at", OffsetDateTime.class));
