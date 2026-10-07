@@ -511,3 +511,15 @@ export type VariantCombinationPanel = { "spuId": string; "spuCode": string; "spu
 export type VariantDraftInput = { "mode": string; "combinations": Array<CombinationInput> | null; "notes": string | null; "occurredAt": string | null };
 export type VerificationInput = { "verification": "CONFIRMED_APPLIED" | "CONFIRMED_NOT_APPLIED" | "STILL_UNKNOWN" };
 export type WarehouseRef = { "id": string; "code": string; "name": string; "countryCode": string; "status": string; "isDefault": boolean };
+
+export type ExportAppliedFilter = { "key": string; "label": string; "value": string };
+export type ExportFieldInfo = { "key": string; "label": string; "pii": boolean; "note": string | null };
+export type ExportFilterInfo = { "key": string; "label": string; "kind": string; "available": boolean; "note": string };
+export type ExportFilterInput = { "spuId": string | null; "category": string | null; "status": Array<string | null> | null; "q": string | null; "barcode": string | null; "spec": string | null; "brand": string | null; "partyId": string | null; "partyType": string | null; "primary": boolean | null; "roleType": string | null; "onHandMin": number | null; "onHandMax": number | null; "priceMin": number | null; "priceMax": number | null; "outOfStock": boolean | null; "onSale": boolean | null; "platform": string | null } | null;
+export type ExportJobInput = { "sourceKey": string; "fields": Array<string>; "filters": ExportFilterInput; "sort": ExportSortInput; "piiPurpose": string | null };
+export type ExportJobPage = { "items": Array<ExportJobRow>; "total": number; "page": number; "size": number };
+export type ExportJobRow = { "id": string; "sourceKey": string; "sourceLabel": string; "status": string; "statusNote": string; "fields": Array<string>; "headers": Array<string>; "appliedFilters": Array<ExportAppliedFilter>; "sortKey": string; "sortOrder": string; "rowCount": number; "fileName": string | null; "byteSize": number | null; "contentSha256": string | null; "includesPii": boolean; "piiFields": Array<string>; "piiPurpose": string; "actorId": string; "departmentId": string | null; "requestedAt": string; "startedAt": string | null; "finishedAt": string | null; "expiresAt": string | null; "downloadable": boolean; "downloadNote": string; "error": string };
+export type ExportSortInfo = { "key": string; "label": string };
+export type ExportSortInput = { "key": string | null; "order": string | null } | null;
+export type ExportSourceInfo = { "key": string; "label": string; "upstreamModule": string; "permission": string; "available": boolean; "note": string; "fields": Array<ExportFieldInfo>; "sorts": Array<ExportSortInfo>; "filters": Array<ExportFilterInfo>; "defaultSortKey": string; "maxRows": number; "downloadTtlHours": number };
+export type ExportSourcePage = { "items": Array<ExportSourceInfo> };
