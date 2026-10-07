@@ -142,3 +142,40 @@ it('identity/hierarchy-authorizations 的读、判定、撤销被放行，多余
   }
   expect(fetcher).not.toHaveBeenCalledWith(expect.stringContaining(`/restore`), expect.anything());
 });
+
+/**
+ * 17.2.1.2 部门负责人：allowlist 必须放行已实现的四个子资源形状。
+ *
+ * <p>同一个坑：没放进白名单的路径一律 404，页面只会进错误态，看起来像「后端没实现」。
+ *
+ * <p>同时钉住**反向**：`leader/unknown` 必须仍然 404。白名单逐段列出而不是一条通配，
+ * 就是为了不让「一个还不存在的子路径」看起来像已交付。
+ */
+it('department-leaders 与 departments/{id}/leader 的四个子资源被放行，未实现的子路径仍被拒绝', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const allowed = [
+    'identity/department-leaders',
+    `identity/departments/${id}/leader`,
+    `identity/departments/${id}/leader/proxies`,
+    `identity/departments/${id}/leader/proxies/${id}`,
+    `identity/departments/${id}/leader/grants`,
+    `identity/departments/${id}/leader/grants/${id}`,
+    `identity/departments/${id}/approval-chain`,
+  ];
+  for (const path of allowed) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8081/${path}`),
+      expect.anything(),
+    );
+  }
+  for (const path of [
+    `identity/departments/${id}/leader/unknown`,
+    `identity/departments/${id}/leader/proxies/${id}/unknown`,
+    `identity/departments/${id}/approval-chain/unknown`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+  }
+});

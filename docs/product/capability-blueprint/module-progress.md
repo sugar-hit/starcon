@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 73 |
+| 已交付 | 74 |
 | 进行中 | 0 |
-| **未开发** | **392** |
-| 完成率 | 15.7% |
+| **未开发** | **391** |
+| 完成率 | 15.9% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 71 | 0 | 9 | 80 |
+| **D1–D2** | 72 | 0 | 8 | 80 |
 | **D3** | 2 | 0 | 38 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -48,7 +48,7 @@
 | 14 | 广告与增长系统 | D7 | 0 | 22 |
 | 15 | 客户与客服系统 | D7 | 0 | 24 |
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 13 | 29 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 14 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
 
 ## 判定「已交付」的标准
@@ -510,7 +510,7 @@
 | 17.1.2.1 | 法人档案 | — | D1–D2 | 已交付 | identity V5 legal_entity + CRUD + 删除保护触发器 + /org/legal-entities |
 | 17.1.2.2 | 本位币与账簿 | — | D1–D2 | 已交付 | identity `V43__accounting_book.sql`（账簿挂 legal_entity_id 复合外键、本位币副本、金额/数量两套精度与舍入、期间粒度+起始月+首期起点 timestamptz、ENABLE/FORCE RLS isolation、账簿页 CRUD 权限）；端点 `GET /identity/accounting-books`（可按 legalEntityId 过滤）/ `POST /identity/legal-entities/{id}/accounting-books` / `PUT·DELETE /identity/accounting-books/{id}`，本位币必须等于法人本位币否则 409，读出口带 currencyAligned 与按期间设置推导的当前会计年度区间；页面 `/org/accounting-books` 工作区（法人下拉+搜索、未建账法人提示、本位币未对齐示警、首期对齐前端预校验）；测试 `AccountingBookIntegrationTest` 13 例含租户隔离三断言与 timestamptz 按值往返 |
 | 17.2.1.1 | 部门树 | — | D1–D2 | 已交付 | 迁移 `backend/services/identity/src/main/resources/db/migration/V6__department_tree.sql`（code/parent_id/legal_entity_id/leader_membership_id + 自引用与法人/成员复合外键 + 树索引 + `department_tree()` SECURITY DEFINER 递归 CTE）；端点 `GET/POST/PUT/DELETE /identity/departments` + `PUT /identity/departments/{id}/parent`（防环校验、删除拒绝并回报具体数量）；页面 `apps/web/src/components/iam/department-tree.tsx` + `administration-panel.tsx`（真实树视图、HTML5 拖拽移动、成员分布计数）；测试 `IdentityIntegrationTest` 5 个部门专项用例（层级树/移动/防环/跨租户/删除保护） |
-| 17.2.1.2 | 部门负责人 | — | D1–D2 | 未开发 | — |
+| 17.2.1.2 | 部门负责人 | — | D1–D2 | 已交付 | 迁移 `backend/services/identity/src/main/resources/db/migration/V44__department_leader.sql`（department_leader 负责人记录含 scope_mode 管理范围与 approval_limit/approval_currency 审批额度，唯一键 tenant+department 使「一个部门一个负责人」；department_leader_proxy 代管带可空 ends_at 长期代管；department_leader_grant 临时授权额度必填且区间必填；三个表 tenant_id NOT NULL + FORCE RLS + 复合外键；department.leader_membership_id 由双向触发器与负责人记录保持同源——部门表单换人只改 membership_id、**保留**既有范围与额度，两个方向都带 IS DISTINCT FROM 守卫所以互触发一轮后收敛；两个 SECURITY DEFINER 函数 department_leaders(hash) 与 department_approval_chain(hash,dept,as_of)，与 17.2.1.1 的 department_tree 同一套约定：用户名经 member_names 解析、租户由 session_access 推导）；端点 `GET /identity/department-leaders`、`PUT/DELETE /identity/departments/{id}/leader`、`POST/DELETE /identity/departments/{id}/leader/proxies[/{proxyId}]`、`POST/DELETE /identity/departments/{id}/leader/grants[/{grantId}]`、`GET /identity/departments/{id}/approval-chain?asOf=`（**输出=负责人记录 + 审批链引用**，asOf 可查历史归属，供下游 17.4 审批流按时刻取数）；页面 `apps/web/src/app/org/department-leaders/page.tsx` + `components/iam/department-leader-workspace.tsx`（真实工作区：负责人清单、代管与临时授权面板、审批链面板、加载态/空态/失败重试）；测试 `DepartmentLeaderIntegrationTest` 10 项实跑 Testcontainers PostgreSQL 16（连接池压到 1），覆盖双向同源与 upsert、负责人可为空 + requiresFallback、额度与币种成对/停用成员拒绝、撤销连带作废代管与授权、代管继承全口径 vs 临时授权收敛、额度不得超负责人与币种须一致、**断言 timestamptz 写回值含 +08:00 偏移**（漂移 −28800s 即失败）、停用成员退出审批链、租户隔离三断言、OWNER + identity.department_leader 权限码闸、三新表 FORCE RLS |
 | 17.2.2.1 | 成员管理 | — | D1–D2 | 已交付 | membership + app_user + role_assignment 表 + /members CRUD + /org/members 成员工作区 |
 | 17.2.2.2 | 成员开通与入职 | — | D1–D2 | 已交付 | 迁移 `backend/services/identity/src/main/resources/db/migration/V45__member_onboarding.sql`（member_onboarding 表带 tenant_id NOT NULL + FORCE RLS + isolation 策略 + 两个索引；account_mode 区分 CREATED 新建账号与 LINKED 关联已有全局账号；四条 CHECK 把「发过凭据必须有时刻」「建了账号就必须发过凭据」「完成的记录必须同时有时刻和操作人」写成数据库不变量；三个 SECURITY DEFINER 函数 onboardings / onboard_member / complete_onboarding 签名里**没有任何 tenant_id 参数**，伪造 X-Tenant-Id 结构上无处可传；独立页面权限 identity.onboarding.read/create/update，不与 identity.member 共用一组——「改在册的人」和「放人进来」风险面不同）+ 端点 `MemberOnboardingController`（GET /identity/onboardings 列表、POST /identity/onboardings 开通、POST /identity/onboardings/{id}/complete 完成入职；沿用 call() 的租户事务 + 会话锁 + 租户二次校验，开通与完成均为当前租户所有者专属）+ 页面 `apps/web/src/components/iam/member-onboarding-workspace.tsx` + `onboarding-model.ts` + `/org/onboarding` 开通工作区（真实列表、开通表单、完成入职、加载/失败重试/空态三态，api-proxy 白名单只放行 onboardings 与 onboardings/{id}/complete 两个字面量形状、刻意不放行 onboardings/{id} 因为后端没有该端点）+ 测试 `MemberOnboardingIntegrationTest` 8 个用例实跑 Testcontainers PostgreSQL 16（连接池压到 1）；**凭据纪律是本模块的核心**：初始凭据由服务端 SecureRandom 生成（20 位、去掉 I/l/1/O/0 等易混字符），bcrypt 哈希只落 app_user.password_hash 一份，member_onboarding 上**只有 credential_issued 布尔位与时刻、没有任何凭据或哈希列**（information_schema 断言钉住，且断言表里不存在 password/token/secret/invitation 任何列），明文只在创建那一次响应里返回，列表 DTO 形状上就没有凭据字段、审计快照也不构造 credential 键、用例断言列表 JSON 与审计 changes 里都搜不到明文且审计行不含 `$2a$`；LINKED 关联时服务端根本不知道对方密码所以返回 null 而不是编一个，关联不改动原密码（用例用原凭据重新登录验证）；**蓝图点名排除的邮件邀请、接受令牌、自助激活刻意不做**，库里没有邀请态列，将来补齐时必须连同令牌摘要、有效期、单次使用、防枚举与撤销规则一起加而不是只加一列 token；租户隔离三断言实跑（两租户入职记录互不可见、伪造 X-Tenant-Id 指向真实存在的对方租户也换不来记录、A→B→A 交替后直查 member_onboarding 只见自己租户的行），另有拿对方入职 id 去完成得到 404 而不是把它改掉 |
 | 17.2.2.3 | 离职与停用 | — | D1–D2 | 未开发 | — |

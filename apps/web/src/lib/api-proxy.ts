@@ -35,6 +35,10 @@ const services: readonly {
       // tenants 是 17.1.1.1 租户列表：只有 tenants 与 tenants/current 两个形状，
       //   **刻意不接 {uuid} 段** —— 按任意 tenant id 读取租户不是这个模块该有的能力，
       //   可切换集合只能由服务端从成员关系推导（实体目录 §4 的窄权限路径）。
+      // department-leaders 是 17.2.1.2 部门负责人：负责人清单（没有负责人的部门也在列，
+      //   因为它们要在审批流里配兜底）。departments/{id}/leader 下面挂 leader、proxies、
+      //   grants 与 approval-chain 四类**已实现**的子资源：多放一段会让一个还不存在的
+      //   路径看起来像已交付，所以逐段列出而不是一条通配。
       // hierarchy-authorizations 是 17.1.1.3 层级授权：授权记录的增改查与判定。
       //   check 放在 {uuid} 之前判别（第一段是字面量，不是 UUID），两条不冲突；
       //   {id}/revoke 是撤销（POST，见下），撤销是审计事件所以不是 DELETE。
@@ -52,7 +56,7 @@ const services: readonly {
       //   onboardings/{id}/complete 是完成入职的状态流转（POST）。
       //   **刻意不放行 onboardings/{id}**：后端没有「按 id 取单条入职记录」这个端点，
       //   放行它会让界面以为已交付——放行不该存在的路径比 404 更糟。
-      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?|onboardings(?:\/[0-9a-f-]+\/complete)?)$/,
+      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?|onboardings(?:\/[0-9a-f-]+\/complete)?|department-leaders|departments\/[0-9a-f-]+\/(?:leader(?:\/(?:proxies|grants)(?:\/[0-9a-f-]+)?)?|approval-chain))$/,
   },
   {
     prefix: 'catalog/',

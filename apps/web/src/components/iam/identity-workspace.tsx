@@ -14,6 +14,7 @@ const destinations = [
   ['members', '用户与成员', '管理本租户成员、启停状态和角色分配'],
   ['roles', '角色配置', '配置页面操作权限与数据范围'],
   ['departments', '部门管理', '维护成员归属与部门数据范围'],
+  ['department-leaders', '部门负责人', '指定各部门负责人、管理范围与审批权限，支持代管与临时授权'],
   ['children', '子租户管理', '创建独立工作空间并指定所有者'],
   ['hierarchy', '层级授权', '显式开通父租户对子租户数据的访问范围与有效期'],
   ['audit', '审计日志', '检索关键操作留痕、变更详情与导出'],
@@ -31,6 +32,8 @@ function visible(session: Access, key: string) {
   // 17.2.2.2 把内联 filter 抽成 visible() 时漏了这条，hierarchy 会落到 canManage 兜底 ——
   // 而 AdministrationKind 里根本没有 'hierarchy'，于是有 tenant.hierarchy.read 的人反而看不到入口。
   if (key === 'hierarchy') return hasPermission(session, 'tenant.hierarchy.read');
+  // 部门负责人同样是独立页面权限码，不走 canManage 的页面映射（17.2.1.2）。
+  if (key === 'department-leaders') return hasPermission(session, 'identity.department_leader.read');
   if (key === 'onboarding')
     return session.grants.some(
       (g) => g.scopeMode === 'ALL' && g.permissions.includes('identity.onboarding.read'),

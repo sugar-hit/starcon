@@ -5,10 +5,13 @@ import com.starcon.tenancy.TenantTransactions;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.Function;
 import org.jooq.DSLContext;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -149,6 +152,104 @@ public class AdministrationController {
   /** 引用登记：channel 等服务登记"这个法人被我用着"，让删除保护有真实依据。 */
   public record LegalEntityReferenceInput(
       @NotNull UUID legalEntityId, @NotBlank @Pattern(regexp = "[a-z_]{2,32}") String source, @NotNull UUID referenceId) {}
+
+  // ------------------------------------------------------------------
+  // 17.2.1.2 部门负责人
+  // ------------------------------------------------------------------
+
+  /**
+   * 负责人记录。
+   *
+   * <p>{@code leaderId} / {@code membershipId} / {@code username} 全部可空：蓝图点名
+   * 「负责人可为空」，没有负责人的部门要在审批流里指定兜底人。所以这类部门**必须出现在列表里**
+   * （前端标「未指定负责人」），把它过滤掉等于让运营看不见自己漏配了审批人。
+   */
+  public record DepartmentLeaderView(
+      @Schema(nullable = true) UUID leaderId,
+      UUID departmentId,
+      String departmentCode,
+      String departmentName,
+      @Schema(nullable = true) UUID membershipId,
+      @Schema(nullable = true) String username,
+      @Schema(nullable = true) String scopeMode,
+      @Schema(nullable = true) BigDecimal approvalLimit,
+      @Schema(nullable = true) String approvalCurrency,
+      @Schema(nullable = true) String note,
+      List<UUID> proxyIds,
+      List<UUID> grantIds,
+      @Schema(nullable = true) OffsetDateTime createdAt,
+      @Schema(nullable = true) OffsetDateTime updatedAt) {}
+
+  /**
+   * 设置负责人。
+   *
+   * <p>{@code approvalLimit} 与 {@code approvalCurrency} 同进同出：只有额度没有币种的话，
+   * 「1000」在 USD 与 JPY 下是两回事，17.4 无从判断该批多少。两者要么都填要么都留空。
+   */
+  public record DepartmentLeaderInput(
+      @NotNull UUID membershipId,
+      @NotNull @Pattern(regexp = "DEPARTMENT|SUBTREE|TENANT") String scopeMode,
+      @Schema(nullable = true)
+          @Digits(integer = 13, fraction = 6)
+          @DecimalMin(value = "0", inclusive = false)
+          BigDecimal approvalLimit,
+      @Schema(nullable = true) @Pattern(regexp = "[A-Z]{3}", message = "审批额度币种需为三位大写币种代码") String approvalCurrency,
+      @Size(max = 500) String note) {}
+
+  /**
+   * 代管：负责人不在时由谁代行。
+   *
+   * <p>{@code endsAt} 可空表示长期代管（授权副总代管是真实业务形态），强行要求截止时间
+   * 只会逼出「填一个假截止日」的数据。
+   */
+  public record LeaderProxyInput(
+      @NotNull UUID membershipId,
+      @Size(max = 500) String reason,
+      @Schema(nullable = true) OffsetDateTime startsAt,
+      @Schema(nullable = true) OffsetDateTime endsAt) {}
+
+  /**
+   * 临时授权：把审批权限在有界区间内借给别人。
+   *
+   * <p>额度必填且有上界——没有上界的「临时授权」等于凭空多出一个负责人，
+   * 那是「改负责人」该做的事。区间也必填：临时就是有界，不设终点会退化成第二份长期负责人。
+   */
+  public record LeaderGrantInput(
+      @NotNull UUID membershipId,
+      @NotNull
+          @Digits(integer = 13, fraction = 6)
+          @DecimalMin(value = "0", inclusive = false)
+          BigDecimal approvalLimit,
+      @NotNull @Pattern(regexp = "[A-Z]{3}", message = "审批额度币种需为三位大写币种代码") String approvalCurrency,
+      @NotNull OffsetDateTime startsAt,
+      @NotNull OffsetDateTime endsAt,
+      @Size(max = 500) String reason) {}
+
+  /** 审批链的一环：某一时刻谁有审批权、批到什么程度。 */
+  public record ApprovalChainEntry(
+      int seq,
+      String source,
+      UUID membershipId,
+      String username,
+      String scopeMode,
+      @Schema(nullable = true) BigDecimal approvalLimit,
+      @Schema(nullable = true) String approvalCurrency,
+      OffsetDateTime startsAt,
+      @Schema(nullable = true) OffsetDateTime endsAt) {}
+
+  /**
+   * 审批链引用：下游 17.4 审批流的取数口。
+   *
+   * <p>{@code requiresFallback} 是蓝图的硬要求——负责人可为空，空的时候审批流必须自己指定兜底人。
+   * 这里显式把这个信号返回出去，而不是让下游拿到空数组后自行猜测「没人需要审批」。
+   */
+  public record ApprovalChainView(
+      UUID departmentId,
+      String departmentCode,
+      String departmentName,
+      OffsetDateTime asOf,
+      boolean requiresFallback,
+      List<ApprovalChainEntry> entries) {}
 
   private <T> T call(
       String auth,
@@ -1244,6 +1345,429 @@ public class AdministrationController {
               new Object[] {a.tenantId(), input.legalEntityId(), input.source(), input.referenceId()});
           return null;
         });
+  }
+
+  // ------------------------------------------------------------------
+  // 17.2.1.2 部门负责人
+  //
+  // 上游是 17.2.1.1 的部门树：负责人挂在部门上（department_leader 唯一键 tenant+department），
+  // 而不是另起一套组织节点——否则「谁能批」与「部门在哪」会各自漂移。
+  //
+  // 负责人可为空是蓝图硬约束，所以列表走 LEFT JOIN，未指定负责人的部门照样出现；
+  // 审批链返回 requiresFallback，让下游 17.4 知道该去配兜底人而不是把单据卡住。
+  // ------------------------------------------------------------------
+
+  private static final String LEADER_READ = "identity.department_leader.read";
+
+  /** 部门负责人 + 代管 + 临时授权的成员可读名；只解析调用者自己可见的成员，不采信 tenant 头。 */
+  private String memberName(UUID membershipId, String auth) {
+    var names =
+        sql.fetch(
+            "select username from member_names(?) n join membership m on m.id=n.id where n.id=?",
+            hash(auth),
+            membershipId);
+    return names.isEmpty() ? null : names.get(0).get("username", String.class);
+  }
+
+  /** 负责人快照：授权口径（范围 + 额度 + 币种）必须进审计，否则事后无法解释「当时谁能批多少」。 */
+  private Map<String, Object> leaderSnapshot(UUID departmentId) {
+    var row =
+        sql.fetchOne(
+            "select * from department_leader where department_id=?", departmentId);
+    if (row == null) return null;
+    var snapshot = new LinkedHashMap<String, Object>();
+    snapshot.put("membershipId", str(row.get("membership_id", UUID.class)));
+    snapshot.put("scopeMode", row.get("scope_mode", String.class));
+    snapshot.put("approvalLimit", str(row.get("approval_limit", BigDecimal.class)));
+    snapshot.put("approvalCurrency", row.get("approval_currency", String.class));
+    snapshot.put("note", row.get("note", String.class));
+    return snapshot;
+  }
+
+  /** 代管 / 临时授权各自一条快照：区间与被授权人都是事后追责的关键事实。 */
+  private Map<String, Object> grantSnapshot(String table, UUID id) {
+    var row = sql.fetchOne("select * from " + table + " where id=?", id);
+    if (row == null) return null;
+    var snapshot = new LinkedHashMap<String, Object>();
+    snapshot.put("departmentId", str(row.get("department_id", UUID.class)));
+    snapshot.put("membershipId", str(row.get("membership_id", UUID.class)));
+    snapshot.put("startsAt", str(row.get("starts_at", OffsetDateTime.class)));
+    snapshot.put("endsAt", str(row.get("ends_at", OffsetDateTime.class)));
+    snapshot.put("reason", row.get("reason", String.class));
+    if (table.equals("department_leader_grant")) {
+      snapshot.put("approvalLimit", str(row.get("approval_limit", BigDecimal.class)));
+      snapshot.put("approvalCurrency", row.get("approval_currency", String.class));
+    }
+    return snapshot;
+  }
+
+  /**
+   * 负责人清单。
+   *
+   * <p>走 {@code department_leaders(hash)}：{@code identity_app} 对这些表只有租户内的读写权，
+   * 用户名必须在 SECURITY DEFINER 里经 {@code member_names} 解析，否则查询会以 42501 被拒
+   * （与 17.2.1.1 的 {@code department_tree} 同一套约定）。
+   */
+  @GetMapping("/department-leaders")
+  public List<DepartmentLeaderView> departmentLeaders(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
+    return call(
+        auth,
+        LEADER_READ,
+        false,
+        a ->
+            sql.fetch("select * from department_leaders(?)", hash(auth))
+                .stream()
+                .map(
+                    r ->
+                        new DepartmentLeaderView(
+                            r.get("leader_id", UUID.class),
+                            r.get("department_id", UUID.class),
+                            r.get("department_code", String.class),
+                            r.get("department_name", String.class),
+                            r.get("membership_id", UUID.class),
+                            r.get("username", String.class),
+                            r.get("scope_mode", String.class),
+                            r.get("approval_limit", BigDecimal.class),
+                            r.get("approval_currency", String.class),
+                            r.get("note", String.class),
+                            Arrays.asList(r.get("proxy_ids", UUID[].class)),
+                            Arrays.asList(r.get("grant_ids", UUID[].class)),
+                            r.get("created_at", OffsetDateTime.class),
+                            r.get("updated_at", OffsetDateTime.class)))
+                .toList());
+  }
+
+  /**
+   * 指定 / 更换部门负责人，并同时设定管理范围与审批权限。
+   *
+   * <p>同一个端点同时做三件事（谁负责、管多大、能批多少），因为这三者是一次授权决定：
+   * 分成三个端点就会出现「先把权限开大、再补人」这种中间态，审批链会在那个窗口里放行。
+   *
+   * <p>唯一键 (tenant_id, department_id) 决定这是 upsert 而不是新建。
+   */
+  @PutMapping("/departments/{id}/leader")
+  public UUID setDepartmentLeader(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @Valid @RequestBody DepartmentLeaderInput input) {
+    return call(
+        auth,
+        "identity.department_leader.create",
+        true,
+        a -> {
+          check(exists("select 1 from department where id=?", id), "部门不存在");
+          var member =
+              sql.fetchOne(
+                  "select status from membership where id=? and tenant_id=?",
+                  input.membershipId(),
+                  a.tenantId());
+          check(member != null, "负责人不存在或不属于当前租户");
+          check(member.get("status", String.class).equals("ACTIVE"), "负责人必须处于启用状态");
+          // 额度与币种同进同出：只有数字没有币种，下游 17.4 无从判断这是多少钱。
+          check(
+              (input.approvalLimit() == null) == (input.approvalCurrency() == null),
+              "审批额度与币种必须同时填写或同时留空");
+          var before = leaderSnapshot(id);
+          UUID leaderId =
+              sql.fetchOne(
+                      "insert into department_leader(id,tenant_id,department_id,membership_id,scope_mode,"
+                          + " approval_limit,approval_currency,note) values(?,?,?,?,?,?::numeric,?,?)"
+                          + " on conflict(tenant_id,department_id) do update set"
+                          + " membership_id=excluded.membership_id,scope_mode=excluded.scope_mode,"
+                          + " approval_limit=excluded.approval_limit,"
+                          + " approval_currency=excluded.approval_currency,note=excluded.note,"
+                          + " updated_at=now() returning id",
+                      Ids.next(),
+                      a.tenantId(),
+                      id,
+                      input.membershipId(),
+                      input.scopeMode(),
+                      input.approvalLimit(),
+                      input.approvalCurrency(),
+                      trim(input.note()))
+                  .get("id", UUID.class);
+          audit(
+              a,
+              auth,
+              "identity.department_leader",
+              leaderId,
+              memberName(input.membershipId(), auth),
+              before == null ? "DepartmentLeaderAssigned" : "DepartmentLeaderChanged",
+              before,
+              leaderSnapshot(id));
+          return leaderId;
+        });
+  }
+
+  /** 撤销负责人：部门回到「可为空」状态，代管与临时授权一并清掉——它们依附于负责人而存在。 */
+  @DeleteMapping("/departments/{id}/leader")
+  public void clearDepartmentLeader(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
+    call(
+        auth,
+        "identity.department_leader.delete",
+        true,
+        a -> {
+          check(exists("select 1 from department where id=?", id), "部门不存在");
+          var before = leaderSnapshot(id);
+          check(before != null, "该部门尚未指定负责人");
+          // 先报数量再拒绝，而不是静默级联：撤销负责人会让已配置的审批链立刻失去归属，
+          // 运营需要知道「连带作废了几条代管 / 临时授权」再决定。
+          int proxies =
+              sql.fetchOne(
+                      "select count(*) from department_leader_proxy where department_id=?", id)
+                  .get(0, Integer.class);
+          int grants =
+              sql.fetchOne(
+                      "select count(*) from department_leader_grant where department_id=?", id)
+                  .get(0, Integer.class);
+          sql.execute("delete from department_leader_proxy where department_id=?", id);
+          sql.execute("delete from department_leader_grant where department_id=?", id);
+          check(sql.execute("delete from department_leader where department_id=?", id) == 1, "负责人已被撤销");
+          audit(
+              a,
+              auth,
+              "identity.department_leader",
+              id,
+              (String) before.get("membershipId"),
+              "DepartmentLeaderCleared",
+              before,
+              Map.of("clearedProxies", proxies, "clearedGrants", grants));
+          return null;
+        });
+  }
+
+  /**
+   * 代管：负责人不在时由谁代行。
+   *
+   * <p>区间允许开口（长期代管），但不允许闭区间——起止相同的「代管」在任何时刻都不生效，
+   * 却会在列表里占一行，看起来像配了个授权其实没有。
+   */
+  @PostMapping("/departments/{id}/leader/proxies")
+  public UUID createLeaderProxy(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @Valid @RequestBody LeaderProxyInput input) {
+    return call(
+        auth,
+        "identity.department_leader.create",
+        true,
+        a -> {
+          check(exists("select 1 from department where id=?", id), "部门不存在");
+          check(leaderSnapshot(id) != null, "请先指定部门负责人再配置代管");
+          checkActiveMember(a, input.membershipId(), "代管人");
+          OffsetDateTime startsAt = now();
+          OffsetDateTime endsAt = input.endsAt();
+          check(endsAt == null || endsAt.isAfter(startsAt), "代管结束时间必须晚于开始时间");
+          UUID proxyId = Ids.next();
+          // 显式 ::timestamptz：jOOQ 在纯文本语句里无法为 OffsetDateTime 推断类型，
+          // 不写 cast 会被驱动按 varchar 处理并报类型错误（见 AuditLog 的同款注释）。
+          sql.execute(
+              "insert into department_leader_proxy(id,tenant_id,department_id,membership_id,reason,"
+                  + " starts_at,ends_at) values(?,?,?,?,?,?::timestamptz,?::timestamptz)",
+              proxyId,
+              a.tenantId(),
+              id,
+              input.membershipId(),
+              trim(input.reason()),
+              startsAt,
+              endsAt);
+          audit(
+              a,
+              auth,
+              "identity.department_leader_proxy",
+              proxyId,
+              memberName(input.membershipId(), auth),
+              "DepartmentLeaderProxyCreated",
+              null,
+              grantSnapshot("department_leader_proxy", proxyId));
+          return proxyId;
+        });
+  }
+
+  @DeleteMapping("/departments/{id}/leader/proxies/{proxyId}")
+  public void deleteLeaderProxy(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @PathVariable UUID proxyId) {
+    call(
+        auth,
+        "identity.department_leader.delete",
+        true,
+        a -> {
+          var before = grantSnapshot("department_leader_proxy", proxyId);
+          check(before != null && before.get("departmentId").equals(id.toString()), "代管记录不存在");
+          sql.execute("delete from department_leader_proxy where id=?", proxyId);
+          audit(
+              a,
+              auth,
+              "identity.department_leader_proxy",
+              proxyId,
+              (String) before.get("membershipId"),
+              "DepartmentLeaderProxyDeleted",
+              before,
+              null);
+          return null;
+        });
+  }
+
+  /**
+   * 临时授权：把审批权限在有界区间内借给别人。
+   *
+   * <p>额度必须有上界（DB 的 NOT NULL + CHECK 兜住），且不得超过负责人的额度——
+   * 借出去比本人还大的权限等于凭空造出一个上级，绕过负责人这道闸。
+   */
+  @PostMapping("/departments/{id}/leader/grants")
+  public UUID createLeaderGrant(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @Valid @RequestBody LeaderGrantInput input) {
+    return call(
+        auth,
+        "identity.department_leader.create",
+        true,
+        a -> {
+          var leader = leaderSnapshot(id);
+          check(leader != null, "请先指定部门负责人再配置临时授权");
+          checkActiveMember(a, input.membershipId(), "被授权人");
+          check(input.endsAt().isAfter(input.startsAt()), "临时授权结束时间必须晚于开始时间");
+          var leaderLimit = (BigDecimal) decimal(leader.get("approvalLimit"));
+          var leaderCurrency = (String) leader.get("approvalCurrency");
+          check(
+              leaderLimit != null && leaderCurrency != null,
+              "负责人未设置审批额度，无法派生临时授权额度");
+          check(
+              leaderCurrency.equals(input.approvalCurrency()),
+              "临时授权币种必须与负责人审批额度币种一致（" + leaderCurrency + "）");
+          check(
+              input.approvalLimit().compareTo(leaderLimit) <= 0,
+              "临时授权额度不得超过负责人的审批额度 " + leaderLimit.stripTrailingZeros().toPlainString());
+          UUID grantId = Ids.next();
+          sql.execute(
+              "insert into department_leader_grant(id,tenant_id,department_id,membership_id,"
+                  + " approval_limit,approval_currency,reason,starts_at,ends_at)"
+                  + " values(?,?,?,?,?::numeric,?,?,?::timestamptz,?::timestamptz)",
+              grantId,
+              a.tenantId(),
+              id,
+              input.membershipId(),
+              input.approvalLimit(),
+              input.approvalCurrency(),
+              trim(input.reason()),
+              input.startsAt(),
+              input.endsAt());
+          audit(
+              a,
+              auth,
+              "identity.department_leader_grant",
+              grantId,
+              memberName(input.membershipId(), auth),
+              "DepartmentLeaderGrantCreated",
+              null,
+              grantSnapshot("department_leader_grant", grantId));
+          return grantId;
+        });
+  }
+
+  @DeleteMapping("/departments/{id}/leader/grants/{grantId}")
+  public void deleteLeaderGrant(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @PathVariable UUID grantId) {
+    call(
+        auth,
+        "identity.department_leader.delete",
+        true,
+        a -> {
+          var before = grantSnapshot("department_leader_grant", grantId);
+          check(before != null && before.get("departmentId").equals(id.toString()), "临时授权记录不存在");
+          sql.execute("delete from department_leader_grant where id=?", grantId);
+          audit(
+              a,
+              auth,
+              "identity.department_leader_grant",
+              grantId,
+              (String) before.get("membershipId"),
+              "DepartmentLeaderGrantDeleted",
+              before,
+              null);
+          return null;
+        });
+  }
+
+  /**
+   * 审批链引用：某一时刻该部门的审批权落在谁身上。
+   *
+   * <p>{@code asOf} 可空（取当前时刻），给了就能回答「上周三这条单该谁批」——
+   * 这是临时授权与代管存在的意义：权限随时间变化，历史单据必须能还原当时的归属。
+   *
+   * <p>{@code requiresFallback} 在链为空时为 true：蓝图要求没有负责人的部门由审批流指定兜底人，
+   * 这里把信号显式给下游，而不是让它拿到空数组后以为「这条单不需要审批」。
+   */
+  @GetMapping("/departments/{id}/approval-chain")
+  public ApprovalChainView approvalChain(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @RequestParam(value = "asOf", required = false)
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+          OffsetDateTime asOf) {
+    return call(
+        auth,
+        LEADER_READ,
+        false,
+        a -> {
+          var department = sql.fetchOne("select code,name from department where id=?", id);
+          check(department != null, "部门不存在");
+          var entries =
+              sql.fetch(
+                      "select * from department_approval_chain(?,?,?::timestamptz)",
+                      hash(auth),
+                      id,
+                      asOf)
+                  .stream()
+                  .map(
+                      r ->
+                          new ApprovalChainEntry(
+                              r.get("seq", Integer.class),
+                              r.get("source", String.class),
+                              r.get("membership_id", UUID.class),
+                              r.get("username", String.class),
+                              r.get("scope_mode", String.class),
+                              r.get("approval_limit", BigDecimal.class),
+                              r.get("approval_currency", String.class),
+                              r.get("starts_at", OffsetDateTime.class),
+                              r.get("ends_at", OffsetDateTime.class)))
+                  .toList();
+          return new ApprovalChainView(
+              id,
+              department.get("code", String.class),
+              department.get("name", String.class),
+              asOf == null ? now() : asOf,
+              entries.isEmpty(),
+              entries);
+        });
+  }
+
+  /** 授权对象必须是本租户启用中的成员：跨租户 id 由 RLS 表现为不存在，停用成员不能持有审批权。 */
+  private void checkActiveMember(IdentityController.Access a, UUID membershipId, String label) {
+    var member =
+        sql.fetchOne(
+            "select status from membership where id=? and tenant_id=?", membershipId, a.tenantId());
+    check(member != null, label + "不存在或不属于当前租户");
+    check(member.get("status", String.class).equals("ACTIVE"), label + "必须处于启用状态");
+  }
+
+  /** timestamptz 绑定走 OffsetDateTime：与 AuditLog.utc 同一条纪律，见那里的注释。 */
+  private static OffsetDateTime now() {
+    return OffsetDateTime.now(ZoneOffset.UTC);
+  }
+
+  /** 快照里金额是字符串，派生比较时要还原成 BigDecimal——金额不经过 double。 */
+  private static Object decimal(Object value) {
+    if (value == null) return null;
+    return new BigDecimal(String.valueOf(value));
   }
 
   // ------------------------------------------------------------------
