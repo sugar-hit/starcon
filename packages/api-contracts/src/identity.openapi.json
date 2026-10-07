@@ -727,7 +727,7 @@
         "tags": [
           "business-parameter-controller"
         ],
-        "operationId": "update_3",
+        "operationId": "update_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -768,7 +768,7 @@
         "tags": [
           "business-parameter-controller"
         ],
-        "operationId": "delete_1",
+        "operationId": "delete",
         "parameters": [
           {
             "name": "Authorization",
@@ -801,7 +801,7 @@
         "tags": [
           "accounting-book-controller"
         ],
-        "operationId": "update_4",
+        "operationId": "update_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -842,7 +842,7 @@
         "tags": [
           "accounting-book-controller"
         ],
-        "operationId": "delete_2",
+        "operationId": "delete_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1682,7 +1682,7 @@
         "tags": [
           "accounting-book-controller"
         ],
-        "operationId": "create_4",
+        "operationId": "create_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -1799,7 +1799,7 @@
         "tags": [
           "hierarchy-authorization-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "create_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -2481,7 +2481,7 @@
         "tags": [
           "business-parameter-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "create_5",
         "parameters": [
           {
             "name": "Authorization",

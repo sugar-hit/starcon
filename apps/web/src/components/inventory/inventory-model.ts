@@ -17,6 +17,10 @@ import type {
   OverviewGroup,
   OverviewRow,
   QualityStatusRef,
+  ReconciliationFindingPage,
+  ReconciliationRequest,
+  ReconciliationResult,
+  ReconciliationRunPage,
   SkuRef,
   WarehouseRef,
 } from '../../../../../packages/api-contracts/src/catalog';
@@ -116,6 +120,120 @@ export function fetchLedgerDrill(transactionId: string) {
 
 export function fetchLedgerRefTypes() {
   return api<InventoryRefType[]>('warehouse/inventory/ledger/ref-types');
+}
+
+// ------------------------------------------------------------ 7.1.2.2 账实核对
+
+export interface ReconciliationParams {
+  from?: string;
+  to?: string;
+  warehouseId?: string;
+  skuId?: string;
+  legalEntityId?: string;
+}
+
+/**
+ * 发起一次核对。
+ *
+ * <p>用 POST：核对会落一份不可变的结论（run + findings），是写操作而不是查询。
+ * 时间串按带偏移的 ISO-8601 送（`datetime-local` 读到的是不带偏移的墙钟串，
+ * 这里补上本机偏移量），后端不接受无偏移的时间串 —— 那样同一份请求在开发机与
+ * K8s 里会核出不同区间。
+ */
+export function runReconciliation(params: ReconciliationParams) {
+  const payload: ReconciliationRequest = {
+    from: params.from ? withOffset(params.from) : null,
+    to: params.to ? withOffset(params.to) : null,
+    warehouseId: params.warehouseId || null,
+    skuId: params.skuId || null,
+    legalEntityId: params.legalEntityId || null,
+  };
+  return api<ReconciliationResult>('warehouse/inventory/reconciliation', 'POST', payload);
+}
+
+export function fetchReconciliationRuns(params: { status?: string; page?: number; size?: number }) {
+  return api<ReconciliationRunPage>(`warehouse/inventory/reconciliation${query(params)}`);
+}
+
+export function fetchReconciliationRun(runId: string) {
+  return api<ReconciliationResult>(
+    `warehouse/inventory/reconciliation/${encodeURIComponent(runId)}`,
+  );
+}
+
+/** 回查某次核对的发现。kind 决定翻的是差异明细还是可疑流水。 */
+export function fetchReconciliationFindings(
+  runId: string,
+  params: { kind?: string; page?: number; size?: number },
+) {
+  return api<ReconciliationFindingPage>(
+    `warehouse/inventory/reconciliation/${encodeURIComponent(runId)}/findings${query(params)}`,
+  );
+}
+
+/** 给 `datetime-local` 的墙钟串补上本机偏移量：`2026-10-01T09:30` → `2026-10-01T09:30:00+08:00`。 */
+export function withOffset(local: string): string {
+  const date = new Date(local);
+  if (Number.isNaN(date.getTime())) return local;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const sign = date.getTimezoneOffset() <= 0 ? '+' : '-';
+  const offset = Math.abs(date.getTimezoneOffset());
+  return `${local.length === 16 ? `${local}:00` : local}${sign}${pad(Math.floor(offset / 60))}:${pad(
+    offset % 60,
+  )}`;
+}
+
+/** 可疑类别的中文标签。与后端 SuspectCategory 一一对应，不认识的码原样显示而不是静默吞掉。 */
+export const suspectCategoryLabels: Record<string, string> = {
+  MISSING: '漏记',
+  BACKFILL: '迟到补记',
+  DUPLICATE: '重复记',
+  LOST_UPDATE: '并发丢失',
+};
+
+export const suspectCategoryOptions = Object.entries(suspectCategoryLabels).map(
+  ([value, label]) => ({ value, label }),
+);
+
+export const severityLabels: Record<string, string> = {
+  INFO: '提示',
+  WARN: '警告',
+  HIGH: '严重',
+};
+
+export const statusLabels: Record<string, string> = {
+  CONSISTENT: '账实一致',
+  DISCREPANT: '存在差异',
+};
+
+export const scopeTypeLabels: Record<string, string> = {
+  ALL: '全部余额行',
+  WAREHOUSE: '仓库',
+  SKU: 'SKU',
+  LEGAL_ENTITY: '货权法人',
+};
+
+/**
+ * 可疑区间的时间桶标题：`2026-10-03` 这种按天粒度直接可读，不必展示到时分。
+ *
+ * <p>刻意按**浏览器本地时区**取日期而不是 `toISOString()`：后者会把 `+08:00` 的
+ * 凌晨折算成前一天的 UTC，桶标签和用户心里的"那几天"对不上。核对区间是按天分的，
+ * 运营就是按本地日读账的。
+ */
+export function windowLabel(start: string, end: string | null): string {
+  const from = new Date(start);
+  const to = end ? new Date(end) : null;
+  const day = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  if (Number.isNaN(from.getTime())) return start;
+  if (!to || Number.isNaN(to.getTime()) || day(to) === day(from)) return day(from);
+  return `${day(from)} ~ ${day(to)}`;
+}
+
+/** 差异为 0 时不能显示成空白或「—」：空白会被读成"没查到"。 */
+export function diffText(value: number | null | undefined): string {
+  if (value === null || value === undefined) return '0.0000';
+  return Number(value).toFixed(4);
 }
 
 // ------------------------------------------------------------ 查询参数
@@ -279,6 +397,14 @@ export function ledgerQuery(params: LedgerParams) {
 export interface LedgerDrill {
   skuId: string;
   warehouseId: string;
+  /**
+   * 直接定位到某一笔业务的分录明细。
+   *
+   * <p>7.1.2.2 账实核对的「可疑流水定位」终点就是一笔具体的业务：从核对页点进来时
+   * 必须直接落到那笔的分录上，而不是打开一个没筛选的台账让人自己再找一遍 ——
+   * 那等于把定位成本又推回给人了。
+   */
+  transactionId: string;
 }
 
 export function parseLedgerHref(href: string | null | undefined): LedgerDrill | null {
@@ -289,8 +415,9 @@ export function parseLedgerHref(href: string | null | undefined): LedgerDrill | 
   const drill = {
     skuId: params.get('skuId')?.trim() ?? '',
     warehouseId: params.get('warehouseId')?.trim() ?? '',
+    transactionId: params.get('transactionId')?.trim() ?? '',
   };
-  return drill.skuId || drill.warehouseId ? drill : null;
+  return drill.skuId || drill.warehouseId || drill.transactionId ? drill : null;
 }
 
 /**
