@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { DELETE, GET, POST } from './route';
+import { DELETE, GET, POST, PUT } from './route';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -197,20 +197,92 @@ it('8.1.1.1 仓库列表的四个调用形状都被放行', async () => {
   ).toBe(200);
 });
 
-it('8.1.1.1 刻意不放行仓库详情与改删形状', async () => {
+it('8.1.1.2 仓库详情与库位清单被放行，且不越界到未交付的子路径', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // 8.1.1.2 已交付，详情与它下面的两个子资源必须逐条钉住。
+  // 白名单只在浏览器端生效，单测直连服务层发现不了漏登记 ——
+  // 少放行一个的现场表现是「页面进了控制塔却只加载出骨架」，而且四道 CI 全绿。
+  for (const path of [
+    `warehouse/facilities/${id}`,
+    `warehouse/facilities/${id}/locations`,
+    `warehouse/facilities/${id}/entrypoints`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行`).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 改基础信息与地址走 PUT 同一路径
+  expect(
+    (
+      await PUT(request(`warehouse/facilities/${id}`, 'PUT'), {
+        params: { path: ['warehouse', 'facilities', id] },
+      })
+    ).status,
+  ).toBe(200);
+  // 8.1.1.1 已交付的四个形状一条都不能被这次放宽挤掉：白名单是求并，不是二选一。
+  for (const path of [
+    'warehouse/facilities',
+    'warehouse/facilities/options',
+    'warehouse/facilities/capabilities',
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 被详情车道的改动挤掉了`,
+    ).toBe(200);
+  }
+  expect(
+    (await POST(request('warehouse/facilities', 'POST'), { params: { path: ['warehouse', 'facilities'] } }))
+      .status,
+  ).toBe(200);
+});
+
+it('8.1.1.2 刻意不放行未交付的子路径', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
   const id = '11111111-1111-1111-1111-111111111111';
-  // 详情属 8.1.1.2、改仓库属性属 8.1.1.2、行为参数属 8.1.1.3，三者都未交付。
-  // 放行这些形状会让界面以为「按 id 取单仓」「能改能删仓库」已经可用 ——
-  // 放行不该存在的路径比 404 更糟。
-  for (const path of [`warehouse/facilities/${id}`, 'warehouse/facilities/wrong-segment']) {
+  // 行为参数属 8.1.1.3、库位树属 8.1.2.1，两者都未交付。
+  // 放行这些形状会让界面以为「配置已经能改」已经可用 —— 放行不该存在的路径比 404 更糟。
+  for (const path of [
+    `warehouse/facilities/${id}/config`,
+    `warehouse/facilities/${id}/locations/capacity`,
+    'warehouse/facilities/wrong-segment',
+  ]) {
     expect(
       (await GET(request(path), { params: { path: path.split('/') } })).status,
       `${path} 不应被放行`,
     ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
+});
+
+/**
+ * 白名单只管**路径形状**，不管 HTTP 方法 —— 这是 api-proxy 的既有设计
+ * （同一个 pattern 覆盖 GET/PUT/POST/DELETE，方法原样透传给后端）。
+ *
+ * <p>所以「仓库不能被删」这条纪律的落点**不在**白名单，而在后端：
+ * DELETE /warehouse/facilities/{id} 没有对应端点，由 Spring 返回 405。
+ * 本模块因此不给代理层加任何「拦 DELETE」的特例：那会让代理的行为与
+ * 其余所有前缀不一致，而真正需要拒绝的方法本来就该由拥有该端点的服务裁决。
+ */
+it('DELETE 落到同一个路径形状上由后端裁决而不是由代理拦', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('', { status: 405 })));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const response = await DELETE(request(`warehouse/facilities/${id}`, 'DELETE'), {
+    params: { path: ['warehouse', 'facilities', id] },
+  });
+  expect(response.status).toBe(405);
+  expect(fetcher).toHaveBeenCalledWith(
+    expect.stringContaining(`:8084/warehouse/facilities/${id}`),
+    expect.objectContaining({ method: 'DELETE' }),
+  );
 });
 
 /**

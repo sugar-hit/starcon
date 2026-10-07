@@ -80,7 +80,10 @@ public class WarehouseFacilityService {
                 bindsToArray(binds, size, page * size))
             .map(r -> row(r));
 
-    return new WarehouseFacilityPage(summary(), rows, total, page, size, true, summaryNote());
+    // detailUnavailable 从 true 翻成 false：8.1.1.2 仓库详情已交付
+    // （GET /warehouse/facilities/{id}）。本行的这个布尔值就是两条车道之间约定的交接开关 ——
+    // 8.1.1.1 交付时它写死 true 让前端禁用详情入口，现在由交付详情的那条车道来翻。
+    return new WarehouseFacilityPage(summary(), rows, total, page, size, false, summaryNote());
   }
 
   /**
