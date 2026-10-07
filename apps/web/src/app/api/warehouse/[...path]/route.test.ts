@@ -88,6 +88,34 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
       params: { path: ['warehouse', 'inventory', 'expiry', 'allocation'] },
     })).status,
   ).toBe(200);
+  // 7.8.1.1 分配策略配置：capabilities / effective / calculation（试算）/ runs（落库）
+  // / runs/{runId}（批次明细）/ {id}（详情）/ {id}/versions（换版）/ {id}/retire（作废）
+  // 以及销量登记 allocation-sales（GET 名册 + POST 登记）。
+  // 动作路径必须逐个钉住 —— 少放行一个，页面上的按钮就会变成静默 404。
+  for (const path of [
+    'warehouse/inventory/allocation-policies/capabilities',
+    'warehouse/inventory/allocation-policies/effective',
+    'warehouse/inventory/allocation-sales',
+    'warehouse/inventory/allocation-policies/runs',
+    `warehouse/inventory/allocation-policies/runs/${id}`,
+    'warehouse/inventory/allocation-policies/calculation',
+    `warehouse/inventory/allocation-policies/${id}`,
+    `warehouse/inventory/allocation-policies/${id}/versions`,
+    `warehouse/inventory/allocation-policies/${id}/retire`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  for (const path of [
+    'warehouse/inventory/allocation-policies/calculation',
+    'warehouse/inventory/allocation-policies/runs',
+    'warehouse/inventory/allocation-sales',
+    `warehouse/inventory/allocation-policies/${id}/versions`,
+    `warehouse/inventory/allocation-policies/${id}/retire`,
+  ]) {
+    expect(
+      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+    ).toBe(200);
+  }
   expect(
     (await POST(request('warehouse/inventory/expiry/policy', 'POST'), {
       params: { path: ['warehouse', 'inventory', 'expiry', 'policy'] },

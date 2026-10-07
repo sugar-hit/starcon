@@ -3586,7 +3586,7 @@
         "tags": [
           "inventory-expiry-controller"
         ],
-        "operationId": "policies_1",
+        "operationId": "policies_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -6219,6 +6219,666 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/InventoryHealthGate"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-sales": {
+      "get": {
+        "tags": [
+          "allocation-policy-controller"
+        ],
+        "operationId": "sales",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SaleRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "allocation-policy-controller"
+        ],
+        "operationId": "recordSales",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllocationShopSalesInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationShopSalesSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-policies": {
+      "get": {
+        "tags": [
+          "allocation-policy-controller"
+        ],
+        "operationId": "policies_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "scopeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "referenceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "effectiveOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationPolicyPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "allocation-policy-controller"
+        ],
+        "operationId": "create_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllocationPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationPolicySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-policies/{id}/versions": {
+      "post": {
+        "tags": [
+          "allocation-policy-controller"
+        ],
+        "operationId": "supersede",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllocationPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationPolicySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-policies/{id}/retire": {
+      "post": {
+        "tags": [
+          "allocation-policy-controller"
+        ],
+        "operationId": "retire",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationPolicySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-policies/runs": {
+      "get": {
+        "tags": [
+          "allocation-policy-controller"
+        ],
+        "operationId": "runs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationRunPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "allocation-policy-controller"
+        ],
+        "operationId": "run",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllocationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AllocationResult"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-policies/calculation": {
+      "post": {
+        "tags": [
+          "allocation-policy-controller"
+        ],
+        "operationId": "calculate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllocationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AllocationResult"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-policies/{id}": {
+      "get": {
+        "tags": [
+          "allocation-policy-controller"
+        ],
+        "operationId": "policy_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationPolicyDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-policies/runs/{runId}": {
+      "get": {
+        "tags": [
+          "allocation-policy-controller"
+        ],
+        "operationId": "runDetail",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationRunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-policies/effective": {
+      "get": {
+        "tags": [
+          "allocation-policy-controller"
+        ],
+        "operationId": "effective",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "scopeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "referenceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationPolicyEffective"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/allocation-policies/capabilities": {
+      "get": {
+        "tags": [
+          "allocation-policy-controller"
+        ],
+        "operationId": "capabilities_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationCapabilities"
                 }
               }
             }
@@ -13990,6 +14650,766 @@
           "size": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "AllocationShopSalesInput": {
+        "required": [
+          "periodEnd",
+          "periodStart",
+          "referenceId",
+          "skuId",
+          "sourceSystem",
+          "unitsSold"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceSystem": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceLabel": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "unitsSold": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          }
+        }
+      },
+      "AllocationShopSalesSaved": {
+        "type": "object",
+        "properties": {
+          "salesId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "unitsSold": {
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "AllocationPolicyInput": {
+        "required": [
+          "bufferMode",
+          "members",
+          "method",
+          "scopeType"
+        ],
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceLabel": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          },
+          "method": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "bufferMode": {
+            "maxLength": 8,
+            "minLength": 0,
+            "type": "string"
+          },
+          "bufferRatio": {
+            "maximum": 1,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "bufferQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "shopTypeOrder": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          },
+          "salesWindowDays": {
+            "maximum": 365,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "members": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationPolicyMemberInput"
+            }
+          }
+        }
+      },
+      "AllocationPolicyMemberInput": {
+        "required": [
+          "referenceId",
+          "shopOperatingMode",
+          "sourceSystem"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceSystem": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceLabel": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shopOperatingMode": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "priority": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "shareLimit": {
+            "maximum": 1,
+            "exclusiveMaximum": false,
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AllocationPolicySaved": {
+        "type": "object",
+        "properties": {
+          "policyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PROPORTIONAL_SALES",
+              "FIXED_PRIORITY",
+              "SHOP_TYPE_PRIORITY"
+            ]
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "supersededPolicyId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "memberCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "AllocationRequest": {
+        "required": [
+          "skuIds"
+        ],
+        "type": "object",
+        "properties": {
+          "skuIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "availableQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "scopeType": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "persist": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AllocationLine": {
+        "type": "object",
+        "properties": {
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceLabel": {
+            "type": "string"
+          },
+          "shopOperatingMode": {
+            "type": "string"
+          },
+          "allocationOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "salesUnits": {
+            "type": "number"
+          },
+          "salesShare": {
+            "type": "number",
+            "nullable": true
+          },
+          "allocatedQty": {
+            "type": "number"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "OK",
+              "CAP_REACHED",
+              "DEMAND_EXHAUSTED",
+              "NO_SALES",
+              "DISABLED"
+            ]
+          }
+        }
+      },
+      "AllocationPolicyEffective": {
+        "type": "object",
+        "properties": {
+          "policy": {
+            "$ref": "#/components/schemas/AllocationPolicyRow"
+          },
+          "resolvedScopeType": {
+            "type": "string",
+            "enum": [
+              "DEFAULT",
+              "SHOP",
+              "SKU"
+            ]
+          },
+          "usedFallback": {
+            "type": "boolean"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AllocationPolicyRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeType": {
+            "type": "string",
+            "enum": [
+              "DEFAULT",
+              "SHOP",
+              "SKU"
+            ]
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceLabel": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PROPORTIONAL_SALES",
+              "FIXED_PRIORITY",
+              "SHOP_TYPE_PRIORITY"
+            ]
+          },
+          "bufferMode": {
+            "type": "string",
+            "enum": [
+              "RATIO",
+              "QUANTITY"
+            ]
+          },
+          "bufferRatio": {
+            "type": "number"
+          },
+          "bufferQuantity": {
+            "type": "number"
+          },
+          "shopTypeOrder": {
+            "type": "string"
+          },
+          "salesWindowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "nullable": true
+      },
+      "AllocationResult": {
+        "type": "object",
+        "properties": {
+          "effective": {
+            "$ref": "#/components/schemas/AllocationPolicyEffective"
+          },
+          "run": {
+            "$ref": "#/components/schemas/AllocationRunRef"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationLine"
+            }
+          },
+          "availableQuantity": {
+            "type": "number"
+          },
+          "bufferQuantity": {
+            "type": "number"
+          },
+          "allocatableQuantity": {
+            "type": "number"
+          },
+          "allocatedTotal": {
+            "type": "number"
+          },
+          "unallocatedQuantity": {
+            "type": "number"
+          },
+          "salesWindowStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "salesWindowEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "totalSalesUnits": {
+            "type": "number"
+          },
+          "totalSalesShare": {
+            "type": "number",
+            "nullable": true
+          },
+          "memberCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "starvedMemberCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AllocationRunRef": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allocatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "persisted": {
+            "type": "boolean"
+          }
+        },
+        "nullable": true
+      },
+      "SaleRow": {
+        "type": "object",
+        "properties": {
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceLabel": {
+            "type": "string"
+          },
+          "units": {
+            "type": "number"
+          },
+          "records": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AllocationPolicyPage": {
+        "type": "object",
+        "properties": {
+          "policies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationPolicyRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AllocationPolicyDetail": {
+        "type": "object",
+        "properties": {
+          "policy": {
+            "$ref": "#/components/schemas/AllocationPolicyRow"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationPolicyMember"
+            }
+          }
+        }
+      },
+      "AllocationPolicyMember": {
+        "type": "object",
+        "properties": {
+          "policyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceLabel": {
+            "type": "string"
+          },
+          "shopOperatingMode": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shareLimit": {
+            "type": "number",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AllocationRunPage": {
+        "type": "object",
+        "properties": {
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationRunSummary"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AllocationRunSummary": {
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "policyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "policyLabel": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PROPORTIONAL_SALES",
+              "FIXED_PRIORITY",
+              "SHOP_TYPE_PRIORITY"
+            ]
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "allocatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "availableQuantity": {
+            "type": "number"
+          },
+          "bufferQuantity": {
+            "type": "number"
+          },
+          "allocatableQuantity": {
+            "type": "number"
+          },
+          "allocatedTotal": {
+            "type": "number"
+          },
+          "unallocatedQuantity": {
+            "type": "number"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "starvedLineCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AllocationRunDetail": {
+        "type": "object",
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/AllocationRunSummary"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationLine"
+            }
+          }
+        }
+      },
+      "AllocationCapabilities": {
+        "type": "object",
+        "properties": {
+          "methods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationMethodOption"
+            }
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationScopeOption"
+            }
+          },
+          "shopOperatingModes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "defaultShopTypeOrder": {
+            "type": "string"
+          },
+          "salesBasisAvailable": {
+            "type": "boolean"
+          },
+          "salesBasisNote": {
+            "type": "string"
+          },
+          "bufferNote": {
+            "type": "string"
+          },
+          "downstreamNote": {
+            "type": "string"
+          }
+        }
+      },
+      "AllocationMethodOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "needsSales": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AllocationScopeOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
           }
         }
       }
