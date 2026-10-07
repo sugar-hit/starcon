@@ -29,6 +29,11 @@ const destinations = [
   ['hierarchy', '层级授权', '显式开通父租户对子租户数据的访问范围与有效期'],
   ['audit', '审计日志', '检索关键操作留痕、变更详情与导出'],
   ['business-parameters', '业务参数', '配置审单、库存、售后、成本与展示默认值，并按全局/法人/店铺分档生效'],
+  [
+    'operation-log',
+    '操作日志',
+    '按用户、时间与请求 ID 检索登录、API 调用、任务执行与错误堆栈，用于运维排障',
+  ],
 ] as const;
 /** 17.2.2.2 成员开通有自己的页面权限码，不与成员管理共用一组。 */
 // 'hierarchy' 只出现在导航目的地里（点击跳 /org/hierarchy 独立页面），
@@ -57,6 +62,10 @@ function visible(session: Access, key: string) {
     return session.grants.some(
       (g) => g.scopeMode === 'ALL' && g.permissions.includes('identity.onboarding.read'),
     );
+  // 操作日志同样是独立页面权限码，不走 canManage 的页面映射（17.5.3.2）。
+  // 少了这条会落到 canManage 兜底，而 AdministrationKind 里没有 'operation-log'，
+  // 于是有 identity.operation_log.read 的人反而在导航里看不到入口。
+  if (key === 'operation-log') return hasPermission(session, 'identity.operation_log.read');
   return canManage(session, key as AdministrationKind);
 }
 export function IdentityWorkspace({
