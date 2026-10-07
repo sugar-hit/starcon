@@ -422,16 +422,32 @@ BEGIN
   END IF;
  END IF;
 
- -- 状态与时间戳自洽
- IF (NEW.status = 'SUBMITTED') <> (NEW.submitted_at IS NOT NULL) THEN
+ -- 状态与时间戳自洽。
+ -- 注意判据方向：这些时间戳是**历史痕迹**，一旦打上就不会因为状态往前走而消失
+ -- （放行后退单、放行后改单，submitted_at/cleared_at 都必须留着当举证）。
+ -- 所以只能单向约束「没发生过的事不许有痕迹」+「到了那一步就必须有痕迹」，
+ -- 不能写成 (status=X) <> (ts IS NOT NULL) 的双向等价 —— 那会把「往前走一步」全判成不自洽。
+ IF NEW.submitted_at IS NULL
+    AND NEW.status IN ('SUBMITTED','CLEARED','CUSTOMS_REJECTED','AMENDED') THEN
   RAISE EXCEPTION '状态「%」与提交时间不自洽：只有已提交才可能已经送到报关行', NEW.status
    USING ERRCODE='23514';
  END IF;
- IF (NEW.status = 'CLEARED') <> (NEW.cleared_at IS NOT NULL) THEN
+ IF NEW.submitted_at IS NOT NULL
+    AND NEW.status NOT IN ('SUBMITTED','CLEARED','CUSTOMS_REJECTED','AMENDED') THEN
+  RAISE EXCEPTION '状态「%」没有提交过，不允许带提交痕迹', NEW.status USING ERRCODE='23514';
+ END IF;
+ IF NEW.cleared_at IS NULL AND NEW.status = 'CLEARED' THEN
   RAISE EXCEPTION '状态「%」与放行时间不自洽', NEW.status USING ERRCODE='23514';
  END IF;
- IF (NEW.status = 'CUSTOMS_REJECTED') <> (NEW.customs_rejected_at IS NOT NULL) THEN
+ IF NEW.cleared_at IS NOT NULL AND NEW.status NOT IN ('CLEARED','AMENDED') THEN
+  RAISE EXCEPTION '状态「%」没有放行过，不允许带放行痕迹', NEW.status USING ERRCODE='23514';
+ END IF;
+ IF NEW.customs_rejected_at IS NULL AND NEW.status = 'CUSTOMS_REJECTED' THEN
   RAISE EXCEPTION '状态「%」与退单时间不自洽', NEW.status USING ERRCODE='23514';
+ END IF;
+ IF NEW.customs_rejected_at IS NOT NULL
+    AND NEW.status NOT IN ('CUSTOMS_REJECTED','AMENDED') THEN
+  RAISE EXCEPTION '状态「%」没有被退过单，不允许带退单痕迹', NEW.status USING ERRCODE='23514';
  END IF;
  IF (NEW.status = 'CANCELLED') <> (NEW.cancelled_at IS NOT NULL) THEN
   RAISE EXCEPTION '状态「%」与取消时间不自洽', NEW.status USING ERRCODE='23514';
@@ -593,22 +609,28 @@ CREATE TRIGGER customs_3_documents BEFORE UPDATE ON customs_declaration
 --     延迟约束触发器：头与明细在同一个事务里先后写，即时触发器会对着半成品报错。
 CREATE FUNCTION guard_customs_rate_snapshot() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE line_sum numeric; expected_base numeric;
+ cur_value numeric; cur_rate numeric; cur_base numeric;
 BEGIN
- -- 只在明细可能已齐备之后校验（草稿态允许汇总尚未回填）
- IF NEW.status IN ('DRAFT','PENDING_REVIEW','REJECTED') THEN
-  RETURN NULL;
- END IF;
+ -- 延迟约束在**提交时**才跑，而触发时捕获的 NEW 是那一刻的行镜像。
+ -- 建单路径是「先插单头(货值 0) → 写明细 → 回填单头货值」：拿 INSERT 那一刻的旧镜像
+ -- 去比提交时早已存在的明细，必然误报成 0 ≠ 2000。
+ -- 所以不信 NEW 快照，回表读**最终提交态**——与 guard_customs_line_count 同一个做法。
+ SELECT d.declaration_value, d.exchange_rate, d.declaration_value_base
+  INTO cur_value, cur_rate, cur_base
+  FROM customs_declaration d
+  WHERE d.tenant_id = NEW.tenant_id AND d.id = NEW.id;
+
  SELECT coalesce(sum(l.declared_value),0) INTO line_sum FROM customs_declaration_line l
   WHERE l.tenant_id = NEW.tenant_id AND l.declaration_id = NEW.id;
  -- 单头申报货值必须等于明细货值合计：分头申报与分行货值对不上就是申报不实
- IF NEW.declaration_value <> line_sum THEN
+ IF cur_value <> line_sum THEN
   RAISE EXCEPTION '单头申报货值 % 与明细货值合计 % 不一致：申报资料必须与明细逐项对得上',
-   NEW.declaration_value, line_sum USING ERRCODE='23514';
+   cur_value, line_sum USING ERRCODE='23514';
  END IF;
- expected_base := round(line_sum * NEW.exchange_rate, 4);
- IF NEW.declaration_value_base <> expected_base THEN
+ expected_base := round(line_sum * cur_rate, 4);
+ IF cur_base <> expected_base THEN
   RAISE EXCEPTION '折算本位币金额 % ≠ 明细货值合计 % × 汇率 % = %：汇率快照必须自洽可举证',
-   NEW.declaration_value_base, line_sum, NEW.exchange_rate, expected_base USING ERRCODE='23514';
+   cur_base, line_sum, cur_rate, expected_base USING ERRCODE='23514';
  END IF;
  RETURN NULL;
 END $$;

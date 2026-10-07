@@ -538,7 +538,12 @@ public class CustomsDeclarationService {
     Record head = head(id);
     String status = head.get("status", String.class);
     DeclarationStatus current = DeclarationStatus.parse(status);
-    if (current != DeclarationStatus.DRAFT && current != DeclarationStatus.REJECTED) {
+    // 撤回复核后必须能改：withdrawReview 把单子退回「待复核」就是为了让人接着改，
+    // 这里若不放行 PENDING_REVIEW，撤回复核就成了一条死路 —— 退回后既不能改也不能复核。
+    // 改完仍需重新复核才能提交（submit 只认「已复核」），所以放宽不会绕过人工复核闸。
+    if (current != DeclarationStatus.DRAFT
+        && current != DeclarationStatus.PENDING_REVIEW
+        && current != DeclarationStatus.REJECTED) {
       throw new IllegalArgumentException(
           "报关单处于「"
               + current.label()
@@ -721,10 +726,13 @@ public class CustomsDeclarationService {
     }
 
     String currency = head.get("declaration_currency", String.class);
+    // 单据编号必须挂在**本单**的报关单号下。取别的报关单的号来编本单的单据号，
+    // 会让退单举证时单据号与报关单号对不上。
+    String declarationCode = head.get("declaration_code", String.class);
     BigDecimal total = value(lines, type, head);
     String docNo =
         request.documentNo() == null || request.documentNo().isBlank()
-            ? code() + "-" + type.name() + "-v" + nextVersion
+            ? declarationCode + "-" + type.name() + "-v" + nextVersion
             : fit(request.documentNo(), 64, "单据号");
 
     sql.execute(
@@ -740,11 +748,11 @@ public class CustomsDeclarationService {
         nextVersion,
         currency,
         total,
-        content(type, head, lines, currency, total).toString(),
+        toJson(content(type, head, lines, currency, total), "单据内容"),
         prev == null ? null : prev.get("id", UUID.class),
         currentActor(),
         "CUSTOMS_DECLARATION",
-        code() + ":" + type.name() + ":v" + nextVersion);
+        declarationCode + ":" + type.name() + ":v" + nextVersion);
 
     recordEvent(id, "DOCUMENT_GENERATED", status, status, "", type.label() + " v" + nextVersion);
     return saved(
@@ -864,7 +872,10 @@ public class CustomsDeclarationService {
       throw new IllegalStateException("这张报关单还没有任何提交记录，不能登记海关回执");
     }
 
-    String from = head.get("status", String.class);
+    // from_result/to_result 记的是**海关回执口径**，不是报关单内部状态机口径：
+    // 两套枚举不是同一套名字（单头有 SUBMITTED/CUSTOMS_REJECTED，回执侧是 PENDING/REJECTED）。
+    // 直接把单头状态写进去会撞 CHECK 约束，而且事后翻回执也读不懂。
+    String from = resultVocabulary(current);
     DeclarationStatus to =
         switch (type) {
           case CLEARED -> DeclarationStatus.CLEARED;
@@ -882,7 +893,7 @@ public class CustomsDeclarationService {
         submission.get("id", UUID.class),
         type.name(),
         from,
-        to.name(),
+        resultVocabulary(to),
         fit(request.resultReference(), 64, "海关单号"),
         reason,
         at,
@@ -990,6 +1001,17 @@ public class CustomsDeclarationService {
     switch (to) {
       case REVIEWED -> sql.execute(
           "update customs_declaration set status='REVIEWED',review_round=review_round+1,"
+              + "reviewed_at=?::timestamptz,reviewed_by=?,review_notes=?,"
+              + "version=version+1,updated_at=now() where id=?",
+          now,
+          currentActor(),
+          fit(notes, 2000, "复核意见"),
+          id);
+      // 复核退回同样**走完过一轮复核**：有人真的看过这张单才退得回去。
+      // 不记轮次就会在库里留下「轮次 0 却已复核」的自相矛盾凭据，
+      // 而罚款追责时要被问的正是「这张单到底谁看过」。
+      case REJECTED -> sql.execute(
+          "update customs_declaration set status='REJECTED',review_round=review_round+1,"
               + "reviewed_at=?::timestamptz,reviewed_by=?,review_notes=?,"
               + "version=version+1,updated_at=now() where id=?",
           now,
@@ -1193,12 +1215,6 @@ public class CustomsDeclarationService {
     return r;
   }
 
-  private String code() {
-    return sql.fetchOne("select declaration_code from customs_declaration where id=?",
-            sql.fetchOne("select min(id) from customs_declaration").get(0, UUID.class))
-        .get(0, String.class);
-  }
-
   private CustomsSaved saved(UUID id, String message) {
     Record r = head(id);
     String status = r.get("status", String.class);
@@ -1391,10 +1407,28 @@ public class CustomsDeclarationService {
   }
 
   private String elementsJson(Map<String, Object> elements) {
+    return toJson(elements == null ? Map.of() : elements, "申报要素");
+  }
+
+  /** 报关单状态 → 海关回执口径（对应 customs_result.from_result/to_result 的 CHECK 词表）。 */
+  private String resultVocabulary(DeclarationStatus status) {
+    return switch (status) {
+      case SUBMITTED -> "PENDING";
+      case CUSTOMS_REJECTED -> "REJECTED";
+      case CLEARED -> "CLEARED";
+      case AMENDED -> "AMENDED";
+      default ->
+          throw new IllegalArgumentException(
+              "状态「" + status.label() + "」还没有对应的海关回执口径，不能登记回执");
+    };
+  }
+
+  /** 单据内容快照序列化成 jsonb。申报资料必须是真 JSON —— Map.toString() 出来的是 {k=v}，不是 JSON。 */
+  private String toJson(Object value, String what) {
     try {
-      return json.writeValueAsString(elements == null ? Map.of() : elements);
+      return json.writeValueAsString(value);
     } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-      throw new IllegalArgumentException("申报要素不是可序列化的键值对象：" + e.getMessage());
+      throw new IllegalArgumentException(what + "不是可序列化的对象：" + e.getMessage());
     }
   }
 

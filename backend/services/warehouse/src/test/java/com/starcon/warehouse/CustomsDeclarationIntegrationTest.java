@@ -376,16 +376,19 @@ class CustomsDeclarationIntegrationTest {
 
   @Test
   void reviewRequiresAtLeastOneLine() {
-    CustomsSaved saved =
-        asA(
-            () ->
-                service.create(
-                    a,
-                    new CustomsCreateRequest(
-                        idFor(a, 10), idFor(a, 1), "GENERAL_TRADE", "出口方", "CN", "收货方", "US",
-                        "", "", "", "", "", "US", "", "", "", "SEA", "", "USD", "CNY",
-                        new BigDecimal("7.1234567890"), 6, LocalDate.of(2026, 10, 1), "", List.of())));
+    CustomsSaved saved = asA(() -> service.create(a, createRequest(a, idFor(a, 10))));
     UUID id = saved.id();
+    // 建单时就拒空明细（没有货物就没有申报），所以复核闸要靠「改单把明细清空」这条路来验：
+    // 改单整份替换明细，清空后这张单必须在复核通过前被挡下（customs_2_review_completeness）。
+    asA(
+        () ->
+            service.update(
+                id,
+                new CustomsUpdateRequest(
+                    null, "GENERAL_TRADE", "上海星创电子商务有限公司", "CN", "Pacific Trading LLC",
+                    "US", "", "", "上海报关行", "BR-001", "张三", "US", "US-LAX", "上海港",
+                    "洛杉矶港", "SEA", "BL-2026-000003", "USD", "CNY",
+                    new BigDecimal("7.1234567890"), 6, LocalDate.of(2026, 10, 1), "清空明细", List.of())));
     asA(() -> service.submitForReview(id, new CustomsSubmitForReviewRequest("请复核")));
     assertThatThrownBy(() -> asA(() -> service.review(id, new CustomsReviewRequest("过"))))
         .hasMessageContaining("不允许复核通过");
@@ -457,15 +460,16 @@ class CustomsDeclarationIntegrationTest {
     CustomsSaved saved = asA(() -> service.create(a, createRequest(a, idFor(a, 10))));
     UUID id = saved.id();
     asA(() -> service.submitForReview(id, new CustomsSubmitForReviewRequest("请复核")));
+    // 单头货值被改成与明细合计不符 → DB 延迟约束必须拦下。
+    // 分头申报与分行货值对不上就是申报不实，这条不能只靠服务层自觉。
     assertThatThrownBy(
             () ->
                 asA(
                     () -> {
-                      sql.execute("update customs_declaration set review_round=1,reviewed_at=now(),"
-                          + "reviewed_by=? where id=?", user, id);
+                      sql.execute("update customs_declaration set declaration_value=1 where id=?", id);
                       return null;
                     }))
-        .isInstanceOfAny(IllegalArgumentException.class, RuntimeException.class);
+        .hasMessageContaining("与明细货值合计");
   }
 
   // ================================================================ 不变量 4：三单据齐备才许提交
@@ -662,17 +666,13 @@ class CustomsDeclarationIntegrationTest {
       assertThat(asB(() -> service.page(new CustomsQuery(null, null, null, null, null, null, null, null, 0, 50)).rows()))
           .singleElement();
     }
-    // 事件/明细行同样不串
+    // 事件表同样不串。注意这里断言的是「读不到行」而不是「抛异常」：
+    // RLS 的隔离语义就是**静默过滤**（对方行对你根本不存在），报不报错反而是次要的。
     UUID bId = asB(() -> service.page(new CustomsQuery(null, null, null, null, null, null, null, null, 0, 50)).rows())
         .get(0).id();
-    assertThatThrownBy(
-            () ->
-                asA(
-                    () -> {
-                      sql.fetch("select * from customs_declaration_event where declaration_id=?", bId);
-                      return null;
-                    }))
-        .isInstanceOf(Exception.class);
+    assertThat(
+            asA(() -> sql.fetch("select * from customs_declaration_event where declaration_id=?", bId)))
+        .isEmpty();
   }
 
   // ================================================================ 端点与契约
