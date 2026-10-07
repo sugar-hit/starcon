@@ -32,6 +32,10 @@ const services: readonly {
     pattern:
       // audit 是 17.5.3.1 审计日志：列表、变更详情与 CSV 导出。
       // 导出走 GET + query（与列表同一套条件），所以 allowlist 只需放行读路径。
+      // operation-log 是 17.5.3.2 操作日志：检索、单条详情、CSV 导出与链路关联视图。
+      //   trace/{requestId} 放行但**不接 uuid 段**——请求 ID 可能是网关传来的非 UUID 串，
+      //   用字符集而不是 {uuid} 段来界定。purge 是 POST 的留存期清理，
+      //   同样在读路径正则里放行（前端页面只读，清理动作留给运维脚本调用）。
       // tenants 是 17.1.1.1 租户列表：只有 tenants 与 tenants/current 两个形状，
       //   **刻意不接 {uuid} 段** —— 按任意 tenant id 读取租户不是这个模块该有的能力，
       //   可切换集合只能由服务端从成员关系推导（实体目录 §4 的窄权限路径）。
@@ -66,7 +70,7 @@ const services: readonly {
       //   onboardings/{id}/complete 是完成入职的状态流转（POST）。
       //   **刻意不放行 onboardings/{id}**：后端没有「按 id 取单条入职记录」这个端点，
       //   放行它会让界面以为已交付——放行不该存在的路径比 404 更糟。
-      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?|business-parameters(?:\/(?:effective|history|overrides(?:\/[0-9a-f-]+)?|freezes(?:\/[^/]+\/[^/]+)?))?|onboardings(?:\/[0-9a-f-]+\/complete)?|department-leaders|departments\/[0-9a-f-]+\/(?:leader(?:\/(?:proxies|grants)(?:\/[0-9a-f-]+)?)?|approval-chain)|offboarding(?:\/[0-9a-f-]+(?:\/revert|\/responsibility-items(?:\/[0-9a-f-]+(?:\/transfer)?)?|\/reclaim-items(?:\/[0-9a-f-]+(?:\/reclaim)?)?)?)?)$/,
+      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|operation-log(?:\/(?:export|trace\/[0-9a-zA-Z-]+|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?|accounting-books(?:\/[0-9a-f-]+)?|business-parameters(?:\/(?:effective|history|overrides(?:\/[0-9a-f-]+)?|freezes(?:\/[^/]+\/[^/]+)?))?|onboardings(?:\/[0-9a-f-]+\/complete)?|department-leaders|departments\/[0-9a-f-]+\/(?:leader(?:\/(?:proxies|grants)(?:\/[0-9a-f-]+)?)?|approval-chain)|offboarding(?:\/[0-9a-f-]+(?:\/revert|\/responsibility-items(?:\/[0-9a-f-]+(?:\/transfer)?)?|\/reclaim-items(?:\/[0-9a-f-]+(?:\/reclaim)?)?)?)?)$/,
   },
   {
     prefix: 'catalog/',

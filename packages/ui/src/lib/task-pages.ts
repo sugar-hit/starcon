@@ -481,6 +481,17 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['检索记录', '核对变更', '导出审计'],
   },
   {
+    // 17.5.3.2 操作日志。排障用，含技术细节（耗时、状态码、错误堆栈）与请求 ID 链路。
+    // 与审计日志的分野是实的：这里可按留存期清理，审计不可篡改、长期留存。
+    href: '/org/operation-log',
+    implemented: true,
+    domain: 'org',
+    label: '操作日志',
+    description: '检索登录、API 调用、任务执行与错误堆栈，按请求 ID 查看完整链路。',
+    fields: ['发生时间', '事件类型', '级别', '请求 ID', '操作人', '摘要', '耗时'],
+    workflow: ['检索日志', '查看链路', '定位错误'],
+  },
+  {
     href: '/logistics',
     implemented: true,
     domain: 'logistics',
@@ -640,6 +651,7 @@ export const ACCOUNT_MENU_ORDER = [
   '/org/stores',
   '/org/permissions',
   '/org/audit',
+  '/org/operation-log',
 ];
 export function isAccountDomain(domain: string): boolean {
   return ACCOUNT_DOMAINS.has(domain);
