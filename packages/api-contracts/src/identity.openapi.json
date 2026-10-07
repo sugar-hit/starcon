@@ -464,6 +464,80 @@
         }
       }
     },
+    "/identity/accounting-books/{id}": {
+      "put": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountingBookInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/roles": {
       "get": {
         "tags": [
@@ -700,6 +774,57 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/LegalEntityInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/legal-entities/{legalEntityId}/accounting-books": {
+      "post": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountingBookInput"
               }
             }
           },
@@ -1319,6 +1444,49 @@
         }
       }
     },
+    "/identity/accounting-books": {
+      "get": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "accountingBooks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountingBookView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/session": {
       "get": {
         "tags": [
@@ -1598,6 +1766,77 @@
             "maxLength": 100,
             "minLength": 0,
             "type": "string"
+          },
+          "status": {
+            "pattern": "ACTIVE|SUSPENDED",
+            "type": "string"
+          }
+        }
+      },
+      "AccountingBookInput": {
+        "required": [
+          "baseCurrency",
+          "bookType",
+          "code",
+          "firstPeriodStart",
+          "name",
+          "periodType",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "pattern": "[A-Z0-9_-]{1,64}",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "bookType": {
+            "pattern": "BOOK|CASH|BANK",
+            "type": "string"
+          },
+          "baseCurrency": {
+            "minLength": 1,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "amountScale": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "amountRounding": {
+            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
+            "type": "string"
+          },
+          "quantityScale": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantityRounding": {
+            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
+            "type": "string"
+          },
+          "periodType": {
+            "pattern": "MONTH|WEEK|QUARTER",
+            "type": "string"
+          },
+          "fiscalYearStartMonth": {
+            "maximum": 12,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstPeriodStart": {
+            "type": "string",
+            "format": "date-time"
           },
           "status": {
             "pattern": "ACTIVE|SUSPENDED",
@@ -2208,6 +2447,96 @@
             "additionalProperties": {
               "type": "object"
             }
+          }
+        }
+      },
+      "AccountingBookView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bookType": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "legalEntityCurrency": {
+            "type": "string"
+          },
+          "currencyAligned": {
+            "type": "boolean"
+          },
+          "amountScale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "amountRounding": {
+            "type": "string"
+          },
+          "quantityScale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantityRounding": {
+            "type": "string"
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "fiscalYearStartMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstPeriodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "baseCurrencyChangedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currentFiscalYear": {
+            "type": "string"
+          },
+          "fiscalYearStart": {
+            "type": "string"
+          },
+          "fiscalYearEnd": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }
