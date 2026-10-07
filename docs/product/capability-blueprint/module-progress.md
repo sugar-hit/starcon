@@ -12,17 +12,17 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 82 |
+| 已交付 | 83 |
 | 进行中 | 0 |
-| **未开发** | **383** |
-| 完成率 | 17.6% |
+| **未开发** | **382** |
+| 完成率 | 17.8% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
-| **D3** | 4 | 0 | 36 | 40 |
+| **D3** | 5 | 0 | 35 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
@@ -38,7 +38,7 @@
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
-| 07 | 库存核算系统 | D3 | 4 | 31 |
+| 07 | 库存核算系统 | D3 | 5 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 0 | 27 |
@@ -262,7 +262,7 @@
 | 7.2.1.3 | 释放与过期 | /inventory/reservation | D3 | 未开发 | — |
 | 7.2.2.1 | 可售量口径 | — | D3 | 未开发 | — |
 | 7.2.2.2 | 安全库存 | — | D3 | 未开发 | — |
-| 7.3.1.1 | 批次管理 | /inventory/lots | D3 | 未开发 | — |
+| 7.3.1.1 | 批次管理 | /inventory/lots | D3 | 已交付 | 迁移 warehouse V57__warehouse_inventory_lot_archive.sql（**只补列、不另建批次档案表**：V2 的 inventory_lot 已被 stock_bucket 外键接成一等事实单位，另建表等于给同一批次制造两个真相来源；补 produced_on（date 业务日期）、origin（RECEIPT/MANUAL）、source_system + source_ref_id + source_ref_code 与 supplier_ref_id + supplier_name（**跨服务定位键，不建外键不联查**采购 6/收货 8）、notes，加 ck_lot_origin_source 等三条 CHECK 与到期/来源/供应商三个部分索引；**本迁移刻意不写 RLS/GRANT**：inventory_lot 的 FORCE RLS 与授权在 V2 已成立，ADD COLUMN 不失效，由租户隔离三断言实跑证明）+ 端点 GET /warehouse/inventory/lots（档案列表 + 全量汇总 + 三组下拉词表，筛选 SKU/仓库/状态/建立方式/来源系统/供应商/关键字/N 天内到期/在手大于 0，排序白名单 7 键，非法码当场 400）、GET /warehouse/inventory/lots/{id} 档案详情、GET /warehouse/inventory/lots/{id}/distribution（**真从 stock_bucket 按批次 LEFT JOIN LATERAL 聚合**仓库级与库位级切片，仓库合计与库位合计均须等于总计）、GET /warehouse/inventory/lots/{id}/movements（**复用 7.1.2.1 台账** page(query, lotId) 重载，不另写流水查询；因 inventory_entry/inventory_balance 均无 lot_id，响应带 attribution=BALANCE_GRANULAR 与口径说明）、POST 建批次（收货生成与手工建共用，RECEIPT 必须给来源单据，批号冲突 DB 裁决后翻成 409）、PUT 改属性（批号/SKU/origin 为身份不可改，null 表示不修改）+ 页面 /inventory/lots（汇总卡、筛选、列表、展开看库存分布与出入库历史、新建批次对话框、过期与状态分列、无效期批次不消失、归属口径常驻显示、加载/空/错误三态）+ 测试 InventoryLotIntegrationTest 14 例（业务日期原样落库、RECEIPT 必带来源、批号冲突 409、效期写反 400、跨租户 SKU 拒绝、部分更新与 updated_at 推进、仓库与库位合计双等于总计、同库位两种质量状态分行、零库存批次仍在列表、过期按日历事实而 status 仍 ACTIVE、效期排序 nulls last、合计不受分页影响、非法筛选 400、流水复用只列本批次所在余额行、端点 400/403/401、租户隔离三断言池压到 1）+ inventory-lot-model.test.ts 10 例。批次与序列号保持两个独立实体（序列号属 7.3.1.2，本模块无任何序列号字段） |
 | 7.3.1.2 | 效期与先进先出 | /inventory/lots | D3 | 未开发 | — |
 | 7.3.2.1 | 序列号 | /inventory/serials | D3 | 未开发 | — |
 | 7.4.1.1 | 调整单管理 | /inventory/adjustments | D3 | 未开发 | — |
