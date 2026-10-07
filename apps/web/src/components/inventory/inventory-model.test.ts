@@ -19,8 +19,14 @@ import {
   roleLabels,
   rowComposition,
   scopeLabels,
+  diffText,
+  severityLabels,
   signed,
   signedTone,
+  statusLabels,
+  suspectCategoryLabels,
+  windowLabel,
+  withOffset,
   type OverviewParams,
 } from './inventory-model';
 import type {
@@ -421,7 +427,7 @@ describe('7.1.1.2 → 7.1.2.1 下钻契约', () => {
   it('解析「查看流水」的 href，取出台账接得住的两个维度', () => {
     expect(
       parseLedgerHref('/inventory/ledger?skuId=s1&warehouseId=w1&locationId=l1&lotId=t1'),
-    ).toEqual({ skuId: 's1', warehouseId: 'w1' });
+    ).toEqual({ skuId: 's1', warehouseId: 'w1', transactionId: '' });
   });
 
   it('bucket 级的库位与批次维度被丢弃：台账读的是 balance 口径', () => {
@@ -433,6 +439,15 @@ describe('7.1.1.2 → 7.1.2.1 下钻契约', () => {
     expect(parseLedgerHref('/inventory/ledger?skuId=s1')).toEqual({
       skuId: 's1',
       warehouseId: '',
+      transactionId: '',
+    });
+  });
+
+  it('7.1.2.2 核对页带着 transactionId 进来时也解析（直接定位到那笔流水）', () => {
+    expect(parseLedgerHref('/inventory/ledger?transactionId=tx-9')).toEqual({
+      skuId: '',
+      warehouseId: '',
+      transactionId: 'tx-9',
     });
   });
 
@@ -440,5 +455,69 @@ describe('7.1.1.2 → 7.1.2.1 下钻契约', () => {
     expect(parseLedgerHref('/inventory/adjustments?skuId=s1')).toBeNull();
     expect(parseLedgerHref('')).toBeNull();
     expect(parseLedgerHref(null)).toBeNull();
+  });
+});
+
+// ================================================================ 7.1.2.2 账实核对
+
+describe('账实核对的前端口径', () => {
+  it('datetime-local 的墙钟串被补上本机偏移量', () => {
+    const local = '2026-10-01T09:30';
+    const stamped = withOffset(local);
+    // 必须带偏移：后端不接受无偏移的时间串，否则同一份请求在不同环境核出不同区间
+    expect(stamped).toMatch(/^2026-10-01T09:30:00[+-]\d{2}:\d{2}$/);
+    expect(new Date(stamped).getTime()).toBe(new Date(local).getTime());
+  });
+
+  it('已经带秒的串不会被重复补秒', () => {
+    const local = '2026-10-01T09:30:00';
+    expect(withOffset(local)).toBe(`2026-10-01T09:30:00${withOffset(local).slice(19)}`);
+  });
+
+  it('无法解析的串原样返回，不吞也不编一个时间', () => {
+    expect(withOffset('不是时间')).toBe('不是时间');
+  });
+
+  it('差异为 0 显示成 0.0000 而不是空白（空白会被读成"没查到"）', () => {
+    expect(diffText(0)).toBe('0.0000');
+    expect(diffText(null)).toBe('0.0000');
+    expect(diffText(undefined)).toBe('0.0000');
+    expect(diffText(-3.5)).toBe('-3.5000');
+  });
+
+  it('可疑区间按天分桶：同一天显示一天，跨天显示区间', () => {
+    // 用本地时刻构造，换任何时区跑都是 10-03 / 10-04，断言不依赖 CI 的时区
+    const start = new Date(2026, 9, 3, 0, 0, 0).toISOString();
+    const end = new Date(2026, 9, 4, 0, 0, 0).toISOString();
+    expect(windowLabel(start, end)).toBe('2026-10-03 ~ 2026-10-04');
+    expect(windowLabel(start, null)).toBe('2026-10-03');
+  });
+
+  it('桶标签按本地时区取日：+08:00 的凌晨不会被折算成前一天', () => {
+    expect(windowLabel('2026-10-03T00:30:00+08:00', '2026-10-04T00:30:00+08:00')).toBe(
+      '2026-10-03 ~ 2026-10-04',
+    );
+  });
+
+  it('无法解析的时间原样返回，不编一个日期出来', () => {
+    expect(windowLabel('不是时间', null)).toBe('不是时间');
+  });
+
+  it('可疑类别与后端四类一一对应，没有为"其它"留一个假类别', () => {
+    expect(Object.keys(suspectCategoryLabels).sort()).toEqual([
+      'BACKFILL',
+      'DUPLICATE',
+      'LOST_UPDATE',
+      'MISSING',
+    ]);
+    expect(suspectCategoryLabels.MISSING).toBe('漏记');
+    expect(suspectCategoryLabels.DUPLICATE).toBe('重复记');
+    expect(suspectCategoryLabels.LOST_UPDATE).toBe('并发丢失');
+  });
+
+  it('结论标签：一致与有差异都是有效结论，都要有中文说法', () => {
+    expect(statusLabels.CONSISTENT).toBe('账实一致');
+    expect(statusLabels.DISCREPANT).toBe('存在差异');
+    expect(severityLabels.HIGH).toBe('严重');
   });
 });

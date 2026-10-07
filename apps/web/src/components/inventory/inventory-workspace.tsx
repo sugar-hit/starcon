@@ -28,6 +28,7 @@ import type {
 import { deletePolicy, errorText, fetchCapabilities, fetchLegalEntities, fetchOverview, fetchPolicies, fetchQualityStatuses, fetchWarehouses, groupByDimension, groupLabel, parseDetailHref, qty, roleBadge, roleLabels, rowComposition, savePolicy, scopeLabels, type BucketDrill, type OverviewParams } from './inventory-model';
 import { InventoryBucketDetail } from './inventory-bucket-detail';
 import { InventoryLedger } from './inventory-ledger';
+import { InventoryReconciliation } from './inventory-reconciliation';
 import { useIdentity } from '../iam/identity-shell';
 
 /**
@@ -64,10 +65,10 @@ export function InventoryWorkspace() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
-  // 7.1.1.1 总览 / 7.1.1.2 明细 / 7.1.2.1 流水台账：同一页面内切换，行内下钻时带上维度。
-  // 台账另有独立路由 /inventory/ledger（那是 7.1.1.2「查看流水」入口的契约地址），
+  // 7.1.1.1 总览 / 7.1.1.2 明细 / 7.1.2.1 流水台账 / 7.1.2.2 账实核对：同一页面内切换，
+  // 行内下钻时带上维度。台账与核对另有独立路由（7.1.1.2「查看流水」与核对记录的契约地址），
   // 页内这个入口是同一工作区内的就地切换，少一次跳转。
-  const [view, setView] = useState<'OVERVIEW' | 'BUCKET' | 'LEDGER'>('OVERVIEW');
+  const [view, setView] = useState<'OVERVIEW' | 'BUCKET' | 'LEDGER' | 'RECONCILE'>('OVERVIEW');
   const [drill, setDrill] = useState<BucketDrill | null>(null);
 
   const [warehouseId, setWarehouseId] = useState('');
@@ -236,6 +237,7 @@ export function InventoryWorkspace() {
                   ['OVERVIEW', '库存总览'],
                   ['BUCKET', '库位明细'],
                   ['LEDGER', '流水台账'],
+                  ['RECONCILE', '账实核对'],
                 ] as const
               ).map(([key, label]) => (
                 <button
@@ -259,8 +261,16 @@ export function InventoryWorkspace() {
         }
       />
 
-      {view === 'LEDGER' ? (
-        <InventoryLedger drill={drill ? { skuId: drill.skuId, warehouseId: drill.warehouseId } : null} />
+      {view === 'RECONCILE' ? (
+        <InventoryReconciliation />
+      ) : view === 'LEDGER' ? (
+        <InventoryLedger
+          drill={
+            drill
+              ? { skuId: drill.skuId, warehouseId: drill.warehouseId, transactionId: '' }
+              : null
+          }
+        />
       ) : view === 'BUCKET' ? (
         <InventoryBucketDetail drill={drill} readable={readable} />
       ) : (

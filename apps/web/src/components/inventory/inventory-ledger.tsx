@@ -87,6 +87,33 @@ export function InventoryLedger({ drill }: { drill: LedgerDrill | null }) {
     setPageNumber(0);
   }, [drill]);
 
+  /**
+   * 7.1.2.2 账实核对带着 {@code transactionId} 进来时，直接展开那笔业务的分录。
+   *
+   * <p>可疑定位的终点就是一笔具体的流水，点进来却什么都没展开等于把定位成本又推回给人。
+   * 查不到时不报错：可能那笔已经不在当前时间区间里，如实说清比抛个错有用。
+   */
+  useEffect(() => {
+    const target = drill?.transactionId;
+    if (!target) return;
+    void (async () => {
+      setDrillError('');
+      setExpanded(target);
+      setDrillLoading(true);
+      try {
+        setDrillDown({ id: target, data: await fetchLedgerDrill(target) });
+      } catch (e) {
+        setDrillError(
+          `${errorText(e)}（该笔流水可能不在当前时间区间内，可放宽区间后再试）`,
+        );
+        setDrillDown(null);
+        setExpanded(null);
+      } finally {
+        setDrillLoading(false);
+      }
+    })();
+  }, [drill?.transactionId]);
+
   const hasDimensionFilter = Boolean(warehouseId || skuId);
 
   const load = useCallback(async () => {
