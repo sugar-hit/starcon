@@ -29,6 +29,7 @@ const destinations = [
   ['hierarchy', '层级授权', '显式开通父租户对子租户数据的访问范围与有效期'],
   ['audit', '审计日志', '检索关键操作留痕、变更详情与导出'],
   ['business-parameters', '业务参数', '配置审单、库存、售后、成本与展示默认值，并按全局/法人/店铺分档生效'],
+  ['numbering-rules', '编号规则', '配置单据编号规则（前缀 + 日期 + 序号 + 后缀），序号按实体与日期重置，支持多级嵌套与预览'],
   [
     'operation-log',
     '操作日志',
@@ -62,6 +63,8 @@ function visible(session: Access, key: string) {
     return session.grants.some(
       (g) => g.scopeMode === 'ALL' && g.permissions.includes('identity.onboarding.read'),
     );
+  // 编号规则同样是独立页面权限码，不走 canManage 的页面映射（17.5.1.2）。
+  if (key === 'numbering-rules') return hasPermission(session, 'identity.numbering_rule.read');
   // 操作日志同样是独立页面权限码，不走 canManage 的页面映射（17.5.3.2）。
   // 少了这条会落到 canManage 兜底，而 AdministrationKind 里没有 'operation-log'，
   // 于是有 identity.operation_log.read 的人反而在导航里看不到入口。

@@ -156,12 +156,124 @@
         }
       }
     },
+    "/identity/numbering/rules/{id}": {
+      "get": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "rule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NumberRuleView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NumberRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/members/{membershipId}/role-assignments/{roleId}": {
       "put": {
         "tags": [
           "role-assignment-controller"
         ],
-        "operationId": "update",
+        "operationId": "update_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -361,7 +473,7 @@
         "tags": [
           "hierarchy-authorization-controller"
         ],
-        "operationId": "update_1",
+        "operationId": "update_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -641,12 +753,86 @@
         }
       }
     },
+    "/identity/business-parameters/overrides/{id}": {
+      "put": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "update_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessParameterOverrideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "delete_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/accounting-books/{id}": {
       "put": {
         "tags": [
           "accounting-book-controller"
         ],
-        "operationId": "update_2",
+        "operationId": "update_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -687,7 +873,7 @@
         "tags": [
           "accounting-book-controller"
         ],
-        "operationId": "delete_1",
+        "operationId": "delete_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -819,6 +1005,45 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/operation-log/purge": {
+      "post": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "purge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationLogPurge"
+                }
+              }
+            }
           }
         }
       }
@@ -1242,6 +1467,194 @@
         }
       }
     },
+    "/identity/numbering/rules": {
+      "get": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ruleKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NumberRuleView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "create_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NumberRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/numbering/rules/{id}/next": {
+      "post": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "next",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NumberIssueInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NumberIssuedView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/numbering/preview": {
+      "post": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "preview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NumberPreviewInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NumberPreviewView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identity/members": {
       "get": {
         "tags": [
@@ -1321,7 +1734,7 @@
         "tags": [
           "role-assignment-controller"
         ],
-        "operationId": "create_2",
+        "operationId": "create_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -1488,7 +1901,7 @@
         "tags": [
           "accounting-book-controller"
         ],
-        "operationId": "create_2",
+        "operationId": "create_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -1605,7 +2018,7 @@
         "tags": [
           "hierarchy-authorization-controller"
         ],
-        "operationId": "create_3",
+        "operationId": "create_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -1966,6 +2379,138 @@
         }
       }
     },
+    "/identity/business-parameters/overrides": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "overrides",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "parameterCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessParameterOverrideView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "create_6",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessParameterOverrideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/freezes": {
+      "post": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "freeze",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessParameterFreezeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/switch": {
       "post": {
         "tags": [
@@ -2237,6 +2782,266 @@
         }
       }
     },
+    "/identity/operation-log": {
+      "get": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "search",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "actorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "eventType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationLogPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/operation-log/{id}": {
+      "get": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationLogDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/operation-log/trace/{requestId}": {
+      "get": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "trace",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationLogTrace"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/operation-log/export": {
+      "get": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "actorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "eventType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identity/offboarding/{id}": {
       "get": {
         "tags": [
@@ -2270,6 +3075,166 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/OffboardingDetailView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/numbering/sequences": {
+      "get": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "sequences",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NumberSequenceView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/numbering/rules/conflicts": {
+      "get": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "conflicts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NumberRuleConflictView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/numbering/issued": {
+      "get": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "issued",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NumberIssuedView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/numbering/entities": {
+      "get": {
+        "tags": [
+          "number-rule-controller"
+        ],
+        "operationId": "entities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NumberEntityView"
+                  }
                 }
               }
             }
@@ -2392,6 +3357,189 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/DepartmentLeaderView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "definitions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessParameterDefinitionView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/history": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "history",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "parameterCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessParameterHistoryView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/freezes/{documentType}/{documentNo}": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "frozen",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "documentType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentNo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessParameterFreezeView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/business-parameters/effective": {
+      "get": {
+        "tags": [
+          "business-parameter-controller"
+        ],
+        "operationId": "effective_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BusinessParameterEffectiveView"
                   }
                 }
               }
@@ -2814,694 +3962,6 @@
           }
         }
       }
-    },
-    "/identity/business-parameters/overrides/{id}": {
-      "put": {
-        "tags": [
-          "business-parameter-controller"
-        ],
-        "operationId": "update_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BusinessParameterOverrideInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "business-parameter-controller"
-        ],
-        "operationId": "delete",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/identity/business-parameters/overrides": {
-      "get": {
-        "tags": [
-          "business-parameter-controller"
-        ],
-        "operationId": "overrides",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "parameterCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "scopeType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/BusinessParameterOverrideView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "business-parameter-controller"
-        ],
-        "operationId": "create_4",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BusinessParameterOverrideInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/business-parameters/freezes": {
-      "post": {
-        "tags": [
-          "business-parameter-controller"
-        ],
-        "operationId": "freeze",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BusinessParameterFreezeInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/business-parameters": {
-      "get": {
-        "tags": [
-          "business-parameter-controller"
-        ],
-        "operationId": "definitions",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/BusinessParameterDefinitionView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/business-parameters/history": {
-      "get": {
-        "tags": [
-          "business-parameter-controller"
-        ],
-        "operationId": "history",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "parameterCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "scopeType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/BusinessParameterHistoryView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/business-parameters/freezes/{documentType}/{documentNo}": {
-      "get": {
-        "tags": [
-          "business-parameter-controller"
-        ],
-        "operationId": "frozen",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "documentType",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "documentNo",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/BusinessParameterFreezeView"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/business-parameters/effective": {
-      "get": {
-        "tags": [
-          "business-parameter-controller"
-        ],
-        "operationId": "effective",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "legalEntityId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "shopId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/BusinessParameterEffectiveView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/operation-log/purge": {
-      "post": {
-        "tags": [
-          "operation-log-controller"
-        ],
-        "operationId": "purge",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "before",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OperationLogPurge"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/operation-log": {
-      "get": {
-        "tags": [
-          "operation-log-controller"
-        ],
-        "operationId": "search",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "actorId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "eventType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "level",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "requestId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OperationLogPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/operation-log/{id}": {
-      "get": {
-        "tags": [
-          "operation-log-controller"
-        ],
-        "operationId": "detail",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OperationLogDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/operation-log/trace/{requestId}": {
-      "get": {
-        "tags": [
-          "operation-log-controller"
-        ],
-        "operationId": "trace",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "requestId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OperationLogTrace"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/operation-log/export": {
-      "get": {
-        "tags": [
-          "operation-log-controller"
-        ],
-        "operationId": "export",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "actorId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "eventType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "level",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "requestId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/csv": {
-                "schema": {
-                  "type": "string",
-                  "format": "byte"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -3553,6 +4013,101 @@
               "minLength": 1,
               "type": "string"
             }
+          }
+        }
+      },
+      "NumberRuleInput": {
+        "required": [
+          "entityCode",
+          "ruleKind",
+          "ruleName",
+          "segments"
+        ],
+        "type": "object",
+        "properties": {
+          "entityCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ruleName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ruleKind": {
+            "pattern": "PRIMARY|COMPONENT",
+            "type": "string"
+          },
+          "status": {
+            "pattern": "ACTIVE|DISABLED",
+            "type": "string"
+          },
+          "timezone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "description": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          },
+          "segments": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NumberRuleSegmentInput"
+            }
+          }
+        }
+      },
+      "NumberRuleSegmentInput": {
+        "required": [
+          "segmentType"
+        ],
+        "type": "object",
+        "properties": {
+          "segmentType": {
+            "pattern": "PREFIX|DATE|SEQUENCE|SUFFIX|LITERAL|NESTED",
+            "type": "string"
+          },
+          "literalText": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "dateFormat": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sequenceWidth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sequenceStart": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sequenceReset": {
+            "pattern": "NONE|DAILY|MONTHLY|YEARLY",
+            "type": "string"
+          },
+          "sequenceScope": {
+            "pattern": "ENTITY|RULE",
+            "type": "string"
+          },
+          "childRuleId": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -3860,6 +4415,48 @@
           }
         }
       },
+      "BusinessParameterOverrideInput": {
+        "required": [
+          "parameterCode",
+          "scopeType",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "parameterCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "scopeType": {
+            "pattern": "GLOBAL|LEGAL_ENTITY|SHOP",
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopLabel": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
       "AccountingBookInput": {
         "required": [
           "baseCurrency",
@@ -3940,6 +4537,19 @@
           "membershipId": {
             "type": "string",
             "format": "uuid"
+          }
+        }
+      },
+      "OperationLogPurge": {
+        "type": "object",
+        "properties": {
+          "removed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "before": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -4150,6 +4760,193 @@
             "type": "string",
             "format": "uuid",
             "nullable": true
+          }
+        }
+      },
+      "NumberIssueInput": {
+        "type": "object",
+        "properties": {
+          "documentDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "documentType": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "documentNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "NumberIssuedView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityCode": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "sequenceValue": {
+            "type": "number"
+          },
+          "resetKey": {
+            "type": "string"
+          },
+          "documentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NumberPreviewInput": {
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "NumberPreviewPartView": {
+        "type": "object",
+        "properties": {
+          "segmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "segmentType": {
+            "type": "string"
+          },
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "depth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "NumberPreviewView": {
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "entityCode": {
+            "type": "string"
+          },
+          "documentDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "consumed": {
+            "type": "boolean"
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NumberPreviewPartView"
+            }
+          },
+          "sequences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NumberSequencePlanView"
+            }
+          }
+        }
+      },
+      "NumberSequencePlanView": {
+        "type": "object",
+        "properties": {
+          "segmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "segmentType": {
+            "type": "string"
+          },
+          "entityCode": {
+            "type": "string"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "resetKey": {
+            "type": "string"
+          },
+          "resetScope": {
+            "type": "string"
+          },
+          "nextValue": {
+            "type": "number"
+          },
+          "rendered": {
+            "type": "string"
           }
         }
       },
@@ -4400,6 +5197,46 @@
             "minLength": 12,
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "BusinessParameterFreezeInput": {
+        "required": [
+          "documentNo",
+          "documentType"
+        ],
+        "type": "object",
+        "properties": {
+          "documentType": {
+            "minLength": 1,
+            "pattern": "[A-Z][A-Z0-9_]{1,31}",
+            "type": "string"
+          },
+          "documentNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopLabel": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
           }
         }
       },
@@ -4759,6 +5596,225 @@
           }
         }
       },
+      "OperationLogPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OperationLogView"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "OperationLogView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "traceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string"
+          },
+          "httpMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "durationMs": {
+            "type": "number",
+            "nullable": true
+          },
+          "taskName": {
+            "type": "string",
+            "nullable": true
+          },
+          "taskStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorClass": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OperationLogDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "traceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string"
+          },
+          "httpMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "durationMs": {
+            "type": "number",
+            "nullable": true
+          },
+          "taskName": {
+            "type": "string",
+            "nullable": true
+          },
+          "taskStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorClass": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "stackTrace": {
+            "type": "string",
+            "nullable": true
+          },
+          "stackTruncated": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "OperationLogTrace": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OperationLogView"
+            }
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "errorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalDurationMs": {
+            "type": "number"
+          },
+          "spanMs": {
+            "type": "number"
+          },
+          "firstAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
       "OnboardingView": {
         "type": "object",
         "properties": {
@@ -5014,6 +6070,182 @@
           "transferredAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "NumberSequenceView": {
+        "type": "object",
+        "properties": {
+          "entityCode": {
+            "type": "string"
+          },
+          "scopeKey": {
+            "type": "string"
+          },
+          "resetKey": {
+            "type": "string"
+          },
+          "currentValue": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NumberRuleSegmentView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "segmentType": {
+            "type": "string"
+          },
+          "literalText": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateFormat": {
+            "type": "string",
+            "nullable": true
+          },
+          "sequenceWidth": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "sequenceStart": {
+            "type": "number",
+            "nullable": true
+          },
+          "sequenceReset": {
+            "type": "string",
+            "nullable": true
+          },
+          "sequenceScope": {
+            "type": "string",
+            "nullable": true
+          },
+          "childRuleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "childRuleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "rendered": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "NumberRuleView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityCode": {
+            "type": "string"
+          },
+          "entityName": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "ruleKind": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "description": {
+            "type": "string"
+          },
+          "sampleNumber": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NumberRuleSegmentView"
+            }
+          }
+        }
+      },
+      "NumberRuleConflictView": {
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityCode": {
+            "type": "string"
+          },
+          "ruleName": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "overlaps": {
+            "type": "boolean"
+          }
+        }
+      },
+      "NumberEntityView": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
           }
         }
       },
@@ -5477,289 +6709,6 @@
           }
         }
       },
-      "AuditPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AuditView"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "AuditView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "action": {
-            "type": "string"
-          },
-          "resourceType": {
-            "type": "string"
-          },
-          "resourceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "resourceLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "actorId": {
-            "type": "string",
-            "nullable": true
-          },
-          "actorName": {
-            "type": "string",
-            "nullable": true
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "owner": {
-            "type": "boolean"
-          }
-        }
-      },
-      "AuditDetail": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "action": {
-            "type": "string"
-          },
-          "resourceType": {
-            "type": "string"
-          },
-          "resourceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "resourceLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "actorId": {
-            "type": "string",
-            "nullable": true
-          },
-          "actorName": {
-            "type": "string",
-            "nullable": true
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "owner": {
-            "type": "boolean"
-          },
-          "authorization": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
-          },
-          "changes": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
-          }
-        }
-      },
-      "AccountingBookView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "legalEntityCode": {
-            "type": "string"
-          },
-          "legalEntityName": {
-            "type": "string"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "bookType": {
-            "type": "string"
-          },
-          "baseCurrency": {
-            "type": "string"
-          },
-          "legalEntityCurrency": {
-            "type": "string"
-          },
-          "currencyAligned": {
-            "type": "boolean"
-          },
-          "amountScale": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "amountRounding": {
-            "type": "string"
-          },
-          "quantityScale": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "quantityRounding": {
-            "type": "string"
-          },
-          "periodType": {
-            "type": "string"
-          },
-          "fiscalYearStartMonth": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "firstPeriodStart": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "baseCurrencyChangedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "currentFiscalYear": {
-            "type": "string"
-          },
-          "fiscalYearStart": {
-            "type": "string"
-          },
-          "fiscalYearEnd": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "BusinessParameterOverrideInput": {
-        "required": [
-          "parameterCode",
-          "scopeType",
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "parameterCode": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "scopeType": {
-            "pattern": "GLOBAL|LEGAL_ENTITY|SHOP",
-            "type": "string"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "shopId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "shopLabel": {
-            "maxLength": 150,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "value": {
-            "type": "string"
-          },
-          "note": {
-            "maxLength": 300,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
-      "BusinessParameterFreezeInput": {
-        "required": [
-          "documentNo",
-          "documentType"
-        ],
-        "type": "object",
-        "properties": {
-          "documentType": {
-            "minLength": 1,
-            "pattern": "[A-Z][A-Z0-9_]{1,31}",
-            "type": "string"
-          },
-          "documentNo": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "shopId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "shopLabel": {
-            "maxLength": 150,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "note": {
-            "maxLength": 300,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
       "BusinessParameterDefinitionView": {
         "type": "object",
         "properties": {
@@ -6110,26 +7059,13 @@
           }
         }
       },
-      "OperationLogPurge": {
-        "type": "object",
-        "properties": {
-          "removed": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "before": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "OperationLogPage": {
+      "AuditPage": {
         "type": "object",
         "properties": {
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/OperationLogView"
+              "$ref": "#/components/schemas/AuditView"
             }
           },
           "total": {
@@ -6146,23 +7082,24 @@
           }
         }
       },
-      "OperationLogView": {
+      "AuditView": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
           },
-          "eventType": {
+          "action": {
             "type": "string"
           },
-          "level": {
+          "resourceType": {
             "type": "string"
           },
-          "requestId": {
-            "type": "string"
+          "resourceId": {
+            "type": "string",
+            "format": "uuid"
           },
-          "traceId": {
+          "resourceLabel": {
             "type": "string",
             "nullable": true
           },
@@ -6174,61 +7111,33 @@
             "type": "string",
             "nullable": true
           },
-          "summary": {
-            "type": "string"
-          },
-          "httpMethod": {
-            "type": "string",
-            "nullable": true
-          },
-          "path": {
-            "type": "string",
-            "nullable": true
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "durationMs": {
-            "type": "number",
-            "nullable": true
-          },
-          "taskName": {
-            "type": "string",
-            "nullable": true
-          },
-          "taskStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "errorClass": {
-            "type": "string",
-            "nullable": true
-          },
           "occurredAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "owner": {
+            "type": "boolean"
           }
         }
       },
-      "OperationLogDetail": {
+      "AuditDetail": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
           },
-          "eventType": {
+          "action": {
             "type": "string"
           },
-          "level": {
+          "resourceType": {
             "type": "string"
           },
-          "requestId": {
-            "type": "string"
+          "resourceId": {
+            "type": "string",
+            "format": "uuid"
           },
-          "traceId": {
+          "resourceLabel": {
             "type": "string",
             "nullable": true
           },
@@ -6240,59 +7149,20 @@
             "type": "string",
             "nullable": true
           },
-          "summary": {
-            "type": "string"
-          },
-          "httpMethod": {
-            "type": "string",
-            "nullable": true
-          },
-          "path": {
-            "type": "string",
-            "nullable": true
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "durationMs": {
-            "type": "number",
-            "nullable": true
-          },
-          "taskName": {
-            "type": "string",
-            "nullable": true
-          },
-          "taskStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "errorClass": {
-            "type": "string",
-            "nullable": true
-          },
-          "errorMessage": {
-            "type": "string",
-            "nullable": true
-          },
-          "stackTrace": {
-            "type": "string",
-            "nullable": true
-          },
-          "stackTruncated": {
-            "type": "boolean",
-            "nullable": true
-          },
           "occurredAt": {
             "type": "string",
             "format": "date-time"
           },
-          "expiresAt": {
-            "type": "string",
-            "format": "date-time"
+          "owner": {
+            "type": "boolean"
           },
-          "detail": {
+          "authorization": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "changes": {
             "type": "object",
             "additionalProperties": {
               "type": "object"
@@ -6300,45 +7170,93 @@
           }
         }
       },
-      "OperationLogTrace": {
+      "AccountingBookView": {
         "type": "object",
         "properties": {
-          "requestId": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
             "type": "string"
           },
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OperationLogView"
-            }
+          "legalEntityName": {
+            "type": "string"
           },
-          "entryCount": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bookType": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "legalEntityCurrency": {
+            "type": "string"
+          },
+          "currencyAligned": {
+            "type": "boolean"
+          },
+          "amountScale": {
             "type": "integer",
-            "format": "int64"
+            "format": "int32"
           },
-          "errorCount": {
+          "amountRounding": {
+            "type": "string"
+          },
+          "quantityScale": {
             "type": "integer",
-            "format": "int64"
+            "format": "int32"
           },
-          "warningCount": {
+          "quantityRounding": {
+            "type": "string"
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "fiscalYearStartMonth": {
             "type": "integer",
-            "format": "int64"
+            "format": "int32"
           },
-          "totalDurationMs": {
-            "type": "number"
-          },
-          "spanMs": {
-            "type": "number"
-          },
-          "firstAt": {
+          "firstPeriodStart": {
             "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "format": "date-time"
           },
-          "lastAt": {
+          "baseCurrencyChangedAt": {
             "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "format": "date-time"
+          },
+          "currentFiscalYear": {
+            "type": "string"
+          },
+          "fiscalYearStart": {
+            "type": "string"
+          },
+          "fiscalYearEnd": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }

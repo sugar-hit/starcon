@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 79 |
+| 已交付 | 80 |
 | 进行中 | 0 |
-| **未开发** | **386** |
-| 完成率 | 17.0% |
+| **未开发** | **385** |
+| 完成率 | 17.2% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 76 | 0 | 4 | 80 |
+| **D1–D2** | 77 | 0 | 3 | 80 |
 | **D3** | 3 | 0 | 37 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -48,7 +48,7 @@
 | 14 | 广告与增长系统 | D7 | 0 | 22 |
 | 15 | 客户与客服系统 | D7 | 0 | 24 |
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 18 | 29 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 19 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
 
 ## 判定「已交付」的标准
@@ -524,7 +524,7 @@
 | 17.4.2.1 | 待我审批 | — | D4 | 未开发 | — |
 | 17.4.2.2 | 审批记录 | — | D4 | 未开发 | — |
 | 17.5.1.1 | 业务参数 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V48__business_parameter.sql（business_parameter_definition 参数码表含 8 个出厂默认值 / business_parameter_override 全局·法人·店铺三档覆盖值 / business_parameter_history 追加不可改变更历史 / business_parameter_freeze 与 freeze_value 单据冻结快照，四张业务表 tenant_id NOT NULL + RLS FORCE isolation，码表按先例不带 tenant_id）· 端点 GET /identity/business-parameters、/business-parameters/effective、/overrides、/overrides/{id}、/history、/freezes、/freezes/{documentType}/{documentNo}（BusinessParameterController.java）· 页面 apps/web/src/app/org/business-parameters/page.tsx· 测试 BusinessParameterIntegrationTest.java（15 项：默认值与类型自洽、店铺大于法人大于全局大于默认的生效范围优先级、码表驱动取值校验、NUMERIC 与 timestamptz 按值往返、变更历史前后值与不可篡改、单据冻结后改参数不影响历史单据、租户隔离三断言实跑）与 business-parameter-model.test.ts（24 项前端口径与预校验） |
-| 17.5.1.2 | 编号规则 | — | D1–D2 | 未开发 | — |
+| 17.5.1.2 | 编号规则 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V52__document_number_rule.sql（document_entity 单据实体码表含 11 类出厂实体 / document_number_rule 规则含 PRIMARY 主规则与 COMPONENT 可复用子规则 / document_number_rule_segment 组成段含前缀·日期·序号·后缀·固定文本·嵌套六类并用 CHECK 钉死每类段的列形状 / document_number_sequence 序号计数器键为 tenant·entity·scope·reset 四列 / document_number_issued 已发放编号带触发器与 REVOKE 双重不可改，四张业务表 tenant_id NOT NULL + RLS FORCE isolation，码表按先例不带 tenant_id）· 端点 GET /identity/numbering/entities、/rules、/rules/{id}、/rules/conflicts、/sequences、/issued与 POST /identity/numbering/rules、/rules/{id}、/rules/{id}/next、/preview（NumberRuleController.java，10 个端点）· 页面 apps/web/src/app/org/numbering-rules/page.tsx· 测试 NumberRuleIntegrationTest.java（21 项：前缀日期序号后缀拼装与时区渲染、跨日跨月跨年重置与回补旧单据落旧桶、跨实体独立计数、ENTITY 与 RULE 两种计数作用域、预览不占号且与取号一致、按实体定位生效规则、多级嵌套展开与子规则段深度、三层嵌套、嵌套环与自嵌在配置时被拒、删除被引用子规则被拒、同实体生效区间交叠在配置时 409 且相邻不误伤、已发放编号携带可读单据引用且不可改、同实体重复编号被拒、权限隔离与租户隔离三断言实跑）与 numbering-model.test.ts（37 项前端分桶·区间冲突·段校验·成环检测与口径一致） |
 | 17.5.2.1 | 数据字典 | — | D1–D2 | 未开发 | — |
 | 17.5.3.1 | 审计日志 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V7__audit_log.sql（补 resource_type/actor_name/authorization_context/changes 列、三组检索索引、SELECT+INSERT 授权、UPDATE/DELETE 触发器拒绝）· 端点 GET /identity/audit、/identity/audit/{id}、/identity/audit/export（AuditController.java）· 页面 apps/web/src/app/org/audit/page.tsx · 测试 AuditIntegrationTest.java（10 项：检索/详情/CSV 导出、租户隔离三断言、不可篡改、明文不入库）与 AuditRedactorTest.java（7 项脱敏） |
 | 17.5.3.2 | 操作日志 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V49__operation_log.sql（operation_log 表：request_id/trace_id 链路键、API 调用摘要、任务执行、错误堆栈上限、expires_at 留存期；五组检索索引；FORCE RLS；SELECT+INSERT+DELETE 授权，与审计日志的不可篡改策略形成对照）· 端点 GET /identity/operation-log、/{id}、/trace/{requestId} 链路聚合、/export、POST /purge（OperationLogController.java；写入侧 OperationLog.java、采集 OperationLogInterceptor.java、链路键 RequestTrace.java）· 页面 apps/web/src/app/org/operation-log/page.tsx（操作日志 + 链路关联视图）· 测试 OperationLogIntegrationTest.java（14 项：四类事件落库、链路聚合、堆栈截断与无 secret、可删对照审计不可删、租户隔离三断言、时间无漂移） |
