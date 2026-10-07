@@ -192,6 +192,41 @@ it('8.1.1.1 刻意不放行仓库详情与改删形状', async () => {
   expect(fetcher).not.toHaveBeenCalled();
 });
 
+/**
+ * 7.8.1.1 分配策略 + 序列号历史/操作头：这几条路径前端确实在调，白名单却一度漏登记。
+ *
+ * <p>allocation-policies 的 uuid 分支曾自带前导 `\/`，而外层组已经消费了那个斜杠，
+ * 于是 `/{id}` 与 `/{id}/retire` 永远匹配不上；外层组还缺 `?`，强制要求子路径，
+ * 裸列表与新增（前端 POST 裸路径）一并被拒 —— 新增分配策略在浏览器里静默 404。
+ * serial-movements / serial-operations 后端早已实现（InventorySerialController 的
+ * @GetMapping），前端也在调，白名单却从来没登记过。
+ *
+ * <p>白名单只在浏览器端生效，`pnpm test` 直连服务层发现不了漏登记，所以逐条钉住。
+ */
+it('7.8.1.1 分配策略与序列号历史的调用形状都被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'warehouse/inventory/allocation-policies',
+    'warehouse/inventory/allocation-policies/capabilities',
+    `warehouse/inventory/allocation-policies/${id}`,
+    `warehouse/inventory/allocation-policies/${id}/retire`,
+    'warehouse/inventory/allocation-sales',
+    'warehouse/inventory/serial-movements',
+    'warehouse/inventory/serial-operations',
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行`).toBe(200);
+  }
+  // 新增策略走 POST 裸路径，这条最容易因为「强制要求子路径」被拒
+  expect(
+    (await POST(request('warehouse/inventory/allocation-policies', 'POST'), {
+      params: { path: ['warehouse', 'inventory', 'allocation-policies'] },
+    })).status,
+  ).toBe(200);
+});
+
 it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
