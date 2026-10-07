@@ -455,7 +455,7 @@ export function StockOwnershipWorkspace() {
                         variant="outline"
                         size="sm"
                         disabled={!writable || saving}
-                        onClick={() => void onRetire(rule.id)}
+                        onClick={() => void retireRuleById(rule.id)}
                       >
                         作废
                       </Button>
@@ -560,11 +560,22 @@ export function StockOwnershipWorkspace() {
     </div>
   );
 
+  /** 作废货权规则：规则行留档，只是不再参与后续赋权（与后端 retire 语义一致）。 */
+  async function retireRuleById(id: string) {
+    try {
+      const saved = await retireRule(id);
+      setNotice(saved.message);
+      void load();
+    } catch (e) {
+      setError(errorText(e));
+    }
+  }
+
   /** 货权转移：只改「这批货是谁的」，不动数量、余额与流水。 */
   async function doReassign(
     fromOwnerId: string,
     toOwnerId: string,
-    scope: { warehouseId?: string; legalEntityId?: string; skuId?: string },
+    scope: { warehouseId?: string | undefined; legalEntityId?: string | undefined; skuId?: string },
   ) {
     setSaving(true);
     setError('');
@@ -622,8 +633,8 @@ function ScopeFilter({
   onChange,
 }: {
   options: OwnershipReferenceOptions | null;
-  filter: { warehouseId?: string; legalEntityId?: string; skuId?: string };
-  onChange: (next: { warehouseId?: string; legalEntityId?: string; skuId?: string }) => void;
+  filter: { warehouseId?: string | undefined; legalEntityId?: string | undefined; skuId?: string };
+  onChange: (next: { warehouseId?: string | undefined; legalEntityId?: string | undefined; skuId?: string }) => void;
 }) {
   const warehouses = (options?.warehouses ?? []).filter(notNull);
   const entities = (options?.legalEntities ?? []).filter(notNull);
@@ -681,6 +692,7 @@ function RuleEditor({
   onError,
   onCancelSupersede,
   onRetire,
+  superseding,
 }: {
   writable: boolean;
   saving: boolean;
@@ -809,7 +821,7 @@ function RuleEditor({
                 </option>
               ))}
             </select>
-            <Button variant="primary" size="sm" disabled={saving || !ownerId} onClick={() => void submit()}>
+            <Button variant="outline" size="sm" disabled={saving || !ownerId} onClick={() => void submit()}>
               保存
             </Button>
           </div>
@@ -958,7 +970,7 @@ function OwnerEditor({
               />
             )}
             <Button
-              variant="primary"
+              variant="outline"
               size="sm"
               disabled={
                 saving ||

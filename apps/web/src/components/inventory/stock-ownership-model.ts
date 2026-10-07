@@ -37,11 +37,11 @@ import { ApiError, api } from './api';
 // ------------------------------------------------------------ 接口
 
 export interface OwnerListParams {
-  ownerKind?: string;
-  status?: string;
-  ownerRefId?: string;
+  ownerKind?: string | undefined;
+  status?: string | undefined;
+  ownerRefId?: string | undefined;
   ownedAssetOnly?: boolean;
-  keyword?: string;
+  keyword?: string | undefined;
   page?: number;
   size?: number;
 }
@@ -71,13 +71,13 @@ export function setOwnerStatus(id: string, status: string): Promise<StockOwnerSa
 }
 
 export interface RuleListParams {
-  scopeType?: string;
-  ownerId?: string;
-  warehouseId?: string;
-  legalEntityId?: string;
-  skuId?: string;
+  scopeType?: string | undefined;
+  ownerId?: string | undefined;
+  warehouseId?: string | undefined;
+  legalEntityId?: string | undefined;
+  skuId?: string | undefined;
   effectiveOnly?: boolean;
-  keyword?: string;
+  keyword?: string | undefined;
   page?: number;
   size?: number;
 }
@@ -100,25 +100,25 @@ export function retireRule(id: string): Promise<OwnershipRuleSaved> {
 }
 
 export function fetchResolved(params: {
-  warehouseId?: string;
-  legalEntityId?: string;
-  skuId?: string;
+  warehouseId?: string | undefined;
+  legalEntityId?: string | undefined;
+  skuId?: string | undefined;
 }): Promise<StockOwnershipResolved> {
   return api<StockOwnershipResolved>(`warehouse/inventory/ownership/resolved${query(params)}`);
 }
 
 export function fetchReport(params: {
-  warehouseId?: string;
-  legalEntityId?: string;
-  skuId?: string;
+  warehouseId?: string | undefined;
+  legalEntityId?: string | undefined;
+  skuId?: string | undefined;
 }): Promise<OwnerInventoryReport> {
   return api<OwnerInventoryReport>(`warehouse/inventory/ownership/report${query(params)}`);
 }
 
 export function fetchDrift(params: {
-  warehouseId?: string;
-  legalEntityId?: string;
-  skuId?: string;
+  warehouseId?: string | undefined;
+  legalEntityId?: string | undefined;
+  skuId?: string | undefined;
 }): Promise<OwnershipDriftReport> {
   return api<OwnershipDriftReport>(`warehouse/inventory/ownership/drift${query(params)}`);
 }
@@ -175,12 +175,12 @@ export const scopeTypeLabels: Record<string, string> = {
 };
 
 /** 解析优先级：数字越小越优先（SKU 最具体，DEFAULT 兜底）。与后端保持同一套约定。 */
-export const scopePriority: Record<string, number> = {
+export const scopePriority = {
   SKU: 0,
   LEGAL_ENTITY: 1,
   WAREHOUSE: 2,
   DEFAULT: 3,
-};
+} as const;
 
 /** 每种所有权类型允许的指向类型 —— 与后端同一套规则，用来在建档表单里就地拦下自相矛盾的组合。 */
 export function allowedRefTypes(kind: string): OwnerRefType[] {
