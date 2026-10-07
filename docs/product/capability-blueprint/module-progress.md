@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 75 |
+| 已交付 | 76 |
 | 进行中 | 0 |
-| **未开发** | **390** |
-| 完成率 | 16.1% |
+| **未开发** | **389** |
+| 完成率 | 16.3% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 73 | 0 | 7 | 80 |
+| **D1–D2** | 74 | 0 | 6 | 80 |
 | **D3** | 2 | 0 | 38 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -48,7 +48,7 @@
 | 14 | 广告与增长系统 | D7 | 0 | 22 |
 | 15 | 客户与客服系统 | D7 | 0 | 24 |
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 15 | 29 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 16 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
 
 ## 判定「已交付」的标准
@@ -527,7 +527,7 @@
 | 17.5.1.2 | 编号规则 | — | D1–D2 | 未开发 | — |
 | 17.5.2.1 | 数据字典 | — | D1–D2 | 未开发 | — |
 | 17.5.3.1 | 审计日志 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V7__audit_log.sql（补 resource_type/actor_name/authorization_context/changes 列、三组检索索引、SELECT+INSERT 授权、UPDATE/DELETE 触发器拒绝）· 端点 GET /identity/audit、/identity/audit/{id}、/identity/audit/export（AuditController.java）· 页面 apps/web/src/app/org/audit/page.tsx · 测试 AuditIntegrationTest.java（10 项：检索/详情/CSV 导出、租户隔离三断言、不可篡改、明文不入库）与 AuditRedactorTest.java（7 项脱敏） |
-| 17.5.3.2 | 操作日志 | — | D1–D2 | 未开发 | — |
+| 17.5.3.2 | 操作日志 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V49__operation_log.sql（operation_log 表：request_id/trace_id 链路键、API 调用摘要、任务执行、错误堆栈上限、expires_at 留存期；五组检索索引；FORCE RLS；SELECT+INSERT+DELETE 授权，与审计日志的不可篡改策略形成对照）· 端点 GET /identity/operation-log、/{id}、/trace/{requestId} 链路聚合、/export、POST /purge（OperationLogController.java；写入侧 OperationLog.java、采集 OperationLogInterceptor.java、链路键 RequestTrace.java）· 页面 apps/web/src/app/org/operation-log/page.tsx（操作日志 + 链路关联视图）· 测试 OperationLogIntegrationTest.java（14 项：四类事件落库、链路聚合、堆栈截断与无 secret、可删对照审计不可删、租户隔离三断言、时间无漂移） |
 | 17.6.1.1 | 账簿与本位币 | — | D6 | 未开发 | — |
 | 17.7.1.1 | 套餐与权益 | — | D7 | 未开发 | — |
 | 17.7.1.2 | 用量统计 | — | D7 | 未开发 | — |
