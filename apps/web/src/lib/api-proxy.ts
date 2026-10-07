@@ -35,7 +35,10 @@ const services: readonly {
       // tenants 是 17.1.1.1 租户列表：只有 tenants 与 tenants/current 两个形状，
       //   **刻意不接 {uuid} 段** —— 按任意 tenant id 读取租户不是这个模块该有的能力，
       //   可切换集合只能由服务端从成员关系推导（实体目录 §4 的窄权限路径）。
-      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/references|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?)$/,
+      // accounting-books 是 17.1.2.2 本位币与账簿：账簿挂在**法人**上，所以写入形状是
+      //   legal-entities/{uuid}/accounting-books（POST 新建），而更新/删除按账簿自身 id 寻址：
+      //   accounting-books/{uuid}。两个前缀第一段不同，不会互相吃掉。
+      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/(?:[0-9a-f-]+\/accounting-books|references)|accounting-books(?:\/[0-9a-f-]+)?|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?)$/,
   },
   {
     prefix: 'catalog/',
