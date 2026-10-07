@@ -600,6 +600,31 @@ if (cmd === 'land') {
 
 if (cmd === 'merge-ready') {
   const state = readState();
+
+  // 老调度器遗留的车道不会调用 lane.mjs land（它释放的是 lock.mjs），
+  // 替它判断该不该落地，否则这部分交付记录会永远停在 running 上没人回收。
+  const legacyLock = (() => {
+    try {
+      return JSON.parse(readFileSync(join(STATE_DIR, 'dev-task.json'), 'utf8'));
+    } catch {
+      return null;
+    }
+  })();
+  // 只看已跟踪文件的改动：编排器自己那几个文件此刻在工作区里还是未跟踪状态，
+  // 它们不该阻塞对在途模块的收口。
+  const trackedDirty = git(['status', '--porcelain', '--untracked-files=no'], ROOT);
+  for (const lane of Object.values(state.lanes)) {
+    if (!lane.inPlace || lane.state !== 'running') continue;
+    if (legacyLock?.module === lane.id) continue; // 还在跑，不碰
+    if (trackedDirty) continue; // 主工作区有在途改动，不碰
+    const sha = git(['rev-parse', 'HEAD'], ROOT);
+    if (!sha || sha === lane.baseSha) continue; // 没有新提交，等于没开工
+    lane.state = 'ready';
+    lane.headSha = sha;
+    lane.landedAt = new Date().toISOString();
+    lane.landedBy = 'reap-legacy';
+  }
+
   const ready = Object.values(state.lanes).filter((l) => l.state === 'ready');
 
   if (!ready.length) {
@@ -614,6 +639,28 @@ if (cmd === 'merge-ready') {
     console.error(`✗ 主工作区不干净，拒绝切分支：\n${dirty}`);
     process.exit(1);
   }
+
+  // 编排器这几个文件在工作区里可能是「未跟踪但内容与集成头完全一致」的状态
+  // （在途模块还没并入集成头，切换分支时 git 会以「会被覆盖」拒绝）。
+  // 逐个比对内容，一致才删，不一致就保留并报错 —— 绝不盲删。
+  const TOOLING = [
+    'tools/module-progress/lane.mjs',
+    'tools/module-progress/merge-union.mjs',
+    'tools/module-progress/merge-union.itest.mjs',
+    'tools/module-progress/PIPELINE.md',
+  ];
+  const untracked = (git(['ls-files', '--others', '--exclude-standard'], ROOT) ?? '')
+    .split('\n')
+    .filter(Boolean);
+  for (const f of untracked) {
+    if (!TOOLING.includes(f)) continue;
+    const inBranch = git(['show', `${state.integrationBranch}:${f}`], ROOT, true);
+    const abs = join(ROOT, f);
+    const onDisk = existsSync(abs) ? readFileSync(abs, 'utf8') : null;
+    if (inBranch !== null && inBranch === onDisk) rmSync(abs);
+    else console.error(`⚠ ${f} 未跟踪且内容与集成头不同，已保留，请人工确认`);
+  }
+
   if (current !== state.integrationBranch) git(['checkout', state.integrationBranch]);
 
   const merged = [];
