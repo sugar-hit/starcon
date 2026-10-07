@@ -11,6 +11,55 @@
     }
   ],
   "paths": {
+    "/catalog/zombie-candidates/rules/{entityType}": {
+      "put": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "saveRule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZombieCleanupRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieCleanupRuleView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/versions/{id}": {
       "get": {
         "tags": [
@@ -4874,6 +4923,262 @@
         }
       }
     },
+    "/catalog/completeness/customs/skus/{skuId}": {
+      "get": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "customs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsDeclaration"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "saveCustoms",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsDeclarationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsDeclaration"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "deleteCustoms",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/completeness/certifications/skus/{skuId}/{certId}": {
+      "put": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "updateCertification",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "certId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CertificationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Certification"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "deleteCertification",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "certId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/categories/trees/{id}": {
       "put": {
         "tags": [
@@ -6765,6 +7070,104 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AttributeOptionToggled"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/reference-stats": {
+      "post": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "pushStats",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZombieReferenceStatPush"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieReferenceStatPushResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/deactivate": {
+      "post": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "deactivate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZombieDeactivateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieDeactivateResult"
                 }
               }
             }
@@ -11600,6 +12003,152 @@
         }
       }
     },
+    "/catalog/export-jobs": {
+      "get": {
+        "tags": [
+          "export-controller"
+        ],
+        "operationId": "jobs_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "sourceKey",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "export-controller"
+        ],
+        "operationId": "create_6",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportJobInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/export-jobs/{id}/cancel": {
+      "post": {
+        "tags": [
+          "export-controller"
+        ],
+        "operationId": "cancel_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/duplicate-scans": {
       "get": {
         "tags": [
@@ -12113,6 +12662,295 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ContentPhraseRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/completeness/precheck/listing": {
+      "post": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "listingPrecheck",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListingPrecheck"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/completeness/precheck/customs": {
+      "post": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "customsPrecheck",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsPrecheck"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/completeness/evaluations": {
+      "get": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "evaluations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ownerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ownerType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletenessEvaluationPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "evaluate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompletenessEvaluationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletenessEvaluationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/completeness/certifications/skus/{skuId}": {
+      "get": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "certifications",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CertificationSet"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "createCertification",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CertificationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Certification"
                 }
               }
             }
@@ -12791,7 +13629,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "list_7",
+        "operationId": "list_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -12881,7 +13719,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "create_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -13458,7 +14296,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "list_8",
+        "operationId": "list_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -13555,7 +14393,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "create_7",
+        "operationId": "create_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -13682,6 +14520,332 @@
                   "type": "object",
                   "additionalProperties": {
                     "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "list_10",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verdict",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/rules": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "rules_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ZombieCleanupRuleView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/records": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "records_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "decidedBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieCleanupRecordPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/overview": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieCandidateOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/options": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "options_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/evidence": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "evidence",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieReferenceEvidence"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/deactivation-targets": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "deactivationTargets",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
                   }
                 }
               }
@@ -17151,6 +18315,118 @@
         }
       }
     },
+    "/catalog/export-sources": {
+      "get": {
+        "tags": [
+          "export-controller"
+        ],
+        "operationId": "sources",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSourcePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/export-jobs/{id}": {
+      "get": {
+        "tags": [
+          "export-controller"
+        ],
+        "operationId": "job_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/export-jobs/{id}/file": {
+      "get": {
+        "tags": [
+          "export-controller"
+        ],
+        "operationId": "file",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/duplicate-scans/{id}": {
       "get": {
         "tags": [
@@ -17280,7 +18556,7 @@
         "tags": [
           "duplicate-detection-controller"
         ],
-        "operationId": "overview_12",
+        "operationId": "overview_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -17736,7 +19012,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "overview_13",
+        "operationId": "overview_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -17852,7 +19128,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "overview_14",
+        "operationId": "overview_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -17878,12 +19154,449 @@
         }
       }
     },
+    "/catalog/completeness": {
+      "get": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "list_13",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownerType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "grade",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "categoryName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingReadyOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "missingOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ascending",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletenessPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/completeness/{ownerType}/{ownerId}": {
+      "get": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "card",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ownerType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletenessScorecard"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/completeness/overview": {
+      "get": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "overview_16",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletenessOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/completeness/options": {
+      "get": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "options_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletenessOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/completeness/gaps": {
+      "get": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "gaps",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownerType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "grade",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listingReadyOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "missingOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletenessGapPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/completeness/gaps/summary": {
+      "get": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "gapSummary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ownerType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GapSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/completeness/evaluations/{id}": {
+      "get": {
+        "tags": [
+          "completeness-score-controller"
+        ],
+        "operationId": "evaluation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletenessEvaluation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/categories/overview": {
       "get": {
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "overview_15",
+        "operationId": "overview_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -17957,7 +19670,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "overview_16",
+        "operationId": "overview_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -18036,7 +19749,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "overview_17",
+        "operationId": "overview_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -18107,7 +19820,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "overview_18",
+        "operationId": "overview_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -18246,7 +19959,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "overview_19",
+        "operationId": "overview_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -18517,7 +20230,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_20",
+        "operationId": "overview_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -18548,7 +20261,7 @@
         "tags": [
           "attribute-option-controller"
         ],
-        "operationId": "list_13",
+        "operationId": "list_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -19097,1723 +20810,95 @@
           }
         }
       }
-    },
-    "/catalog/export-jobs": {
-      "get": {
-        "tags": [
-          "export-controller"
-        ],
-        "operationId": "jobs_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "sourceKey",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportJobPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "export-controller"
-        ],
-        "operationId": "create_5",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExportJobInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportJobRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/export-jobs/{id}/cancel": {
-      "post": {
-        "tags": [
-          "export-controller"
-        ],
-        "operationId": "cancel_2",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportJobRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/export-sources": {
-      "get": {
-        "tags": [
-          "export-controller"
-        ],
-        "operationId": "sources",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportSourcePage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/export-jobs/{id}": {
-      "get": {
-        "tags": [
-          "export-controller"
-        ],
-        "operationId": "job_2",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportJobRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/export-jobs/{id}/file": {
-      "get": {
-        "tags": [
-          "export-controller"
-        ],
-        "operationId": "file",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/csv": {
-                "schema": {
-                  "type": "string",
-                  "format": "byte"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/zombie-candidates/rules/{entityType}": {
-      "put": {
-        "tags": [
-          "zombie-candidate-controller"
-        ],
-        "operationId": "saveRule",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "entityType",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ZombieCleanupRuleInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ZombieCleanupRuleView"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/zombie-candidates/reference-stats": {
-      "post": {
-        "tags": [
-          "zombie-candidate-controller"
-        ],
-        "operationId": "pushStats",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "entityType",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ZombieReferenceStatPush"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ZombieReferenceStatPushResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/zombie-candidates/deactivate": {
-      "post": {
-        "tags": [
-          "zombie-candidate-controller"
-        ],
-        "operationId": "deactivate",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "entityType",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ZombieDeactivateInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ZombieDeactivateResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/zombie-candidates": {
-      "get": {
-        "tags": [
-          "zombie-candidate-controller"
-        ],
-        "operationId": "list_10",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "entityType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "verdict",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ZombieCandidatePage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/zombie-candidates/rules": {
-      "get": {
-        "tags": [
-          "zombie-candidate-controller"
-        ],
-        "operationId": "rules_2",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ZombieCleanupRuleView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/zombie-candidates/records": {
-      "get": {
-        "tags": [
-          "zombie-candidate-controller"
-        ],
-        "operationId": "records_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "entityType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "entityId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "decidedBy",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ZombieCleanupRecordPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/zombie-candidates/overview": {
-      "get": {
-        "tags": [
-          "zombie-candidate-controller"
-        ],
-        "operationId": "overview",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ZombieCandidateOverview"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/zombie-candidates/options": {
-      "get": {
-        "tags": [
-          "zombie-candidate-controller"
-        ],
-        "operationId": "options_2",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ZombieOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/zombie-candidates/evidence": {
-      "get": {
-        "tags": [
-          "zombie-candidate-controller"
-        ],
-        "operationId": "evidence",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "entityType",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "entityId",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ZombieReferenceEvidence"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/zombie-candidates/deactivation-targets": {
-      "get": {
-        "tags": [
-          "zombie-candidate-controller"
-        ],
-        "operationId": "deactivationTargets",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "object"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/completeness/customs/skus/{skuId}": {
-      "get": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "customs",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CustomsDeclaration"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "saveCustoms",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CustomsDeclarationInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CustomsDeclaration"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "deleteCustoms",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "version",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "boolean"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/completeness/certifications/skus/{skuId}/{certId}": {
-      "put": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "updateCertification",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "certId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CertificationInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/Certification"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "deleteCertification",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "certId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "version",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "boolean"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/completeness/precheck/listing": {
-      "post": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "listingPrecheck",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListingPrecheck"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/completeness/precheck/customs": {
-      "post": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "customsPrecheck",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CustomsPrecheck"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/completeness/evaluations": {
-      "get": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "evaluations",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "ownerId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "ownerType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompletenessEvaluationPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "evaluate",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CompletenessEvaluationInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompletenessEvaluationResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/completeness/certifications/skus/{skuId}": {
-      "get": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "certifications",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CertificationSet"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "createCertification",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CertificationInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/Certification"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/completeness": {
-      "get": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "list_12",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "ownerType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "grade",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "spuId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "categoryName",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "listingReadyOnly",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "missingOnly",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "orderBy",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "ascending",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompletenessPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/completeness/{ownerType}/{ownerId}": {
-      "get": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "card",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "ownerType",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "ownerId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompletenessScorecard"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/completeness/overview": {
-      "get": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "overview_14",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompletenessOverview"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/completeness/options": {
-      "get": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "options_4",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompletenessOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/completeness/gaps": {
-      "get": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "gaps",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "ownerType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "grade",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dimension",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "spuId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "listingReadyOnly",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "missingOnly",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompletenessGapPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/completeness/gaps/summary": {
-      "get": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "gapSummary",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "ownerType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/GapSummary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/completeness/evaluations/{id}": {
-      "get": {
-        "tags": [
-          "completeness-score-controller"
-        ],
-        "operationId": "evaluation",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompletenessEvaluation"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
     "schemas": {
+      "ZombieCleanupRuleInput": {
+        "type": "object",
+        "properties": {
+          "inactiveDays": {
+            "maximum": 3650,
+            "minimum": 30,
+            "type": "integer",
+            "format": "int32"
+          },
+          "snapshotStaleDays": {
+            "maximum": 3650,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "requireZeroOrderReference": {
+            "type": "boolean"
+          },
+          "requireZeroInventory": {
+            "type": "boolean"
+          },
+          "requireZeroListing": {
+            "type": "boolean"
+          },
+          "requireZeroCost": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "deactivateNote": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ZombieCleanupRuleView": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string"
+          },
+          "entityTypeLabel": {
+            "type": "string"
+          },
+          "inactiveDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "snapshotStaleDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requireZeroOrderReference": {
+            "type": "boolean"
+          },
+          "requireZeroInventory": {
+            "type": "boolean"
+          },
+          "requireZeroListing": {
+            "type": "boolean"
+          },
+          "requireZeroCost": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "deactivateNote": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "configured": {
+            "type": "boolean"
+          }
+        }
+      },
       "BundleVersionInput": {
         "required": [
           "effectiveFrom",
@@ -24455,6 +24540,208 @@
           }
         }
       },
+      "CustomsDeclarationInput": {
+        "type": "object",
+        "properties": {
+          "hsCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "declaredName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "originCountry": {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "legalUnit": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "declarationElements": {
+            "maxItems": 32,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "maxLength": 200,
+              "minLength": 0,
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        }
+      },
+      "CustomsDeclaration": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "declaredName": {
+            "type": "string"
+          },
+          "originCountry": {
+            "type": "string"
+          },
+          "legalUnit": {
+            "type": "string"
+          },
+          "declarationElements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CertificationInput": {
+        "required": [
+          "certificationCode",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "certificationCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "certificationName": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "certificateNo": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "issuedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "scored": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        }
+      },
+      "Certification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "certificationCode": {
+            "type": "string"
+          },
+          "certificationName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "certificateNo": {
+            "type": "string"
+          },
+          "issuedOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "scored": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
       "CategoryTreeInput": {
         "required": [
           "code",
@@ -25553,6 +25840,138 @@
           },
           "deletable": {
             "type": "boolean"
+          }
+        }
+      },
+      "ZombieReferenceStatItem": {
+        "required": [
+          "entityId",
+          "metric",
+          "metricValue",
+          "observedAt",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "metric": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "metricValue": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "source": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ZombieReferenceStatPush": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 500,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieReferenceStatItem"
+            }
+          }
+        }
+      },
+      "ZombieReferenceStatPushResult": {
+        "type": "object",
+        "properties": {
+          "received": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "written": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejectedReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ZombieDeactivateInput": {
+        "required": [
+          "entityIds"
+        ],
+        "type": "object",
+        "properties": {
+          "entityIds": {
+            "maxItems": 500,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ZombieDeactivateResult": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string"
+          },
+          "affected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieDeactivatedEntry"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ZombieDeactivatedEntry": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "previousStatus": {
+            "type": "string"
+          },
+          "newStatus": {
+            "type": "string"
           }
         }
       },
@@ -28252,13 +28671,261 @@
           }
         }
       },
+      "ExportFilterInput": {
+        "type": "object",
+        "properties": {
+          "spuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "q": {
+            "type": "string",
+            "nullable": true
+          },
+          "barcode": {
+            "type": "string",
+            "nullable": true
+          },
+          "spec": {
+            "type": "string",
+            "nullable": true
+          },
+          "brand": {
+            "type": "string",
+            "nullable": true
+          },
+          "partyId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "partyType": {
+            "type": "string",
+            "nullable": true
+          },
+          "primary": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "roleType": {
+            "type": "string",
+            "nullable": true
+          },
+          "onHandMin": {
+            "type": "number",
+            "nullable": true
+          },
+          "onHandMax": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceMin": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceMax": {
+            "type": "number",
+            "nullable": true
+          },
+          "outOfStock": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "onSale": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "platform": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "ExportJobInput": {
+        "required": [
+          "fields",
+          "sourceKey"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceKey": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "fields": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filters": {
+            "$ref": "#/components/schemas/ExportFilterInput"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/ExportSortInput"
+          },
+          "piiPurpose": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExportSortInput": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "nullable": true
+          },
+          "order": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "ExportAppliedFilter": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "ExportJobRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceKey": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "headers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "appliedFilters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportAppliedFilter"
+            }
+          },
+          "sortKey": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "string"
+          },
+          "rowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "byteSize": {
+            "type": "number",
+            "nullable": true
+          },
+          "contentSha256": {
+            "type": "string",
+            "nullable": true
+          },
+          "includesPii": {
+            "type": "boolean"
+          },
+          "piiFields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "piiPurpose": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "departmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "requestedAt": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "finishedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "downloadable": {
+            "type": "boolean"
+          },
+          "downloadNote": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
       "DuplicateScanInput": {
         "type": "object",
         "properties": {
           "minSimilarity": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -28508,6 +29175,289 @@
             "type": "string"
           },
           "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ListingPrecheck": {
+        "type": "object",
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "checkedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blockedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blockedOwners": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrecheckBlocker"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PrecheckBlocker": {
+        "type": "object",
+        "properties": {
+          "ownerType": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerCode": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "grade": {
+            "type": "string"
+          },
+          "missingCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hint": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsPrecheck": {
+        "type": "object",
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "checkedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blockedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blockedOwners": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrecheckBlocker"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CompletenessEvaluationInput": {
+        "required": [
+          "ownerIds",
+          "ownerType"
+        ],
+        "type": "object",
+        "properties": {
+          "ownerType": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerIds": {
+            "maxItems": 500,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "CompletenessCheck": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "subjectLabel": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "remedy": {
+            "type": "string"
+          },
+          "satisfied": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CompletenessEvaluation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerType": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerCode": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "grade": {
+            "type": "string"
+          },
+          "gradeLabel": {
+            "type": "string"
+          },
+          "listingReady": {
+            "type": "boolean"
+          },
+          "customsReady": {
+            "type": "boolean"
+          },
+          "missingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dimensionGaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DimensionGap"
+            }
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompletenessCheck"
+            }
+          },
+          "evaluatedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "evaluatedAt": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CompletenessEvaluationResult": {
+        "type": "object",
+        "properties": {
+          "requested": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "succeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "evaluations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompletenessEvaluation"
+            }
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EvaluationFailure"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DimensionGap": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "missingCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "EvaluationFailure": {
+        "type": "object",
+        "properties": {
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
             "type": "string"
           }
         }
@@ -29264,6 +30214,478 @@
           "allowedOptionCount": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ZombieCandidate": {
+        "type": "object",
+        "properties": {
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityType": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lastMaintainedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "daysSinceMaintained": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "verdictLabel": {
+            "type": "string"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieDimensionStatus"
+            }
+          },
+          "ruleInactiveDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ruleEnabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ZombieCandidatePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieCandidate"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entityType": {
+            "type": "string"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inUseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "incompleteCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ZombieDimensionStatus": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "ORDER_LINE_COUNT",
+              "INVENTORY_ON_HAND",
+              "LISTING_COUNT",
+              "UNIT_COST"
+            ]
+          },
+          "state": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number",
+            "nullable": true
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stale": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ZombieCleanupRecord": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityType": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityCode": {
+            "type": "string"
+          },
+          "entityName": {
+            "type": "string"
+          },
+          "previousStatus": {
+            "type": "string"
+          },
+          "newStatus": {
+            "type": "string"
+          },
+          "decidedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "lastMaintainedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "affectedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ruleSnapshot": {
+            "$ref": "#/components/schemas/ZombieRuleSnapshot"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/ZombieEvidenceSnapshot"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ZombieCleanupRecordPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieCleanupRecord"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ZombieDimensionEvidence": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "observedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "stale": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ZombieEvidenceSnapshot": {
+        "type": "object",
+        "properties": {
+          "verdict": {
+            "type": "string"
+          },
+          "orderLineCount": {
+            "$ref": "#/components/schemas/ZombieDimensionEvidence"
+          },
+          "inventoryOnHand": {
+            "$ref": "#/components/schemas/ZombieDimensionEvidence"
+          },
+          "listingCount": {
+            "$ref": "#/components/schemas/ZombieDimensionEvidence"
+          },
+          "unitCost": {
+            "$ref": "#/components/schemas/ZombieDimensionEvidence"
+          }
+        }
+      },
+      "ZombieRuleSnapshot": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string"
+          },
+          "inactiveDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "snapshotStaleDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deactivateNote": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requireZeroOrderReference": {
+            "type": "boolean"
+          },
+          "requireZeroInventory": {
+            "type": "boolean"
+          },
+          "requireZeroListing": {
+            "type": "boolean"
+          },
+          "requireZeroCost": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ZombieCandidateOverview": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieOverviewRow"
+            }
+          },
+          "coveredEntities": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "coveredDimensions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unmappedDimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ZombieOverviewRow": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string"
+          },
+          "entityTypeLabel": {
+            "type": "string"
+          },
+          "totalActive": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "candidates": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inUse": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "incomplete": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inactiveDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "snapshotStaleDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requiredDimensionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ruleEnabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ZombieEntityTypeOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "targetTable": {
+            "type": "string"
+          }
+        }
+      },
+      "ZombieMetricOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "wired": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ZombieOptions": {
+        "type": "object",
+        "properties": {
+          "entityTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieEntityTypeOption"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieMetricOption"
+            }
+          },
+          "verdicts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieVerdictOption"
+            }
+          },
+          "deactivateTargets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ZombieVerdictOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "actionable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ZombieReferenceEvidence": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lastMaintainedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "daysSinceMaintained": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieDimensionStatus"
+            }
+          },
+          "recentRecords": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieCleanupRecord"
+            }
           }
         }
       },
@@ -34355,6 +35777,141 @@
           }
         }
       },
+      "ExportFieldInfo": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "pii": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExportFilterInfo": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ExportSortInfo": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "ExportSourceInfo": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "upstreamModule": {
+            "type": "string"
+          },
+          "permission": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportFieldInfo"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportSortInfo"
+            }
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportFilterInfo"
+            }
+          },
+          "defaultSortKey": {
+            "type": "string"
+          },
+          "maxRows": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "downloadTtlHours": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ExportSourcePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportSourceInfo"
+            }
+          }
+        }
+      },
+      "ExportJobPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportJobRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "DuplicateScanPage": {
         "type": "object",
         "properties": {
@@ -35277,6 +36834,516 @@
             "format": "int64"
           },
           "nonPositiveQuantityCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CompletenessPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompletenessRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "listingReadyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "customsReadyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "blockedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gradeCounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GradeCount"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CompletenessRow": {
+        "type": "object",
+        "properties": {
+          "ownerType": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerCode": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "ownerStatus": {
+            "type": "string"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "scorePercent": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "string"
+          },
+          "gradeLabel": {
+            "type": "string"
+          },
+          "missingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "listingReady": {
+            "type": "boolean"
+          },
+          "customsReady": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GradeCount": {
+        "type": "object",
+        "properties": {
+          "grade": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CompletenessDimension": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number"
+          },
+          "satisfied": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ratio": {
+            "type": "number"
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "blockedFor": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CompletenessScorecard": {
+        "type": "object",
+        "properties": {
+          "ownerType": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ownerCode": {
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "ownerStatus": {
+            "type": "string"
+          },
+          "categoryCode": {
+            "type": "string"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "scorePercent": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "string"
+          },
+          "gradeLabel": {
+            "type": "string"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompletenessDimension"
+            }
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompletenessCheck"
+            }
+          },
+          "missing": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompletenessCheck"
+            }
+          },
+          "missingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "listingReady": {
+            "type": "boolean"
+          },
+          "customsReady": {
+            "type": "boolean"
+          },
+          "listingBlockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "customsBlockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CompletenessOverview": {
+        "type": "object",
+        "properties": {
+          "spuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "listingReadyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "customsReadyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "listingBlockedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "customsBlockedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bothBlockedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "gradeCounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GradeCount"
+            }
+          },
+          "dimensionGaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DimensionGap"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CompletenessOptions": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dimensionOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "grades": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "gradeOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "ownerTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "certificationStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "certificationStatusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "minImageCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minPrimaryImageEdgePx": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "listingGateScore": {
+            "type": "string"
+          },
+          "customsGateScore": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CompletenessGap": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "dimensionLabel": {
+            "type": "string"
+          },
+          "subjectType": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "remedy": {
+            "type": "string"
+          },
+          "affectedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sampleOwners": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "nextEntry": {
+            "type": "string"
+          }
+        }
+      },
+      "CompletenessGapPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompletenessGap"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "affectedOwnerCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byDimension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DimensionGap"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "GapSummary": {
+        "type": "object",
+        "properties": {
+          "ownerCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "missingCheckCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byDimension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DimensionGap"
+            }
+          },
+          "byGrade": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GradeCount"
+            }
+          },
+          "cleanCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CompletenessEvaluationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompletenessEvaluation"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CertificationSet": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Certification"
+            }
+          },
+          "completeness": {
+            "type": "string"
+          },
+          "completenessLabel": {
+            "type": "string"
+          },
+          "expiredCount": {
             "type": "integer",
             "format": "int64"
           },
@@ -36874,2073 +38941,6 @@
             }
           },
           "createdAt": {
-            "type": "string"
-          }
-        }
-      },
-      "ExportFilterInput": {
-        "type": "object",
-        "properties": {
-          "spuId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "category": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "nullable": true
-            }
-          },
-          "q": {
-            "type": "string",
-            "nullable": true
-          },
-          "barcode": {
-            "type": "string",
-            "nullable": true
-          },
-          "spec": {
-            "type": "string",
-            "nullable": true
-          },
-          "brand": {
-            "type": "string",
-            "nullable": true
-          },
-          "partyId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "partyType": {
-            "type": "string",
-            "nullable": true
-          },
-          "primary": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "roleType": {
-            "type": "string",
-            "nullable": true
-          },
-          "onHandMin": {
-            "type": "number",
-            "nullable": true
-          },
-          "onHandMax": {
-            "type": "number",
-            "nullable": true
-          },
-          "priceMin": {
-            "type": "number",
-            "nullable": true
-          },
-          "priceMax": {
-            "type": "number",
-            "nullable": true
-          },
-          "outOfStock": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "onSale": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "platform": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "nullable": true
-      },
-      "ExportJobInput": {
-        "required": [
-          "fields",
-          "sourceKey"
-        ],
-        "type": "object",
-        "properties": {
-          "sourceKey": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "fields": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "filters": {
-            "$ref": "#/components/schemas/ExportFilterInput"
-          },
-          "sort": {
-            "$ref": "#/components/schemas/ExportSortInput"
-          },
-          "piiPurpose": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ExportSortInput": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string",
-            "nullable": true
-          },
-          "order": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "nullable": true
-      },
-      "ExportAppliedFilter": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string"
-          }
-        }
-      },
-      "ExportJobRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "sourceKey": {
-            "type": "string"
-          },
-          "sourceLabel": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusNote": {
-            "type": "string"
-          },
-          "fields": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "headers": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "appliedFilters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExportAppliedFilter"
-            }
-          },
-          "sortKey": {
-            "type": "string"
-          },
-          "sortOrder": {
-            "type": "string"
-          },
-          "rowCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "fileName": {
-            "type": "string",
-            "nullable": true
-          },
-          "byteSize": {
-            "type": "number",
-            "nullable": true
-          },
-          "contentSha256": {
-            "type": "string",
-            "nullable": true
-          },
-          "includesPii": {
-            "type": "boolean"
-          },
-          "piiFields": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "piiPurpose": {
-            "type": "string"
-          },
-          "actorId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "departmentId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "requestedAt": {
-            "type": "string"
-          },
-          "startedAt": {
-            "type": "string",
-            "nullable": true
-          },
-          "finishedAt": {
-            "type": "string",
-            "nullable": true
-          },
-          "expiresAt": {
-            "type": "string",
-            "nullable": true
-          },
-          "downloadable": {
-            "type": "boolean"
-          },
-          "downloadNote": {
-            "type": "string"
-          },
-          "error": {
-            "type": "string"
-          }
-        }
-      },
-      "ExportFieldInfo": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "pii": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ExportFilterInfo": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "kind": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ExportSortInfo": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          }
-        }
-      },
-      "ExportSourceInfo": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "upstreamModule": {
-            "type": "string"
-          },
-          "permission": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          },
-          "fields": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExportFieldInfo"
-            }
-          },
-          "sorts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExportSortInfo"
-            }
-          },
-          "filters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExportFilterInfo"
-            }
-          },
-          "defaultSortKey": {
-            "type": "string"
-          },
-          "maxRows": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "downloadTtlHours": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "ExportSourcePage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExportSourceInfo"
-            }
-          }
-        }
-      },
-      "ExportJobPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExportJobRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "ZombieCleanupRuleInput": {
-        "type": "object",
-        "properties": {
-          "inactiveDays": {
-            "maximum": 3650,
-            "minimum": 30,
-            "type": "integer",
-            "format": "int32"
-          },
-          "snapshotStaleDays": {
-            "maximum": 3650,
-            "minimum": 1,
-            "type": "integer",
-            "format": "int32"
-          },
-          "requireZeroOrderReference": {
-            "type": "boolean"
-          },
-          "requireZeroInventory": {
-            "type": "boolean"
-          },
-          "requireZeroListing": {
-            "type": "boolean"
-          },
-          "requireZeroCost": {
-            "type": "boolean"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "deactivateNote": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "ZombieCleanupRuleView": {
-        "type": "object",
-        "properties": {
-          "entityType": {
-            "type": "string"
-          },
-          "entityTypeLabel": {
-            "type": "string"
-          },
-          "inactiveDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "snapshotStaleDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "requireZeroOrderReference": {
-            "type": "boolean"
-          },
-          "requireZeroInventory": {
-            "type": "boolean"
-          },
-          "requireZeroListing": {
-            "type": "boolean"
-          },
-          "requireZeroCost": {
-            "type": "boolean"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "deactivateNote": {
-            "type": "string"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "configured": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ZombieReferenceStatItem": {
-        "required": [
-          "entityId",
-          "metric",
-          "metricValue",
-          "observedAt",
-          "source"
-        ],
-        "type": "object",
-        "properties": {
-          "entityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "metric": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "metricValue": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number"
-          },
-          "source": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "observedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ZombieReferenceStatPush": {
-        "required": [
-          "items"
-        ],
-        "type": "object",
-        "properties": {
-          "items": {
-            "maxItems": 500,
-            "minItems": 0,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ZombieReferenceStatItem"
-            }
-          }
-        }
-      },
-      "ZombieReferenceStatPushResult": {
-        "type": "object",
-        "properties": {
-          "received": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "written": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rejected": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "rejectedReasons": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "ZombieDeactivateInput": {
-        "required": [
-          "entityIds"
-        ],
-        "type": "object",
-        "properties": {
-          "entityIds": {
-            "maxItems": 500,
-            "minItems": 0,
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "reason": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
-      "ZombieDeactivateResult": {
-        "type": "object",
-        "properties": {
-          "entityType": {
-            "type": "string"
-          },
-          "affected": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ZombieDeactivatedEntry"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ZombieDeactivatedEntry": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "previousStatus": {
-            "type": "string"
-          },
-          "newStatus": {
-            "type": "string"
-          }
-        }
-      },
-      "ZombieCandidate": {
-        "type": "object",
-        "properties": {
-          "entityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "entityType": {
-            "type": "string"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "lastMaintainedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "daysSinceMaintained": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          },
-          "verdict": {
-            "type": "string"
-          },
-          "verdictLabel": {
-            "type": "string"
-          },
-          "reasons": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "dimensions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ZombieDimensionStatus"
-            }
-          },
-          "ruleInactiveDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "ruleEnabled": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ZombieCandidatePage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ZombieCandidate"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "entityType": {
-            "type": "string"
-          },
-          "candidateCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "inUseCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "incompleteCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "ZombieDimensionStatus": {
-        "type": "object",
-        "properties": {
-          "metric": {
-            "type": "string",
-            "nullable": true,
-            "enum": [
-              "ORDER_LINE_COUNT",
-              "INVENTORY_ON_HAND",
-              "LISTING_COUNT",
-              "UNIT_COST"
-            ]
-          },
-          "state": {
-            "type": "string"
-          },
-          "value": {
-            "type": "number",
-            "nullable": true
-          },
-          "observedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "stale": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ZombieCleanupRecord": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "entityType": {
-            "type": "string"
-          },
-          "entityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "entityCode": {
-            "type": "string"
-          },
-          "entityName": {
-            "type": "string"
-          },
-          "previousStatus": {
-            "type": "string"
-          },
-          "newStatus": {
-            "type": "string"
-          },
-          "decidedBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reason": {
-            "type": "string"
-          },
-          "lastMaintainedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "affectedCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "ruleSnapshot": {
-            "$ref": "#/components/schemas/ZombieRuleSnapshot"
-          },
-          "evidence": {
-            "$ref": "#/components/schemas/ZombieEvidenceSnapshot"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ZombieCleanupRecordPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ZombieCleanupRecord"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "ZombieDimensionEvidence": {
-        "type": "object",
-        "properties": {
-          "state": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string",
-            "nullable": true
-          },
-          "observedAt": {
-            "type": "string",
-            "nullable": true
-          },
-          "stale": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ZombieEvidenceSnapshot": {
-        "type": "object",
-        "properties": {
-          "verdict": {
-            "type": "string"
-          },
-          "orderLineCount": {
-            "$ref": "#/components/schemas/ZombieDimensionEvidence"
-          },
-          "inventoryOnHand": {
-            "$ref": "#/components/schemas/ZombieDimensionEvidence"
-          },
-          "listingCount": {
-            "$ref": "#/components/schemas/ZombieDimensionEvidence"
-          },
-          "unitCost": {
-            "$ref": "#/components/schemas/ZombieDimensionEvidence"
-          }
-        }
-      },
-      "ZombieRuleSnapshot": {
-        "type": "object",
-        "properties": {
-          "entityType": {
-            "type": "string"
-          },
-          "inactiveDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "snapshotStaleDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "deactivateNote": {
-            "type": "string"
-          },
-          "ruleVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "requireZeroOrderReference": {
-            "type": "boolean"
-          },
-          "requireZeroInventory": {
-            "type": "boolean"
-          },
-          "requireZeroListing": {
-            "type": "boolean"
-          },
-          "requireZeroCost": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ZombieCandidateOverview": {
-        "type": "object",
-        "properties": {
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ZombieOverviewRow"
-            }
-          },
-          "coveredEntities": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "coveredDimensions": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "unmappedDimensions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "ZombieOverviewRow": {
-        "type": "object",
-        "properties": {
-          "entityType": {
-            "type": "string"
-          },
-          "entityTypeLabel": {
-            "type": "string"
-          },
-          "totalActive": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "candidates": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "inUse": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "incomplete": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "inactiveDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "snapshotStaleDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "requiredDimensionCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "ruleEnabled": {
-            "type": "boolean"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "ZombieEntityTypeOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "targetTable": {
-            "type": "string"
-          }
-        }
-      },
-      "ZombieMetricOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "owner": {
-            "type": "string"
-          },
-          "source": {
-            "type": "string"
-          },
-          "wired": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ZombieOptions": {
-        "type": "object",
-        "properties": {
-          "entityTypes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ZombieEntityTypeOption"
-            }
-          },
-          "metrics": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ZombieMetricOption"
-            }
-          },
-          "verdicts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ZombieVerdictOption"
-            }
-          },
-          "deactivateTargets": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "ZombieVerdictOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "actionable": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ZombieReferenceEvidence": {
-        "type": "object",
-        "properties": {
-          "entityType": {
-            "type": "string"
-          },
-          "entityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "lastMaintainedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "daysSinceMaintained": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          },
-          "verdict": {
-            "type": "string"
-          },
-          "dimensions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ZombieDimensionStatus"
-            }
-          },
-          "recentRecords": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ZombieCleanupRecord"
-            }
-          }
-        }
-      },
-      "CustomsDeclarationInput": {
-        "type": "object",
-        "properties": {
-          "hsCode": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "declaredName": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "originCountry": {
-            "maxLength": 2,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "legalUnit": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "declarationElements": {
-            "maxItems": 32,
-            "minItems": 0,
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "maxLength": 200,
-              "minLength": 0,
-              "type": "string",
-              "nullable": true
-            }
-          },
-          "enabled": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          }
-        }
-      },
-      "CustomsDeclaration": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "hsCode": {
-            "type": "string"
-          },
-          "declaredName": {
-            "type": "string"
-          },
-          "originCountry": {
-            "type": "string"
-          },
-          "legalUnit": {
-            "type": "string"
-          },
-          "declarationElements": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "updatedAt": {
-            "type": "string"
-          }
-        }
-      },
-      "CertificationInput": {
-        "required": [
-          "certificationCode",
-          "status"
-        ],
-        "type": "object",
-        "properties": {
-          "certificationCode": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string"
-          },
-          "certificationName": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string"
-          },
-          "certificateNo": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "issuedOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "expiresOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "scored": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          }
-        }
-      },
-      "Certification": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "certificationCode": {
-            "type": "string"
-          },
-          "certificationName": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "certificateNo": {
-            "type": "string"
-          },
-          "issuedOn": {
-            "type": "string",
-            "format": "date"
-          },
-          "expiresOn": {
-            "type": "string",
-            "format": "date"
-          },
-          "scored": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "updatedAt": {
-            "type": "string"
-          }
-        }
-      },
-      "ListingPrecheck": {
-        "type": "object",
-        "properties": {
-          "allowed": {
-            "type": "boolean"
-          },
-          "checkedCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "blockedCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "blockedOwners": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "blockers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PrecheckBlocker"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "PrecheckBlocker": {
-        "type": "object",
-        "properties": {
-          "ownerType": {
-            "type": "string"
-          },
-          "ownerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "ownerCode": {
-            "type": "string"
-          },
-          "ownerName": {
-            "type": "string"
-          },
-          "score": {
-            "type": "number"
-          },
-          "grade": {
-            "type": "string"
-          },
-          "missingCodes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "blockers": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "hint": {
-            "type": "string"
-          }
-        }
-      },
-      "CustomsPrecheck": {
-        "type": "object",
-        "properties": {
-          "allowed": {
-            "type": "boolean"
-          },
-          "checkedCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "blockedCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "blockedOwners": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "blockers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PrecheckBlocker"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "CompletenessEvaluationInput": {
-        "required": [
-          "ownerIds",
-          "ownerType"
-        ],
-        "type": "object",
-        "properties": {
-          "ownerType": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerIds": {
-            "maxItems": 500,
-            "minItems": 0,
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "format": "uuid",
-              "nullable": true
-            }
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "CompletenessCheck": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "dimension": {
-            "type": "string"
-          },
-          "subjectType": {
-            "type": "string"
-          },
-          "subjectLabel": {
-            "type": "string"
-          },
-          "detail": {
-            "type": "string"
-          },
-          "remedy": {
-            "type": "string"
-          },
-          "satisfied": {
-            "type": "boolean"
-          }
-        }
-      },
-      "CompletenessEvaluation": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "ownerType": {
-            "type": "string"
-          },
-          "ownerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "ownerCode": {
-            "type": "string"
-          },
-          "ownerName": {
-            "type": "string"
-          },
-          "score": {
-            "type": "number"
-          },
-          "grade": {
-            "type": "string"
-          },
-          "gradeLabel": {
-            "type": "string"
-          },
-          "listingReady": {
-            "type": "boolean"
-          },
-          "customsReady": {
-            "type": "boolean"
-          },
-          "missingCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "dimensionGaps": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DimensionGap"
-            }
-          },
-          "missing": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CompletenessCheck"
-            }
-          },
-          "evaluatedBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "evaluatedAt": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "CompletenessEvaluationResult": {
-        "type": "object",
-        "properties": {
-          "requested": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "succeeded": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "failed": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "evaluations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CompletenessEvaluation"
-            }
-          },
-          "failures": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EvaluationFailure"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DimensionGap": {
-        "type": "object",
-        "properties": {
-          "dimension": {
-            "type": "string"
-          },
-          "dimensionLabel": {
-            "type": "string"
-          },
-          "missingCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "EvaluationFailure": {
-        "type": "object",
-        "properties": {
-          "ownerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "CompletenessPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CompletenessRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "listingReadyCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "customsReadyCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "blockedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "gradeCounts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GradeCount"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "CompletenessRow": {
-        "type": "object",
-        "properties": {
-          "ownerType": {
-            "type": "string"
-          },
-          "ownerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "spuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "ownerCode": {
-            "type": "string"
-          },
-          "ownerName": {
-            "type": "string"
-          },
-          "ownerStatus": {
-            "type": "string"
-          },
-          "categoryName": {
-            "type": "string"
-          },
-          "score": {
-            "type": "number"
-          },
-          "scorePercent": {
-            "type": "string"
-          },
-          "grade": {
-            "type": "string"
-          },
-          "gradeLabel": {
-            "type": "string"
-          },
-          "missingCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "listingReady": {
-            "type": "boolean"
-          },
-          "customsReady": {
-            "type": "boolean"
-          }
-        }
-      },
-      "GradeCount": {
-        "type": "object",
-        "properties": {
-          "grade": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "CompletenessDimension": {
-        "type": "object",
-        "properties": {
-          "dimension": {
-            "type": "string"
-          },
-          "dimensionLabel": {
-            "type": "string"
-          },
-          "weight": {
-            "type": "number"
-          },
-          "satisfied": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "ratio": {
-            "type": "number"
-          },
-          "complete": {
-            "type": "boolean"
-          },
-          "blockedFor": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "CompletenessScorecard": {
-        "type": "object",
-        "properties": {
-          "ownerType": {
-            "type": "string"
-          },
-          "ownerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "ownerCode": {
-            "type": "string"
-          },
-          "ownerName": {
-            "type": "string"
-          },
-          "ownerStatus": {
-            "type": "string"
-          },
-          "categoryCode": {
-            "type": "string"
-          },
-          "categoryName": {
-            "type": "string"
-          },
-          "score": {
-            "type": "number"
-          },
-          "scorePercent": {
-            "type": "string"
-          },
-          "grade": {
-            "type": "string"
-          },
-          "gradeLabel": {
-            "type": "string"
-          },
-          "dimensions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CompletenessDimension"
-            }
-          },
-          "checks": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CompletenessCheck"
-            }
-          },
-          "missing": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CompletenessCheck"
-            }
-          },
-          "missingCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "listingReady": {
-            "type": "boolean"
-          },
-          "customsReady": {
-            "type": "boolean"
-          },
-          "listingBlockers": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "customsBlockers": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "evaluatedAt": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "CompletenessOverview": {
-        "type": "object",
-        "properties": {
-          "spuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "listingReadyCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "customsReadyCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "listingBlockedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "customsBlockedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bothBlockedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "gradeCounts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GradeCount"
-            }
-          },
-          "dimensionGaps": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DimensionGap"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "CompletenessOptions": {
-        "type": "object",
-        "properties": {
-          "dimensions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "dimensionOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Option"
-            }
-          },
-          "grades": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "gradeOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Option"
-            }
-          },
-          "ownerTypes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "certificationStatuses": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "certificationStatusOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Option"
-            }
-          },
-          "minImageCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "minPrimaryImageEdgePx": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "listingGateScore": {
-            "type": "string"
-          },
-          "customsGateScore": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "CompletenessGap": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "dimension": {
-            "type": "string"
-          },
-          "dimensionLabel": {
-            "type": "string"
-          },
-          "subjectType": {
-            "type": "string"
-          },
-          "detail": {
-            "type": "string"
-          },
-          "remedy": {
-            "type": "string"
-          },
-          "affectedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "sampleOwners": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "nextEntry": {
-            "type": "string"
-          }
-        }
-      },
-      "CompletenessGapPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CompletenessGap"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "affectedOwnerCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "byDimension": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DimensionGap"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "GapSummary": {
-        "type": "object",
-        "properties": {
-          "ownerCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "missingCheckCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "byDimension": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DimensionGap"
-            }
-          },
-          "byGrade": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GradeCount"
-            }
-          },
-          "cleanCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "CompletenessEvaluationPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CompletenessEvaluation"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "CertificationSet": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Certification"
-            }
-          },
-          "completeness": {
-            "type": "string"
-          },
-          "completenessLabel": {
-            "type": "string"
-          },
-          "expiredCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "note": {
             "type": "string"
           }
         }
