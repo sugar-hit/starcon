@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **385** |
 | 完成率 | 17.2% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 77 | 0 | 3 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 19 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -524,7 +507,7 @@
 | 17.4.2.1 | 待我审批 | — | D4 | 未开发 | — |
 | 17.4.2.2 | 审批记录 | — | D4 | 未开发 | — |
 | 17.5.1.1 | 业务参数 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V48__business_parameter.sql（business_parameter_definition 参数码表含 8 个出厂默认值 / business_parameter_override 全局·法人·店铺三档覆盖值 / business_parameter_history 追加不可改变更历史 / business_parameter_freeze 与 freeze_value 单据冻结快照，四张业务表 tenant_id NOT NULL + RLS FORCE isolation，码表按先例不带 tenant_id）· 端点 GET /identity/business-parameters、/business-parameters/effective、/overrides、/overrides/{id}、/history、/freezes、/freezes/{documentType}/{documentNo}（BusinessParameterController.java）· 页面 apps/web/src/app/org/business-parameters/page.tsx· 测试 BusinessParameterIntegrationTest.java（15 项：默认值与类型自洽、店铺大于法人大于全局大于默认的生效范围优先级、码表驱动取值校验、NUMERIC 与 timestamptz 按值往返、变更历史前后值与不可篡改、单据冻结后改参数不影响历史单据、租户隔离三断言实跑）与 business-parameter-model.test.ts（24 项前端口径与预校验） |
-| 17.5.1.2 | 编号规则 | — | D1–D2 | 未开发 | — |
+| 17.5.1.2 | 编号规则 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V52__document_number_rule.sql（document_entity 单据实体码表含 11 类出厂实体 / document_number_rule 规则含 PRIMARY 主规则与 COMPONENT 可复用子规则 / document_number_rule_segment 组成段含前缀·日期·序号·后缀·固定文本·嵌套六类并用 CHECK 钉死每类段的列形状 / document_number_sequence 序号计数器键为 tenant·entity·scope·reset 四列 / document_number_issued 已发放编号带触发器与 REVOKE 双重不可改，四张业务表 tenant_id NOT NULL + RLS FORCE isolation，码表按先例不带 tenant_id）· 端点 GET /identity/numbering/entities、/rules、/rules/{id}、/rules/conflicts、/sequences、/issued与 POST /identity/numbering/rules、/rules/{id}、/rules/{id}/next、/preview（NumberRuleController.java，10 个端点）· 页面 apps/web/src/app/org/numbering-rules/page.tsx· 测试 NumberRuleIntegrationTest.java（21 项：前缀日期序号后缀拼装与时区渲染、跨日跨月跨年重置与回补旧单据落旧桶、跨实体独立计数、ENTITY 与 RULE 两种计数作用域、预览不占号且与取号一致、按实体定位生效规则、多级嵌套展开与子规则段深度、三层嵌套、嵌套环与自嵌在配置时被拒、删除被引用子规则被拒、同实体生效区间交叠在配置时 409 且相邻不误伤、已发放编号携带可读单据引用且不可改、同实体重复编号被拒、权限隔离与租户隔离三断言实跑）与 numbering-model.test.ts（37 项前端分桶·区间冲突·段校验·成环检测与口径一致） |
 | 17.5.2.1 | 数据字典 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V53__data_dictionary.sql（dict_catalog 出厂字典目录含 8 项覆盖状态枚举·原因码·分类标签·单位类型四类、不带 tenant_id 按先例只授予 SELECT；dict_item 租户私有字典项；dict_item_usage 引用台账；dict_history 追加不可改变更历史；三张业务表 tenant_id NOT NULL 加 FORCE RLS；禁删四道防线：控制器无 DELETE 端点、迁移不授予 identity_app DELETE、dict_item_usage 外键 ON DELETE RESTRICT、dict_item_delete_guard 触发器；dict_item_update_guard 触发器锁死被引用编码；出厂目录 code_locked=true）· 端点 GET /identity/dict-catalog、/dict-items、/dict-items/options/{dictCode} 下拉选项只给 ACTIVE、/dict-items/{id}、/dict-items/{id}/usage、/dict-history，POST /dict-items、/dict-items/{id}/deactivate 停用、/dict-items/{id}/reactivate 恢复、/dict-items/{id}/usage 引用登记，PUT /dict-items/{id} 改名改说明、被引用时改编码 409（DictionaryController.java；jOOQ 显式 SQL，无 DELETE 端点）· 页面 apps/web/src/app/org/dictionary/page.tsx（DictionaryWorkspace：字典目录、字典项分组、引用明细、变更历史，无删除按钮）· 测试 DictionaryIntegrationTest.java（15 项：四类目录齐备、租户级扩展跨租户不可见、引用统计真实聚合与来源系统数、计数归零仍算被引用、四道防线逐层验证含 has_table_privilege 断言、停用恢复保持 id 与台账、编码锁死控制器与触发器两道、变更历史前后值与不可篡改、下拉选项只给 ACTIVE、搜索过滤、租户隔离三断言实跑）与 dictionary-model.test.ts（24 项编码校验与展示口径） |
 | 17.5.3.1 | 审计日志 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V7__audit_log.sql（补 resource_type/actor_name/authorization_context/changes 列、三组检索索引、SELECT+INSERT 授权、UPDATE/DELETE 触发器拒绝）· 端点 GET /identity/audit、/identity/audit/{id}、/identity/audit/export（AuditController.java）· 页面 apps/web/src/app/org/audit/page.tsx · 测试 AuditIntegrationTest.java（10 项：检索/详情/CSV 导出、租户隔离三断言、不可篡改、明文不入库）与 AuditRedactorTest.java（7 项脱敏） |
 | 17.5.3.2 | 操作日志 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V49__operation_log.sql（operation_log 表：request_id/trace_id 链路键、API 调用摘要、任务执行、错误堆栈上限、expires_at 留存期；五组检索索引；FORCE RLS；SELECT+INSERT+DELETE 授权，与审计日志的不可篡改策略形成对照）· 端点 GET /identity/operation-log、/{id}、/trace/{requestId} 链路聚合、/export、POST /purge（OperationLogController.java；写入侧 OperationLog.java、采集 OperationLogInterceptor.java、链路键 RequestTrace.java）· 页面 apps/web/src/app/org/operation-log/page.tsx（操作日志 + 链路关联视图）· 测试 OperationLogIntegrationTest.java（14 项：四类事件落库、链路聚合、堆栈截断与无 secret、可删对照审计不可删、租户隔离三断言、时间无漂移） |

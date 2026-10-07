@@ -642,3 +642,17 @@ export type ZombieReferenceStatPush = { "items": Array<ZombieReferenceStatItem> 
 export type ZombieReferenceStatPushResult = { "received": number; "written": number; "rejected": number; "rejectedReasons": Array<string> };
 export type ZombieRuleSnapshot = { "entityType": string; "inactiveDays": number; "snapshotStaleDays": number; "deactivateNote": string; "ruleVersion": number; "requireZeroOrderReference": boolean; "requireZeroInventory": boolean; "requireZeroListing": boolean; "requireZeroCost": boolean };
 export type ZombieVerdictOption = { "code": string; "label": string; "actionable": boolean };
+
+export type NumberEntityView = { "code": string; "name": string; "description": string };
+export type NumberIssueInput = { "documentDate": string; "documentType": string | null; "documentNo": string | null };
+export type NumberIssuedView = { "id": string; "entityCode": string; "ruleId": string; "ruleName": string; "number": string; "sequenceValue": number; "resetKey": string; "documentType": string | null; "documentNo": string | null; "actorName": string | null; "issuedAt": string };
+export type NumberPreviewInput = { "ruleId": string; "entityCode": string | null; "documentDate": string; "legalEntityId": string | null };
+export type NumberPreviewPartView = { "segmentId": string; "segmentType": string; "ruleId": string; "ruleName": string; "position": number; "depth": number; "value": string };
+export type NumberPreviewView = { "ruleId": string; "ruleName": string; "entityCode": string; "documentDate": string; "timezone": string; "number": string; "consumed": boolean; "parts": Array<NumberPreviewPartView>; "sequences": Array<NumberSequencePlanView> };
+export type NumberRuleConflictView = { "ruleId": string; "entityCode": string; "ruleName": string; "effectiveFrom": string; "effectiveTo": string | null; "overlaps": boolean };
+export type NumberRuleInput = { "entityCode": string; "ruleName": string; "ruleKind": string; "status": string; "timezone": string; "effectiveFrom": string; "effectiveTo": string; "description": string; "segments": Array<NumberRuleSegmentInput> };
+export type NumberRuleSegmentInput = { "segmentType": string; "literalText": string; "dateFormat": string; "sequenceWidth": number; "sequenceStart": number; "sequenceReset": string; "sequenceScope": string; "childRuleId": string };
+export type NumberRuleSegmentView = { "id": string; "position": number; "segmentType": string; "literalText": string | null; "dateFormat": string | null; "sequenceWidth": number | null; "sequenceStart": number | null; "sequenceReset": string | null; "sequenceScope": string | null; "childRuleId": string | null; "childRuleName": string | null; "rendered": string | null };
+export type NumberRuleView = { "id": string; "entityCode": string; "entityName": string; "ruleName": string; "ruleKind": string; "status": string; "timezone": string; "effectiveFrom": string; "effectiveTo": string | null; "description": string; "sampleNumber": string; "version": number; "createdAt": string; "updatedAt": string; "segments": Array<NumberRuleSegmentView> };
+export type NumberSequencePlanView = { "segmentId": string; "segmentType": string; "entityCode": string; "scopeKey": string; "resetKey": string; "resetScope": string; "nextValue": number; "rendered": string };
+export type NumberSequenceView = { "entityCode": string; "scopeKey": string; "resetKey": string; "currentValue": number; "updatedAt": string };
