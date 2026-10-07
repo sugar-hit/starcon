@@ -39,7 +39,9 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(HERE, '..', '..');
+// 默认就是脚本所在的仓库；LANE_ROOT 仅供 lane-*.itest.mjs 把整条流水线
+// 指向一个一次性仓库来跑端到端断言（不设时行为完全不变）。
+const ROOT = process.env.LANE_ROOT ? resolve(process.env.LANE_ROOT) : join(HERE, '..', '..');
 const STATE_DIR = join(ROOT, '.dev-agent');
 const STATE_FILE = join(STATE_DIR, 'lanes.json');
 const WORKTREE_DIR = join(ROOT, '.worktrees');
@@ -780,7 +782,13 @@ if (cmd === 'merge-ready') {
         conflicts: conflicts ? conflicts.split('\n').filter(Boolean) : [],
       });
       console.error(`✗ ${lane.id} 并入冲突：${conflicts || '(未知)'}`);
-      // 冲突留给人工/下一轮处理，先把这辆车道挪出 ready，避免反复重试
+      // 冲突留给人工/下一轮处理，先把这辆车道挪出 ready，避免反复重试。
+      //
+      // 但**必须立刻 abort**：不 abort 的话 MERGE_HEAD 残留、主工作区保持脏，
+      // 于是 ① 下一个 tick 的 merge-ready 会在「主工作区不干净，拒绝切分支」处直接退出，
+      // 并入通道彻底堵死；② 本循环里下一条车道会在同一棵冲突树上再 merge，
+      // 报出与它自身毫无关系的级联冲突。2026-10-07 一晚被这个缺陷撂了两次。
+      git(['merge', '--abort'], ROOT, true);
       lane.state = 'conflict';
       lane.conflicts = conflicts ? conflicts.split('\n').filter(Boolean) : [];
       continue;
