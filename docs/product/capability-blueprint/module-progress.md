@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **377** |
 | 完成率 | 18.9% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 20 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -269,7 +252,7 @@
 | 7.4.1.2 | 调整审批 | /inventory/adjustments | D3 | 未开发 | — |
 | 7.4.2.1 | 盘点单 | /inventory/count | D3 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V59__warehouse_stocktake_sheet.sql`（stocktake_sheet / stocktake_task / stocktake_line 三表，tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT + 索引；版本按调度器预分配取 V59）；**冻结落成数据而不是查询**（本模块唯一红线「盘点时点必须冻结账面数，否则边盘边卖产生虚假差异」）：发起盘点那一刻把范围内 stock_bucket.on_hand 复制成 stocktake_line.book_on_hand，并由 DB 触发器 `stocktake_line_frozen` 把账面数与八个维度列钉成不可更新（拿到连接直接 UPDATE 也改不动，冻结是数据库不变量而非应用层承诺）；差异列是 generated column `counted_qty - book_on_hand`，人工赋值被 PG 直接拒绝；`stocktake_line_no_delete` 挡住删除（删一行等于让这张单从未盘过它）；进度三计数、三列合计与任务状态全部**由明细行派生**、表里无对应列（另存就要每次同步，漏同步一次会出现「任务显示已完成但还有行没盘」）；范围（哪些 bucket 进这次盘）与任务单元（怎么切任务）是**两个独立维度**，可组合出「按仓库盘 + 按库位发任务」；端点 8 个挂在 `/warehouse/inventory/stocktakes` 下：`GET /stocktakes` 列表（真分页）、`GET /stocktakes/capabilities` 范围维度接入情况、`GET /stocktakes/{id}` 详情+三列合计、`POST /stocktakes` 发起（冻结，拒绝空范围以免留下「盘过了没差异」的假单）、`GET /stocktakes/{id}/lines` 明细分页（PENDING/MATCH/GAIN/LOSS 四口径）、`POST /stocktakes/{id}/lines/{lineId}/count` 录入实盘（传 null 即撤销录入）、`GET /stocktakes/{id}/tasks` 任务列表、`POST /stocktakes/{id}/tasks/{taskId}/assign` 派工；写动作走 warehouse.inventory.update（冻结账面与录实盘都是写）；**盘点范围只给三种并如实说明另两种**：按仓库/按库位可筛出真正不同的任务集合；按类目在枚举里保留但**显式拒绝 422**（sku_ref 刻意不存类目、catalog 读取投影未接入，沿用 7.1.1.1 已建立的未接入维度约定：拒绝而不是返回空集）；**ABC 分类连枚举都不给** —— 全库 warehouse 与 catalog 两侧迁移加 db/schemas 均无任何 ABC 字段、也无动销率等可推导列，不臆造分位算法冒充已有数据，改由 capabilities 端点报 available=false 并在页面折叠区向用户讲清原因；不接受 frozenAt 请求参数（允许指定时刻等于允许「盘三天前的账」）；扫码做成手工录入加条码字段、不伪造扫码流程；集成测试 `StocktakeIntegrationTest` 19 例实跑 Testcontainers PostgreSQL 16（连接池压到 1），核心用例「冻结的账面数不被后续出入库改写」真的在发起盘点后出了一笔 −30 的出库，逐列断言账面合计纹丝不动、实盘 95、差异 −5，并核对当前余额确实已变成 70（证明那笔出入库真的发生了而非空转）；另有账面数/维度列直改被 DB 拒绝、差异列生成列被拒、明细行删除被拒、未录入差异为 NULL 而非 0、录入推进状态且可撤销后状态重算、四种差异筛选互斥、冻结时点连可读名一起冻结（之后 sku_ref 改名盘点单仍读得懂）、frozen_at 与 counted_at 零漂移（OffsetDateTime 绑定）、负实盘被 CHECK 拒绝、租户隔离三断言（两租户互不可见含列表/详情/明细/任务/录入全隔离、伪造 X-Tenant-Id 无效、A→B→A→B 交替复用同一条物理连接不串租户并逐张表确认 relforcerowsecurity）；页面 `/inventory/count` 工作区（stocktake-workspace.tsx + 纯函数 stocktake-model.ts 与 21 例单测）：冻结时刻与账面合计摆在第一屏 StatCard、账面/实盘/差异三列表格、未录入显破折号且差异只读、录入框含实盘数与可选条码、撤销录入、按任务进度表与取消派工、发起盘点表单按可用范围过滤并附不可用原因说明、加载态/错误态/无权限态/空态/搜索无结果态/分页俱全；api-proxy 白名单登记盘点全部形状（capabilities 排在 {id} 之前判别、路径上刻意没有 DELETE） |
 | 7.4.2.2 | 盘点差异处理 | /inventory/count | D3 | 未开发 | — |
-| 7.5.1.1 | 调拨单 | — | D3 | 未开发 | — |
+| 7.5.1.1 | 调拨单 | — | D3 | 已交付 | 迁移 warehouse V61__warehouse_transfer_order.sql（transfer_order 调拨单头 + transfer_order_line 明细（SKU × 质量状态）+ transfer_shipment 发出动作 + transfer_receipt / transfer_receipt_line 收货与差异事件，五张表 tenant_id NOT NULL + FORCE RLS isolation + GRANT 与 starcon_app REVOKE，另 GRANT USAGE ON SEQUENCE 发号器；**调拨不是瞬时**由 guard_transfer_order_state 触发器钉死状态与三个时间戳自洽；**在途不丢账**由 guard_transfer_line_conservation 延迟约束触发器钉死「已发出 = 已实收 + 已确认差异 + 仍在途」；inventory_transfer 只加一列可空的 line_id，不改既有列语义与约束，部分收货走**拆行**（原行留未到剩余、另起一行记已收段）而不是把余量归零，因为 V1 的 CHECK(quantity>0) 不允许归零、且 CHECK((status='IN_TRANSIT')=(received_at IS NULL)) 要求非在途状态必须带了结时刻，拆行后四条既有模块的 sum(quantity) where status='IN_TRANSIT' 仍是精确未达量且无需改一行代码）· 端点 8 个挂在 /warehouse/inventory/transfers：GET 列表（真分页 + 全量汇总 + 六态与仓库下拉，筛选源仓/目标仓/SKU/状态/关键字，排序白名单 5 键）、GET /{id} 详情（头 + 明细 + 每次发出 + 每次收货与差异登记）、GET /{id}/movements（**复用 7.1.2.1 台账**，响应带 attribution=ORDER_GRANULAR 与口径说明）、POST 建单（草稿，不动库存，单号由 DB 序列生成）、PUT 改单（仅草稿，整份替换明细）、POST /{id}/confirm 草稿转待发、POST /{id}/ship 发出（**只减源仓、只挂在途，目的仓纹丝不动**）、POST /{id}/receive 实收（**分次**，转入目的仓并逐次冲减在途）、POST /{id}/close 结案（收不到的部分如实记 SHORTAGE、在途行转 CANCELLED、差异原因必填）—— 状态机只有 deriveStatus 一处真相，发出/收货/结案都改完数量后由它统一算状态，不在三个动作里各写一遍 if · 页面 /inventory/transfers（apps/web/src/app/inventory/transfers/page.tsx + components/inventory/inventory-transfer.tsx + inventory-transfer-model.ts）汇总卡与守恒式自检、筛选、列表、展开看明细与分录、建单与发货/收货/结案对话框、**仍在途独立成列且未发出量与差异量分列**（前者是还没走、后者是路上少了，混在一起会把发货计划误读成货损）、按钮按状态给（两个终态不再给发货收货）、分录归属口径常驻显示、加载/空/错误三态 · 测试 InventoryTransferIntegrationTest 20 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）覆盖**在途不丢账**（发出 60 后共享口径在途=60 且目的仓仍为 0、收 25 后=35、收满后=0）、分次收货三笔 25/20/15 逐笔留痕、部分收货拆行后已收段与未到段之和仍等于发出量、差异短少 10 件既不挪回源仓也不凭空进目的仓且在途归零、乐观锁版本不符与缺失都拒绝且失败请求不留库存痕迹、可用量不足拒绝发货、状态机拒绝草稿直接发货与已收后重复收货、timestamptz 带 +08:00 写入后断言读回偏移零漂移、分录符号出库为负入库为正且**不产生任何 SHIPMENT 事务**（与 7.1.3.1 多仓分布刻意把 TRANSFER_OUT 排除在周转速度之外的口径对齐）、逐张表断言 relforcerowsecurity、租户隔离三断言 + 端点 400/403/401 · warehouse 服务回归 209 例全绿 · **跨服务边界**：sku 属 catalog，只用 sku_ref 逻辑 ID + 可读名快照，不建外键不联查；源仓与目标仓都用复合外键 (tenant_id, warehouse_id) 指向本服务 warehouse，DB 层直接堵死「源仓指向别的租户」这个口子；7.5.2.1 跨法人调拨是另一条车道，本模块 legal_entity_id 只表示货权法人，不做跨法人定价与内部结算 · 已知边界：调拨按蓝图契约是 SKU × 数量、不按批次拆分，收货时批次由调用方给 lotId 可选（给了落该批次、不给落无批次 bucket），批次级拆分属 7.3.1.x 的演进范围 |
 | 7.5.1.2 | 在途库存 | — | D3 | 未开发 | — |
 | 7.5.2.1 | 跨法人调拨 | — | D3 | 未开发 | — |
 | 7.6.1.1 | 库龄与呆滞 | /inventory/aging | D3 | 未开发 | — |
@@ -557,3 +540,8 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 86 |
+| **未开发** | **379** |
+| 完成率 | 18.5% |
+| **D3** | 8 | 0 | 32 | 40 |
+| 07 | 库存核算系统 | D3 | 8 | 31 |

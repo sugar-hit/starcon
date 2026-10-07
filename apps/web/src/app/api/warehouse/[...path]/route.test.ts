@@ -41,6 +41,15 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
     'warehouse/quality-statuses',
     'warehouse/locations',
     'warehouse/lots',
+    // 7.5.1.1 调拨单：列表 / 详情 / 分录，以及四个动作端点。
+    // 动作路径必须逐个钉住 —— 少放行一个，页面上的按钮就会变成静默 404。
+    'warehouse/inventory/transfers',
+    `warehouse/inventory/transfers/${id}`,
+    `warehouse/inventory/transfers/${id}/movements`,
+    `warehouse/inventory/transfers/${id}/confirm`,
+    `warehouse/inventory/transfers/${id}/ship`,
+    `warehouse/inventory/transfers/${id}/receive`,
+    `warehouse/inventory/transfers/${id}/close`,
   ]) {
     const response = await GET(request(path), { params: { path: path.split('/') } });
     expect(response.status).toBe(200);
@@ -92,7 +101,9 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
 it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
-  // 预占（7.2.1）、调整单（7.4.1.1）、调拨单（7.5.1.1）尚未交付，不应被代理放行。
+  // 预占（7.2.1）与调整单（7.4.1.1）尚未交付，不应被代理放行。
+  // transfer 曾在这份拒绝清单里，那是 7.5.1.1 交付前的状态；它已并入且前端在调
+  // /transfers 这组路径，不放行等于调拨页面在浏览器里 404，故已移出。
   // 7.1.1.2 明细页的行内操作入口指向这些路由，入口契约就位但目标模块还没到 ——
   // 目标模块交付后再加，否则就是一个点下去 404 的死链。
   //
@@ -102,7 +113,6 @@ it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
   for (const path of [
     'warehouse/inventory/reservations',
     'warehouse/inventory/adjustments',
-    'warehouse/inventory/transfer',
     'warehouse/internal/access',
   ]) {
     expect(

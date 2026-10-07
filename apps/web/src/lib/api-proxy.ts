@@ -286,6 +286,9 @@ const services: readonly {
     // locations/lots 是逐级下钻的库位与批次下拉项，与其余参照数据同形。
     // sellable-policies 是 7.2.2.1 可售量口径：列表 / effective / pools / pools/{poolKey} / {id}
     // 五个读形状，calculation（POST 试算）、{id}/versions（换版）、{id}/retire（作废）三个动作。
+    // transfers 是 7.5.1.1 调拨单：列表 / {id} / {id}/movements 三个读形状，
+    // 以及 {id}/confirm、{id}/ship、{id}/receive、{id}/close 四个动作端点
+    // （刻意**没有** DELETE 段：调拨单要靠分录与在途行回溯，不能物理删掉一条单据）。
     // 口径路径上刻意**没有** DELETE 段：作废是审计事件，档位行永久保留，
     // 放行一个删除形状会让"能不能物理删掉一条防超卖配置"看起来是能。
     // effective / pools / pools/{poolKey} 是字面量，排在 {id} 之前判别，两者不会互相吃掉。
@@ -297,10 +300,9 @@ const services: readonly {
     env: 'WAREHOUSE_URL',
     fallback: 'http://127.0.0.1:8084',
     pattern:
-    // 下面同一段里同时登记了 stocktakes（7.4.2.1）、expiry（7.3.1.2）与 ledger / reconciliation /
     // distribution / platform-observations / serials / lots / internal-access —— 这些路径此前漏登记，
     // 白名单只在浏览器端生效、单测直连服务层发现不了，漏一条就等于该页面在浏览器里拿代理 404。
-      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement))?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
+      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement))?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
   },
 ];
 
