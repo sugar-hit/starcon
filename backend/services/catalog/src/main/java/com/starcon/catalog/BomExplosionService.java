@@ -172,24 +172,10 @@ public class BomExplosionService {
         BigDecimal inTransit = stock.get(p.lineId()).inTransit();
         BigDecimal gap = BomExplosionRules.gap(p.required(), available, inTransit);
         boolean wantsExpand = p.isSubAssembly() && p.subVersionId() != null;
-        if (wantsExpand && BomExplosionRules.covered(p.required(), available, inTransit)) {
-          // 缺口为 0（已被库存与在途覆盖）就不往下展开：再展开只会产出一串 0 需求的噪声行。
-          lines.add(
-              line(depth, p, available, inTransit, false, true, false,
-                  "可用 + 在途已覆盖本行需求，无需向下展开"));
-          continue;
-        }
-        if (wantsExpand && depth >= maxDepth) {
-          // 深度上限：截断但**显式标明**（静默截断是未完成）。
-          truncatedAny = true;
-          lines.add(
-              line(depth, p, available, inTransit, false, false, true,
-                  "已展开到第 " + maxDepth + " 层上限，这个组件仍是另一个 BOM 的成品（"
-                      + p.subBom().code() + " 的 " + p.subVersionNo()
-                      + "），它的下级没有展开 —— 这份清单不完整"));
-          continue;
-        }
-        boolean expand = wantsExpand;
+        boolean covered = wantsExpand && BomExplosionRules.covered(p.required(), available, inTransit);
+        boolean truncated = wantsExpand && !covered && depth >= maxDepth;
+        boolean expand = wantsExpand && !covered && !truncated;
+        if (truncated) truncatedAny = true;
         if (expand) {
           next.add(
               new Work(
@@ -203,11 +189,8 @@ public class BomExplosionService {
                   append(p.ancestorCodes(), p.skuCode())));
         }
         lines.add(
-            line(depth, p, available, inTransit, expand, false, false,
-                expand
-                    ? "已按 " + p.subBom().code() + " 的 " + p.subVersionNo()
-                        + " 继续展开（子级用量按本行缺口 " + plain(gap) + " 递推）"
-                    : p.note()));
+            line(depth, p, available, inTransit, expand, covered, truncated,
+                note(p, gap, expand, covered, truncated, maxDepth)));
       }
       check(lines.size() <= MAX_LINES,
           "展开结果超过 " + MAX_LINES + " 行，已中止：这不是一棵人能核对的物料清单，"
@@ -412,12 +395,11 @@ public class BomExplosionService {
           } else {
             subVersionId = version.get("id", UUID.class);
             subVersionNo = version.get("version_no", String.class);
-            note = ambiguous
-                ? "这个成品 SKU 被 " + candidatesBySku.get(skuId).size()
-                    + " 个 BOM 同时声明为产出（" + joinCodes(candidatesBySku.get(skuId))
-                    + "），本次按编码序取第一个（" + candidate.code() + "）展开。"
-                    + "请检查是不是有重复的 BOM 定义"
-                : "子装配：按 " + candidate.code() + " 的 " + subVersionNo + " 继续展开";
+            note = (ambiguous
+                    ? "这个成品 SKU 被 " + candidatesBySku.get(skuId).size()
+                        + " 个 BOM 同时声明为产出（" + joinCodes(candidatesBySku.get(skuId))
+                        + "），本次按编码序取第一个（" + candidate.code() + "）"
+                    : "子装配：" + candidate.code() + " 的 " + subVersionNo);
           }
         }
         out.add(
@@ -539,6 +521,30 @@ public class BomExplosionService {
         p.subBom() == null ? null : p.subBom().id(),
         p.subBom() == null ? null : p.subBom().code(), p.subVersionId(), p.subVersionNo(),
         p.ambiguousSubBom(), expanded, isCovered, truncated, p.role(), note);
+  }
+
+  /**
+   * 组合一行的说明。
+   *
+   * <p><b>基础说明永远保留在前面</b>：子 BOM 歧义告警（「被 2 个 BOM 同时声明为产出」）
+   * 与「子级用量按缺口递推」这类展开说明是**两件事**，后者一旦覆盖前者，
+   * 恰恰是在真正展开歧义行的那一刻把告警吞掉 —— 那正是最需要看见它的时刻。
+   */
+  private static String note(
+      Pending p, BigDecimal gap, boolean expand, boolean covered, boolean truncated, int maxDepth) {
+    StringBuilder out = new StringBuilder(p.note());
+    if (expand) {
+      out.append("；已按 ").append(p.subBom().code()).append(" 的 ").append(p.subVersionNo())
+          .append(" 继续展开（子级用量按本行缺口 ").append(plain(gap)).append(" 递推）");
+    } else if (covered) {
+      out.append("；可用 + 在途已覆盖本行需求，无需向下展开");
+    } else if (truncated) {
+      out.append("；已展开到第 ").append(maxDepth)
+          .append(" 层展开深度上限，这个组件仍是另一个 BOM 的成品（")
+          .append(p.subBom().code()).append(" 的 ").append(p.subVersionNo())
+          .append("），它的下级没有展开 —— 这份清单不完整");
+    }
+    return out.toString();
   }
 
   // ================================================================ 循环引用
