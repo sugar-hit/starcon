@@ -6635,6 +6635,474 @@
         }
       }
     },
+    "/warehouse/goods-receipt-discrepancies": {
+      "get": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "page_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "receiptId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "disposition",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "discrepancyType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "claimStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "intake",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyHandlingIntakeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/evidence": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "addEvidence",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyEvidenceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyEvidenceRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/decide": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "decide",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/close": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "close_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyHandlingCloseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "claim",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim/withdraw": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "withdrawClaim",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyClaimWithdrawRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim/submit": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "submitClaim",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyClaimSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/facilities": {
       "get": {
         "tags": [
@@ -9869,7 +10337,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "page_4",
+        "operationId": "page_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -11970,6 +12438,77 @@
         }
       }
     },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}": {
+      "get": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "detail_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/capabilities": {
+      "get": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "capabilities_9",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoodsReceiptDiscrepancyCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/facilities/options": {
       "get": {
         "tags": [
@@ -12006,7 +12545,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -18377,6 +18916,319 @@
           },
           "notes": {
             "type": "string"
+          }
+        }
+      },
+      "DiscrepancyHandlingIntakeRequest": {
+        "type": "object",
+        "properties": {
+          "discrepancyId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "DiscrepancyHandlingSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "disposition": {
+            "type": "string",
+            "nullable": true
+          },
+          "dispositionLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "acceptedQuantity": {
+            "type": "number"
+          },
+          "rejectedQuantity": {
+            "type": "number"
+          },
+          "evidenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimed": {
+            "type": "boolean"
+          },
+          "claimStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DiscrepancyEvidenceRequest": {
+        "type": "object",
+        "properties": {
+          "evidenceType": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "contentBase64": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyEvidenceRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "evidenceType": {
+            "type": "string"
+          },
+          "evidenceTypeLabel": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "uploadedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "dataUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyDecisionRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disposition": {
+            "type": "string"
+          },
+          "acceptedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "rejectedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "inboundQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fromQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyHandlingCloseRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyClaimRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimType": {
+            "type": "string"
+          },
+          "claimedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "claimedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyClaimWithdrawRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyClaimRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimCode": {
+            "type": "string"
+          },
+          "claimType": {
+            "type": "string"
+          },
+          "claimTypeLabel": {
+            "type": "string"
+          },
+          "claimedQuantity": {
+            "type": "number"
+          },
+          "claimedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "sourceRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "claimRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "withdrawnAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DiscrepancyClaimSubmitRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -25909,6 +26761,507 @@
             "type": "string"
           },
           "conservationNote": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyDependencyCapability": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyHandlingOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DiscrepancyHandlingPage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/DiscrepancyHandlingSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingRow"
+            }
+          },
+          "statusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
+            }
+          },
+          "downstream": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyDependencyCapability"
+            }
+          },
+          "qualityStatusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyQualityStatusOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DiscrepancyHandlingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "discrepancyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptCode": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "discrepancyType": {
+            "type": "string"
+          },
+          "discrepancyTypeLabel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "disposition": {
+            "type": "string",
+            "nullable": true
+          },
+          "dispositionLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "acceptedQuantity": {
+            "type": "number"
+          },
+          "rejectedQuantity": {
+            "type": "number"
+          },
+          "inboundQualityStatusName": {
+            "type": "string"
+          },
+          "evidenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "stockMoveCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimed": {
+            "type": "boolean"
+          },
+          "claimStatus": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DiscrepancyHandlingSummary": {
+        "type": "object",
+        "properties": {
+          "handlingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "decidedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "closedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "riskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "discrepancyQuantity": {
+            "type": "number"
+          },
+          "acceptedQuantity": {
+            "type": "number"
+          },
+          "rejectedQuantity": {
+            "type": "number"
+          },
+          "claimedAmount": {
+            "type": "number"
+          },
+          "evidenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unclaimedRiskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "earliestCreatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DiscrepancyQualityStatusOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyDispositionOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "allowedForRiskTypes": {
+            "type": "boolean"
+          },
+          "requiresInboundQualityStatus": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyFactRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "discrepancyType": {
+            "type": "string"
+          },
+          "discrepancyTypeLabel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "evidenceNote": {
+            "type": "string"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "DiscrepancyHandlingDetail": {
+        "type": "object",
+        "properties": {
+          "handling": {
+            "$ref": "#/components/schemas/DiscrepancyHandlingRow"
+          },
+          "discrepancy": {
+            "$ref": "#/components/schemas/DiscrepancyFactRow"
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyEvidenceRow"
+            }
+          },
+          "stockMoves": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyStockMoveRow"
+            }
+          },
+          "claim": {
+            "$ref": "#/components/schemas/DiscrepancyClaimRow"
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingTransition"
+            }
+          },
+          "allowedDispositions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyDispositionOption"
+            }
+          },
+          "sellableRuleNote": {
+            "type": "string"
+          },
+          "notPostedNote": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyHandlingTransition": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyStockMoveRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "fromQualityStatusName": {
+            "type": "string"
+          },
+          "toQualityStatusName": {
+            "type": "string"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "lotCode": {
+            "type": "string"
+          },
+          "transactionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "GoodsReceiptDiscrepancyCapabilities": {
+        "type": "object",
+        "properties": {
+          "statusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingTransition"
+            }
+          },
+          "dispositionOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyDispositionOption"
+            }
+          },
+          "riskDiscrepancyTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claimTypeOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
+            }
+          },
+          "evidenceTypeOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
+            }
+          },
+          "stockMoveDirectionOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
+            }
+          },
+          "downstream": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyDependencyCapability"
+            }
+          },
+          "qualityStatusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyQualityStatusOption"
+            }
+          },
+          "sellableRuleNote": {
+            "type": "string"
+          },
+          "claimNote": {
+            "type": "string"
+          },
+          "notPostedNote": {
+            "type": "string"
+          },
+          "revisionNote": {
             "type": "string"
           }
         }
