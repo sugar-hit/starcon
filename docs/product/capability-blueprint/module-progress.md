@@ -12,17 +12,17 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 83 |
+| 已交付 | 84 |
 | 进行中 | 0 |
-| **未开发** | **382** |
-| 完成率 | 17.8% |
+| **未开发** | **381** |
+| 完成率 | 18.1% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
-| **D3** | 5 | 0 | 35 | 40 |
+| **D3** | 6 | 0 | 34 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
@@ -38,7 +38,7 @@
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
-| 07 | 库存核算系统 | D3 | 5 | 31 |
+| 07 | 库存核算系统 | D3 | 6 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 0 | 27 |
@@ -267,7 +267,7 @@
 | 7.3.2.1 | 序列号 | /inventory/serials | D3 | 未开发 | — |
 | 7.4.1.1 | 调整单管理 | /inventory/adjustments | D3 | 未开发 | — |
 | 7.4.1.2 | 调整审批 | /inventory/adjustments | D3 | 未开发 | — |
-| 7.4.2.1 | 盘点单 | /inventory/count | D3 | 未开发 | — |
+| 7.4.2.1 | 盘点单 | /inventory/count | D3 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V59__warehouse_stocktake_sheet.sql`（stocktake_sheet / stocktake_task / stocktake_line 三表，tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT + 索引；版本按调度器预分配取 V59）；**冻结落成数据而不是查询**（本模块唯一红线「盘点时点必须冻结账面数，否则边盘边卖产生虚假差异」）：发起盘点那一刻把范围内 stock_bucket.on_hand 复制成 stocktake_line.book_on_hand，并由 DB 触发器 `stocktake_line_frozen` 把账面数与八个维度列钉成不可更新（拿到连接直接 UPDATE 也改不动，冻结是数据库不变量而非应用层承诺）；差异列是 generated column `counted_qty - book_on_hand`，人工赋值被 PG 直接拒绝；`stocktake_line_no_delete` 挡住删除（删一行等于让这张单从未盘过它）；进度三计数、三列合计与任务状态全部**由明细行派生**、表里无对应列（另存就要每次同步，漏同步一次会出现「任务显示已完成但还有行没盘」）；范围（哪些 bucket 进这次盘）与任务单元（怎么切任务）是**两个独立维度**，可组合出「按仓库盘 + 按库位发任务」；端点 8 个挂在 `/warehouse/inventory/stocktakes` 下：`GET /stocktakes` 列表（真分页）、`GET /stocktakes/capabilities` 范围维度接入情况、`GET /stocktakes/{id}` 详情+三列合计、`POST /stocktakes` 发起（冻结，拒绝空范围以免留下「盘过了没差异」的假单）、`GET /stocktakes/{id}/lines` 明细分页（PENDING/MATCH/GAIN/LOSS 四口径）、`POST /stocktakes/{id}/lines/{lineId}/count` 录入实盘（传 null 即撤销录入）、`GET /stocktakes/{id}/tasks` 任务列表、`POST /stocktakes/{id}/tasks/{taskId}/assign` 派工；写动作走 warehouse.inventory.update（冻结账面与录实盘都是写）；**盘点范围只给三种并如实说明另两种**：按仓库/按库位可筛出真正不同的任务集合；按类目在枚举里保留但**显式拒绝 422**（sku_ref 刻意不存类目、catalog 读取投影未接入，沿用 7.1.1.1 已建立的未接入维度约定：拒绝而不是返回空集）；**ABC 分类连枚举都不给** —— 全库 warehouse 与 catalog 两侧迁移加 db/schemas 均无任何 ABC 字段、也无动销率等可推导列，不臆造分位算法冒充已有数据，改由 capabilities 端点报 available=false 并在页面折叠区向用户讲清原因；不接受 frozenAt 请求参数（允许指定时刻等于允许「盘三天前的账」）；扫码做成手工录入加条码字段、不伪造扫码流程；集成测试 `StocktakeIntegrationTest` 19 例实跑 Testcontainers PostgreSQL 16（连接池压到 1），核心用例「冻结的账面数不被后续出入库改写」真的在发起盘点后出了一笔 −30 的出库，逐列断言账面合计纹丝不动、实盘 95、差异 −5，并核对当前余额确实已变成 70（证明那笔出入库真的发生了而非空转）；另有账面数/维度列直改被 DB 拒绝、差异列生成列被拒、明细行删除被拒、未录入差异为 NULL 而非 0、录入推进状态且可撤销后状态重算、四种差异筛选互斥、冻结时点连可读名一起冻结（之后 sku_ref 改名盘点单仍读得懂）、frozen_at 与 counted_at 零漂移（OffsetDateTime 绑定）、负实盘被 CHECK 拒绝、租户隔离三断言（两租户互不可见含列表/详情/明细/任务/录入全隔离、伪造 X-Tenant-Id 无效、A→B→A→B 交替复用同一条物理连接不串租户并逐张表确认 relforcerowsecurity）；页面 `/inventory/count` 工作区（stocktake-workspace.tsx + 纯函数 stocktake-model.ts 与 21 例单测）：冻结时刻与账面合计摆在第一屏 StatCard、账面/实盘/差异三列表格、未录入显破折号且差异只读、录入框含实盘数与可选条码、撤销录入、按任务进度表与取消派工、发起盘点表单按可用范围过滤并附不可用原因说明、加载态/错误态/无权限态/空态/搜索无结果态/分页俱全；api-proxy 白名单登记盘点全部形状（capabilities 排在 {id} 之前判别、路径上刻意没有 DELETE） |
 | 7.4.2.2 | 盘点差异处理 | /inventory/count | D3 | 未开发 | — |
 | 7.5.1.1 | 调拨单 | — | D3 | 未开发 | — |
 | 7.5.1.2 | 在途库存 | — | D3 | 未开发 | — |
