@@ -10,6 +10,11 @@ const destinations = [
   ['tenants', '租户列表', '查看你可进入的租户、切换工作空间并维护本租户基本信息'],
   ['members', '用户与成员', '管理本租户成员、启停状态和角色分配'],
   ['roles', '角色配置', '配置页面操作权限与数据范围'],
+  [
+    'role-assignments',
+    '角色分配',
+    '给成员分配角色，设定生效时间与法人、店铺、仓库、部门作用范围',
+  ],
   ['departments', '部门管理', '维护成员归属与部门数据范围'],
   ['children', '子租户管理', '创建独立工作空间并指定所有者'],
   ['hierarchy', '层级授权', '显式开通父租户对子租户数据的访问范围与有效期'],
@@ -132,10 +137,13 @@ export function IdentityWorkspace({
               // 租户列表对每个成员都开放：不知道自己属于哪些租户的人没法切换工作空间，
               // 所以它不受页面权限码过滤（服务端仍按成员关系裁剪，见 17.1.1.1）。
               // 层级授权是独立页面（不在 AdministrationPanel 的四类管理里），走自己的页面权限码。
+              // 角色分配同理：它有自己的页面权限码，与「角色配置」「成员管理」不是一回事。
               .filter(([key]) => {
                 if (key === 'tenants') return true;
                 if (key === 'audit') return hasPermission(session, 'identity.audit.read');
                 if (key === 'hierarchy') return hasPermission(session, 'tenant.hierarchy.read');
+                if (key === 'role-assignments')
+                  return hasPermission(session, 'identity.assignment.read');
                 return canManage(session, key as AdministrationKind);
               })
               .map(([key, label, description]) => (
