@@ -300,13 +300,18 @@ const services: readonly {
     // lines|report|audit|adjustments / adjustments/{id}(+submit|approve|reject|cancel|post)。
     // 同样**没有** DELETE：差异处理全程只追加审计，归因/调整单/审计行都不可删，
     // 放行一个删除形状会让「能不能把一条差异的痕迹抹掉」看起来是能。
+    // consignments 是 7.7.1.2 寄售与代销：capabilities / {id}(+lines|stock-view|settlements|
+    // settlement-window|returns|audit|activate|suspend|close) / {id}/lines/{lineId}/sales /
+    // settlements/{id}(+confirm) / returns/{id}(+execute|cancel)。
+    // 同样**没有** DELETE：销售事实与审计是凭据（append-only），协议行是结算的依据，
+    // 放行删除形状等于让「把一笔应付的痕迹抹掉」看起来是能。
     prefix: 'warehouse/',
     env: 'WAREHOUSE_URL',
     fallback: 'http://127.0.0.1:8084',
     pattern:
     // distribution / platform-observations / serials / lots / internal-access —— 这些路径此前漏登记，
     // 白名单只在浏览器端生效、单测直连服务层发现不了，漏一条就等于该页面在浏览器里拿代理 404。
-      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement))?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|stocktake-variances(?:\/capabilities|\/sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|\/adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
+      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement))?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|stocktake-variances(?:\/capabilities|\/sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|\/adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?|consignments(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:lines|stock-view|settlement-window|settlements|returns|audit|activate|suspend|close))?|\/lines\/[0-9a-f-]+\/sales|\/settlements(?:\/[0-9a-f-]+(?:\/confirm)?)?|\/returns(?:\/[0-9a-f-]+(?:\/(?:execute|cancel))?)?)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
   },
 ];
 
