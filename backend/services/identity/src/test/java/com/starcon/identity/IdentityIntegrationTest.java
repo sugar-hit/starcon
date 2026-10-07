@@ -400,7 +400,7 @@ class IdentityIntegrationTest extends IdentityIntegrationTestBase {
   void allTenantTablesForceRlsAndGlobalUsersRemainInaccessible() {
     assertThat(
             sql.fetch(
-                "select relname from pg_class join pg_namespace n on n.oid=relnamespace where n.nspname='public' and relkind='r' and relname in ('membership','role','role_permission','role_assignment','department','tenant_closure','identity_audit','identity_outbox','legal_entity','legal_entity_reference') and (not relrowsecurity or not relforcerowsecurity)"))
+                "select relname from pg_class join pg_namespace n on n.oid=relnamespace where n.nspname='public' and relkind='r' and relname in ('membership','role','role_permission','role_assignment','department','tenant_closure','identity_audit','identity_outbox','legal_entity','legal_entity_reference','tenant_hierarchy_grant') and (not relrowsecurity or not relforcerowsecurity)"))
         .isEmpty();
     var runtime =
         sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");

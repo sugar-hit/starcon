@@ -12791,7 +12791,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "list_7",
+        "operationId": "list_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -12881,7 +12881,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "create_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -13458,7 +13458,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "list_8",
+        "operationId": "list_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -13555,7 +13555,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "create_7",
+        "operationId": "create_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -19168,7 +19168,7 @@
         "tags": [
           "export-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "create_6",
         "parameters": [
           {
             "name": "Authorization",

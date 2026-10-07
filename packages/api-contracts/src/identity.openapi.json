@@ -304,6 +304,49 @@
         }
       }
     },
+    "/identity/hierarchy-authorizations/{id}": {
+      "put": {
+        "tags": [
+          "hierarchy-authorization-controller"
+        ],
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HierarchyGrantUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/departments/{id}": {
       "put": {
         "tags": [
@@ -750,6 +793,154 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/hierarchy-authorizations": {
+      "get": {
+        "tags": [
+          "hierarchy-authorization-controller"
+        ],
+        "operationId": "grants",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HierarchyGrantView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "hierarchy-authorization-controller"
+        ],
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HierarchyGrantInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/hierarchy-authorizations/{id}/revoke": {
+      "post": {
+        "tags": [
+          "hierarchy-authorization-controller"
+        ],
+        "operationId": "revoke",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/hierarchy-authorizations/check": {
+      "post": {
+        "tags": [
+          "hierarchy-authorization-controller"
+        ],
+        "operationId": "check",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessCheckInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessDecisionView"
+                }
+              }
+            }
           }
         }
       }
@@ -1543,6 +1734,45 @@
           }
         }
       },
+      "HierarchyGrantUpdate": {
+        "required": [
+          "accessLevel",
+          "domains",
+          "validFrom"
+        ],
+        "type": "object",
+        "properties": {
+          "domains": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "maxLength": 64,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          "accessLevel": {
+            "pattern": "READ|WRITE",
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "DepartmentInput": {
         "required": [
           "code",
@@ -1673,6 +1903,101 @@
           "referenceId": {
             "type": "string",
             "format": "uuid"
+          }
+        }
+      },
+      "HierarchyGrantInput": {
+        "required": [
+          "accessLevel",
+          "childTenantId",
+          "domains",
+          "validFrom"
+        ],
+        "type": "object",
+        "properties": {
+          "childTenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "domains": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "maxLength": 64,
+              "minLength": 0,
+              "type": "string"
+            }
+          },
+          "accessLevel": {
+            "pattern": "READ|WRITE",
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AccessCheckInput": {
+        "required": [
+          "domain"
+        ],
+        "type": "object",
+        "properties": {
+          "childTenantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "domain": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requireWrite": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AccessDecisionView": {
+        "type": "object",
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "accessLevel": {
+            "type": "string",
+            "nullable": true
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "grantId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
           }
         }
       },
@@ -2031,6 +2356,74 @@
           "referenceCount": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "HierarchyGrantView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "childTenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "childCode": {
+            "type": "string"
+          },
+          "childName": {
+            "type": "string"
+          },
+          "childStatus": {
+            "type": "string"
+          },
+          "domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "accessLevel": {
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "effectiveStatus": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revokedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "revokedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
           }
         }
       },

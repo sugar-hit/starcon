@@ -4,12 +4,7 @@ import Link from 'next/link';
 import { Avatar, Button } from '@starcon/ui';
 import { useIdentity } from './identity-shell';
 import { AdministrationPanel } from './administration-panel';
-import {
-  canManage,
-  hasPermission,
-  isOwner,
-  type AdministrationKind,
-} from './administration-model';
+import { canManage, hasPermission, isOwner, type AdministrationKind } from './administration-model';
 
 const destinations = [
   ['tenants', '租户列表', '查看你可进入的租户、切换工作空间并维护本租户基本信息'],
@@ -17,6 +12,7 @@ const destinations = [
   ['roles', '角色配置', '配置页面操作权限与数据范围'],
   ['departments', '部门管理', '维护成员归属与部门数据范围'],
   ['children', '子租户管理', '创建独立工作空间并指定所有者'],
+  ['hierarchy', '层级授权', '显式开通父租户对子租户数据的访问范围与有效期'],
   ['audit', '审计日志', '检索关键操作留痕、变更详情与导出'],
 ] as const;
 export function IdentityWorkspace({
@@ -135,13 +131,13 @@ export function IdentityWorkspace({
             {destinations
               // 租户列表对每个成员都开放：不知道自己属于哪些租户的人没法切换工作空间，
               // 所以它不受页面权限码过滤（服务端仍按成员关系裁剪，见 17.1.1.1）。
-              .filter(([key]) =>
-                key === 'tenants'
-                  ? true
-                  : key === 'audit'
-                    ? hasPermission(session, 'identity.audit.read')
-                    : canManage(session, key),
-              )
+              // 层级授权是独立页面（不在 AdministrationPanel 的四类管理里），走自己的页面权限码。
+              .filter(([key]) => {
+                if (key === 'tenants') return true;
+                if (key === 'audit') return hasPermission(session, 'identity.audit.read');
+                if (key === 'hierarchy') return hasPermission(session, 'tenant.hierarchy.read');
+                return canManage(session, key as AdministrationKind);
+              })
               .map(([key, label, description]) => (
                 <Link
                   key={key}

@@ -35,7 +35,10 @@ const services: readonly {
       // tenants 是 17.1.1.1 租户列表：只有 tenants 与 tenants/current 两个形状，
       //   **刻意不接 {uuid} 段** —— 按任意 tenant id 读取租户不是这个模块该有的能力，
       //   可切换集合只能由服务端从成员关系推导（实体目录 §4 的窄权限路径）。
-      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/references|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?)$/,
+      // hierarchy-authorizations 是 17.1.1.3 层级授权：授权记录的增改查与判定。
+      //   check 放在 {uuid} 之前判别（第一段是字面量，不是 UUID），两条不冲突；
+      //   {id}/revoke 是撤销（POST，见下），撤销是审计事件所以不是 DELETE。
+      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/references|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?|hierarchy-authorizations(?:\/check|\/[0-9a-f-]+(?:\/revoke)?)?)$/,
   },
   {
     prefix: 'catalog/',
