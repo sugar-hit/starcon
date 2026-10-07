@@ -112,13 +112,33 @@ public class InventoryLedgerService {
 
   /** 台账列表 + 期间净变动汇总。纯读：不写任何表。 */
   public InventoryLedgerPage page(InventoryLedgerQuery query) {
+    return page(query, null);
+  }
+
+  /**
+   * 台账列表 + 期间净变动汇总，可按批次收窄。纯读：不写任何表。
+   *
+   * <p>7.3.1.1 批次管理用它取「批次出入库历史」。刻意做成**重载**而不是往
+   * {@link InventoryLedgerQuery} 里加 {@code lotId} 字段：加字段会改掉那条 record 的构造签名，
+   * 台账控制器与它的集成测试里每一处构造都要跟着改，而那属于另一个模块的改动。
+   * 重载是纯加法：不传批次时行为与原来逐字节一致，既有调用方一个都不用动。
+   *
+   * <p><b>批次归属口径（写在这里是因为它决定了这个数怎么读）</b>：流水按 balance 记账，
+   * 而 {@code inventory_balance} 的唯一键是 SKU × 仓库 × 货权法人 × 质量状态，
+   * <b>不含批次</b>；批次是 {@code stock_bucket} 这一层的事实。所以一条分录不能被精确归属到
+   * 某一个批次 —— 同一 balance 行下可能同时挂着本批次与别的批次。本重载取的是
+   * 「该批次当前所在 bucket 的 balance 行上发生过的全部流水」，属**批次相关流水**；
+   * 同一 balance 下并存多个批次时，其数量不可按批次拆分。要真正按批次记账就得给
+   * {@code inventory_entry} 加批次维度，那是台账表结构变更，不在本模块范围内。
+   */
+  public InventoryLedgerPage page(InventoryLedgerQuery query, UUID lotId) {
     int size = Math.min(MAX_PAGE_SIZE, Math.max(1, query.size() == null ? 50 : query.size()));
     int pageNumber = Math.max(0, query.page() == null ? 0 : query.page());
     checkRange(query);
 
     var where = new ArrayList<String>();
     var binds = new ArrayList<Object>();
-    conditions(query, where, binds);
+    conditions(query, lotId, where, binds);
     String sqlWhere = where.isEmpty() ? "" : " where " + String.join(" and ", where);
 
     // 总笔数只查业务单表本身：SKU/仓库是 exists 里的存在性过滤，不改变命中哪些业务单。
@@ -147,9 +167,9 @@ public class InventoryLedgerService {
             append(binds, size, (long) pageNumber * size).toArray());
 
     return new InventoryLedgerPage(
-        summary(query),
+        summary(query, lotId),
         rows.stream().map(InventoryLedgerService::row).toList(),
-        breakdown(query),
+        breakdown(query, lotId),
         refTypes(),
         scopeOf(query),
         scopeNote(query),
@@ -173,10 +193,10 @@ public class InventoryLedgerService {
    * <p>没有 SKU/仓库筛选时两者必然相等，这个等式就是账实核对的基线，所以直接算成
    * {@code onHandConserved} / {@code reservedConserved} 摆在响应里。
    */
-  private InventoryLedgerSummary summary(InventoryLedgerQuery query) {
+  private InventoryLedgerSummary summary(InventoryLedgerQuery query, UUID lotId) {
     var tWhere = new ArrayList<String>();
     var tBinds = new ArrayList<Object>();
-    conditions(query, tWhere, tBinds);
+    conditions(query, lotId, tWhere, tBinds);
     String tSqlWhere = tWhere.isEmpty() ? "" : " where " + String.join(" and ", tWhere);
 
     Record byTransaction =
@@ -201,7 +221,7 @@ public class InventoryLedgerService {
 
     var eWhere = new ArrayList<>(tWhere);
     var eBinds = new ArrayList<>(tBinds);
-    dimensionConditions(query, "", eWhere, eBinds);
+    dimensionConditions(query, lotId, "", eWhere, eBinds);
     String eSqlWhere = eWhere.isEmpty() ? "" : " where " + String.join(" and ", eWhere);
     Record byEntry =
         sql.fetchOne(
@@ -267,10 +287,10 @@ public class InventoryLedgerService {
    * <p>只返回期间真实发生过的类型：没有发生的类型报 0 笔会让人误判"这个期间查过了、没有这类业务"，
    * 与 7.1.1.1 把「未设阈值」和「未超储」分开是同一条纪律。
    */
-  private List<InventoryLedgerBreakdown> breakdown(InventoryLedgerQuery query) {
+  private List<InventoryLedgerBreakdown> breakdown(InventoryLedgerQuery query, UUID lotId) {
     var where = new ArrayList<String>();
     var binds = new ArrayList<Object>();
-    conditions(query, where, binds);
+    conditions(query, lotId, where, binds);
     String sqlWhere = where.isEmpty() ? "" : " where " + String.join(" and ", where);
     return sql.fetch(
             "select t.kind,count(*) as transaction_count,count(e.id) as entry_count,"
@@ -385,7 +405,7 @@ public class InventoryLedgerService {
    * 一行就不再等于一笔真实发生过的业务了（见类注释的粒度说明）。
    */
   private void conditions(
-      InventoryLedgerQuery query, List<String> where, List<Object> binds) {
+      InventoryLedgerQuery query, UUID lotId, List<String> where, List<Object> binds) {
     // 时间范围排在最前：`?::timestamptz` 后面一定还跟着别的绑定，避免 cast 落在绑定序列末位
     // 时 jOOQ 整体错位一格（V1/V2 与 identity 的写入都遵守同一条纪律）。
     if (query.from() != null) {
@@ -422,7 +442,7 @@ public class InventoryLedgerService {
       where.add("t.actor_id = ?");
       binds.add(query.actorId());
     }
-    dimensionConditions(query, "2", where, binds);
+    dimensionConditions(query, lotId, "2", where, binds);
   }
 
   /**
@@ -433,7 +453,7 @@ public class InventoryLedgerService {
    *     同一段条件在列表查询（exists 内）与分录口径汇总里都要用，别名参数化才不用写两遍。
    */
   private void dimensionConditions(
-      InventoryLedgerQuery query, String prefix, List<String> where, List<Object> binds) {
+      InventoryLedgerQuery query, UUID lotId, String prefix, List<String> where, List<Object> binds) {
     var conditions = new ArrayList<String>();
     if (query.skuId() != null) {
       conditions.add("bal" + prefix + ".sku_id = ?");
@@ -442,6 +462,27 @@ public class InventoryLedgerService {
     if (query.warehouseId() != null) {
       conditions.add("bal" + prefix + ".warehouse_id = ?");
       binds.add(query.warehouseId());
+    }
+    // 批次（7.3.1.1 传入）。批次不在 balance 上，只能借 stock_bucket 的 lot_id 反查：
+    // 「这条分录所挂的 balance 行，当前是否有本批次的货」。用 exists 而不是 join ——
+    // 一个 balance 行可能挂着多个批次，join 会把同一条分录复制成多行，计数与求和都会翻倍。
+    // 两种前缀下 bal{prefix} 都已 join，所以这句不需要区分主查询与子查询。
+    if (lotId != null) {
+      conditions.add(
+          "exists (select 1 from stock_bucket lb"
+              + prefix
+              + " where lb"
+              + prefix
+              + ".tenant_id=bal"
+              + prefix
+              + ".tenant_id and lb"
+              + prefix
+              + ".balance_id=bal"
+              + prefix
+              + ".id and lb"
+              + prefix
+              + ".lot_id=?)");
+      binds.add(lotId);
     }
     if (query.keyword() != null && !query.keyword().isBlank()) {
       conditions.add(

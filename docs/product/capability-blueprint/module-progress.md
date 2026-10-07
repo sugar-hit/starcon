@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **381** |
 | 完成率 | 18.1% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 20 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -262,7 +245,7 @@
 | 7.2.1.3 | 释放与过期 | /inventory/reservation | D3 | 未开发 | — |
 | 7.2.2.1 | 可售量口径 | — | D3 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V56__warehouse_sellable_policy.sql`（sellable_policy 口径分档 + sellable_policy_warehouse 挂仓，两表 tenant_id NOT NULL + FORCE RLS isolation + GRANT 与 starcon_app REVOKE；**口径内容写定后不可改**由 guard_sellable_policy_immutable 触发器钉死，改口径只能收口旧档 + 开新档，与 17.5.1.1 业务参数的 effective_from 分档生效同一套约定 —— 因此刻意不建第二张变更历史表，已关区间的那些行就是历史，它永远是「当时真正生效的防线」的凭据；guard_sellable_policy_interval 触发器挡住同槽位生效区间重叠并报出冲突档 id（重叠的区间在解析时没有唯一答案）；缓冲比例 numeric(9,6) 且 CHECK 取值 0~1 落在 DB 层（禁浮点）；独占池键由服务按 EXCL-{referenceId} 派生并由 CHECK 钉死（人手填才可能把独占池写成共享池），共享池名不得占用 EXCL- 命名空间；REVOKE DELETE 挡住物理删除） · 端点 9 个挂在 `/warehouse/inventory/sellable-policies`：GET 列表（真分页 + effectiveOnly + 关键字）、GET `/effective`（按时刻解析生效档，SHOP > CHANNEL > DEFAULT 优先级，回退兜底与完全未配置都**如实报出**而不是静默按 0 处理）、GET `/pools`（池名册与安全判定）、GET `/pools/{poolKey}`（成员清单 + 仓构成 + 被平台口径排除掉的 FBA 量）、GET `/{id}` 详情、POST 新建、POST `/{id}/versions` 换版、POST `/{id}/retire` 作废、POST `/calculation` 按 SKU 试算（`InventoryController.java` + `SellablePolicyService.java` + `SellablePolicyModels.java`） · 页面 `/inventory/sellable-policies`（`apps/web/src/app/inventory/sellable-policies/page.tsx` + `components/inventory/sellable-policy-workspace.tsx` + `sellable-policy-model.ts`），api-proxy 放行 5 个读形状与 3 个动作、刻意不设 DELETE 段（能不能物理删掉一条防超卖配置的答案是不能） · 测试 `SellablePolicyIntegrationTest.java` 17 例实跑 Testcontainers PostgreSQL 16（连接池压到 1） **共享池与缓冲作为一组不可拆开测**：allocationRatio = 成员数 − 缓冲比例之和，两店铺各留 50% 缓冲时恰好为 1.0、余量为 0（判定 NO_HEADROOM），任一提到 80% 后回到 0.7、余量 30（GUARDED），各留 10% 时为 1.8、余量 −80（OVERSOLD）；超卖容忍额度内的负余量判 TOLERATED（有意为之）而不是配置错误。**口径逐项可计算**：仅自有仓时 FBA 的 60 件不进池容量且被排除量如实报出、改含 FBA 后容量变 160；include_in_transit 为真时发往该仓的在途 40 件计入、残次 500 件被**排除而不是扣减**（蓝图 7.1.1.3 原文）、buffer_ratio 边界 0/1/越界由 DB CHECK 拒；池容量按去重后的仓集合聚合（同一仓被两个共享成员引用只算一次）。其余用例覆盖分档生效（按时刻解析出不同档、旧档值原样保留）、未配置时拒绝回写、输入校验拒绝共享池名占用 EXCL- 命名空间与挂不存在的仓、effective_from 带 +08:00 偏移写入后断言读回 Instant 与偏移零漂移、端点权限码（改防超卖的最后一道防线挂 warehouse.inventory.update 而非 read，只有读权限返回 403）、逐张表断言 relforcerowsecurity 为真 · 跨服务边界（AGENTS.md 禁止跨服务 SQL/FK/视图）：店铺与渠道属 channel 服务，本模块只用 source_system + reference_id 逻辑定位键与写入时的可读名快照，不建外键也不查它的表；池容量所需的「哪些仓计入」挂在口径自己的挂仓表上，且 warehouse 没有 type 列（FBA 分类归 7.1.3.1 那条车道），因此 OWN/PLATFORM_FBA 分类标注在口径侧而不去改 warehouse 表语义 |
 | 7.2.2.2 | 安全库存 | — | D3 | 未开发 | — |
-| 7.3.1.1 | 批次管理 | /inventory/lots | D3 | 未开发 | — |
+| 7.3.1.1 | 批次管理 | /inventory/lots | D3 | 已交付 | 迁移 warehouse V57__warehouse_inventory_lot_archive.sql（**只补列、不另建批次档案表**：V2 的 inventory_lot 已被 stock_bucket 外键接成一等事实单位，另建表等于给同一批次制造两个真相来源；补 produced_on（date 业务日期）、origin（RECEIPT/MANUAL）、source_system + source_ref_id + source_ref_code 与 supplier_ref_id + supplier_name（**跨服务定位键，不建外键不联查**采购 6/收货 8）、notes，加 ck_lot_origin_source 等三条 CHECK 与到期/来源/供应商三个部分索引；**本迁移刻意不写 RLS/GRANT**：inventory_lot 的 FORCE RLS 与授权在 V2 已成立，ADD COLUMN 不失效，由租户隔离三断言实跑证明）+ 端点 GET /warehouse/inventory/lots（档案列表 + 全量汇总 + 三组下拉词表，筛选 SKU/仓库/状态/建立方式/来源系统/供应商/关键字/N 天内到期/在手大于 0，排序白名单 7 键，非法码当场 400）、GET /warehouse/inventory/lots/{id} 档案详情、GET /warehouse/inventory/lots/{id}/distribution（**真从 stock_bucket 按批次 LEFT JOIN LATERAL 聚合**仓库级与库位级切片，仓库合计与库位合计均须等于总计）、GET /warehouse/inventory/lots/{id}/movements（**复用 7.1.2.1 台账** page(query, lotId) 重载，不另写流水查询；因 inventory_entry/inventory_balance 均无 lot_id，响应带 attribution=BALANCE_GRANULAR 与口径说明）、POST 建批次（收货生成与手工建共用，RECEIPT 必须给来源单据，批号冲突 DB 裁决后翻成 409）、PUT 改属性（批号/SKU/origin 为身份不可改，null 表示不修改）+ 页面 /inventory/lots（汇总卡、筛选、列表、展开看库存分布与出入库历史、新建批次对话框、过期与状态分列、无效期批次不消失、归属口径常驻显示、加载/空/错误三态）+ 测试 InventoryLotIntegrationTest 14 例（业务日期原样落库、RECEIPT 必带来源、批号冲突 409、效期写反 400、跨租户 SKU 拒绝、部分更新与 updated_at 推进、仓库与库位合计双等于总计、同库位两种质量状态分行、零库存批次仍在列表、过期按日历事实而 status 仍 ACTIVE、效期排序 nulls last、合计不受分页影响、非法筛选 400、流水复用只列本批次所在余额行、端点 400/403/401、租户隔离三断言池压到 1）+ inventory-lot-model.test.ts 10 例。批次与序列号保持两个独立实体（序列号属 7.3.1.2，本模块无任何序列号字段） |
 | 7.3.1.2 | 效期与先进先出 | /inventory/lots | D3 | 未开发 | — |
 | 7.3.2.1 | 序列号 | /inventory/serials | D3 | 未开发 | — |
 | 7.4.1.1 | 调整单管理 | /inventory/adjustments | D3 | 未开发 | — |
@@ -557,3 +540,8 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 83 |
+| **未开发** | **382** |
+| 完成率 | 17.8% |
+| **D3** | 5 | 0 | 35 | 40 |
+| 07 | 库存核算系统 | D3 | 5 | 31 |

@@ -297,7 +297,7 @@ public class InventoryController {
    * <p>不接受不带偏移的裸时间串：那样"2026-10-01T00:00:00"会被按运行环境的本地时区猜，
    * 同一份请求在开发机与 K8s 里会筛出不同区间，台账的期间汇总就没法复现了。
    */
-  private static OffsetDateTime moment(String value) {
+  static OffsetDateTime moment(String value) {
     if (value == null || value.isBlank()) {
       return null;
     }
@@ -320,7 +320,7 @@ public class InventoryController {
    * <p>注意 actorId 与 selfOnly 都来自**已认证身份**，不接受任何请求参数传入 ——
    * 否则"只看我自己的流水"会变成一个能越权的开关。
    */
-  private static boolean selfOnly(AccessService.Access a, String permission) {
+  static boolean selfOnly(AccessService.Access a, String permission) {
     var read = permission.substring(0, permission.lastIndexOf('.')) + ".read";
     List<AccessService.Grant> grants = a.grants() == null ? List.of() : a.grants();
     String scope =
