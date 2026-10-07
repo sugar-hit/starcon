@@ -632,17 +632,11 @@ if (cmd === 'merge-ready') {
     process.exit(0);
   }
 
-  // 只允许在集成分支上并入；主工作区此前可能停在某条车道分支上，先切回来
+  // 只允许在集成分支上并入；主工作区此前可能停在某条车道分支上，先切回来。
+  // 顺序很重要：编排器自己那几个文件在工作区里是「未跟踪但内容与集成头完全一致」的状态
+  // （在途模块还没并入集成头），git checkout 会以「会被覆盖」拒绝。
+  // 所以必须先把它们处理掉，再做干净度检查 —— 反过来做会永远卡住。
   const current = git(['rev-parse', '--abbrev-ref', 'HEAD']);
-  const dirty = git(['status', '--porcelain']);
-  if (dirty) {
-    console.error(`✗ 主工作区不干净，拒绝切分支：\n${dirty}`);
-    process.exit(1);
-  }
-
-  // 编排器这几个文件在工作区里可能是「未跟踪但内容与集成头完全一致」的状态
-  // （在途模块还没并入集成头，切换分支时 git 会以「会被覆盖」拒绝）。
-  // 逐个比对内容，一致才删，不一致就保留并报错 —— 绝不盲删。
   const TOOLING = [
     'tools/module-progress/lane.mjs',
     'tools/module-progress/merge-union.mjs',
@@ -659,6 +653,12 @@ if (cmd === 'merge-ready') {
     const onDisk = existsSync(abs) ? readFileSync(abs, 'utf8') : null;
     if (inBranch !== null && inBranch === onDisk) rmSync(abs);
     else console.error(`⚠ ${f} 未跟踪且内容与集成头不同，已保留，请人工确认`);
+  }
+
+  const dirty = git(['status', '--porcelain']);
+  if (dirty) {
+    console.error(`✗ 主工作区不干净，拒绝切分支：\n${dirty}`);
+    process.exit(1);
   }
 
   if (current !== state.integrationBranch) git(['checkout', state.integrationBranch]);
