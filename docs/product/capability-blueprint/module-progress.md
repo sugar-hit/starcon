@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **387** |
 | 完成率 | 16.8% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 76 | 0 | 4 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 18 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -254,7 +237,7 @@
 | 7.1.1.1 | 库存总览 | /inventory | D3 | 已交付 | 迁移 warehouse V1__warehouse_inventory_core.sql（inventory_balance 生成列 available + RLS/GRANT、inventory_quality_status、inventory_transaction/entry append-only、inventory_transfer、inventory_policy）+ identity V8__warehouse_page_permissions + GET /warehouse/inventory/overview 与 /inventory/capabilities、阈值 CRUD /warehouse/inventory/policies + 下拉参照数据 /warehouse/{warehouses,legal-entities,skus,quality-statuses} + 页面 /inventory（总览工作区：合计卡 + 分布图 + 汇总表 + 行内展开 + 阈值维护）+ 测试 InventoryOverviewIntegrationTest 30 例（含总览合计==明细逐行求和、守恒式、租户隔离三断言）+ inventory-model.test.ts 15 例 |
 | 7.1.1.2 | 库存明细 | /inventory | D3 | 已交付 | 迁移 warehouse V2__warehouse_inventory_bucket.sql（stock_bucket 六维最小事实单位 + 复合外键锁定归属 balance + 延迟约束触发器守恒 + guard_bucket_movement_time 版本/业务时间 + RLS/GRANT，warehouse_location 库位档案、inventory_lot 批次档案）+ GET /warehouse/inventory/buckets（法人→仓库→库位→SKU→批次逐级下钻，含 summary/reconciliation/actions）、GET /warehouse/inventory/bucket-actions、下拉 /warehouse/{locations,lots} + 页面 /inventory（总览 ↔ 库位明细双视图，总览行按 detailHref 契约下钻，明细含加载/空/错误态、账实核对告警、未分解提示、行内操作入口）+ 测试 InventoryBucketIntegrationTest 31 例（六维形状、DB 级守恒与不平拒绝、版本与业务时间口径、逐级下钻真实生效、租户隔离三断言） |
 | 7.1.1.3 | 可用量计算 | /inventory | D3 | 未开发 | — |
-| 7.1.2.1 | 库存流水台账 | — | D3 | 未开发 | — |
+| 7.1.2.1 | 库存流水台账 | — | D3 | 已交付 | 迁移 warehouse V51__warehouse_inventory_ledger.sql（**不建新表**：台账是 append-only 台账的只读面，事实表与 append-only 触发器、RLS、REVOKE 在 V1 已成立；只补台账查询路径索引：occurred_at 倒序翻页、kind 与 ref_type 两个低基数字段的时间复合索引、entry 带 INCLUDE 的聚合索引）+ 端点 GET /warehouse/inventory/ledger（时间范围左闭右开、SKU、仓库、业务类型、来源单据类型、关键字、排序、分页；返回行口径与分录口径**两套净变动**并在无维度筛选时恒等，即 7.1.2.2 核对基线）、GET /warehouse/inventory/ledger/{id} 分录下钻（跨仓户 404 不泄露存在性）、GET /warehouse/inventory/ledger/ref-types 来源单据类型词表 + 页面 /inventory/ledger（7.1.1.2「查看流水」入口契约地址）与 /inventory 页内第三个页签（筛选、期间净变动、按类型分组、列表、下钻分录、空分录告警、数据范围 SELF 提示、加载/空/错误三态）+ 测试 InventoryLedgerIntegrationTest 21 例（数量符号正负、跨仓一笔不被维度筛选切成半个数、时间范围左闭右开与 +08:00 时区零漂移、非法业务类型与排序键 400、翻页决胜键不重不漏、流水与分录 UPDATE/DELETE 被 DB 拒绝、空分录业务单独计数、租户隔离三断言）+ inventory-model.test.ts 16 例 |
 | 7.1.2.2 | 账实核对 | — | D3 | 未开发 | — |
 | 7.1.3.1 | 多仓分布视图 | — | D3 | 未开发 | — |
 | 7.2.1.1 | 预占需求列表 | /inventory/reservation | D3 | 未开发 | — |
@@ -557,3 +540,10 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 77 |
+| **未开发** | **388** |
+| 完成率 | 16.6% |
+| **D1–D2** | 74 | 0 | 6 | 80 |
+| **D3** | 3 | 0 | 37 | 40 |
+| 07 | 库存核算系统 | D3 | 3 | 31 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 16 | 29 |

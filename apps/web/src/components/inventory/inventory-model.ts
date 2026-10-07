@@ -3,10 +3,14 @@ import type {
   BucketRow,
   DimensionCapability,
   InventoryBucketDetail,
+  InventoryLedgerDrill,
+  InventoryLedgerPage,
+  InventoryLedgerRow,
   InventoryOverview,
   InventoryPolicy,
   InventoryPolicyInput,
   InventoryPolicySaved,
+  InventoryRefType,
   LegalEntityRef,
   LocationRef,
   LotRef,
@@ -95,6 +99,23 @@ export function savePolicy(id: string | null, input: InventoryPolicyInput) {
 
 export function deletePolicy(id: string) {
   return api<{ deleted: boolean }>(`warehouse/inventory/policies/${id}`, 'DELETE');
+}
+
+// ------------------------------------------------------------ 7.1.2.1 库存流水台账
+
+export function fetchLedger(params: LedgerParams) {
+  return api<InventoryLedgerPage>(`warehouse/inventory/ledger${ledgerQuery(params)}`);
+}
+
+/** 分录下钻：一笔业务的全部带符号分录。 */
+export function fetchLedgerDrill(transactionId: string) {
+  return api<InventoryLedgerDrill>(
+    `warehouse/inventory/ledger/${encodeURIComponent(transactionId)}`,
+  );
+}
+
+export function fetchLedgerRefTypes() {
+  return api<InventoryRefType[]>('warehouse/inventory/ledger/ref-types');
 }
 
 // ------------------------------------------------------------ 查询参数
@@ -202,6 +223,157 @@ export function bucketQuery(params: BucketParams) {
   if (params.size !== undefined) parts.push(`size=${params.size}`);
   return parts.length ? `?${parts.join('&')}` : '';
 }
+
+/** 7.1.2.1 台账查询条件：时间范围 / SKU / 仓库 / 业务类型 / 来源单据类型。 */
+export interface LedgerParams {
+  /** 发生时间下界（含），ISO-8601 带时区偏移，例如 2026-10-01T00:00:00+08:00。 */
+  from?: string;
+  /** 发生时间上界（不含）。 */
+  to?: string;
+  skuId?: string;
+  warehouseId?: string;
+  kinds?: string[];
+  refTypes?: string[];
+  keyword?: string;
+  sort?: string;
+  page?: number;
+  size?: number;
+}
+
+/**
+ * 台账查询串。
+ *
+ * <p>时间参数必须**带时区偏移**发出去：后端按 `timestamptz` 的绝对时刻筛选，
+ * 发一个不带偏移的裸时间会被服务端按运行环境时区猜，同一个请求在开发机和 K8s 里
+ * 会筛出不同区间，期间净变动就没法复现了。
+ */
+export function ledgerQuery(params: LedgerParams) {
+  const parts: string[] = [];
+  if (params.from) parts.push(`from=${encodeURIComponent(params.from)}`);
+  if (params.to) parts.push(`to=${encodeURIComponent(params.to)}`);
+  if (params.skuId) parts.push(`skuId=${encodeURIComponent(params.skuId)}`);
+  if (params.warehouseId) parts.push(`warehouseId=${encodeURIComponent(params.warehouseId)}`);
+  if (params.kinds?.length) {
+    // 同一参数名重复出现 = 多选；后端按 List<String> 接
+    params.kinds.forEach((k) => parts.push(`kinds=${encodeURIComponent(k)}`));
+  }
+  if (params.refTypes?.length) {
+    params.refTypes.forEach((r) => parts.push(`refTypes=${encodeURIComponent(r)}`));
+  }
+  if (params.keyword?.trim()) parts.push(`keyword=${encodeURIComponent(params.keyword.trim())}`);
+  if (params.sort) parts.push(`sort=${encodeURIComponent(params.sort)}`);
+  if (params.page !== undefined) parts.push(`page=${params.page}`);
+  if (params.size !== undefined) parts.push(`size=${params.size}`);
+  return parts.length ? `?${parts.join('&')}` : '';
+}
+
+/**
+ * 7.1.1.2 行内「查看流水」入口带过来的定位参数。
+ *
+ * <p>契约里 href 带的是 skuId / warehouseId / locationId / lotId 四个 bucket 维度，
+ * 但台账读的是 balance 口径 —— locationId 与 lotId 台账接不住（分录挂在 balance 行上，
+ * 不在库位/批次上），所以这里只认 skuId 与 warehouseId，多出来的参数静默丢掉。
+ * 前端把这份"哪些维度接得住"写死在这里，而不是把四个参数都原样转发后让用户对着一个
+ * 没有库位筛选的台账页发问。
+ */
+export interface LedgerDrill {
+  skuId: string;
+  warehouseId: string;
+}
+
+export function parseLedgerHref(href: string | null | undefined): LedgerDrill | null {
+  if (!href) return null;
+  const [raw] = href.split('?');
+  if (raw !== '/inventory/ledger') return null;
+  const params = new URLSearchParams(href.split('?')[1] ?? '');
+  const drill = {
+    skuId: params.get('skuId')?.trim() ?? '',
+    warehouseId: params.get('warehouseId')?.trim() ?? '',
+  };
+  return drill.skuId || drill.warehouseId ? drill : null;
+}
+
+/**
+ * 业务类型标签。
+ *
+ * <p>蓝图列了「入库、出库、预占、释放、调整、盘点、组装、调拨」八类业务，
+ * 而 `inventory_transaction.kind` 的 CHECK 约束只有八个码，盘点与组装当前由写入方
+ * 记成 ADJUSTMENT（差异体现在备注与分录构成上）。所以这里**不给盘点/组装造标签** ——
+ * 界面上的类型必须与库里真能筛出来的类型一一对应，否则会出现"有盘点单却筛不出盘点"。
+ * 调整这一行显式写明它同时承载盘点与组装，免得用户以为盘点漏记了。
+ */
+export const ledgerKindLabels: Record<string, string> = {
+  RECEIPT: '入库',
+  SHIPMENT: '出库',
+  ADJUSTMENT: '调整（含盘点 / 组装）',
+  TRANSFER_OUT: '调拨出',
+  TRANSFER_IN: '调拨入',
+  RETURN: '退货',
+  RESERVE: '预占',
+  RELEASE: '释放',
+};
+
+/** 业务类型下拉的固定选项。与 ledgerKindLabels 同源，不在第二处再写一份。 */
+export const ledgerKindOptions = Object.entries(ledgerKindLabels).map(([value, label]) => ({
+  value,
+  label,
+}));
+
+/**
+ * 带符号数量。
+ *
+ * <p>台账的核心是**数量符号**（入库正、出库负）：这里显式渲染 +/− 而不是靠颜色区分，
+ * 因为颜色在灰度打印与色觉障碍下不可用；颜色只是辅助。
+ */
+export function signed(value: number | null | undefined): string {
+  if (value === null || value === undefined) return '—';
+  const text = Math.abs(value).toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  if (value > 0) return `+${text}`;
+  if (value < 0) return `−${text}`;
+  return '0.00';
+}
+
+/** 数量符号对应的语义色 class：入库绿、出库红、预占琥珀（与 roleBadge 同一套观感）。 */
+export function signedTone(value: number | null | undefined): string {
+  if (value === null || value === undefined || value === 0) return 'text-muted-foreground';
+  return value > 0 ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300';
+}
+
+/**
+ * 期间净变动的展示口径说明。
+ *
+ * <p>行上的量是「这笔业务整笔的净变动」，而汇总里同时给了分录口径。两个口径不等时
+ * （通常是按 SKU/仓库筛过）差异是有解释的：那就是这笔业务在其它 SKU/仓库上的部分。
+ * 界面上把这句写出来，用户才不会以为数字算错了。
+ */
+export function grainNote(filtered: boolean): string {
+  return filtered
+    ? '行上的数量是**整笔业务**的净变动；已按 SKU / 仓库筛选时它不等于该维度的量，差额见汇总里的分录口径。'
+    : '行上的数量是**整笔业务**的净变动，与汇总的分录口径在无维度筛选时恒等。';
+}
+
+/**
+ * 一行流水的定位说明。
+ *
+ * <p>蓝图要求「每笔含来源单据」：refType 是来源单据类型、refId 是那张单据的 ID。
+ * 单据号在其它服务里，仓库服务只登记逻辑 ID，所以这里展示短 ID 并说明它的来源，
+ * 而不是显示一个空白格让人以为没记录。
+ */
+export function refLabel(row: InventoryLedgerRow): string {
+  return `${row.refType} · ${row.refId.slice(0, 8)}`;
+}
+
+/**
+ * 分录"当前余额"的说明。
+ *
+ * <p>下钻里显示的 balance 是**现在**多少，不是这笔业务发生时的多少（流水只追加，
+ * 要还原当时值得从更早的分录累加）。字段名带 Now，这里再补一句中文防止误读。
+ */
+export const balanceNowNote =
+  '当前余额（不是这笔业务发生时的值：流水只追加，历史值需从更早分录累加）';
 
 export const locationTypeLabels: Record<string, string> = {
   STORAGE: '存储',

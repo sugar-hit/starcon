@@ -1,9 +1,11 @@
 package com.starcon.warehouse;
 
 import static com.starcon.warehouse.InventoryBucketModels.*;
+import static com.starcon.warehouse.InventoryLedgerModels.*;
 import static com.starcon.warehouse.WarehouseModels.*;
 
 import jakarta.validation.Valid;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -35,18 +37,21 @@ public class InventoryController {
   private final InventoryBucketService buckets;
   private final WarehouseReferenceService references;
   private final InventoryAvailabilityService availability;
+  private final InventoryLedgerService ledger;
 
   public InventoryController(
       AccessService access,
       InventoryOverviewService overview,
       InventoryBucketService buckets,
       WarehouseReferenceService references,
-      InventoryAvailabilityService availability) {
+      InventoryAvailabilityService availability,
+      InventoryLedgerService ledger) {
     this.access = access;
     this.overview = overview;
     this.buckets = buckets;
     this.references = references;
     this.availability = availability;
+    this.ledger = ledger;
   }
 
   /**
@@ -142,6 +147,120 @@ public class InventoryController {
   public List<BucketAction> bucketActions(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
     return call(auth, "inventory.read", a -> buckets.actions());
+  }
+
+  /**
+   * 7.1.2.1 库存流水台账：流水列表 + 期间净变动汇总 + 分录下钻入口。
+   *
+   * <p>**只读端点**：蓝图要求「流水只追加不修改，错误用反向分录纠正」，所以本模块没有任何
+   * POST/PUT/DELETE 落在流水与分录上（那两张表在 V1 里已被 append-only 触发器与
+   * REVOKE UPDATE,DELETE 双重锁死）。
+   *
+   * <p>读权限沿用 {@code warehouse.inventory.read}：台账与总览/明细同源同权，
+   * 台账比明细更敏感（能看出谁在什么时候动了多少货），但**没有额外的读权限** ——
+   * 多设一个权限码只会让"能看到库存却看不到流水"变成一个没人记得开的开关。
+   *
+   * <p>时间参数按 ISO-8601 带偏移量解析（{@code 2026-10-01T00:00:00+08:00}），
+   * 与 {@code timestamptz} 列的存储口径一致；格式不对直接 400，不按服务器本地时区猜。
+   */
+  @GetMapping("/inventory/ledger")
+  public InventoryLedgerPage ledger(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestParam(required = false) String from,
+      @RequestParam(required = false) String to,
+      @RequestParam(required = false) UUID skuId,
+      @RequestParam(required = false) UUID warehouseId,
+      @RequestParam(required = false) List<String> kinds,
+      @RequestParam(required = false) List<String> refTypes,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false) String sort,
+      @RequestParam(required = false, defaultValue = "0") int page,
+      @RequestParam(required = false, defaultValue = "50") int size) {
+    return call(
+        auth,
+        "inventory.read",
+        a ->
+            ledger.page(
+                new InventoryLedgerQuery(
+                    moment(from),
+                    moment(to),
+                    skuId,
+                    warehouseId,
+                    kinds,
+                    refTypes,
+                    keyword,
+                    sort,
+                    page,
+                    size,
+                    a.userId(),
+                    selfOnly(a, "warehouse.inventory.read"))));
+  }
+
+  /**
+   * 分录下钻：一笔业务的全部带符号分录。
+   *
+   * <p>跨租户访问在 RLS 下表现为「查不到」，返回 404 而不是 403 —— 403 会泄露「这笔业务存在」。
+   */
+  @GetMapping("/inventory/ledger/{transactionId}")
+  public InventoryLedgerDrill ledgerDrill(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID transactionId) {
+    return call(auth, "inventory.read", a -> ledger.drill(transactionId));
+  }
+
+  /** 来源单据类型下拉。租户级词表，不随时间与其它筛选变化。 */
+  @GetMapping("/inventory/ledger/ref-types")
+  public List<InventoryRefType> ledgerRefTypes(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
+    return call(auth, "inventory.read", a -> ledger.refTypes());
+  }
+
+  /**
+   * 解析 ISO-8601 时间（必须带偏移量或 Z）。
+   *
+   * <p>不接受不带偏移的裸时间串：那样"2026-10-01T00:00:00"会被按运行环境的本地时区猜，
+   * 同一份请求在开发机与 K8s 里会筛出不同区间，台账的期间汇总就没法复现了。
+   */
+  private static OffsetDateTime moment(String value) {
+    if (value == null || value.isBlank()) {
+      return null;
+    }
+    try {
+      return OffsetDateTime.parse(value.trim());
+    } catch (java.time.format.DateTimeParseException e) {
+      throw new IllegalArgumentException(
+          "时间格式需为带时区的 ISO-8601，例如 2026-10-01T00:00:00+08:00：" + value);
+    }
+  }
+
+  /**
+   * 数据范围是否为「仅本人」。
+   *
+   * <p>蓝图把「用户数据范围」列为台账的输入之一，所以它必须真的生效，而不是只挂在页面上。
+   * 取值规则与 {@code AccessService.require} 同一套授权：命中的授权里只要有一条 ALL 就按 ALL，
+   * 有一条 DEPARTMENT 就按 DEPARTMENT（库存没有部门维度，DEPARTMENT 退化为本租户全量，
+   * 这个退化由 {@code dataScopeNote} 在响应里如实说明），否则按 SELF 收窄到本人操作过的业务。
+   *
+   * <p>注意 actorId 与 selfOnly 都来自**已认证身份**，不接受任何请求参数传入 ——
+   * 否则"只看我自己的流水"会变成一个能越权的开关。
+   */
+  private static boolean selfOnly(AccessService.Access a, String permission) {
+    var read = permission.substring(0, permission.lastIndexOf('.')) + ".read";
+    List<AccessService.Grant> grants = a.grants() == null ? List.of() : a.grants();
+    String scope =
+        grants.stream()
+            .filter(g -> g.permissions().contains(permission) && g.permissions().contains(read))
+            .map(AccessService.Grant::scopeMode)
+            .min(
+                java.util.Comparator.comparingInt(
+                    (String s) ->
+                        switch (s) {
+                          case "ALL" -> 0;
+                          case "DEPARTMENT" -> 1;
+                          default -> 2;
+                        }))
+            .orElse("ALL");
+    return "SELF".equals(scope);
   }
 
   /**
