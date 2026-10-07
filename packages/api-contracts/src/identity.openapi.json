@@ -156,6 +156,58 @@
         }
       }
     },
+    "/identity/members/{membershipId}/role-assignments/{roleId}": {
+      "put": {
+        "tags": [
+          "role-assignment-controller"
+        ],
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "membershipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleAssignmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/members/{id}": {
       "put": {
         "tags": [
@@ -309,7 +361,7 @@
         "tags": [
           "hierarchy-authorization-controller"
         ],
-        "operationId": "update",
+        "operationId": "update_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -507,6 +559,80 @@
         }
       }
     },
+    "/identity/accounting-books/{id}": {
+      "put": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "update_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountingBookInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/roles": {
       "get": {
         "tags": [
@@ -689,6 +815,99 @@
         }
       }
     },
+    "/identity/members/{membershipId}/role-assignments": {
+      "post": {
+        "tags": [
+          "role-assignment-controller"
+        ],
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "membershipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleAssignmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/members/{membershipId}/role-assignments/{roleId}/revoke": {
+      "post": {
+        "tags": [
+          "role-assignment-controller"
+        ],
+        "operationId": "revoke",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "membershipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/legal-entities": {
       "get": {
         "tags": [
@@ -743,6 +962,57 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/LegalEntityInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/legal-entities/{legalEntityId}/accounting-books": {
+      "post": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "create_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountingBookInput"
               }
             }
           },
@@ -834,7 +1104,7 @@
         "tags": [
           "hierarchy-authorization-controller"
         ],
-        "operationId": "create",
+        "operationId": "create_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -876,7 +1146,7 @@
         "tags": [
           "hierarchy-authorization-controller"
         ],
-        "operationId": "revoke",
+        "operationId": "revoke_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1253,6 +1523,83 @@
         }
       }
     },
+    "/identity/role-assignments": {
+      "get": {
+        "tags": [
+          "role-assignment-controller"
+        ],
+        "operationId": "assignments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "membershipId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoleAssignmentView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/role-assignment-scopes": {
+      "get": {
+        "tags": [
+          "role-assignment-controller"
+        ],
+        "operationId": "scopeOptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoleAssignmentScopeOption"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identity/permissions": {
       "get": {
         "tags": [
@@ -1280,6 +1627,46 @@
                   "items": {
                     "$ref": "#/components/schemas/PermissionView"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/members/{membershipId}/effective-permissions": {
+      "get": {
+        "tags": [
+          "role-assignment-controller"
+        ],
+        "operationId": "effective",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "membershipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleAssignmentMergeView"
                 }
               }
             }
@@ -1510,6 +1897,49 @@
         }
       }
     },
+    "/identity/accounting-books": {
+      "get": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "accountingBooks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountingBookView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/session": {
       "get": {
         "tags": [
@@ -1574,174 +2004,6 @@
           }
         }
       }
-    },
-    "/identity/accounting-books/{id}": {
-      "put": {
-        "tags": [
-          "accounting-book-controller"
-        ],
-        "operationId": "update",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AccountingBookInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "accounting-book-controller"
-        ],
-        "operationId": "delete",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/identity/legal-entities/{legalEntityId}/accounting-books": {
-      "post": {
-        "tags": [
-          "accounting-book-controller"
-        ],
-        "operationId": "create",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "legalEntityId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AccountingBookInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/accounting-books": {
-      "get": {
-        "tags": [
-          "accounting-book-controller"
-        ],
-        "operationId": "accountingBooks",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "legalEntityId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AccountingBookView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -1793,6 +2055,70 @@
               "minLength": 1,
               "type": "string"
             }
+          }
+        }
+      },
+      "RoleAssignmentInput": {
+        "required": [
+          "effectiveFrom",
+          "roleId",
+          "scopeMode",
+          "scopes"
+        ],
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeMode": {
+            "pattern": "ALL|SELF|DEPARTMENT",
+            "type": "string"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentScopeInput"
+            }
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "RoleAssignmentScopeInput": {
+        "required": [
+          "scopeId",
+          "scopeType"
+        ],
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "pattern": "LEGAL_ENTITY|SHOP|WAREHOUSE|DEPARTMENT",
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "description": "范围名称；法人与部门由服务端覆写为真实编码，店铺与仓库必填",
+            "nullable": true
           }
         }
       },
@@ -1996,6 +2322,77 @@
             "maxLength": 100,
             "minLength": 0,
             "type": "string"
+          },
+          "status": {
+            "pattern": "ACTIVE|SUSPENDED",
+            "type": "string"
+          }
+        }
+      },
+      "AccountingBookInput": {
+        "required": [
+          "baseCurrency",
+          "bookType",
+          "code",
+          "firstPeriodStart",
+          "name",
+          "periodType",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "pattern": "[A-Z0-9_-]{1,64}",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "bookType": {
+            "pattern": "BOOK|CASH|BANK",
+            "type": "string"
+          },
+          "baseCurrency": {
+            "minLength": 1,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "amountScale": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "amountRounding": {
+            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
+            "type": "string"
+          },
+          "quantityScale": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantityRounding": {
+            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
+            "type": "string"
+          },
+          "periodType": {
+            "pattern": "MONTH|WEEK|QUARTER",
+            "type": "string"
+          },
+          "fiscalYearStartMonth": {
+            "maximum": 12,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstPeriodStart": {
+            "type": "string",
+            "format": "date-time"
           },
           "status": {
             "pattern": "ACTIVE|SUSPENDED",
@@ -2425,6 +2822,120 @@
           }
         }
       },
+      "RoleAssignmentScopeView": {
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "type": "string",
+            "description": "范围类型",
+            "enum": [
+              "LEGAL_ENTITY",
+              "SHOP",
+              "WAREHOUSE",
+              "DEPARTMENT"
+            ]
+          },
+          "scopeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeCode": {
+            "type": "string"
+          }
+        }
+      },
+      "RoleAssignmentView": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roleCode": {
+            "type": "string"
+          },
+          "roleName": {
+            "type": "string"
+          },
+          "roleStatus": {
+            "type": "string"
+          },
+          "scopeMode": {
+            "type": "string",
+            "description": "范围模式",
+            "enum": [
+              "ALL",
+              "SELF",
+              "DEPARTMENT"
+            ]
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentScopeView"
+            }
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "effectiveStatus": {
+            "type": "string"
+          },
+          "assignedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "revokedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "revokedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "RoleAssignmentScopeOption": {
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "type": "string"
+          },
+          "scopeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "PermissionView": {
         "type": "object",
         "properties": {
@@ -2472,6 +2983,111 @@
           },
           "owner": {
             "type": "boolean"
+          }
+        }
+      },
+      "RoleAssignmentInactiveReason": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roleCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "description": "未参与合并的原因",
+            "enum": [
+              "PENDING",
+              "EXPIRED",
+              "REVOKED",
+              "ROLE_INACTIVE"
+            ]
+          }
+        }
+      },
+      "RoleAssignmentMergeView": {
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "assignmentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "effectiveCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mergeRule": {
+            "type": "string"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentMergedPermission"
+            }
+          },
+          "inactive": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentInactiveReason"
+            }
+          }
+        }
+      },
+      "RoleAssignmentMergedPermission": {
+        "type": "object",
+        "properties": {
+          "permissionCode": {
+            "type": "string"
+          },
+          "pageCode": {
+            "type": "string"
+          },
+          "pageName": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "mergedScopeMode": {
+            "type": "string",
+            "description": "合并后的范围模式",
+            "enum": [
+              "ALL",
+              "SELF",
+              "DEPARTMENT"
+            ]
+          },
+          "sourceRoles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scopeObjects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentScopeView"
+            }
+          },
+          "mergeRule": {
+            "type": "string",
+            "description": "合并规则",
+            "enum": [
+              "SINGLE",
+              "UNION",
+              "ABSORBED_BY_TENANT_SCOPE"
+            ]
           }
         }
       },
@@ -2769,77 +3385,6 @@
             "additionalProperties": {
               "type": "object"
             }
-          }
-        }
-      },
-      "AccountingBookInput": {
-        "required": [
-          "baseCurrency",
-          "bookType",
-          "code",
-          "firstPeriodStart",
-          "name",
-          "periodType",
-          "status"
-        ],
-        "type": "object",
-        "properties": {
-          "code": {
-            "minLength": 1,
-            "pattern": "[A-Z0-9_-]{1,64}",
-            "type": "string"
-          },
-          "name": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string"
-          },
-          "bookType": {
-            "pattern": "BOOK|CASH|BANK",
-            "type": "string"
-          },
-          "baseCurrency": {
-            "minLength": 1,
-            "pattern": "[A-Z]{3}",
-            "type": "string"
-          },
-          "amountScale": {
-            "maximum": 6,
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32"
-          },
-          "amountRounding": {
-            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
-            "type": "string"
-          },
-          "quantityScale": {
-            "maximum": 6,
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32"
-          },
-          "quantityRounding": {
-            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
-            "type": "string"
-          },
-          "periodType": {
-            "pattern": "MONTH|WEEK|QUARTER",
-            "type": "string"
-          },
-          "fiscalYearStartMonth": {
-            "maximum": 12,
-            "minimum": 1,
-            "type": "integer",
-            "format": "int32"
-          },
-          "firstPeriodStart": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "status": {
-            "pattern": "ACTIVE|SUSPENDED",
-            "type": "string"
           }
         }
       },
