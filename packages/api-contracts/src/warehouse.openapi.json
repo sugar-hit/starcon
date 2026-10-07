@@ -11,6 +11,94 @@
     }
   ],
   "paths": {
+    "/warehouse/inventory/transfers/{orderId}": {
+      "get": {
+        "tags": [
+          "inventory-transfer-controller"
+        ],
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "inventory-transfer-controller"
+        ],
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferOrderUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferOrderSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/policies/{id}": {
       "put": {
         "tags": [
@@ -88,6 +176,438 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/lots/{lotId}": {
+      "get": {
+        "tags": [
+          "inventory-lot-controller"
+        ],
+        "operationId": "archive",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "lotId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LotArchiveRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "inventory-lot-controller"
+        ],
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "lotId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LotArchiveUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LotArchiveSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/transfers": {
+      "get": {
+        "tags": [
+          "inventory-transfer-controller"
+        ],
+        "operationId": "page",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "fromWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "toWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "inventory-transfer-controller"
+        ],
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferOrderCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferOrderSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/transfers/{orderId}/ship": {
+      "post": {
+        "tags": [
+          "inventory-transfer-controller"
+        ],
+        "operationId": "ship",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferShipRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferOrderSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/transfers/{orderId}/receive": {
+      "post": {
+        "tags": [
+          "inventory-transfer-controller"
+        ],
+        "operationId": "receive",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferReceiveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferOrderSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/transfers/{orderId}/confirm": {
+      "post": {
+        "tags": [
+          "inventory-transfer-controller"
+        ],
+        "operationId": "confirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferOrderActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferOrderSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/transfers/{orderId}/close": {
+      "post": {
+        "tags": [
+          "inventory-transfer-controller"
+        ],
+        "operationId": "close",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferCloseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferOrderSaved"
+                }
+              }
+            }
           }
         }
       }
@@ -542,6 +1062,230 @@
         }
       }
     },
+    "/warehouse/inventory/platform-observations": {
+      "post": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "recordPlatformObservation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformObservationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformObservationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/lots": {
+      "get": {
+        "tags": [
+          "inventory-lot-controller"
+        ],
+        "operationId": "lots",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "sourceSystem",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "supplierRefId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expiringWithinDays",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "inStock",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LotArchivePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "inventory-lot-controller"
+        ],
+        "operationId": "create_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LotArchiveCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LotArchiveSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/availability": {
       "post": {
         "tags": [
@@ -814,6 +1558,90 @@
                   "items": {
                     "$ref": "#/components/schemas/LegalEntityRef"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/transfers/{orderId}/movements": {
+      "get": {
+        "tags": [
+          "inventory-transfer-controller"
+        ],
+        "operationId": "movements",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferMovements"
                 }
               }
             }
@@ -1260,6 +2088,169 @@
         }
       }
     },
+    "/warehouse/inventory/lots/{lotId}/movements": {
+      "get": {
+        "tags": [
+          "inventory-lot-controller"
+        ],
+        "operationId": "movements_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "lotId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "kinds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "refTypes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LotMovements"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/lots/{lotId}/distribution": {
+      "get": {
+        "tags": [
+          "inventory-lot-controller"
+        ],
+        "operationId": "distribution",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "lotId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LotDistribution"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/ledger": {
       "get": {
         "tags": [
@@ -1449,6 +2440,107 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/InventoryRefType"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/distribution": {
+      "get": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "distribution_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "spuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lookbackDays",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultiWarehouseDistribution"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/distribution/spus": {
+      "get": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "distributionSpus",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DistributionSpuRef"
                   }
                 }
               }
@@ -1653,586 +2745,103 @@
           }
         }
       }
-    },
-    "/warehouse/inventory/platform-observations": {
-      "post": {
-        "tags": [
-          "inventory-controller"
-        ],
-        "operationId": "recordPlatformObservation",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PlatformObservationInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PlatformObservationSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/distribution": {
-      "get": {
-        "tags": [
-          "inventory-controller"
-        ],
-        "operationId": "distribution",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "spuId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "legalEntityId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "lookbackDays",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/MultiWarehouseDistribution"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/distribution/spus": {
-      "get": {
-        "tags": [
-          "inventory-controller"
-        ],
-        "operationId": "distributionSpus",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DistributionSpuRef"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/lots/{lotId}": {
-      "get": {
-        "tags": [
-          "inventory-lot-controller"
-        ],
-        "operationId": "archive",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "lotId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LotArchiveRow"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "inventory-lot-controller"
-        ],
-        "operationId": "update",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "lotId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LotArchiveUpdateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LotArchiveSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/lots": {
-      "get": {
-        "tags": [
-          "inventory-lot-controller"
-        ],
-        "operationId": "lots",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "origin",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "sourceSystem",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "supplierRefId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "expiringWithinDays",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "inStock",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LotArchivePage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "inventory-lot-controller"
-        ],
-        "operationId": "create",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LotArchiveCreateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LotArchiveSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/lots/{lotId}/movements": {
-      "get": {
-        "tags": [
-          "inventory-lot-controller"
-        ],
-        "operationId": "movements",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "lotId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "kinds",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "refTypes",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LotMovements"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/lots/{lotId}/distribution": {
-      "get": {
-        "tags": [
-          "inventory-lot-controller"
-        ],
-        "operationId": "distribution",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "lotId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LotDistribution"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
     "schemas": {
+      "TransferOrderLineRequest": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      },
+      "TransferOrderUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expectedShipAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransferOrderLineRequest"
+            }
+          }
+        }
+      },
+      "TransferOrderSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "shippedQuantity": {
+            "type": "number"
+          },
+          "receivedQuantity": {
+            "type": "number"
+          },
+          "discrepancyQuantity": {
+            "type": "number"
+          },
+          "inTransitQuantity": {
+            "type": "number"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
       "InventoryPolicyInput": {
         "required": [
           "scopeType"
@@ -2273,6 +2882,248 @@
           "version": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "LotArchiveUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "producedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierName": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "notes": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "LotArchiveSaved": {
+        "type": "object",
+        "properties": {
+          "lotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "producedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "receivedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "sourceSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "expired": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TransferOrderCreateRequest": {
+        "type": "object",
+        "properties": {
+          "fromWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expectedShipAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransferOrderLineRequest"
+            }
+          }
+        }
+      },
+      "TransferShipLineRequest": {
+        "type": "object",
+        "properties": {
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      },
+      "TransferShipRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransferShipLineRequest"
+            }
+          }
+        }
+      },
+      "TransferReceiveLineRequest": {
+        "type": "object",
+        "properties": {
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      },
+      "TransferReceiveRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransferReceiveLineRequest"
+            }
+          }
+        }
+      },
+      "TransferOrderActionRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "TransferCloseRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
           }
         }
       },
@@ -3024,6 +3875,143 @@
           }
         }
       },
+      "PlatformObservationInput": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string"
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedOnHand": {
+            "type": "number"
+          },
+          "observedReserved": {
+            "type": "number"
+          },
+          "observedAvailable": {
+            "type": "number"
+          },
+          "observedInbound": {
+            "type": "number"
+          },
+          "rawReference": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformObservationSaved": {
+        "type": "object",
+        "properties": {
+          "observationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseKind": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "storedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LotArchiveCreateRequest": {
+        "required": [
+          "lotCode",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "producedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "receivedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "origin": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "supplierRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierName": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "notes": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
       "AvailabilityQuery": {
         "type": "object",
         "properties": {
@@ -3222,6 +4210,636 @@
           },
           "status": {
             "type": "string"
+          }
+        }
+      },
+      "TransferOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TransferOrderPage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/TransferOrderSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransferOrderRow"
+            }
+          },
+          "statusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransferOption"
+            }
+          },
+          "warehouseOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransferWarehouseOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TransferOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "fromWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromWarehouseCode": {
+            "type": "string"
+          },
+          "fromWarehouseName": {
+            "type": "string"
+          },
+          "toWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toWarehouseCode": {
+            "type": "string"
+          },
+          "toWarehouseName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "expectedShipAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "shippedQuantity": {
+            "type": "number"
+          },
+          "receivedQuantity": {
+            "type": "number"
+          },
+          "discrepancyQuantity": {
+            "type": "number"
+          },
+          "inTransitQuantity": {
+            "type": "number"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TransferOrderSummary": {
+        "type": "object",
+        "properties": {
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "shippedQuantity": {
+            "type": "number"
+          },
+          "receivedQuantity": {
+            "type": "number"
+          },
+          "discrepancyQuantity": {
+            "type": "number"
+          },
+          "inTransitQuantity": {
+            "type": "number"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingShipmentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inTransitCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partiallyReceivedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receivedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "discrepancyOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "earliestExpectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "TransferWarehouseOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "TransferOrderDetail": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/TransferOrderRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransferOrderLineRow"
+            }
+          },
+          "shipments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransferShipmentRow"
+            }
+          },
+          "receipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransferReceiptRow"
+            }
+          },
+          "conservationNote": {
+            "type": "string"
+          }
+        }
+      },
+      "TransferOrderLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "qualityStatusName": {
+            "type": "string"
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "shippedQuantity": {
+            "type": "number"
+          },
+          "receivedQuantity": {
+            "type": "number"
+          },
+          "discrepancyQuantity": {
+            "type": "number"
+          },
+          "inTransitQuantity": {
+            "type": "number"
+          },
+          "unshippedQuantity": {
+            "type": "number"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TransferReceiptLineRow": {
+        "type": "object",
+        "properties": {
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      },
+      "TransferReceiptRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransferReceiptLineRow"
+            }
+          }
+        }
+      },
+      "TransferShipmentLineRow": {
+        "type": "object",
+        "properties": {
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      },
+      "TransferShipmentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransferShipmentLineRow"
+            }
+          }
+        }
+      },
+      "InventoryLedgerBreakdown": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "RECEIPT",
+              "SHIPMENT",
+              "ADJUSTMENT",
+              "TRANSFER_OUT",
+              "TRANSFER_IN",
+              "RETURN",
+              "RESERVE",
+              "RELEASE"
+            ]
+          },
+          "transactionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHandDelta": {
+            "type": "number"
+          },
+          "reservedDelta": {
+            "type": "number"
+          }
+        }
+      },
+      "InventoryLedgerPage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/InventoryLedgerSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryLedgerRow"
+            }
+          },
+          "breakdown": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryLedgerBreakdown"
+            }
+          },
+          "refTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryRefType"
+            }
+          },
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "InventoryLedgerRow": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "RECEIPT",
+              "SHIPMENT",
+              "ADJUSTMENT",
+              "TRANSFER_OUT",
+              "TRANSFER_IN",
+              "RETURN",
+              "RESERVE",
+              "RELEASE"
+            ]
+          },
+          "refType": {
+            "type": "string"
+          },
+          "refId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "onHandDelta": {
+            "type": "number"
+          },
+          "reservedDelta": {
+            "type": "number"
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warehouseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "InventoryLedgerSummary": {
+        "type": "object",
+        "properties": {
+          "transactionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "emptyTransactionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transactionOnHandDelta": {
+            "type": "number"
+          },
+          "transactionReservedDelta": {
+            "type": "number"
+          },
+          "entryOnHandDelta": {
+            "type": "number"
+          },
+          "entryReservedDelta": {
+            "type": "number"
+          },
+          "onHandConserved": {
+            "type": "boolean"
+          },
+          "reservedConserved": {
+            "type": "boolean"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warehouseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "actorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "firstOccurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastOccurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "InventoryRefType": {
+        "type": "object",
+        "properties": {
+          "refType": {
+            "type": "string"
+          },
+          "transactionCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TransferMovements": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "attribution": {
+            "type": "string"
+          },
+          "attributionNote": {
+            "type": "string"
+          },
+          "movements": {
+            "$ref": "#/components/schemas/InventoryLedgerPage"
           }
         }
       },
@@ -3715,1063 +5333,6 @@
           }
         }
       },
-      "InventoryLedgerBreakdown": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "RECEIPT",
-              "SHIPMENT",
-              "ADJUSTMENT",
-              "TRANSFER_OUT",
-              "TRANSFER_IN",
-              "RETURN",
-              "RESERVE",
-              "RELEASE"
-            ]
-          },
-          "transactionCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "entryCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "onHandDelta": {
-            "type": "number"
-          },
-          "reservedDelta": {
-            "type": "number"
-          }
-        }
-      },
-      "InventoryLedgerPage": {
-        "type": "object",
-        "properties": {
-          "summary": {
-            "$ref": "#/components/schemas/InventoryLedgerSummary"
-          },
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/InventoryLedgerRow"
-            }
-          },
-          "breakdown": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/InventoryLedgerBreakdown"
-            }
-          },
-          "refTypes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/InventoryRefType"
-            }
-          },
-          "dataScope": {
-            "type": "string"
-          },
-          "dataScopeNote": {
-            "type": "string"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "InventoryLedgerRow": {
-        "type": "object",
-        "properties": {
-          "transactionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "RECEIPT",
-              "SHIPMENT",
-              "ADJUSTMENT",
-              "TRANSFER_OUT",
-              "TRANSFER_IN",
-              "RETURN",
-              "RESERVE",
-              "RELEASE"
-            ]
-          },
-          "refType": {
-            "type": "string"
-          },
-          "refId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "actorId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "notes": {
-            "type": "string"
-          },
-          "onHandDelta": {
-            "type": "number"
-          },
-          "reservedDelta": {
-            "type": "number"
-          },
-          "entryCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "warehouseCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "InventoryLedgerSummary": {
-        "type": "object",
-        "properties": {
-          "transactionCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "entryCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "emptyTransactionCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "transactionOnHandDelta": {
-            "type": "number"
-          },
-          "transactionReservedDelta": {
-            "type": "number"
-          },
-          "entryOnHandDelta": {
-            "type": "number"
-          },
-          "entryReservedDelta": {
-            "type": "number"
-          },
-          "onHandConserved": {
-            "type": "boolean"
-          },
-          "reservedConserved": {
-            "type": "boolean"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "warehouseCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "actorCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "firstOccurredAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "lastOccurredAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "InventoryRefType": {
-        "type": "object",
-        "properties": {
-          "refType": {
-            "type": "string"
-          },
-          "transactionCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "InventoryEntryLine": {
-        "type": "object",
-        "properties": {
-          "entryId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "balanceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "warehouseCode": {
-            "type": "string"
-          },
-          "warehouseName": {
-            "type": "string"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "legalEntityCode": {
-            "type": "string"
-          },
-          "qualityStatusId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "qualityStatusCode": {
-            "type": "string"
-          },
-          "qualityStatusName": {
-            "type": "string"
-          },
-          "onHandDelta": {
-            "type": "number"
-          },
-          "reservedDelta": {
-            "type": "number"
-          },
-          "balanceOnHandNow": {
-            "type": "number"
-          },
-          "balanceReservedNow": {
-            "type": "number"
-          },
-          "balanceAvailableNow": {
-            "type": "number"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "InventoryLedgerDrill": {
-        "type": "object",
-        "properties": {
-          "transaction": {
-            "$ref": "#/components/schemas/InventoryLedgerRow"
-          },
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/InventoryEntryLine"
-            }
-          }
-        }
-      },
-      "BucketAction": {
-        "type": "object",
-        "properties": {
-          "action": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "href": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "BucketReconciliation": {
-        "type": "object",
-        "properties": {
-          "balanceOnHand": {
-            "type": "number"
-          },
-          "balanceReserved": {
-            "type": "number"
-          },
-          "bucketOnHand": {
-            "type": "number"
-          },
-          "bucketReserved": {
-            "type": "number"
-          },
-          "touchedBalanceCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bucketCountForTouched": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "onHandConserved": {
-            "type": "boolean"
-          },
-          "reservedConserved": {
-            "type": "boolean"
-          },
-          "undecomposedBalanceCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "BucketRow": {
-        "type": "object",
-        "properties": {
-          "bucketId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "balanceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "warehouseCode": {
-            "type": "string"
-          },
-          "warehouseName": {
-            "type": "string"
-          },
-          "locationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "locationCode": {
-            "type": "string"
-          },
-          "locationName": {
-            "type": "string"
-          },
-          "locationType": {
-            "type": "string"
-          },
-          "pickable": {
-            "type": "boolean"
-          },
-          "lotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "lotCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "expiresOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "lotStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "expired": {
-            "type": "boolean"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "legalEntityCode": {
-            "type": "string"
-          },
-          "legalEntityName": {
-            "type": "string"
-          },
-          "qualityStatusId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "qualityStatusCode": {
-            "type": "string"
-          },
-          "qualityStatusName": {
-            "type": "string"
-          },
-          "qualityRole": {
-            "type": "string",
-            "enum": [
-              "SELLABLE",
-              "PENDING_INSPECTION",
-              "DEFECTIVE"
-            ]
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "available": {
-            "type": "number"
-          },
-          "zeroStock": {
-            "type": "boolean"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lastMovementAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "BucketSummary": {
-        "type": "object",
-        "properties": {
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "available": {
-            "type": "number"
-          },
-          "sellable": {
-            "type": "number"
-          },
-          "pendingInspection": {
-            "type": "number"
-          },
-          "defective": {
-            "type": "number"
-          },
-          "rowCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "locationCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lotCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unbatchedRowCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lastMovementAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "InventoryBucketDetail": {
-        "type": "object",
-        "properties": {
-          "summary": {
-            "$ref": "#/components/schemas/BucketSummary"
-          },
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BucketRow"
-            }
-          },
-          "reconciliation": {
-            "$ref": "#/components/schemas/BucketReconciliation"
-          },
-          "actions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BucketAction"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "PlatformObservationInput": {
-        "type": "object",
-        "properties": {
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "source": {
-            "type": "string"
-          },
-          "collectedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "observedOnHand": {
-            "type": "number"
-          },
-          "observedReserved": {
-            "type": "number"
-          },
-          "observedAvailable": {
-            "type": "number"
-          },
-          "observedInbound": {
-            "type": "number"
-          },
-          "rawReference": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "PlatformObservationSaved": {
-        "type": "object",
-        "properties": {
-          "observationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "warehouseKind": {
-            "type": "string"
-          },
-          "source": {
-            "type": "string"
-          },
-          "collectedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "storedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "DistributionAction": {
-        "type": "object",
-        "properties": {
-          "action": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "href": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DistributionRow": {
-        "type": "object",
-        "properties": {
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "warehouseCode": {
-            "type": "string"
-          },
-          "warehouseName": {
-            "type": "string"
-          },
-          "warehouseKind": {
-            "type": "string"
-          },
-          "countryCode": {
-            "type": "string"
-          },
-          "timezone": {
-            "type": "string"
-          },
-          "onHand": {
-            "type": "number",
-            "nullable": true
-          },
-          "reserved": {
-            "type": "number",
-            "nullable": true
-          },
-          "available": {
-            "type": "number",
-            "nullable": true
-          },
-          "inTransit": {
-            "type": "number",
-            "nullable": true
-          },
-          "platformOnHand": {
-            "type": "number",
-            "nullable": true
-          },
-          "platformReserved": {
-            "type": "number",
-            "nullable": true
-          },
-          "platformAvailable": {
-            "type": "number",
-            "nullable": true
-          },
-          "platformInbound": {
-            "type": "number",
-            "nullable": true
-          },
-          "source": {
-            "type": "string",
-            "nullable": true
-          },
-          "collectedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "observationAgeSeconds": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          },
-          "turnoverDays": {
-            "type": "number",
-            "nullable": true
-          },
-          "turnoverComputable": {
-            "type": "boolean"
-          },
-          "turnoverBasis": {
-            "type": "string"
-          },
-          "turnoverNote": {
-            "type": "string"
-          },
-          "bucketCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "locationCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lotCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lastMovementAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "DistributionSkuScope": {
-        "type": "object",
-        "properties": {
-          "matchedSkuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unregisteredSpuCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "DistributionSubject": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "skuCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "skuName": {
-            "type": "string",
-            "nullable": true
-          },
-          "spuId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          }
-        }
-      },
-      "DistributionTotals": {
-        "type": "object",
-        "properties": {
-          "ownOnHand": {
-            "type": "number"
-          },
-          "ownReserved": {
-            "type": "number"
-          },
-          "ownAvailable": {
-            "type": "number"
-          },
-          "ownInTransit": {
-            "type": "number"
-          },
-          "ownWarehouseCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "ownZeroWarehouseCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "platformOnHand": {
-            "type": "number"
-          },
-          "platformReserved": {
-            "type": "number"
-          },
-          "platformAvailable": {
-            "type": "number"
-          },
-          "platformInbound": {
-            "type": "number"
-          },
-          "platformWarehouseCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "earliestCollectedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "DistributionWindow": {
-        "type": "object",
-        "properties": {
-          "lookbackDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "outboundKinds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "from": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "to": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "MultiWarehouseDistribution": {
-        "type": "object",
-        "properties": {
-          "subject": {
-            "$ref": "#/components/schemas/DistributionSubject"
-          },
-          "window": {
-            "$ref": "#/components/schemas/DistributionWindow"
-          },
-          "totals": {
-            "$ref": "#/components/schemas/DistributionTotals"
-          },
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DistributionRow"
-            }
-          },
-          "skuScope": {
-            "$ref": "#/components/schemas/DistributionSkuScope"
-          },
-          "actions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DistributionAction"
-            }
-          }
-        }
-      },
-      "DistributionSpuRef": {
-        "type": "object",
-        "properties": {
-          "spuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "LotArchiveUpdateRequest": {
-        "type": "object",
-        "properties": {
-          "producedOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "expiresOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "nullable": true
-          },
-          "supplierRefId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "supplierName": {
-            "maxLength": 128,
-            "minLength": 0,
-            "type": "string"
-          },
-          "notes": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
-      "LotArchiveSaved": {
-        "type": "object",
-        "properties": {
-          "lotId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "lotCode": {
-            "type": "string"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "origin": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "producedOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "expiresOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "receivedOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "sourceSystem": {
-            "type": "string",
-            "nullable": true
-          },
-          "sourceRefId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "sourceRefCode": {
-            "type": "string"
-          },
-          "supplierRefId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "supplierName": {
-            "type": "string"
-          },
-          "expired": {
-            "type": "boolean"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "LotArchiveCreateRequest": {
-        "required": [
-          "lotCode",
-          "skuId"
-        ],
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "lotCode": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string"
-          },
-          "producedOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "expiresOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "receivedOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "origin": {
-            "type": "string",
-            "nullable": true
-          },
-          "sourceSystem": {
-            "type": "string",
-            "nullable": true
-          },
-          "sourceRefId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "sourceRefCode": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string"
-          },
-          "supplierRefId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "supplierName": {
-            "maxLength": 128,
-            "minLength": 0,
-            "type": "string"
-          },
-          "notes": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
       "LotArchivePage": {
         "type": "object",
         "properties": {
@@ -5145,6 +5706,617 @@
           "locationCount": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "InventoryEntryLine": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "qualityStatusName": {
+            "type": "string"
+          },
+          "onHandDelta": {
+            "type": "number"
+          },
+          "reservedDelta": {
+            "type": "number"
+          },
+          "balanceOnHandNow": {
+            "type": "number"
+          },
+          "balanceReservedNow": {
+            "type": "number"
+          },
+          "balanceAvailableNow": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "InventoryLedgerDrill": {
+        "type": "object",
+        "properties": {
+          "transaction": {
+            "$ref": "#/components/schemas/InventoryLedgerRow"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryEntryLine"
+            }
+          }
+        }
+      },
+      "DistributionAction": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DistributionRow": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "warehouseKind": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "onHand": {
+            "type": "number",
+            "nullable": true
+          },
+          "reserved": {
+            "type": "number",
+            "nullable": true
+          },
+          "available": {
+            "type": "number",
+            "nullable": true
+          },
+          "inTransit": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformOnHand": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformReserved": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformAvailable": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformInbound": {
+            "type": "number",
+            "nullable": true
+          },
+          "source": {
+            "type": "string",
+            "nullable": true
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "observationAgeSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "turnoverDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "turnoverComputable": {
+            "type": "boolean"
+          },
+          "turnoverBasis": {
+            "type": "string"
+          },
+          "turnoverNote": {
+            "type": "string"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastMovementAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DistributionSkuScope": {
+        "type": "object",
+        "properties": {
+          "matchedSkuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unregisteredSpuCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DistributionSubject": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "DistributionTotals": {
+        "type": "object",
+        "properties": {
+          "ownOnHand": {
+            "type": "number"
+          },
+          "ownReserved": {
+            "type": "number"
+          },
+          "ownAvailable": {
+            "type": "number"
+          },
+          "ownInTransit": {
+            "type": "number"
+          },
+          "ownWarehouseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ownZeroWarehouseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "platformOnHand": {
+            "type": "number"
+          },
+          "platformReserved": {
+            "type": "number"
+          },
+          "platformAvailable": {
+            "type": "number"
+          },
+          "platformInbound": {
+            "type": "number"
+          },
+          "platformWarehouseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "earliestCollectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DistributionWindow": {
+        "type": "object",
+        "properties": {
+          "lookbackDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "outboundKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MultiWarehouseDistribution": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "$ref": "#/components/schemas/DistributionSubject"
+          },
+          "window": {
+            "$ref": "#/components/schemas/DistributionWindow"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/DistributionTotals"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DistributionRow"
+            }
+          },
+          "skuScope": {
+            "$ref": "#/components/schemas/DistributionSkuScope"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DistributionAction"
+            }
+          }
+        }
+      },
+      "DistributionSpuRef": {
+        "type": "object",
+        "properties": {
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BucketAction": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BucketReconciliation": {
+        "type": "object",
+        "properties": {
+          "balanceOnHand": {
+            "type": "number"
+          },
+          "balanceReserved": {
+            "type": "number"
+          },
+          "bucketOnHand": {
+            "type": "number"
+          },
+          "bucketReserved": {
+            "type": "number"
+          },
+          "touchedBalanceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bucketCountForTouched": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHandConserved": {
+            "type": "boolean"
+          },
+          "reservedConserved": {
+            "type": "boolean"
+          },
+          "undecomposedBalanceCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BucketRow": {
+        "type": "object",
+        "properties": {
+          "bucketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "locationName": {
+            "type": "string"
+          },
+          "locationType": {
+            "type": "string"
+          },
+          "pickable": {
+            "type": "boolean"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "lotStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "expired": {
+            "type": "boolean"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "qualityStatusName": {
+            "type": "string"
+          },
+          "qualityRole": {
+            "type": "string",
+            "enum": [
+              "SELLABLE",
+              "PENDING_INSPECTION",
+              "DEFECTIVE"
+            ]
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "zeroStock": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastMovementAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BucketSummary": {
+        "type": "object",
+        "properties": {
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "sellable": {
+            "type": "number"
+          },
+          "pendingInspection": {
+            "type": "number"
+          },
+          "defective": {
+            "type": "number"
+          },
+          "rowCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unbatchedRowCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastMovementAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "InventoryBucketDetail": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/BucketSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BucketRow"
+            }
+          },
+          "reconciliation": {
+            "$ref": "#/components/schemas/BucketReconciliation"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BucketAction"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       }
