@@ -67,4 +67,42 @@ public class ApiErrorHandler {
     body.setProperty("missingCount", e.missing().size());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
   }
+
+  /**
+   * 3.6.2.1 供应商报价优先级歧义（规则 **R2**）。
+   *
+   * <p>蓝图点名的那条规则：**同一优先级多条有效报价必须报错让用户选，不能随机取一条**。
+   * 「报错让用户选」的后半句要求错误里**带得出候选** —— 只回一句"存在多条有效报价"
+   * 的话，运营不知道该去改哪几条的优先级，界面就只能显示一个红条然后让他自己去猜。
+   *
+   * <p>所以把并列候选的清单挂在 ProblemDetail 上（与 3.1.3.2 的 {@code conflicts} 同一手法）：
+   * 每条带 id、供应商、SKU、货号、币种、单价档数，界面逐条显示并给出「把这条设为首选」的入口。
+   */
+  @ExceptionHandler(SupplierQuoteService.SupplierQuoteAmbiguityException.class)
+  ResponseEntity<ProblemDetail> quoteAmbiguity(
+      SupplierQuoteService.SupplierQuoteAmbiguityException e) {
+    var result = e.result();
+    var candidates =
+        result.candidates().stream()
+            .filter(q -> "AMBIGUOUS".equals(q.selectionState()))
+            .map(
+                q ->
+                    java.util.Map.of(
+                        "id", q.id().toString(),
+                        "priority", q.priority(),
+                        "supplierCode", q.supplierCode(),
+                        "supplierName", q.supplierName(),
+                        "skuCode", q.skuCode(),
+                        "supplierSkuCode", q.supplierSkuCode(),
+                        "currency", q.currency(),
+                        "validityLabel", q.validityLabel(),
+                        "tierCount", q.tiers().size()))
+            .toList();
+    var body = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+    body.setProperty("ambiguous", true);
+    body.setProperty("candidates", candidates);
+    body.setProperty("ambiguityProblem", result.ambiguityProblem());
+    body.setProperty("candidatesSkuId", result.skuId());
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+  }
 }
