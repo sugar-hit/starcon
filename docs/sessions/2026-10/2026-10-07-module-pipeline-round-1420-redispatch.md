@@ -220,3 +220,127 @@ worker 还做了**两处反向验证**并逐字还原：
   「回收未 commit 的车道 worktree」时顺带清容器的规则
 - 把 14:00 轮待办继续挂着：「同名分支已存在且非集成头后代 → 快进/重建」固化进 `lane.mjs plan`
 - 根治陈旧分支：定期把 feature 分支回合到集成头 —— **属需用户确认的动作，未自行执行**
+---
+
+# 14:45 轮次追记：3.8.1.1 交付复核 + 并入失败诊断
+
+## 3.8.1.1 导入向导：Worker 交付质量高，但**并入被阻塞**
+
+### Worker 查出的 7 处真实缺陷（遗留代码「从未真正跑绿过」）
+
+最严重的一处是**架构级**的：
+
+> 异步执行器只绑 `app.current_tenant` 没绑 `app.actor`，
+> 而 `spu` 被 V3 的 `stamp_record_owner` 触发器要求 `app.actor` ——
+> **每一行写入都被拒，所有导入任务落 FAILED**。
+
+修法正确：传 `AccessService.Access`（来自 `AccessService#require` 解析已认证成员关系），
+而不是裸 tenantId。测试从 14 failures 收敛到 0。
+
+其余 6 处：行分页用 `offset` 导致静默漏数据（改 keyset 游标）、
+`r.get("values")` 与列名 `cells` 不符致逐行结果恒空、
+SKU 新增模式跳过时 `skipped=false` 虚报成功数、条码全表扫、
+缺取消端点（`→CANCELLED` 无出口导致**永久占住互斥槽位**）、CSV 解析异常逃逸成 500。
+
+另修两处**测试自身缺陷**：一个断言用了不在 CSV 里的编码（查不到恒真）、
+一个异步用例没等终态与「已入队」构成竞态。
+
+### 实证复核（全部对上）
+
+| 复核项 | 结果 |
+| --- | --- |
+| 原子提交 | 5 个，14:43:46–14:44:13 |
+| 工作区未提交 | 0 |
+| V29 表 / CHECK / RLS | 6 表 · 33 CHECK · ENABLE+FORCE |
+| 同租户互斥约束 | `UNIQUE(tenant_id,target_entity) WHERE status IN ('PENDING','PREVALIDATING','PREVALIDATED','RUNNING')` ✅ |
+| actor 绑定修复 | 在位，附完整理由注释 |
+| 集成测试 | 19 例，含「不同租户的同类任务也互不影响」 |
+| catalog 全量 | 778 例 0 失败 |
+| 前端 | 622 例 / typecheck / lint / Next 构建全绿 |
+
+**Excel 不支持**：已确认各 pom 无 POI/EasyExcel/OpenCSV，页面与迁移文件头都显式写明，
+未静默省略 —— 符合「不许偷懒」第 2 条。
+**报价边界**：`target_entity` 的 CHECK 不含 `QUOTE`，理由写明「价格唯一写入所有者是定价服务，
+catalog 建表等于造出第二个价格事实来源」—— 边界判断正确。
+
+## 🚨 并入失败：`apps/web/src/lib/api-proxy.ts` 冲突（`merge-ready` 退出码 2）
+
+```
+✗ 3.8.1.1 并入冲突：apps/web/src/lib/api-proxy.ts
+merge-union: 走了行级兜底并集，请人工确认这个文件改对了
+CONFLICT_KEYS paths:/catalog/brands paths:/catalog/attributes
+```
+
+### 根因：车道分支基线陈旧 + 并集驱动器分不清「删除」与「没见过」
+
+实测：
+
+```
+集成头 api-proxy.ts            parties 出现 3 次   ← 3.6.1.1 加的
+feat/3-8-1-1 api-proxy.ts      parties 出现 0 次   ← 它从 fa8dee8 切，3.6.1.1 还没并
+feat/3-8-1-1 的 merge-base      fa8dee8（3.5.2.2）
+```
+
+`feat/3-8-1-1` 从 `fa8dee8` 切出，**早于 3.6.1.1 并入**。
+合并时驱动拿它的文件与集成头比，看到「集成头有 `parties`，它没有」，
+于是判定它**删掉了** `parties` 块 → 冲突。
+
+**它并没有删。**它只是从未见过那个块。3.8.1.1 自己新增的是 `import-*` 放行块。
+
+**语义正确的解法是两边都保留**（`parties` 与 `import-*` 是互相独立的放行条目）：
+要么先把 `integration/module-dev` 合进 `feat/3-8-1-1` 再重试并入，
+要么人工把两个注释块都留下。
+
+### 处置：abort 掉半途的 merge，不自行强解
+
+`merge-ready` 失败后**把主工作区留在了半合并状态**
+（`integration/module-dev` 上 `MERGE_HEAD` 存在，`api-proxy.ts` 为 `UU`，
+其余 3.8.1.1 文件全部 staged）。这个状态会**卡住主工作区与另一 tick 的所有操作**。
+
+按「不要自己强行解冲突」的纪律，本轮执行 `git merge --abort` 恢复到干净状态，
+**没有替它挑一个解法**。3.8.1.1 的成果安全留在 `feat/3-8-1-1` @ `28a845a`，未丢失。
+
+> 顺带记一条操作教训：`merge --abort` 会把**当时已 staged 但未提交**的改动一起回退。
+> 我在同一轮里先 `git add` 了会话日志再触发 abort，日志内容被一并回退，需重写。
+> 正确顺序是：**先 abort 清干净，再写日志并提交**。
+
+### 与「并集驱动把已交付模块改回未开发」同源
+
+上一轮（`36a871e`）已记录过并集驱动的事故，本轮 `c8b6787` 修回了 3.6.1.1 的台账行。
+同一个驱动、同一个盲点：**它假设车道分支总是从最新集成头切出**，
+一旦不是，它就无法区分「故意删除」与「从未见过」，于是要么误报冲突，要么静默覆盖。
+
+**根治方案**：并集驱动器必须用**三方的 merge base**（`git merge-base`）而不是文件级双边比较 ——
+只有「base 里有、ours 有、theirs 没有」的键才判定为「theirs 删除了」；
+base 里也没有的，是「theirs 从未见过」，应当保留 ours。
+
+## 3.7.2.1 仍处于「会被永久丢弃」状态（已 steer，等它二次 land）
+
+14:45 实测：
+
+```
+08e9e07  in integration head: NO
+0124359  in integration head: NO
+V28 在集成头里的 CHECK 数量：2    ← 约束那批仍未进去
+lane state: merged               ← merge-ready 不会再捞它
+```
+
+它的 worktree 被 `gc` **删了两次**（`gc` 按 `state=merged` 判断可回收，
+而它当时还在用），worker 改用「先提交到分支保命」策略，worktree 现已恢复在 `0124359`。
+已 steer 要求它收尾后**再 land 一次**，否则这批约束永久滞留分支上。
+
+## 全局状态
+
+- 台账 **57 → 59 已交付**（3.6.1.1、3.7.2.1）
+- 集成头 `b6bc6a3`；另一个 tick 在 14:40 又派发 3.6.1.2 / 3.6.3.1（均为 0 提交，刚起步）
+- `sync --check` 通过
+- 车道：3.6.1.1 merged · 3.7.2.1 merged（**但代码未并**）· 3.8.1.1 **conflict**
+
+## 本轮新增待办
+
+- **[P0]** 解决 `api-proxy.ts` 冲突：把两边注释块都保留；或先合集成头进车道分支再重试
+- **[P0]** 并集驱动改用**三方 merge base**，不再用双边文件比较
+- **[P0]** `merge-ready` 失败后应自动 `merge --abort`，不要把主工作区留在半合并状态
+- **[P0]** 确认 3.7.2.1 二次 `land` 之后 V28 在集成头里真的带上 4 个 CHECK + 触发器
+- **[P1]** `gc` 回收前应校验 worker 心跳，不要回收 `state=merged` 但仍在跑的 worktree
+- **[P1]** 派发前把车道分支快进到当前集成头，避免同类冲突复发
