@@ -5,7 +5,7 @@ import { Badge, Button } from '@starcon/ui';
 import { RefreshCw, ShieldCheck, X } from 'lucide-react';
 import type {
   MemberView,
-  RoleAssignmentInput,
+  MemberRoleAssignmentInput,
   RoleAssignmentMergeView,
   RoleAssignmentScopeOption,
   RoleAssignmentScopeView,
@@ -238,7 +238,7 @@ export function RoleAssignmentWorkspace() {
       setFormError(problem);
       return;
     }
-    const body: RoleAssignmentInput = {
+    const body: MemberRoleAssignmentInput = {
       roleId: form.roleId,
       scopeMode: form.scopeMode,
       scopes: form.scopeKeys

@@ -130,7 +130,7 @@ public class RoleAssignmentController {
           @Size(max = 64)
           String scopeCode) {}
 
-  public record RoleAssignmentInput(
+  public record MemberRoleAssignmentInput(
       @NotNull UUID roleId,
       @NotNull @Pattern(regexp = SCOPE_MODES, message = "范围模式必须是租户内全部、仅本人或本部门") String scopeMode,
       @NotNull List<@NotNull @Valid RoleAssignmentScopeInput> scopes,
@@ -221,7 +221,7 @@ public class RoleAssignmentController {
   public UUID create(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID membershipId,
-      @Valid @RequestBody RoleAssignmentInput input) {
+      @Valid @RequestBody MemberRoleAssignmentInput input) {
     return call(
         auth,
         CREATE,
@@ -248,7 +248,7 @@ public class RoleAssignmentController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID membershipId,
       @PathVariable UUID roleId,
-      @Valid @RequestBody RoleAssignmentInput input) {
+      @Valid @RequestBody MemberRoleAssignmentInput input) {
     call(
         auth,
         UPDATE,
@@ -389,7 +389,7 @@ public class RoleAssignmentController {
    * 这里回答「这条配置在业务上说不说得通」，返回 400 而不是笼统的 409，
    * 用户能直接看到哪一条填错了。
    */
-  private void validate(IdentityController.Access a, UUID membershipId, RoleAssignmentInput input) {
+  private void validate(IdentityController.Access a, UUID membershipId, MemberRoleAssignmentInput input) {
     var role = role(input.roleId());
     require(!role.get("code", String.class).equals("OWNER"), "请使用转移所有者操作");
     check(role.get("status", String.class).equals("ACTIVE"), "不能分配停用角色");
@@ -444,7 +444,7 @@ public class RoleAssignmentController {
    * 不抛异常、只让值偏掉；而把 cast 挪到末位会让 jOOQ 整体绑定错位一格。两个坑都踩过，顺序是刻意的。
    */
   private void write(
-      IdentityController.Access a, UUID membershipId, RoleAssignmentInput input, UUID id) {
+      IdentityController.Access a, UUID membershipId, MemberRoleAssignmentInput input, UUID id) {
     sql.execute("delete from role_assignment_scope where membership_id=? and role_id=?",
         membershipId, input.roleId());
     if (id == null) {
