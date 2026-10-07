@@ -298,6 +298,10 @@ public class SyncService {
           HttpStatus.CONFLICT, "游标处于 BROKEN 状态，请先修复失败原因再回退");
     if (toValue.compareTo(c.get("cursor_value", String.class)) > 0)
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "回退目标不能超前于当前游标");
+    // DB 层 guard_cursor_direction 触发器只认这个显式意图位，
+    // 因此倒退写只可能发生在这个可审计的端点上。该设置是事务内局部的，
+    // 随端点调用所在事务结束而失效，不会泄漏给后续请求。
+    sql.fetch("select set_config('app.cursor_rollback','true',true)");
     sql.execute(
         "update sync_cursor set cursor_value=?,version=version+1,updated_at=now() where id=?",
         toValue, cursorId);
