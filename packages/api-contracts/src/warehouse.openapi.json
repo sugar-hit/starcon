@@ -6357,6 +6357,47 @@
         }
       }
     },
+    "/warehouse/inventory/aging/policy": {
+      "post": {
+        "tags": [
+          "inventory-aging-controller"
+        ],
+        "operationId": "savePolicy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgingPolicyUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgingPolicyEffective"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/goods-receipts": {
       "get": {
         "tags": [
@@ -11503,6 +11544,317 @@
         }
       }
     },
+    "/warehouse/inventory/aging/slow-moving": {
+      "get": {
+        "tags": [
+          "inventory-aging-controller"
+        ],
+        "operationId": "slowMoving",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "slowMovingStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "disposition",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlowMovingPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/aging/policy/{skuId}": {
+      "get": {
+        "tags": [
+          "inventory-aging-controller"
+        ],
+        "operationId": "policy_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgingPolicyEffective"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/aging/policies": {
+      "get": {
+        "tags": [
+          "inventory-aging-controller"
+        ],
+        "operationId": "policies_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgingPolicyPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/aging/buckets": {
+      "get": {
+        "tags": [
+          "inventory-aging-controller"
+        ],
+        "operationId": "buckets_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "agingBasis",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgingBucketReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/goods-receipts/{receiptId}/movements": {
       "get": {
         "tags": [
@@ -11676,358 +12028,6 @@
                   "items": {
                     "$ref": "#/components/schemas/WorkVolumeCapability"
                   }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/aging/policy": {
-      "post": {
-        "tags": [
-          "inventory-aging-controller"
-        ],
-        "operationId": "savePolicy",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AgingPolicyUpsertRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgingPolicyEffective"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/aging/slow-moving": {
-      "get": {
-        "tags": [
-          "inventory-aging-controller"
-        ],
-        "operationId": "slowMoving",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "legalEntityId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "slowMovingStatus",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "disposition",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/SlowMovingPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/aging/policy/{skuId}": {
-      "get": {
-        "tags": [
-          "inventory-aging-controller"
-        ],
-        "operationId": "policy_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgingPolicyEffective"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/aging/policies": {
-      "get": {
-        "tags": [
-          "inventory-aging-controller"
-        ],
-        "operationId": "policies_2",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "enabled",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgingPolicyPage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/aging/buckets": {
-      "get": {
-        "tags": [
-          "inventory-aging-controller"
-        ],
-        "operationId": "buckets_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "legalEntityId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "agingBasis",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgingBucketReport"
                 }
               }
             }
@@ -18166,6 +18166,72 @@
           }
         },
         "nullable": true
+      },
+      "AgingPolicyUpsertRequest": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "slowMovingDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "obsoleteDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AgingPolicyEffective": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "slowMovingDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "obsoleteDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
       },
       "GoodsReceiptCreateRequest": {
         "type": "object",
@@ -24844,6 +24910,451 @@
           }
         }
       },
+      "SlowMovingDispositionOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SlowMovingPage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/SlowMovingSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SlowMovingRow"
+            }
+          },
+          "statusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SlowMovingStatusOption"
+            }
+          },
+          "dispositionOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SlowMovingDispositionOption"
+            }
+          },
+          "defaultSlowMovingDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "defaultObsoleteDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "agingBasisNote": {
+            "type": "string"
+          },
+          "salesVelocityNote": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SlowMovingRow": {
+        "type": "object",
+        "properties": {
+          "bucketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "qualityRole": {
+            "type": "string"
+          },
+          "receivedOn": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "inboundDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "agingBasis": {
+            "type": "string"
+          },
+          "agingBasisLabel": {
+            "type": "string"
+          },
+          "agingDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "agingBucket": {
+            "type": "string"
+          },
+          "agingBucketLabel": {
+            "type": "string"
+          },
+          "slowMovingDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "obsoleteDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "slowMovingDaysSource": {
+            "type": "string"
+          },
+          "slowMovingStatus": {
+            "type": "string"
+          },
+          "slowMovingStatusLabel": {
+            "type": "string"
+          },
+          "daysToExpiry": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "expiryStatus": {
+            "type": "string"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "disposition": {
+            "type": "string"
+          },
+          "dispositionLabel": {
+            "type": "string"
+          },
+          "dispositionRationale": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "automatable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SlowMovingStatusOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SlowMovingSummary": {
+        "type": "object",
+        "properties": {
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "obsoleteCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "slowMovingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "obsoleteAvailable": {
+            "type": "number"
+          },
+          "slowMovingAvailable": {
+            "type": "number"
+          },
+          "obsoleteAndUpAvailable": {
+            "type": "number"
+          },
+          "oldestAgingDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "oldestInboundDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        }
+      },
+      "AgingPolicyPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgingPolicyRow"
+            }
+          },
+          "defaultSlowMovingDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "defaultObsoleteDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AgingPolicyRow": {
+        "type": "object",
+        "properties": {
+          "policyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "slowMovingDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "obsoleteDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AgingBucketReport": {
+        "type": "object",
+        "properties": {
+          "asOf": {
+            "type": "string",
+            "format": "date"
+          },
+          "buckets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgingBucketRow"
+            }
+          },
+          "totals": {
+            "$ref": "#/components/schemas/AgingTotals"
+          },
+          "defaultSlowMovingDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "defaultObsoleteDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distinctSlowMovingDaysCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "capitalTie": {
+            "$ref": "#/components/schemas/AgingCapitalTie"
+          },
+          "agingBasisNote": {
+            "type": "string"
+          }
+        }
+      },
+      "AgingBucketRow": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "lowerDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "upperDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lotBasedBucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          }
+        }
+      },
+      "AgingCapitalTie": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "occupiedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "blockedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "AgingTotals": {
+        "type": "object",
+        "properties": {
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          }
+        }
+      },
       "GoodsReceiptPage": {
         "type": "object",
         "properties": {
@@ -25731,517 +26242,6 @@
           },
           "note": {
             "type": "string"
-          }
-        }
-      },
-      "AgingPolicyUpsertRequest": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "slowMovingDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "obsoleteDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "notes": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "AgingPolicyEffective": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "slowMovingDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "obsoleteDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "configured": {
-            "type": "boolean"
-          },
-          "source": {
-            "type": "string"
-          },
-          "bucketCount": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          },
-          "notes": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "SlowMovingDispositionOption": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "bucketCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "SlowMovingPage": {
-        "type": "object",
-        "properties": {
-          "summary": {
-            "$ref": "#/components/schemas/SlowMovingSummary"
-          },
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SlowMovingRow"
-            }
-          },
-          "statusOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SlowMovingStatusOption"
-            }
-          },
-          "dispositionOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SlowMovingDispositionOption"
-            }
-          },
-          "defaultSlowMovingDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "defaultObsoleteDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "agingBasisNote": {
-            "type": "string"
-          },
-          "salesVelocityNote": {
-            "type": "string"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "SlowMovingRow": {
-        "type": "object",
-        "properties": {
-          "bucketId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "lotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "lotCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "warehouseCode": {
-            "type": "string"
-          },
-          "locationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "locationCode": {
-            "type": "string"
-          },
-          "qualityStatusId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "qualityStatusCode": {
-            "type": "string"
-          },
-          "qualityRole": {
-            "type": "string"
-          },
-          "receivedOn": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "inboundDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "agingBasis": {
-            "type": "string"
-          },
-          "agingBasisLabel": {
-            "type": "string"
-          },
-          "agingDays": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "agingBucket": {
-            "type": "string"
-          },
-          "agingBucketLabel": {
-            "type": "string"
-          },
-          "slowMovingDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "obsoleteDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "slowMovingDaysSource": {
-            "type": "string"
-          },
-          "slowMovingStatus": {
-            "type": "string"
-          },
-          "slowMovingStatusLabel": {
-            "type": "string"
-          },
-          "daysToExpiry": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "expiryStatus": {
-            "type": "string"
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "available": {
-            "type": "number"
-          },
-          "disposition": {
-            "type": "string"
-          },
-          "dispositionLabel": {
-            "type": "string"
-          },
-          "dispositionRationale": {
-            "type": "string"
-          },
-          "basis": {
-            "type": "string"
-          },
-          "automatable": {
-            "type": "boolean"
-          }
-        }
-      },
-      "SlowMovingStatusOption": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "bucketCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "SlowMovingSummary": {
-        "type": "object",
-        "properties": {
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bucketCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "obsoleteCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "slowMovingCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "obsoleteAvailable": {
-            "type": "number"
-          },
-          "slowMovingAvailable": {
-            "type": "number"
-          },
-          "obsoleteAndUpAvailable": {
-            "type": "number"
-          },
-          "oldestAgingDays": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "oldestInboundDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          }
-        }
-      },
-      "AgingPolicyPage": {
-        "type": "object",
-        "properties": {
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AgingPolicyRow"
-            }
-          },
-          "defaultSlowMovingDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "defaultObsoleteDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "AgingPolicyRow": {
-        "type": "object",
-        "properties": {
-          "policyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "slowMovingDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "obsoleteDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "bucketCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "notes": {
-            "type": "string"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "AgingBucketReport": {
-        "type": "object",
-        "properties": {
-          "asOf": {
-            "type": "string",
-            "format": "date"
-          },
-          "buckets": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AgingBucketRow"
-            }
-          },
-          "totals": {
-            "$ref": "#/components/schemas/AgingTotals"
-          },
-          "defaultSlowMovingDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "defaultObsoleteDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "distinctSlowMovingDaysCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "capitalTie": {
-            "$ref": "#/components/schemas/AgingCapitalTie"
-          },
-          "agingBasisNote": {
-            "type": "string"
-          }
-        }
-      },
-      "AgingBucketRow": {
-        "type": "object",
-        "properties": {
-          "bucket": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "lowerDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "upperDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bucketCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lotBasedBucketCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "available": {
-            "type": "number"
-          }
-        }
-      },
-      "AgingCapitalTie": {
-        "type": "object",
-        "properties": {
-          "available": {
-            "type": "boolean"
-          },
-          "occupiedAmount": {
-            "type": "number",
-            "nullable": true
-          },
-          "currency": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          },
-          "blockedBy": {
-            "type": "string"
-          }
-        }
-      },
-      "AgingTotals": {
-        "type": "object",
-        "properties": {
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bucketCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "available": {
-            "type": "number"
           }
         }
       }
