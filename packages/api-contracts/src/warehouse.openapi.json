@@ -9325,12 +9325,83 @@
         }
       }
     },
+    "/warehouse/inventory/outbound-orders/{orderId}": {
+      "get": {
+        "tags": [
+          "outbound-order-detail-controller"
+        ],
+        "operationId": "detail_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/outbound-orders/detail-capabilities": {
+      "get": {
+        "tags": [
+          "outbound-order-detail-controller"
+        ],
+        "operationId": "capabilities_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundOrderDetailCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/outbound-orders/capabilities": {
       "get": {
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_4",
+        "operationId": "capabilities_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -9721,7 +9792,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_3",
+        "operationId": "detail_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -10689,7 +10760,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_4",
+        "operationId": "detail_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -11145,7 +11216,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -11176,7 +11247,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -11518,7 +11589,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -11944,7 +12015,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -12006,7 +12077,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -21751,6 +21822,348 @@
           "size": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "OutboundDetailAction": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "toStatusLabel": {
+            "type": "string"
+          },
+          "reasonRequired": {
+            "type": "boolean"
+          },
+          "requiresCarrier": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundDetailEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "fromStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "toStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "toStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundDetailLine": {
+        "type": "object",
+        "properties": {
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "pickedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "shippedQuantity": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "OutboundDetailPickRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPieceCount": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "requestedByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "nullable": true
+      },
+      "OutboundOrderDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string"
+          },
+          "sourceTransferOrderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceTransferCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceExternalRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "skuLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPieceCount": {
+            "type": "number"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundDetailLine"
+            }
+          },
+          "quantities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundQuantityAvailability"
+            }
+          },
+          "pickRequested": {
+            "type": "boolean"
+          },
+          "pickRequest": {
+            "$ref": "#/components/schemas/OutboundDetailPickRequest"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundDetailEvent"
+            }
+          },
+          "timelineEventCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "linkedOrder": {
+            "$ref": "#/components/schemas/OutboundUnavailableLink"
+          },
+          "shipToAddress": {
+            "$ref": "#/components/schemas/OutboundUnavailableLink"
+          },
+          "reservationRefs": {
+            "$ref": "#/components/schemas/OutboundUnavailableLink"
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundUnavailableLink"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundDetailAction"
+            }
+          }
+        }
+      },
+      "OutboundQuantityAvailability": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number",
+            "nullable": true
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundUnavailableLink": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundOrderDetailCapabilities": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundUnavailableLink"
+            }
+          },
+          "quantityPolicies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundQuantityAvailability"
+            }
+          },
+          "actionOwnerModules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pickedQuantityNote": {
+            "type": "string"
+          },
+          "shippedQuantityNote": {
+            "type": "string"
+          },
+          "linkedOrderNote": {
+            "type": "string"
+          },
+          "reservationNote": {
+            "type": "string"
+          },
+          "packageNote": {
+            "type": "string"
           }
         }
       },
