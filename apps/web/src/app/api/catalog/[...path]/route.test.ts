@@ -1114,3 +1114,82 @@ it('catalog/components 与 catalog/bundle-skus 的全部路由被放行（3.5.1.
     ).status,
   ).toBe(404);
 });
+
+/**
+ * 3.8.1.2 校验报告：catalog allowlist 必须放行 import-jobs/{id}/report 下的全部路径。
+ *
+ * <p>allowlist 是锚定正则，落不在分支里的路径一律被拦成 404 —— 页面只进错误态，
+ * 看起来像「后端没实现」。报告页的第一版就踩过这一层：后端六个端点都实现了，
+ * 正则里少写一个 `report` 子段，页面就只能看到「接口不存在」。
+ *
+ * <p>这组用例同时钉住**别的车道已有的 import 段**没有因为本次改动被改坏：
+ * import-templates / import-field-mappings / import-jobs/{id}/mapping|execute|errors
+ * 全部仍然放行，而 report 下未声明的子路径仍然 404。
+ */
+it('catalog/import-jobs 的校验报告全路径被放行且转发到 catalog 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const exportId = '22222222-2222-2222-2222-222222222222';
+  for (const path of [
+    `catalog/import-jobs/${id}/report`,
+    `catalog/import-jobs/${id}/report/issues`,
+    `catalog/import-jobs/${id}/report/exports`,
+    `catalog/import-jobs/${id}/report/exports/${exportId}/file`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8082/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 重新生成报告与发起导出都是 POST
+  for (const path of [
+    `catalog/import-jobs/${id}/report`,
+    `catalog/import-jobs/${id}/report/exports`,
+  ]) {
+    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+});
+
+it('校验报告放行不等于放行 import-jobs 的任意子路径', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const exportId = '22222222-2222-2222-2222-222222222222';
+  for (const path of [
+    `catalog/import-jobs/${id}/report/unknown`,
+    `catalog/import-jobs/${id}/report/exports/${exportId}/extra`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it('3.8.1.1 导入向导已有的路径没有被报告子段改坏', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'catalog/import-templates',
+    `catalog/import-templates/${id}`,
+    `catalog/import-templates/${id}/file`,
+    'catalog/import-field-mappings',
+    'catalog/import-jobs',
+    `catalog/import-jobs/${id}`,
+    `catalog/import-jobs/${id}/mapping`,
+    `catalog/import-jobs/${id}/prevalidate`,
+    `catalog/import-jobs/${id}/execute`,
+    `catalog/import-jobs/${id}/cancel`,
+    `catalog/import-jobs/${id}/rows`,
+    `catalog/import-jobs/${id}/errors`,
+  ]) {
+    // 失败时用 path 指出是哪一段被改坏了，而不是只看到一个 404
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 必须仍然放行`,
+    ).toBe(200);
+  }
+});

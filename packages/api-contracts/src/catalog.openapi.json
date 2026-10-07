@@ -10932,6 +10932,172 @@
         }
       }
     },
+    "/catalog/import-jobs/{id}/report": {
+      "get": {
+        "tags": [
+          "import-validation-controller"
+        ],
+        "operationId": "report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportValidationSummary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "import-validation-controller"
+        ],
+        "operationId": "regenerate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportValidationReportRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/import-jobs/{id}/report/exports": {
+      "get": {
+        "tags": [
+          "import-validation-controller"
+        ],
+        "operationId": "exports",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportValidationExportPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "import-validation-controller"
+        ],
+        "operationId": "createExport",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportValidationExportInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportValidationExportRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/import-jobs/{id}/prevalidate": {
       "post": {
         "tags": [
@@ -16058,6 +16224,141 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ImportJobRowPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/import-jobs/{id}/report/issues": {
+      "get": {
+        "tags": [
+          "import-validation-controller"
+        ],
+        "operationId": "issues",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rowNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportValidationIssuePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/import-jobs/{id}/report/exports/{exportId}/file": {
+      "get": {
+        "tags": [
+          "import-validation-controller"
+        ],
+        "operationId": "exportFile",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "exportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
                 }
               }
             }
@@ -24867,6 +25168,139 @@
           }
         }
       },
+      "ImportValidationReportRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourcePrevalidatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceStatus": {
+            "type": "string"
+          },
+          "sourceStatusLabel": {
+            "type": "string"
+          },
+          "totalRowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blockingRowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippableRowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cleanRowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "issueRowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errorCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "stale": {
+            "type": "boolean"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ImportValidationExportInput": {
+        "required": [
+          "exportKind"
+        ],
+        "type": "object",
+        "properties": {
+          "exportKind": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "severityFilter": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ImportValidationExportRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "exportKind": {
+            "type": "string"
+          },
+          "exportKindLabel": {
+            "type": "string"
+          },
+          "severityFilter": {
+            "type": "string"
+          },
+          "rowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "issueCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "byteSize": {
+            "type": "number"
+          },
+          "contentSha256": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "stale": {
+            "type": "boolean"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "ImportFieldMappingInput": {
         "required": [
           "mapping",
@@ -30484,6 +30918,168 @@
           "total": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "ImportValidationCategoryStat": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "rowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errorCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ImportValidationColumnStat": {
+        "type": "object",
+        "properties": {
+          "fieldKey": {
+            "type": "string"
+          },
+          "fieldLabel": {
+            "type": "string"
+          },
+          "rowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errorCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ImportValidationSummary": {
+        "type": "object",
+        "properties": {
+          "report": {
+            "$ref": "#/components/schemas/ImportValidationReportRow"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportValidationCategoryStat"
+            }
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportValidationColumnStat"
+            }
+          }
+        }
+      },
+      "ImportValidationIssueLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rowNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fieldKey": {
+            "type": "string"
+          },
+          "fieldLabel": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "categoryLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "rawValue": {
+            "type": "string"
+          },
+          "rowOutcome": {
+            "type": "string"
+          },
+          "rowOutcomeLabel": {
+            "type": "string"
+          },
+          "rowBlocking": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ImportValidationIssuePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportValidationIssueLine"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "errorCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ImportValidationExportPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportValidationExportRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
