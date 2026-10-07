@@ -3,6 +3,7 @@ package com.starcon.warehouse;
 import static com.starcon.warehouse.InventoryBucketModels.*;
 import static com.starcon.warehouse.InventoryLedgerModels.*;
 import static com.starcon.warehouse.InventoryReconciliationModels.*;
+import static com.starcon.warehouse.SellablePolicyModels.*;
 import static com.starcon.warehouse.WarehouseModels.*;
 
 import jakarta.validation.Valid;
@@ -40,6 +41,7 @@ public class InventoryController {
   private final InventoryAvailabilityService availability;
   private final InventoryLedgerService ledger;
   private final InventoryReconciliationService reconciliation;
+  private final SellablePolicyService sellablePolicies;
 
   public InventoryController(
       AccessService access,
@@ -48,7 +50,8 @@ public class InventoryController {
       WarehouseReferenceService references,
       InventoryAvailabilityService availability,
       InventoryLedgerService ledger,
-      InventoryReconciliationService reconciliation) {
+      InventoryReconciliationService reconciliation,
+      SellablePolicyService sellablePolicies) {
     this.access = access;
     this.overview = overview;
     this.buckets = buckets;
@@ -56,6 +59,7 @@ public class InventoryController {
     this.availability = availability;
     this.ledger = ledger;
     this.reconciliation = reconciliation;
+    this.sellablePolicies = sellablePolicies;
   }
 
   /**
@@ -438,5 +442,133 @@ public class InventoryController {
           references.deletePolicy(id);
           return null;
         });
+  }
+
+  // ------------------------------------------------------------ 7.2.2.1 可售量口径
+
+  /**
+   * 7.2.2.1 可售量口径：口径分档列表（真分页）。
+   *
+   * <p>{@code effectiveOnly=true} 只看此刻仍在生效的档；服务端用 {@code now()} 判定而不是
+   * 接受调用方传时刻 —— 「看未来某一刻谁生效」在这里没有业务含义，却会变成一个能试错的入口。
+   *
+   * <p>读权限沿用 {@code warehouse.inventory.read}：读口径不改任何数，
+   * 与总览/明细同源同权。
+   */
+  @GetMapping("/inventory/sellable-policies")
+  public SellablePolicyPage sellablePolicies(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestParam(required = false) String scopeType,
+      @RequestParam(required = false) UUID referenceId,
+      @RequestParam(required = false) String poolMode,
+      @RequestParam(required = false, defaultValue = "false") boolean effectiveOnly,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false, defaultValue = "0") int page,
+      @RequestParam(required = false, defaultValue = "50") int size) {
+    return call(
+        auth,
+        "inventory.read",
+        a ->
+            sellablePolicies.page(
+                new SellablePolicyQuery(
+                    scopeType, referenceId, poolMode, effectiveOnly, keyword, page, size)));
+  }
+
+  /**
+   * 解析某一时刻真正生效的口径（分档生效语义，与 17.5.1.1 业务参数同一套约定）。
+   *
+   * <p>{@code at} 缺省取当前时刻。返回里的 {@code usedFallback} 与 {@code note} 如实说明
+   * 用的是指定档还是回退到的兜底档 —— 没有配置时返回 {@code policy=null}，调用方据此拒绝
+   * 回写平台，而不是回写 0（立刻断货）或回写满（超卖）。
+   */
+  @GetMapping("/inventory/sellable-policies/effective")
+  public SellablePolicyEffective sellableEffective(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestParam(required = false) String scopeType,
+      @RequestParam(required = false) UUID referenceId,
+      @RequestParam(required = false) String at) {
+    return call(
+        auth,
+        "inventory.read",
+        a -> sellablePolicies.effective(scopeType, referenceId, moment(at)));
+  }
+
+  /** 共享池名册 + 安全判定。池余量的比例只取决于缓冲配置，不需要库存数据。 */
+  @GetMapping("/inventory/sellable-policies/pools")
+  public List<SellablePoolSummary> sellablePools(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestParam(required = false) String at) {
+    return call(auth, "inventory.read", a -> sellablePolicies.pools(moment(at)));
+  }
+
+  /** 单个池的成员清单、仓构成与被平台口径排除掉的 FBA 量。池名对不上 → 404。 */
+  @GetMapping("/inventory/sellable-policies/pools/{poolKey}")
+  public SellablePoolDetail sellablePool(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable String poolKey,
+      @RequestParam(required = false) String at) {
+    return call(auth, "inventory.read", a -> sellablePolicies.pool(poolKey, moment(at)));
+  }
+
+  /** 口径详情（含它吃哪几个仓、哪些算自有）。跨租户在 RLS 下查不到 → 404，不泄露存在性。 */
+  @GetMapping("/inventory/sellable-policies/{id}")
+  public SellablePolicyDetail sellablePolicy(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
+    return call(auth, "inventory.read", a -> sellablePolicies.detail(id));
+  }
+
+  /**
+   * 新建一档口径。
+   *
+   * <p>权限码是 {@code warehouse.inventory.update} 而不是 read：缓冲比例与超卖容忍是经营决策，
+   * 配错了直接超卖 —— 把「改防超卖的最后一道防线」挂在读权限上，那道闸门等于没有。
+   */
+  @PostMapping("/inventory/sellable-policies")
+  public SellablePolicySaved createSellablePolicy(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @Valid @RequestBody SellablePolicyInput input) {
+    return call(auth, "inventory.update", a -> sellablePolicies.save(null, input, a.userId()));
+  }
+
+  /**
+   * 换版：收口当前在效的那一档，再开新档。
+   *
+   * <p>刻意不给「改这一档」的 PUT —— 口径内容写定后不可改（V56 触发器在 DB 层挡住），
+   * 改口径只能通过收口 + 新开，历史那一档因此永远是「当时真正生效的防线」的凭据。
+   */
+  @PostMapping("/inventory/sellable-policies/{id}/versions")
+  public SellablePolicySaved supersedeSellablePolicy(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @Valid @RequestBody SellablePolicyInput input) {
+    return call(auth, "inventory.update", a -> sellablePolicies.save(id, input, a.userId()));
+  }
+
+  /**
+   * 作废一档（收口它的生效区间）。
+   *
+   * <p>用 POST 而不是 DELETE：作废是审计事件，档位行必须永久保留（V54 台账的同一条纪律）。
+   * 整个口径路径上**没有** DELETE 端点 —— 想知道"能不能物理删掉一条防超卖配置"，答案是不能。
+   */
+  @PostMapping("/inventory/sellable-policies/{id}/retire")
+  public SellablePolicySaved retireSellablePolicy(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id,
+      @RequestParam(required = false) String at) {
+    return call(auth, "inventory.update", a -> sellablePolicies.retire(id, moment(at)));
+  }
+
+  /**
+   * 可售量计算：按生效口径算出每个 SKU 的平台可售数与池余量。
+   *
+   * <p>用 POST 而不是 GET：请求体是一组 SKU（与 {@code /inventory/availability} 同一理由，
+   * 列表放 URL 里会撞长度限制）。7.1.1.3 与 04 回写消费的就是这个。
+   */
+  @PostMapping("/inventory/sellable-policies/calculation")
+  public SellableQuantityResult sellableCalculation(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestBody SellableQuantityRequest request) {
+    return call(auth, "inventory.read", a -> sellablePolicies.calculate(request));
   }
 }
