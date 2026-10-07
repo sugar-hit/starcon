@@ -3846,4 +3846,160 @@ public final class CatalogModels {
   /** 版本列表筛选条件（跨套装）。 */
   public record BundleVersionQuery(
       String keyword, String status, UUID bundleId, int page, int size) {}
+
+  // ================================================================ 3.5.1.2 组件维护
+  //
+  // 蓝图 3.5.1.2：「输出：组件清单；校验结果（循环、数量非法、组件不存在均拒绝保存）。」
+  // 所以本节有两组 DTO：清单（Component*）与校验（ComponentCheck / ComponentProblem）。
+
+  /**
+   * 组件工作台概览。
+   *
+   * <p>六个数都是真的 count，不是「估算」：
+   *
+   * <ul>
+   *   <li>{@code selfReferencingCount} 与 {@code nonPositiveQuantityCount} <b>必须恒为 0</b> ——
+   *       它们是纪律的体检指标。写出来是为了让「一条都没坏」这件事<b>可核对</b>，
+   *       而不是靠「约束建了就一定对」。
+   *   <li>{@code nestedComponentCount} 是「指向套装可售 SKU 的组件」数量，也就是嵌套套装的实际规模；
+   *       循环检测守的就是这一类边。
+   * </ul>
+   */
+  public record BundleComponentOverview(
+      long componentCount,
+      long versionWithComponentCount,
+      long distinctSkuCount,
+      long linkedSkuCount,
+      long nestedComponentCount,
+      long selfReferencingCount,
+      long nonPositiveQuantityCount,
+      String note) {}
+
+  /**
+   * 组件清单行（跨版本工作台的主形状）。
+   *
+   * <p>与 3.5.1.1 的 {@link BundleComponentRow} 的区别：这里带上了
+   * 「这个组件属于哪个套装的哪一版、那一版还能不能改」——
+   * 工作台是<b>跨版本</b>的，运营在一个列表里要能立刻看出哪几行是冻结的。
+   *
+   * <p>{@code nested} + {@code linkedBundleCode} 是循环检测的可见面：
+   * 嵌套套装在界面上必须一眼看出来，因为它意味着展开还会继续往下走一层。
+   */
+  public record BundleComponentItem(
+      UUID id,
+      UUID versionId,
+      UUID bundleId,
+      String bundleCode,
+      String versionNo,
+      String versionName,
+      String versionStatus,
+      String versionStatusLabel,
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      BigDecimal quantity,
+      String role,
+      String note,
+      boolean nested,
+      @Schema(nullable = true) UUID linkedBundleId,
+      @Schema(nullable = true) String linkedBundleCode,
+      boolean editable,
+      long rowVersion) {}
+
+  public record BundleComponentPage(
+      List<BundleComponentItem> items, int page, int size, long total, int totalPages) {}
+
+  /** 组件清单筛选条件。{@code nested} 取 {@code "true"} / {@code "false"} / 空（不过滤）。 */
+  public record BundleComponentQuery(
+      String keyword, UUID versionId, UUID bundleId, String nested, int page, int size) {}
+
+  /**
+   * 单行组件修改输入。
+   *
+   * <p><b>没有 skuId</b>：组件行的身份是「这个版本里的这个 SKU」，
+   * 换 SKU 等于删掉这一行再新建一行（那样历史更清楚：改了什么就是改了什么）。
+   * 逐行编辑只改数量、角色、备注。
+   */
+  public record BundleComponentEditInput(
+      @NotNull @DecimalMin(value = "0", inclusive = false) @Digits(integer = 13, fraction = 6)
+          BigDecimal quantity,
+      @Schema(nullable = true) @Size(max = 32) String role,
+      @Schema(nullable = true) @Size(max = 200) String note,
+      @PositiveOrZero long rowVersion) {}
+
+  /**
+   * 一条校验问题。
+   *
+   * <p>{@code code} 是稳定的机器可读码（前端按它决定图标与分组），
+   * {@code message} 是可以直接显示的中文原因。两者都要：界面按 code 排版，
+   * 人按 message 判断下一步做什么。
+   */
+  public record BundleComponentProblem(
+      String code,
+      String message,
+      @Schema(nullable = true) UUID skuId,
+      @Schema(nullable = true) String skuCode,
+      @Schema(nullable = true) UUID componentId) {}
+
+  /**
+   * 组件校验结果（蓝图的「校验结果」输出）。
+   *
+   * <p>与「保存时报错」是两件事：保存被拒只会给一条原因，
+   * 而工作台要在保存<b>之前</b>就把一个版本的所有问题一次列全
+   * （少一个环、三个数量非法、一个 SKU 不存在），否则运营只能反复提交试错。
+   *
+   * <p>{@code ok=false} 时 {@code problems} 一定非空；{@code ok=true} 时一定为空。
+   */
+  public record BundleComponentCheck(
+      UUID versionId,
+      UUID bundleId,
+      String bundleCode,
+      String versionNo,
+      String versionStatus,
+      String versionStatusLabel,
+      long componentCount,
+      BigDecimal totalQuantity,
+      boolean editable,
+      boolean ok,
+      List<BundleComponentProblem> problems,
+      String note) {}
+
+  /**
+   * SKU ↔ 套装指向行。
+   *
+   * <p>「这个 SKU 是那个套装的可售面」—— 循环引用就发生在这些指向构成的边上。
+   * {@code usedByComponentCount} 是「有多少个组件行把这个 SKU 当组件」，
+   * 删指向前必须先看它：已发布版本里的那些组件是冻结的历史。
+   */
+  public record BundleSkuRow(
+      UUID id,
+      UUID bundleId,
+      String bundleCode,
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      String note,
+      long usedByComponentCount,
+      boolean usedByPublished,
+      long rowVersion,
+      String createdAt,
+      String updatedAt) {}
+
+  public record BundleSkuPage(
+      List<BundleSkuRow> items, int page, int size, long total, int totalPages) {}
+
+  /** 指向列表筛选条件。 */
+  public record BundleSkuQuery(String keyword, int page, int size) {}
+
+  /**
+   * 指向输入（新建与改指向共用）。
+   *
+   * <p>「改指向」是本模块里最危险的一个操作：它一次性改掉所有把该 SKU 当组件的套装的出边，
+   * 所以它同样要过循环检测（V24 的 guard_bundle_sku_cycle 兜底）。
+   */
+  public record BundleSkuInput(
+      @NotNull UUID bundleId,
+      @NotNull UUID skuId,
+      @Schema(nullable = true) @Size(max = 200) String note,
+      @PositiveOrZero long rowVersion) {}
 }
