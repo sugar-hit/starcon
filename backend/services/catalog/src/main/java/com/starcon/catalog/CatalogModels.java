@@ -3305,4 +3305,357 @@ public final class CatalogModels {
       long incompleteSectionCount,
       long issueCount,
       String note) {}
+
+  // ================================================================== 3.4.3.1 多语言内容
+
+  /**
+   * 多语言内容概览。
+   *
+   * <p>{@code pendingTranslationCount} 是这个模块唯一需要每天盯的数字：
+   * 「需要哪些语言」推导出来后，待翻的积压直接决定 04 刊登能不能上新。
+   * {@code siteLocaleAvailable} 让页面能把「站点推导」标成未接入而不是显示空的语言列表。
+   */
+  public record TranslationOverview(
+      long localeCount,
+      long enabledLocaleCount,
+      long manualLocaleCount,
+      long siteLocaleCount,
+      boolean siteLocaleAvailable,
+      long spuTranslationCount,
+      long skuTranslationCount,
+      long pendingTranslationCount,
+      long translatedTranslationCount,
+      long reviewedTranslationCount,
+      long publishableTranslationCount,
+      long pendingSuggestionCount,
+      long adoptedSuggestionCount,
+      long rejectedSuggestionCount,
+      long batchCount,
+      String note) {}
+
+  /** 租户语言需求一行（人工维护的一侧），带该语言下的译文覆盖统计。 */
+  public record TranslationLocaleRow(
+      UUID id,
+      String locale,
+      String localeName,
+      String source,
+      String sourceLabel,
+      boolean enabled,
+      String note,
+      long version,
+      String createdAt,
+      String updatedAt,
+      long translationCount,
+      long pendingCount,
+      long translatedCount,
+      long reviewedCount) {}
+
+  /** 语言需求写入（新建或改）。 */
+  public record TranslationLocaleInput(
+      @NotBlank @Size(max = 16) String locale,
+      @Size(max = 60) String localeName,
+      @Schema(nullable = true) Boolean enabled,
+      @Schema(nullable = true) String note,
+      @PositiveOrZero long version) {}
+
+  /** 保存结果：行 + 是否新建。 */
+  public record TranslationLocaleSaved(
+      TranslationLocaleRow locale, boolean created, String message) {}
+
+  /** 语言需求列表筛选条件。字段与 GET /catalog/translations/locales 的 query 逐字对应。 */
+  public record TranslationLocaleQuery(
+      @Schema(nullable = true) @Size(max = 60) String keyword,
+      @Schema(nullable = true) @Size(max = 16) String source,
+      @Schema(nullable = true) @Size(max = 16) String enabled,
+      int page,
+      int size) {}
+
+  public record TranslationLocalePage(
+      List<TranslationLocaleRow> items, int page, int size, long total, int totalPages) {}
+
+  /**
+   * 合并视图里的一种语言。
+   *
+   * <p>{@code required} 为 true 表示该语言在**租户语言需求**里（人工维护 ∪ 站点推导）。
+   * 站点推导那一侧未接入时 {@code shopCount} / {@code marketplaceCount} 为 0，
+   * 但那表示「取不到」而不是「没有店铺用这种语言」——区分靠同级的
+   * {@code siteLocaleAvailable}，不是靠这两个数字。
+   */
+  public record TranslationRequirementRow(
+      String locale,
+      String localeName,
+      boolean required,
+      boolean fromManual,
+      boolean fromSite,
+      int shopCount,
+      int marketplaceCount,
+      boolean enabled,
+      String note,
+      long translationCount,
+      long pendingCount,
+      long translatedCount,
+      long reviewedCount) {}
+
+  /**
+   * 「人工维护 ∪ 站点推导」的合并视图。
+   *
+   * <p>{@code siteLocaleAvailable=false} 时 {@code siteNote} 说明归 02 渠道，
+   * 而 {@code requirements} 里 {@code fromSite} 的行**一条都不会有**——
+   * 空的站点推导列表会被读成「这个租户不需要多语言」，那是本模块最危险的错误方向。
+   */
+  public record TranslationRequirementView(
+      boolean siteLocaleAvailable,
+      String siteNote,
+      List<TranslationRequirementRow> requirements,
+      long manualCount,
+      long derivedCount,
+      String note) {}
+
+  /** 一条商品多语言译文（SPU 或 SKU，见 {@code targetType}）。 */
+  public record TranslationEntry(
+      UUID id,
+      String targetType,
+      @Schema(nullable = true) UUID spuId,
+      @Schema(nullable = true) UUID skuId,
+      String locale,
+      String name,
+      String description,
+      String origin,
+      String status,
+      @Schema(nullable = true) UUID reviewedBy,
+      @Schema(nullable = true) String reviewedAt,
+      long version,
+      String createdAt,
+      String updatedAt,
+      @Schema(nullable = true) String translatedAt) {}
+
+  /** 新建译文。locale 必填（按语言唯一的键就是它）。 */
+  public record TranslationEntryInput(
+      @NotBlank @Size(max = 16) String locale,
+      @Schema(nullable = true) @Size(max = 200) String name,
+      @Schema(nullable = true) @Size(max = 8000) String description,
+      @Schema(nullable = true) String origin,
+      @Schema(nullable = true) String status) {}
+
+  /**
+   * 改译文。
+   *
+   * <p>刻意**不含 locale**：语言的唯一性是这张表的业务主键的一部分，
+   * 「把德语译文改成法语」不是编辑而是「删一条建一条」，
+   * 混进编辑会让「按语言唯一」的语义在审计上说不清。
+   */
+  public record TranslationEntryEdit(
+      @Schema(nullable = true) @Size(max = 200) String name,
+      @Schema(nullable = true) @Size(max = 8000) String description,
+      @Schema(nullable = true) String origin,
+      @Schema(nullable = true) String status,
+      @PositiveOrZero long version) {}
+
+  /** 翻译状态流转（人工校对 / 退回）。 */
+  public record TranslationStatusInput(
+      @NotBlank String status, @PositiveOrZero long version) {}
+
+  /** 译文列表筛选条件。字段与 GET /catalog/translations/entries 的 query 逐字对应。 */
+  public record TranslationEntryQuery(
+      @Schema(nullable = true) @Size(max = 8) String targetType,
+      @Schema(nullable = true) @Size(max = 16) String status,
+      @Schema(nullable = true) @Size(max = 16) String locale,
+      @Schema(nullable = true) String spuId,
+      @Schema(nullable = true) String skuId,
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      int page,
+      int size) {}
+
+  public record TranslationEntryPage(
+      List<TranslationEntry> items, int page, int size, long total, int totalPages) {}
+
+  /**
+   * 一个商品在一种语言上的翻译情况。
+   *
+   * <p>这是本模块的核心读形状：把「需要哪些语言」（租户语言需求）与
+   * 「翻到什么程度」（译文状态）在**同一行**对上，
+   * 否则页面得自己拼两张表再对齐，而「这个商品还差哪几种语言」正是运营唯一要问的问题。
+   *
+   * @param required 该语言是否在租户语言需求里（不在需求里的译文也照常显示，但标成「非需求语言」）
+   * @param status 译文状态；该语言还没有译文行时为 null
+   * @param publishable 是否可刊登（只有 status='REVIEWED' 为 true）
+   */
+  public record TranslationProductRow(
+      String locale,
+      String localeName,
+      boolean required,
+      String status,
+      String statusLabel,
+      @Schema(nullable = true) UUID entryId,
+      @Schema(nullable = true) String name,
+      boolean publishable) {}
+
+  /** 某个 SPU / SKU 的多语言工作台视图。 */
+  public record TranslationProductView(
+      String targetType,
+      UUID targetId,
+      String code,
+      String name,
+      List<TranslationProductRow> rows,
+      long pendingSuggestionCount,
+      boolean siteLocaleAvailable,
+      String siteNote,
+      String note) {}
+
+  /** 一条 AI 翻译建议。 */
+  public record TranslationSuggestionRow(
+      UUID id,
+      String targetType,
+      @Schema(nullable = true) UUID spuId,
+      @Schema(nullable = true) UUID skuId,
+      String locale,
+      String suggestedName,
+      String suggestedDescription,
+      String origin,
+      String modelName,
+      String batchRef,
+      String status,
+      @Schema(nullable = true) UUID decidedBy,
+      @Schema(nullable = true) String decidedAt,
+      String rejectReason,
+      String targetCode,
+      String targetName,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /** 单条 AI 翻译建议写入（18 AI 翻译调用）。 */
+  public record TranslationSuggestionInput(
+      @NotBlank String targetType,
+      @Schema(nullable = true) String spuId,
+      @Schema(nullable = true) String skuId,
+      @NotBlank @Size(max = 16) String locale,
+      @Schema(nullable = true) @Size(max = 200) String suggestedName,
+      @Schema(nullable = true) @Size(max = 8000) String suggestedDescription,
+      @Schema(nullable = true) String origin,
+      @Schema(nullable = true) @Size(max = 100) String modelName,
+      @Schema(nullable = true) @Size(max = 64) String batchRef) {}
+
+  /** 18 一次交回一批建议。 */
+  public record TranslationSuggestionSubmit(
+      @NotNull @Size(max = 500) List<@NotNull TranslationSuggestionInput> items) {}
+
+  /** 驳回建议。理由必填——不给理由的驳回让下一轮翻译无从改进。 */
+  public record TranslationSuggestionReject(
+      @NotBlank @Size(max = 500) String rejectReason) {}
+
+  /** 建议列表筛选条件。字段与 GET /catalog/translations/suggestions 的 query 逐字对应。 */
+  public record TranslationSuggestionQuery(
+      @Schema(nullable = true) @Size(max = 8) String targetType,
+      @Schema(nullable = true) @Size(max = 16) String status,
+      @Schema(nullable = true) @Size(max = 16) String locale,
+      @Schema(nullable = true) String spuId,
+      @Schema(nullable = true) String skuId,
+      @Schema(nullable = true) @Size(max = 64) String batchRef,
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      int page,
+      int size) {}
+
+  public record TranslationSuggestionPage(
+      List<TranslationSuggestionRow> items, int page, int size, long total, int totalPages) {}
+
+  /**
+   * 批量操作提交。
+   *
+   * @param action CREATE_PENDING 补齐待翻占位（按 locales 展开 targetIds × locales）
+   *     · ADOPT_SUGGESTIONS 批量采纳（按 batchRef 找建议，targetIds 忽略）
+   *     · MARK_REVIEWED 批量标记已校对（按 locales 展开，已翻的行才动）
+   * @param targetIds 选中的商品 ID（CREATE_PENDING / MARK_REVIEWED 用）
+   * @param locales 期望语言（CREATE_PENDING / MARK_REVIEWED 用）
+   * @param batchRef AI 建议的批次归组键（ADOPT_SUGGESTIONS 用）
+   */
+  public record TranslationBatchInput(
+      @NotBlank String action,
+      @NotBlank String targetType,
+      @Schema(nullable = true) @Size(max = 200) List<@NotNull String> targetIds,
+      @Schema(nullable = true) @Size(max = 10) List<@NotNull String> locales,
+      @Schema(nullable = true) @Size(max = 64) String batchRef) {}
+
+  /** 批量操作批次一行。 */
+  public record TranslationBatchRow(
+      UUID id,
+      String action,
+      String actionLabel,
+      String targetType,
+      UUID requestedBy,
+      int itemCount,
+      int localeCount,
+      int succeededCount,
+      int skippedCount,
+      int rejectedCount,
+      String status,
+      String statusLabel,
+      String error,
+      long version,
+      String createdAt,
+      @Schema(nullable = true) String finishedAt) {}
+
+  /**
+   * 逐条结果一行。
+   *
+   * <p>{@code targetCode} / {@code targetName} 随行带出：批次详情页要能直接回答
+   * 「哪几个商品没成」，页面不必再为每一行回查商品表（那会让 N 行详情变成 N 次往返）。
+   */
+  public record TranslationBatchItemRow(
+      UUID id,
+      String targetType,
+      @Schema(nullable = true) UUID spuId,
+      @Schema(nullable = true) UUID skuId,
+      String targetCode,
+      String targetName,
+      String locale,
+      String outcome,
+      String outcomeLabel,
+      String reason,
+      String createdAt) {}
+
+  /** 批次详情：批次 + 逐条结果 + 目标编码（页面逐条核对用）。 */
+  public record TranslationBatchDetail(
+      TranslationBatchRow batch, List<TranslationBatchItemRow> items, String note) {}
+
+  /** 批次列表筛选条件。 */
+  public record TranslationBatchQuery(
+      @Schema(nullable = true) @Size(max = 24) String action,
+      @Schema(nullable = true) @Size(max = 8) String targetType,
+      @Schema(nullable = true) @Size(max = 16) String status,
+      int page,
+      int size) {}
+
+  public record TranslationBatchPage(
+      List<TranslationBatchRow> items, int page, int size, long total, int totalPages) {}
+
+  /**
+   * 翻译完整度：一个商品在一种语言上能不能直接刊登。
+   *
+   * <p>04 刊登填充的读形状：只有 {@code publishable=true}（status='REVIEWED'）才可刊登，
+   * 「已翻」是机器译文，拿去发平台等于没做校对这一步。
+   */
+  public record TranslationCoverageRow(
+      String locale,
+      boolean required,
+      String status,
+      String statusLabel,
+      @Schema(nullable = true) UUID entryId,
+      @Schema(nullable = true) String name,
+      boolean publishable) {}
+
+  /** 翻译完整度汇总。 */
+  public record TranslationCoverage(
+      String targetType,
+      UUID targetId,
+      String code,
+      String name,
+      List<String> locales,
+      List<TranslationCoverageRow> rows,
+      long requiredLocaleCount,
+      long publishableCount,
+      long pendingCount,
+      long translatedCount,
+      long reviewedCount,
+      String note) {}
 }

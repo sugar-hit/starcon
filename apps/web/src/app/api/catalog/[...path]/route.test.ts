@@ -585,3 +585,122 @@ it('sku-attribute-override 放行不等于放行任意 catalog 子路径', async
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
+
+it('catalog/translations 的全部路由被放行且转发到 catalog 服务（3.4.3.1 多语言内容）', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const spu = '11111111-1111-1111-1111-111111111111';
+  const sku = '22222222-2222-2222-2222-222222222222';
+  const locale = '33333333-3333-3333-3333-333333333333';
+  const entry = '44444444-4444-4444-4444-444444444444';
+  const suggestion = '55555555-5555-5555-5555-555555555555';
+  const batch = '66666666-6666-6666-6666-666666666666';
+
+  // GET：概览、语言需求（人工维护 + 合并视图）、商品工作台、列表、完整度、批次、建议。
+  for (const path of [
+    'catalog/translations/overview',
+    'catalog/translations/locales',
+    'catalog/translations/locales/requirements',
+    `catalog/translations/locales/${locale}`,
+    `catalog/translations/spus/${spu}`,
+    `catalog/translations/skus/${sku}`,
+    'catalog/translations/entries',
+    `catalog/translations/entries/${entry}`,
+    'catalog/translations/coverage',
+    'catalog/translations/suggestions',
+    `catalog/translations/suggestions/${suggestion}`,
+    'catalog/translations/batches',
+    `catalog/translations/batches/${batch}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8082/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+
+  // 建语言需求 / 建译文 / 从店铺站点同步 / 登记建议 / 批量采纳 是 POST。
+  // sync 走 POST 是因为它是「重新推导一次」而不是「新建一条」。
+  for (const path of [
+    'catalog/translations/locales',
+    'catalog/translations/locales/sync',
+    `catalog/translations/spus/${spu}/entries`,
+    `catalog/translations/skus/${sku}/entries`,
+    'catalog/translations/suggestions',
+    `catalog/translations/suggestions/${suggestion}/adopt`,
+    `catalog/translations/suggestions/${suggestion}/reject`,
+    'catalog/translations/batches',
+  ]) {
+    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(
+      200,
+    );
+  }
+
+  // 启停语言需求 / 改译文 / 状态流转（人工校对）是 PUT。
+  for (const path of [
+    `catalog/translations/locales/${locale}`,
+    `catalog/translations/locales/${locale}/enabled`,
+    `catalog/translations/entries/${entry}`,
+    `catalog/translations/entries/${entry}/status`,
+  ]) {
+    expect((await PUT(request(path, 'PUT'), { params: { path: path.split('/') } })).status).toBe(
+      200,
+    );
+  }
+
+  // CSV 导出与删除都带 ?version=，走 DELETE。
+  expect(
+    (await GET(request(`catalog/translations/entries/export?version=0`), {
+      params: { path: 'catalog/translations/entries/export'.split('/') },
+    })).status,
+  ).toBe(200);
+  for (const [prefix, id] of [
+    ['locales', locale],
+    ['entries', entry],
+    ['suggestions', suggestion],
+  ] as const) {
+    expect(
+      (
+        await DELETE(request(`catalog/translations/${prefix}/${id}?version=0`, 'DELETE'), {
+          params: { path: ['catalog', 'translations', prefix, id] },
+        })
+      ).status,
+    ).toBe(200);
+  }
+});
+
+it('translations 放行不等于放行任意 catalog 子路径', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const entry = '44444444-4444-4444-4444-444444444444';
+  // allowlist 是精确路径：多一层未声明的子路径、或把 SPU 工作台当成任意资源读，仍应 404，
+  // 否则拼错的路径会被静默转发到后端，后端给出的错误会与真正的参数错误混在一起。
+  for (const path of [
+    'catalog/translations',
+    'catalog/translations/unknown',
+    'catalog/translations/locales/requirements/extra',
+    `catalog/translations/entries/${entry}/unknown`,
+    `catalog/translations/suggestions/${entry}/adopt/extra`,
+    'catalog/translations/batches/abc',
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it('translations 放行不放行 3.4.2.2 的模板译文路径（两套 locale 不能混用）', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  // descriptions 自己的 translations/{id}（模板译文删除）仍然放行，
+  // 但它必须挂在 descriptions 之下；裸的 translations/{id} 不是合法路径 ——
+  // 否则「模板译文」与「商品译文」会在代理层就变成同一条规则。
+  const suggestion = '55555555-5555-5555-5555-555555555555';
+  expect(
+    (await GET(request(`catalog/translations/${suggestion}`), {
+      params: { path: ['catalog', 'translations', suggestion] },
+    })).status,
+  ).toBe(404);
+  expect(fetcher).not.toHaveBeenCalled();
+});
