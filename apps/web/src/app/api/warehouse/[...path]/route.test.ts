@@ -50,6 +50,24 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
     `warehouse/inventory/transfers/${id}/ship`,
     `warehouse/inventory/transfers/${id}/receive`,
     `warehouse/inventory/transfers/${id}/close`,
+    // 8.3.4.2 面单与标签打印：能力声明 / 打印机 / 模板 / 打印对象（含打印历史）/
+    //   重复打印规则 / 任务列表与详情 / 执行与取消 / 打印内容下载 / 打印日志。
+    //   动作与下载路径必须逐个钉住 —— 少放行一个，页面上的按钮就会变成静默 404，
+    //   而 allowlist 只在浏览器端生效、后端集成测试发现不了。
+    'warehouse/inventory/printing/capabilities',
+    'warehouse/inventory/printing/devices',
+    'warehouse/inventory/printing/templates',
+    `warehouse/inventory/printing/templates/${id}`,
+    'warehouse/inventory/printing/reprint-rules',
+    'warehouse/inventory/printing/targets',
+    `warehouse/inventory/printing/targets/${id}`,
+    `warehouse/inventory/printing/targets/${id}/history`,
+    'warehouse/inventory/printing/jobs',
+    `warehouse/inventory/printing/jobs/${id}`,
+    `warehouse/inventory/printing/jobs/${id}/execute`,
+    `warehouse/inventory/printing/jobs/${id}/cancel`,
+    `warehouse/inventory/printing/jobs/${id}/items/${id}/content`,
+    'warehouse/inventory/printing/logs',
   ]) {
     const response = await GET(request(path), { params: { path: path.split('/') } });
     expect(response.status).toBe(200);
@@ -133,4 +151,43 @@ it('跨站写入被拒绝且不发出请求', async () => {
     ).status,
   ).toBe(403);
   expect(fetcher).not.toHaveBeenCalled();
+});
+
+/**
+ * 8.3.4.2 打印内容下载：ZPL 指令流与 HTML 打印视图都不是 JSON，必须原样透传。
+ *
+ * <p>为什么要单独钉：走 JSON.parse 的话，条码指令流会被解析失败吞成一个假的 503，
+ * 现场看到的是「下载失败」，而真实原因是代理把非 JSON 响应吃掉了。
+ * content-disposition 也必须一起带走，否则浏览器拿不到文件名。
+ */
+it('打印内容（ZPL / HTML）原样透传而不是被 JSON 解析吞成 503', async () => {
+  const zpl = '^XA^FO32,24^A0N,34,34^FD面单^FS^XZ\n';
+  for (const [contentType, body] of [
+    ['text/vnd.zpl; charset=utf-8', zpl],
+    ['text/html; charset=utf-8', '<!doctype html><html><body>装箱单</body></html>'],
+  ] as const) {
+    const fetcher = vi.fn().mockImplementation(() =>
+      Promise.resolve(
+        new Response(body, {
+          status: 200,
+          headers: {
+            'content-type': contentType,
+            'content-disposition': 'attachment; filename="label.zpl"',
+          },
+        }),
+      ),
+    );
+    vi.stubGlobal('fetch', fetcher);
+    // params.path 的第一段是 'warehouse'（服务前缀），与上面「已放行」用例同一写法
+    const path =
+      'warehouse/inventory/printing/jobs/11111111-1111-1111-1111-111111111111' +
+      '/items/22222222-2222-2222-2222-222222222222/content';
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toBe(contentType);
+    expect(response.headers.get('content-disposition')).toBe('attachment; filename="label.zpl"');
+    // 字节必须一字不差 —— 条码少一个字符，扫码枪就读不出来了
+    expect(await response.text()).toBe(body);
+  }
 });
