@@ -184,6 +184,7 @@ export type SafetyDraft = {
   containsLiquid: boolean;
   dangerousGoods: boolean;
   isMagnetic: boolean;
+  dangerousSubstanceClass: string;
   safetyNote: string;
   safetyVersion: number;
   packagingVersion: number;
@@ -202,9 +203,14 @@ export function draftFrom(profile: PhysicalSafetyProfile): SafetyDraft {
     containsLiquid: profile.containsLiquid,
     dangerousGoods: profile.dangerousGoods,
     isMagnetic: profile.isMagnetic,
-    safetyNote: '',
+    // 备注与包装版本号都必须**从服务端回填**：
+    //   * 备注写成 '' 会让「打开页面看一眼就点保存」把已填的备注静默清空；
+    //   * packagingVersion 恒为 0 会让第二次保存永远撞不上乐观锁 ——
+    //     第一次写完 sku_package.version 就变成 1，此后每次提交都拿 0 去 CAS，必然 409。
+    dangerousSubstanceClass: profile.dangerousSubstanceClass,
+    safetyNote: profile.safetyNote,
     safetyVersion: profile.safetyVersion ?? 0,
-    packagingVersion: 0,
+    packagingVersion: profile.packagingVersion ?? 0,
   };
 }
 
@@ -228,6 +234,13 @@ export function validateDraft(draft: SafetyDraft): string[] {
     draft.containsBattery || draft.containsLiquid || draft.dangerousGoods || draft.isMagnetic;
   if (anyFlag && !draft.safetyCollected)
     errors.push('勾选了安全标记就必须同时确认「已采集安全属性」');
+  // 规则 B3：与后端 PhysicalSafetyService.validate 同一套判定，两个方向都拦。
+  const substance = draft.dangerousSubstanceClass.trim();
+  if (substance.length > 64) errors.push('危险品类别最多 64 个字符');
+  if (draft.dangerousGoods && substance === '')
+    errors.push('勾了危险品就必须填写危险品类别：16 合规要按类别决定申报路径与所需证书');
+  if (!draft.dangerousGoods && substance !== '')
+    errors.push('没有勾危险品就不该填危险品类别');
   return errors;
 }
 
@@ -263,6 +276,7 @@ export type SafetyPayload = {
   containsLiquid: boolean;
   dangerousGoods: boolean;
   isMagnetic: boolean;
+  dangerousSubstanceClass: string;
   safetyNote: string;
   safetyVersion: number;
   packagingVersion: number;
@@ -281,6 +295,7 @@ export function draftToPayload(draft: SafetyDraft): SafetyPayload {
     containsLiquid: draft.containsLiquid,
     dangerousGoods: draft.dangerousGoods,
     isMagnetic: draft.isMagnetic,
+    dangerousSubstanceClass: draft.dangerousSubstanceClass.trim(),
     safetyNote: draft.safetyNote.trim(),
     safetyVersion: draft.safetyVersion,
     packagingVersion: draft.packagingVersion,
