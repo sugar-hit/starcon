@@ -110,12 +110,24 @@ trade 目前没有任何端点，照抄那种写法就没有人持有它 ——
 
 ## 验证
 
-- `cd backend && ./mvnw verify`：见交付报告。
-- `pnpm typecheck` / `pnpm lint` / `pnpm test` / `@starcon/web build`：见交付报告。
+后端全量 `./mvnw verify -fae`（无并发）：**BUILD SUCCESS**，
+2158 例全绿（identity 183 / catalog 1205 / channel 66 / warehouse 700 / **trade 4**）。
+warehouse 700 与 trade 4 均为 0 失败 0 错误。
 
-## 顺带发现：基线上 warehouse 有一个**真实**失败（不是 flake，也不属于本车道）
+前端：`pnpm typecheck` 通过（3/3）、`pnpm lint` 通过（3/3，仅有他车道既有 warning）、
+`pnpm test` **81 个文件 / 1454 例全绿**、`NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` 成功。
 
-全量 `./mvnw verify` 在 `warehouse` 阶段红：
+## 顺带发现：warehouse 的 `SellablePolicyIntegrationTest` 是**间歇性**失败（不属于本车道）
+
+本车道三次观察同一件事，结论是「间歇性、不稳定复现」，记录下来供派车道复查：
+
+| 轮次 | 命令 | 结果 |
+| --- | --- | --- |
+| A | 全量 `./mvnw verify`（与前端 build 并发） | ❌ warehouse 阶段红 |
+| B | `./mvnw -pl services/warehouse -am test -Dtest=SellablePolicyIntegrationTest` | ❌ 17 例红 1 例 |
+| C | 全量 `./mvnw verify -fae`（无并发） | ✅ 17 例全绿，整个反应堆 BUILD SUCCESS |
+
+失败症状固定：
 
 ```
 SellablePolicyIntegrationTest.断言三_连接池归还后不串租户
@@ -126,18 +138,17 @@ java.lang.AssertionError: Expected size: 1 but was: 0 in: []
 该断言在 `for (int i = 0; i < 20; i++)` 的交替读取里，期望租户 A 能看到自己那条
 `EXCLUSIVE` 可售策略，实际是 0 条。
 
-**它不是并发 flake**：隔离重跑（`./mvnw -pl services/warehouse -am test
--Dtest=SellablePolicyIntegrationTest`）同样稳定失败，17 例红 1 例。
-那次隔离重跑的 reactor 只有 `backend` 父 POM + `tenancy` + `warehouse`，
-**根本没有构建 `services/trade`**。
+**不是本车道造成的**，两条独立证据：
 
-**也不是本车道造成的**：`git diff --stat 4ead1b7 HEAD -- backend/services/warehouse
-backend/services/channel backend/services/catalog backend/services/identity backend/libraries`
-输出为空 —— 本车道对这五个目录零改动。全量 verify 的中断点在 warehouse，
-按 Maven 反应堆顺序 `trade` 排在 warehouse 之后，因此全量跑时 `trade` 根本没轮到执行。
+1. `git diff --stat 4ead1b7 HEAD -- backend/services/warehouse backend/services/channel
+   backend/services/catalog backend/services/identity backend/libraries` 输出为空 ——
+   本车道对这五个目录零改动。
+2. 轮次 B 的 reactor 只有 `backend` 父 POM + `tenancy` + `warehouse`，
+   **根本没有构建 `services/trade`**。
 
 最后修改该测试的提交是 `54c5d6c feat(warehouse): 7.2.2.1 可售量口径（共享池 + 缓冲的防超卖体检）`。
-建议单独派车道复查该模块的租户可见性，本车道不代劳（不在本车道所有权范围内）。
+建议单独派车道复查该模块的租户可见性（尤其 `service.page` 在交替租户下的可见性），
+本车道不代劳 —— 不在本车道所有权范围内。
 
 ## 文件清单
 
