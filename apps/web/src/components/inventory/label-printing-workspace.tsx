@@ -149,7 +149,8 @@ export function LabelPrintingWorkspace() {
       setDevices(deviceList);
       if (!templateId && caps.objectTypes.length > 0) {
         const list = await fetchTemplates({ size: 100 }).catch(() => null);
-        if (list && list.rows.length > 0) setTemplateId(list.rows[0].id);
+        const first = list?.rows[0];
+        if (first) setTemplateId(first.id);
       }
     } catch (e) {
       setError(errorText(e));
@@ -948,7 +949,7 @@ export function LabelPrintingWorkspace() {
         <SectionCard
           title={`打印任务 ${detail.job.jobNo}`}
           description="每一行都是一份按模板与快照现算的渲染内容；下载端点返回的就是打印时落库的那一份。"
-          action={
+          extra={
             <button
               type="button"
               className="text-sm text-muted-foreground hover:text-foreground"
