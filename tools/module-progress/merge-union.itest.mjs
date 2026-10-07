@@ -43,6 +43,7 @@ writeFileSync(
 );
 
 const ledger = (id, name, status) => `| ${id} | ${name} | /x | D1–D2 | ${status} | 证据 |\n`;
+const LEDGER_ROW = /^\| (\d+\.\d+\.\d+\.\d+) \|/;
 
 mkdirSync(join(SANDBOX, 'packages/api-contracts/src'), { recursive: true });
 mkdirSync(join(SANDBOX, 'docs/product/capability-blueprint'), { recursive: true });
@@ -160,6 +161,22 @@ if (!mergeFailed) {
     /\| 3\.6\.1\.1 \| 往来单位档案 \| \/x \| D1–D2 \| 已交付 \|/.test(led),
     led,
   );
+  // 回归：按整行去重会让同 ID 的两行都留下，sync.mjs 后写覆盖会把
+  // 已交付读成未开发 → plan 重派 → 撞已占用的 Flyway 版本号。
+  // 这三条断言 2026-10-07 加：原断言只验「好行在不在」，从不验「坏行没了没」。
+  const rowIds = led
+    .split('\n')
+    .filter((l) => LEDGER_ROW.test(l))
+    .map((l) => l.split('|')[1].trim());
+  const dupIds = rowIds.filter((id, i) => rowIds.indexOf(id) !== i);
+  check('台账同一模块 ID 不出现重复行', dupIds.length === 0, `重复: ${[...new Set(dupIds)].join(' ')}`);
+  check(
+    '台账不残留车道侧的未开发占位行（3.5.2.2 / 3.6.1.1）',
+    !/\| 3\.5\.2\.2 \| BOM 展开 \| \/x \| D1–D2 \| 未开发 \|/.test(led) &&
+      !/\| 3\.6\.1\.1 \| 往来单位档案 \| \/x \| D1–D2 \| 未开发 \|/.test(led),
+    led,
+  );
+  check('台账行数等于模块数（无多余行）', rowIds.length === 2, `实际 ${rowIds.length} 行`);
 }
 
 // 关键二仗：纯业务文件（不走驱动器）必须正常冲突，不能被并集吃掉

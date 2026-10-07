@@ -196,13 +196,65 @@ try {
 }
 
 /* ── 兜底：行级去重并集。解析不了语义时至少不丢内容，但要报出来 ───────── */
-const seen = new Set();
+
+/*
+ * 台账（module-progress.md）不能按整行去重，必须按**模块 ID** 求并集。
+ *
+ * 为什么：台账里同一模块的两行只在状态与证据上不同，整行文本不一样，
+ * 按整行去重会把两行都留下 → 台账出现重复行 → sync.mjs 的 map.set 是
+ * 后写覆盖，车道带来的占位行（未开发 | —）排在后面就赢 → 已交付模块被
+ * 读成未开发 → plan 重派 → 撞已占用的 Flyway 版本号。
+ *
+ * 2026-10-07 在 40 分钟内因此损坏三次（17.5.1.1、17.5.3.2 两次并入）。
+ * 胜负规则与人工修复时一致，也与 sync.mjs 的读取口径一致：
+ *   1. 证据非 `—` 优先（占位行证据是 `—`，天然垫底）
+ *   2. 再比状态：已交付 > 进行中 > 未开发
+ *   3. 再比证据长度（同状态时取信息更全的那条）
+ */
+const LEDGER_ROW = /^\| (\d+\.\d+\.\d+\.\d+) \|/;
+const STATUS_RANK = { 已交付: 3, 进行中: 2, 未开发: 1 };
+const cell = (line, i) => (line.split('|')[i] ?? '').trim();
+
+const betterRow = (a, b) => {
+  const ea = cell(a, 6);
+  const eb = cell(b, 6);
+  const ha = ea && ea !== '—' ? 1 : 0;
+  const hb = eb && eb !== '—' ? 1 : 0;
+  if (ha !== hb) return ha > hb;
+  const ra = STATUS_RANK[cell(a, 5)] ?? 0;
+  const rb = STATUS_RANK[cell(b, 5)] ?? 0;
+  if (ra !== rb) return ra > rb;
+  return ea.length > eb.length;
+};
+
+const seen = new Set(); // 非台账行仍按整行去重
+const rowAt = new Map(); // 模块 ID -> 在 outLines 中的下标
 const outLines = [];
+let ledgerRowsMerged = 0;
+
 for (const line of `${ours}\n${theirs}`.split('\n')) {
-  if (seen.has(line)) continue;
-  seen.add(line);
-  outLines.push(line);
+  const m = LEDGER_ROW.exec(line);
+  if (!m) {
+    if (seen.has(line)) continue;
+    seen.add(line);
+    outLines.push(line);
+    continue;
+  }
+  const id = m[1];
+  if (!rowAt.has(id)) {
+    rowAt.set(id, outLines.length);
+    outLines.push(line);
+    continue;
+  }
+  ledgerRowsMerged += 1;
+  const i = rowAt.get(id);
+  if (betterRow(line, outLines[i])) outLines[i] = line;
 }
 writeFileSync(oursPath, outLines.join('\n'));
 process.stderr.write('merge-union: 走了行级兜底并集，请人工确认这个文件改对了\n');
+if (ledgerRowsMerged > 0) {
+  process.stderr.write(
+    `merge-union: 台账按模块 ID 求并集，折叠了 ${ledgerRowsMerged} 行同 ID 记录\n`,
+  );
+}
 process.exit(0);
