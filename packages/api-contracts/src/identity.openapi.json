@@ -464,6 +464,88 @@
         }
       }
     },
+    "/identity/departments/{id}/leader": {
+      "put": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "setDepartmentLeader",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DepartmentLeaderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "clearDepartmentLeader",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/children/{id}": {
       "put": {
         "tags": [
@@ -500,6 +582,80 @@
           },
           "required": true
         },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/accounting-books/{id}": {
+      "put": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountingBookInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -603,6 +759,464 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/OwnerTransfer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/operation-log/purge": {
+      "post": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "purge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationLogPurge"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/onboardings": {
+      "get": {
+        "tags": [
+          "member-onboarding-controller"
+        ],
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OnboardingView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "member-onboarding-controller"
+        ],
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/onboardings/{id}/complete": {
+      "post": {
+        "tags": [
+          "member-onboarding-controller"
+        ],
+        "operationId": "complete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/offboarding": {
+      "get": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "cases",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OffboardingCaseView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "create_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OffboardingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/offboarding/{id}/revert": {
+      "post": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "revert",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/offboarding/{caseId}/responsibility-items": {
+      "post": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "addResponsibilityItem",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OffboardingResponsibilityInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/offboarding/{caseId}/responsibility-items/{itemId}/transfer": {
+      "post": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "transferResponsibility",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OffboardingTransferInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/identity/offboarding/{caseId}/reclaim-items": {
+      "post": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "addReclaimItem",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OffboardingReclaimInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/offboarding/{caseId}/reclaim-items/{itemId}/reclaim": {
+      "post": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "reclaimItem",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OffboardingReclaimActionInput"
               }
             }
           },
@@ -763,6 +1377,57 @@
         }
       }
     },
+    "/identity/legal-entities/{legalEntityId}/accounting-books": {
+      "post": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "create_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountingBookInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identity/legal-entities/references": {
       "post": {
         "tags": [
@@ -834,7 +1499,7 @@
         "tags": [
           "hierarchy-authorization-controller"
         ],
-        "operationId": "create_2",
+        "operationId": "create_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -999,6 +1664,108 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DepartmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/departments/{id}/leader/proxies": {
+      "post": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "createLeaderProxy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaderProxyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/departments/{id}/leader/grants": {
+      "post": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "createLeaderGrant",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaderGrantInput"
               }
             }
           },
@@ -1287,12 +2054,395 @@
         }
       }
     },
+    "/identity/operation-log": {
+      "get": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "search",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "actorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "eventType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationLogPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/operation-log/{id}": {
+      "get": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationLogDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/operation-log/trace/{requestId}": {
+      "get": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "trace",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationLogTrace"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/operation-log/export": {
+      "get": {
+        "tags": [
+          "operation-log-controller"
+        ],
+        "operationId": "export",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "actorId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "eventType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/offboarding/{id}": {
+      "get": {
+        "tags": [
+          "offboarding-controller"
+        ],
+        "operationId": "detail_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OffboardingDetailView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/departments/{id}/approval-chain": {
+      "get": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "approvalChain",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "asOf",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalChainView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/department-leaders": {
+      "get": {
+        "tags": [
+          "administration-controller"
+        ],
+        "operationId": "departmentLeaders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DepartmentLeaderView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/identity/audit": {
       "get": {
         "tags": [
           "audit-controller"
         ],
-        "operationId": "search",
+        "operationId": "search_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1393,7 +2543,7 @@
         "tags": [
           "audit-controller"
         ],
-        "operationId": "detail_1",
+        "operationId": "detail_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -1433,7 +2583,7 @@
         "tags": [
           "audit-controller"
         ],
-        "operationId": "export",
+        "operationId": "export_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1510,6 +2660,49 @@
         }
       }
     },
+    "/identity/accounting-books": {
+      "get": {
+        "tags": [
+          "accounting-book-controller"
+        ],
+        "operationId": "accountingBooks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountingBookView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/session": {
       "get": {
         "tags": [
@@ -1567,547 +2760,6 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/Membership"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/accounting-books/{id}": {
-      "put": {
-        "tags": [
-          "accounting-book-controller"
-        ],
-        "operationId": "update_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AccountingBookInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "accounting-book-controller"
-        ],
-        "operationId": "delete",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/identity/legal-entities/{legalEntityId}/accounting-books": {
-      "post": {
-        "tags": [
-          "accounting-book-controller"
-        ],
-        "operationId": "create_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "legalEntityId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AccountingBookInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/accounting-books": {
-      "get": {
-        "tags": [
-          "accounting-book-controller"
-        ],
-        "operationId": "accountingBooks",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "legalEntityId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AccountingBookView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/onboardings": {
-      "get": {
-        "tags": [
-          "member-onboarding-controller"
-        ],
-        "operationId": "list",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OnboardingView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "member-onboarding-controller"
-        ],
-        "operationId": "create",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OnboardingInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OnboardingResult"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/onboardings/{id}/complete": {
-      "post": {
-        "tags": [
-          "member-onboarding-controller"
-        ],
-        "operationId": "complete",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/identity/departments/{id}/leader": {
-      "put": {
-        "tags": [
-          "administration-controller"
-        ],
-        "operationId": "setDepartmentLeader",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DepartmentLeaderInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "administration-controller"
-        ],
-        "operationId": "clearDepartmentLeader",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/identity/departments/{id}/leader/proxies": {
-      "post": {
-        "tags": [
-          "administration-controller"
-        ],
-        "operationId": "createLeaderProxy",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LeaderProxyInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/departments/{id}/leader/grants": {
-      "post": {
-        "tags": [
-          "administration-controller"
-        ],
-        "operationId": "createLeaderGrant",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LeaderGrantInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/departments/{id}/approval-chain": {
-      "get": {
-        "tags": [
-          "administration-controller"
-        ],
-        "operationId": "approvalChain",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "asOf",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApprovalChainView"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/department-leaders": {
-      "get": {
-        "tags": [
-          "administration-controller"
-        ],
-        "operationId": "departmentLeaders",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DepartmentLeaderView"
                   }
                 }
               }
@@ -2196,359 +2848,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          }
-        }
-      }
-    },
-    "/identity/offboarding": {
-      "get": {
-        "tags": [
-          "offboarding-controller"
-        ],
-        "operationId": "cases",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OffboardingCaseView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "offboarding-controller"
-        ],
-        "operationId": "create",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OffboardingInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/offboarding/{id}/revert": {
-      "post": {
-        "tags": [
-          "offboarding-controller"
-        ],
-        "operationId": "revert",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/identity/offboarding/{caseId}/responsibility-items": {
-      "post": {
-        "tags": [
-          "offboarding-controller"
-        ],
-        "operationId": "addResponsibilityItem",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "caseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OffboardingResponsibilityInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/offboarding/{caseId}/responsibility-items/{itemId}/transfer": {
-      "post": {
-        "tags": [
-          "offboarding-controller"
-        ],
-        "operationId": "transferResponsibility",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "caseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "itemId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OffboardingTransferInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/identity/offboarding/{caseId}/reclaim-items": {
-      "post": {
-        "tags": [
-          "offboarding-controller"
-        ],
-        "operationId": "addReclaimItem",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "caseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OffboardingReclaimInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/identity/offboarding/{caseId}/reclaim-items/{itemId}/reclaim": {
-      "post": {
-        "tags": [
-          "offboarding-controller"
-        ],
-        "operationId": "reclaimItem",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "caseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "itemId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OffboardingReclaimActionInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/identity/offboarding/{id}": {
-      "get": {
-        "tags": [
-          "offboarding-controller"
-        ],
-        "operationId": "detail",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OffboardingDetailView"
-                }
-              }
-            }
           }
         }
       }
@@ -2795,6 +3094,39 @@
           }
         }
       },
+      "DepartmentLeaderInput": {
+        "required": [
+          "membershipId",
+          "scopeMode"
+        ],
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeMode": {
+            "pattern": "DEPARTMENT|SUBTREE|TENANT",
+            "type": "string"
+          },
+          "approvalLimit": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number",
+            "nullable": true
+          },
+          "approvalCurrency": {
+            "pattern": "[A-Z]{3}",
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
       "ChildUpdate": {
         "required": [
           "name",
@@ -2813,6 +3145,77 @@
           }
         }
       },
+      "AccountingBookInput": {
+        "required": [
+          "baseCurrency",
+          "bookType",
+          "code",
+          "firstPeriodStart",
+          "name",
+          "periodType",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "pattern": "[A-Z0-9_-]{1,64}",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "bookType": {
+            "pattern": "BOOK|CASH|BANK",
+            "type": "string"
+          },
+          "baseCurrency": {
+            "minLength": 1,
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "amountScale": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "amountRounding": {
+            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
+            "type": "string"
+          },
+          "quantityScale": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantityRounding": {
+            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
+            "type": "string"
+          },
+          "periodType": {
+            "pattern": "MONTH|WEEK|QUARTER",
+            "type": "string"
+          },
+          "fiscalYearStartMonth": {
+            "maximum": 12,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstPeriodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "pattern": "ACTIVE|SUSPENDED",
+            "type": "string"
+          }
+        }
+      },
       "OwnerTransfer": {
         "required": [
           "membershipId"
@@ -2822,6 +3225,229 @@
           "membershipId": {
             "type": "string",
             "format": "uuid"
+          }
+        }
+      },
+      "OperationLogPurge": {
+        "type": "object",
+        "properties": {
+          "removed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "before": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OnboardingInput": {
+        "required": [
+          "roles",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "departmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentInput"
+            }
+          }
+        }
+      },
+      "RoleAssignmentInput": {
+        "required": [
+          "roleId",
+          "scopeMode"
+        ],
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeMode": {
+            "pattern": "ALL|DEPARTMENT|SELF",
+            "type": "string"
+          }
+        }
+      },
+      "OnboardingResult": {
+        "type": "object",
+        "properties": {
+          "onboardingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountMode": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "initialCredential": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OffboardingInput": {
+        "required": [
+          "effectiveAt",
+          "membershipId",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "effectiveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "departmentLeaderSuccessorMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "responsibilityItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffboardingResponsibilityInput"
+            }
+          },
+          "reclaimItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffboardingReclaimInput"
+            }
+          }
+        }
+      },
+      "OffboardingReclaimInput": {
+        "required": [
+          "itemKind",
+          "referenceId",
+          "sourceSystem",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "itemKind": {
+            "pattern": "TODO|TASK",
+            "type": "string"
+          },
+          "sourceSystem": {
+            "minLength": 1,
+            "pattern": "[a-z_]{2,32}",
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "OffboardingResponsibilityInput": {
+        "required": [
+          "itemKind",
+          "referenceId",
+          "sourceSystem",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "itemKind": {
+            "pattern": "DOCUMENT|APPROVAL",
+            "type": "string"
+          },
+          "sourceSystem": {
+            "minLength": 1,
+            "pattern": "[a-z_]{2,32}",
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "successorMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "OffboardingTransferInput": {
+        "required": [
+          "successorMembershipId"
+        ],
+        "type": "object",
+        "properties": {
+          "successorMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "OffboardingReclaimActionInput": {
+        "type": "object",
+        "properties": {
+          "successorMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
           }
         }
       },
@@ -2976,6 +3602,71 @@
             "type": "string",
             "format": "uuid",
             "nullable": true
+          }
+        }
+      },
+      "LeaderProxyInput": {
+        "required": [
+          "membershipId"
+        ],
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "LeaderGrantInput": {
+        "required": [
+          "approvalCurrency",
+          "approvalLimit",
+          "endsAt",
+          "membershipId",
+          "startsAt"
+        ],
+        "type": "object",
+        "properties": {
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "approvalLimit": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "approvalCurrency": {
+            "pattern": "[A-Z]{3}",
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
           }
         }
       },
@@ -3252,6 +3943,483 @@
           }
         }
       },
+      "OperationLogPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OperationLogView"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "OperationLogView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "traceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string"
+          },
+          "httpMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "durationMs": {
+            "type": "number",
+            "nullable": true
+          },
+          "taskName": {
+            "type": "string",
+            "nullable": true
+          },
+          "taskStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorClass": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OperationLogDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "traceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string"
+          },
+          "httpMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "durationMs": {
+            "type": "number",
+            "nullable": true
+          },
+          "taskName": {
+            "type": "string",
+            "nullable": true
+          },
+          "taskStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorClass": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "stackTrace": {
+            "type": "string",
+            "nullable": true
+          },
+          "stackTruncated": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "OperationLogTrace": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OperationLogView"
+            }
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "errorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalDurationMs": {
+            "type": "number"
+          },
+          "spanMs": {
+            "type": "number"
+          },
+          "firstAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "OnboardingView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountMode": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "departmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "departmentName": {
+            "type": "string",
+            "nullable": true
+          },
+          "roleCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "credentialIssued": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "OffboardingCaseView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "memberName": {
+            "type": "string"
+          },
+          "operatorMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operatorName": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "effectiveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          },
+          "previousStatus": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "responsibilityTotal": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "responsibilityPending": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reclaimTotal": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reclaimPending": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revertedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revertedByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "OffboardingDetailView": {
+        "type": "object",
+        "properties": {
+          "offboardingCase": {
+            "$ref": "#/components/schemas/OffboardingCaseView"
+          },
+          "responsibilityItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffboardingResponsibilityView"
+            }
+          },
+          "reclaimItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OffboardingReclaimView"
+            }
+          }
+        }
+      },
+      "OffboardingReclaimView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemKind": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "holderMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "successorMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "successorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "reclaimedByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reclaimedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OffboardingResponsibilityView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemKind": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceNo": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "ownerMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "successorMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "successorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "transferredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "MemberView": {
         "type": "object",
         "properties": {
@@ -3453,529 +4621,6 @@
           }
         }
       },
-      "ChildView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          }
-        }
-      },
-      "AuditPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AuditView"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "AuditView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "action": {
-            "type": "string"
-          },
-          "resourceType": {
-            "type": "string"
-          },
-          "resourceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "resourceLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "actorId": {
-            "type": "string",
-            "nullable": true
-          },
-          "actorName": {
-            "type": "string",
-            "nullable": true
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "owner": {
-            "type": "boolean"
-          }
-        }
-      },
-      "AuditDetail": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "action": {
-            "type": "string"
-          },
-          "resourceType": {
-            "type": "string"
-          },
-          "resourceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "resourceLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "actorId": {
-            "type": "string",
-            "nullable": true
-          },
-          "actorName": {
-            "type": "string",
-            "nullable": true
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "owner": {
-            "type": "boolean"
-          },
-          "authorization": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
-          },
-          "changes": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
-          }
-        }
-      },
-      "AccountingBookInput": {
-        "required": [
-          "baseCurrency",
-          "bookType",
-          "code",
-          "firstPeriodStart",
-          "name",
-          "periodType",
-          "status"
-        ],
-        "type": "object",
-        "properties": {
-          "code": {
-            "minLength": 1,
-            "pattern": "[A-Z0-9_-]{1,64}",
-            "type": "string"
-          },
-          "name": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string"
-          },
-          "bookType": {
-            "pattern": "BOOK|CASH|BANK",
-            "type": "string"
-          },
-          "baseCurrency": {
-            "minLength": 1,
-            "pattern": "[A-Z]{3}",
-            "type": "string"
-          },
-          "amountScale": {
-            "maximum": 6,
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32"
-          },
-          "amountRounding": {
-            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
-            "type": "string"
-          },
-          "quantityScale": {
-            "maximum": 6,
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32"
-          },
-          "quantityRounding": {
-            "pattern": "HALF_UP|HALF_EVEN|DOWN|UP",
-            "type": "string"
-          },
-          "periodType": {
-            "pattern": "MONTH|WEEK|QUARTER",
-            "type": "string"
-          },
-          "fiscalYearStartMonth": {
-            "maximum": 12,
-            "minimum": 1,
-            "type": "integer",
-            "format": "int32"
-          },
-          "firstPeriodStart": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "status": {
-            "pattern": "ACTIVE|SUSPENDED",
-            "type": "string"
-          }
-        }
-      },
-      "AccountingBookView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "legalEntityCode": {
-            "type": "string"
-          },
-          "legalEntityName": {
-            "type": "string"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "bookType": {
-            "type": "string"
-          },
-          "baseCurrency": {
-            "type": "string"
-          },
-          "legalEntityCurrency": {
-            "type": "string"
-          },
-          "currencyAligned": {
-            "type": "boolean"
-          },
-          "amountScale": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "amountRounding": {
-            "type": "string"
-          },
-          "quantityScale": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "quantityRounding": {
-            "type": "string"
-          },
-          "periodType": {
-            "type": "string"
-          },
-          "fiscalYearStartMonth": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "firstPeriodStart": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "baseCurrencyChangedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "currentFiscalYear": {
-            "type": "string"
-          },
-          "fiscalYearStart": {
-            "type": "string"
-          },
-          "fiscalYearEnd": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "OnboardingInput": {
-        "required": [
-          "roles",
-          "username"
-        ],
-        "type": "object",
-        "properties": {
-          "username": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string"
-          },
-          "departmentId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "roles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RoleAssignmentInput"
-            }
-          }
-        }
-      },
-      "RoleAssignmentInput": {
-        "required": [
-          "roleId",
-          "scopeMode"
-        ],
-        "type": "object",
-        "properties": {
-          "roleId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "scopeMode": {
-            "pattern": "ALL|DEPARTMENT|SELF",
-            "type": "string"
-          }
-        }
-      },
-      "OnboardingResult": {
-        "type": "object",
-        "properties": {
-          "onboardingId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "membershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "userId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "accountMode": {
-            "type": "string"
-          },
-          "username": {
-            "type": "string"
-          },
-          "initialCredential": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "OnboardingView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "membershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "userId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "accountMode": {
-            "type": "string"
-          },
-          "username": {
-            "type": "string"
-          },
-          "departmentId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "departmentName": {
-            "type": "string",
-            "nullable": true
-          },
-          "roleCodes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "credentialIssued": {
-            "type": "boolean"
-          },
-          "status": {
-            "type": "string"
-          },
-          "createdBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "completedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "completedBy": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          }
-        }
-      },
-      "DepartmentLeaderInput": {
-        "required": [
-          "membershipId",
-          "scopeMode"
-        ],
-        "type": "object",
-        "properties": {
-          "membershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "scopeMode": {
-            "pattern": "DEPARTMENT|SUBTREE|TENANT",
-            "type": "string"
-          },
-          "approvalLimit": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "nullable": true
-          },
-          "approvalCurrency": {
-            "pattern": "[A-Z]{3}",
-            "type": "string",
-            "nullable": true
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
-      "LeaderProxyInput": {
-        "required": [
-          "membershipId"
-        ],
-        "type": "object",
-        "properties": {
-          "membershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reason": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string"
-          },
-          "startsAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "endsAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "LeaderGrantInput": {
-        "required": [
-          "approvalCurrency",
-          "approvalLimit",
-          "endsAt",
-          "membershipId",
-          "startsAt"
-        ],
-        "type": "object",
-        "properties": {
-          "membershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "approvalLimit": {
-            "minimum": 0,
-            "exclusiveMinimum": true,
-            "type": "number"
-          },
-          "approvalCurrency": {
-            "pattern": "[A-Z]{3}",
-            "type": "string"
-          },
-          "startsAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "endsAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "reason": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
       "ApprovalChainEntry": {
         "type": "object",
         "properties": {
@@ -4112,334 +4757,220 @@
           }
         }
       },
-      "OffboardingInput": {
-        "required": [
-          "effectiveAt",
-          "membershipId",
-          "reason"
-        ],
-        "type": "object",
-        "properties": {
-          "membershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reason": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string"
-          },
-          "effectiveAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "departmentLeaderSuccessorMembershipId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "responsibilityItems": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OffboardingResponsibilityInput"
-            }
-          },
-          "reclaimItems": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OffboardingReclaimInput"
-            }
-          }
-        }
-      },
-      "OffboardingReclaimInput": {
-        "required": [
-          "itemKind",
-          "referenceId",
-          "sourceSystem",
-          "title"
-        ],
-        "type": "object",
-        "properties": {
-          "itemKind": {
-            "pattern": "TODO|TASK",
-            "type": "string"
-          },
-          "sourceSystem": {
-            "minLength": 1,
-            "pattern": "[a-z_]{2,32}",
-            "type": "string"
-          },
-          "referenceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "title": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string"
-          }
-        }
-      },
-      "OffboardingResponsibilityInput": {
-        "required": [
-          "itemKind",
-          "referenceId",
-          "sourceSystem",
-          "title"
-        ],
-        "type": "object",
-        "properties": {
-          "itemKind": {
-            "pattern": "DOCUMENT|APPROVAL",
-            "type": "string"
-          },
-          "sourceSystem": {
-            "minLength": 1,
-            "pattern": "[a-z_]{2,32}",
-            "type": "string"
-          },
-          "referenceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "referenceNo": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "title": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string"
-          },
-          "successorMembershipId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          }
-        }
-      },
-      "OffboardingTransferInput": {
-        "required": [
-          "successorMembershipId"
-        ],
-        "type": "object",
-        "properties": {
-          "successorMembershipId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "OffboardingReclaimActionInput": {
-        "type": "object",
-        "properties": {
-          "successorMembershipId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          }
-        }
-      },
-      "OffboardingCaseView": {
+      "ChildView": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
           },
-          "membershipId": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "AuditPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditView"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AuditView": {
+        "type": "object",
+        "properties": {
+          "id": {
             "type": "string",
             "format": "uuid"
           },
-          "memberName": {
+          "action": {
             "type": "string"
           },
-          "operatorMembershipId": {
+          "resourceType": {
+            "type": "string"
+          },
+          "resourceId": {
             "type": "string",
             "format": "uuid"
           },
-          "operatorName": {
-            "type": "string"
+          "resourceLabel": {
+            "type": "string",
+            "nullable": true
           },
-          "reason": {
-            "type": "string"
+          "actorId": {
+            "type": "string",
+            "nullable": true
           },
-          "effectiveAt": {
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "owner": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AuditDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "resourceType": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resourceLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "owner": {
+            "type": "boolean"
+          },
+          "authorization": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "changes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "AccountingBookView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bookType": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "legalEntityCurrency": {
+            "type": "string"
+          },
+          "currencyAligned": {
+            "type": "boolean"
+          },
+          "amountScale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "amountRounding": {
+            "type": "string"
+          },
+          "quantityScale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantityRounding": {
+            "type": "string"
+          },
+          "periodType": {
+            "type": "string"
+          },
+          "fiscalYearStartMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "firstPeriodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "baseCurrencyChangedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currentFiscalYear": {
+            "type": "string"
+          },
+          "fiscalYearStart": {
+            "type": "string"
+          },
+          "fiscalYearEnd": {
+            "type": "string"
           },
           "status": {
             "type": "string"
           },
-          "previousStatus": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          },
-          "responsibilityTotal": {
+          "version": {
             "type": "integer",
-            "format": "int32"
-          },
-          "responsibilityPending": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "reclaimTotal": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "reclaimPending": {
-            "type": "integer",
-            "format": "int32"
+            "format": "int64"
           },
           "createdAt": {
             "type": "string",
             "format": "date-time"
           },
-          "revertedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "revertedByMembershipId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          }
-        }
-      },
-      "OffboardingDetailView": {
-        "type": "object",
-        "properties": {
-          "offboardingCase": {
-            "$ref": "#/components/schemas/OffboardingCaseView"
-          },
-          "responsibilityItems": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OffboardingResponsibilityView"
-            }
-          },
-          "reclaimItems": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OffboardingReclaimView"
-            }
-          }
-        }
-      },
-      "OffboardingReclaimView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "itemKind": {
-            "type": "string"
-          },
-          "sourceSystem": {
-            "type": "string"
-          },
-          "referenceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string"
-          },
-          "holderMembershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "successorMembershipId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "successorName": {
-            "type": "string",
-            "nullable": true
-          },
-          "reclaimedByMembershipId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "status": {
-            "type": "string"
-          },
-          "registeredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "reclaimedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "OffboardingResponsibilityView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "caseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "itemKind": {
-            "type": "string"
-          },
-          "sourceSystem": {
-            "type": "string"
-          },
-          "referenceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "referenceNo": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "ownerMembershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "successorMembershipId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "successorName": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string"
-          },
-          "registeredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "transferredAt": {
+          "updatedAt": {
             "type": "string",
             "format": "date-time"
           }
