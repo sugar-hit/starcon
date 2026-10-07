@@ -394,6 +394,87 @@
         }
       }
     },
+    "/identity/legal-entities/{legalEntityId}/default-book": {
+      "get": {
+        "tags": [
+          "ledger-book-controller"
+        ],
+        "operationId": "defaultBook",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultBookView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ledger-book-controller"
+        ],
+        "operationId": "setDefaultBook",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefaultBookInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/identity/legal-entities/{id}": {
       "put": {
         "tags": [
@@ -3210,6 +3291,106 @@
         }
       }
     },
+    "/identity/accounting-books/{bookId}/fact-assignments": {
+      "get": {
+        "tags": [
+          "ledger-book-controller"
+        ],
+        "operationId": "factAssignments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "factSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FactAssignmentView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ledger-book-controller"
+        ],
+        "operationId": "assignFact",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FactAssignmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/switch": {
       "post": {
         "tags": [
@@ -3974,6 +4155,46 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/RoleAssignmentMergeView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/legal-entities/{legalEntityId}/ledger-books": {
+      "get": {
+        "tags": [
+          "ledger-book-controller"
+        ],
+        "operationId": "ledgerBooks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LedgerBookGroups"
                 }
               }
             }
@@ -4935,6 +5156,48 @@
           }
         }
       }
+    },
+    "/identity/accounting-books/{bookId}/fact-assignments/{assignmentId}": {
+      "delete": {
+        "tags": [
+          "ledger-book-controller"
+        ],
+        "operationId": "releaseFact",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "bookId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "assignmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5186,6 +5449,18 @@
             "items": {
               "$ref": "#/components/schemas/AssignmentInput"
             }
+          }
+        }
+      },
+      "DefaultBookInput": {
+        "required": [
+          "bookId"
+        ],
+        "type": "object",
+        "properties": {
+          "bookId": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -5752,6 +6027,21 @@
           "status": {
             "pattern": "ACTIVE|SUSPENDED",
             "type": "string"
+          },
+          "bookCategory": {
+            "pattern": "BUSINESS|STATUTORY",
+            "type": "string"
+          },
+          "baseCurrencyMode": {
+            "pattern": "INHERIT|OWN",
+            "type": "string"
+          },
+          "chartOfAccountsSource": {
+            "pattern": "STANDARD|LOCAL|GROUP",
+            "type": "string"
+          },
+          "defaultBook": {
+            "type": "boolean"
           }
         }
       },
@@ -6503,6 +6793,32 @@
           "note": {
             "maxLength": 300,
             "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "FactAssignmentInput": {
+        "required": [
+          "factRef",
+          "factSource"
+        ],
+        "type": "object",
+        "properties": {
+          "factSource": {
+            "maxLength": 64,
+            "minLength": 0,
+            "pattern": "[A-Z0-9_]+",
+            "type": "string"
+          },
+          "factRef": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "pattern": "[A-Z]{3}",
             "type": "string"
           }
         }
@@ -7703,6 +8019,94 @@
           "referenceCount": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "LedgerBookGroups": {
+        "type": "object",
+        "properties": {
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "hasDefault": {
+            "type": "boolean"
+          },
+          "businessBooks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LedgerBookItem"
+            }
+          },
+          "statutoryBooks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LedgerBookItem"
+            }
+          }
+        }
+      },
+      "LedgerBookItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bookCategory": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "baseCurrencyMode": {
+            "type": "string"
+          },
+          "chartOfAccountsSource": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "defaultBook": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DefaultBookView": {
+        "type": "object",
+        "properties": {
+          "bookId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookCode": {
+            "type": "string"
+          },
+          "bookName": {
+            "type": "string"
+          },
+          "bookCategory": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "baseCurrencyMode": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "hasDefault": {
+            "type": "boolean"
           }
         }
       },
@@ -9049,6 +9453,64 @@
             "format": "date-time"
           },
           "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "bookCategory": {
+            "type": "string"
+          },
+          "baseCurrencyMode": {
+            "type": "string"
+          },
+          "chartOfAccountsSource": {
+            "type": "string"
+          },
+          "defaultBook": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FactAssignmentView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bookCode": {
+            "type": "string"
+          },
+          "bookName": {
+            "type": "string"
+          },
+          "bookCategory": {
+            "type": "string"
+          },
+          "factSource": {
+            "type": "string"
+          },
+          "factRef": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "bookedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
             "type": "string",
             "format": "date-time"
           }

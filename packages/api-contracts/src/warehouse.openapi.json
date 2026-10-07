@@ -789,6 +789,182 @@
         }
       }
     },
+    "/warehouse/first-mile-shipments/{shipmentId}": {
+      "get": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "detail_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shipmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMileDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "update_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shipmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstMileUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMileSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/facilities/{id}": {
+      "get": {
+        "tags": [
+          "warehouse-detail-controller"
+        ],
+        "operationId": "detail_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "warehouse-detail-controller"
+        ],
+        "operationId": "update_6",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseUpdated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/labor/work-tasks": {
       "get": {
         "tags": [
@@ -6946,12 +7122,797 @@
         }
       }
     },
+    "/warehouse/goods-receipt-discrepancies": {
+      "get": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "page_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "receiptId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "disposition",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "discrepancyType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "claimStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "intake",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyHandlingIntakeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/evidence": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "addEvidence",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyEvidenceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyEvidenceRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/decide": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "decide",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/close": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "close_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyHandlingCloseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "claim",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim/withdraw": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "withdrawClaim",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyClaimWithdrawRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim/submit": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "submitClaim",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyClaimSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments": {
+      "get": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "page_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "transportMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "incoterm",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "originWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "destinationWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "destinationCountryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inTransitOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMilePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "create_9",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstMileCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMileSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments/{shipmentId}/dispatch": {
+      "post": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "dispatch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shipmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstMileDispatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMileSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments/{shipmentId}/confirm": {
+      "post": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "confirm_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shipmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstMileConfirmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMileSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments/{shipmentId}/cancel": {
+      "post": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "cancel_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shipmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstMileCancelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMileSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/facilities": {
       "get": {
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "list_2",
+        "operationId": "list_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -7049,7 +8010,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "create_9",
+        "operationId": "create_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -9636,6 +10597,77 @@
         }
       }
     },
+    "/warehouse/inventory/outbound-orders/{orderId}": {
+      "get": {
+        "tags": [
+          "outbound-order-detail-controller"
+        ],
+        "operationId": "detail_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/outbound-orders/detail-capabilities": {
+      "get": {
+        "tags": [
+          "outbound-order-detail-controller"
+        ],
+        "operationId": "capabilities_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundOrderDetailCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/outbound-orders/capabilities": {
       "get": {
         "tags": [
@@ -10032,7 +11064,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_5",
+        "operationId": "detail_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -10180,7 +11212,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "page_5",
+        "operationId": "page_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -11000,7 +12032,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_6",
+        "operationId": "detail_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -11771,7 +12803,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "detail_7",
+        "operationId": "detail_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -12439,12 +13471,52 @@
         }
       }
     },
-    "/warehouse/facilities/options": {
+    "/warehouse/goods-receipt-discrepancies/{handlingId}": {
       "get": {
         "tags": [
-          "warehouse-facility-controller"
+          "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "options",
+        "operationId": "detail_9",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/capabilities": {
+      "get": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -12462,7 +13534,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/FacilityOptions"
+                  "$ref": "#/components/schemas/GoodsReceiptDiscrepancyCapabilities"
                 }
               }
             }
@@ -12470,10 +13542,139 @@
         }
       }
     },
-    "/warehouse/facilities/capabilities": {
+    "/warehouse/first-mile-shipments/{shipmentId}/transit-legs": {
       "get": {
         "tags": [
-          "warehouse-facility-controller"
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "transitLegs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shipmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FirstMileTransitLegRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments/source-candidates": {
+      "get": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "sourceCandidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "receiptId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments/capabilities": {
+      "get": {
+        "tags": [
+          "first-mile-shipment-controller"
         ],
         "operationId": "capabilities_12",
         "parameters": [
@@ -12493,98 +13694,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/WorkVolumeCapability"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/facilities/{id}": {
-      "get": {
-        "tags": [
-          "warehouse-detail-controller"
-        ],
-        "operationId": "detail_3",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WarehouseDetail"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "warehouse-detail-controller"
-        ],
-        "operationId": "update_5",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WarehouseUpdateInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WarehouseUpdated"
+                  "$ref": "#/components/schemas/FirstMileCapabilities"
                 }
               }
             }
@@ -12727,12 +13837,12 @@
         }
       }
     },
-    "/warehouse/inventory/outbound-orders/{orderId}": {
+    "/warehouse/facilities/options": {
       "get": {
         "tags": [
-          "outbound-order-detail-controller"
+          "warehouse-facility-controller"
         ],
-        "operationId": "detail_4",
+        "operationId": "options",
         "parameters": [
           {
             "name": "Authorization",
@@ -12742,15 +13852,6 @@
               "type": "string",
               "default": ""
             }
-          },
-          {
-            "name": "orderId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
           }
         ],
         "responses": {
@@ -12759,7 +13860,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/OutboundOrderDetail"
+                  "$ref": "#/components/schemas/FacilityOptions"
                 }
               }
             }
@@ -12767,12 +13868,12 @@
         }
       }
     },
-    "/warehouse/inventory/outbound-orders/detail-capabilities": {
+    "/warehouse/facilities/capabilities": {
       "get": {
         "tags": [
-          "outbound-order-detail-controller"
+          "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_4",
+        "operationId": "capabilities_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -12781,990 +13882,6 @@
             "schema": {
               "type": "string",
               "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/OutboundOrderDetailCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies": {
-      "get": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "page_4",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "receiptId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "disposition",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "discrepancyType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "claimStatus",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyHandlingPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "intake",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyHandlingIntakeRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}/evidence": {
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "addEvidence",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyEvidenceRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyEvidenceRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}/decide": {
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "decide",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyDecisionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}/close": {
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "close_4",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyHandlingCloseRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim": {
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "claim",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyClaimRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim/withdraw": {
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "withdrawClaim",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyClaimWithdrawRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyClaimRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim/submit": {
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "submitClaim",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyClaimSubmitRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyClaimRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}": {
-      "get": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "detail_8",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyHandlingDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/capabilities": {
-      "get": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "capabilities_11",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/GoodsReceiptDiscrepancyCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/first-mile-shipments/{shipmentId}": {
-      "get": {
-        "tags": [
-          "first-mile-shipment-controller"
-        ],
-        "operationId": "detail_3",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "shipmentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirstMileDetail"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "first-mile-shipment-controller"
-        ],
-        "operationId": "update_5",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "shipmentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FirstMileUpdateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirstMileSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/first-mile-shipments": {
-      "get": {
-        "tags": [
-          "first-mile-shipment-controller"
-        ],
-        "operationId": "page_4",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "transportMode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "incoterm",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "originWarehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "destinationWarehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "destinationCountryCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "inTransitOnly",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirstMilePage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "first-mile-shipment-controller"
-        ],
-        "operationId": "create_8",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FirstMileCreateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirstMileSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/first-mile-shipments/{shipmentId}/dispatch": {
-      "post": {
-        "tags": [
-          "first-mile-shipment-controller"
-        ],
-        "operationId": "dispatch",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "shipmentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FirstMileDispatchRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirstMileSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/first-mile-shipments/{shipmentId}/confirm": {
-      "post": {
-        "tags": [
-          "first-mile-shipment-controller"
-        ],
-        "operationId": "confirm_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "shipmentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FirstMileConfirmRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirstMileSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/first-mile-shipments/{shipmentId}/cancel": {
-      "post": {
-        "tags": [
-          "first-mile-shipment-controller"
-        ],
-        "operationId": "cancel_3",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "shipmentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FirstMileCancelRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirstMileSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/first-mile-shipments/{shipmentId}/transit-legs": {
-      "get": {
-        "tags": [
-          "first-mile-shipment-controller"
-        ],
-        "operationId": "transitLegs",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "shipmentId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
             }
           }
         ],
@@ -13776,125 +13893,8 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/FirstMileTransitLegRow"
+                    "$ref": "#/components/schemas/WorkVolumeCapability"
                   }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/first-mile-shipments/source-candidates": {
-      "get": {
-        "tags": [
-          "first-mile-shipment-controller"
-        ],
-        "operationId": "sourceCandidates",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "receiptId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/SourceCandidatePage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/first-mile-shipments/capabilities": {
-      "get": {
-        "tags": [
-          "first-mile-shipment-controller"
-        ],
-        "operationId": "capabilities_9",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/FirstMileCapabilities"
                 }
               }
             }
@@ -14664,6 +14664,296 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          }
+        }
+      },
+      "FirstMileLineRequest": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceReceiptEventLineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "declaredItemName": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "originCountryCode": {
+            "type": "string"
+          },
+          "declaredUnitValue": {
+            "type": "number"
+          },
+          "declaredValue": {
+            "type": "number"
+          },
+          "grossWeightKg": {
+            "type": "number"
+          },
+          "netWeightKg": {
+            "type": "number"
+          },
+          "volumeCbm": {
+            "type": "number"
+          },
+          "cartonCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FirstMileUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "destinationWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationName": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "bookingNo": {
+            "type": "string"
+          },
+          "vesselOrFlightNo": {
+            "type": "string"
+          },
+          "incoterm": {
+            "type": "string"
+          },
+          "riskBearer": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "freightCost": {
+            "type": "number"
+          },
+          "insuranceCost": {
+            "type": "number"
+          },
+          "dutyEstimate": {
+            "type": "number"
+          },
+          "handlingCost": {
+            "type": "number"
+          },
+          "customsBroker": {
+            "type": "string"
+          },
+          "departAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FirstMileLineRequest"
+            }
+          }
+        }
+      },
+      "FirstMileSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shipmentCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "shippedQuantity": {
+            "type": "number"
+          },
+          "declaredValue": {
+            "type": "number"
+          },
+          "totalCost": {
+            "type": "number"
+          },
+          "incoterm": {
+            "type": "string"
+          },
+          "incotermLabel": {
+            "type": "string"
+          },
+          "riskBearer": {
+            "type": "string"
+          },
+          "riskBearerLabel": {
+            "type": "string"
+          },
+          "transitLegCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "departAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "WarehouseUpdateInput": {
+        "required": [
+          "countryCode",
+          "name",
+          "timezone"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string"
+          },
+          "timezone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "addressLine1": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine2": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "region": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "postalCode": {
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "WarehouseUpdated": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
           }
         }
       },
@@ -20561,6 +20851,480 @@
           }
         }
       },
+      "DiscrepancyHandlingIntakeRequest": {
+        "type": "object",
+        "properties": {
+          "discrepancyId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "DiscrepancyHandlingSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "disposition": {
+            "type": "string",
+            "nullable": true
+          },
+          "dispositionLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "acceptedQuantity": {
+            "type": "number"
+          },
+          "rejectedQuantity": {
+            "type": "number"
+          },
+          "evidenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimed": {
+            "type": "boolean"
+          },
+          "claimStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DiscrepancyEvidenceRequest": {
+        "type": "object",
+        "properties": {
+          "evidenceType": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "contentBase64": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyEvidenceRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "evidenceType": {
+            "type": "string"
+          },
+          "evidenceTypeLabel": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "uploadedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "dataUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyDecisionRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disposition": {
+            "type": "string"
+          },
+          "acceptedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "rejectedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "inboundQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fromQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyHandlingCloseRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyClaimRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimType": {
+            "type": "string"
+          },
+          "claimedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "claimedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyClaimWithdrawRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyClaimRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimCode": {
+            "type": "string"
+          },
+          "claimType": {
+            "type": "string"
+          },
+          "claimTypeLabel": {
+            "type": "string"
+          },
+          "claimedQuantity": {
+            "type": "number"
+          },
+          "claimedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "sourceRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "claimRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "withdrawnAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DiscrepancyClaimSubmitRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "FirstMileCreateRequest": {
+        "type": "object",
+        "properties": {
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationName": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "bookingNo": {
+            "type": "string"
+          },
+          "vesselOrFlightNo": {
+            "type": "string"
+          },
+          "incoterm": {
+            "type": "string"
+          },
+          "riskBearer": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "freightCost": {
+            "type": "number"
+          },
+          "insuranceCost": {
+            "type": "number"
+          },
+          "dutyEstimate": {
+            "type": "number"
+          },
+          "handlingCost": {
+            "type": "number"
+          },
+          "customsBroker": {
+            "type": "string"
+          },
+          "departAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FirstMileLineRequest"
+            }
+          }
+        }
+      },
+      "FirstMileDispatchLineRequest": {
+        "type": "object",
+        "properties": {
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shippedQuantity": {
+            "type": "number"
+          }
+        }
+      },
+      "FirstMileDispatchRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FirstMileDispatchLineRequest"
+            }
+          }
+        }
+      },
+      "FirstMileConfirmRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "departAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "FirstMileCancelRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
       "WarehouseCreateInput": {
         "required": [
           "code",
@@ -23932,6 +24696,348 @@
           "size": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "OutboundDetailAction": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "toStatusLabel": {
+            "type": "string"
+          },
+          "reasonRequired": {
+            "type": "boolean"
+          },
+          "requiresCarrier": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundDetailEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "fromStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "toStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "toStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundDetailLine": {
+        "type": "object",
+        "properties": {
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "pickedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "shippedQuantity": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "OutboundDetailPickRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPieceCount": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "requestedByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "nullable": true
+      },
+      "OutboundOrderDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string"
+          },
+          "sourceTransferOrderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceTransferCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceExternalRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "skuLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPieceCount": {
+            "type": "number"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundDetailLine"
+            }
+          },
+          "quantities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundQuantityAvailability"
+            }
+          },
+          "pickRequested": {
+            "type": "boolean"
+          },
+          "pickRequest": {
+            "$ref": "#/components/schemas/OutboundDetailPickRequest"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundDetailEvent"
+            }
+          },
+          "timelineEventCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "linkedOrder": {
+            "$ref": "#/components/schemas/OutboundUnavailableLink"
+          },
+          "shipToAddress": {
+            "$ref": "#/components/schemas/OutboundUnavailableLink"
+          },
+          "reservationRefs": {
+            "$ref": "#/components/schemas/OutboundUnavailableLink"
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundUnavailableLink"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundDetailAction"
+            }
+          }
+        }
+      },
+      "OutboundQuantityAvailability": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number",
+            "nullable": true
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundUnavailableLink": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundOrderDetailCapabilities": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundUnavailableLink"
+            }
+          },
+          "quantityPolicies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundQuantityAvailability"
+            }
+          },
+          "actionOwnerModules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pickedQuantityNote": {
+            "type": "string"
+          },
+          "shippedQuantityNote": {
+            "type": "string"
+          },
+          "linkedOrderNote": {
+            "type": "string"
+          },
+          "reservationNote": {
+            "type": "string"
+          },
+          "packageNote": {
+            "type": "string"
           }
         }
       },
@@ -28346,1692 +29452,6 @@
           }
         }
       },
-      "FacilitySummary": {
-        "type": "object",
-        "properties": {
-          "warehouseCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "activeCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "platformWarehouseCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "available": {
-            "type": "number"
-          },
-          "platformObservedOnHand": {
-            "type": "number"
-          },
-          "workOrderTotal": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "openWorkOrderCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "PlatformStock": {
-        "type": "object",
-        "properties": {
-          "sourceCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "observedOnHand": {
-            "type": "number"
-          },
-          "observedAvailable": {
-            "type": "number"
-          },
-          "observedInbound": {
-            "type": "number"
-          },
-          "latestCollectedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "nullable": true
-      },
-      "StockMetrics": {
-        "type": "object",
-        "properties": {
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "available": {
-            "type": "number"
-          },
-          "balanceRowCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "WarehouseFacilityPage": {
-        "type": "object",
-        "properties": {
-          "summary": {
-            "$ref": "#/components/schemas/FacilitySummary"
-          },
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WarehouseRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "detailUnavailable": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "WarehouseRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "LOCAL",
-              "OVERSEAS",
-              "PLATFORM_FBA",
-              "THIRD_PARTY",
-              "BONDED"
-            ]
-          },
-          "kindLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "countryCode": {
-            "type": "string"
-          },
-          "timezone": {
-            "type": "string"
-          },
-          "localTime": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string"
-          },
-          "defaultWarehouse": {
-            "type": "boolean"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "legalEntityCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "legalEntityName": {
-            "type": "string",
-            "nullable": true
-          },
-          "legalEntityCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "locationCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "stock": {
-            "$ref": "#/components/schemas/StockMetrics"
-          },
-          "platformStock": {
-            "$ref": "#/components/schemas/PlatformStock"
-          },
-          "work": {
-            "$ref": "#/components/schemas/WorkVolume"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "WorkVolume": {
-        "type": "object",
-        "properties": {
-          "stocktakeTaskCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "transferInCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "transferOutCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "inventoryMovementCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "workOrderTotal": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "openWorkOrderCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "CountryOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          }
-        }
-      },
-      "FacilityOptions": {
-        "type": "object",
-        "properties": {
-          "kinds": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/KindOption"
-            }
-          },
-          "countries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CountryOption"
-            }
-          },
-          "legalEntities": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LegalEntityOption"
-            }
-          },
-          "statuses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StatusOption"
-            }
-          },
-          "timezoneNote": {
-            "type": "string"
-          },
-          "countryNote": {
-            "type": "string"
-          }
-        }
-      },
-      "KindOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "platformObserved": {
-            "type": "boolean"
-          }
-        }
-      },
-      "LegalEntityOption": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          }
-        }
-      },
-      "StatusOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          }
-        }
-      },
-      "WorkVolumeCapability": {
-        "type": "object",
-        "properties": {
-          "dimension": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "WarehouseUpdateInput": {
-        "required": [
-          "countryCode",
-          "name",
-          "timezone"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string"
-          },
-          "countryCode": {
-            "maxLength": 2,
-            "minLength": 0,
-            "type": "string"
-          },
-          "timezone": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string"
-          },
-          "addressLine1": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "addressLine2": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "city": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "region": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "postalCode": {
-            "maxLength": 20,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "WarehouseUpdated": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DetailEntryPoint": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "module": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "href": {
-            "type": "string",
-            "nullable": true
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "LaborResources": {
-        "type": "object",
-        "properties": {
-          "taskAvailable": {
-            "type": "boolean"
-          },
-          "taskOwnerModule": {
-            "type": "string"
-          },
-          "taskNote": {
-            "type": "string"
-          },
-          "taskTotal": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unassignedTaskCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "runningTaskCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "completedTaskCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "exceptionTaskCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "distinctOperatorCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "byWorkType": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WorkTypeSlice"
-            }
-          },
-          "rosterAvailable": {
-            "type": "boolean"
-          },
-          "rosterOwnerModule": {
-            "type": "string"
-          },
-          "rosterNote": {
-            "type": "string"
-          },
-          "equipmentAvailable": {
-            "type": "boolean"
-          },
-          "equipmentOwnerModule": {
-            "type": "string"
-          },
-          "equipmentNote": {
-            "type": "string"
-          }
-        }
-      },
-      "LegalEntitySlice": {
-        "type": "object",
-        "properties": {
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string",
-            "nullable": true
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "LocationStructure": {
-        "type": "object",
-        "properties": {
-          "totalCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "activeCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pickableCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "occupiedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "byType": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LocationTypeSlice"
-            }
-          }
-        }
-      },
-      "LocationTypeSlice": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          },
-          "typeLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "locationCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pickableCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "onHand": {
-            "type": "number"
-          }
-        }
-      },
-      "QualitySlice": {
-        "type": "object",
-        "properties": {
-          "qualityStatusId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "role": {
-            "type": "string"
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "available": {
-            "type": "number"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "StockDistribution": {
-        "type": "object",
-        "properties": {
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "available": {
-            "type": "number"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bucketCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "byQuality": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QualitySlice"
-            }
-          },
-          "byLegalEntity": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LegalEntitySlice"
-            }
-          },
-          "byLocationType": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LocationTypeSlice"
-            }
-          },
-          "platform": {
-            "$ref": "#/components/schemas/PlatformStock"
-          }
-        }
-      },
-      "StrategyBinding": {
-        "type": "object",
-        "properties": {
-          "dimension": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          },
-          "href": {
-            "type": "string",
-            "nullable": true
-          },
-          "facts": {
-            "$ref": "#/components/schemas/StrategyFacts"
-          }
-        }
-      },
-      "StrategyFacts": {
-        "type": "object",
-        "properties": {
-          "transferInCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "transferOutCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "inTransitLegCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "platformObservedOnHand": {
-            "type": "number",
-            "nullable": true
-          },
-          "platformSourceCount": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "WarehouseAddress": {
-        "type": "object",
-        "properties": {
-          "line1": {
-            "type": "string",
-            "nullable": true
-          },
-          "line2": {
-            "type": "string",
-            "nullable": true
-          },
-          "city": {
-            "type": "string",
-            "nullable": true
-          },
-          "region": {
-            "type": "string",
-            "nullable": true
-          },
-          "postalCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "countryCode": {
-            "type": "string"
-          },
-          "missingFields": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "text": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "WarehouseBase": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "LOCAL",
-              "OVERSEAS",
-              "PLATFORM_FBA",
-              "THIRD_PARTY",
-              "BONDED"
-            ]
-          },
-          "kindLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "countryCode": {
-            "type": "string"
-          },
-          "timezone": {
-            "type": "string"
-          },
-          "localTime": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "defaultWarehouse": {
-            "type": "boolean"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "legalEntityCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "legalEntityName": {
-            "type": "string",
-            "nullable": true
-          },
-          "legalEntityCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "WarehouseDetail": {
-        "type": "object",
-        "properties": {
-          "base": {
-            "$ref": "#/components/schemas/WarehouseBase"
-          },
-          "address": {
-            "$ref": "#/components/schemas/WarehouseAddress"
-          },
-          "stock": {
-            "$ref": "#/components/schemas/StockDistribution"
-          },
-          "locations": {
-            "$ref": "#/components/schemas/LocationStructure"
-          },
-          "work": {
-            "$ref": "#/components/schemas/WorkStatistics"
-          },
-          "strategies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StrategyBinding"
-            }
-          },
-          "labor": {
-            "$ref": "#/components/schemas/LaborResources"
-          },
-          "entryPoints": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DetailEntryPoint"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "WorkStatistics": {
-        "type": "object",
-        "properties": {
-          "receiptTotal": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "receiptOpenCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "receiptClosedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "receiptReceivedQuantity": {
-            "type": "number"
-          },
-          "stocktakeTaskCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "transferInCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "transferOutCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "inventoryMovementCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "workOrderTotal": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "openWorkOrderCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "WorkTypeSlice": {
-        "type": "object",
-        "properties": {
-          "workType": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "taskCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "completedCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "LocationPage": {
-        "type": "object",
-        "properties": {
-          "totals": {
-            "$ref": "#/components/schemas/LocationTotals"
-          },
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LocationRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "LocationRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "typeLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string"
-          },
-          "pickable": {
-            "type": "boolean"
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "available": {
-            "type": "number"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bucketCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lastMovementAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "LocationTotals": {
-        "type": "object",
-        "properties": {
-          "locationCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "activeCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pickableCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "occupiedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "onHand": {
-            "type": "number"
-          }
-        }
-      },
-      "OutboundDetailAction": {
-        "type": "object",
-        "properties": {
-          "action": {
-            "type": "string"
-          },
-          "toStatus": {
-            "type": "string"
-          },
-          "toStatusLabel": {
-            "type": "string"
-          },
-          "reasonRequired": {
-            "type": "boolean"
-          },
-          "requiresCarrier": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          },
-          "ownerModule": {
-            "type": "string"
-          }
-        }
-      },
-      "OutboundDetailEvent": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "eventType": {
-            "type": "string"
-          },
-          "eventTypeLabel": {
-            "type": "string"
-          },
-          "fromStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "fromStatusLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "toStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "toStatusLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "actorUserId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "detail": {
-            "type": "string"
-          }
-        }
-      },
-      "OutboundDetailLine": {
-        "type": "object",
-        "properties": {
-          "lineNo": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "plannedQuantity": {
-            "type": "number"
-          },
-          "pickedQuantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "shippedQuantity": {
-            "type": "number",
-            "nullable": true
-          }
-        }
-      },
-      "OutboundDetailPickRequest": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "lineCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPieceCount": {
-            "type": "number"
-          },
-          "note": {
-            "type": "string"
-          },
-          "requestedByUserId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "nullable": true
-      },
-      "OutboundOrderDetail": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderCode": {
-            "type": "string"
-          },
-          "sourceType": {
-            "type": "string"
-          },
-          "sourceTypeLabel": {
-            "type": "string"
-          },
-          "sourceTransferOrderId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "sourceTransferCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "sourceExternalRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "warehouseCode": {
-            "type": "string"
-          },
-          "warehouseName": {
-            "type": "string"
-          },
-          "carrierCode": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "terminal": {
-            "type": "boolean"
-          },
-          "shippedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "cancelledAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "cancelReason": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdByUserId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "skuLineCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPieceCount": {
-            "type": "number"
-          },
-          "lines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundDetailLine"
-            }
-          },
-          "quantities": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundQuantityAvailability"
-            }
-          },
-          "pickRequested": {
-            "type": "boolean"
-          },
-          "pickRequest": {
-            "$ref": "#/components/schemas/OutboundDetailPickRequest"
-          },
-          "timeline": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundDetailEvent"
-            }
-          },
-          "timelineEventCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "linkedOrder": {
-            "$ref": "#/components/schemas/OutboundUnavailableLink"
-          },
-          "shipToAddress": {
-            "$ref": "#/components/schemas/OutboundUnavailableLink"
-          },
-          "reservationRefs": {
-            "$ref": "#/components/schemas/OutboundUnavailableLink"
-          },
-          "packages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundUnavailableLink"
-            }
-          },
-          "actions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundDetailAction"
-            }
-          }
-        }
-      },
-      "OutboundQuantityAvailability": {
-        "type": "object",
-        "properties": {
-          "quantity": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "value": {
-            "type": "number",
-            "nullable": true
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "OutboundUnavailableLink": {
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string",
-            "nullable": true
-          },
-          "href": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "OutboundOrderDetailCapabilities": {
-        "type": "object",
-        "properties": {
-          "sections": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundUnavailableLink"
-            }
-          },
-          "quantityPolicies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundQuantityAvailability"
-            }
-          },
-          "actionOwnerModules": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "pickedQuantityNote": {
-            "type": "string"
-          },
-          "shippedQuantityNote": {
-            "type": "string"
-          },
-          "linkedOrderNote": {
-            "type": "string"
-          },
-          "reservationNote": {
-            "type": "string"
-          },
-          "packageNote": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyHandlingIntakeRequest": {
-        "type": "object",
-        "properties": {
-          "discrepancyId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "DiscrepancyHandlingSaved": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "disposition": {
-            "type": "string",
-            "nullable": true
-          },
-          "dispositionLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "acceptedQuantity": {
-            "type": "number"
-          },
-          "rejectedQuantity": {
-            "type": "number"
-          },
-          "evidenceCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "claimed": {
-            "type": "boolean"
-          },
-          "claimStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "decidedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "closedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "DiscrepancyEvidenceRequest": {
-        "type": "object",
-        "properties": {
-          "evidenceType": {
-            "type": "string"
-          },
-          "fileName": {
-            "type": "string"
-          },
-          "contentType": {
-            "type": "string"
-          },
-          "contentBase64": {
-            "type": "string"
-          },
-          "capturedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyEvidenceRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "evidenceType": {
-            "type": "string"
-          },
-          "evidenceTypeLabel": {
-            "type": "string"
-          },
-          "fileName": {
-            "type": "string"
-          },
-          "contentType": {
-            "type": "string"
-          },
-          "byteSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "sha256": {
-            "type": "string"
-          },
-          "capturedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "uploadedBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "note": {
-            "type": "string"
-          },
-          "dataUrl": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyDecisionRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "disposition": {
-            "type": "string"
-          },
-          "acceptedQuantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "rejectedQuantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "inboundQualityStatusId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "fromQualityStatusId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "locationId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "lotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyHandlingCloseRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyClaimRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "claimType": {
-            "type": "string"
-          },
-          "claimedQuantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "claimedAmount": {
-            "type": "number",
-            "nullable": true
-          },
-          "currency": {
-            "type": "string",
-            "nullable": true
-          },
-          "sourceRefId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "sourceRefCode": {
-            "type": "string"
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyClaimWithdrawRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyClaimRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "claimCode": {
-            "type": "string"
-          },
-          "claimType": {
-            "type": "string"
-          },
-          "claimTypeLabel": {
-            "type": "string"
-          },
-          "claimedQuantity": {
-            "type": "number"
-          },
-          "claimedAmount": {
-            "type": "number",
-            "nullable": true
-          },
-          "currency": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "sourceRefId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "sourceRefCode": {
-            "type": "string"
-          },
-          "claimRefId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          },
-          "submittedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "withdrawnAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "DiscrepancyClaimSubmitRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
       "DiscrepancyDependencyCapability": {
         "type": "object",
         "properties": {
@@ -30529,371 +29949,6 @@
             "type": "string"
           },
           "revisionNote": {
-            "type": "string"
-          }
-        }
-      },
-      "FirstMileLineRequest": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "qualityStatusId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "sourceReceiptEventLineId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "lotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "plannedQuantity": {
-            "type": "number"
-          },
-          "declaredItemName": {
-            "type": "string"
-          },
-          "hsCode": {
-            "type": "string"
-          },
-          "brand": {
-            "type": "string"
-          },
-          "originCountryCode": {
-            "type": "string"
-          },
-          "declaredUnitValue": {
-            "type": "number"
-          },
-          "declaredValue": {
-            "type": "number"
-          },
-          "grossWeightKg": {
-            "type": "number"
-          },
-          "netWeightKg": {
-            "type": "number"
-          },
-          "volumeCbm": {
-            "type": "number"
-          },
-          "cartonCount": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "FirstMileUpdateRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "sourceRefCode": {
-            "type": "string"
-          },
-          "destinationWarehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "destinationCountryCode": {
-            "type": "string"
-          },
-          "destinationName": {
-            "type": "string"
-          },
-          "transportMode": {
-            "type": "string"
-          },
-          "carrierName": {
-            "type": "string"
-          },
-          "bookingNo": {
-            "type": "string"
-          },
-          "vesselOrFlightNo": {
-            "type": "string"
-          },
-          "incoterm": {
-            "type": "string"
-          },
-          "riskBearer": {
-            "type": "string"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "freightCost": {
-            "type": "number"
-          },
-          "insuranceCost": {
-            "type": "number"
-          },
-          "dutyEstimate": {
-            "type": "number"
-          },
-          "handlingCost": {
-            "type": "number"
-          },
-          "customsBroker": {
-            "type": "string"
-          },
-          "departAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "expectedArriveAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "notes": {
-            "type": "string"
-          },
-          "lines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FirstMileLineRequest"
-            }
-          }
-        }
-      },
-      "FirstMileSaved": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "shipmentCode": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "plannedQuantity": {
-            "type": "number"
-          },
-          "shippedQuantity": {
-            "type": "number"
-          },
-          "declaredValue": {
-            "type": "number"
-          },
-          "totalCost": {
-            "type": "number"
-          },
-          "incoterm": {
-            "type": "string"
-          },
-          "incotermLabel": {
-            "type": "string"
-          },
-          "riskBearer": {
-            "type": "string"
-          },
-          "riskBearerLabel": {
-            "type": "string"
-          },
-          "transitLegCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "departAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "expectedArriveAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "dispatchedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "cancelledAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "FirstMileCreateRequest": {
-        "type": "object",
-        "properties": {
-          "sourceType": {
-            "type": "string"
-          },
-          "sourceRefId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "sourceRefCode": {
-            "type": "string"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "originWarehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "destinationWarehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "destinationCountryCode": {
-            "type": "string"
-          },
-          "destinationName": {
-            "type": "string"
-          },
-          "transportMode": {
-            "type": "string"
-          },
-          "carrierName": {
-            "type": "string"
-          },
-          "bookingNo": {
-            "type": "string"
-          },
-          "vesselOrFlightNo": {
-            "type": "string"
-          },
-          "incoterm": {
-            "type": "string"
-          },
-          "riskBearer": {
-            "type": "string"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "freightCost": {
-            "type": "number"
-          },
-          "insuranceCost": {
-            "type": "number"
-          },
-          "dutyEstimate": {
-            "type": "number"
-          },
-          "handlingCost": {
-            "type": "number"
-          },
-          "customsBroker": {
-            "type": "string"
-          },
-          "departAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "expectedArriveAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "notes": {
-            "type": "string"
-          },
-          "lines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FirstMileLineRequest"
-            }
-          }
-        }
-      },
-      "FirstMileDispatchLineRequest": {
-        "type": "object",
-        "properties": {
-          "lineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "shippedQuantity": {
-            "type": "number"
-          }
-        }
-      },
-      "FirstMileDispatchRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "shippedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "notes": {
-            "type": "string"
-          },
-          "lines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FirstMileDispatchLineRequest"
-            }
-          }
-        }
-      },
-      "FirstMileConfirmRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "departAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "expectedArriveAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "notes": {
-            "type": "string"
-          }
-        }
-      },
-      "FirstMileCancelRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "reason": {
-            "type": "string"
-          },
-          "notes": {
             "type": "string"
           }
         }
@@ -31715,6 +30770,951 @@
             "type": "string"
           },
           "label": {
+            "type": "string"
+          }
+        }
+      },
+      "FacilitySummary": {
+        "type": "object",
+        "properties": {
+          "warehouseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "platformWarehouseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "platformObservedOnHand": {
+            "type": "number"
+          },
+          "workOrderTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openWorkOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PlatformStock": {
+        "type": "object",
+        "properties": {
+          "sourceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "observedOnHand": {
+            "type": "number"
+          },
+          "observedAvailable": {
+            "type": "number"
+          },
+          "observedInbound": {
+            "type": "number"
+          },
+          "latestCollectedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "nullable": true
+      },
+      "StockMetrics": {
+        "type": "object",
+        "properties": {
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "balanceRowCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "WarehouseFacilityPage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/FacilitySummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detailUnavailable": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "LOCAL",
+              "OVERSEAS",
+              "PLATFORM_FBA",
+              "THIRD_PARTY",
+              "BONDED"
+            ]
+          },
+          "kindLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "localTime": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "defaultWarehouse": {
+            "type": "boolean"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "stock": {
+            "$ref": "#/components/schemas/StockMetrics"
+          },
+          "platformStock": {
+            "$ref": "#/components/schemas/PlatformStock"
+          },
+          "work": {
+            "$ref": "#/components/schemas/WorkVolume"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WorkVolume": {
+        "type": "object",
+        "properties": {
+          "stocktakeTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transferInCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transferOutCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inventoryMovementCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "workOrderTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openWorkOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DetailEntryPoint": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LaborResources": {
+        "type": "object",
+        "properties": {
+          "taskAvailable": {
+            "type": "boolean"
+          },
+          "taskOwnerModule": {
+            "type": "string"
+          },
+          "taskNote": {
+            "type": "string"
+          },
+          "taskTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unassignedTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "runningTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "exceptionTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "distinctOperatorCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byWorkType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkTypeSlice"
+            }
+          },
+          "rosterAvailable": {
+            "type": "boolean"
+          },
+          "rosterOwnerModule": {
+            "type": "string"
+          },
+          "rosterNote": {
+            "type": "string"
+          },
+          "equipmentAvailable": {
+            "type": "boolean"
+          },
+          "equipmentOwnerModule": {
+            "type": "string"
+          },
+          "equipmentNote": {
+            "type": "string"
+          }
+        }
+      },
+      "LegalEntitySlice": {
+        "type": "object",
+        "properties": {
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LocationStructure": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "occupiedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "byType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationTypeSlice"
+            }
+          }
+        }
+      },
+      "LocationTypeSlice": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "typeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHand": {
+            "type": "number"
+          }
+        }
+      },
+      "QualitySlice": {
+        "type": "object",
+        "properties": {
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "StockDistribution": {
+        "type": "object",
+        "properties": {
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byQuality": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualitySlice"
+            }
+          },
+          "byLegalEntity": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntitySlice"
+            }
+          },
+          "byLocationType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationTypeSlice"
+            }
+          },
+          "platform": {
+            "$ref": "#/components/schemas/PlatformStock"
+          }
+        }
+      },
+      "StrategyBinding": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "facts": {
+            "$ref": "#/components/schemas/StrategyFacts"
+          }
+        }
+      },
+      "StrategyFacts": {
+        "type": "object",
+        "properties": {
+          "transferInCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transferOutCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inTransitLegCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "platformObservedOnHand": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformSourceCount": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAddress": {
+        "type": "object",
+        "properties": {
+          "line1": {
+            "type": "string",
+            "nullable": true
+          },
+          "line2": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "region": {
+            "type": "string",
+            "nullable": true
+          },
+          "postalCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "missingFields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "text": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "WarehouseBase": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "LOCAL",
+              "OVERSEAS",
+              "PLATFORM_FBA",
+              "THIRD_PARTY",
+              "BONDED"
+            ]
+          },
+          "kindLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "localTime": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "defaultWarehouse": {
+            "type": "boolean"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WarehouseDetail": {
+        "type": "object",
+        "properties": {
+          "base": {
+            "$ref": "#/components/schemas/WarehouseBase"
+          },
+          "address": {
+            "$ref": "#/components/schemas/WarehouseAddress"
+          },
+          "stock": {
+            "$ref": "#/components/schemas/StockDistribution"
+          },
+          "locations": {
+            "$ref": "#/components/schemas/LocationStructure"
+          },
+          "work": {
+            "$ref": "#/components/schemas/WorkStatistics"
+          },
+          "strategies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StrategyBinding"
+            }
+          },
+          "labor": {
+            "$ref": "#/components/schemas/LaborResources"
+          },
+          "entryPoints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DetailEntryPoint"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkStatistics": {
+        "type": "object",
+        "properties": {
+          "receiptTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receiptOpenCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receiptClosedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receiptReceivedQuantity": {
+            "type": "number"
+          },
+          "stocktakeTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transferInCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transferOutCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inventoryMovementCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "workOrderTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openWorkOrderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "WorkTypeSlice": {
+        "type": "object",
+        "properties": {
+          "workType": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "taskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LocationPage": {
+        "type": "object",
+        "properties": {
+          "totals": {
+            "$ref": "#/components/schemas/LocationTotals"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "typeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "pickable": {
+            "type": "boolean"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastMovementAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "LocationTotals": {
+        "type": "object",
+        "properties": {
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "occupiedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHand": {
+            "type": "number"
+          }
+        }
+      },
+      "CountryOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "FacilityOptions": {
+        "type": "object",
+        "properties": {
+          "kinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KindOption"
+            }
+          },
+          "countries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CountryOption"
+            }
+          },
+          "legalEntities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityOption"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatusOption"
+            }
+          },
+          "timezoneNote": {
+            "type": "string"
+          },
+          "countryNote": {
+            "type": "string"
+          }
+        }
+      },
+      "KindOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "platformObserved": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LegalEntityOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "StatusOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkVolumeCapability": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "note": {
             "type": "string"
           }
         }
