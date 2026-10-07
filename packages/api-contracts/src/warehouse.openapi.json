@@ -2662,6 +2662,768 @@
           }
         }
       }
+    },
+    "/warehouse/inventory/serials/{id}": {
+      "get": {
+        "tags": [
+          "inventory-serial-controller"
+        ],
+        "operationId": "serial",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SerialProfile"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "inventory-serial-controller"
+        ],
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SerialUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SerialProfile"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "inventory-serial-controller"
+        ],
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/serials": {
+      "get": {
+        "tags": [
+          "inventory-serial-controller"
+        ],
+        "operationId": "serials",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lotId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SerialPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "inventory-serial-controller"
+        ],
+        "operationId": "register",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SerialRegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SerialValidationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/serials/validate-movement": {
+      "post": {
+        "tags": [
+          "inventory-serial-controller"
+        ],
+        "operationId": "validate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SerialValidateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SerialValidationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/serials/movements": {
+      "post": {
+        "tags": [
+          "inventory-serial-controller"
+        ],
+        "operationId": "move",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SerialMoveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SerialValidationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/serials/import": {
+      "post": {
+        "tags": [
+          "inventory-serial-controller"
+        ],
+        "operationId": "importBatch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SerialImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SerialValidationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/serials/{id}/movements": {
+      "get": {
+        "tags": [
+          "inventory-serial-controller"
+        ],
+        "operationId": "timeline",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SerialMovementPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/serials/stats": {
+      "get": {
+        "tags": [
+          "inventory-serial-controller"
+        ],
+        "operationId": "stats",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lotId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SerialStats"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/serial-vocabularies": {
+      "get": {
+        "tags": [
+          "inventory-serial-controller"
+        ],
+        "operationId": "vocabularies",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SerialVocabularies"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/serial-operations": {
+      "get": {
+        "tags": [
+          "inventory-serial-controller"
+        ],
+        "operationId": "operations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "refType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SerialOperationPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/serial-movements": {
+      "get": {
+        "tags": [
+          "inventory-serial-controller"
+        ],
+        "operationId": "movements",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "serialId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "operationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SerialMovementPage"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5961,6 +6723,750 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "SerialUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "clearLot": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SerialProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_STOCK",
+              "SOLD",
+              "IN_TRANSIT",
+              "REPAIR",
+              "SCRAPPED"
+            ]
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "currentLocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationWarehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "movementCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastMovementAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SerialRegisterRequest": {
+        "type": "object",
+        "properties": {
+          "serialNumber": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "refType": {
+            "type": "string",
+            "nullable": true
+          },
+          "refId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "SerialIssue": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "QUANTITY_NOT_INTEGER",
+              "QUANTITY_NEGATIVE",
+              "SERIAL_COUNT_MISMATCH",
+              "SERIAL_DUPLICATED",
+              "SERIAL_NOT_FOUND",
+              "SERIAL_EXISTS",
+              "SKU_MISMATCH",
+              "LOT_MISMATCH",
+              "STATUS_NOT_ALLOWED",
+              "TRANSITION_NOT_ALLOWED",
+              "LOCATION_MISMATCH",
+              "LOCATION_REQUIRED",
+              "LOCATION_NOT_ALLOWED",
+              "SERIAL_REQUIRED",
+              "NO_CHANGE"
+            ]
+          },
+          "codeLabel": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "expected": {
+            "type": "string"
+          },
+          "actual": {
+            "type": "string"
+          }
+        }
+      },
+      "SerialOperationRecord": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "INBOUND",
+              "OUTBOUND",
+              "RELOCATION",
+              "STATUS_CHANGE",
+              "REBIND"
+            ]
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "refType": {
+            "type": "string"
+          },
+          "refId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "declaredQuantity": {
+            "type": "number"
+          },
+          "serialCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "nullable": true
+      },
+      "SerialValidationResult": {
+        "type": "object",
+        "properties": {
+          "passed": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "declaredQuantity": {
+            "type": "number"
+          },
+          "serialCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SerialIssue"
+            }
+          },
+          "applied": {
+            "type": "boolean"
+          },
+          "operation": {
+            "$ref": "#/components/schemas/SerialOperationRecord"
+          },
+          "serials": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/SerialProfile"
+            }
+          }
+        }
+      },
+      "SerialValidateRequest": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "declaredQuantity": {
+            "type": "number"
+          },
+          "serialNumbers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "toLocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fromLocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "toStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "refType": {
+            "type": "string",
+            "nullable": true
+          },
+          "refId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "SerialMoveRequest": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "declaredQuantity": {
+            "type": "number"
+          },
+          "serialNumbers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "toLocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fromLocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "toStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "refType": {
+            "type": "string",
+            "nullable": true
+          },
+          "refId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dryRun": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          }
+        }
+      },
+      "SerialImportRequest": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serials": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "refType": {
+            "type": "string",
+            "nullable": true
+          },
+          "refId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dryRun": {
+            "type": "boolean",
+            "nullable": true,
+            "default": false
+          }
+        }
+      },
+      "SerialPage": {
+        "type": "object",
+        "properties": {
+          "serials": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SerialProfile"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SerialMovementPage": {
+        "type": "object",
+        "properties": {
+          "movements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SerialMovementRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SerialMovementRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serialId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "movementKind": {
+            "type": "string",
+            "enum": [
+              "INBOUND",
+              "OUTBOUND",
+              "RELOCATION",
+              "STATUS_CHANGE",
+              "REBIND"
+            ]
+          },
+          "movementLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string",
+            "enum": [
+              "IN_STOCK",
+              "SOLD",
+              "IN_TRANSIT",
+              "REPAIR",
+              "SCRAPPED"
+            ]
+          },
+          "toStatus": {
+            "type": "string",
+            "enum": [
+              "IN_STOCK",
+              "SOLD",
+              "IN_TRANSIT",
+              "REPAIR",
+              "SCRAPPED"
+            ]
+          },
+          "fromLocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fromLocationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "toLocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "toLocationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "fromLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fromLotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "toLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "toLotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "refType": {
+            "type": "string"
+          },
+          "refId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SerialStats": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inStock": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sold": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inTransit": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "repair": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scrapped": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sumMatches": {
+            "type": "boolean"
+          },
+          "unboundCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lotMismatchCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SerialVocabularies": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "IN_STOCK",
+                "SOLD",
+                "IN_TRANSIT",
+                "REPAIR",
+                "SCRAPPED"
+              ]
+            }
+          },
+          "movementKinds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "INBOUND",
+                "OUTBOUND",
+                "RELOCATION",
+                "STATUS_CHANGE",
+                "REBIND"
+              ]
+            }
+          },
+          "directions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "INBOUND",
+                "OUTBOUND",
+                "RELOCATION",
+                "STATUS_CHANGE",
+                "REBIND"
+              ]
+            }
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "QUANTITY_NOT_INTEGER",
+                "QUANTITY_NEGATIVE",
+                "SERIAL_COUNT_MISMATCH",
+                "SERIAL_DUPLICATED",
+                "SERIAL_NOT_FOUND",
+                "SERIAL_EXISTS",
+                "SKU_MISMATCH",
+                "LOT_MISMATCH",
+                "STATUS_NOT_ALLOWED",
+                "TRANSITION_NOT_ALLOWED",
+                "LOCATION_MISMATCH",
+                "LOCATION_REQUIRED",
+                "LOCATION_NOT_ALLOWED",
+                "SERIAL_REQUIRED",
+                "NO_CHANGE"
+              ]
+            }
+          }
+        }
+      },
+      "SerialOperationPage": {
+        "type": "object",
+        "properties": {
+          "operations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SerialOperationRecord"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       }
