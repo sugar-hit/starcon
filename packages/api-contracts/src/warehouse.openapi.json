@@ -5915,6 +5915,316 @@
           }
         }
       }
+    },
+    "/warehouse/inventory/health/assess": {
+      "post": {
+        "tags": [
+          "inventory-health-controller"
+        ],
+        "operationId": "assess",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryHealthQuery"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryHealthAssessed"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/health": {
+      "get": {
+        "tags": [
+          "inventory-health-controller"
+        ],
+        "operationId": "page_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "accuracyThreshold",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryHealthScorecardPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/health/trend": {
+      "get": {
+        "tags": [
+          "inventory-health-controller"
+        ],
+        "operationId": "trend",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryHealthTrend"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/health/issues": {
+      "get": {
+        "tags": [
+          "inventory-health-controller"
+        ],
+        "operationId": "issues",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryHealthIssuePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/health/gate": {
+      "get": {
+        "tags": [
+          "inventory-health-controller"
+        ],
+        "operationId": "gate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "accuracyThreshold",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryHealthGate"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -13289,6 +13599,397 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "InventoryHealthQuery": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "accuracyThreshold": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "InventoryHealthAssessed": {
+        "type": "object",
+        "properties": {
+          "tenant": {
+            "$ref": "#/components/schemas/InventoryHealthScorecard"
+          },
+          "warehouses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryHealthScorecard"
+            }
+          },
+          "gate": {
+            "$ref": "#/components/schemas/InventoryHealthGate"
+          }
+        }
+      },
+      "InventoryHealthGate": {
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "type": "string",
+            "enum": [
+              "TENANT",
+              "WAREHOUSE"
+            ]
+          },
+          "scopeKey": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "accuracyState": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "UNAVAILABLE",
+              "NO_DATA"
+            ]
+          },
+          "accuracyRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "accuracyThreshold": {
+            "type": "number"
+          },
+          "blocked": {
+            "type": "boolean"
+          },
+          "blockReason": {
+            "type": "string"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "lastReconciledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastStocktakenAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryHealthIssue"
+            }
+          }
+        }
+      },
+      "InventoryHealthIssue": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "enum": [
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "metricType": {
+            "type": "string",
+            "enum": [
+              "TURNOVER",
+              "STOCKOUT_RATE",
+              "OVERSTOCK_RATE",
+              "STAGNANT_SHARE",
+              "ACCURACY",
+              "NEGATIVE_STOCK"
+            ]
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      },
+      "InventoryHealthMetric": {
+        "type": "object",
+        "properties": {
+          "metricType": {
+            "type": "string",
+            "enum": [
+              "TURNOVER",
+              "STOCKOUT_RATE",
+              "OVERSTOCK_RATE",
+              "STAGNANT_SHARE",
+              "ACCURACY",
+              "NEGATIVE_STOCK"
+            ]
+          },
+          "metricLabel": {
+            "type": "string"
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "UNAVAILABLE",
+              "NO_DATA"
+            ]
+          },
+          "value": {
+            "type": "number",
+            "nullable": true
+          },
+          "source": {
+            "type": "string",
+            "nullable": true
+          },
+          "numerator": {
+            "type": "number",
+            "nullable": true
+          },
+          "denominator": {
+            "type": "number",
+            "nullable": true
+          },
+          "deduction": {
+            "type": "number"
+          },
+          "basis": {
+            "type": "string"
+          },
+          "blockedByModule": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "InventoryHealthScorecard": {
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "type": "string",
+            "enum": [
+              "TENANT",
+              "WAREHOUSE"
+            ]
+          },
+          "scopeKey": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "grade": {
+            "type": "string",
+            "enum": [
+              "HEALTHY",
+              "WATCH",
+              "RISK",
+              "UNVERIFIABLE"
+            ]
+          },
+          "gradeLabel": {
+            "type": "string"
+          },
+          "availableMetricCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalMetricCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "accuracyRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "accuracyThreshold": {
+            "type": "number",
+            "nullable": true
+          },
+          "accuracyPassed": {
+            "type": "boolean"
+          },
+          "blocked": {
+            "type": "boolean"
+          },
+          "blockReason": {
+            "type": "string"
+          },
+          "windowFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryHealthMetric"
+            }
+          }
+        }
+      },
+      "InventoryHealthScorecardPage": {
+        "type": "object",
+        "properties": {
+          "scorecards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryHealthScorecard"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "InventoryHealthTrend": {
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "type": "string",
+            "enum": [
+              "TENANT",
+              "WAREHOUSE"
+            ]
+          },
+          "scopeKey": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "windowFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryHealthTrendPoint"
+            }
+          }
+        }
+      },
+      "InventoryHealthTrendPoint": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "accuracy": {
+            "type": "number",
+            "nullable": true
+          },
+          "sampleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "discrepancyCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "InventoryHealthIssuePage": {
+        "type": "object",
+        "properties": {
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryHealthIssue"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "criticalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       }

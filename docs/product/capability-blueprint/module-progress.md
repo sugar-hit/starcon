@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 1 |
 | **未开发** | **372** |
 | 完成率 | 19.8% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 20 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -273,7 +256,7 @@
 | 7.5.1.2 | 在途库存 | — | D3 | 进行中 | **本车道只交付后端，前端页面与契约未做（硬停机 2026-10-08 00:00 到点）** · 迁移 backend/services/warehouse/src/main/resources/db/migration/V63__warehouse_in_transit_leg.sql：**刻意不建第二张在途表** —— V1 的 inventory_transfer 已是全服务在途唯一事实（7.1.1.1 总览、7.2.2.1 可售量、7.1.3.1 多仓分布、7.5.1.1 调拨单四条老查询都按 status='IN_TRANSIT' 求和），蓝图关系段说「在途漏算会导致重复补货」，漏算的根因永远是同一个在途有两套账，所以走**扩列**路线把头程/采购/FBA 也写进同一张表，四条既有读者一行都不用改就自动把新类型在途算进去；新增列 transit_kind（四类，默认 TRANSFER 兼容既有行）、expected_arrive_at（**逾期预警的计算依据**，V1 原先没有这一列）、lot_id（同服务内 composite FK 指向 inventory_lot，批次维度）、source_system + source_reference（跨服务定位键兼幂等锚点，部分唯一索引挡重复投递双记在途）、from/to_warehouse_name（起止站可读名快照）、carrier_name + tracking_no、settled_quantity、version；**放宽** from/to_warehouse_id 的 NOT NULL（供应商工厂与 Amazon FBA 仓不在本租户 warehouse 内，硬塞一个仓就是编造事实），两站至少一站是本租户仓、仓外那一站必须有可读名快照由 ck_transfer_endpoint_name 钉死；新表 in_transit_event（ARRIVED / SHORTAGE 到达与差异事件，逐笔留痕、兼 inventory_transaction 的 UNIQUE 幂等锚点）tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT 与 starcon_app REVOKE；三个触发器：guard_in_transit_event 挡住「已终态还登记到达」与「到货量超未达量」（否则货已在仓、缺口计算仍当它没到，重复补货就是这么来的）、guard_in_transit_leg_lot 挡住批次与 SKU 不匹配、guard_in_transit_settled 延迟约束钉死 **settled_quantity = 到达事件之和**（这条不变量是「原发 = 已了结 + 未达」能成立的前提） · 端点 7 个挂在 /warehouse/inventory/in-transit：GET 清单（真分页 + 全量汇总不受分页影响 + 四类与五档逾期下拉带真实条数，筛选类型/起止仓/SKU/逾期档/关键词，排序白名单 6 键）、GET /alerts 到达预警（按 ETA 升序、随时间自动变）、GET /netting 补货可扣在途净额（按目的仓 × SKU 聚合，**平台仓方向不计入**否则补货算错方向）、GET /{legId} 详情（行 + 该腿到达/差异时间线 + 指标口径说明）、POST 登记外部在途腿、POST /{legId}/arrive 分批到货、POST /{legId}/discrepancy 差异登记 · **逾期是真算的不是写死的标记**：库里没有任何可写的「已逾期」列，档位由 ETA 与此刻相减实时分桶（ON_TIME/MILD 24h/OVERDUE 72h/SEVERE 168h/CRITICAL），服务与 SQL 用同一套阈值表达式；**没有 ETA 的历史行如实显示「未登记预计到达」而不是算成准点**（否则预警一上线全是噪声）；已了结的腿一律不报逾期（货都到了还进待办清单） · **调拨腿只读**：登记端点显式拒绝 transitKind=TRANSIT 类型的调拨腿，否则两处都能写同一批货、在途数翻倍；**调拨腿的 ETA 从 transfer_order.expected_arrive_at 读侧派生**（coalesce），所以 7.5.1.1 的既有单据立刻有 ETA 且**不需要改它的一行代码** · **外部腿的落账分两段**：FBA 发货登记时就从我方发货仓扣减在手并写 SHIPMENT 分录（货真的离仓了，不扣就是虚增在手）；头程/采购登记时**不动在手**（货还没进我方账，到货前凭空多出库存更糟），到达时才入库目的仓并写 RECEIPT 分录；FBA 到货只了结在途**不入库** —— 平台仓库存是外部仓观测值（7.1.1.2，尚未交付），本服务没有它的库位 · 数量一律 numeric(19,4) + BigDecimal，全程禁浮点 · 测试 backend/services/warehouse/src/test/java/com/starcon/warehouse/InventoryInTransitIntegrationTest.java **24 例全绿**，实跑 Testcontainers PostgreSQL 16（连接池压到 1）· 覆盖：外部腿进入四个既有模块同一条在途口径（在途漏算不得发生）、重复投递撞唯一索引且不双记、分批到货逐笔留痕且分录 RECEIPT 累计等于全部到货量、部分短少只了结那一段而**不抹掉整条腿**、timestamptz 带 +08:00 写入后断言读回 Instant 与墙钟时刻零漂移（并断言 UTC 墙钟 2026-10-20 09:45:00）、ETA 改一档逾期档立刻跟着变（证明没有可写的标记列）、逾期档位六个边界逐一断言、调拨腿 ETA 从调拨单派生、补货净额按仓与 SKU 聚合且平台仓方向排除、清单筛选搜索排序分页且汇总不受分页影响、逐张表断言 relforcerowsecurity、租户隔离三断言（两租户互不可见、伪造 X-Tenant-Id 无效、连接池归还后不串租户）· **跨服务边界（AGENTS.md 禁止跨服务 SQL/FK/视图）**：头程属 10 物流与头程、采购属 6 采购、FBA 属 4 外部仓，三者**均未交付**；本模块只带 source_system + source_reference 跨服务定位键与写入时的可读名快照，不建外键也不连查它们的库。将来交接：上游交付后由各自适配器调本服务「登记在途腿」接口或直接发事件，source_system/source_reference 就是对接契约，本表结构不需要再变 · **未完成部分**：① 前端页面 /inventory/in-transit 未做（硬停机到点），apps/web/src/lib/api-proxy.ts 白名单因此**未登记** in-transit 路径 —— 新增页面时必须把分支放在 inventory/(?:…) 组内且每个子路径前面带 /；② packages/api-contracts 与 packages/sdk **未重新生成**（codegen 需要四个服务的 spec 同时存在于 backend/target/openapi，需跑一次全量 verify 才能产出，本次只跑了 warehouse 段）；③ 全量 ./mvnw verify、pnpm typecheck/lint/test/web build、node tools/module-progress/sync.mjs --check 均**未执行** |
 | 7.5.2.1 | 跨法人调拨 | — | D3 | 已交付 | 迁移 warehouse V64__warehouse_cross_legal_entity_transfer.sql（cross_entity_transfer 单头（from_legal_entity_id 与 to_legal_entity_id **两个法人** + valuation_basis 转移定价口径 + currency_code 单币种 + total_amount）、cross_entity_transfer_line 明细（SKU × 质量状态 × 数量 × unit_price，**amount 为生成列 round(quantity*unit_price,4)**，改数量忘改金额的错行写不出来）、cross_entity_approval **append-only 双方确认事件**（UNIQUE(transfer_id, side) 保证一个方向只签一次）、cross_entity_settlement **内部结算凭据**（UNIQUE(source_system, reference_id) 跨服务定位键 + UNIQUE(transfer_id) 一单一凭据），四张表 tenant_id NOT NULL 加 FORCE RLS isolation、GRANT 与 starcon_app REVOKE，另 GRANT USAGE ON SEQUENCE 两个发号器；**CHECK(from_legal_entity_id<>to_legal_entity_id)** 在 DB 层堵死「同一法人走本模块」（那是 7.5.1.1 的活）；guard_cross_entity_transfer_state 触发器钉死状态与三个时间戳自洽（含 CANCELLED 属于「尚未发出」侧）；guard_cross_entity_two_parties **延迟约束触发器钉死两个方向的确认人必须是两个人**；guard_cross_entity_total / _head 双侧钉死单头合计等于明细金额之和；数量与金额一律 numeric(19,4) 加 BigDecimal，舍入只发生在落 numeric(19,4) 这一步（PostgreSQL 四舍五入远离零），数量与单价不做中间舍入以免双重舍入）· 端点 11 个挂在 /warehouse/inventory/cross-entity-transfers（**刻意不复用 transfers 前缀**，否则「跨法人」看起来只是普通调拨的一个筛选项）：GET 列表（真分页 + 全量汇总 + 按币种分组的金额合计 + 状态/定价口径/法人/仓库下拉）、GET /{id} 详情（头 + 明细含单价 + 双方确认留痕 + 结算凭据 + pricingNote/ownershipNote/authorizationNote 三条口径说明）、GET /{id}/movements（**复用 7.1.2.1 台账**，说明两条分录分属不同法人余额行）、GET /{id}/settlement（给 12 财务的取数形状，未发运时 404 而非空壳）、POST 建单（草稿，单号由 DB 序列生成）、PUT 改单（仅草稿整份替换）、POST /{id}/source-confirm 与 POST /{id}/target-confirm（**两个独立端点**，让调用方在请求体里自称哪一方等于让它可以自称另一方）、POST /{id}/ship（**整单发运**：扣转出法人余额 + 挂在途 + 开具结算凭据，跨法人调拨不拆批次因为转移定价是整单口径）、POST /{id}/receive（**分次**，余额行落在**转入法人**名下即货权转移本身，逐行冲减在途，收满才转已交割并确认凭据）、POST /{id}/close（短少如实记差异、在途归零、**凭据不因此作废**因为部分货权确实转移了）、POST /{id}/cancel（仅发运前可用，已发运只能结案）—— 货权转移点定在**实收**而非发出，沿用 7.5.1.1「调拨不是瞬时」；结算凭据在**发出**时开具（那时转出方已交付、转入方已确认定价，财务据以挂账），两时刻不同是业务事实 · 页面 /inventory/cross-entity-transfers（apps/web/src/app/inventory/cross-entity-transfers/page.tsx + components/inventory/legal-entity-transfer.tsx + legal-entity-transfer-model.ts）**两个法人是页面第一视觉要素**而非筛选器里的两个下拉、转移单价与定价口径与金额三列并排、按币种分行的金额汇总卡、待对方确认计数单列、发出与实收两个时刻分开显示、凭据面板显式展示 source_system 与 reference_id、详情页常驻显示三条口径说明、按钮按状态给（终态不再给发货确认）· **api-proxy 白名单**在 inventory/(?:…) 组**内**新增 cross-entity-transfers 分支（两个历史坑：分支必须落在组内、每个子路径前都要有 /），另建 cross-entity-transfer-allowlist.test.ts 逐条钉住全部 11 条调用点与「未交付模块（inventory/adjustments、inventory/reservations）与不存在子路径仍 404」—— 该文件独立而不并进 route.test.ts，避免改别车道在维护的清单 · 测试 LegalEntityTransferIntegrationTest 26 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）覆盖**货权真的换法人**（发出扣转出方 100→40 且转入方仍为 0、实收后转入方=60、共享口径在途归零、TRANSFER_OUT 与 TRANSFER_IN 各一条）、定价与舍入（60×12.5=750、1.0001×1.0001=1.0002、零定价允许但显形、缺币种与非法币种拒绝、超四位小数拒绝而非悄悄舍入）、**同一人不能代表两个法人**（DB 触发器）、同一法人不能建单、顺序不能倒、重复确认被拒、货不在转出法人名下时拒绝发出、分次实收后仍在途不提前算已交割、结案短少如实记差异且凭据保持 ISSUED、已发运不能作废、凭据定位键唯一、timestamptz 带 +08:00 写入后断言读回瞬时与偏移零漂移、乐观锁冲突 409、租户隔离三断言 + 端点 401/403/404 · 契约 codegen 后类型名集合**新增 24 个 LegalEntityTransfer*、消失 0 个**（catalog.ts 原始 diff 行数大只是键序重排）· **跨服务边界**：12 财务**尚未交付**，本模块只开具 cross_entity_settlement 凭据并以 source_system + reference_id 为定位键，**不建跨服务外键、不查 12 的表、不复制科目/凭证/税额与汇率**（跨币种换算与汇兑损益属 12 职责，本模块整单单币种且不存汇率），取数契约见 GET /{id}/settlement 的响应形状；17 权限双方法人授权**尚未交付**，当前可执行约束是同租户加租户级权限码加两次不同自然人确认，该事实随详情响应 authorizationNote 返回并在页面常驻显示，**不谎称已接入权限系统** · 已知边界：跨法人调拨**整单发运**不拆批次（转移定价是整单口径，部分发运会让「一张凭据对应哪几行货」失去唯一答案）；凭据状态只有 ISSUED 与 ACKNOWLEDGED，**刻意没有「已结算/已入账」**，那属于 12 财务的账本模块无权宣告；SKU 属 catalog，只用逻辑 ID 加可读名快照，不建外键不联查 |
 | 7.6.1.1 | 库龄与呆滞 | /inventory/aging | D3 | 未开发 | — |
-| 7.6.2.1 | 库存健康 | /inventory/health | D3 | 未开发 | — |
+| 7.6.2.1 | 库存健康 | /inventory/health | D3 | 已交付 | 迁移 warehouse V66__warehouse_inventory_health.sql（三张表：**一次评估 = 1 行头 + 6 行指标 + 1 行结论**，塞进一张表会出现同一份得分六份副本，故拆 assessment 头 / metric 明细 / verdict 结论；metric 六行**恒定存在**并带 metric_state 三值 AVAILABLE / UNAVAILABLE / NO_DATA + blocked_by_module，四个依赖未交付上游的指标**不带值**；CHECK 钉死「AVAILABLE 必须有值且必须有 metric_source」「UNAVAILABLE 必须有 blocked_by_module」「比率必须落 0..1」「score 0..100」「total_metric_count 必须为 6」；三张表 tenant_id NOT NULL、ENABLE+FORCE RLS isolation、GRANT SELECT/INSERT 给 warehouse_app、REVOKE UPDATE/DELETE 并挂 V1 的 append-only 触发器，评估结论写下即不可改）+ 端点 GET /warehouse/inventory/health 评分卡、GET /trend 准确率趋势（核对口径与盘点口径**各自成序列不混**）、GET /gate 准确率红线判定、GET /issues 问题清单、POST /assess 触发评估（写权限 warehouse.inventory.update；**无证据时按最保守口径阻断**，理由说清是缺证据而非账错了；阻断由 12 财务与 7.1.2.2 在各自边界执行，本服务只给可查询可复现的判定，不代下游改单据状态）+ 页面 /inventory/health（六行恒定渲染、得分旁常驻覆盖度 2/6、红线三态分说「从没核过账」不显示成「通过」；api-proxy 白名单登记在 inventory/(?:…) 组内，含 health 与 trend/gate/issues/assess 四个子路径）+ 测试 InventoryHealthIntegrationTest 21 例实跑 Testcontainers PG16（核对口径准确率与扣分可追溯、取**最后一次**批次而非平均、回落盘点口径、未录实盘行不计入、四个不可用指标标记 UNAVAILABLE 且不带值、落库后仍不带值、负库存恒为 0 且**实跑 DB CHECK 证明写不进负库存**、无证据不得报健康、按仓库口径只认本仓批次、红线阻断与达标放行、阈值越界与倒置区间被拒、问题清单带证据、趋势双序列、+08:00 时间零漂移、租户隔离三断言）+ 前端模型测试 inventory-health-model.test.ts 22 例（不可用指标不给数值位、null 不等于 0、红线三态分说、问题排序）。**指标可算性逐个核实**：库存准确率可算（7.1.2.2 核对 V54 优先、7.4.2.1 盘点 V59 回落）；负库存发生次数可算且恒为 0（V1/V2 的 CHECK 结构上排除，测试实跑证明）；周转率/缺货率/超储率**不可用**（依赖 13 销量，warehouse 不持有销售事实，跨服务不得查它的表）；呆滞占比**不可用**（依赖同批在途的 7.6.1 V65）；**按类目打分不提供**（sku_ref 与 inventory_balance 均无类目列，类目真相在 catalog，跨服务不得 join）。覆盖度与 UNVERIFIABLE 评级是刻意设计：六个指标只算得出一个时，那个分数必须让人看出它不是整体健康度 |
 | 7.7.1.1 | 货主与所有权 | — | D3 | 未开发 | — |
 | 7.7.1.2 | 寄售与代销 | — | D3 | 未开发 | — |
 | 7.7.2.1 | VMI 供应商管理库存 | — | D3 | 未开发 | — |
@@ -557,3 +540,10 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 90 |
+| 进行中 | 0 |
+| **未开发** | **375** |
+| 完成率 | 19.4% |
+| **D3** | 12 | 0 | 28 | 40 |
+| 07 | 库存核算系统 | D3 | 12 | 31 |
+| 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
