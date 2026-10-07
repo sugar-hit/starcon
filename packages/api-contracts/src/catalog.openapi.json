@@ -1546,6 +1546,192 @@
         }
       }
     },
+    "/catalog/media/processing/recipes/{id}": {
+      "get": {
+        "tags": [
+          "image-process-controller"
+        ],
+        "operationId": "recipe",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaProcessRecipeRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "image-process-controller"
+        ],
+        "operationId": "updateRecipe",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaProcessRecipeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaProcessRecipeSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "image-process-controller"
+        ],
+        "operationId": "deleteRecipe",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/processing/recipes/{id}/enabled": {
+      "put": {
+        "tags": [
+          "image-process-controller"
+        ],
+        "operationId": "setRecipeEnabled",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaProcessRecipeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/lifecycle/rules/{id}": {
       "put": {
         "tags": [
@@ -4881,6 +5067,225 @@
         }
       }
     },
+    "/catalog/media/processing/recipes": {
+      "get": {
+        "tags": [
+          "image-process-controller"
+        ],
+        "operationId": "recipes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaProcessRecipeRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "image-process-controller"
+        ],
+        "operationId": "createRecipe",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaProcessRecipeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaProcessRecipeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/processing/jobs": {
+      "get": {
+        "tags": [
+          "image-process-controller"
+        ],
+        "operationId": "jobs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaProcessJobPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "image-process-controller"
+        ],
+        "operationId": "submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaProcessJobInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaProcessJob"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/processing/jobs/{jobId}/cancel": {
+      "post": {
+        "tags": [
+          "image-process-controller"
+        ],
+        "operationId": "cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaProcessJob"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/lifecycle/rules": {
       "get": {
         "tags": [
@@ -6827,12 +7232,169 @@
         }
       }
     },
+    "/catalog/media/processing/overview": {
+      "get": {
+        "tags": [
+          "image-process-controller"
+        ],
+        "operationId": "overview_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaProcessOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/processing/jobs/{jobId}": {
+      "get": {
+        "tags": [
+          "image-process-controller"
+        ],
+        "operationId": "job",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaProcessJobDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/processing/jobs/{jobId}/items": {
+      "get": {
+        "tags": [
+          "image-process-controller"
+        ],
+        "operationId": "items",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaProcessJobItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/media/processing/assets/{assetId}/history": {
+      "get": {
+        "tags": [
+          "image-process-controller"
+        ],
+        "operationId": "history",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "assetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaProcessJobRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/media/overview": {
       "get": {
         "tags": [
           "media-controller"
         ],
-        "operationId": "overview_5",
+        "operationId": "overview_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -6955,7 +7517,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "overview_6",
+        "operationId": "overview_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -7029,7 +7591,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "overview_7",
+        "operationId": "overview_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -7100,7 +7662,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "overview_8",
+        "operationId": "overview_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -7191,7 +7753,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_9",
+        "operationId": "overview_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -8554,6 +9116,150 @@
             "format": "int64"
           },
           "usageCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MediaProcessRatioInput": {
+        "required": [
+          "heightPx",
+          "label",
+          "widthPx"
+        ],
+        "type": "object",
+        "properties": {
+          "label": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "widthPx": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "heightPx": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cropMode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "MediaProcessRecipeInput": {
+        "required": [
+          "code",
+          "name",
+          "targetFormat"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "targetPlatform": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "targetFormat": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "removeBackground": {
+            "type": "boolean"
+          },
+          "backgroundTolerance": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "whiteBackground": {
+            "type": "boolean"
+          },
+          "watermarkText": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "watermarkPosition": {
+            "type": "string",
+            "nullable": true
+          },
+          "watermarkOpacity": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "targetWidthPx": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "targetHeightPx": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "cropMode": {
+            "type": "string",
+            "nullable": true
+          },
+          "ratios": {
+            "maxItems": 8,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/MediaProcessRatioInput"
+            }
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MediaProcessRecipeSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ratioCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "jobCount": {
             "type": "integer",
             "format": "int64"
           }
@@ -10809,6 +11515,67 @@
             "items": {
               "$ref": "#/components/schemas/MediaIntegrityResult"
             }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaProcessJobInput": {
+        "required": [
+          "assetIds",
+          "recipeId"
+        ],
+        "type": "object",
+        "properties": {
+          "recipeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetIds": {
+            "maxItems": 500,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "MediaProcessJob": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recipeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recipeName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "assetCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "error": {
+            "type": "string"
+          },
+          "cancelRequested": {
+            "type": "boolean"
           },
           "note": {
             "type": "string"
@@ -13708,6 +14475,403 @@
             "type": "string"
           },
           "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaProcessRatio": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string"
+          },
+          "widthPx": {
+            "type": "number"
+          },
+          "heightPx": {
+            "type": "number"
+          },
+          "cropMode": {
+            "type": "string"
+          },
+          "sortNo": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "MediaProcessRecipeRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "targetPlatform": {
+            "type": "string"
+          },
+          "targetFormat": {
+            "type": "string"
+          },
+          "removeBackground": {
+            "type": "boolean"
+          },
+          "backgroundTolerance": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "whiteBackground": {
+            "type": "boolean"
+          },
+          "watermarkText": {
+            "type": "string"
+          },
+          "watermarkPosition": {
+            "type": "string"
+          },
+          "watermarkOpacity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "targetWidthPx": {
+            "type": "number",
+            "nullable": true
+          },
+          "targetHeightPx": {
+            "type": "number",
+            "nullable": true
+          },
+          "cropMode": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "ratios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaProcessRatio"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaProcessOverview": {
+        "type": "object",
+        "properties": {
+          "jobCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "succeededJobCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partialJobCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failedJobCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openJobCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "assetTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "recipeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "outputCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "outputByteSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaProcessJobPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaProcessJobRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "runningCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partialCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaProcessJobRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recipeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "recipeName": {
+            "type": "string"
+          },
+          "recipeCode": {
+            "type": "string"
+          },
+          "targetPlatform": {
+            "type": "string"
+          },
+          "targetFormat": {
+            "type": "string"
+          },
+          "requestedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "assetCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "succeededCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cancelRequested": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "finishedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "MediaProcessJobDetail": {
+        "type": "object",
+        "properties": {
+          "job": {
+            "$ref": "#/components/schemas/MediaProcessJobRow"
+          },
+          "ratios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaProcessRatio"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaProcessJobItem"
+            }
+          },
+          "finishedItemCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "MediaProcessJobItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "jobId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetName": {
+            "type": "string"
+          },
+          "sourceVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sourceStorageKey": {
+            "type": "string"
+          },
+          "sourceFormat": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "producedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "error": {
+            "type": "string"
+          },
+          "outputs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaProcessOutput"
+            }
+          },
+          "assetCurrentVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "finishedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MediaProcessOutput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ratioLabel": {
+            "type": "string"
+          },
+          "fromVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "toVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "storageKey": {
+            "type": "string"
+          },
+          "fileFormat": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "number"
+          },
+          "widthPx": {
+            "type": "number"
+          },
+          "heightPx": {
+            "type": "number"
+          },
+          "contentSha256": {
+            "type": "string"
+          },
+          "createdAt": {
             "type": "string"
           }
         }
