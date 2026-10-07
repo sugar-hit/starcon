@@ -61,8 +61,8 @@
 --   * byte_size 用 NUMERIC(19,6) 而非 bigint：与本库其它字节/数量列同精度（AGENTS.md 禁浮点）。
 --
 -- 允许为空的语义：**任务还没跑出文件时这几列就是空的**（PENDING / RUNNING / FAILED / CANCELLED）。
--- 「有文件 ⟺ 成功且未过期」这条由第 8 节的 CHECK 保证，不会出现「状态是成功却没有文件」
--- 或「文件已过期却还挂着 storage_key 让下载端去读一个不存在的键」。
+-- 「有文件 ⟺ 成功或已过期」这条由第 6 节的 CHECK 保证，不会出现「状态是成功却没有文件」
+-- 或「已过期却查不出当初的文件键」。
 --
 -- sha256 固定 64 位十六进制；只在有文件时有值——同样由第 8 节的 CHECK 保证。
 
@@ -165,8 +165,18 @@ BEGIN
       USING ERRCODE='23514';
   END IF;
   -- 文件落位之后不可换位置：storage_key 变了，下载端会去找一个从未写过的键。
-  IF NEW.storage_key IS DISTINCT FROM OLD.storage_key AND OLD.storage_key IS NOT NULL THEN
+  IF OLD.storage_key IS NOT NULL AND NEW.storage_key IS NOT NULL
+     AND NEW.storage_key IS DISTINCT FROM OLD.storage_key THEN
     RAISE EXCEPTION '导出文件落位后不可更换存储键（任务 %）', OLD.id
+      USING ERRCODE='23514';
+  END IF;
+  -- 清空存储键**只允许在作废时发生**：作废的语义是「这份文件不再可取」，
+  -- 所以要把键摘掉（DB CHECK 也要求非成功态无键）。其它状态下清空它，
+  -- 会让一条 SUCCEEDED 的记录指向不了自己的文件，下载端只能报「文件不在」。
+  -- file_name / row_count / content_sha256 不清空 —— 它们是「当初导出了什么」的审计事实，
+  -- 随作废一起删掉等于把审计也作废掉。
+  IF OLD.storage_key IS NOT NULL AND NEW.storage_key IS NULL AND NEW.status <> 'CANCELLED' THEN
+    RAISE EXCEPTION '导出文件的存储键只能在作废时清空（任务 %）', OLD.id
       USING ERRCODE='23514';
   END IF;
 
@@ -206,14 +216,19 @@ ALTER TABLE export_job ADD CONSTRAINT export_job_pii_traceable CHECK (
   includes_pii = false OR (jsonb_array_length(pii_fields) > 0 AND btrim(pii_purpose) <> '')
 );
 --
--- (2) 有文件 ⟺ 成功且未过期。
---     行数（row_count）同样在成功时才有意义，但 0 行是一次**合法**的导出
---     （筛选条件确实没命中任何行），所以它不受这条约束管，只由上面的 CHECK(row_count>=0) 管。
+-- (2) 有文件 ⟺ 成功或已过期。
+--     **EXPIRED 也保留 storage_key**：文件过期后下载被服务层挡住，但「这份导出当初
+--     产出到哪、多大、sha 是多少」仍然是有价值的事实（过期清理要靠这个键找文件，
+--     审计要靠 sha 回答「导出去的那份是不是这一份」）。若在这里强制清空 storage_key，
+--     过期之后就再也找不到那个文件，清理任务只能靠猜。
+--     真正「没有文件」的四种状态（PENDING / RUNNING / FAILED / CANCELLED）必须为空键：
+--     带一个指向未产出文件的键，会让下载端去读一个从来不存在的东西。
+--     行数（row_count）不受这条约束管：0 行是一次**合法**的导出（条件确实没命中）。
 ALTER TABLE export_job ADD CONSTRAINT export_job_file_iff_usable CHECK (
-  (status = 'SUCCEEDED'
+  (status IN ('SUCCEEDED','EXPIRED')
      AND storage_key IS NOT NULL AND file_name IS NOT NULL
      AND byte_size IS NOT NULL AND content_sha256 IS NOT NULL AND expires_at IS NOT NULL)
-  OR (status <> 'SUCCEEDED' AND storage_key IS NULL)
+  OR (status NOT IN ('SUCCEEDED','EXPIRED') AND storage_key IS NULL)
 );
 --
 -- (3) sha256 形状：固定 64 位十六进制，只在有文件时有值。

@@ -259,17 +259,35 @@ public class ExportJobService {
   }
 
   /**
-   * 惰性过期扫描：把「已过 expires_at 但状态还没推进」的记录批量推进。
+   * 惰性过期扫描：把「已过 expires_at 但状态还没推进」的记录推进到 EXPIRED，**并删掉文件**。
    *
    * <p>不靠定时任务（本服务没有调度器，也不该为了一个状态位引入一个常驻线程）：
-   * 读列表或读详情时顺手扫一次就够了 —— 过期这件事的**对外效果**由 {@link #file} 保证，
-   * 这里的扫描只保证列表页不会一直显示一个其实已经不能下载的「成功」。
+   * 读列表或读详情时顺手扫一次就够了。
+   *
+   * <p><b>删除是这个方法的一部分，不是可选项</b>：只把状态改成 EXPIRED 而把文件留在磁盘上，
+   * 等于「有效期过了但文件还在」—— 对一份含联系方式的导出，那是一份没人认领的数据。
+   * 所以这里先取出待过期行的 storage_key，批量推进状态后再逐个删除。
+   * 删除失败只记日志：记录已是 EXPIRED、下载已被挡住，残留由存储侧清理兜底。
    */
   private void sweepExpired(UUID tenantId) {
+    var keys =
+        sql.fetch(
+            "select storage_key from export_job where tenant_id=? and status='SUCCEEDED'"
+                + " and expires_at is not null and expires_at < now() and storage_key is not null",
+            tenantId);
+    if (keys.isEmpty()) return;
     sql.execute(
         "update export_job set status='EXPIRED'"
             + " where tenant_id=? and status='SUCCEEDED' and expires_at is not null and expires_at < now()",
         tenantId);
+    for (var key : keys) {
+      try {
+        storage.delete(key.get("storage_key", String.class));
+      } catch (IOException e) {
+        org.slf4j.LoggerFactory.getLogger(ExportJobService.class)
+            .warn("过期导出文件删除失败：{}", key.get("storage_key", String.class), e);
+      }
+    }
   }
 
   // ================================================================ 作废

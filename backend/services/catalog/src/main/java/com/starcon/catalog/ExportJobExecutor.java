@@ -105,7 +105,9 @@ public class ExportJobExecutor {
 
   private void run(AccessService.Access actor, String permission, UUID jobId) {
     try {
-      var job = ExportJobService.load(sql, actor.tenantId(), jobId);
+      // 读任务行本身也必须在租户事务里：export_job 开了 FORCE RLS，
+      // 而工作线程此刻不在任何租户上下文里，裸查会取不到行（看起来像「任务不存在」）。
+      var job = access.run(actor, permission, () -> ExportJobService.load(sql, actor.tenantId(), jobId));
       var source = sources.require(job.sourceKey());
       var columns = resolveColumns(source, job.selectedFields());
       var spec = job.filters();

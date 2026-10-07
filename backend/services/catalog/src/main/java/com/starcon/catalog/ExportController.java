@@ -3,7 +3,6 @@ package com.starcon.catalog;
 import static com.starcon.catalog.ExportModels.*;
 
 import jakarta.validation.Valid;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import org.springframework.http.HttpHeaders;
@@ -127,15 +126,5 @@ public class ExportController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID id) {
     return call(auth, "spu.update", a -> jobs.cancel(a, id));
-  }
-
-  /** 供健康检查与概览用：本租户可导出的数据源键。 */
-  @GetMapping("/export-capabilities")
-  public Map<String, Object> capabilities(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
-    return call(
-        auth,
-        "spu.read",
-        a -> Map.of("sources", jobs.sourcePage().items().stream().map(ExportSourceInfo::key).toList()));
   }
 }
