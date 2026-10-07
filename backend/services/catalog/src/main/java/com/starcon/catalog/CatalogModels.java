@@ -2529,4 +2529,191 @@ public final class CatalogModels {
       long versionCount,
       long storageHealthy,
       String note) {}
+
+  // ============================================================ 3.4.1.2 图片处理
+
+  /**
+   * 处理配方的一个比例档（「生成多比例版本」的一档，如主图 1:1 + 缩略图）。
+   *
+   * <p>尺寸是 {@code numeric(19,6)}：与仓库里 byte_size / width_px 同一口径，
+   * 像素数是整数也不改成 bigint，免得同一份「量」在前端有两套格式化。
+   */
+  public record MediaProcessRatio(
+      UUID id,
+      String label,
+      java.math.BigDecimal widthPx,
+      java.math.BigDecimal heightPx,
+      String cropMode,
+      int sortNo) {}
+
+  /** 配方写入（新建或改，id 为空即新建）。比例档整体替换。 */
+  public record MediaProcessRecipeInput(
+      @NotBlank @Size(max = 32) String code,
+      @NotBlank @Size(max = 100) String name,
+      @Schema(nullable = true) @Size(max = 2000) String note,
+      @Schema(nullable = true) @Size(max = 64) String targetPlatform,
+      @NotBlank String targetFormat,
+      boolean removeBackground,
+      @Schema(nullable = true) Integer backgroundTolerance,
+      boolean whiteBackground,
+      @Schema(nullable = true) @Size(max = 120) String watermarkText,
+      @Schema(nullable = true) String watermarkPosition,
+      @Schema(nullable = true) Integer watermarkOpacity,
+      @Schema(nullable = true) @PositiveOrZero Integer targetWidthPx,
+      @Schema(nullable = true) @PositiveOrZero Integer targetHeightPx,
+      @Schema(nullable = true) String cropMode,
+      @Schema(nullable = true) @Size(max = 8) List<@Valid MediaProcessRatioInput> ratios,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  /** 比例档输入。标签在同一配方内必须唯一（否则产物表里会出现两行无法区分的「主图」）。 */
+  public record MediaProcessRatioInput(
+      @NotBlank @Size(max = 32) String label,
+      @NotNull @Positive Integer widthPx,
+      @NotNull @Positive Integer heightPx,
+      @Schema(nullable = true) String cropMode) {}
+
+  /** 配方一行（带比例档）。 */
+  public record MediaProcessRecipeRow(
+      UUID id,
+      String code,
+      String name,
+      String note,
+      String targetPlatform,
+      String targetFormat,
+      boolean removeBackground,
+      int backgroundTolerance,
+      boolean whiteBackground,
+      String watermarkText,
+      String watermarkPosition,
+      int watermarkOpacity,
+      @Schema(nullable = true) java.math.BigDecimal targetWidthPx,
+      @Schema(nullable = true) java.math.BigDecimal targetHeightPx,
+      String cropMode,
+      boolean enabled,
+      List<MediaProcessRatio> ratios,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  public record MediaProcessRecipeSaved(
+      UUID id, String code, long version, int ratioCount, long jobCount) {}
+
+  /** 提交处理任务。素材 id 列表放在请求体而不是 URL（一次可能 500 个）。 */
+  public record MediaProcessJobInput(
+      @NotNull UUID recipeId, @NotNull @Size(max = 500) List<@NotNull UUID> assetIds) {}
+
+  /** 提交结果：任务已排队，像素加工在线程池里跑。 */
+  public record MediaProcessJob(
+      UUID id,
+      UUID recipeId,
+      String recipeName,
+      String status,
+      String statusLabel,
+      int assetCount,
+      long itemCount,
+      String error,
+      boolean cancelRequested,
+      String note) {}
+
+  /** 任务列表的一行（含配方名，省一次查询）。 */
+  public record MediaProcessJobRow(
+      UUID id,
+      UUID recipeId,
+      String recipeName,
+      String recipeCode,
+      String targetPlatform,
+      String targetFormat,
+      UUID requestedBy,
+      String status,
+      String statusLabel,
+      int assetCount,
+      int succeededCount,
+      int failedCount,
+      int skippedCount,
+      boolean cancelRequested,
+      String error,
+      String createdAt,
+      @Schema(nullable = true) String startedAt,
+      @Schema(nullable = true) String finishedAt,
+      long version) {}
+
+  /**
+   * 一个产物：某素材在某比例档下的处理结果。
+   *
+   * <p>{@code fromVersion} 与 {@code toVersion} 是这条「原图始终保留」最直接的证据：
+   * 产物落在**新版本**上（V19 的 CHECK 强制 {@code toVersion > fromVersion}），
+   * 作为来源的旧版本原封不动。
+   */
+  public record MediaProcessOutput(
+      UUID id,
+      UUID itemId,
+      UUID assetId,
+      String ratioLabel,
+      int fromVersion,
+      int toVersion,
+      String storageKey,
+      String fileFormat,
+      String mimeType,
+      java.math.BigDecimal byteSize,
+      java.math.BigDecimal widthPx,
+      java.math.BigDecimal heightPx,
+      String contentSha256,
+      String createdAt) {}
+
+  /** 一个条目 = 一个素材在这次处理里的完整结果（蓝图点名的「成功/失败原因」）。 */
+  public record MediaProcessJobItem(
+      UUID id,
+      UUID jobId,
+      UUID assetId,
+      String assetName,
+      int sourceVersion,
+      String sourceStorageKey,
+      String sourceFormat,
+      String status,
+      String statusLabel,
+      int producedCount,
+      String error,
+      List<MediaProcessOutput> outputs,
+      int assetCurrentVersion,
+      @Schema(nullable = true) String startedAt,
+      @Schema(nullable = true) String finishedAt) {}
+
+  /** 任务详情：任务 + 配方比例档 + 条目（含产物）。 */
+  public record MediaProcessJobDetail(
+      MediaProcessJobRow job,
+      List<MediaProcessRatio> ratios,
+      List<MediaProcessJobItem> items,
+      long finishedItemCount,
+      String note) {}
+
+  /** 列表筛选条件。null 表示不筛。 */
+  public record MediaProcessJobQuery(
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      @Schema(nullable = true) @Size(max = 16) String status,
+      int page,
+      int size) {}
+
+  public record MediaProcessJobPage(
+      List<MediaProcessJobRow> items,
+      long total,
+      int page,
+      int size,
+      long pendingCount,
+      long runningCount,
+      long partialCount,
+      long failedCount,
+      String note) {}
+
+  public record MediaProcessOverview(
+      long jobCount,
+      long succeededJobCount,
+      long partialJobCount,
+      long failedJobCount,
+      long openJobCount,
+      long assetTotal,
+      long recipeCount,
+      long outputCount,
+      long outputByteSize,
+      String note) {}
 }
