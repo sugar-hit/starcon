@@ -353,8 +353,8 @@ public final class InTransitTrackingModels {
       UUID destinationWarehouseId,
       String destinationCountryCode,
       String transportMode,
-      /** 只要还在途且已过预计到港的（漏斗里最常用的那一刀）。 */
-      Boolean delayedOnly,
+      @Schema(description = "只要有任何延误信号（含 WATCH 提前提示区）：漏斗里最常用的那一刀")
+          Boolean delayedOnly,
       String keyword,
       String sort,
       int page,
@@ -533,12 +533,13 @@ public final class InTransitTrackingModels {
   @Schema(name = "TrackingCreateRequest")
   public record TrackingCreateRequest(
       @Schema(description = "要跟踪的发运单（必须是**已发出**）") UUID shipmentId,
-      @Schema(description = "初始位置") String currentLocation,
-      OffsetDateTime locationOccurredAt,
-      @Schema(description = "初始清关状态") String customsStatus,
-      @Schema(description = "扣关/退单原因（HELD·REJECTED 必填）") String customsHoldReason,
-      @Schema(description = "初始阶段（默认 AT_ORIGIN）") String trackingStage,
-      String notes) {}
+      @Schema(description = "初始位置", nullable = true) String currentLocation,
+      @Schema(nullable = true) OffsetDateTime locationOccurredAt,
+      @Schema(description = "初始清关状态", nullable = true) String customsStatus,
+      @Schema(description = "扣关/退单原因（HELD·REJECTED 必填）", nullable = true)
+          String customsHoldReason,
+      @Schema(description = "初始阶段（默认 AT_ORIGIN）", nullable = true) String trackingStage,
+      @Schema(nullable = true) String notes) {}
 
   /** 登记节点事件：位置 / 改期 / 清关 / 阶段推进 / 备注 / 异常，五合一。 */
   @Schema(name = "TrackingEventRequest")
@@ -546,31 +547,35 @@ public final class InTransitTrackingModels {
       @Schema(description = "事件类型：LOCATION / ETA_REVISED / CUSTOMS / STAGE / NOTE")
           String kind,
       @Schema(description = "事实来源（默认 MANUAL）") String sourceSystem,
-      @Schema(description = "来源单号：外部来源必填") String referenceId,
-      String locationText,
-      @Schema(description = "位置发生时间（LOCATION 必填）") OffsetDateTime locationOccurredAt,
-      @Schema(description = "改期后的新预计到港（ETA_REVISED 必填）") OffsetDateTime etaAfter,
-      @Schema(description = "改期原因（ETA_REVISED 必填）") String reason,
-      @Schema(description = "新的清关状态（CUSTOMS 必填）") String customsStatus,
-      @Schema(description = "扣关/退单原因（HELD·REJECTED 必填）") String customsHoldReason,
-      @Schema(description = "推进到的阶段（STAGE 必填）") String toStage,
-      @Schema(description = "事件正文") String detail,
-      OffsetDateTime occurredAt) {}
+      @Schema(description = "来源单号：外部来源必填", nullable = true) String referenceId,
+      @Schema(nullable = true) String locationText,
+      @Schema(description = "位置发生时间（LOCATION 必填）", nullable = true)
+          OffsetDateTime locationOccurredAt,
+      @Schema(description = "改期后的新预计到港（ETA_REVISED 必填）", nullable = true)
+          OffsetDateTime etaAfter,
+      @Schema(description = "改期原因（ETA_REVISED 必填）", nullable = true) String reason,
+      @Schema(description = "新的清关状态（CUSTOMS 必填）", nullable = true) String customsStatus,
+      @Schema(description = "扣关/退单原因（HELD·REJECTED 必填）", nullable = true)
+          String customsHoldReason,
+      @Schema(description = "推进到的阶段（STAGE 必填）", nullable = true) String toStage,
+      @Schema(description = "事件正文", nullable = true) String detail,
+      @Schema(nullable = true) OffsetDateTime occurredAt) {}
 
   /** 目的仓收货确认：只记确认事实，入库落账归 7.5.1.2。 */
   @Schema(name = "TrackingReceiptRequest")
   public record TrackingReceiptRequest(
-      @Schema(description = "目的仓收货回单号") String receiptReference,
-      OffsetDateTime receivedAt,
-      @Schema(description = "备注：短少/破损等差异如实写，不自动抹平") String notes) {}
+      @Schema(description = "目的仓收货回单号", nullable = true) String receiptReference,
+      @Schema(nullable = true) OffsetDateTime receivedAt,
+      @Schema(description = "备注：短少/破损等差异如实写，不自动抹平", nullable = true)
+          String notes) {}
 
   /** 关闭跟踪（货已闭环）。 */
   @Schema(name = "TrackingCloseRequest")
-  public record TrackingCloseRequest(String reason) {}
+  public record TrackingCloseRequest(@Schema(nullable = true) String reason) {}
 
   /** 预警确认 / 关闭。 */
   @Schema(name = "DelayAlertAckRequest")
-  public record DelayAlertAckRequest(String note) {}
+  public record DelayAlertAckRequest(@Schema(nullable = true) String note) {}
 
   @Schema(name = "DelayAlertCloseRequest")
   public record DelayAlertCloseRequest(
@@ -579,5 +584,8 @@ public final class InTransitTrackingModels {
   /** 改阈值。 */
   @Schema(name = "DelayThresholdUpdateRequest")
   public record DelayThresholdUpdateRequest(
-      Integer watchLeadDays, Integer warningLeadDays, Integer criticalLeadDays, String notes) {}
+      Integer watchLeadDays,
+      Integer warningLeadDays,
+      Integer criticalLeadDays,
+      @Schema(nullable = true) String notes) {}
 }

@@ -66,8 +66,6 @@ public class InTransitTrackingService {
   private static final List<String> SORTS =
       List.of("UPDATED_AT", "CREATED_AT", "ETA_ASC", "REMAINING_ASC", "LEVEL_DESC");
 
-  private static final BigDecimal DAYS = BigDecimal.valueOf(24 * 60 * 60);
-  private static final BigDecimal HOURS = BigDecimal.valueOf(60 * 60);
   private static final BigDecimal MAX = new BigDecimal("99999999.99");
 
   private final DSLContext sql;
@@ -537,10 +535,11 @@ public class InTransitTrackingService {
           continue;
         }
       }
-      if (Boolean.TRUE.equals(q.delayedOnly())
-          && !(level == DelayLevel.WARNING
-              || level == DelayLevel.CRITICAL
-              || (remaining != null && remaining.signum() < 0))) {
+      // delayedOnly = 「有任何延误信号」，即三档里的任意一档（WATCH / WARNING / CRITICAL）。
+      // **刻意包含 WATCH**：蓝图关系段原文「头程延误是断货的主要外因，预警必须提前到
+      // 预计到港前若干天」—— 提前量最大的那一档恰恰是 WATCH（默认到港前 7 天进区）。
+      // 若把它排除在「延误筛选」之外，这个筛选就正好把本模块最该被看见的那批货藏起来了。
+      if (Boolean.TRUE.equals(q.delayedOnly()) && level == DelayLevel.ON_TRACK) {
         continue;
       }
       switch (level) {
@@ -739,12 +738,19 @@ public class InTransitTrackingService {
     return new TrackingQuery(null, null, null, null, null, null, null, null, null, null, null, 0, 50);
   }
 
-  /** 剩余窗口天数：保留两位、遇截断夹紧，避免 long 区间溢出成科学计数。 */
-  private static BigDecimal days(BigDecimal rawSeconds) {
-    if (rawSeconds == null) {
+  /**
+   * 剩余窗口天数：保留两位、遇截断夹紧，避免 long 区间溢出成科学计数。
+   *
+   * <p>入参 {@code rawDays} 是 SQL 里 {@code extract(epoch from (eta - now()))/86400.0}
+   * 已经算好的**天**，这里只做舍入与夹紧，**不能再除一次 86400**：
+   * 秒→天的换算只有 SQL 里那一处，真在这里再除一遍会把「还剩 40 天」变成 0.0046 天，
+   * 于是每一条在途记录都会被判成「已经进预警区」—— 提前量口径整个失去意义。
+   */
+  private static BigDecimal days(BigDecimal rawDays) {
+    if (rawDays == null) {
       return null;
     }
-    var v = rawSeconds.divide(DAYS, 2, RoundingMode.HALF_UP);
+    var v = rawDays.setScale(2, RoundingMode.HALF_UP);
     if (v.abs().compareTo(MAX) > 0) {
       return v.signum() < 0 ? MAX.negate() : MAX;
     }
@@ -1116,7 +1122,7 @@ public class InTransitTrackingService {
         "insert into first_mile_tracking_event"
             + " (id,tenant_id,tracking_id,kind,to_stage,from_stage,location_text,detail,"
             + " eta_before,eta_after,source_system,reference_id,occurred_at,actor_id)"
-            + " values (?,?,?,?,?,?,?,?,?,?::timestamptz,?,?,?::timestamptz,?)",
+            + " values (?,?,?,?,?,?,?,?,?::timestamptz,?::timestamptz,?,?,?::timestamptz,?)",
         UUID.randomUUID(),
         currentTenant(),
         trackingId,
@@ -1164,21 +1170,9 @@ public class InTransitTrackingService {
     }
     var receivedAt = r.receivedAt() == null ? OffsetDateTime.now() : r.receivedAt();
 
-    sql.execute(
-        "update first_mile_tracking set"
-            + " tracking_stage='RECEIVED', receipt_confirmed_at=?, receipt_confirmed_by=?,"
-            + " receipt_reference=?, notes=?, status='CLOSED', closed_at=?, closed_by=?,"
-            + " version=version+1, updated_at=now()"
-            + " where tenant_id=? and id=?",
-        receivedAt.toInstant(),
-        actorId,
-        nz(r.receiptReference()),
-        nz(r.notes()),
-        OffsetDateTime.now().toInstant(),
-        actorId,
-        currentTenant(),
-        trackingId);
-
+    // **先写事件行，再关跟踪**：DB 触发器 guard_first_mile_tracking_event_source 明确
+    // 「已闭环的跟踪记录不再接受 RECEIPT 类节点更新」，而本动作自身就要把记录关掉。
+    // 顺序反过来，收货确认这条最该留痕的事实会被自己的约束当场拒掉（整笔回滚）。
     sql.execute(
         "insert into first_mile_tracking_event"
             + " (id,tenant_id,tracking_id,kind,to_stage,from_stage,detail,source_system,"
@@ -1199,6 +1193,21 @@ public class InTransitTrackingService {
         receivedAt.toInstant(),
         actorId);
 
+    sql.execute(
+        "update first_mile_tracking set"
+            + " tracking_stage='RECEIVED', receipt_confirmed_at=?::timestamptz, receipt_confirmed_by=?,"
+            + " receipt_reference=?, notes=?, status='CLOSED', closed_at=?::timestamptz, closed_by=?,"
+            + " version=version+1, updated_at=now()"
+            + " where tenant_id=? and id=?",
+        receivedAt.toInstant(),
+        actorId,
+        nz(r.receiptReference()),
+        nz(r.notes()),
+        OffsetDateTime.now().toInstant(),
+        actorId,
+        currentTenant(),
+        trackingId);
+
     return reload(trackingId);
   }
 
@@ -1215,7 +1224,7 @@ public class InTransitTrackingService {
       throw new IllegalArgumentException("关闭跟踪必须给出原因：没有原因的闭环事后无法解释这批货为什么停止跟踪");
     }
     sql.execute(
-        "update first_mile_tracking set status='CLOSED', closed_at=?, closed_by=?,"
+        "update first_mile_tracking set status='CLOSED', closed_at=?::timestamptz, closed_by=?,"
             + " notes=coalesce(nullif(notes,''),'')||'｜关闭：'||?, version=version+1, updated_at=now()"
             + " where tenant_id=? and id=?",
         OffsetDateTime.now().toInstant(),
@@ -1312,9 +1321,17 @@ public class InTransitTrackingService {
         r.get("close_reason", String.class));
   }
 
+  /**
+   * 该跟踪下的预警行。
+   *
+   * <p>{@code shipment_code} 一并 join 出来（而不是填空串）：告警列表里「是哪张发运单」
+   * 是人要看的第一列，填空串等于让界面上那一格永远空白。
+   */
   private List<DelayAlertRow> alertRowsForTracking(UUID trackingId) {
     return sql.fetch(
-            "select a.*,'' as shipment_code from first_mile_delay_alert a"
+            "select a.*,s.shipment_code from first_mile_delay_alert a"
+                + " join first_mile_tracking t on t.tenant_id=a.tenant_id and t.id=a.tracking_id"
+                + " join first_mile_shipment s on s.tenant_id=t.tenant_id and s.id=t.shipment_id"
                 + " where a.tracking_id=? order by a.raised_at desc",
             trackingId)
         .stream()
@@ -1527,9 +1544,23 @@ public class InTransitTrackingService {
     return reloadAlert(alertId);
   }
 
+  /**
+   * 重读预警行。
+   *
+   * <p>必须把 {@code shipment_code} 一并 join 出来：{@link #alertOf} 会读这一列，
+   * 而 {@code select *} 不带它 —— 缺列时 jOOQ 抛的是 {@code IllegalArgumentException}
+   * （读一个 ResultSet 里不存在的字段名），被统一错误处理翻译成 400，
+   * 看上去像「字段格式不正确」，实际是「回读时少查了一列」。这种 400 极难从现象反推。
+   */
   private DelayAlertRow reloadAlert(UUID alertId) {
     return alertOf(
-        sql.fetchOne("select * from first_mile_delay_alert where tenant_id=? and id=?", currentTenant(), alertId));
+        sql.fetchOne(
+            "select a.*,s.shipment_code from first_mile_delay_alert a"
+                + " join first_mile_tracking t on t.tenant_id=a.tenant_id and t.id=a.tracking_id"
+                + " join first_mile_shipment s on s.tenant_id=t.tenant_id and s.id=t.shipment_id"
+                + " where a.tenant_id=? and a.id=?",
+            currentTenant(),
+            alertId));
   }
 
   // ================================================================ 内部助手

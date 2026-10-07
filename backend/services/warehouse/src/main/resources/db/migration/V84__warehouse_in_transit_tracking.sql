@@ -294,7 +294,7 @@ BEGIN
     AND (NEW.closed_at IS NOT NULL OR NEW.closed_by IS NOT NULL) THEN
   RAISE EXCEPTION '状态「%」不是已关闭，不允许带关闭痕迹', NEW.status USING ERRCODE='23514';
  END IF;
- IF NEW.status <> 'CANCELLED' AND NEW.tracking_stage = 'RECEIVED' THEN
+ IF NEW.status = 'CANCELLED' AND NEW.tracking_stage = 'RECEIVED' THEN
   RAISE EXCEPTION '已取消的跟踪记录不允许处于「已收货」阶段' USING ERRCODE='23514';
  END IF;
  -- 终态不许离开（只拦离开，不拦进入：TRACKING → CLOSED 必须放行）。

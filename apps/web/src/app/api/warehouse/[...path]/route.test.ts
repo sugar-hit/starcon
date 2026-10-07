@@ -243,6 +243,81 @@ it('头程发运单白名单：后端不存在的子路径仍被拒绝', async (
   expect(fetcher).not.toHaveBeenCalled();
 });
 
+it('10.4.1.2 在途跟踪白名单：从模型文件反向抽取的每条调用点都被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const tid = '11111111-1111-1111-1111-111111111111';
+  const aid = '22222222-2222-2222-2222-222222222222';
+  // 路径是从 transit-tracking-model.ts 里反向抽取的，不是照着正则抄的 ——
+  // 少放行一个，页面就只在浏览器里静默 404（typecheck / lint / vitest 全绿都发现不了）。
+  for (const path of [
+    'warehouse/transit-trackings',
+    'warehouse/transit-trackings/capabilities',
+    'warehouse/transit-trackings/alerts',
+    'warehouse/transit-trackings/alerts/evaluate-all',
+    'warehouse/transit-trackings/thresholds',
+    `warehouse/transit-trackings/${tid}`,
+    `warehouse/transit-trackings/${tid}/events`,
+    `warehouse/transit-trackings/${tid}/receipt`,
+    `warehouse/transit-trackings/${tid}/close`,
+    `warehouse/transit-trackings/${tid}/alerts/evaluate`,
+    `warehouse/transit-trackings/alerts/${aid}/acknowledge`,
+    `warehouse/transit-trackings/alerts/${aid}/close`,
+    `warehouse/transit-trackings/thresholds/${tid}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  // 建跟踪与节点登记走 POST：白名单只看路径形状不看方法，
+  // 这里显式跑 POST 证明写动作也真的被转发（而不是只放行了读）。
+  for (const path of [
+    'warehouse/transit-trackings',
+    `warehouse/transit-trackings/${tid}/events`,
+    `warehouse/transit-trackings/${tid}/receipt`,
+    `warehouse/transit-trackings/${tid}/close`,
+    `warehouse/transit-trackings/${tid}/alerts/evaluate`,
+    'warehouse/transit-trackings/alerts/evaluate-all',
+    `warehouse/transit-trackings/alerts/${aid}/acknowledge`,
+    `warehouse/transit-trackings/alerts/${aid}/close`,
+  ]) {
+    expect(
+      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+    ).toBe(200);
+  }
+  // 改阈值走 PUT：后端 InTransitTrackingController 的改阈值端点是 @PutMapping
+  expect(
+    (await PUT(request(`warehouse/transit-trackings/thresholds/${tid}`, 'PUT'), {
+      params: { path: ['warehouse', 'transit-trackings', 'thresholds', tid] },
+    })).status,
+  ).toBe(200);
+});
+
+it('10.4.1.2 在途跟踪白名单：后端不存在的子路径仍被拒绝', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const tid = '11111111-1111-1111-1111-111111111111';
+  // 后端只有上面那 13 个端点。多一段 / 少一个动作后缀、以及看起来合理的推导路径
+  // （sync / cancel / forecast）在后端都不存在，放行它们等于让界面以为外部同步已交付 ——
+  // 放行不该存在的路径比 404 更糟。
+  for (const path of [
+    // 外部同步连接器（10.4.2.1）**未交付**：刻意不放行 sync / import 形状，
+    // 否则界面上会出现一个点下去必然 404 的「同步」按钮。
+    `warehouse/transit-trackings/${tid}/sync`,
+    `warehouse/transit-trackings/${tid}/cancel`,
+    'warehouse/transit-trackings/forecast',
+    'warehouse/transit-trackings/sync',
+    // capabilities / alerts / thresholds / evaluate-all 是字面量子路径，不能再往下挂一段。
+    `warehouse/transit-trackings/capabilities/${tid}`,
+    `warehouse/transit-trackings/alerts/${tid}`,
+    `warehouse/transit-trackings/alerts/evaluate-all/${tid}`,
+    `warehouse/transit-trackings/thresholds/${tid}/history`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+    ).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
 it('在途库存白名单：未交付的子路径仍被拒绝', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);

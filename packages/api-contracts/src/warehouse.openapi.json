@@ -11,6 +11,56 @@
     }
   ],
   "paths": {
+    "/warehouse/transit-trackings/thresholds/{thresholdId}": {
+      "put": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "updateThreshold",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "thresholdId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DelayThresholdUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelayThresholdRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/transfers/{orderId}": {
       "get": {
         "tags": [
@@ -965,6 +1015,525 @@
         }
       }
     },
+    "/warehouse/transit-trackings": {
+      "get": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "page",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "stage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "customsStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "delayLevel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "shipmentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "destinationWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "destinationCountryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transportMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delayedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitTrackPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackingCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/transit-trackings/{trackingId}/receipt": {
+      "post": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "confirmReceipt",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "trackingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackingReceiptRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/transit-trackings/{trackingId}/events": {
+      "post": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "recordEvent",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "trackingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackingEventRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/transit-trackings/{trackingId}/close": {
+      "post": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "close",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "trackingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackingCloseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackingRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/transit-trackings/{trackingId}/alerts/evaluate": {
+      "post": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "evaluateOne",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "trackingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/transit-trackings/alerts/{alertId}/close": {
+      "post": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "closeAlert",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "alertId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DelayAlertCloseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelayAlertRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/transit-trackings/alerts/{alertId}/acknowledge": {
+      "post": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "acknowledge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "alertId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DelayAlertAckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelayAlertRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/transit-trackings/alerts/evaluate-all": {
+      "post": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "evaluateAll",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/labor/work-tasks": {
       "get": {
         "tags": [
@@ -1061,7 +1630,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "create",
+        "operationId": "create_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1301,7 +1870,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "page",
+        "operationId": "page_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1404,7 +1973,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "create_1",
+        "operationId": "create_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -1595,7 +2164,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "close",
+        "operationId": "close_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -4155,7 +4724,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "create_2",
+        "operationId": "create_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -4511,7 +5080,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "create_3",
+        "operationId": "create_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -4552,7 +5121,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "page_1",
+        "operationId": "page_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -4934,7 +5503,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "page_2",
+        "operationId": "page_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -5055,7 +5624,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "create_4",
+        "operationId": "create_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -5296,7 +5865,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "close_1",
+        "operationId": "close_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -5469,7 +6038,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "create_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -5768,7 +6337,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "close_2",
+        "operationId": "close_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -6282,7 +6851,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "create_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -6556,7 +7125,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "create_7",
+        "operationId": "create_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -6890,7 +7459,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "page_3",
+        "operationId": "page_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -6986,7 +7555,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "create_8",
+        "operationId": "create_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -7077,7 +7646,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "close_3",
+        "operationId": "close_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -7127,7 +7696,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "page_4",
+        "operationId": "page_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -7395,7 +7964,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "close_4",
+        "operationId": "close_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -7595,7 +8164,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "page_5",
+        "operationId": "page_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -7721,7 +8290,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "create_9",
+        "operationId": "create_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -8010,7 +8579,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "create_10",
+        "operationId": "create_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -8073,6 +8642,192 @@
                   "items": {
                     "$ref": "#/components/schemas/WarehouseRef"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/transit-trackings/{trackingId}": {
+      "get": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "detail_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "trackingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitTrackDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/transit-trackings/thresholds": {
+      "get": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "thresholds",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DelayThresholdRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/transit-trackings/capabilities": {
+      "get": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitTrackCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/transit-trackings/alerts": {
+      "get": {
+        "tags": [
+          "in-transit-tracking-controller"
+        ],
+        "operationId": "alerts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelayAlertPage"
                 }
               }
             }
@@ -8568,7 +9323,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "capabilities",
+        "operationId": "capabilities_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -9068,7 +9823,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "capabilities_1",
+        "operationId": "capabilities_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -10140,7 +10895,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "capabilities_2",
+        "operationId": "capabilities_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -10425,7 +11180,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "capabilities_3",
+        "operationId": "capabilities_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -10602,7 +11357,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "detail_5",
+        "operationId": "detail_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -10642,7 +11397,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "capabilities_4",
+        "operationId": "capabilities_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -10673,7 +11428,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -11064,7 +11819,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_6",
+        "operationId": "detail_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -11181,7 +11936,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "alerts",
+        "operationId": "alerts_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -11212,7 +11967,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "page_6",
+        "operationId": "page_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -11694,7 +12449,7 @@
         "tags": [
           "inventory-expiry-controller"
         ],
-        "operationId": "alerts_1",
+        "operationId": "alerts_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -12032,7 +12787,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_7",
+        "operationId": "detail_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -12488,7 +13243,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -12519,7 +13274,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -12803,7 +13558,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "detail_8",
+        "operationId": "detail_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -12843,7 +13598,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -13019,7 +13774,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -13445,7 +14200,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -13476,7 +14231,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "detail_9",
+        "operationId": "detail_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -13516,7 +14271,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -13676,7 +14431,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "capabilities_12",
+        "operationId": "capabilities_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -13873,7 +14628,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_13",
+        "operationId": "capabilities_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -13905,6 +14660,69 @@
   },
   "components": {
     "schemas": {
+      "DelayThresholdUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "watchLeadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "warningLeadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "criticalLeadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DelayThresholdRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "watchLeadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "warningLeadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "criticalLeadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "inUse": {
+            "type": "boolean",
+            "description": "是否当前在途批次实际命中的那一行"
+          }
+        }
+      },
       "TransferOrderLineRequest": {
         "type": "object",
         "properties": {
@@ -14954,6 +15772,333 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "TrackingCreateRequest": {
+        "type": "object",
+        "properties": {
+          "shipmentId": {
+            "type": "string",
+            "description": "要跟踪的发运单（必须是**已发出**）",
+            "format": "uuid"
+          },
+          "currentLocation": {
+            "type": "string",
+            "description": "初始位置",
+            "nullable": true
+          },
+          "locationOccurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "customsStatus": {
+            "type": "string",
+            "description": "初始清关状态",
+            "nullable": true
+          },
+          "customsHoldReason": {
+            "type": "string",
+            "description": "扣关/退单原因（HELD·REJECTED 必填）",
+            "nullable": true
+          },
+          "trackingStage": {
+            "type": "string",
+            "description": "初始阶段（默认 AT_ORIGIN）",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "TrackingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shipmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shipmentCode": {
+            "type": "string",
+            "description": "发运单号（10.4.1.1）"
+          },
+          "transportMode": {
+            "type": "string",
+            "description": "运输方式（10.4.1.1）"
+          },
+          "carrierName": {
+            "type": "string",
+            "description": "承运人（10.4.1.1）"
+          },
+          "bookingNo": {
+            "type": "string",
+            "description": "订舱号/运单号（10.4.1.1）"
+          },
+          "destinationWarehouseId": {
+            "type": "string",
+            "description": "目的仓 id",
+            "format": "uuid"
+          },
+          "destinationWarehouseName": {
+            "type": "string",
+            "description": "目的仓名"
+          },
+          "destinationCountryCode": {
+            "type": "string",
+            "description": "目的国"
+          },
+          "status": {
+            "type": "string"
+          },
+          "trackingStage": {
+            "type": "string",
+            "description": "跟踪阶段"
+          },
+          "customsStatus": {
+            "type": "string",
+            "description": "清关状态"
+          },
+          "currentLocation": {
+            "type": "string",
+            "description": "当前位置"
+          },
+          "locationOccurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "originalEta": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revisedEta": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveEta": {
+            "type": "string",
+            "description": "当前生效 ETA（改期后取改后值）",
+            "format": "date-time"
+          },
+          "etaRevisedCount": {
+            "type": "integer",
+            "description": "ETA 被改期过几次",
+            "format": "int32"
+          },
+          "remainingDays": {
+            "type": "number",
+            "description": "**剩余窗口（天）**：预计到港 − 现在，负数=已过港未到货"
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "是否已过预计到港仍未到货"
+          },
+          "delayLevel": {
+            "type": "string",
+            "description": "本次评估算出的预警档位"
+          },
+          "openAlertCount": {
+            "type": "integer",
+            "description": "未结预警条数",
+            "format": "int64"
+          },
+          "legCount": {
+            "type": "integer",
+            "description": "在途腿数（7.5.1.2 名下）",
+            "format": "int64"
+          },
+          "inTransitQuantity": {
+            "type": "number",
+            "description": "在途总数量（7.5.1.2 名下，本模块不持有余额）"
+          },
+          "settledQuantity": {
+            "type": "number",
+            "description": "已了结数量（7.5.1.2 名下）"
+          },
+          "receiptConfirmedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TrackingReceiptRequest": {
+        "type": "object",
+        "properties": {
+          "receiptReference": {
+            "type": "string",
+            "description": "目的仓收货回单号",
+            "nullable": true
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "description": "备注：短少/破损等差异如实写，不自动抹平",
+            "nullable": true
+          }
+        }
+      },
+      "TrackingEventRequest": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "事件类型：LOCATION / ETA_REVISED / CUSTOMS / STAGE / NOTE"
+          },
+          "sourceSystem": {
+            "type": "string",
+            "description": "事实来源（默认 MANUAL）"
+          },
+          "referenceId": {
+            "type": "string",
+            "description": "来源单号：外部来源必填",
+            "nullable": true
+          },
+          "locationText": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationOccurredAt": {
+            "type": "string",
+            "description": "位置发生时间（LOCATION 必填）",
+            "format": "date-time",
+            "nullable": true
+          },
+          "etaAfter": {
+            "type": "string",
+            "description": "改期后的新预计到港（ETA_REVISED 必填）",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "description": "改期原因（ETA_REVISED 必填）",
+            "nullable": true
+          },
+          "customsStatus": {
+            "type": "string",
+            "description": "新的清关状态（CUSTOMS 必填）",
+            "nullable": true
+          },
+          "customsHoldReason": {
+            "type": "string",
+            "description": "扣关/退单原因（HELD·REJECTED 必填）",
+            "nullable": true
+          },
+          "toStage": {
+            "type": "string",
+            "description": "推进到的阶段（STAGE 必填）",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "description": "事件正文",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "TrackingCloseRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DelayAlertCloseRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "关闭原因（必填：货到了/改期了/查明了都算）"
+          }
+        }
+      },
+      "DelayAlertRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trackingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shipmentCode": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "thresholdId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "leadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "remainingDays": {
+            "type": "number",
+            "description": "剩余窗口（天），负数=已过港未到货"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "raisedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "raisedFor": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closeReason": {
+            "type": "string"
+          }
+        }
+      },
+      "DelayAlertAckRequest": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -21420,6 +22565,490 @@
           },
           "isDefault": {
             "type": "boolean"
+          }
+        }
+      },
+      "TrackingOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "编码"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文名"
+          }
+        },
+        "description": "预警档位词表"
+      },
+      "TrackingStageOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "rank": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "description": "阶段词表"
+      },
+      "TrackingWarehouseOption": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "trackingCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "description": "目的仓下拉（含在途批数）"
+      },
+      "TransitTrackPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrackingRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "trackingTotal": {
+            "type": "integer",
+            "description": "全量在途数（不受分页影响）",
+            "format": "int64"
+          },
+          "watchCount": {
+            "type": "integer",
+            "description": "全量 WATCH 档数",
+            "format": "int64"
+          },
+          "warningCount": {
+            "type": "integer",
+            "description": "全量 WARNING 档数",
+            "format": "int64"
+          },
+          "criticalCount": {
+            "type": "integer",
+            "description": "全量 CRITICAL 档数",
+            "format": "int64"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "description": "全量已过预计到港仍未到货数",
+            "format": "int64"
+          },
+          "customsHeldCount": {
+            "type": "integer",
+            "description": "全量清关被扣/退单数",
+            "format": "int64"
+          },
+          "statuses": {
+            "type": "array",
+            "description": "状态词表",
+            "items": {
+              "$ref": "#/components/schemas/TrackingOption"
+            }
+          },
+          "stages": {
+            "type": "array",
+            "description": "阶段词表",
+            "items": {
+              "$ref": "#/components/schemas/TrackingStageOption"
+            }
+          },
+          "customsStatuses": {
+            "type": "array",
+            "description": "清关状态词表",
+            "items": {
+              "$ref": "#/components/schemas/TrackingOption"
+            }
+          },
+          "delayLevels": {
+            "type": "array",
+            "description": "预警档位词表",
+            "items": {
+              "$ref": "#/components/schemas/TrackingOption"
+            }
+          },
+          "warehouses": {
+            "type": "array",
+            "description": "目的仓下拉（含在途批数）",
+            "items": {
+              "$ref": "#/components/schemas/TrackingWarehouseOption"
+            }
+          }
+        }
+      },
+      "EffectiveThreshold": {
+        "type": "object",
+        "properties": {
+          "thresholdId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "defaultRow": {
+            "type": "boolean",
+            "description": "匹配到的阈值行；为默认行时 thresholdId 为空"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "watchLeadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "warningLeadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "criticalLeadDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "basis": {
+            "type": "string",
+            "description": "三档提前量的口径说明（随响应返回，界面不自造解释）"
+          }
+        },
+        "description": "当前生效的阈值口径（从阈值表读出，不是代码常量）"
+      },
+      "TrackingEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "description": "事件类型"
+          },
+          "locationText": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "fromStage": {
+            "type": "string"
+          },
+          "toStage": {
+            "type": "string"
+          },
+          "etaBefore": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "etaAfter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceSystem": {
+            "type": "string",
+            "description": "事实来源"
+          },
+          "referenceId": {
+            "type": "string",
+            "description": "来源单号（外部来源必填）"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "TrackingLegRow": {
+        "type": "object",
+        "properties": {
+          "legId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shipmentLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "legStatus": {
+            "type": "string"
+          },
+          "shippedQuantity": {
+            "type": "number"
+          },
+          "settledQuantity": {
+            "type": "number"
+          },
+          "remainingQuantity": {
+            "type": "number"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "trackingNo": {
+            "type": "string"
+          }
+        },
+        "description": "在途腿（真在 7.5.1.2 名下，本模块只读）"
+      },
+      "TransitTrackDetail": {
+        "type": "object",
+        "properties": {
+          "tracking": {
+            "$ref": "#/components/schemas/TrackingRow"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrackingEventRow"
+            }
+          },
+          "legs": {
+            "type": "array",
+            "description": "在途腿（真在 7.5.1.2 名下，本模块只读）",
+            "items": {
+              "$ref": "#/components/schemas/TrackingLegRow"
+            }
+          },
+          "alerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DelayAlertRow"
+            }
+          },
+          "allowedNext": {
+            "type": "array",
+            "description": "当前状态的合法下一步",
+            "items": {
+              "type": "string",
+              "description": "当前状态的合法下一步"
+            }
+          },
+          "allowedNextStages": {
+            "type": "array",
+            "description": "当前阶段的合法下一步",
+            "items": {
+              "type": "string",
+              "description": "当前阶段的合法下一步"
+            }
+          },
+          "threshold": {
+            "$ref": "#/components/schemas/EffectiveThreshold"
+          }
+        }
+      },
+      "TrackingDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "维度编码"
+          },
+          "label": {
+            "type": "string",
+            "description": "中文名"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "是否可用"
+          },
+          "ownerModule": {
+            "type": "string",
+            "description": "归属模块"
+          },
+          "href": {
+            "type": "string",
+            "description": "对应路由"
+          },
+          "note": {
+            "type": "string",
+            "description": "为什么可用/不可用"
+          }
+        },
+        "description": "**未交付依赖**逐条声明：外部连接器未接入，不假装有同步任务"
+      },
+      "TrackingStageTransition": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "当前阶段"
+          },
+          "to": {
+            "type": "string",
+            "description": "可到达阶段"
+          },
+          "label": {
+            "type": "string",
+            "description": "该转换的含义"
+          }
+        },
+        "description": "跟踪阶段状态机（含推进顺序）"
+      },
+      "TrackingTransition": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "当前状态"
+          },
+          "to": {
+            "type": "string",
+            "description": "可到达状态"
+          },
+          "label": {
+            "type": "string",
+            "description": "该转换的含义"
+          }
+        },
+        "description": "跟踪生命周期状态机"
+      },
+      "TransitTrackCapabilities": {
+        "type": "object",
+        "properties": {
+          "sources": {
+            "type": "array",
+            "description": "可跟踪的发运单来源（10.4.1.1 已交付）",
+            "items": {
+              "$ref": "#/components/schemas/TrackingDimension"
+            }
+          },
+          "dependencies": {
+            "type": "array",
+            "description": "**未交付依赖**逐条声明：外部连接器未接入，不假装有同步任务",
+            "items": {
+              "$ref": "#/components/schemas/TrackingDimension"
+            }
+          },
+          "statusTransitions": {
+            "type": "array",
+            "description": "跟踪生命周期状态机",
+            "items": {
+              "$ref": "#/components/schemas/TrackingTransition"
+            }
+          },
+          "stageTransitions": {
+            "type": "array",
+            "description": "跟踪阶段状态机（含推进顺序）",
+            "items": {
+              "$ref": "#/components/schemas/TrackingStageTransition"
+            }
+          },
+          "customsStatuses": {
+            "type": "array",
+            "description": "清关状态词表",
+            "items": {
+              "$ref": "#/components/schemas/TrackingOption"
+            }
+          },
+          "sources2": {
+            "type": "array",
+            "description": "事实来源词表",
+            "items": {
+              "$ref": "#/components/schemas/TrackingOption"
+            }
+          },
+          "delayLevels": {
+            "type": "array",
+            "description": "预警档位词表",
+            "items": {
+              "$ref": "#/components/schemas/TrackingOption"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "description": "本模块必须自己讲清楚的口径",
+            "items": {
+              "type": "string",
+              "description": "本模块必须自己讲清楚的口径"
+            }
+          }
+        }
+      },
+      "DelayAlertPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DelayAlertRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "acknowledgedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "watchCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warningCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "criticalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrackingOption"
+            }
           }
         }
       },

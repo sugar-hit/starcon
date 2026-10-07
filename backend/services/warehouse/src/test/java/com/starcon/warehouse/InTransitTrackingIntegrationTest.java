@@ -407,6 +407,8 @@ class InTransitTrackingIntegrationTest {
         .isEqualTo("WATCH");
 
     // 把 warning 提前量从 3 放宽到 9：剩余 5 天现在就进预警区。
+    // watch 必须一并抬到 9 —— 三档递减是硬约束（否则「进观察区」反而比「进提示区」晚，
+    // 分级会静默倒挂），所以这一改是**两档一起动**，不是单行孤立地改 warning。
     var defaults = asA(() -> tracking.thresholds()).stream()
         .filter(t -> t.transportMode().equals("*") && t.countryCode().equals("*"))
         .findFirst()
@@ -414,7 +416,7 @@ class InTransitTrackingIntegrationTest {
     asAWrite(
         () ->
             tracking.updateThreshold(
-                defaults.id(), new DelayThresholdUpdateRequest(7, 9, 0, "放宽到 9 天")));
+                defaults.id(), new DelayThresholdUpdateRequest(9, 9, 0, "两档一并放宽到 9 天")));
 
     assertThat(levelOf(asA(() -> tracking.page(query(null, null, null, null, 0, 50))), shipmentId))
         .isEqualTo("WARNING");
@@ -533,15 +535,8 @@ class InTransitTrackingIntegrationTest {
   @DisplayName("收货确认只记事实不写库存：确认后阶段 RECEIVED、状态 CLOSED，在途腿一行未改")
   void 收货确认_不写库存() {
     var shipmentId = dispatched(a, ETA_ONT, "100");
-    createTracking(a, shipmentId);
-    var trackingId = idOfShipment(shipmentId);
-    var legBefore =
-        asA(
-                () ->
-                    sql.fetchOne(
-                            "select status,quantity,settled_quantity from inventory_transfer where source_reference like ?",
-                            "%" + shipmentId + "%")
-                        .toString());
+    var trackingId = createTracking(a, shipmentId).id();
+    var legBefore = asA(() -> legRow(shipmentId).toString());
     var receiptAt = eta(-1);
     asAWrite(
         () ->
@@ -558,14 +553,7 @@ class InTransitTrackingIntegrationTest {
     assertThat(detail.tracking().receiptConfirmedAt().toInstant())
         .isEqualTo(receiptAt.toInstant());
     // 本模块一个库存字段都没碰。
-    assertThat(
-            asA(
-                () ->
-                    sql.fetchOne(
-                            "select status,quantity,settled_quantity from inventory_transfer where source_reference like ?",
-                            "%" + shipmentId + "%")
-                        .toString()))
-        .isEqualTo(legBefore);
+    assertThat(asA(() -> legRow(shipmentId).toString())).isEqualTo(legBefore);
     // 已闭环后不再接受位置/阶段类事件（DB 触发器 guard_first_mile_tracking_event_source 兜底）。
     assertThatThrownBy(
             () ->
@@ -577,6 +565,23 @@ class InTransitTrackingIntegrationTest {
                             ev().kind("LOCATION").location("东京", eta(0))
                                 .detail("还在海上").occurredAt(eta(0)).build())))
         .isInstanceOf(ResponseStatusException.class);
+  }
+
+  /**
+   * 该发运单在 7.5.1.2 名下那条在途腿的三列快照。
+   *
+   * <p>按 {@code first_mile_shipment_leg_receipt.transit_leg_id} 定位，而不是拿发运单 id
+   * 去 like {@code inventory_transfer.source_reference}：那里的锚点是
+   * 「发运单**号**-行号」（V80 定的幂等锚点），拿 UUID 去 like 永远匹配不到，
+   * 断言会在「查不到行」上空转，等于没验。
+   */
+  private org.jooq.Record legRow(UUID shipmentId) {
+    return sql.fetchOne(
+            "select t.status,t.quantity,t.settled_quantity"
+                + " from first_mile_shipment_leg_receipt g"
+                + " join inventory_transfer t on t.tenant_id=g.tenant_id and t.id=g.transit_leg_id"
+                + " where g.shipment_id=?",
+            shipmentId);
   }
 
   // ================================================================ 节点事件与来源纪律
@@ -621,7 +626,7 @@ class InTransitTrackingIntegrationTest {
   @DisplayName("外部来源必须有单号、人工必须有操作人；扣关/退单必须有原因")
   void 事件_来源与原因纪律() {
     var shipmentId = dispatched(a, ETA_ONT, "100");
-    var trackingId = idOfShipment(createTracking(a, shipmentId).id());
+    var trackingId = createTracking(a, shipmentId).id();
 
     // 外部来源无单号 → 拒。
     assertThatThrownBy(
@@ -664,7 +669,7 @@ class InTransitTrackingIntegrationTest {
   @DisplayName("阶段只进不退：服务层与 DB 触发器同一套序号，倒退被拒")
   void 阶段_只进不退() {
     var shipmentId = dispatched(a, ETA_ONT, "100");
-    var trackingId = idOfShipment(createTracking(a, shipmentId).id());
+    var trackingId = createTracking(a, shipmentId).id();
     asAWrite(
         () ->
             tracking.recordEvent(
@@ -820,13 +825,17 @@ class InTransitTrackingIntegrationTest {
   @DisplayName("端点串通：建跟踪 → 登记货代位置 → 看板 → 预警 → 确认 → 关闭，全程经 HTTP")
   void 端点_串通() throws Exception {
     var shipmentId = dispatched(a, ETA_WATCH, "100");
+    // 位置必须带发生时间：服务层与 DB 触发器 guard_first_mile_tracking_stage 同一条纪律，
+    // 「什么时候的事」问不出来的那条位置不许入库。
     var created =
         http.perform(
                 post("/warehouse/transit-trackings")
                     .header("Authorization", "Bearer tenant-a")
                     .contentType("application/json")
                     .content(
-                        "{\"shipmentId\":\"" + shipmentId + "\",\"currentLocation\":\"上海洋山港\"}"))
+                        "{\"shipmentId\":\""
+                            + shipmentId
+                            + "\",\"currentLocation\":\"上海洋山港\",\"locationOccurredAt\":\"2026-10-08T09:00:00+08:00\"}"))
             .andExpect(status().isOk())
             .andReturn();
     var id =
@@ -844,11 +853,13 @@ class InTransitTrackingIntegrationTest {
                         + "\"locationText\":\"Singapore\",\"locationOccurredAt\":\"2026-10-20T14:05:00-07:00\"}"))
         .andExpect(status().isOk());
 
+    // 再评估一次：上一条 LOCATION 事件末尾已自动重算过一次，
+    // 所以这里返回 0（本次新落库条数，幂等刷新），而不是又堆一行。
     http.perform(
             post("/warehouse/transit-trackings/" + id + "/alerts/evaluate")
                 .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.raised").value(1));
+        .andExpect(jsonPath("$.raised").value(0));
 
     var board =
         http.perform(
@@ -960,13 +971,41 @@ class InTransitTrackingIntegrationTest {
                 .header("Authorization", "Bearer tenant-b")
                 .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
-    // 伪造头也不能让 B 读到 A 的阈值行
-    http.perform(
-            get("/warehouse/transit-trackings/thresholds")
-                .header("Authorization", "Bearer tenant-b")
-                .header("X-Tenant-Id", a.toString()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.length()").value(0));
+    // 伪造头也不能让 B 读到 A 的阈值行：B 只会拿到**自己那份**默认行（惰性 bootstrap），
+    // 判据是行 id 与 A 的不同 —— 断言「长度为 0」反而会把 bootstrap 判成 bug。
+    var aThresholdId =
+        asA(() -> tracking.thresholds()).stream()
+            .filter(t -> t.transportMode().equals("*") && t.countryCode().equals("*"))
+            .findFirst()
+            .orElseThrow()
+            .id();
+    var bSeen =
+        http.perform(
+                get("/warehouse/transit-trackings/thresholds")
+                    .header("Authorization", "Bearer tenant-b")
+                    .header("X-Tenant-Id", a.toString()))
+            .andExpect(status().isOk())
+            .andReturn();
+    var bIds =
+        new com.fasterxml.jackson.databind.ObjectMapper()
+            .readTree(bSeen.getResponse().getContentAsString())
+            .findValuesAsText("id");
+    assertThat(bIds).hasSize(1);
+    assertThat(bIds).doesNotContain(aThresholdId.toString());
+    // 反向：身份是 A 伪造 B 的头，也拿不到 B 那份行。
+    var aIds =
+        new com.fasterxml.jackson.databind.ObjectMapper()
+            .readTree(
+                http.perform(
+                        get("/warehouse/transit-trackings/thresholds")
+                            .header("Authorization", "Bearer tenant-a")
+                            .header("X-Tenant-Id", b.toString()))
+                    .andExpect(status().isOk())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString())
+            .findValuesAsText("id");
+    assertThat(aIds).doesNotContain(bIds.get(0));
   }
 
   @Test
