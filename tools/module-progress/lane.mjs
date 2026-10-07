@@ -279,6 +279,29 @@ function laneIsStale(lane) {
   return !Number.isFinite(age) || age > TTL_MINUTES;
 }
 
+/**
+ * 「车道建了但一直没人接手」——注意这**不等于** sessionId 为空。
+ *
+ * 2026-10-07 实测踩到的坑：cron 派发写的是 `plan --lanes 4`，**不带 --session**，
+ * 于是每条车道的 sessionId 恒为 null。原来的孤儿判据是
+ * `state === 'running' && (!l.sessionId || laneIsStale(l))`，
+ * 后果是**每一条正在跑的车道都被当成孤儿**：
+ *   - reDispatched 每轮 +1，`toDispatch` 里永远是同 4 条（照单全派 = 双 writer）；
+ *   - `pickModules(count - orphaned.length)` 被这批「假孤儿」吃光名额，
+ *     newlyPlanned 恒为 [] —— 一条新车道都排不出来，流水线静默卡死在 4 条。
+ *
+ * 心跳才是判活依据：worker 每 25 分钟续一次，TTL 90 分钟。
+ * 宽限取 60 分钟：高于 25 分钟的心跳周期（活着的 worker 绝不会被误判成孤儿），
+ * 又低于 90 分钟的 TTL（崩掉的车道比原来更快被回收）。
+ */
+const CLAIM_GRACE_MINUTES = 60;
+
+function laneIsUnclaimed(lane) {
+  if (lane.sessionId) return false;
+  const age = (Date.now() - new Date(lane.heartbeatAt ?? lane.createdAt).getTime()) / 60000;
+  return Number.isFinite(age) && age > CLAIM_GRACE_MINUTES;
+}
+
 function ensureIntegration() {
   const exists = git(['rev-parse', '--verify', INTEGRATION], ROOT, true);
   if (exists) return git(['rev-parse', '--short', INTEGRATION]);
@@ -449,7 +472,7 @@ if (cmd === 'plan') {
   // 之后每一轮 plan 都因为「已被占用」跳过它 —— 既不开发也不回收，整条流水线静默少一条。
   const session = flag('--session') === true ? null : (flag('--session') ?? null);
   const orphaned = Object.values(state.lanes).filter(
-    (l) => l.state === 'running' && (!l.sessionId || laneIsStale(l)),
+    (l) => l.state === 'running' && (laneIsStale(l) || laneIsUnclaimed(l)),
   );
   for (const l of orphaned) {
     l.sessionId = session;

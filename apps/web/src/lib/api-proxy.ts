@@ -289,13 +289,20 @@ const services: readonly {
     // transfers 是 7.5.1.1 调拨单：列表 / {id} / {id}/movements 三个读形状，
     // 以及 {id}/confirm、{id}/ship、{id}/receive、{id}/close 四个动作端点
     // （刻意**没有** DELETE 段：调拨单要靠分录与在途行回溯，不能物理删掉一条单据）。
+    // cross-entity-transfers 是 7.5.2.1 跨法人调拨，**刻意不复用 transfers 前缀**：
+    //   两者语义不同（那边货权前后同一个法人、不定价、无内部结算凭据），
+    //   挂在同一前缀下会让「跨法人」看起来只是普通调拨的一个筛选项 ——
+    //   而那正是蓝图点名要避免的「当作普通同仓调拨」。
+    //   读形状：列表 / {id} / {id}/movements / {id}/settlement；
+    //   动作形状：{id}/source-confirm 与 {id}/target-confirm（**两个独立端点**，
+    //   让调用方在请求体里声明代表哪一方等于让它可以自称另一方）、
+    //   {id}/ship、{id}/receive、{id}/close、{id}/cancel。
+    //   同样**没有** DELETE 段：已发运的货权变更不能物理删除，只能结案。
     // in-transit 是 7.5.1.2 在途库存：调拨 / 头程 / 采购 / FBA 发运四类同一个口径。
     //   in-transit 同一路径两种方法：GET 清单 / POST 登记（登记是对上游发运事件的镜像）。
     //   alerts 与 netting 是两个字面量聚合路径（到达预警 / 补货可扣在途净额）。
-    //   {legId} 是详情；{legId}/arrive 与 {legId}/discrepancy 是两个写动作，
-    //   两者都带 expectedVersion 乐观锁。
-    //   动作后缀**逐个列出**而不是一条通配：多放一层会让「一个还不存在的动作」
-    //   看起来像已交付（放行不该存在的路径比 404 更糟）。
+    //   {legId} 是详情；{legId}/arrive 与 {legId}/discrepancy 是两个写动作，都带 expectedVersion 乐观锁。
+    //   动作后缀**逐个列出**而不是一条通配：多放一层会让「一个还不存在的动作」看起来像已交付。
     //   刻意**没有** DELETE / PUT 段：在途腿靠事件时间线回溯，货已上路不该改历史。
     // 口径路径上刻意**没有** DELETE 段：作废是审计事件，档位行永久保留，
     // 放行一个删除形状会让"能不能物理删掉一条防超卖配置"看起来是能。
@@ -304,13 +311,75 @@ const services: readonly {
     // {id}/lines/{lineId}/count / {id}/tasks / {id}/tasks/{taskId}/assign。
     // 盘点路径上同样**没有** DELETE：账面数是冻结快照，删一张盘点单等于让这次盘从未发生过。
     // capabilities 是字面量，排在 {id} 之前判别。
+    // stocktake-variances 是 7.4.2.2 盘点差异处理：capabilities / sheets/{sheetId}/
+    // lines|report|audit|adjustments / adjustments/{id}(+submit|approve|reject|cancel|post)。
+    // 同样**没有** DELETE：差异处理全程只追加审计，归因/调整单/审计行都不可删，
+    // 放行一个删除形状会让「能不能把一条差异的痕迹抹掉」看起来是能。
+    // facilities 是 8.1.1.1 仓库列表：facilities 是集合读 + POST 新增；
+    // facilities/options 与 facilities/capabilities 是两个**单段字面量**子路径
+    // （筛选下拉项与作业维度接入情况），排在任何 {uuid} 之前判别。
+    // 刻意**没有** {id} 段：仓库详情是 8.1.1.2，尚未交付，
+    // 放行一个不存在的形状会让界面以为「按 id 取单仓」已交付。
+    // 也不放 update/delete：8.1.1.1 的职责范围是「展示 + 筛选 + 新增」，
+    // 改仓库属性属 8.1.1.2、行为参数属 8.1.1.3。放行写路径会让
+    // 「能不能改、能删仓库」看起来是能。
+    // 与 warehouses|legal-entities|skus 的区别：那几个是 7.1.x 各页共用的**下拉参照项**
+    // （只有 id/code/name 等少数列），facilities 是**列表本体**（带库存量、作业量、
+    // 货权法人、当地时间）。名字相近但形状不同，混用会让筛选下拉退化成全量传输。
+    // ownership 是 7.7.1.1 货主与所有权：capabilities / resolved / report / drift /
+    // reference-options / reassign 六个读与动作形状，owners[/{id}[/status]]、
+    // rules[/{id}[/versions|/retire]] 两组读与动作。
+    // 同样**没有** DELETE 段：货主与货权档都是「当时这批货归谁」的唯一凭据，
+    // 停用走 status / 收区间，放行一个删除形状会让「能不能抹掉一条货权痕迹」看起来是能。
+    // capabilities/resolved/report/drift/reference-options 是字面量，排在 {id} 之前判别。
+    // allocation-policies 是 7.8.1.1 分配策略配置：capabilities / effective / calculation（试算）
+    // / runs（落库分摊）/ runs/{runId}（批次明细）/ {id}（详情）/ {id}/versions（换版）
+    // / {id}/retire（作废）七个形状。allocation-sales 是销量登记与窗口名册。
+    // 同样**没有** DELETE：策略档与分摊批次都是不可改的事实，作废走收口区间，
+    // 放行一个删除形状会让「能不能把一条分摊算法配置抹掉」看起来是能。
+    // effective / calculation / runs 是字面量，排在 {id} 之前判别，彼此不会互相吃掉。
+    // consignments 是 7.7.1.2 寄售与代销：capabilities / {id}(+lines|stock-view|settlements|
+    // settlement-window|returns|audit|activate|suspend|close) / {id}/lines/{lineId}/sales /
+    // settlements/{id}(+confirm) / returns/{id}(+execute|cancel)。
+    // 同样**没有** DELETE：销售事实与审计是凭据（append-only），协议行是结算的依据，
+    // 放行删除形状等于让「把一笔应付的痕迹抹掉」看起来是能。
+    // outbound-orders 是 8.3.1.1 出库单列表：capabilities / 集合读 / 集合写（建单）/
+    //   pick-requests（生成拣货任务）/ print / cancel，以及 {id}/transition（状态推进）。
+    //   同样**没有** DELETE 出库单，也没有 {id} 单条详情：详情是 8.3.1.2 的职责，
+    //   放行一个不存在的形状比 404 更糟（放行不该存在的路径会让界面以为已交付）。
+    //   capabilities / pick-requests / print / cancel 是字面量首段，与 {uuid}/transition
+    //   靠「首段是字面量还是 UUID」区分，两条不冲突。
+    // labor 是 8.5.1.1 作业效率：capabilities / report / ranking / trend /
+    // work-tasks / work-tasks/{id} / work-tasks/{id}/(assign|start|complete|exception)。
+    // 与 warehouses 同级（不在 inventory/ 之下），因为前端打的是 warehouse/labor/...。
+    // 同样**没有** DELETE：人效是提成核算与排班的凭据 —— 作业任务定稿后计量列由数据库
+    // 触发器冻结、作业事件 append-only，放行删除等于让「改不掉也能抹掉」。
+    // goods-receipts 是 8.2.1.1 收货单：capabilities / {id} / {id}/movements，
+    // 以及 POST 建单、PUT 改单、POST {id}/receive 实收、POST {id}/close 关单。
+    // 同样**没有** DELETE：收货单是账实凭证，草稿可以改、实收可以追加，
+    // 但删一张收货单等于让这次收货从未发生过。
+    // capabilities 是字面量，排在 {id} 之前判别。
+    // serials / lots 的明细子路径此前漏登记：白名单里只有集合读
+    // （serials 与 lots 各一条），而页面实际在调 serials/stats、serials/{id}、
+    // serials/{id}/movements、lots/{id}、lots/{id}/distribution、lots/{id}/movements，
+    // 后端 InventorySerialController / InventoryLotController 这些端点都真实存在。
+    // 漏一条 = 那些页面在浏览器里拿代理 404，而 pnpm test 直连服务层发现不了。
+    // 两组都刻意**没有**在 movements 之外再放行别的动作段：
+    // 序列号的 validate-movement 与导入是既有形状，批次只读不写。
     prefix: 'warehouse/',
     env: 'WAREHOUSE_URL',
     fallback: 'http://127.0.0.1:8084',
+    // printing 是 8.3.4.2 面单与标签打印：capabilities / devices / templates(/{id}) /
+    //   targets(/{id}(/history)) / reprint-rules / jobs(/{id}(/execute|/cancel|/items/{itemId}/content)) / logs。
+    //   jobs/{id}/items/{itemId}/content 是打印内容下载端点：它返回的是打印那一刻落库并校验过的那份
+    //   渲染内容（ZPL 指令流或 HTML 打印视图），因此**不能**走下面 text/csv 那条原样透传分支 ——
+    //   走 JSON.parse 会把条码指令流解析失败变成 503。这里只放行路径，字节由响应体原样带回。
+    //   刻意**没有** DELETE 段：打印凭据（label_print_log）与任务明细都是 append-only 审计凭据，
+    //   放行一个删除形状会让「能不能把一条打印痕迹抹掉」看起来是能。
     pattern:
     // distribution / platform-observations / serials / lots / internal-access —— 这些路径此前漏登记，
     // 白名单只在浏览器端生效、单测直连服务层发现不了，漏一条就等于该页面在浏览器里拿代理 404。
-      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement))?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|in-transit(?:\/(?:alerts|netting)|\/[0-9a-f-]+(?:\/(?:arrive|discrepancy))?)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
+      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots(?:\/[0-9a-f-]+(?:\/(?:distribution|movements))?)?|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|in-transit(?:\/(?:alerts|netting)|\/[0-9a-f-]+(?:\/(?:arrive|discrepancy))?)?|stocktake-variances(?:\/capabilities|\/sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|\/adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?|cross-entity-transfers(?:\/[0-9a-f-]+(?:\/(?:movements|settlement|source-confirm|target-confirm|ship|receive|close|cancel))?)?|health(?:\/(?:trend|gate|issues|assess))?|ownership(?:\/(?:capabilities|resolved|report|drift|reference-options|reassign|owners(?:\/[0-9a-f-]+(?:\/status)?)?|rules(?:\/[0-9a-f-]+(?:\/(?:versions|retire))?)?))?|allocation-policies(?:\/(?:capabilities|effective|calculation|runs(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/(?:versions|retire))?)?)?|allocation-sales|consignments(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:lines|stock-view|settlement-window|settlements|returns|audit|activate|suspend|close))?|\/lines\/[0-9a-f-]+\/sales|\/settlements(?:\/[0-9a-f-]+(?:\/confirm)?)?|\/returns(?:\/[0-9a-f-]+(?:\/(?:execute|cancel))?)?)?|outbound-orders(?:\/(?:capabilities|pick-requests|print|cancel)|\/[0-9a-f-]+\/transition)?|printing(?:\/capabilities|\/templates(?:\/[0-9a-f-]+)?|\/devices|\/reprint-rules|\/targets(?:\/[0-9a-f-]+(?:\/history)?)?|\/jobs(?:\/[0-9a-f-]+(?:\/(?:execute|cancel)|\/items\/[0-9a-f-]+\/content)?)?|\/logs)?|serial-movements|serial-operations|aging(?:\/(?:buckets|slow-moving|policies|policy(?:\/[0-9a-f-]+)?))?|serials(?:\/(?:import|movements|validate-movement|stats)|\/[0-9a-f-]+(?:\/movements)?)?)|facilities(?:\/(?:options|capabilities))?|warehouses|legal-entities|skus|quality-statuses|locations|labor(?:\/capabilities|\/report|\/ranking|\/trend|\/work-tasks(?:\/[0-9a-f-]+(?:\/(?:assign|start|complete|exception))?)?)?|goods-receipts(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:movements|receive|close))?)?|lots)$/,
   },
 ];
 
@@ -353,7 +422,17 @@ export async function proxy(request: NextRequest, context: { params: { path: str
     // CSV 导出必须原样透传：走 JSON.parse 会把 CSV 解析失败变成 503，而且即使解析成功
     // 也会被重新序列化成 JSON，下载到的是一串引号转义的文本。
     // 只认 text/csv：JSON 接口一律走下面的正常分支，不受这里影响。
-    if (text && contentType.includes('text/csv')) {
+    //
+    // 8.3.4.2 面单与标签打印的**打印内容下载**（ZPL 指令流 / HTML 打印视图）同理：
+    // 两者都不是 JSON，走 JSON.parse 只会得到一个假的 503，现场看到的就是「下载失败」。
+    // 所以把这两个 content-type 一并纳入原样透传（content-disposition 也一起带走，
+    // 否则浏览器会拿不到文件名）。白名单式列举而不是「非 JSON 就透传」：
+    // 后者会让上游一个返回 HTML 的错误页被当成文件下载下来，更难排查。
+    const passthrough =
+      contentType.includes('text/csv') ||
+      contentType.includes('text/vnd.zpl') ||
+      contentType.includes('text/html');
+    if (text && passthrough) {
       const raw = new NextResponse(text, { status: upstream.status, headers: {} });
       raw.headers.set('Content-Type', contentType);
       const disposition = upstream.headers.get('content-disposition');

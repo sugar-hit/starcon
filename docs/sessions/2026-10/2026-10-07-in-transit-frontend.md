@@ -66,11 +66,35 @@
   - `catalog.ts`：真新增恰好 14 个 `InTransit*`，**0 消失**；另有 88 行是既有 warehouse 类型被重新排序（非语义变化）
   - `catalog.openapi.json`：零差异
 - `pnpm typecheck` → **3/3 成功，零错误**
-- `pnpm lint` → **3/3 成功，无新增 error**；唯一 warning 在他人文件 `variant-combination-workspace.tsx`
-- 全量 `npx vitest run`（仓库根）→ **64 文件 / 1192 例全过**
+- `pnpm lint` → **3/3 成功，无新增 error**；warning 全在他人文件
+  （`variant-combination-workspace.tsx`、`goods-receipt.tsx`），`in-transit` 相关文件零告警
+- 全量 `npx vitest run`（仓库根）→ 提交前 **64 文件 / 1192 例全过**
   - 开工前基线**自己量**：`npx vitest run` → **63 文件 / 1142 例**
   - 差值 **+1 文件 / +50 例**（49 模型 + 1 白名单拒绝用例），**无回归**
 - `node tools/module-progress/sync.mjs --check` → ✓ 台账与蓝图一致
+
+## api-proxy 白名单冲突与求并（提交后才发现的坑）
+
+第一次 `land` 后用 `git merge-tree` 预演，发现并入会**在 `apps/web/src/lib/api-proxy.ts` 冲突**：
+本分支是从 7.5.1.1 时点的集成头切出来的，而集成头早已被十余条并行车道推进 ——
+`cross-entity-transfers` / `stocktake-variances` / `goods-receipts` / `outbound-orders` /
+`allocation-policies` / `ownership` / `aging` / `printing` / `labor` / `facilities` / `health`
+各自加了 allowlist 分支。本分支那份 `api-proxy.ts` 是**旧副本**，直接并会撞车，
+且调度器用的是**裸 `git merge`**（不自动跑 `merge-union.mjs`），撞了就把车道打成 `conflict`。
+
+处理：把 `integration/module-dev` 并进本分支，`api-proxy.ts` 取**集成头版本原样**，
+只在其正则里 `transfers(...)` 之后插入本车道那一条 `in-transit` 分支 + 注释。
+
+求并正确性是**可验证**的，不是靠肉眼：
+- `npx vitest run apps/web/src/app/api` → **5 文件 / 56 例全过**，含四条车道各自的
+  allowlist 用例（catalog 35 例、iam 7 例、warehouse 8 例、`cross-entity-transfer-allowlist` 2 例）。
+  这些用例逐条断言各自车道的路径仍被放行，所以「漏掉别人的分支」会被直接测出来。
+- `git diff integration/module-dev HEAD -- apps/web/src/lib/api-proxy.ts` → **+7 / -1**，
+  即本分支相对集成头**只多出 in-transit 这一条**，没有把别人的分支改回去。
+- 再预演 `git merge-tree --write-tree integration/module-dev HEAD` → **0 冲突**。
+
+并入集成头后全量：**78 文件 / 1403 例全过**（比 64/1192 多出来的是随集成头一起并进来的其他车道用例，
+不是本车道写的；本车道自己的增量仍是 49 模型例 + 1 白名单拒绝例）。
 
 ## 白名单正反断言
 
@@ -88,7 +112,9 @@
    `packages/ui/src/lib/task-pages.ts`；那里只有蓝图占位条目 `implemented: false`）。
    本车道刻意不改这个共享文件，避免重排他人条目。**这是已知缺口，不是遗漏。**
 2. **未跑全量 `./mvnw verify`，未跑 `pnpm --filter @starcon/web build`**（只跑了 warehouse 段契约测试 + 前端三项）。
-3. **能力边界**（界面上已如实标注，未假装有）：
+3. **`land` 只把车道置为 `ready`，真正并入集成头由调度器下一轮执行**（本车道未碰集成分支、未 push）。
+   预演已确认并入零冲突。
+4. **能力边界**（界面上已如实标注，未假装有）：
    - 到货 / 差异登记是**直接落库的业务事件，不经审批流、不进常驻调度**。
    - 补货净额**只交数不给建议** —— 需求预测与下单属 6.2.1.1。
    - 上游头程（10）、采购（6）、FBA（4 外部仓）**均未交付**；本模块只靠
