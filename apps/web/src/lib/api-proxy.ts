@@ -289,11 +289,15 @@ const services: readonly {
     // 口径路径上刻意**没有** DELETE 段：作废是审计事件，档位行永久保留，
     // 放行一个删除形状会让"能不能物理删掉一条防超卖配置"看起来是能。
     // effective / pools / pools/{poolKey} 是字面量，排在 {id} 之前判别，两者不会互相吃掉。
+    // stocktakes 是 7.4.2.1 盘点单：列表 / capabilities / {id} / {id}/lines /
+    // {id}/lines/{lineId}/count / {id}/tasks / {id}/tasks/{taskId}/assign。
+    // 盘点路径上同样**没有** DELETE：账面数是冻结快照，删一张盘点单等于让这次盘从未发生过。
+    // capabilities 是字面量，排在 {id} 之前判别。
     prefix: 'warehouse/',
     env: 'WAREHOUSE_URL',
     fallback: 'http://127.0.0.1:8084',
     pattern:
-      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?|calculation)|[0-9a-f-]+(?:\/(?:versions|retire))?)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
+      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?|calculation)|[0-9a-f-]+(?:\/(?:versions|retire))?)?)|stocktakes(?:\/capabilities|[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
   },
 ];
 
