@@ -34,16 +34,19 @@ public class InventoryController {
   private final InventoryOverviewService overview;
   private final InventoryBucketService buckets;
   private final WarehouseReferenceService references;
+  private final InventoryAvailabilityService availability;
 
   public InventoryController(
       AccessService access,
       InventoryOverviewService overview,
       InventoryBucketService buckets,
-      WarehouseReferenceService references) {
+      WarehouseReferenceService references,
+      InventoryAvailabilityService availability) {
     this.access = access;
     this.overview = overview;
     this.buckets = buckets;
     this.references = references;
+    this.availability = availability;
   }
 
   /**
@@ -139,6 +142,24 @@ public class InventoryController {
   public List<BucketAction> bucketActions(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
     return call(auth, "inventory.read", a -> buckets.actions());
+  }
+
+  /**
+   * 批量可用量查询（3.5.2.2 BOM 展开消费）。
+   *
+   * <p>用 POST 而不是 GET：请求体是一组 SKU，展开树最坏 500 个 UUID，
+   * 放 URL 里会撞长度限制，也会把一份清单塞进访问日志。
+   *
+   * <p>租户不来自请求体也不来自任何客户端头：{@link #call} 先向 identity 确认
+   * 已认证成员关系与权限，再在一个事务里绑定 {@code app.current_tenant}，
+   * 由 RLS 在数据库层强制隔离。catalog 侧必须透传调用者的 Authorization 头 ——
+   * 丢了它这里就无从解析租户（这是跨服务调用丢掉租户上下文的直接后果）。
+   */
+  @PostMapping("/inventory/availability")
+  public AvailabilityView availability(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestBody AvailabilityQuery query) {
+    return call(auth, "inventory.read", a -> availability.availability(query));
   }
 
   /** 跨服务筛选维度接入情况：前端据此禁用不可用的筛选项，而不是让用户填完收 422。 */

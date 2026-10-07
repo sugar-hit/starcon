@@ -4276,4 +4276,140 @@ public final class CatalogModels {
 
   /** 倒排查询筛选条件。 */
   public record BomUsageQuery(UUID skuId, String keyword, Boolean onlyEffective, int page, int size) {}
+
+  // ================================================================ 3.5.2.2 BOM 展开
+
+  /**
+   * 展开请求。
+   *
+   * <p><b>{@code versionId} 与 {@code bomId} 至少给一个</b>：
+   * 给 {@code versionId} 就是「按这一版展开」（可含草稿，试算是纯计算不是事实）；
+   * 给 {@code bomId} 就是「按 {@code asOf} 这一刻生效的那一版展开」（规则 R4 的时刻查询），
+   * 与 06 采购建议、08 加工单取版本的形状一致。
+   *
+   * @param outputQuantity 成品数量。规则 R7 的产量因子，正整数（生产计划按件下达）
+   * @param warehouseId 仓库过滤。null = 全仓合计。逻辑 ID，**不建外键**（warehouse 是另一个服务）
+   * @param asOf 展开基准时刻，决定子 BOM 取哪一版（规则 R4）。null = 此刻
+   * @param maxDepth 展开深度上限。null = {@code BomExplosionRules.DEFAULT_MAX_DEPTH}
+   */
+  public record BomExplosionInput(
+      @Schema(nullable = true) UUID versionId,
+      @Schema(nullable = true) UUID bomId,
+      @NotNull @DecimalMin(value = "0", inclusive = false) @Digits(integer = 13, fraction = 6)
+          BigDecimal outputQuantity,
+      @Schema(nullable = true) UUID warehouseId,
+      @Schema(nullable = true) String asOf,
+      @Schema(nullable = true) @Min(1) Integer maxDepth,
+      @Size(max = 500) String note) {}
+
+  /**
+   * 展开结果的一行（展开树上的一层）。
+   *
+   * <p><b>需求量按「逐层结转」递推</b>（V26 规则 E1）：顶层用成品数量，子层用<b>父行的缺口</b>。
+   * 半成品已有库存与在途时只展开缺的那部分，否则会为不生产的半成品多算一层料。
+   *
+   * @param requiredQuantity 需求量 = 父级驱动量 × 单位用量 × (1 + 损耗率/100)，6 位小数不取整（规则 R7）
+   * @param available 当前可用。跨服务取自 warehouse 的授权端点，<b>不在 catalog 库聚合</b>
+   * @param inTransit 在途。抵扣它是为了不把同一批料重复下单（货权已归本租户，只是没到）
+   * @param gap 缺口 = max(0, required − available − inTransit)。下限 0：负数表达「多出来」，
+   *     对采购决策无用，富余量由 {@code surplus} 单独给出
+   * @param isSubAssembly 该组件 SKU 本身是某个 BOM 的成品（判定规则 E3）
+   * @param expanded 是否真的向下展开了（子装配 + 有生效版本 + 未命中深度上限）
+   * @param covered 可用 + 在途已够本行 → 不再向下展开（再展开只会产出一串 0 需求的噪声行）
+   * @param truncated 命中深度上限，本行还有下级没展开（规则 E4）。<b>静默截断是未完成</b>，页面必须看见
+   */
+  public record BomExplosionLine(
+      UUID id,
+      @Schema(nullable = true) UUID parentLineId,
+      int depth,
+      String path,
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      UUID componentId,
+      UUID sourceVersionId,
+      String sourceVersionNo,
+      String sourceBomCode,
+      BigDecimal unitQuantity,
+      BigDecimal scrapRate,
+      BigDecimal requiredQuantity,
+      BigDecimal available,
+      BigDecimal inTransit,
+      BigDecimal gap,
+      BigDecimal surplus,
+      boolean isSubAssembly,
+      @Schema(nullable = true) UUID subBomId,
+      @Schema(nullable = true) String subBomCode,
+      @Schema(nullable = true) UUID subVersionId,
+      @Schema(nullable = true) String subVersionNo,
+      boolean ambiguousSubBom,
+      boolean expanded,
+      boolean covered,
+      boolean truncated,
+      String role,
+      String note) {}
+
+  /**
+   * 一次展开的完整结果。
+   *
+   * <p><b>展开结果是建议不是事实</b>（蓝图原话）：实际采购由 06 生成单据后成立。
+   * 所以本记录把「当时算的是什么」整份冻结下来（规则、版本、仓库过滤、as_of 全部在内），
+   * 06 的采购单引用的是 {@code id} 而不是「现在的 BOM × 现在的库存」——
+   * 后者随时会变，单子发出去之后就无法解释「当时为什么按这个数下单」。
+   *
+   * @param status COMPLETED = 清单完整；TRUNCATED = 命中深度上限，<b>清单不完整</b>
+   * @param asOf 展开基准时刻（业务时间），与 {@code createdAt}（系统时间）分开存
+   */
+  public record BomExplosionRun(
+      UUID id,
+      UUID bomId,
+      String bomCode,
+      UUID versionId,
+      String versionNo,
+      String versionStatus,
+      String versionName,
+      UUID outputSkuId,
+      String outputSkuCode,
+      String outputSkuName,
+      BigDecimal outputQuantity,
+      @Schema(nullable = true) UUID warehouseId,
+      String asOf,
+      int maxDepth,
+      int reachedDepth,
+      String status,
+      boolean truncated,
+      int lineCount,
+      int purchaseLineCount,
+      BigDecimal totalRequired,
+      BigDecimal totalGap,
+      UUID requestedBy,
+      String note,
+      List<BomExplosionLine> lines,
+      String calculationNote) {}
+
+  /** 展开运行记录列表页（只带摘要，不带 lines —— 一棵五层的树有几百行）。 */
+  public record BomExplosionRunRow(
+      UUID id,
+      UUID bomId,
+      String bomCode,
+      UUID versionId,
+      String versionNo,
+      UUID outputSkuId,
+      String outputSkuCode,
+      BigDecimal outputQuantity,
+      @Schema(nullable = true) UUID warehouseId,
+      String asOf,
+      String status,
+      boolean truncated,
+      int reachedDepth,
+      int lineCount,
+      int purchaseLineCount,
+      BigDecimal totalGap,
+      String createdAt) {}
+
+  public record BomExplosionRunPage(
+      List<BomExplosionRunRow> items, int page, int size, long total, int totalPages) {}
+
+  /** 展开运行记录列表筛选条件。 */
+  public record BomExplosionRunQuery(UUID bomId, UUID skuId, int page, int size) {}
 }

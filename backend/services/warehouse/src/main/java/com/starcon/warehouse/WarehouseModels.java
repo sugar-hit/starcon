@@ -251,6 +251,47 @@ public final class WarehouseModels {
   /** 阈值保存结果。 */
   public record InventoryPolicySaved(UUID id, long version) {}
 
+  // ------------------------------------------------------------ 可用量查询（3.5.2.2 BOM 展开消费）
+
+  /**
+   * 可用量批量查询条件。
+   *
+   * <p>本端点是 catalog 的 3.5.2.2 BOM 展开**唯一**的库存数据入口 —— catalog
+   * 既不直连本库也不建跨库视图（AGENTS.md「模块边界纪律」）。
+   *
+   * @param skuIds 要查的 SKU 集合（一次批量查整棵展开树上的全部组件，避免逐个来回）
+   * @param warehouseId 仓库过滤；null = 全仓合计。in_transit 按
+   *     {@code to_warehouse_id} 一并过滤：只按收货仓过滤可用量却把别仓发来的在途
+   *     一起抵扣，会出现「这仓的缺口被另一仓的货填掉」，而那批货根本不会进这仓。
+   */
+  public record AvailabilityQuery(List<UUID> skuIds, @Schema(nullable = true) UUID warehouseId) {}
+
+  /**
+   * 单个 SKU 的可用与在途。
+   *
+   * @param available 可用量 = Σ inventory_balance.available（生成列 on_hand − reserved），
+   *     不含在途：未到货的库存拿去预占就是超卖
+   * @param inTransit 在途量 = Σ inventory_transfer.quantity WHERE status='IN_TRANSIT'
+   */
+  public record AvailabilityRow(
+      UUID skuId,
+      @Schema(nullable = true) String skuCode,
+      BigDecimal available,
+      BigDecimal inTransit) {}
+
+  /**
+   * 可用量批量查询结果。
+   *
+   * @param requestedCount 请求了几个 SKU，{@code items.size()} 可能小于它 ——
+   *     没有任何库存行的 SKU 返回 available=0 而不是缺席，
+   *     否则「这个 SKU 没库存」与「这个 SKU 不属于你」在调用方眼里分不开
+   */
+  public record AvailabilityView(
+      @Schema(nullable = true) UUID warehouseId,
+      int requestedCount,
+      List<AvailabilityRow> items,
+      String note) {}
+
   /** 阈值录入。 */
   public record InventoryPolicyInput(
       @jakarta.validation.constraints.NotBlank

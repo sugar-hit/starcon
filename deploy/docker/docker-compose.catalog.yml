@@ -57,6 +57,7 @@ services:
       DB_MIGRATION_USER: starcon_migrator
       DB_MIGRATION_PASSWORD: ${PG_PASSWORD}
       IDENTITY_URL: http://identity:8081
+      WAREHOUSE_URL: http://warehouse:8084
       INTERNAL_KEY: ${INTERNAL_KEY}
   channel:
     build:
