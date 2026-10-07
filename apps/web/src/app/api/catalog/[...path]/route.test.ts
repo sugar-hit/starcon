@@ -705,6 +705,81 @@ it('translations 放行不放行 3.4.2.2 的模板译文路径（两套 locale �
   expect(fetcher).not.toHaveBeenCalled();
 });
 
+it('catalog/boms、catalog/bom-versions 与 catalog/bom-components 的全部路由被放行（3.5.2.1 BOM 版本管理）', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const bom = '55555555-5555-5555-5555-555555555555';
+  const version = '66666666-6666-6666-6666-666666666666';
+  const sku = '77777777-7777-7777-7777-777777777777';
+  // 读：BOM 概览、列表、详情、当前生效版本（规则 R4 的时刻查询）、版本列表、组件清单、
+  // 单层需求量（规则 R7）、倒排查询。
+  for (const path of [
+    'catalog/boms/overview',
+    'catalog/boms',
+    `catalog/boms/${bom}`,
+    `catalog/boms/${bom}/effective`,
+    `catalog/boms/${bom}/versions`,
+    'catalog/bom-versions',
+    `catalog/bom-versions/${version}`,
+    `catalog/bom-versions/${version}/components`,
+    `catalog/bom-versions/${version}/requirement?outputQuantity=100`,
+    `catalog/bom-components/usage?skuId=${sku}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('?')[0].split('/') } })).status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8082/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // POST：建 BOM、建草稿版本、发布、版本复制。
+  for (const path of [
+    'catalog/boms',
+    `catalog/boms/${bom}/versions`,
+    `catalog/bom-versions/${version}/publish`,
+    `catalog/bom-versions/${version}/copy?versionNo=v2`,
+  ]) {
+    expect((await POST(request(path, 'POST'), { params: { path: path.split('?')[0].split('/') } })).status).toBe(
+      200,
+    );
+  }
+  // PUT：改 BOM、改草稿版本、向前关闭生效区间、整体替换组件清单。
+  for (const path of [
+    `catalog/boms/${bom}`,
+    `catalog/boms/${bom}/status?status=ARCHIVED`,
+    `catalog/bom-versions/${version}`,
+    `catalog/bom-versions/${version}/close?effectiveTo=2026-04-01T00:00:00Z`,
+    `catalog/bom-versions/${version}/components`,
+  ]) {
+    expect((await PUT(request(path, 'PUT'), { params: { path: path.split('?')[0].split('/') } })).status).toBe(200);
+  }
+  // DELETE：删 BOM、删草稿版本。
+  for (const path of [`catalog/boms/${bom}`, `catalog/bom-versions/${version}`]) {
+    expect(
+      (await DELETE(request(path, 'DELETE'), { params: { path: path.split('?')[0].split('/') } })).status,
+    ).toBe(200);
+  }
+  // 不在白名单里的相邻路径仍然 404：放行不能是前缀通配。
+  // 尤其 bom-components 只放行 usage —— 它按 ?skuId= 寻址，不接 id 段。
+  for (const path of [
+    'catalog/boms/unknown',
+    `catalog/boms/${bom}/unknown`,
+    `catalog/bom-versions/${version}/unknown`,
+    'catalog/bom-components',
+    `catalog/bom-components/${sku}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('?')[0].split('/') } })).status).toBe(404);
+  }
+  // 与 3.5.1.1 并列而不合并：放行 boms 绝不代表放行 bundles（反之亦然）。
+  for (const path of ['catalog/bundles', `catalog/versions/${version}`]) {
+    expect((await GET(request(path), { params: { path: path.split('?')[0].split('/') } })).status).toBe(200);
+  }
+  expect(
+    (await GET(request('catalog/bomsx'), { params: { path: ['catalog', 'bomsx'] } })).status,
+  ).toBe(404);
+});
+
 it('catalog/components 与 catalog/bundle-skus 的全部路由被放行（3.5.1.2 组件维护）', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
   vi.stubGlobal('fetch', fetcher);
