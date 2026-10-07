@@ -729,13 +729,20 @@ class InventoryBucketIntegrationTest {
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
 
     // 跨服务不得建外键：sku 仍只是逻辑 ID，不 REFERENCES 对方表
+    //
+    // 7.7.1.1 货主与所有权额外加了一条 fk_stock_bucket_stock_owner。它指向的是**本服务**的
+    // stock_owner（与 warehouse / legal_entity_ref 同属 warehouse），不是跨服务引用，
+    // 所以不在这条不变量的范围内，必须在这里显式排除 —— 否则这条断言会把一条本地约束
+    // 也当成"跨服务外键"数进去，而它的原意（方法名与注释都写着「跨服务不得建外键」）只是
+    // 不让 sku / legal_entity 这类跨服务逻辑 ID 指向对方的表。
     var skuFk = access.run(actorA, "warehouse.inventory.read", () -> sql.fetchOne(
         "select count(*) from information_schema.table_constraints"
             + " where constraint_type='FOREIGN KEY'"
             + " and table_name in ('stock_bucket','inventory_lot')"
             + " and constraint_name not like '%balance_id%'"
             + " and constraint_name not like '%lot_id%'"
-            + " and constraint_name not like '%location_id%'"));
+            + " and constraint_name not like '%location_id%'"
+            + " and constraint_name not like 'fk_stock_bucket_stock_owner'"));
     assertThat(skuFk.get(0, Long.class)).isZero();
   }
 
