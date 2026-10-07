@@ -9,6 +9,7 @@ import type {
   OwnerInventoryReport,
   StockOwnerInput,
   StockOwnerPage,
+  StockOwnerRow,
   StockOwnerSaved,
   StockOwnershipCapabilities,
   StockOwnershipResolved,
@@ -16,14 +17,13 @@ import type {
 import { ApiError, api } from './api';
 
 /**
- * 所有权类型与指向类型 —— 取值与后端 `StockOwnershipModels` 的同名枚举一字不差。
- *
- * <p>刻意**不从契约导入**：后端把这两个字段暴露成普通字符串（spec 里就是
- * `{"type":"string"}`），枚举本体只存在于 Java 侧，所以 codegen 永远不会生成这两个类型 ——
- * 去契约里 import 只会得到「无此导出成员」的编译错误。
+ * 后端 `StockOwnershipModels` 里货主种类与指向类型是**两个不同的枚举**
+ * （`StockOwnerKind` / `OwnerRefType`），但 codegen 只把枚举内联成 `StockOwnerRow` 上的
+ * 字面量联合，不会生成具名类型别名。所以这里从契约的行类型反推出别名：
+ * 契约仍是唯一来源，也不用在前端复制一份手写枚举。
  */
-export type StockOwnerKind = 'SELF' | 'SUPPLIER_CONSIGNMENT' | 'PLATFORM' | 'CONSIGNEE';
-export type OwnerRefType = 'LEGAL_ENTITY' | 'SUPPLIER' | 'PLATFORM' | 'INTERNAL';
+export type StockOwnerKind = NonNullable<StockOwnerRow>['ownerKind'];
+export type OwnerRefType = NonNullable<StockOwnerRow>['ownerRefType'];
 
 /**
  * 7.7.1.1 货主与所有权前端模型。
@@ -45,11 +45,11 @@ export type OwnerRefType = 'LEGAL_ENTITY' | 'SUPPLIER' | 'PLATFORM' | 'INTERNAL'
 // ------------------------------------------------------------ 接口
 
 export interface OwnerListParams {
-  ownerKind?: string | undefined;
-  status?: string | undefined;
-  ownerRefId?: string | undefined;
+  ownerKind?: string;
+  status?: string;
+  ownerRefId?: string;
   ownedAssetOnly?: boolean;
-  keyword?: string | undefined;
+  keyword?: string;
   page?: number;
   size?: number;
 }
@@ -79,13 +79,13 @@ export function setOwnerStatus(id: string, status: string): Promise<StockOwnerSa
 }
 
 export interface RuleListParams {
-  scopeType?: string | undefined;
-  ownerId?: string | undefined;
-  warehouseId?: string | undefined;
-  legalEntityId?: string | undefined;
-  skuId?: string | undefined;
+  scopeType?: string;
+  ownerId?: string;
+  warehouseId?: string;
+  legalEntityId?: string;
+  skuId?: string;
   effectiveOnly?: boolean;
-  keyword?: string | undefined;
+  keyword?: string;
   page?: number;
   size?: number;
 }
@@ -108,25 +108,25 @@ export function retireRule(id: string): Promise<OwnershipRuleSaved> {
 }
 
 export function fetchResolved(params: {
-  warehouseId?: string | undefined;
-  legalEntityId?: string | undefined;
-  skuId?: string | undefined;
+  warehouseId?: string;
+  legalEntityId?: string;
+  skuId?: string;
 }): Promise<StockOwnershipResolved> {
   return api<StockOwnershipResolved>(`warehouse/inventory/ownership/resolved${query(params)}`);
 }
 
 export function fetchReport(params: {
-  warehouseId?: string | undefined;
-  legalEntityId?: string | undefined;
-  skuId?: string | undefined;
+  warehouseId?: string;
+  legalEntityId?: string;
+  skuId?: string;
 }): Promise<OwnerInventoryReport> {
   return api<OwnerInventoryReport>(`warehouse/inventory/ownership/report${query(params)}`);
 }
 
 export function fetchDrift(params: {
-  warehouseId?: string | undefined;
-  legalEntityId?: string | undefined;
-  skuId?: string | undefined;
+  warehouseId?: string;
+  legalEntityId?: string;
+  skuId?: string;
 }): Promise<OwnershipDriftReport> {
   return api<OwnershipDriftReport>(`warehouse/inventory/ownership/drift${query(params)}`);
 }
