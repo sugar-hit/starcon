@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.*;
 
 public final class CatalogModels {
@@ -5042,6 +5043,176 @@ public final class CatalogModels {
       List<PartyRoleProfileRules.Option> settlementMethods,
       List<PartyRoleProfileRules.Option> interfaceTypes,
       List<PartyRoleProfileRules.Option> serviceCapabilities,
+      String note) {}
+
+  // ================================================================ 3.6.2.1 供应商报价
+
+  /**
+   * 一档阶梯价（{@code POST} / {@code PUT /catalog/supplier-quotes} 的嵌套元素）。
+   *
+   * <p><b>刻意没有 currency 字段</b>：币种只在报价行上，同一报价的全部阶梯同币种（规则 **R3**）。
+   * 逐档设币种会造出「100 件档是 USD、500 件档是 EUR」这种行 —— 06 采购单无法判定该用哪个币种
+   * 结算，界面只能让用户挑，而挑错了没有任何东西会报错。理由见 V32 第七节。
+   *
+   * <p>数组顺序即档位顺序：{@code minQuantity} 必须严格递增（规则 **R5**）。
+   * 提交时按升序排好，服务层原样落库 —— 档位顺序是写入前确定的，不靠 DB 的排序保证。
+   */
+  public record SupplierQuotePriceTierInput(
+      @Schema(nullable = true) @DecimalMin(value = "0", inclusive = false) BigDecimal minQuantity,
+      @Schema(nullable = true) @DecimalMin(value = "0", inclusive = false) BigDecimal unitPrice,
+      @Schema(nullable = true) @Size(max = 500) String note) {}
+
+  /**
+   * 供应商报价的写入请求（{@code POST /catalog/supplier-quotes} 与 {@code PUT /{id}}）。
+   *
+   * <p>{@code supplierId} 是**主体 id**（{@code party.id}）而不是角色 id：
+   * 前端手上只有主体（页面上点的是某个供应商），角色由服务端从该主体的 SUPPLIER 角色解析。
+   * 让客户端直接传 role_id 等于把「这条报价属于供应商身份」这层判断交给前端，
+   * 而前端完全可能传来一个 CUSTOMER 角色的 id。
+   *
+   * <p>{@code version} 是行级乐观锁：改档时必须回传详情里拿到的版本号，新建时不传（默认 0）。
+   * {@code tiers} 会<b>整体替换</b>（不是增量合并）：报价的阶梯是一个整体，
+   * 合并写入会让"删掉一档"这个动作无法表达。
+   */
+  public record SupplierQuoteInput(
+      @NotNull UUID supplierId,
+      @NotNull UUID skuId,
+      @NotBlank @Size(max = 64) String supplierSkuCode,
+      @NotBlank @Size(max = 32) String purchaseUnitCode,
+      @NotBlank @Size(max = 3) String currency,
+      @Schema(nullable = true) BigDecimal moqQuantity,
+      @Schema(nullable = true) @Min(0) @Max(365) Integer leadTimeDays,
+      @NotNull @Schema(nullable = false) LocalDate validFrom,
+      @Schema(nullable = true) LocalDate validTo,
+      @Schema(nullable = true) @Min(1) @Max(99) Integer priority,
+      @Schema(nullable = true) String status,
+      @NotNull @Valid @Size(min = 1, max = 50) List<SupplierQuotePriceTierInput> tiers,
+      @Schema(nullable = true) @Size(max = 2000) String note,
+      @PositiveOrZero long version) {}
+
+  /** 一档阶梯价的读出记录（与 {@link SupplierQuotePriceTierInput} 同形，读出多一个展示串）。 */
+  public record SupplierQuotePriceTier(
+      BigDecimal minQuantity,
+      BigDecimal unitPrice,
+      @Schema(nullable = true) String tierRangeLabel,
+      @Schema(nullable = true) String note) {}
+
+  /**
+   * 一条报价的读出记录（详情 / 列表共用）。
+   *
+   * <p>带供应商与 SKU 的身份（code / name）而不只是 id：报价台账上运营要认的是
+   * 「星尘科技 的 SKU-000123 报 3.80 USD」，一次查询就该够，不必回查两次主体与商品。
+   *
+   * <p>{@code selectionState} 只在<b>有效报价</b>集合里有意义（{@code null} = 这条报价
+   * 停用或已过期）。见 {@link SupplierQuoteRules#selectionStates} 与规则 **R2**。
+   *
+   * <p>{@code warnings} 是给下游的提示（"该供应商还没建角色档案"这类），
+   * 不是校验错误 —— 与 {@code PartyRoleProfileService.warnings} 同一纪律。
+   */
+  public record SupplierQuote(
+      UUID id,
+      UUID supplierRoleId,
+      UUID supplierId,
+      String supplierCode,
+      String supplierName,
+      @Schema(nullable = true) String supplierRoleStatus,
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      String supplierSkuCode,
+      String purchaseUnitCode,
+      @Schema(nullable = true) String purchaseUnitName,
+      String currency,
+      BigDecimal moqQuantity,
+      String moqLabel,
+      int leadTimeDays,
+      String leadTimeLabel,
+      LocalDate validFrom,
+      @Schema(nullable = true) LocalDate validTo,
+      String validityLabel,
+      long daysToExpiry,
+      int priority,
+      String priorityLabel,
+      String status,
+      String statusLabel,
+      /** SELECTED / AMBIGUOUS / LOWER_PRIORITY；不参与有效报价判定时为 null。 */
+      @Schema(nullable = true) String selectionState,
+      @Schema(nullable = true) String selectionStateLabel,
+      boolean effective,
+      List<SupplierQuotePriceTier> tiers,
+      @Schema(nullable = true) String note,
+      long version,
+      List<String> warnings,
+      @Schema(nullable = true) String createdAt,
+      @Schema(nullable = true) String updatedAt) {}
+
+  /** 报价台账列表的分页结果。计数与取行引同一处筛选条件。 */
+  public record SupplierQuotePage(
+      List<SupplierQuote> items, long total, int page, int size, String note) {}
+
+  /** 报价列表的筛选条件。null 表示不筛；空串按「不过滤」处理。 */
+  public record SupplierQuoteQuery(
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      /** 按 SKU 精确筛选（06 采购 / 05 定价读这个 SKU 的报价时用）。 */
+      @Schema(nullable = true) UUID skuId,
+      /** 按供应商主体精确筛选。 */
+      @Schema(nullable = true) UUID supplierId,
+      @Schema(nullable = true) @Size(max = 3) String currency,
+      @Schema(nullable = true) @Size(max = 24) String status,
+      @Schema(nullable = true) @Size(max = 64) String purchaseUnitCode,
+      /** 只看参与有效报价判定的（status=ACTIVE 且落在有效期区间内）。 */
+      @Schema(nullable = true) Boolean effectiveOnly,
+      /** 只看需要人工选择优先级的（歧义报价，规则 **R2** 的治理视图）。 */
+      @Schema(nullable = true) Boolean ambiguousOnly,
+      /** 判定「有效」时用的那一天，缺省取库当前日期。回看历史某一刻的报价时传。 */
+      @Schema(nullable = true) LocalDate at,
+      int page,
+      int size) {}
+
+  /**
+   * 有效报价解析结果（{@code GET /catalog/supplier-quotes/effective}）。
+   *
+   * <p>这就是蓝图点名的输出「有效报价列表（默认取优先级最高且在有效期内的版本）」，
+   * 而**「默认取」在本类里是一个可以失败的状态**：{@code selected} 在歧义时是 null
+   * 而不是"随便一条"（规则 **R2**）。{@code candidates} 永远给出全部有效报价并逐条标状态，
+   * 运营据此选；{@code ambiguityProblem} 是可读的处置建议。
+   *
+   * <p>{@code selectedTiers} 只在 {@code selected != null} 时有值 ——
+   * 它是"默认采用那条报价的阶梯"，下游取价时按 {@code quantity} 在其中定位适用档。
+   */
+  public record SupplierQuoteEffectiveResult(
+      @Schema(nullable = true) UUID skuId,
+      @Schema(nullable = true) String skuCode,
+      @Schema(nullable = true) String skuName,
+      @Schema(nullable = true) UUID supplierId,
+      @Schema(nullable = true) String supplierName,
+      @Schema(nullable = true) LocalDate at,
+      /** 唯一可自动采用的那条报价；歧义或没有有效报价时为 null。 */
+      @Schema(nullable = true) SupplierQuote selected,
+      /** selected 那条报价里按 quantity 命中的阶梯；未传数量或低于第一档时为 null。 */
+      @Schema(nullable = true) SupplierQuotePriceTier selectedTier,
+      List<SupplierQuote> candidates,
+      boolean ambiguous,
+      /** 歧义时的可读处置建议；无歧义时为 null（与 {@link SupplierQuoteRules#ambiguityProblem} 同一实现）。 */
+      @Schema(nullable = true) String ambiguityProblem,
+      List<String> warnings,
+      String note) {}
+
+  /** 报价概览：台账顶部的治理数字。 */
+  public record SupplierQuoteOverview(
+      long totalQuotes,
+      long effectiveQuotes,
+      long ambiguousQuotes,
+      long disabledQuotes,
+      long supplierCount,
+      long skuCount,
+      long expiringSoonQuotes,
+      String note) {}
+
+  /** 报价词表选项（前端下拉的数据源，与后端词表同源）。 */
+  public record SupplierQuoteOptions(
+      List<SupplierQuoteRules.Option> statuses,
+      List<SupplierQuoteRules.Option> selectionStates,
       String note) {}
 }
 

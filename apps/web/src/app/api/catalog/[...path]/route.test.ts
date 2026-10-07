@@ -828,6 +828,7 @@ it('catalog/parties 的全部路由被放行（3.6.1.1 往来单位档案）', a
   vi.stubGlobal('fetch', fetcher);
   const party = '77777777-7777-7777-7777-777777777777';
   const role = '99999999-9999-9999-9999-999999999999';
+  const quote = '55555555-5555-5555-5555-555555555555';
   // 读：列表（含查询串）、概览、引用候选、详情、角色清单。
   for (const path of [
     'catalog/parties',
@@ -915,6 +916,53 @@ it('catalog/parties 的全部路由被放行（3.6.1.1 往来单位档案）', a
     (await GET(request('catalog/role-profiles'), { params: { path: ['catalog', 'role-profiles'] } }))
       .status,
   ).toBe(200);
+
+  // 3.6.2.1 供应商报价：台账 + 蓝图点名的「有效报价」输出。
+  // 放行的七条路径逐条列出来 —— 白名单只开了这七条，多一段仍然拒绝。
+  expect(
+    (await GET(request('catalog/supplier-quotes'), { params: { path: ['catalog', 'supplier-quotes'] } }))
+      .status,
+  ).toBe(200);
+  expect(
+    (await POST(request('catalog/supplier-quotes', 'POST'), { params: { path: ['catalog', 'supplier-quotes'] } }))
+      .status,
+  ).toBe(200);
+  for (const suffix of ['overview', 'options', 'effective']) {
+    expect(
+      (
+        await GET(request(`catalog/supplier-quotes/${suffix}`), {
+          params: { path: ['catalog', 'supplier-quotes', suffix] },
+        })
+      ).status,
+    ).toBe(200);
+  }
+  // 06 采购带出价格走 effective/resolve（歧义时后端 409，代理必须把它原样透传）
+  expect(
+    (
+      await GET(request('catalog/supplier-quotes/effective/resolve'), {
+        params: { path: ['catalog', 'supplier-quotes', 'effective', 'resolve'] },
+      })
+    ).status,
+  ).toBe(200);
+  const quoteSegments = ['catalog', 'supplier-quotes', quote];
+  expect((await GET(request(`catalog/supplier-quotes/${quote}`), { params: { path: quoteSegments } })).status).toBe(200);
+  expect((await PUT(request(`catalog/supplier-quotes/${quote}`, 'PUT'), { params: { path: quoteSegments } })).status).toBe(200);
+  expect((await DELETE(request(`catalog/supplier-quotes/${quote}`, 'DELETE'), { params: { path: quoteSegments } })).status).toBe(200);
+  expect(
+    (
+      await GET(request(`catalog/supplier-quotes/${quote}/tiers`), {
+        params: { path: ['catalog', 'supplier-quotes', quote, 'tiers'] },
+      })
+    ).status,
+  ).toBe(200);
+  // 放行仍然不能是前缀通配：{id} 只带 /tiers 一个字面量子段。
+  for (const path of [
+    `catalog/supplier-quotes/${quote}/unknown-sub`,
+    'catalog/supplier-quotes/effective/resolve/extra',
+    'catalog/supplier-quotesx',
+  ]) {
+    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(404);
+  }
 
   // 放行仍然不能是前缀通配：3.6.1.2 只开了上面那几条**字面量**路径，
   // 任意子段仍然拒绝 —— 放行 {id}/xxx 任意组合会让「一个还没实现的子路径」看起来像已交付。
