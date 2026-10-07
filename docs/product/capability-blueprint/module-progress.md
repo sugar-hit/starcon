@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 1 |
 | **未开发** | **371** |
 | 完成率 | 20.0% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 20 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -275,7 +258,7 @@
 | 7.6.1.1 | 库龄与呆滞 | /inventory/aging | D3 | 未开发 | — |
 | 7.6.2.1 | 库存健康 | /inventory/health | D3 | 已交付 | 迁移 warehouse V66__warehouse_inventory_health.sql（三张表：**一次评估 = 1 行头 + 6 行指标 + 1 行结论**，塞进一张表会出现同一份得分六份副本，故拆 assessment 头 / metric 明细 / verdict 结论；metric 六行**恒定存在**并带 metric_state 三值 AVAILABLE / UNAVAILABLE / NO_DATA + blocked_by_module，四个依赖未交付上游的指标**不带值**；CHECK 钉死「AVAILABLE 必须有值且必须有 metric_source」「UNAVAILABLE 必须有 blocked_by_module」「比率必须落 0..1」「score 0..100」「total_metric_count 必须为 6」；三张表 tenant_id NOT NULL、ENABLE+FORCE RLS isolation、GRANT SELECT/INSERT 给 warehouse_app、REVOKE UPDATE/DELETE 并挂 V1 的 append-only 触发器，评估结论写下即不可改）+ 端点 GET /warehouse/inventory/health 评分卡、GET /trend 准确率趋势（核对口径与盘点口径**各自成序列不混**）、GET /gate 准确率红线判定、GET /issues 问题清单、POST /assess 触发评估（写权限 warehouse.inventory.update；**无证据时按最保守口径阻断**，理由说清是缺证据而非账错了；阻断由 12 财务与 7.1.2.2 在各自边界执行，本服务只给可查询可复现的判定，不代下游改单据状态）+ 页面 /inventory/health（六行恒定渲染、得分旁常驻覆盖度 2/6、红线三态分说「从没核过账」不显示成「通过」；api-proxy 白名单登记在 inventory/(?:…) 组内，含 health 与 trend/gate/issues/assess 四个子路径）+ 测试 InventoryHealthIntegrationTest 21 例实跑 Testcontainers PG16（核对口径准确率与扣分可追溯、取**最后一次**批次而非平均、回落盘点口径、未录实盘行不计入、四个不可用指标标记 UNAVAILABLE 且不带值、落库后仍不带值、负库存恒为 0 且**实跑 DB CHECK 证明写不进负库存**、无证据不得报健康、按仓库口径只认本仓批次、红线阻断与达标放行、阈值越界与倒置区间被拒、问题清单带证据、趋势双序列、+08:00 时间零漂移、租户隔离三断言）+ 前端模型测试 inventory-health-model.test.ts 22 例（不可用指标不给数值位、null 不等于 0、红线三态分说、问题排序）。**指标可算性逐个核实**：库存准确率可算（7.1.2.2 核对 V54 优先、7.4.2.1 盘点 V59 回落）；负库存发生次数可算且恒为 0（V1/V2 的 CHECK 结构上排除，测试实跑证明）；周转率/缺货率/超储率**不可用**（依赖 13 销量，warehouse 不持有销售事实，跨服务不得查它的表）；呆滞占比**不可用**（依赖同批在途的 7.6.1 V65）；**按类目打分不提供**（sku_ref 与 inventory_balance 均无类目列，类目真相在 catalog，跨服务不得 join）。覆盖度与 UNVERIFIABLE 评级是刻意设计：六个指标只算得出一个时，那个分数必须让人看出它不是整体健康度 |
 | 7.7.1.1 | 货主与所有权 | — | D3 | 未开发 | — |
-| 7.7.1.2 | 寄售与代销 | — | D3 | 未开发 | — |
+| 7.7.1.2 | 寄售与代销 | — | D3 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V71__warehouse_consignment_agency.sql`（consignment_agreement 协议头 / consignment_agreement_line 协议明细 / consignment_sale 销售事实 / consignment_settlement 结算触发单 / consignment_settlement_line 结算明细 / consignment_return 退货清理单 / consignment_return_line 清理明细 / consignment_audit 审计 八表，tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT + REVOKE UPDATE/DELETE ON consignment_sale,consignment_audit + REVOKE ALL FROM starcon_app + GRANT USAGE ON 三个发号序列；版本按调度器预分配取 V71）；**货主自带字段、不动 stock_bucket** —— 兄弟模块 7.7.1.1 尚未交付且会自己给 bucket 加 stock_owner 列，把货主塞进 bucket 就是跨车道撞 DDL，因此寄售事实自成体系一组表，明细行自带 `stock_owner_type='SUPPLIER'` 与 `counts_as_owned_asset`（**CHECK 写死 false**），07-inventory.md:24 的硬约束「寄售货主是供应商、我方只记持有位置与可销售权、不记为自有资产」因此是 DB 不变量而不是应用层自觉；代价是寄售可用量与 stock_bucket 实物量暂时是两套数，已在 capabilities 与库存视图如实标注，等 7.7.1.1 落地后按 owner 维度合流；**蓝图财务分叉「寄售未售出不产生采购成本与应付」做成四道 DB 不变量**：①`remaining_quantity` 是 generated column（寄售−已售−已退回−已转采购）+ CHECK>=0，寄售量永远只是寄售量、不会变成成本或负债；②`consignment_settlement_line.amount` 是 generated column（已售数量×结算价），应付**只有**这一个来源，**没有「按寄售量算应付」的第二条路径**；③结算明细 UNIQUE(tenant_id, sale_id)，一条销售事实最多进一张结算单；④退货单 CHECK((disposition='CONVERT_TO_PURCHASE') OR total_payable_amount=0)，未售退回不产生应付、转采购是协议写明的唯一例外；退货单应付额由同步触发器**按 disposition 决定**（退回的单据数据库自己算出来就是 0，不依赖谁记得判断）；**表头合计用立即 AFTER 触发而不是延迟约束**（V62 的先例是延迟，但延迟会让「刚建好的结算单读出来合计是 0」——表头在 COMMIT 前没更新而调用方已在同一事务里把对象读走；此处重算的是表头自身、不涉跨表守恒式，每条明细一落就同步，「表头==Σ明细」在每条语句后都成立，比延迟更强）；协议状态机 DRAFT→ACTIVE⇄SUSPENDED→CLOSED 由触发器钉死且 CHECK(status<>'ACTIVE') OR activated_at IS NOT NULL 保证启用时刻自洽；**协议关闭后明细行被 consignment_line_frozen 触发器冻结**（绕过服务层硬改数量被 DB 拒绝）；销售事实 append-only（触发器禁改禁删 + REVOKE UPDATE,DELETE）；审计 append-only；结算单表头合计==Σ明细、已确认后明细被 consignment_settlement_line_locked 冻结；端点 17 个挂 `/warehouse/inventory/consignments`：GET /capabilities、POST /（建协议+明细，草稿）、GET /（列表真分页，筛状态/模式/关键字）、GET /{id}（详情+明细+审计）、POST /{id}/lines（补行，仅草稿）、POST /{id}/activate、/suspend、/close、GET /{id}/stock-view（寄售量/已售/退回/转采购/剩余 + 已售未结算量与应付预估）、POST /{id}/lines/{lineId}/sales（记销售事实，(协议行,sale_ref) 幂等，售出量不得超剩余）、GET /{id}/sales（真分页，可筛未结算）、GET /{id}/settlement-window（**按 WEEKLY/SEMI_MONTHLY/MONTHLY 真算**默认归期区间）、POST /{id}/settlements（出结算触发单，区间内无未结算销售事实时显式拒绝 —— 未售出不产生应付）、GET /settlements 列表、GET /settlements/{id}（每行指回触发它的销售事实）、POST /settlements/{id}/confirm（写 reference_id 交 12 应付）、POST /{id}/returns（建清理单，期末清理必须与协议 endTreatment 一致否则 409）、GET /returns 列表、GET /returns/{id}、POST /returns/{id}/execute（**这一步才扣减剩余量**：退回记 returned_quantity、转采购记 converted_quantity）、POST /returns/{id}/cancel、GET /{id}/audit；新起 ConsignmentController/Service/Models，不动既有车道文件；**销售事实自落地**（9 订单未交付而「销售触发结算数量」是本模块职责不能停摆，自落地 consignment_sale 并以 (协议行,sale_ref) 幂等，交接键 sale_ref+source_system）；12 应付/10 物流/6 采购/9 订单**均未交付**，一律只出单据 + 写 source_system+reference_id 定位键，不跨库读写不建跨服务 FK（AGENTS.md）；金额 numeric(24,6)（数量 13 位×价格 13 位的乘积会溢出 19 位总宽）、数量与结算价 numeric(19,6)、全程 BigDecimal 禁浮点；`ownedAssetValue` 恒为 **null 而非 0**（报 0 会被读成「这些货值 0 元」），capabilities 如实报 costBasisAvailable=false（寄售按设计就不该有采购入库成本列，不是还没做）；集成测试 `ConsignmentIntegrationTest` 20 例实跑 Testcontainers PostgreSQL 16（连接池压到 1），核心两例真的去数据库硬写「按寄售量的应付」（被 sale_id NOT NULL+外键拒绝、合计仍为 0）与 `counts_as_owned_asset=true`（被 CHECK 拒绝）——只测「卖出去了会算应付」证明不了这条红线；另覆盖售出超剩余被拒、同 saleRef 重复被拒（DuplicateKeyException）、结算单合计 60 件/925 元且二次出单被拒、已确认结算单明细硬改被拒、期末转采购 25×12.5=312.5 应付且退回供应商应付为 0、期末清理方式与协议不一致被拒、退货超剩余被拒、timestamptz 写回零漂移断言（+08:00 时刻读回仍是 15 点）、八张表逐张断言 relforcerowsecurity、租户隔离三断言（两租户互不可见含详情/库存视图/销售/审计/写路径全隔离、伪造 X-Tenant-Id 无效且不能确认他人结算单、A→B→A→B 交替复用同一条物理连接不串租户）、只读身份写路径 403；契约 codegen 新增 Consignment* 类型；页面 `/inventory/consignment`（consignment-workspace.tsx + 纯函数 consignment-model.ts 与 16 例单测）：财务口径卡常驻说明应付唯一来源与货主口径、协议列表与筛选、启用/暂停/关闭、寄售可用量 StatCard（寄售量/已售/未售出/已售未结算四张卡分列避免有人把寄售量当成本）、明细行售罄率（分母 0 显示破折号不画 0%）、记销售（选行带剩余量、订单行引用必填）、结算触发单（按周期一键填入区间、确认交 12 应付）、未售退货与期末清理（转采购用警示色与退回区分、确认不豁免提示唯一例外）、审计时间线、加载态/错误态/无权限态/空态（「本期没卖出、不产生应付」是正常状态不是错误）俱全；api-proxy 白名单登记全部形状（**刻意没有 DELETE**：销售事实与审计是凭据、协议行是结算依据）；导航不加条目与 7.4.2.1/7.5.1.1 保持一致（nav 由 IMPLEMENTED_TASK_PAGES 驱动，避免改共享文件产生跨车道冲突）；**跨车道回归自查**：本迁移只 CREATE 表、不 ALTER 任何既有表，无 ADD COLUMN/SET NOT NULL/既有表触发器，不存在「把别的车道列改成 NOT NULL 而它 INSERT 不写」的违约；表名 consignment_*、类名 Consignment*、路由 /inventory/consignment、版本 V71 均与并行车道 V63~V74 不撞 |
 | 7.7.2.1 | VMI 供应商管理库存 | — | D3 | 未开发 | — |
 | 7.7.2.2 | 平台托管与全托管备货 | — | D3 | 未开发 | — |
 | 7.8.1.1 | 分配策略配置 | — | D3 | 未开发 | — |
@@ -557,3 +540,10 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 91 |
+| 进行中 | 0 |
+| **未开发** | **374** |
+| 完成率 | 19.6% |
+| **D3** | 13 | 0 | 27 | 40 |
+| 07 | 库存核算系统 | D3 | 13 | 31 |
+| 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
