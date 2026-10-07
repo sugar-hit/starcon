@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 64 |
+| 已交付 | 65 |
 | 进行中 | 0 |
-| **未开发** | **401** |
-| 完成率 | 13.8% |
+| **未开发** | **400** |
+| 完成率 | 14.0% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 62 | 0 | 18 | 80 |
+| **D1–D2** | 63 | 0 | 17 | 80 |
 | **D3** | 2 | 0 | 38 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
-| 03 | 商品主数据系统 | D1–D2 | 33 | 40 |
+| 03 | 商品主数据系统 | D1–D2 | 34 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
@@ -178,7 +178,7 @@
 | 3.8.2.1 | 导出 | — | D1–D2 | 未开发 | — |
 | 3.9.1.1 | 重复 SKU 识别 | — | D1–D2 | 未开发 | — |
 | 3.9.1.2 | SKU 合并 | — | D1–D2 | 未开发 | — |
-| 3.9.2.1 | 完整度评分 | — | D1–D2 | 未开发 | — |
+| 3.9.2.1 | 完整度评分 | — | D1–D2 | 已交付 | V37__completeness_score.sql（三张新表 sku_customs_declaration 报关属性 / sku_certification 认证声明 / completeness_evaluation 评估快照，均 tenant_id NOT NULL + ENABLE/FORCE RLS + catalog_app/starcon_app GRANT；score 列 NUMERIC(5,4) 存 **0..1 比值**而不是百分数 —— NUMERIC(5,4) 整数位只有 1 位装不下 100.0000，这逼所有读出口统一用比值，百分数与比值混用是这类评分系统最常见的「看起来对但差 100 倍」的 bug）；guard_sku_certification_status 触发器钉死 HELD 必须有证书编号 / NOT_REQUIRED 不能有编号与有效期 / 到期日不早于签发日（与 CHECK 互为纵深，CHECK 可被 DROP CONSTRAINT 绕过而触发器不能，同 V21/V22/V23）；UNIQUE(tenant_id,sku_id) 保证一个 SKU 只有一份报关口径；UNIQUE(tenant_id,sku_id,certification_code) 保证同一 SKU 同一认证种类只有一条；completeness_evaluation 两条 CHECK 保证 owner_type 与它那侧的 id 成对出现（半个快照读不出来而它是可写进来的状态），ON DELETE CASCADE 让主体删掉时快照一起清掉；**六维度加权求和**：必填属性 0.25 / 图片 0.20 / 类目必填 0.15 / 报关属性 0.15 / 包装尺寸重量 0.15 / 认证 0.10，合计精确 1.0000，在 CompletenessScoreRules 的**类初始化块**里断言 —— 改权重忘了配平会在启动时炸，而不是上线后让全店分数静默偏移（症状是页面上没有任何异常表现）；**R3 两个就绪结论分开判**（刊登链 = 必填属性/图片/类目必填/认证，总分 >= 0.7500 且该链四维无缺失；清关链 = 报关属性/包装尺寸重量，总分 >= 0.6000 且该链两维无缺失）：蓝图原话「完整度直接决定能否刊登与能否清关」，合并成一个百分比之后运营就看不出自己被哪一条链拦住，症状是「补到 80% 了」却仍被拦且不知道该去补报关还是去传图；**R1 评分一律现算**，快照只回答「过去某一刻」（4.2.3.2 预检复盘要回答上周三拦住这批的那个分数是几分），删掉全部快照不影响评分功能；**R4 无变体的 SPU 在三条 SKU 侧维度各记一条 SPU_HAS_NO_SKU 缺失项**而不是把权重摊给别的维度 —— 摊权重会让「一个变体都没有的商品」在属性与图片上拿满分，看起来比它实际的状态好得多；**R5 认证四态（NOT_REQUIRED / HELD / EXPIRED / PENDING）各有各的缺失码**：少了 NOT_REQUIRED（已确认无需认证）的话，不需要强制认证的商品会永远停在「认证缺失」而运营怎么补都补不上；**R6 图片阈值（主图 >=1 张 / 总数 >=3 / 主图最短边 >=1000px）写进缺失项文案** —— 运营看到「主图最短边 800px < 1000px」才知道差多少；**R7 报关属性与认证挂 SKU 不挂 SPU**（同一 SPU 的变体可以有不同 HS 编码与不同认证适用范围）；**R9 类目必填只计入 requirement='REQUIRED' 的无条件规则**：条件必填是录入期表单规则，求值必须复用 3.3.1.2 的 conditionHolds 唯一实现，抄进评分 SQL 就是第二份算子语义；**报关与认证为何在 catalog 侧建表**：3.7.1.1 / 3.7.1.2 与 16 合规在集成头里都未交付，而 AGENTS.md 禁止跨服务读表 / 跨库 FK / 共享视图，缺来源时评分维度只能恒为缺失（假分数比没分数危险得多，它看起来是有依据的）—— V37 第九节写死了 3.7.1.1 落地后的**唯一一条**接管路径（复用本表 或 迁移后删本表），两条路都不允许「两边各存一份、评分读其中一份」；**评分 SQL 的租户从连接上下文读**（current_setting('app.current_tenant')）而不是 ? 绑定：十个 CTE 各带一个租户占位符，少绑一个就在运行时报「未设定参数值 N」而报错指不到原因，且从入参再传一遍租户等于给了一条能传错租户的旁路；**同构检查项列（c_<维度>_ok / c_<维度>_total）**：SPU 与 SKU 用 UNION ALL 合到一张表上，六维度四条读出口（列表/概览/评分卡/预检）共用一个查询，加新维度不必改 UNION 两侧的形状；分母恒 >= 1 所以比率永不除零；**分页是真分页**（筛选/排序/LIMIT/OFFSET 全在 SQL 上，评分也现算，不在内存里切页）；**端点** GET /catalog/completeness（台账 + 分档/就绪/缺失筛选 + 真分页）、/overview、/options、/gaps（按缺失码聚合、受影响主体数降序）、/gaps/summary、/{ownerType}/{ownerId}（评分卡：六维度 + 逐条检查项 + 缺失清单 + 两个就绪结论 + 各自阻塞原因）、POST /evaluations（批量评估：只传主体 id 分数由服务端现算，逐条成败返回不做整体成败）、GET /evaluations[/{id}]、POST /precheck/listing（供 4.2.3.2，allowed + blockers 而非只给布尔）、POST /precheck/customs；GET/PUT/DELETE /customs/skus/{skuId}；GET/POST/PUT/DELETE /certifications/skus/{skuId}[/{certId}]；权限读 catalog.spu.read 写 catalog.spu.update（与同章 3.6.2.1 一致，**刻意不混用合规域权限** —— 混用会出现「能看评分却改不了报关属性」这种半截权限，3.7.2.1 已拒绝过该方案）；页面 /products/completeness（completeness-score-workspace.tsx：治理数字 + 评分台账 + 补全清单 + 评分卡，两个就绪结论分开显示且各带阻塞原因、缺失项逐条带主体名与下一步、null 一律显示「—」或「未登记」绝不渲染成 0（「无需认证」渲染成 0 看起来像「认证得分 0」而它其实是一句「确认无需认证」）、分数优先用后端 percent 串不在前端二次乘 100、加载态/空态/错误态分开渲染、401/403 分开文案）；契约 packages/api-contracts 由 python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi 重新生成（先跑四个服务的 OpenApiContractTest 刷新快照再用，不用旧 target/openapi）：+19 个 Completeness/Customs/Certification DTO、13 条新路径，identity/channel/warehouse 快照零漂移，catalog.ts 既有类型零改动；api-proxy 的 catalog 白名单加一条**完整顶层分支**（含前导 |
 | 3.9.2.2 | 僵尸主数据清理 | — | D1–D2 | 未开发 | — |
 | 4.1.1.1 | Listing 列表 | /listings | D5 | 未开发 | — |
 | 4.1.1.2 | Listing 详情 | /listings | D5 | 未开发 | — |
