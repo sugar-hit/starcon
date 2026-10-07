@@ -289,6 +289,15 @@ const services: readonly {
     // transfers 是 7.5.1.1 调拨单：列表 / {id} / {id}/movements 三个读形状，
     // 以及 {id}/confirm、{id}/ship、{id}/receive、{id}/close 四个动作端点
     // （刻意**没有** DELETE 段：调拨单要靠分录与在途行回溯，不能物理删掉一条单据）。
+    // cross-entity-transfers 是 7.5.2.1 跨法人调拨，**刻意不复用 transfers 前缀**：
+    //   两者语义不同（那边货权前后同一个法人、不定价、无内部结算凭据），
+    //   挂在同一前缀下会让「跨法人」看起来只是普通调拨的一个筛选项 ——
+    //   而那正是蓝图点名要避免的「当作普通同仓调拨」。
+    //   读形状：列表 / {id} / {id}/movements / {id}/settlement；
+    //   动作形状：{id}/source-confirm 与 {id}/target-confirm（**两个独立端点**，
+    //   让调用方在请求体里声明代表哪一方等于让它可以自称另一方）、
+    //   {id}/ship、{id}/receive、{id}/close、{id}/cancel。
+    //   同样**没有** DELETE 段：已发运的货权变更不能物理删除，只能结案。
     // 口径路径上刻意**没有** DELETE 段：作废是审计事件，档位行永久保留，
     // 放行一个删除形状会让"能不能物理删掉一条防超卖配置"看起来是能。
     // effective / pools / pools/{poolKey} 是字面量，排在 {id} 之前判别，两者不会互相吃掉。
@@ -306,7 +315,7 @@ const services: readonly {
     pattern:
     // distribution / platform-observations / serials / lots / internal-access —— 这些路径此前漏登记，
     // 白名单只在浏览器端生效、单测直连服务层发现不了，漏一条就等于该页面在浏览器里拿代理 404。
-      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement))?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|stocktake-variances(?:\/capabilities|\/sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|\/adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
+      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement))?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|stocktake-variances(?:\/capabilities|\/sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|\/adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?|cross-entity-transfers(?:\/[0-9a-f-]+(?:\/(?:movements|settlement|source-confirm|target-confirm|ship|receive|close|cancel))?)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
   },
 ];
 

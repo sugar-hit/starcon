@@ -1839,7 +1839,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "update_1",
+        "operationId": "update_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -2072,7 +2072,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "movements_1",
+        "operationId": "movements_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -2706,7 +2706,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "update",
+        "operationId": "update_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -3319,7 +3319,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "movements",
+        "operationId": "movements_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -5031,6 +5031,680 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/StocktakeVarianceAdjustmentDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/cross-entity-transfers/{transferId}": {
+      "get": {
+        "tags": [
+          "legal-entity-transfer-controller"
+        ],
+        "operationId": "detail_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "transferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalEntityTransferDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "legal-entity-transfer-controller"
+        ],
+        "operationId": "update_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "transferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityTransferUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalEntityTransferSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/cross-entity-transfers": {
+      "get": {
+        "tags": [
+          "legal-entity-transfer-controller"
+        ],
+        "operationId": "page_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "fromLegalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "toLegalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "fromWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "toWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalEntityTransferPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "legal-entity-transfer-controller"
+        ],
+        "operationId": "create_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityTransferCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalEntityTransferSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/cross-entity-transfers/{transferId}/target-confirm": {
+      "post": {
+        "tags": [
+          "legal-entity-transfer-controller"
+        ],
+        "operationId": "targetConfirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "transferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityTransferApproveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalEntityTransferSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/cross-entity-transfers/{transferId}/source-confirm": {
+      "post": {
+        "tags": [
+          "legal-entity-transfer-controller"
+        ],
+        "operationId": "sourceConfirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "transferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityTransferApproveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalEntityTransferSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/cross-entity-transfers/{transferId}/ship": {
+      "post": {
+        "tags": [
+          "legal-entity-transfer-controller"
+        ],
+        "operationId": "ship_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "transferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityTransferShipRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalEntityTransferSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/cross-entity-transfers/{transferId}/receive": {
+      "post": {
+        "tags": [
+          "legal-entity-transfer-controller"
+        ],
+        "operationId": "receive_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "transferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityTransferReceiveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalEntityTransferSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/cross-entity-transfers/{transferId}/close": {
+      "post": {
+        "tags": [
+          "legal-entity-transfer-controller"
+        ],
+        "operationId": "close_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "transferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityTransferCloseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalEntityTransferSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/cross-entity-transfers/{transferId}/cancel": {
+      "post": {
+        "tags": [
+          "legal-entity-transfer-controller"
+        ],
+        "operationId": "cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "transferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityTransferCancelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalEntityTransferSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/cross-entity-transfers/{transferId}/settlement": {
+      "get": {
+        "tags": [
+          "legal-entity-transfer-controller"
+        ],
+        "operationId": "settlement",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "transferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalEntityTransferSettlementHandoff"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/cross-entity-transfers/{transferId}/movements": {
+      "get": {
+        "tags": [
+          "legal-entity-transfer-controller"
+        ],
+        "operationId": "movements_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "transferId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegalEntityTransferMovements"
                 }
               }
             }
@@ -11165,6 +11839,846 @@
           "size": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "LegalEntityTransferLineRequest": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          }
+        }
+      },
+      "LegalEntityTransferUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "valuationBasis": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "expectedShipAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityTransferLineRequest"
+            }
+          }
+        }
+      },
+      "LegalEntityTransferSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transferCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "valuationBasis": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "sourceConfirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "targetConfirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "settlementStatus": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LegalEntityTransferCreateRequest": {
+        "type": "object",
+        "properties": {
+          "fromWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromLegalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toLegalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "valuationBasis": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "expectedShipAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityTransferLineRequest"
+            }
+          }
+        }
+      },
+      "LegalEntityTransferApproveRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "LegalEntityTransferShipRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "LegalEntityTransferReceiveLineRequest": {
+        "type": "object",
+        "properties": {
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      },
+      "LegalEntityTransferReceiveRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityTransferReceiveLineRequest"
+            }
+          }
+        }
+      },
+      "LegalEntityTransferCloseRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "LegalEntityTransferCancelRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "LegalEntityTransferCurrencyAmount": {
+        "type": "object",
+        "properties": {
+          "currencyCode": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LegalEntityTransferLegalEntityOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "LegalEntityTransferOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "transferCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LegalEntityTransferPage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/LegalEntityTransferSummary"
+          },
+          "currencyAmounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityTransferCurrencyAmount"
+            }
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityTransferRow"
+            }
+          },
+          "statusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityTransferOption"
+            }
+          },
+          "valuationOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityTransferOption"
+            }
+          },
+          "legalEntityOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityTransferLegalEntityOption"
+            }
+          },
+          "warehouseOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityTransferWarehouseOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LegalEntityTransferRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transferCode": {
+            "type": "string"
+          },
+          "fromWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromWarehouseCode": {
+            "type": "string"
+          },
+          "fromWarehouseName": {
+            "type": "string"
+          },
+          "toWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toWarehouseCode": {
+            "type": "string"
+          },
+          "toWarehouseName": {
+            "type": "string"
+          },
+          "fromLegalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromLegalEntityCode": {
+            "type": "string"
+          },
+          "fromLegalEntityName": {
+            "type": "string"
+          },
+          "toLegalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toLegalEntityCode": {
+            "type": "string"
+          },
+          "toLegalEntityName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "valuationBasis": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "expectedShipAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "sourceConfirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "targetConfirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "receivedQuantity": {
+            "type": "number"
+          },
+          "discrepancyQuantity": {
+            "type": "number"
+          },
+          "inTransitQuantity": {
+            "type": "number"
+          },
+          "settlementStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "settlementCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LegalEntityTransferSummary": {
+        "type": "object",
+        "properties": {
+          "transferCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "receivedQuantity": {
+            "type": "number"
+          },
+          "discrepancyQuantity": {
+            "type": "number"
+          },
+          "inTransitQuantity": {
+            "type": "number"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingSourceConfirmCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingTargetConfirmCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "confirmedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inTransitCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "discrepancyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "awaitingBothPartiesCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "awaitingTargetCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "awaitingSourceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "settlementIssuedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "settlementAcknowledgedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "earliestExpectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "LegalEntityTransferWarehouseOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "LegalEntityTransferApprovalRow": {
+        "type": "object",
+        "properties": {
+          "side": {
+            "type": "string"
+          },
+          "approvedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "approvedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "LegalEntityTransferDetail": {
+        "type": "object",
+        "properties": {
+          "transfer": {
+            "$ref": "#/components/schemas/LegalEntityTransferRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityTransferLineRow"
+            }
+          },
+          "approvals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityTransferApprovalRow"
+            }
+          },
+          "settlement": {
+            "$ref": "#/components/schemas/LegalEntityTransferSettlementRow"
+          },
+          "pricingNote": {
+            "type": "string"
+          },
+          "ownershipNote": {
+            "type": "string"
+          },
+          "authorizationNote": {
+            "type": "string"
+          }
+        }
+      },
+      "LegalEntityTransferLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "qualityStatusName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "receivedQuantity": {
+            "type": "number"
+          },
+          "discrepancyQuantity": {
+            "type": "number"
+          },
+          "inTransitQuantity": {
+            "type": "number"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LegalEntityTransferSettlementRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "settlementCode": {
+            "type": "string"
+          },
+          "transferId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromLegalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromLegalEntityCode": {
+            "type": "string"
+          },
+          "toLegalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toLegalEntityCode": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "acknowledgedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "LegalEntityTransferSettlementHandoff": {
+        "type": "object",
+        "properties": {
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentType": {
+            "type": "string"
+          },
+          "documentCode": {
+            "type": "string"
+          },
+          "fromLegalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toLegalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "settlementStatus": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityTransferSettlementLine"
+            }
+          },
+          "handoffNote": {
+            "type": "string"
+          }
+        }
+      },
+      "LegalEntityTransferSettlementLine": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "receivedQuantity": {
+            "type": "number"
+          },
+          "discrepancyQuantity": {
+            "type": "number"
+          }
+        }
+      },
+      "LegalEntityTransferMovements": {
+        "type": "object",
+        "properties": {
+          "transferId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transferCode": {
+            "type": "string"
+          },
+          "attribution": {
+            "type": "string"
+          },
+          "attributionNote": {
+            "type": "string"
+          },
+          "movements": {
+            "$ref": "#/components/schemas/InventoryLedgerPage"
           }
         }
       }
