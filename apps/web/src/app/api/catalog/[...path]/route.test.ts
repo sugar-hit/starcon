@@ -334,15 +334,17 @@ it('catalog/unit-groups 的全部路由被放行且转发到 catalog 服务（3.
       ['catalog', 'unit-groups', group, 'conversions', version],
     ],
   ] as const) {
-    expect((await DELETE(request(path, 'DELETE'), { params: { path: [...segments] } })).status).toBe(
-      200,
-    );
+    expect(
+      (await DELETE(request(path, 'DELETE'), { params: { path: [...segments] } })).status,
+    ).toBe(200);
   }
   // 不在白名单里的子路径仍然 404：放行不能是前缀通配。
   expect(
-    (await GET(request(`catalog/unit-groups/${group}/unknown`, 'GET'), {
-      params: { path: ['catalog', 'unit-groups', group, 'unknown'] },
-    })).status,
+    (
+      await GET(request(`catalog/unit-groups/${group}/unknown`, 'GET'), {
+        params: { path: ['catalog', 'unit-groups', group, 'unknown'] },
+      })
+    ).status,
   ).toBe(404);
 });
 
@@ -656,9 +658,11 @@ it('catalog/translations 的全部路由被放行且转发到 catalog 服务（3
 
   // CSV 导出与删除都带 ?version=，走 DELETE。
   expect(
-    (await GET(request(`catalog/translations/entries/export?version=0`), {
-      params: { path: 'catalog/translations/entries/export'.split('/') },
-    })).status,
+    (
+      await GET(request(`catalog/translations/entries/export?version=0`), {
+        params: { path: 'catalog/translations/entries/export'.split('/') },
+      })
+    ).status,
   ).toBe(200);
   for (const [prefix, id] of [
     ['locales', locale],
@@ -702,9 +706,11 @@ it('translations 放行不放行 3.4.2.2 的模板译文路径（两套 locale �
   // 否则「模板译文」与「商品译文」会在代理层就变成同一条规则。
   const suggestion = '55555555-5555-5555-5555-555555555555';
   expect(
-    (await GET(request(`catalog/translations/${suggestion}`), {
-      params: { path: ['catalog', 'translations', suggestion] },
-    })).status,
+    (
+      await GET(request(`catalog/translations/${suggestion}`), {
+        params: { path: ['catalog', 'translations', suggestion] },
+      })
+    ).status,
   ).toBe(404);
   expect(fetcher).not.toHaveBeenCalled();
 });
@@ -756,7 +762,9 @@ it('catalog/boms、catalog/bom-versions 与 catalog/bom-components 的全部路�
     `catalog/bom-versions/${version}/close?effectiveTo=2026-04-01T00:00:00Z`,
     `catalog/bom-versions/${version}/components`,
   ]) {
-    expect((await PUT(request(path, 'PUT'), { params: { path: segments(path) } })).status).toBe(200);
+    expect((await PUT(request(path, 'PUT'), { params: { path: segments(path) } })).status).toBe(
+      200,
+    );
   }
   // DELETE：删 BOM、删草稿版本。
   for (const path of [`catalog/boms/${bom}`, `catalog/bom-versions/${version}`]) {
@@ -799,8 +807,11 @@ it('catalog/bom-explosions 被放行且只放行展开与读回（3.5.2.2 BOM �
   }
   // POST：执行一次展开。
   expect(
-    (await POST(request('catalog/bom-explosions', 'POST'), { params: { path: ['catalog', 'bom-explosions'] } }))
-      .status,
+    (
+      await POST(request('catalog/bom-explosions', 'POST'), {
+        params: { path: ['catalog', 'bom-explosions'] },
+      })
+    ).status,
   ).toBe(200);
   // 放行不能是前缀通配：展开只有 {id} 段，没有子资源。
   for (const path of [`catalog/bom-explosions/${run}/unknown`, 'catalog/bom-explosions/abc']) {
@@ -810,6 +821,85 @@ it('catalog/bom-explosions 被放行且只放行展开与读回（3.5.2.2 BOM �
   // 不是这里的断言范围 —— 那是后端的映射问题（未映射的方法回 405），
   // 由 packages/api-contracts 里 codegen 出来的 OpenAPI 快照证明。
   // 代理这一层要保证的是：路径不被前缀通配放开（上面那两条 404）。
+});
+
+it('catalog/parties 的全部路由被放行（3.6.1.1 往来单位档案）', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const party = '77777777-7777-7777-7777-777777777777';
+  const role = '99999999-9999-9999-9999-999999999999';
+  // 读：列表（含查询串）、概览、引用候选、详情、角色清单。
+  for (const path of [
+    'catalog/parties',
+    `catalog/parties?keyword=ACME&roleType=SUPPLIER&usable=true`,
+    'catalog/parties/overview',
+    'catalog/parties/candidates?roleType=CUSTOMER',
+    `catalog/parties/${party}`,
+    `catalog/parties/${party}/roles`,
+  ]) {
+    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(200);
+  }
+  // 写：新建、编辑、状态流转、指派角色、改角色、解除角色、软删除。
+  expect(
+    (await POST(request('catalog/parties', 'POST'), { params: { path: ['catalog', 'parties'] } }))
+      .status,
+  ).toBe(200);
+  expect(
+    (
+      await PUT(request(`catalog/parties/${party}`, 'PUT'), {
+        params: { path: ['catalog', 'parties', party] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await PUT(request(`catalog/parties/${party}/status`, 'PUT'), {
+        params: { path: ['catalog', 'parties', party, 'status'] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await POST(request(`catalog/parties/${party}/roles`, 'POST'), {
+        params: { path: ['catalog', 'parties', party, 'roles'] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await PUT(request(`catalog/parties/${party}/roles/${role}`, 'PUT'), {
+        params: { path: ['catalog', 'parties', party, 'roles', role] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await DELETE(request(`catalog/parties/${party}/roles/${role}`, 'DELETE'), {
+        params: { path: ['catalog', 'parties', party, 'roles', role] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await DELETE(request(`catalog/parties/${party}`, 'DELETE'), {
+        params: { path: ['catalog', 'parties', party] },
+      })
+    ).status,
+  ).toBe(200);
+
+  // 放行不能是前缀通配：角色特有信息归 3.6.1.2，路径由它自己开，
+  // 不该由本模块的 allowlist 顺手放开（那会让一个还不存在的模块看起来像已交付）。
+  for (const path of [
+    `catalog/parties/${party}/supplier-profile`,
+    `catalog/parties/${party}/status/extra`,
+    `catalog/parties/${party}/roles/${role}/profiles`,
+    // id 段用宽松的 [0-9a-f-]+（与 brands / categories 同一口径），所以 abc 这种
+    // 「碰巧是 hex」的串会被放行；这里用一定不是 hex 的串验证非 id 段会被拒。
+    'catalog/parties/not-a-uuid',
+    'catalog/partiesx',
+  ]) {
+    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(404);
+  }
 });
 
 it('catalog/components 与 catalog/bundle-skus 的全部路由被放行（3.5.1.2 组件维护）', async () => {
@@ -837,9 +927,11 @@ it('catalog/components 与 catalog/bundle-skus 的全部路由被放行（3.5.1.
   }
   // 结构化校验结果：一次列全循环/数量非法/组件不存在，与保存报错分开。
   expect(
-    (await GET(request(`catalog/versions/${version}/component-check`), {
-      params: { path: ['catalog', 'versions', version, 'component-check'] },
-    })).status,
+    (
+      await GET(request(`catalog/versions/${version}/component-check`), {
+        params: { path: ['catalog', 'versions', version, 'component-check'] },
+      })
+    ).status,
   ).toBe(200);
   // 加一行组件（POST）与新建指向都是 POST。
   for (const path of [`catalog/versions/${version}/components`, 'catalog/bundle-skus']) {
@@ -876,8 +968,10 @@ it('catalog/components 与 catalog/bundle-skus 的全部路由被放行（3.5.1.
   // 3.5.1.1 的整体替换与 3.5.1.2 的加一行是两条不同语义：
   // components/{id} 放行不代表 components/{id}/components 也放行。
   expect(
-    (await GET(request(`catalog/components/${component}/components`), {
-      params: { path: ['catalog', 'components', component, 'components'] },
-    })).status,
+    (
+      await GET(request(`catalog/components/${component}/components`), {
+        params: { path: ['catalog', 'components', component, 'components'] },
+      })
+    ).status,
   ).toBe(404);
 });
