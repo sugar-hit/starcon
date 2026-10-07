@@ -11600,6 +11600,152 @@
         }
       }
     },
+    "/catalog/export-jobs": {
+      "get": {
+        "tags": [
+          "export-controller"
+        ],
+        "operationId": "jobs_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "sourceKey",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "export-controller"
+        ],
+        "operationId": "create_6",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportJobInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/export-jobs/{id}/cancel": {
+      "post": {
+        "tags": [
+          "export-controller"
+        ],
+        "operationId": "cancel_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/duplicate-scans": {
       "get": {
         "tags": [
@@ -11682,6 +11828,55 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/DuplicateScanRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/duplicate-candidates/{id}/merge": {
+      "post": {
+        "tags": [
+          "sku-merge-controller"
+        ],
+        "operationId": "merge",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuMergeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuMergeRow"
                 }
               }
             }
@@ -12791,7 +12986,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "list_7",
+        "operationId": "list_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -12881,7 +13076,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "create_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -13458,7 +13653,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "list_8",
+        "operationId": "list_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -13555,7 +13750,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "create_7",
+        "operationId": "create_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -15509,6 +15704,208 @@
         }
       }
     },
+    "/catalog/sku-merges": {
+      "get": {
+        "tags": [
+          "sku-merge-controller"
+        ],
+        "operationId": "merges",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuMergePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-merges/{id}": {
+      "get": {
+        "tags": [
+          "sku-merge-controller"
+        ],
+        "operationId": "merge_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuMergeRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-merges/overview": {
+      "get": {
+        "tags": [
+          "sku-merge-controller"
+        ],
+        "operationId": "overview_7",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuMergeOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-merges/by-sku/{id}": {
+      "get": {
+        "tags": [
+          "sku-merge-controller"
+        ],
+        "operationId": "bySku",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuMergeTrace"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/sku-merges/by-candidate/{id}": {
+      "get": {
+        "tags": [
+          "sku-merge-controller"
+        ],
+        "operationId": "byCandidate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuMergeRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/sku-code/skus/{id}": {
       "get": {
         "tags": [
@@ -15554,7 +15951,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "overview_7",
+        "operationId": "overview_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -15780,7 +16177,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "overview_8",
+        "operationId": "overview_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -16331,7 +16728,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "overview_9",
+        "operationId": "overview_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -16524,7 +16921,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "overview_10",
+        "operationId": "overview_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -16681,7 +17078,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "overview_11",
+        "operationId": "overview_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -17151,6 +17548,118 @@
         }
       }
     },
+    "/catalog/export-sources": {
+      "get": {
+        "tags": [
+          "export-controller"
+        ],
+        "operationId": "sources",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportSourcePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/export-jobs/{id}": {
+      "get": {
+        "tags": [
+          "export-controller"
+        ],
+        "operationId": "job_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportJobRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/export-jobs/{id}/file": {
+      "get": {
+        "tags": [
+          "export-controller"
+        ],
+        "operationId": "file",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/duplicate-scans/{id}": {
       "get": {
         "tags": [
@@ -17280,7 +17789,7 @@
         "tags": [
           "duplicate-detection-controller"
         ],
-        "operationId": "overview_12",
+        "operationId": "overview_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -17339,6 +17848,46 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/DuplicateCandidateDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/duplicate-candidates/{id}/merge-preview": {
+      "get": {
+        "tags": [
+          "sku-merge-controller"
+        ],
+        "operationId": "preview_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuMergePreview"
                 }
               }
             }
@@ -17736,7 +18285,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "overview_13",
+        "operationId": "overview_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -17852,7 +18401,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "overview_14",
+        "operationId": "overview_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -17883,7 +18432,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "overview_15",
+        "operationId": "overview_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -17957,7 +18506,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "overview_16",
+        "operationId": "overview_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -18036,7 +18585,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "overview_17",
+        "operationId": "overview_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -18107,7 +18656,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "overview_18",
+        "operationId": "overview_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -18246,7 +18795,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "overview_19",
+        "operationId": "overview_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -18517,7 +19066,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_20",
+        "operationId": "overview_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -19091,264 +19640,6 @@
                   "additionalProperties": {
                     "type": "boolean"
                   }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/export-jobs": {
-      "get": {
-        "tags": [
-          "export-controller"
-        ],
-        "operationId": "jobs_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "sourceKey",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportJobPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "export-controller"
-        ],
-        "operationId": "create_5",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExportJobInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportJobRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/export-jobs/{id}/cancel": {
-      "post": {
-        "tags": [
-          "export-controller"
-        ],
-        "operationId": "cancel_2",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportJobRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/export-sources": {
-      "get": {
-        "tags": [
-          "export-controller"
-        ],
-        "operationId": "sources",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportSourcePage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/export-jobs/{id}": {
-      "get": {
-        "tags": [
-          "export-controller"
-        ],
-        "operationId": "job_2",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExportJobRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/export-jobs/{id}/file": {
-      "get": {
-        "tags": [
-          "export-controller"
-        ],
-        "operationId": "file",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/csv": {
-                "schema": {
-                  "type": "string",
-                  "format": "byte"
                 }
               }
             }
@@ -26797,13 +27088,261 @@
           }
         }
       },
+      "ExportFilterInput": {
+        "type": "object",
+        "properties": {
+          "spuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "q": {
+            "type": "string",
+            "nullable": true
+          },
+          "barcode": {
+            "type": "string",
+            "nullable": true
+          },
+          "spec": {
+            "type": "string",
+            "nullable": true
+          },
+          "brand": {
+            "type": "string",
+            "nullable": true
+          },
+          "partyId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "partyType": {
+            "type": "string",
+            "nullable": true
+          },
+          "primary": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "roleType": {
+            "type": "string",
+            "nullable": true
+          },
+          "onHandMin": {
+            "type": "number",
+            "nullable": true
+          },
+          "onHandMax": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceMin": {
+            "type": "number",
+            "nullable": true
+          },
+          "priceMax": {
+            "type": "number",
+            "nullable": true
+          },
+          "outOfStock": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "onSale": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "platform": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "ExportJobInput": {
+        "required": [
+          "fields",
+          "sourceKey"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceKey": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "fields": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filters": {
+            "$ref": "#/components/schemas/ExportFilterInput"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/ExportSortInput"
+          },
+          "piiPurpose": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExportSortInput": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "nullable": true
+          },
+          "order": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "ExportAppliedFilter": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "ExportJobRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceKey": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusNote": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "headers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "appliedFilters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportAppliedFilter"
+            }
+          },
+          "sortKey": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "string"
+          },
+          "rowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "byteSize": {
+            "type": "number",
+            "nullable": true
+          },
+          "contentSha256": {
+            "type": "string",
+            "nullable": true
+          },
+          "includesPii": {
+            "type": "boolean"
+          },
+          "piiFields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "piiPurpose": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "departmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "requestedAt": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "finishedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "downloadable": {
+            "type": "boolean"
+          },
+          "downloadNote": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
       "DuplicateScanInput": {
         "type": "object",
         "properties": {
           "minSimilarity": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -26881,6 +27420,217 @@
           "keepCount": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "SkuMergeInput": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "confirm": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SkuMergeReferenceRow": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "sourceCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "migratedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deduplicatedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "conflictCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "frozenCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blocked": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuMergeReport": {
+        "type": "object",
+        "properties": {
+          "references": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuMergeReferenceRow"
+            }
+          },
+          "totalMigrated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalSummed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalDeduplicated": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalConflict": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalFrozen": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blockedDimensions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuMergeRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scanId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "primarySkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "primaryCode": {
+            "type": "string"
+          },
+          "primaryName": {
+            "type": "string"
+          },
+          "secondarySkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "secondaryCode": {
+            "type": "string"
+          },
+          "secondaryName": {
+            "type": "string"
+          },
+          "secondaryStatusBefore": {
+            "type": "string"
+          },
+          "secondaryStatusAfter": {
+            "type": "string"
+          },
+          "mergedIntoSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mergedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "mergedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "secondarySpuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "secondarySpuStatusBefore": {
+            "type": "string"
+          },
+          "secondarySpuStatusAfter": {
+            "type": "string"
+          },
+          "secondarySpuRemainingSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "migratedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deduplicatedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "conflictCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "frozenCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          },
+          "executedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "executedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "report": {
+            "$ref": "#/components/schemas/SkuMergeReport"
           }
         }
       },
@@ -30314,6 +31064,126 @@
           }
         }
       },
+      "SkuMergePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuMergeRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingMergeDecisions": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SkuMergeOverview": {
+        "type": "object",
+        "properties": {
+          "latestScanId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "totalMerges": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mergedAwaySkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingMergeDecisions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "conflictReferences": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "frozenReferences": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mergedSince": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuMergeTrace": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "mergedAway": {
+            "type": "boolean"
+          },
+          "mergedIntoSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mergedIntoCode": {
+            "type": "string"
+          },
+          "mergedIntoName": {
+            "type": "string"
+          },
+          "mergedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "mergedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "absorbed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuMergeTrace"
+            }
+          },
+          "chain": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkuMergeTrace"
+            }
+          },
+          "lastReport": {
+            "$ref": "#/components/schemas/SkuMergeReport"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
       "SkuCodeAssignment": {
         "type": "object",
         "properties": {
@@ -32900,6 +33770,141 @@
           }
         }
       },
+      "ExportFieldInfo": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "pii": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ExportFilterInfo": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ExportSortInfo": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "ExportSourceInfo": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "upstreamModule": {
+            "type": "string"
+          },
+          "permission": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportFieldInfo"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportSortInfo"
+            }
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportFilterInfo"
+            }
+          },
+          "defaultSortKey": {
+            "type": "string"
+          },
+          "maxRows": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "downloadTtlHours": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ExportSourcePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportSourceInfo"
+            }
+          }
+        }
+      },
+      "ExportJobPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExportJobRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "DuplicateScanPage": {
         "type": "object",
         "properties": {
@@ -33170,6 +34175,103 @@
           "count": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "SkuMergePreview": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "versionCheck": {
+            "type": "string"
+          },
+          "versionCheckLabel": {
+            "type": "string"
+          },
+          "executable": {
+            "type": "boolean"
+          },
+          "blockReason": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "primarySkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "primaryCode": {
+            "type": "string"
+          },
+          "primaryName": {
+            "type": "string"
+          },
+          "primarySpuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "primarySpuCode": {
+            "type": "string"
+          },
+          "primaryStatus": {
+            "type": "string"
+          },
+          "primaryVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "secondarySkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "secondaryCode": {
+            "type": "string"
+          },
+          "secondaryName": {
+            "type": "string"
+          },
+          "secondarySpuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "secondarySpuCode": {
+            "type": "string"
+          },
+          "secondaryStatus": {
+            "type": "string"
+          },
+          "secondaryVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expectedPrimaryVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expectedSecondaryVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "secondarySpuRemainingSkuCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "report": {
+            "$ref": "#/components/schemas/SkuMergeReport"
           }
         }
       },
@@ -35420,389 +36522,6 @@
           },
           "createdAt": {
             "type": "string"
-          }
-        }
-      },
-      "ExportFilterInput": {
-        "type": "object",
-        "properties": {
-          "spuId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "category": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "type": "string",
-              "nullable": true
-            }
-          },
-          "q": {
-            "type": "string",
-            "nullable": true
-          },
-          "barcode": {
-            "type": "string",
-            "nullable": true
-          },
-          "spec": {
-            "type": "string",
-            "nullable": true
-          },
-          "brand": {
-            "type": "string",
-            "nullable": true
-          },
-          "partyId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "partyType": {
-            "type": "string",
-            "nullable": true
-          },
-          "primary": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "roleType": {
-            "type": "string",
-            "nullable": true
-          },
-          "onHandMin": {
-            "type": "number",
-            "nullable": true
-          },
-          "onHandMax": {
-            "type": "number",
-            "nullable": true
-          },
-          "priceMin": {
-            "type": "number",
-            "nullable": true
-          },
-          "priceMax": {
-            "type": "number",
-            "nullable": true
-          },
-          "outOfStock": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "onSale": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "platform": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "nullable": true
-      },
-      "ExportJobInput": {
-        "required": [
-          "fields",
-          "sourceKey"
-        ],
-        "type": "object",
-        "properties": {
-          "sourceKey": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "fields": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "filters": {
-            "$ref": "#/components/schemas/ExportFilterInput"
-          },
-          "sort": {
-            "$ref": "#/components/schemas/ExportSortInput"
-          },
-          "piiPurpose": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ExportSortInput": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string",
-            "nullable": true
-          },
-          "order": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "nullable": true
-      },
-      "ExportAppliedFilter": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string"
-          }
-        }
-      },
-      "ExportJobRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "sourceKey": {
-            "type": "string"
-          },
-          "sourceLabel": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusNote": {
-            "type": "string"
-          },
-          "fields": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "headers": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "appliedFilters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExportAppliedFilter"
-            }
-          },
-          "sortKey": {
-            "type": "string"
-          },
-          "sortOrder": {
-            "type": "string"
-          },
-          "rowCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "fileName": {
-            "type": "string",
-            "nullable": true
-          },
-          "byteSize": {
-            "type": "number",
-            "nullable": true
-          },
-          "contentSha256": {
-            "type": "string",
-            "nullable": true
-          },
-          "includesPii": {
-            "type": "boolean"
-          },
-          "piiFields": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "piiPurpose": {
-            "type": "string"
-          },
-          "actorId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "departmentId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "requestedAt": {
-            "type": "string"
-          },
-          "startedAt": {
-            "type": "string",
-            "nullable": true
-          },
-          "finishedAt": {
-            "type": "string",
-            "nullable": true
-          },
-          "expiresAt": {
-            "type": "string",
-            "nullable": true
-          },
-          "downloadable": {
-            "type": "boolean"
-          },
-          "downloadNote": {
-            "type": "string"
-          },
-          "error": {
-            "type": "string"
-          }
-        }
-      },
-      "ExportFieldInfo": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "pii": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ExportFilterInfo": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "kind": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ExportSortInfo": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          }
-        }
-      },
-      "ExportSourceInfo": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "upstreamModule": {
-            "type": "string"
-          },
-          "permission": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          },
-          "fields": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExportFieldInfo"
-            }
-          },
-          "sorts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExportSortInfo"
-            }
-          },
-          "filters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExportFilterInfo"
-            }
-          },
-          "defaultSortKey": {
-            "type": "string"
-          },
-          "maxRows": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "downloadTtlHours": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "ExportSourcePage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExportSourceInfo"
-            }
-          }
-        }
-      },
-      "ExportJobPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ExportJobRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       }
