@@ -281,7 +281,7 @@
 | 8.3.3.1 | 复核扫描 | — | D4 | 未开发 | — |
 | 8.3.3.2 | 打包与称重 | — | D4 | 未开发 | — |
 | 8.3.4.1 | 发货交接 | — | D4 | 未开发 | — |
-| 8.3.4.2 | 面单与标签打印 | — | D4 | 未开发 | — |
+| 8.3.4.2 | 面单与标签打印 | — | D4 | 已交付 | V73 迁移（print_device/print_template/print_target/print_job/print_job_item/label_print_log/print_reprint_rule，RLS+FORCE，计数单调/凭据一一对应/快照冻结/任务状态机/append-only 触发器）；`/warehouse/inventory/printing` 17 个端点（能力声明·打印机·模板·打印对象·重复打印规则·任务·执行·取消·打印内容下载·日志）；`/inventory/printing` 工作区；`LabelPrintingIntegrationTest` 26 项（Testcontainers PG16，五种对象真渲染 ZPL/HTML+Code128、打印次数真累加、平台超限拦截与强制重打留名、租户隔离三断言+跨租户不可见次数与凭据） |
 | 8.4.1.1 | 组装单 | — | D4 | 未开发 | — |
 | 8.4.2.1 | 拆解单 | — | D4 | 未开发 | — |
 | 8.5.1.1 | 作业效率 | — | D4 | 未开发 | — |
