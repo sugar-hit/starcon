@@ -175,9 +175,12 @@ describe('生效区间与店铺类型文案', () => {
 });
 
 describe('notNull：codegen 把带可空字段的类型生成成 T | null', () => {
-  it('null 与 undefined 都归一成 null', () => {
-    expect(notNull(null)).toBeNull();
-    expect(notNull(undefined)).toBeNull();
-    expect(notNull(3)).toBe(3);
+  it('是类型谓词：判是否存在，不是把空值归一成 null', () => {
+    // 实现刻意写成 `v is T` 而不是「归一成 null」：只有类型谓词才能让
+    // Array.filter(notNull) 收窄元素类型，普通函数收窄不了，调用点就得处处补判空。
+    expect(notNull(null)).toBe(false);
+    expect(notNull(undefined)).toBe(false);
+    expect(notNull(3)).toBe(true);
+    expect([1, null, 2, undefined].filter(notNull)).toEqual([1, 2]);
   });
 });
