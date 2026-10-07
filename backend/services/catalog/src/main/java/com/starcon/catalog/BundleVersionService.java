@@ -616,6 +616,10 @@ public class BundleVersionService {
         sql.fetchOne("select code from bundle where tenant_id=? and id=?", tenantId, bundleId);
     if (bundleRow == null) throw notFound("套装不存在");
     Instant moment = BundleRules.parseInstant(at, "查询时刻");
+    // 不传 at 就是查「此刻」。空值默认成现在而不是让 moment 变成 null：
+    // 「不传参数」是「查此刻」的最常见写法，让它一路流到 moment.toString() 会变成 500。
+    // 与 BomVersionService.effectiveVersion 同一处裁决，两个模块的 R4 入口行为必须一致。
+    if (moment == null) moment = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS);
     Record row = effectiveVersionRow(tenantId, bundleId, moment);
     String bundleCode = bundleRow.get("code", String.class);
     if (row == null) {

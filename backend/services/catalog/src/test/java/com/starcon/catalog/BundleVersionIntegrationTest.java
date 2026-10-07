@@ -518,6 +518,19 @@ class BundleVersionIntegrationTest {
     assertThat(gap.effective()).isFalse();
     assertThat(gap.versionNo()).isNull();
     assertThat(gap.note()).contains("没有生效版本");
+    // 不传 at 就是查「此刻」。本用例的区间都在过去（t2 = 90 天前），所以此刻**确实**没有生效版本 ——
+    // 而「查到没有」正是曾经 NPE 的那条分支（moment 为 null 时流到 moment.toString()）。
+    // 这条断言的作用是钉死「不传参数不 500」，不是断言此刻有生效版本。
+    var now = tx(actor, () -> bundles.effectiveVersion(f.bundleId(), null));
+    assertThat(now.effective()).isFalse();
+    assertThat(now.versionNo()).isNull();
+    // 不传参数必须与显式传同一个时刻给出同一个答案。
+    assertThat(tx(actor, () -> bundles.effectiveVersion(f.bundleId(), Instant.now().toString()))
+            .effective())
+        .isFalse();
+    // 命中版本时也不能 NPE：显式传一个落在 v1 区间内的时刻。
+    assertThat(tx(actor, () -> bundles.effectiveVersion(f.bundleId(), t0.toString())).versionNo())
+        .isEqualTo("v1");
   }
 
   /**
