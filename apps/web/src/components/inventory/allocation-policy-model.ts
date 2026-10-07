@@ -280,3 +280,12 @@ export function errorText(e: unknown): string {
   }
   return e instanceof Error ? e.message : String(e);
 }
+
+/**
+ * 分摊结果里每行的原因。
+ *
+ * <p>codegen 把 Java 侧的 {@code AllocationOutcome} 枚举内联成了
+ * {@code AllocationLine.outcome} 上的字符串联合（枚举不单独生成类型），
+ * 所以这里从契约类型反推，而不是手写一份会和后端漂移的联合。
+ */
+export type AllocationOutcome = AllocationLine['outcome'];
