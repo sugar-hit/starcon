@@ -122,7 +122,31 @@ describe('收货单的具体路径形状', () => {
     expect(resolveOk('warehouse/inventory/buckets')).toBe(true);
   });
 
-  it('不误放行不存在的兄弟模块路径', () => {
-    expect(resolveOk('warehouse/goods-receipt-discrepancies')).toBe(false);
+  it('8.2.1.2 收货差异已交付：原本挂在拒绝清单上的路径转为放行', () => {
+    // 这一条曾以「不存在的兄弟模块路径」的形式留在拒绝清单里 —— 那正是 8.2.1.2
+    // 尚未交付时的状态。交付后必须把它改成正向断言，否则拒绝清单就变成一条死链断言：
+    // 模块已经实现、页面却在浏览器里被代理 404，而 typecheck / lint / vitest 全绿。
+    expect(resolveOk('warehouse/goods-receipt-discrepancies')).toBe(true);
+    expect(resolveOk('warehouse/goods-receipt-discrepancies/capabilities')).toBe(true);
+    expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}`)).toBe(true);
+    for (const action of ['evidence', 'decide', 'claim', 'close']) {
+      expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}/${action}`)).toBe(true);
+    }
+    expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}/claim/submit`)).toBe(true);
+    expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}/claim/withdraw`)).toBe(true);
+  });
+
+  it('差异处理路径同样没有放行删除与未实现的动作形状', () => {
+    expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}/purge`)).toBe(false);
+    expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}/revise`)).toBe(false);
+    expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}/claim/settle`)).toBe(false);
+  });
+
+  it('差异处理路径与收货单路径互不吃掉', () => {
+    // 两组前缀首段不同但极其接近（goods-receipts vs goods-receipt-discrepancies），
+    // 正则里少写一个 `|` 或多写一个 `?` 就会让其中一组静默失放行。
+    expect(resolveOk('warehouse/goods-receipts')).toBe(true);
+    expect(resolveOk(`warehouse/goods-receipts/${UUID}/receive`)).toBe(true);
+    expect(resolveOk('warehouse/goods-receipt-discrepancies')).toBe(true);
   });
 });
