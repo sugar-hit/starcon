@@ -279,6 +279,19 @@ export function PhysicalSafetyWorkspace({ skuId }: { skuId: string }) {
                 <p className="text-muted-foreground text-xs">
                   四个标记互不蕴含，各自对应一个申报动作。勾选任一项都必须同时确认「已采集安全属性」。
                 </p>
+                {/* 规则 B3：危险品必须有类别，否则 16 合规不知道按什么申报。
+                    只在勾了危险品时出现 —— 不危险时这个字段没有意义。 */}
+                {draft.dangerousGoods && (
+                  <Field label="危险品类别（必填）">
+                    <input
+                      className={control}
+                      value={draft.dangerousSubstanceClass}
+                      disabled={busy || !canWrite || !draft.safetyCollected}
+                      placeholder="UN 编号 / IATA 类别代码 / 内部危险品编码"
+                      onChange={(e) => patch({ dangerousSubstanceClass: e.target.value })}
+                    />
+                  </Field>
+                )}
                 <Field label="备注（不参与判定）">
                   <input
                     className={control}
@@ -365,6 +378,11 @@ export function PhysicalSafetyWorkspace({ skuId }: { skuId: string }) {
                     </Badge>
                   ))}
                 </div>
+                {profile.dangerousGoods && (
+                  <p className="text-muted-foreground mt-2 text-xs">
+                    危险品类别：{profile.dangerousSubstanceClass || '未填写（保存时会被拒绝）'}
+                  </p>
+                )}
               </div>
             )}
           </Card>

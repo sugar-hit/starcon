@@ -33,8 +33,10 @@ function profile(patch: Partial<PhysicalSafetyProfile> = {}): PhysicalSafetyProf
     containsLiquid: false,
     dangerousGoods: false,
     isMagnetic: false,
+    dangerousSubstanceClass: '',
     safetyNote: '',
     safetyVersion: 0,
+    packagingVersion: 0,
     volumeCm3: 3000,
     divisorCm3PerKg: null,
     volumetricWeightKg: null,
@@ -59,6 +61,7 @@ function draft(patch: Partial<SafetyDraft> = {}): SafetyDraft {
     containsLiquid: false,
     dangerousGoods: false,
     isMagnetic: false,
+    dangerousSubstanceClass: '',
     safetyNote: '',
     safetyVersion: 0,
     packagingVersion: 0,
@@ -253,6 +256,44 @@ describe('数字与错误处理', () => {
     expect(isConflict(new ApiError(409, '已被他人修改'))).toBe(true);
     expect(isConflict(new ApiError(404, '记录不存在或没有访问权限'))).toBe(false);
     expect(isConflict(new Error('boom'))).toBe(false);
+  });
+
+  // 这两条是本轮修掉的两个真实缺陷：draftFrom 曾经把备注写成空串、packagingVersion 写成 0。
+  it('草稿从档案回填备注与包装版本号而不是清空', () => {
+    const draft = draftFrom(
+      profile({ safetyNote: '磁性物已做衰减处理', safetyVersion: 3, packagingVersion: 7 }),
+    );
+    // 备注被清空 =「打开页面点一下保存」就静默丢掉已填内容。
+    expect(draft.safetyNote).toBe('磁性物已做衰减处理');
+    // packagingVersion 恒为 0 = 第二次保存必然 409（第一次写完 version 就变成 1）。
+    expect(draft.packagingVersion).toBe(7);
+    expect(draft.safetyVersion).toBe(3);
+  });
+
+  it('草稿回填危险品类别', () => {
+    expect(
+      draftFrom(profile({ dangerousGoods: true, dangerousSubstanceClass: 'UN1266' }))
+        .dangerousSubstanceClass,
+    ).toBe('UN1266');
+  });
+
+  // 规则 B3 的前端侧：与后端同一套判定，缺一个方向都会让界面提交出一个库层必然拒绝的形状。
+  it('危险品必须填类别，非危险品不许填类别', () => {
+    const base = draftFrom(profile({ dangerousGoods: true }));
+    base.dangerousSubstanceClass = '';
+    expect(validateDraft(base).some((e) => e.includes('危险品类别'))).toBe(true);
+
+    base.dangerousSubstanceClass = 'UN1266';
+    expect(validateDraft(base)).toEqual([]);
+
+    const plain = draftFrom(profile({ dangerousGoods: false }));
+    plain.dangerousSubstanceClass = 'UN1266';
+    expect(validateDraft(plain).some((e) => e.includes('危险品类别'))).toBe(true);
+  });
+
+  it('危险品类别带进提交载荷', () => {
+    const draft = draftFrom(profile({ dangerousGoods: true, dangerousSubstanceClass: 'UN1266' }));
+    expect(draftToPayload(draft).dangerousSubstanceClass).toBe('UN1266');
   });
 
   it('写权限按 catalog.compliance.update 收敛', () => {

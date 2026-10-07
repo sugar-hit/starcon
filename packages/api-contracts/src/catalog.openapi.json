@@ -28250,6 +28250,10 @@
           "isMagnetic": {
             "type": "boolean"
           },
+          "dangerousSubstanceClass": {
+            "type": "string",
+            "nullable": true
+          },
           "safetyNote": {
             "type": "string",
             "nullable": true
@@ -28318,10 +28322,18 @@
           "isMagnetic": {
             "type": "boolean"
           },
+          "dangerousSubstanceClass": {
+            "type": "string"
+          },
           "safetyNote": {
             "type": "string"
           },
           "safetyVersion": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "packagingVersion": {
             "type": "integer",
             "format": "int64",
             "nullable": true
@@ -28657,6 +28669,9 @@
           },
           "isMagnetic": {
             "type": "boolean"
+          },
+          "dangerousSubstanceClass": {
+            "type": "string"
           },
           "flagsText": {
             "type": "string"

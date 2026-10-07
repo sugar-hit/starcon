@@ -85,7 +85,8 @@ public class PhysicalSafetyService {
   /** 安全属性行；{@code null} = 未采集（V28 规则 B2）。 */
   private Record safetyRow(UUID skuId) {
     return sql.fetchOne(
-        "select contains_battery,contains_liquid,dangerous_goods,is_magnetic,note,version"
+        "select contains_battery,contains_liquid,dangerous_goods,is_magnetic,"
+            + "dangerous_substance_class,note,version"
             + " from sku_safety_attribute where sku_id=?",
         skuId);
   }
@@ -123,8 +124,10 @@ public class PhysicalSafetyService {
             collected && Boolean.TRUE.equals(safety.get("contains_liquid", Boolean.class)),
             collected && Boolean.TRUE.equals(safety.get("dangerous_goods", Boolean.class)),
             collected && Boolean.TRUE.equals(safety.get("is_magnetic", Boolean.class)),
+            collected ? safety.get("dangerous_substance_class", String.class) : "",
             collected ? safety.get("note", String.class) : "",
             collected ? safety.get("version", Long.class) : null,
+            row.get("packaging_version", Long.class),
             volume,
             divisor,
             volumetric,
@@ -149,8 +152,10 @@ public class PhysicalSafetyService {
         draft.containsLiquid(),
         draft.dangerousGoods(),
         draft.isMagnetic(),
+        draft.dangerousSubstanceClass(),
         draft.safetyNote(),
         draft.safetyVersion(),
+        draft.packagingVersion(),
         draft.volumeCm3(),
         draft.divisorCm3PerKg(),
         draft.volumetricWeightKg(),
@@ -212,6 +217,18 @@ public class PhysicalSafetyService {
     CatalogService.check(note.length() <= 1000, "安全属性备注最多 1000 字");
     String type = input.packagingType() == null ? "" : input.packagingType().trim();
     CatalogService.check(type.length() <= 64, "包装方式最多 64 字");
+
+    // 规则 B3：危险品必须有类别。两个方向都在应用层先拦一次（给可读的中文错误），
+    // DB 层的 CHECK 与触发器是兜底而不是唯一防线。
+    String substance =
+        input.dangerousSubstanceClass() == null ? "" : input.dangerousSubstanceClass().trim();
+    CatalogService.check(substance.length() <= 64, "危险品类别最多 64 字");
+    CatalogService.check(
+        !input.dangerousGoods() || !substance.isEmpty(),
+        "勾了危险品就必须填写危险品类别：16 合规要按类别决定申报路径与所需证书");
+    CatalogService.check(
+        input.dangerousGoods() || substance.isEmpty(),
+        "没有勾危险品就不该填危险品类别，否则这一行会同时告诉物流「不危险」和合规「有类别」");
   }
 
   /**
@@ -283,15 +300,19 @@ public class PhysicalSafetyService {
       return;
     }
     String note = input.safetyNote() == null ? "" : input.safetyNote().trim();
+    String substance =
+        input.dangerousSubstanceClass() == null ? "" : input.dangerousSubstanceClass().trim();
     int updated =
         sql.execute(
             "update sku_safety_attribute set contains_battery=?,contains_liquid=?,"
-                + "dangerous_goods=?,is_magnetic=?,note=?,version=version+1,updated_at=now()"
+                + "dangerous_goods=?,is_magnetic=?,dangerous_substance_class=?,note=?,"
+                + "version=version+1,updated_at=now()"
                 + " where tenant_id=? and sku_id=? and version=?",
             input.containsBattery(),
             input.containsLiquid(),
             input.dangerousGoods(),
             input.isMagnetic(),
+            substance,
             note,
             tenantId,
             skuId,
@@ -302,8 +323,8 @@ public class PhysicalSafetyService {
     int inserted =
         sql.execute(
             "insert into sku_safety_attribute(id,tenant_id,sku_id,contains_battery,contains_liquid,"
-                + "dangerous_goods,is_magnetic,note,version)"
-                + " values(?,?,?,?,?,?,?,?,0)"
+                + "dangerous_goods,is_magnetic,dangerous_substance_class,note,version)"
+                + " values(?,?,?,?,?,?,?,?,?,0)"
                 + " on conflict (tenant_id,sku_id) do nothing",
             Ids.next(),
             tenantId,
@@ -312,6 +333,7 @@ public class PhysicalSafetyService {
             input.containsLiquid(),
             input.dangerousGoods(),
             input.isMagnetic(),
+            substance,
             note);
     if (inserted == 0)
       throw new ResponseStatusException(HttpStatus.CONFLICT, "安全属性已被他人修改，请刷新后重试");
@@ -386,8 +408,9 @@ public class PhysicalSafetyService {
         sql.fetch(
             "select s.id,s.code,s.name,p.code as spu_code,"
                 + "a.contains_battery,a.contains_liquid,a.dangerous_goods,a.is_magnetic,"
-                + "a.id as safety_id,k.length_mm,k.width_mm,k.height_mm,k.gross_weight_g,"
-                + "k.packaging_type,greatest(s.updated_at,k.updated_at,a.updated_at) as profile_updated_at"
+                + "a.dangerous_substance_class,a.id as safety_id,k.length_mm,k.width_mm,"
+                + "k.height_mm,k.gross_weight_g,k.packaging_type,"
+                + "greatest(s.updated_at,k.updated_at,a.updated_at) as profile_updated_at"
                 + from
                 + where
                 + " order by profile_updated_at desc nulls last,s.id desc limit ? offset ?",
@@ -406,7 +429,8 @@ public class PhysicalSafetyService {
               collected && Boolean.TRUE.equals(r.get("contains_liquid", Boolean.class)),
               collected && Boolean.TRUE.equals(r.get("dangerous_goods", Boolean.class)),
               collected && Boolean.TRUE.equals(r.get("is_magnetic", Boolean.class)),
-              "", null, null, null, null, null, List.of(), List.of(), false);
+              collected ? r.get("dangerous_substance_class", String.class) : "",
+              "", null, null, null, null, null, null, List.of(), List.of(), false);
       items.add(
           new PhysicalSafetyRow(
               draft.skuId(),
@@ -418,6 +442,7 @@ public class PhysicalSafetyService {
               draft.containsLiquid(),
               draft.dangerousGoods(),
               draft.isMagnetic(),
+              draft.dangerousSubstanceClass(),
               flagsText(draft),
               volumeCm3(
                   r.get("length_mm", BigDecimal.class),

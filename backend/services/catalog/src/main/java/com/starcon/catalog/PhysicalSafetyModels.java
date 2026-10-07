@@ -55,8 +55,12 @@ public final class PhysicalSafetyModels {
       boolean containsLiquid,
       boolean dangerousGoods,
       boolean isMagnetic,
+      String dangerousSubstanceClass,
       String safetyNote,
       @Schema(nullable = true) Long safetyVersion,
+      // sku_package 的乐观锁凭据。**必须**回给调用方：前端拿它做 CAS，
+      // 不回传就等于让界面永远拿 0 去提交，第二次保存必然 409。
+      @Schema(nullable = true) Long packagingVersion,
       @Schema(nullable = true) BigDecimal volumeCm3,
       @Schema(nullable = true) BigDecimal divisorCm3PerKg,
       @Schema(nullable = true) BigDecimal volumetricWeightKg,
@@ -88,6 +92,7 @@ public final class PhysicalSafetyModels {
       boolean containsLiquid,
       boolean dangerousGoods,
       boolean isMagnetic,
+      @Schema(nullable = true) String dangerousSubstanceClass,
       @Schema(nullable = true) String safetyNote,
       @PositiveOrZero long safetyVersion,
       @PositiveOrZero long packagingVersion) {}
@@ -127,6 +132,7 @@ public final class PhysicalSafetyModels {
       boolean containsLiquid,
       boolean dangerousGoods,
       boolean isMagnetic,
+      String dangerousSubstanceClass,
       String flagsText,
       @Schema(nullable = true) BigDecimal volumeCm3,
       @Schema(nullable = true) BigDecimal grossWeightG,

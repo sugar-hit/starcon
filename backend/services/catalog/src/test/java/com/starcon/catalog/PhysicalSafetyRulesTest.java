@@ -22,21 +22,24 @@ class PhysicalSafetyRulesTest {
     boolean collected = true;
     return new PhysicalSafetyProfile(
         java.util.UUID.randomUUID(), "SKU-1", "测试商品", "SPU-1", l, w, h, net, gross, "纸箱",
-        collected, false, false, false, false, "", 0L,
+        collected, false, false, false, false, "", "", 0L, 0L,
         null, null, null, null, List.of(), List.of(), false);
   }
 
   static PhysicalSafetyProfile withFlags(boolean battery, boolean liquid, boolean dg, boolean magnetic) {
     return new PhysicalSafetyProfile(
         java.util.UUID.randomUUID(), "SKU-1", "测试商品", "SPU-1",
-        null, null, null, null, null, "", true, battery, liquid, dg, magnetic, "", 0L,
+        null, null, null, null, null, "", true, battery, liquid, dg, magnetic,
+        // 危险品必须带类别（规则 B3）：规则函数的入参必须永远是「合法的档案」，
+        // 否则测试就在断言一个 DB 层已经拒绝掉的形状。
+        dg ? "UN1266" : "", "", 0L, 0L,
         null, null, null, null, List.of(), List.of(), false);
   }
 
   static PhysicalSafetyProfile notCollected() {
     return new PhysicalSafetyProfile(
         java.util.UUID.randomUUID(), "SKU-1", "测试商品", "SPU-1",
-        null, null, null, null, null, "", false, false, false, false, false, "", null,
+        null, null, null, null, null, "", false, false, false, false, false, "", "", null, null,
         null, null, null, null, List.of(), List.of(), false);
   }
 

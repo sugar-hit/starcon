@@ -178,9 +178,12 @@ class PhysicalSafetyIntegrationTest {
       String l, String w, String h, String net, String gross, String packaging,
       boolean collected, boolean battery, boolean liquid, boolean dg, boolean magnetic,
       long safetyVersion, long packagingVersion) {
+    // 危险品按规则 B3 必须带类别：测试只走「合法档案」这一条路，
+    // 非法组合由 危险品必须带类别否则服务层与库层都拒绝 单独断言。
     return new PhysicalSafetyInput(
         decimal(l), decimal(w), decimal(h), decimal(net), decimal(gross), packaging,
-        collected, battery, liquid, dg, magnetic, "", safetyVersion, packagingVersion);
+        collected, battery, liquid, dg, magnetic, dg ? "UN1266" : "", "",
+        safetyVersion, packagingVersion);
   }
 
   static BigDecimal decimal(String value) {
@@ -672,6 +675,108 @@ class PhysicalSafetyIntegrationTest {
           assertThat(body.get("dangerousGoods").asBoolean()).isFalse();
           assertThat(body.get("requiredDeclarations").toString()).contains("LIQUID");
         });
+  }
+
+  // ============================================================ DB 层约束（绕开 Java 直接写 SQL）
+  //
+  // 下面每个用例都用**裸 SQL** 绕过服务层，目的是证明约束真的在 DB 上：
+  // Java 校验能被一条裸 SQL 绕开，CHECK 与触发器不能。
+
+  @Test
+  void 裸sql写毛重小于净重被库层拒绝() {
+    UUID sku = skuOf(actor, unique("DBCHK"));
+    // 先用服务层写出一行合法数据，再绕过服务层改坏它。
+    save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, false, false, false, false);
+    assertThatThrownBy(() -> tx(actor, () -> sql.execute(
+        "update sku_package set gross_weight_g=100, net_weight_g=500 where sku_id=?", sku)))
+        .hasMessageContaining("毛重");
+    // 值没被改脏：库里仍然是提交时的 800 / 500。
+    var row = tx(actor, () -> sql.fetchOne(
+        "select gross_weight_g,net_weight_g from sku_package where sku_id=?", sku));
+    assertThat(row.get("gross_weight_g", BigDecimal.class)).isEqualByComparingTo(decimal("800"));
+    assertThat(row.get("net_weight_g", BigDecimal.class)).isEqualByComparingTo(decimal("500"));
+  }
+
+  @Test
+  void 裸sql写零长宽高被库层拒绝() {
+    UUID sku = skuOf(actor, unique("DBZERO"));
+    save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, false, false, false, false);
+    // 0 长度的箱子不是「体积为 0」的箱子，而是「这一维没量到」（规则 R1）。
+    assertThatThrownBy(() -> tx(actor, () -> sql.execute(
+        "update sku_package set length_mm=0 where sku_id=?", sku))).isNotNull();
+    assertThat(tx(actor, () -> sql.fetchOne(
+        "select length_mm from sku_package where sku_id=?", sku))
+        .get("length_mm", BigDecimal.class)).isEqualByComparingTo(decimal("200"));
+  }
+
+  @Test
+  void 裸sql写零净重被库层拒绝() {
+    UUID sku = skuOf(actor, unique("DBNET"));
+    save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, false, false, false, false);
+    // 净重 0 会让计费重退化成只看体积重，渠道拿不到真实实重。
+    assertThatThrownBy(() -> tx(actor, () -> sql.execute(
+        "update sku_package set net_weight_g=0 where sku_id=?", sku))).isNotNull();
+  }
+
+  @Test
+  void 危险品必须带类别否则服务层与库层都拒绝() {
+    UUID sku = skuOf(actor, unique("DBCLASS"));
+    // 服务层先拦（给可读的中文错误）。
+    // 这里**不能**走 save(...) 帮助方法：它按规则 B3 自动补上类别，
+    // 那样构造出来的就不是「缺类别」这个场景了。显式传空串才是被测输入。
+    assertThatThrownBy(() -> write(actor, () -> physical.save(actor, sku,
+        new PhysicalSafetyInput(
+            decimal("200"), decimal("150"), decimal("100"), decimal("500"), decimal("800"), "纸箱",
+            true, false, false, true, false, "", "", 0, 0))))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("危险品类别");
+
+    // 绕过服务层直接写：库层同样拒绝（CHECK 或触发器，至少有一层咬住即可）。
+    assertThatThrownBy(() -> tx(actor, () -> sql.execute(
+        "insert into sku_safety_attribute(id,tenant_id,sku_id,dangerous_goods,"
+            + "dangerous_substance_class) values(?,?,?,true,'')",
+        java.util.UUID.randomUUID(), a, sku))).isNotNull();
+  }
+
+  @Test
+  void 不是危险品却挂了危险品类别被拒() {
+    UUID sku = skuOf(actor, unique("DBCLASS2"));
+    // 服务层：两个方向都拦。
+    assertThatThrownBy(() -> write(actor, () -> physical.save(actor, sku,
+        new PhysicalSafetyInput(
+            decimal("200"), decimal("150"), decimal("100"), decimal("500"), decimal("800"), "纸箱",
+            true, false, false, false, false, "UN1266", "", 0, 0))))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("危险品类别");
+  }
+
+  @Test
+  void 危险品类别随档案读写并可按类别反查() {
+    UUID sku = skuOf(actor, unique("DBCLASS3"));
+    save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, false, false, true, false);
+    var view = tx(actor, () -> physical.profile(sku, decimal("6000")));
+    assertThat(view.dangerousGoods()).isTrue();
+    assertThat(view.dangerousSubstanceClass()).isEqualTo("UN1266");
+
+    // 按类别反查（16 合规的取数形状）：只捞这一类危险品。
+    var rows = tx(actor, () -> physical.search(new PhysicalSafetyQuery(
+        codeOf(sku), null, null, null, null, null, null, null, 0, 20)));
+    assertThat(rows.items()).extracting(PhysicalSafetyRow::dangerousSubstanceClass)
+        .contains("UN1266");
+  }
+
+  @Test
+  void 包装版本号随档案回传供前端做乐观锁() {
+    UUID sku = skuOf(actor, unique("PKGVER"));
+    // 写入口时 packaging_version=0 尚无行；档案必须如实回传它，
+    // 否则前端永远拿 0 去 CAS，第二次保存必然 409。
+    save(actor, sku, "200", "150", "100", "500", "800", "纸箱", true, false, false, false, false);
+    assertThat(tx(actor, () -> physical.profile(sku, decimal("6000"))).packagingVersion())
+        .isEqualTo(0L);
+    save(actor, sku, "210", "150", "100", "500", "800", "纸箱", true, false, false, false, false);
+    // 版本已递增，回传值必须跟着变，否则 CAS 永远打不中。
+    assertThat(tx(actor, () -> physical.profile(sku, decimal("6000"))).packagingVersion())
+        .isEqualTo(1L);
   }
 
   @Test
