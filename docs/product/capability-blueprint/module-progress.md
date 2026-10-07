@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **403** |
 | 完成率 | 13.3% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 60 | 0 | 20 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 31 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 9 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -557,3 +540,5 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 3.6.3.1 | 地址与联系人 | /partners/contacts | D1–D2 | 未开发 | — |
+| 3.8.1.2 | 校验报告 | — | D1–D2 | 已交付 | V34__import_validation_report.sql（catalog 三张新表：import_validation_report 报告快照（一个任务一份当前报告 UNIQUE(tenant_id,job_id)，四段行数 blocking/skippable/clean/total 由 DB 的 CHECK 钉死互相自洽）、import_validation_issue 错误明细表（蓝图的「错误明细表」输出，带 category 六类分类、file 里的原始值 raw_value、行级 row_blocking）、import_validation_export 导出台账；**不重新校验**：规则唯一写入所有者仍是 3.8.1.1 的 ImportRules/ImportJobExecutor，本模块只把某一轮预校验结论固化成报告 + 在其上做分类统计、逐行定位与导出标注；**报告必须是快照（文件头第 1 节）**：import_row_error 唯一键 UNIQUE(job,row_no,field_key,code) 而预校验可重跑、重跑是 delete+整批重写，于是「昨天导出并发出去的错误清单今天打开页面已经变了」——报告固定在 source_prevalidated_at 上，页面拿它与任务 updated_at 比给出 stale；**过期判据用 generated_at vs import_job.updated_at 而不是 prevalidated_at**：V29 触发器是 `prevalidated_at IS NULL` 才写那列，重跑不会更新它，拿它比永远得出「没变过」；**读策略是「第一次读生成、之后原样返回快照 + stale 标记」而不是每次重算**：每次都重算则 stale 永远为 false（重算完当然是新的），报告页就没有机会告诉用户「你看的不是当前结论」，而报告页正是逐条核对的现场，中途换掉它比显示「已过期」危险得多；**分类词表封闭六类无 OTHER 兜底**（REQUIRED_MISSING / FORMAT_INVALID / DUPLICATE_CODE / REFERENCE_MISSING / UNIQUE_CONFLICT / WRITE_FAILED）：留兜底桶的话 3.8.1.1 新增码会悄悄落进「其他问题」，运营看到一栏看不懂的东西却不知道改什么；映射不全时生成报告显式失败（IllegalStateException 点名该码），ImportValidationRulesTest 断言词表与上游 14 个机器码一一对应（少一个/多一个都变红）；**条级 severity 归并成行级结论**：落不落库是行级事实（同一行 2 条 WARNING + 1 条 ERROR 仍然不落库），所以 blocking 直接读 ImportRules.Severity 枚举而非本地复制一份（复制的那份迟早与上游不同步，而不同步的后果是「报告说能落库、执行阶段把它丢了」）；**导出数据列按模板列序而非文件原始列序**：jsonb 不保留键序，文件列序在库里不可复原，模板列序反而与「下载模板」一致；模板声明了但没映射的列给出空列并由 UNMAPPED_COLUMN 说明为什么空；**标注列追加在数据列之后且文件可原样重新上传**（导入只按映射读模板声明的列，多余标注列被忽略）——集成测试真的把导出的文件走一遍 upload 证明这点；**导出字节现算不存 blob**（与 V29「文件本体不落库」同一纪律），导出时校验现算内容的 sha256 与登记值一致，这条守卫让「同一份报告导两次字节一致」成为可验证的性质（集成测试比对两次哈希）；导出被 V34 文件头第 6 节的 xlsx 边界排除（仓库无 Excel 写依赖），只出带 UTF-8 BOM 的 CSV；3 张表全部 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT catalog_app/starcon_app；ImportValidationRules（纯函数：码→分类、行结论归并 conclude、标注行装配 rowIncluded 按行而非按条收敛）；6 个端点全部挂在 import-jobs/{id}/report 之下（报告不是独立资源，是「某任务某轮结论」的视图，挂在任务下后租户隔离只需守一条父路径）：GET report（读时创建）、POST report（显式重新生成）、GET report/issues（分页 + severity/category/rowNo 三种可组合筛选）、GET report/exports、POST report/exports（登记，报告过期时 409 拒绝导出而非静默重算）、GET report/exports/{eid}/file（CSV 下载，普通链接而非 JSON）；权限沿用 catalog.spu.read/update，租户只来自 AccessService.Access，无一个参数是 tenantId；前端 /products/import/report（与导入向导并列而非嵌入：报告是反复核对的地方，与一次性引导链节奏不同；?jobId= 直达），未改动 3.8.1.1 任何前端文件；**未改动 3.8.1.1 的任何 Java/V29 文件**，仅新增 api-proxy 的 report 子段（挂在已有 import-jobs/{id}/ 段下以最小化跨车道冲突），并在 route.test.ts 补三组断言（含 3.8.1.1 既有路径未被改坏的回归钉子） |
