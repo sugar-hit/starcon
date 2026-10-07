@@ -546,6 +546,20 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['建立仓库', '划分库区', '维护库位'],
   },
   {
+    // 8.1.1.1 仓库列表：路由取蓝图 08 的 L3 锚点 /warehouse/facilities。
+    // 导航条目由 SYSTEMS 的 children 从 IMPLEMENTED_TASK_PAGES 派生（见 nav-config），
+    // 所以这里**只**登记任务页，不需要改共享的导航常量文件。
+    // 与上一条 /warehouse（L3「仓库与库位」入口，库位树属 8.1.2.x）并列而不同名：
+    // 两条都指向仓库域，但一个是 L3 伞页，一个是已交付的列表本体。
+    href: '/warehouse/facilities',
+    implemented: true,
+    domain: 'warehouse',
+    label: '仓库列表',
+    description: '查看仓库类型、货权法人、国家与时区、库存量与作业量，并新增仓库。',
+    fields: ['仓库', '类型', '所属法人', '国家地区', '时区', '库存量', '作业量', '状态'],
+    workflow: ['筛选仓库', '核对货权与库存', '新增仓库'],
+  },
+  {
     href: '/warehouse/inbound',
     implemented: false,
     domain: 'warehouse',

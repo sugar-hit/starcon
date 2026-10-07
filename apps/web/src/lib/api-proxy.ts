@@ -300,13 +300,24 @@ const services: readonly {
     // lines|report|audit|adjustments / adjustments/{id}(+submit|approve|reject|cancel|post)。
     // 同样**没有** DELETE：差异处理全程只追加审计，归因/调整单/审计行都不可删，
     // 放行一个删除形状会让「能不能把一条差异的痕迹抹掉」看起来是能。
+    // facilities 是 8.1.1.1 仓库列表：facilities 是集合读 + POST 新增；
+    // facilities/options 与 facilities/capabilities 是两个**单段字面量**子路径
+    // （筛选下拉项与作业维度接入情况），排在任何 {uuid} 之前判别。
+    // 刻意**没有** {id} 段：仓库详情是 8.1.1.2，尚未交付，
+    // 放行一个不存在的形状会让界面以为「按 id 取单仓」已交付。
+    // 也不放 update/delete：8.1.1.1 的职责范围是「展示 + 筛选 + 新增」，
+    // 改仓库属性属 8.1.1.2、行为参数属 8.1.1.3。放行写路径会让
+    // 「能不能改、能删仓库」看起来是能。
+    // 与 warehouses|legal-entities|skus 的区别：那几个是 7.1.x 各页共用的**下拉参照项**
+    // （只有 id/code/name 等少数列），facilities 是**列表本体**（带库存量、作业量、
+    // 货权法人、当地时间）。名字相近但形状不同，混用会让筛选下拉退化成全量传输。
     prefix: 'warehouse/',
     env: 'WAREHOUSE_URL',
     fallback: 'http://127.0.0.1:8084',
     pattern:
     // distribution / platform-observations / serials / lots / internal-access —— 这些路径此前漏登记，
     // 白名单只在浏览器端生效、单测直连服务层发现不了，漏一条就等于该页面在浏览器里拿代理 404。
-      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement))?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|stocktake-variances(?:\/capabilities|\/sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|\/adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
+      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?(?:\/calculation)?|calculation)|\/[0-9a-f-]+(?:\/(?:versions|retire))?)?|stocktakes(?:\/capabilities|\/[0-9a-f-]+(?:\/lines(?:\/[0-9a-f-]+\/count)?|\/tasks(?:\/[0-9a-f-]+\/assign)?)?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?|lots|ledger(?:\/ref-types|\/[0-9a-f-]+)?|reconciliation(?:\/[0-9a-f-]+(?:\/findings)?)?|distribution(?:\/spus)?|platform-observations|serial-vocabularies|serials(?:\/(?:import|movements|validate-movement))?|transfers(?:\/[0-9a-f-]+(?:\/(?:movements|confirm|ship|receive|close))?)?|stocktake-variances(?:\/capabilities|\/sheets\/[0-9a-f-]+\/(?:lines(?:\/[0-9a-f-]+\/attribute)?|report|audit|adjustments)|\/adjustments(?:\/[0-9a-f-]+(?:\/(?:submit|approve|reject|cancel|post))?)?)?)|facilities(?:\/(?:options|capabilities))?|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
   },
 ];
 
