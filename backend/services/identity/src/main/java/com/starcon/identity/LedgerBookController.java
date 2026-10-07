@@ -287,12 +287,20 @@ public class LedgerBookController {
           if (!"ACTIVE".equals(book.get("status", String.class)))
             reject("停用账簿不能作为默认账簿，请先启用该账簿或改选其他账簿");
 
+          // 必须拆成两条语句：一条 UPDATE 里用 set is_default=(id=?) 同时把新账簿置真、
+          // 旧账簿置假时，PostgreSQL 按行的物理顺序逐行校验部分唯一索引 accounting_book_default，
+          // 一旦先处理到新账簿，它会看到"旧的还没被清掉"而撞唯一约束。换默认账簿必现 409。
+          // 先清后设，两步都在同一事务里，原子性不变。
           sql.execute(
-              "update accounting_book set is_default=(id=?),version=version+1,updated_at=now()"
-                  + " where tenant_id=? and legal_entity_id=?",
-              input.bookId(),
+              "update accounting_book set is_default=false,version=version+1,updated_at=now()"
+                  + " where tenant_id=? and legal_entity_id=? and is_default",
               a.tenantId(),
               legalEntityId);
+          sql.execute(
+              "update accounting_book set is_default=true,version=version+1,updated_at=now()"
+                  + " where tenant_id=? and id=?",
+              a.tenantId(),
+              input.bookId());
           audit(a, auth, input.bookId(), (String) book.get("name"), "DefaultBookSet", null, null);
           return null;
         });
@@ -362,6 +370,19 @@ public class LedgerBookController {
                   ? book.get("base_currency", String.class)
                   : input.currency().trim().toUpperCase();
 
+          // 先查既有归属再插入：唯一约束一旦冲突，PostgreSQL 会把**整个事务**置为
+          // aborted，此后再查任何表都会失败——所以"报错前再查一次事实已在哪本账"必须发生在
+          // 冲突之前，否则 mixedBook 里的那查自己就抛了，调用方又只看到通用 409。
+          var existing =
+              sql.fetchOne(
+                  "select b.code,b.name from book_fact_assignment a"
+                      + " join accounting_book b on b.tenant_id=a.tenant_id and b.id=a.book_id"
+                      + " where a.tenant_id=? and a.fact_source=? and a.fact_ref=?",
+                  a.tenantId(),
+                  source,
+                  input.factRef());
+          if (existing != null) throw mixedBook(existing, source, input.factRef());
+
           UUID id = Ids.next();
           try {
             sql.execute(
@@ -375,8 +396,17 @@ public class LedgerBookController {
                 amount,
                 currency,
                 utcNow());
-          } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            throw mixedBook(e, a.tenantId(), source, input.factRef());
+          } catch (org.springframework.dao.DataAccessException
+              | org.jooq.exception.DataAccessException e) {
+            // 兜底并发窗口：两个请求同时通过了上面的查，第二个真的撞上唯一约束。
+            // 此时事务已 aborted，不能再查，只能给一条不依赖查询的同义提示。
+            throw IdentityController.error(
+                HttpStatus.CONFLICT,
+                "该业务事实（"
+                    + source
+                    + "/"
+                    + input.factRef()
+                    + "）已归属其他账簿；同一笔业务事实只能在归属账簿记一次，跨账簿不混记。");
           }
           audit(a, auth, id, source + "/" + input.factRef(), "BookFactAssigned", null, null);
           return id;
@@ -429,39 +459,25 @@ public class LedgerBookController {
   }
 
   /**
-   * 把唯一约束冲突翻译成"跨账簿混记"，并指出事实已经在哪本账上。
+   * 把"事实已归属别的账簿"翻译成跨账簿混记，并指出事实已经在哪本账上。
    *
-   * <p>先查现有归属再报错：调用方真正需要知道的是"我该找谁"，而不是一个 409。
+   * <p>调用方真正需要知道的是"我该找谁"，而不是一个没有信息的 409。
+   * 归属行由调用方在**插入之前**查出并传入：约束真的冲突时事务已被 PostgreSQL 置为
+   * aborted，此时任何查询都会失败，所以这里不再自己查。
    */
-  private RuntimeException mixedBook(Exception e, UUID tenantId, String source, UUID factRef) {
-    String detail = String.valueOf(e.getMessage() == null ? "" : e.getMessage());
-    if (detail.contains("book_fact_assignment_tenant_id_fact_source_fact_ref_key")
-        || detail.contains("book_fact_assignment")) {
-      var owner =
-          sql.fetchOne(
-              "select b.code,b.name,b.book_category from book_fact_assignment a"
-                  + " join accounting_book b on b.tenant_id=a.tenant_id and b.id=a.book_id"
-                  + " where a.tenant_id=? and a.fact_source=? and a.fact_ref=?",
-              tenantId,
-              source,
-              factRef);
-      if (owner != null)
-        return IdentityController.error(
-            HttpStatus.CONFLICT,
-            "该业务事实（"
-                + source
-                + "/"
-                + factRef
-                + "）已归属账簿「"
-                + owner.get("name", String.class)
-                + "（"
-                + owner.get("code", String.class)
-                + "）」；同一笔业务事实只能在归属账簿记一次，跨账簿不混记。"
-                + "如需改归属，请先在原账簿上解除归属。");
-    }
-    if (detail.contains("book_fact_assignment_book_id_fkey"))
-      return IdentityController.error(HttpStatus.CONFLICT, "该账簿已被其他账簿引用或已不存在，无法登记归属");
-    return IdentityController.error(HttpStatus.CONFLICT, "登记业务事实归属失败，请检查归属登记是否冲突");
+  private RuntimeException mixedBook(Record owner, String source, UUID factRef) {
+    return IdentityController.error(
+        HttpStatus.CONFLICT,
+        "该业务事实（"
+            + source
+            + "/"
+            + factRef
+            + "）已归属账簿「"
+            + owner.get("name", String.class)
+            + "（"
+            + owner.get("code", String.class)
+            + "）」；同一笔业务事实只能在归属账簿记一次，跨账簿不混记。"
+            + "如需改归属，请先在原账簿上解除归属。");
   }
 
   private void requireLegalEntity(UUID tenantId, UUID legalEntityId) {

@@ -107,6 +107,30 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
     return input;
   }
 
+  /**
+   * 发一次必然 409 的请求，返回业务错误文案。
+   *
+   * <p>不能读响应体：identity 的业务错误按本模块惯例抛 {@code ResponseStatusException}
+   * （文案在 {@code getReason()} 上），MockMvc 不会把它渲染成 JSON body，读 body 只会拿到空串。
+   * 这条断言恰恰要验的就是那句文案，所以从异常上取。
+   */
+  private String conflictReason(String token, String path, Object body) throws Exception {
+    var response =
+        http.perform(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(path)
+                    .header("Authorization", "Bearer " + token)
+                    .header("X-Tenant-Id", UUID.randomUUID())
+                    .contentType("application/json")
+                    .content(json.writeValueAsString(body)))
+            .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isConflict())
+            .andReturn();
+    var thrown = response.getResolvedException();
+    assertThat(thrown)
+        .as("跨账簿混记应当抛出带文案的 ResponseStatusException")
+        .isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
+    return ((org.springframework.web.server.ResponseStatusException) thrown).getReason();
+  }
+
   // ------------------------------------------------------------------
   // 多账簿与本位币
   // ------------------------------------------------------------------
@@ -204,12 +228,13 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
   void missingDefaultBookIsRejectedInsteadOfGuessed() throws Exception {
     String token = login(), tag = suffix();
     UUID entityId = entity(token, "LE_" + tag, "CNY");
-    createBook(token, entityId, bookInput("BK_" + tag, "CNY"));
+    UUID bookId = createBook(token, entityId, bookInput("BK_" + tag, "CNY"));
 
     request(token, "GET", "/identity/legal-entities/" + entityId + "/default-book", null, 409);
 
-    UUID bookId = UUID.fromString(
-        request(token, "GET", "/identity/accounting-books", null, 200).get(0).get("id").asText());
+    // 取本法人自己的账簿 id：/accounting-books 不带过滤时返回全租户账簿，
+    // 本模块的用例与 17.1.2.2 共用同一个租户，get(0) 会捞到别的用例建的账，
+    // 设默认时就会因为"账簿不属于本法人"而误报 409。
     request(
         token,
         "PUT",
@@ -247,7 +272,13 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
         Map.of("bookId", second.toString()),
         200);
 
-    var books = request(token, "GET", "/identity/accounting-books", null, 200);
+    var books =
+        request(
+            token,
+            "GET",
+            "/identity/accounting-books?legalEntityId=" + entityId,
+            null,
+            200);
     long defaults =
         java.util.stream.StreamSupport.stream(books.spliterator(), false)
             .filter(b -> b.get("defaultBook").asBoolean())
@@ -309,13 +340,10 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
 
     // 第二本账登记同一笔事实 → 409，且消息指向原账簿
     var mixed =
-        request(
-                token,
-                "POST",
-                "/identity/accounting-books/" + usd + "/fact-assignments",
-                factInput("PURCHASE_ORDER", factRef),
-                409)
-            .toString();
+        conflictReason(
+            token,
+            "/identity/accounting-books/" + usd + "/fact-assignments",
+            factInput("PURCHASE_ORDER", factRef));
     assertThat(mixed).contains("跨账簿不混记").contains("CNY_" + tag);
 
     // 金额按 BigDecimal 往返，不能变成浮点尾巴
@@ -385,6 +413,7 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
     UUID factRef = UUID.randomUUID();
 
     OffsetDateTime before = OffsetDateTime.now(java.time.ZoneOffset.UTC).minusMinutes(1);
+    OffsetDateTime after = OffsetDateTime.now(java.time.ZoneOffset.UTC).plusMinutes(1);
     var input = factInput("SALES_ORDER", factRef);
     input.put("currency", "JPY");
     request(token, "POST", "/identity/accounting-books/" + book + "/fact-assignments", input, 200);
@@ -392,10 +421,12 @@ class LedgerBookIntegrationTest extends IdentityIntegrationTestBase {
     var row =
         request(token, "GET", "/identity/accounting-books/" + book + "/fact-assignments", null, 200);
     assertThat(row.get(0).get("currency").asText()).isEqualTo("JPY");
-    // booked_at 是真 timestamptz：偏 −28800s 的写法在这里会被当场抓住
+    // booked_at 是真 timestamptz：读出的**瞬时值**必须落在这个窗口内。
+    // 判瞬时值而不是判偏移量——响应里的偏移取决于服务所在时区（本机 +08:00），
+    // 拿偏移等于 0 当断言只会在换时区的机器上假红，而真正要防的 8 小时偏移
+    // 已经被这个 ±1 分钟窗口抓住了。
     var bookedAt = OffsetDateTime.parse(row.get(0).get("bookedAt").asText());
-    assertThat(bookedAt.toInstant()).isAfter(before.toInstant());
-    assertThat(bookedAt.getOffset().getTotalSeconds()).isEqualTo(0);
+    assertThat(bookedAt.toInstant()).isAfter(before.toInstant()).isBefore(after.toInstant());
   }
 
   // ------------------------------------------------------------------

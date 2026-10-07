@@ -120,7 +120,10 @@ class AccountingBookIntegrationTest extends IdentityIntegrationTestBase {
             409)
         .toString();
 
-    var books = request(token, "GET", "/identity/accounting-books", null, 200);
+    // 按本法人过滤，不看租户全量：账簿现在已经可以一法人多本（17.6.1.1），
+    // 全量清单里必然还有别的用例建的账，拿它断言 hasSize(1) 是在断言"这个租户只有一本账"。
+    var books =
+        request(token, "GET", "/identity/accounting-books?legalEntityId=" + entityId, null, 200);
     assertThat(books).hasSize(1);
     assertThat(books.get(0).get("baseCurrency").asText()).isEqualTo("USD");
     assertThat(books.get(0).get("legalEntityCurrency").asText()).isEqualTo("USD");
