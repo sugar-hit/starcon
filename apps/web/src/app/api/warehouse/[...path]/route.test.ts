@@ -92,12 +92,14 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
 it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
-  // 库存流水/预占属 7.1.2 与 7.2.1，尚未交付，不应被代理放行。
-  // 7.1.1.2 的明细只读端点已在白名单里，但它的行内操作入口指向的路由
-  // （adjustments / transfer / ledger）仍**不**放行 —— 入口契约就位，
+  // 预占（7.2.1）、调整单（7.4.1.1）、调拨单（7.5.1.1）尚未交付，不应被代理放行。
+  // 7.1.1.2 明细页的行内操作入口指向这些路由，入口契约就位但目标模块还没到 ——
   // 目标模块交付后再加，否则就是一个点下去 404 的死链。
+  //
+  // 注意 ledger 曾在这份拒绝清单里：那是 7.1.2 尚未交付时的状态，
+  // 7.1.2.1 已交付并入后它的前端页面就在调这个路径，不放行等于页面在浏览器里 404，
+  // 所以已移出拒绝清单（放行覆盖由上面「已放行」用例钉住）。
   for (const path of [
-    'warehouse/inventory/ledger',
     'warehouse/inventory/reservations',
     'warehouse/inventory/adjustments',
     'warehouse/inventory/transfer',
