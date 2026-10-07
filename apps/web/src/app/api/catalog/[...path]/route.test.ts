@@ -704,3 +704,73 @@ it('translations 放行不放行 3.4.2.2 的模板译文路径（两套 locale �
   ).toBe(404);
   expect(fetcher).not.toHaveBeenCalled();
 });
+
+it('catalog/components 与 catalog/bundle-skus 的全部路由被放行（3.5.1.2 组件维护）', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const bundle = '11111111-1111-1111-1111-111111111111';
+  const version = '22222222-2222-2222-2222-222222222222';
+  const component = '33333333-3333-3333-3333-333333333333';
+  const link = '44444444-4444-4444-4444-444444444444';
+  // 读：组件工作台概览、跨版本清单、单行详情、指向列表、指向单行。
+  for (const path of [
+    'catalog/components/overview',
+    'catalog/components',
+    `catalog/components/${component}`,
+    'catalog/bundle-skus',
+    `catalog/bundle-skus/${link}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8082/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 结构化校验结果：一次列全循环/数量非法/组件不存在，与保存报错分开。
+  expect(
+    (await GET(request(`catalog/versions/${version}/component-check`), {
+      params: { path: ['catalog', 'versions', version, 'component-check'] },
+    })).status,
+  ).toBe(200);
+  // 加一行组件（POST）与新建指向都是 POST。
+  for (const path of [`catalog/versions/${version}/components`, 'catalog/bundle-skus']) {
+    expect((await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status).toBe(
+      200,
+    );
+  }
+  // 改单行组件与改指向都是 PUT。
+  for (const [path, segments] of [
+    [`catalog/components/${component}`, ['catalog', 'components', component]],
+    [`catalog/bundle-skus/${link}`, ['catalog', 'bundle-skus', link]],
+  ] as const) {
+    expect((await PUT(request(path, 'PUT'), { params: { path: [...segments] } })).status).toBe(200);
+  }
+  // 删单行组件与解指向都是 DELETE。
+  for (const [path, segments] of [
+    [`catalog/components/${component}`, ['catalog', 'components', component]],
+    [`catalog/bundle-skus/${link}`, ['catalog', 'bundle-skus', link]],
+  ] as const) {
+    expect(
+      (await DELETE(request(path, 'DELETE'), { params: { path: [...segments] } })).status,
+    ).toBe(200);
+  }
+  // 不在白名单里的相邻路径仍然 404：放行不能是前缀通配。
+  for (const path of [
+    'catalog/components/unknown',
+    `catalog/components/${component}/unknown`,
+    'catalog/bundle-skus/unknown',
+    `catalog/bundle-skus/${link}/unknown`,
+    `catalog/versions/${version}/component-checks`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(404);
+  }
+  // 3.5.1.1 的整体替换与 3.5.1.2 的加一行是两条不同语义：
+  // components/{id} 放行不代表 components/{id}/components 也放行。
+  expect(
+    (await GET(request(`catalog/components/${component}/components`), {
+      params: { path: ['catalog', 'components', component, 'components'] },
+    })).status,
+  ).toBe(404);
+});
