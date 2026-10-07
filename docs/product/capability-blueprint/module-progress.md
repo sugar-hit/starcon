@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 75 |
+| 已交付 | 76 |
 | 进行中 | 0 |
-| **未开发** | **390** |
-| 完成率 | 16.1% |
+| **未开发** | **389** |
+| 完成率 | 16.3% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 73 | 0 | 7 | 80 |
+| **D1–D2** | 74 | 0 | 6 | 80 |
 | **D3** | 2 | 0 | 38 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -48,7 +48,7 @@
 | 14 | 广告与增长系统 | D7 | 0 | 22 |
 | 15 | 客户与客服系统 | D7 | 0 | 24 |
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 15 | 29 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 16 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
 
 ## 判定「已交付」的标准
@@ -516,7 +516,7 @@
 | 17.2.2.3 | 离职与停用 | — | D1–D2 | 已交付 | identity `V46__member_offboarding.sql`（offboarding_case 停用案卷 + offboarding_responsibility_item 在办单据与审批的责任转移台账 + offboarding_reclaim_item 待办与任务的回收台账，三表 tenant_id NOT NULL、ENABLE/FORCE RLS isolation、UNIQUE 租户内 id、部分唯一索引 offboarding_case_open 保证同租户同一人同时只有一条在办离职）；端点 7 个挂在 /identity/offboarding 下：`GET /offboarding` 案卷列表（带两张台账的 total 与 pending 计数）、`GET /offboarding/{id}` 详情（逐条明细而非只给数字）、`POST /offboarding` 发起离职（写案卷、撤销 role_assignment、membership 转 INACTIVE、移交部门负责人指针、登记两张台账、按待结条目推导案卷状态）、`POST /offboarding/{caseId}/responsibility-items` 下游登记待转移条目、`POST /offboarding/{caseId}/responsibility-items/{itemId}/transfer` 执行转移、`POST /offboarding/{caseId}/reclaim-items` 登记待回收、`POST /offboarding/{caseId}/reclaim-items/{itemId}/reclaim` 关闭或改派（`POST /offboarding/{id}/revert` 撤销复职）；**「停用而非删除」落成四道防线**：控制器无任何 DELETE 端点、迁移刻意不授予 identity_app DELETE、指向 membership 的外键全部 ON DELETE RESTRICT、membership 上另加 guard_member_offboarding_delete 删除保护触发器（沿用 V5 法人删除保护的先例）；**边界（AGENTS.md 禁止跨服务 SQL/FK/视图）**：审批 17.4.2.2 与 01 工作台待办尚未交付，本服务不查它们的表，只落两张台账——source_system + reference_id 作为跨服务定位键且刻意不建外键，下游缺席时条目如实停在 PENDING、案卷停在 OPEN，不伪装成已处理完；可逆性由 previousStatus 支撑（撤销恢复停用前的真实状态而非硬编码 ACTIVE），已转移条目不回滚因为它们已发生在下游；**踩到并修掉三个真问题**：① 回收 UPDATE 把 ?::timestamptz 写在了 reclaimed_by_membership_id 上而不是 reclaimed_at，CHECK 约束当场拒绝并被 ApiErrorHandler 映射成 409，语义完全跑偏；② OWNER 判定原先用 role_id=(select id from role where code='OWNER') 这个不带租户条件的标量子查询，多租户库里结果不确定，改为 join 到 role 再按 code 判定；③ 停用成员后重新登录返回的是 403 而非 401（凭据没删，是 membership 停用导致建会话失败），测试按真实状态码断言；其余时间字段全部按纪律把 ?::timestamptz 放在 values 中部而非末位；集成测试 `OffboardingIntegrationTest` 14 例实跑 Testcontainers PostgreSQL 16（连接池压到 1），覆盖：停用后 membership 行与账号都还在且角色分配已撤销（逐表直查而非只看接口）、停用成员旧会话 401 且无法重新登录、重复在办离职撞唯一索引 409、重复停用已 INACTIVE 成员 400、责任台账 PENDING→TRANSFERRED 且未结清时案卷保持 OPEN、接手人必须是启用中的他人、待办关闭与任务改派是两种不同结论、每次转移与回收都进审计且 before/after 载荷形状不同（按动作分别核对）、**留有离职记录的成员物理删除被 DB 拒绝且离职工单不可删**、DELETE 方法在案卷路径上返回 405（证明没有删除端点）、撤销后成员恢复启用且可二次离职、部门负责人离职必须先指定接手人且被拒后成员状态与案卷都不落地、非 Owner 403、**effectiveAt 用 +08:00 偏移写入并断言读回的 Instant 与直接查库的值零漂移**、租户隔离三断言（父→子→父交替复用同一条物理连接、伪造 X-Tenant-Id 换不来对方案卷、跨租户按 id 读详情 404、无 app.current_tenant 时直查表为空、三张表逐张查 relforcerowsecurity）；页面 `/org/offboarding` 工作区（`offboarding-workspace.tsx` + 纯函数 `offboarding-model.ts` 与 9 例单测）：案卷卡片带状态徽标与生效日期、按需展开逐条明细、责任转移与待办回收分段呈现、待办「关闭」与任务「改派」两个动作、撤销二次确认、发起离职表单、加载态/错误态/无权限态/空态/搜索无结果态俱全；api-proxy 白名单登记 offboarding 全部形状（案卷、revert、两张台账的登记与动作）并在锚定正则的 $ 之前追加，用例同时钉住放行与反向（多一层后缀仍 404） |
 | 17.3.1.1 | 角色管理 | — | D1–D2 | 已交付 | role 表 + /roles CRUD + /org/roles 角色管理 |
 | 17.3.1.2 | 页面权限矩阵 | — | D1–D2 | 已交付 | identity V1/V3/V4/V5 page_resource + permission + role_permission 表 + GET /identity/permissions + 权限矩阵页 |
-| 17.3.2.1 | 角色分配 | — | D1–D2 | 未开发 | — |
+| 17.3.2.1 | 角色分配 | — | D1–D2 | 已交付 | identity V47 role_assignment 增生效时间与撤销终态、role_assignment_scope 范围表、「有角色必有范围」延迟约束触发器、/identity/role-assignments 增改查与 /effective-permissions 合并预览、/org/role-assignments 角色分配页 |
 | 17.3.2.2 | 数据范围 | — | D1–D2 | 已交付 | catalog V3 record_data_scopes + RLS scopeMode 数据范围隔离 |
 | 17.3.3.1 | 越权检测 | — | D1–D2 | 已交付 | RLS FORCE + isolation；三条断言实跑（互不可见/伪造头无效/归还不串租户） |
 | 17.4.1.1 | 审批流定义 | — | D4 | 未开发 | — |

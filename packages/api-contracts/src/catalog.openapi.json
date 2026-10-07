@@ -15554,7 +15554,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "overview_8",
+        "operationId": "overview_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -15780,7 +15780,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "overview_9",
+        "operationId": "overview_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -16331,7 +16331,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "overview_10",
+        "operationId": "overview_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -16524,7 +16524,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "overview_11",
+        "operationId": "overview_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -16681,7 +16681,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "overview_12",
+        "operationId": "overview_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -17280,7 +17280,7 @@
         "tags": [
           "duplicate-detection-controller"
         ],
-        "operationId": "overview_13",
+        "operationId": "overview_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -17736,7 +17736,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "overview_14",
+        "operationId": "overview_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -17852,7 +17852,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "overview_15",
+        "operationId": "overview_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -17883,7 +17883,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "overview_17",
+        "operationId": "overview_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -17957,7 +17957,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "overview_18",
+        "operationId": "overview_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -18036,7 +18036,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "overview_19",
+        "operationId": "overview_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -18107,7 +18107,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "overview_20",
+        "operationId": "overview_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -18246,7 +18246,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "overview_21",
+        "operationId": "overview_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -18517,7 +18517,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_22",
+        "operationId": "overview_23",
         "parameters": [
           {
             "name": "Authorization",
@@ -20559,7 +20559,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "overview_16",
+        "operationId": "overview_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -20956,7 +20956,7 @@
         "tags": [
           "sku-merge-controller"
         ],
-        "operationId": "overview_7",
+        "operationId": "overview_8",
         "parameters": [
           {
             "name": "Authorization",

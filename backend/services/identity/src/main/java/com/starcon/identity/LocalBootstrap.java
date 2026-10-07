@@ -52,7 +52,14 @@ public class LocalBootstrap implements ApplicationRunner {
                 tenant,
                 "OWNER");
             tx.execute("insert into role_permission select ?,?,code from permission", tenant, role);
-            tx.execute("insert into role_assignment values(?,?,?,'ALL')", tenant, member, role);
+            // 显式列名：V47 给 role_assignment 加了生效时间与撤销列，位置式 INSERT 已不再成立。
+            tx.execute(
+                "insert into role_assignment(tenant_id,membership_id,role_id,scope_mode,assigned_by)"
+                    + " values(?,?,?,'ALL',?)",
+                tenant,
+                member,
+                role,
+                user);
           });
     }
   }

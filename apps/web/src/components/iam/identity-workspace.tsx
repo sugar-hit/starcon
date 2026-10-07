@@ -18,6 +18,11 @@ const destinations = [
     '停用离职成员、转移在办单据与审批责任、回收待办与任务，全程保留历史记录',
   ],
   ['roles', '角色配置', '配置页面操作权限与数据范围'],
+  [
+    'role-assignments',
+    '角色分配',
+    '给成员分配角色，设定生效时间与法人、店铺、仓库、部门作用范围',
+  ],
   ['departments', '部门管理', '维护成员归属与部门数据范围'],
   ['department-leaders', '部门负责人', '指定各部门负责人、管理范围与审批权限，支持代管与临时授权'],
   ['children', '子租户管理', '创建独立工作空间并指定所有者'],
@@ -41,6 +46,9 @@ function visible(session: Access, key: string) {
   if (key === 'department-leaders') return hasPermission(session, 'identity.department_leader.read');
   // 离职与停用同样是独立页面权限码，不走 AdministrationPanel 的四类管理（17.2.2.3）。
   if (key === 'offboarding') return hasPermission(session, 'identity.offboarding.read');
+  // 角色分配同样是独立页面权限码，与「角色配置」「成员管理」不是一回事（17.3.2.1）。
+  if (key === 'role-assignments')
+    return hasPermission(session, 'identity.assignment.read');
   if (key === 'onboarding')
     return session.grants.some(
       (g) => g.scopeMode === 'ALL' && g.permissions.includes('identity.onboarding.read'),

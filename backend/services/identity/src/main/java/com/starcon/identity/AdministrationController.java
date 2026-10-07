@@ -672,13 +672,32 @@ public class AdministrationController {
             "管理权限只能绑定租户内全部范围");
     }
     sql.execute("delete from role_assignment where membership_id=?", id);
-    for (var input : inputs)
+    for (var input : inputs) {
+      // 显式列名 + 生效时间带 ?::timestamptz 且**不在末位**：jOOQ 对 VALUES 列表里的裸 ? 按 varchar
+      // 推断类型，OffsetDateTime 会被当字符串塞进去且不报错（值偏一个时区偏移）；
+      // 而把 cast 放到列表末位会让 jOOQ 整体绑定错位一格。两处都踩过，所以顺序是刻意的，不要「顺手整理」。
       sql.execute(
-          "insert into role_assignment values(?,?,?,?)",
+          "insert into role_assignment(tenant_id,membership_id,role_id,effective_from,scope_mode,assigned_by)"
+              + " values(?,?,?,?::timestamptz,?,?)",
           a.tenantId(),
           id,
           input.roleId(),
-          input.scopeMode());
+          OffsetDateTime.now(),
+          input.scopeMode(),
+          a.userId());
+      // V47 起「有角色必有范围」是库内延迟约束触发的硬规则。这里 DEPARTMENT 范围就是成员自己的部门，
+      // 显式落成一条对象范围，库里就不会出现一条没有范围的分配。成员换部门时 updateMember 会整体重写
+      // 本方法写下的行，所以范围不会滞留在旧部门上。
+      if (input.scopeMode().equals("DEPARTMENT"))
+        sql.execute(
+            "insert into role_assignment_scope(tenant_id,membership_id,role_id,scope_type,scope_id,scope_code)"
+                + " values(?,?,?,'DEPARTMENT',?,?)",
+            a.tenantId(),
+            id,
+            input.roleId(),
+            department,
+            sql.fetchOne("select code from department where id=?", department).get("code", String.class));
+    }
   }
 
   private UUID user(String auth, String username, String password) {
@@ -806,10 +825,14 @@ public class AdministrationController {
           check(!a.membershipId().equals(input.membershipId()), "请选择其他成员");
           UUID rid = sql.fetchOne("select id from role where code='OWNER'").get("id", UUID.class);
           sql.execute(
-              "insert into role_assignment values(?,?,?,'ALL') on conflict(tenant_id,membership_id,role_id) do update set scope_mode='ALL'",
+              "insert into role_assignment(tenant_id,membership_id,role_id,scope_mode,assigned_by)"
+                  + " values(?,?,?,'ALL',?)"
+                  + " on conflict(tenant_id,membership_id,role_id) do update"
+                  + " set scope_mode='ALL',status='ACTIVE',revoked_at=null,revoked_by=null",
               a.tenantId(),
               input.membershipId(),
-              rid);
+              rid,
+              a.userId());
           sql.execute(
               "delete from role_assignment where membership_id=? and role_id=?",
               a.membershipId(),
