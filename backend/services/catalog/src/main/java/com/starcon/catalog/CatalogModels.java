@@ -3658,4 +3658,192 @@ public final class CatalogModels {
       long translatedCount,
       long reviewedCount,
       String note) {}
+
+  // ================================================================ 3.5.1.1 套装版本管理
+
+  /**
+   * 套装档案输入。
+   *
+   * <p><b>没有 versionNo、没有 name、没有生效区间</b>：编码与备注是套装自己的属性，
+   * 名称/版本号/生效区间全在版本上（V23 文件头第一节写了为什么不合并）。
+   *
+   * <p>{@code version} 是乐观锁，新建时传 0。
+   */
+  public record BundleInput(
+      @NotBlank @Size(max = 64) String code,
+      @Schema(nullable = true) @Size(max = 500) String note,
+      @PositiveOrZero long version) {}
+
+  /** 套装列表行。每行自带版本存量与「此刻生效的是哪一版」，不另开一次查询。 */
+  public record BundleRow(
+      UUID id,
+      String code,
+      String status,
+      String statusLabel,
+      String note,
+      long version,
+      String createdAt,
+      String updatedAt,
+      long versionCount,
+      long draftCount,
+      long publishedCount,
+      @Schema(nullable = true) UUID effectiveVersionId,
+      @Schema(nullable = true) String effectiveVersionNo) {}
+
+  /** 套装列表页。{@code total} 是真实 count，不是「这页有多少行」。 */
+  public record BundlePage(List<BundleRow> items, int page, int size, long total, int totalPages) {}
+
+  /** 版本摘要（套装详情页里的版本列表用，避免把组件清单也塞进来）。 */
+  public record BundleVersionSummary(
+      UUID id,
+      String versionNo,
+      String name,
+      String status,
+      String statusLabel,
+      String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo,
+      long componentCount,
+      boolean effective) {}
+
+  /**
+   * 套装详情。
+   *
+   * <p>{@code effectiveVersionNo} 是「此刻」的答案；想查别的时刻请用
+   * {@code GET /catalog/bundles/{id}/effective?at=}（规则 R4 的时刻查询）。
+   */
+  public record BundleDetail(
+      BundleRow bundle,
+      List<BundleVersionSummary> versions,
+      @Schema(nullable = true) UUID effectiveVersionId,
+      @Schema(nullable = true) String effectiveVersionNo,
+      String note) {}
+
+  /**
+   * 版本输入（建草稿与改草稿共用）。
+   *
+   * <p>{@code effectiveFrom} / {@code effectiveTo} 收 ISO-8601 字符串（带时区偏移）。
+   * {@code effectiveTo} 为 null 表示「此后一直有效」。半开区间的语义见 V23 规则 R1。
+   */
+  public record BundleVersionInput(
+      @NotBlank @Size(max = 32) String versionNo,
+      @NotBlank @Size(max = 200) String name,
+      @NotBlank String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo,
+      @Schema(nullable = true) @Size(max = 500) String note,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 版本行。
+   *
+   * <p>{@code editable} 是「现在能不能改」。已发布版本为 false —— 不是「改某些字段」，
+   * 是整个版本内容冻结（唯一例外是向前关闭生效区间，走单独的接口）。
+   */
+  public record BundleVersionRow(
+      UUID id,
+      UUID bundleId,
+      String bundleCode,
+      String versionNo,
+      String name,
+      String status,
+      String statusLabel,
+      String effectiveFrom,
+      @Schema(nullable = true) String effectiveTo,
+      @Schema(nullable = true) UUID publishedBy,
+      @Schema(nullable = true) String publishedAt,
+      String note,
+      long componentCount,
+      BigDecimal totalQuantity,
+      boolean effective,
+      boolean editable,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  public record BundleVersionPage(
+      List<BundleVersionRow> items, int page, int size, long total, int totalPages) {}
+
+  /** 组件行（附带 SKU 编码与名称，省得前端为了显示再查一次 SKU）。 */
+  public record BundleComponentRow(
+      UUID id,
+      UUID versionId,
+      UUID skuId,
+      String skuCode,
+      String skuName,
+      BigDecimal quantity,
+      String role,
+      String note) {}
+
+  /**
+   * 版本详情：版本 + 组件清单。
+   *
+   * <p>{@code editHint} 用一句中文说明「现在为什么不能改」，而不是只给一个 false ——
+   * 已发布的版本页面上要能看到理由，否则运营只能反复试。
+   */
+  public record BundleVersionDetail(
+      BundleVersionRow version,
+      List<BundleComponentRow> components,
+      BigDecimal totalQuantity,
+      boolean editable,
+      String editHint) {}
+
+  /** 组件行输入。数量是 {@code NUMERIC(19,6)}（@Digits 与列精度逐字一致），必须大于 0。 */
+  public record BundleComponentInput(
+      @NotNull UUID skuId,
+      @NotNull @DecimalMin(value = "0", inclusive = false) @Digits(integer = 13, fraction = 6)
+          BigDecimal quantity,
+      @Schema(nullable = true) @Size(max = 32) String role,
+      @Schema(nullable = true) @Size(max = 200) String note) {}
+
+  /**
+   * 组件清单整体替换输入。
+   *
+   * <p><b>整体替换而不是增删式</b>：组件清单有「同版本内一个 SKU 只有一行」的约束，
+   * 增删式提交时前端必须自己算出最终集合并逐条对账，而漏对账的表现是「页面上还剩一条
+   * 幽灵组件」。整体替换让「保存后清单就是提交的那份」成为事实。
+   */
+  public record BundleComponentsInput(
+      @NotEmpty @Size(max = 50) List<@Valid BundleComponentInput> components,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 当前生效版本视图（规则 R4）。
+   *
+   * <p>{@code effective=false} 表示「这一刻这个套装没有生效版本」。这是真实状态（草稿
+   * 未发布、区间有缝）而不是「查不到」，所以用显式布尔而不是 null 表达。
+   */
+  public record BundleEffectiveView(
+      UUID bundleId,
+      String bundleCode,
+      String at,
+      boolean effective,
+      @Schema(nullable = true) UUID versionId,
+      @Schema(nullable = true) String versionNo,
+      @Schema(nullable = true) String name,
+      List<BundleComponentRow> components,
+      String note) {}
+
+  /**
+   * 套装版本概览。
+   *
+   * <p>{@code openEndedCount} 是这个模块唯一需要每天盯的数字：一个开放区间（永远有效）的
+   * 已发布版本如果没有被接替，这个套装就永远停在一个旧版本上。
+   */
+  public record BundleOverview(
+      long bundleCount,
+      long activeCount,
+      long archivedCount,
+      long versionCount,
+      long draftCount,
+      long publishedCount,
+      long effectiveNowCount,
+      long openEndedCount,
+      long draftWithoutComponentCount,
+      String note) {}
+
+  /** 套装列表筛选条件。 */
+  public record BundleQuery(String keyword, String status, int page, int size) {}
+
+  /** 版本列表筛选条件（跨套装）。 */
+  public record BundleVersionQuery(
+      String keyword, String status, UUID bundleId, int page, int size) {}
 }
