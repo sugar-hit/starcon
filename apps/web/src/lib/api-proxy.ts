@@ -289,11 +289,16 @@ const services: readonly {
     // 口径路径上刻意**没有** DELETE 段：作废是审计事件，档位行永久保留，
     // 放行一个删除形状会让"能不能物理删掉一条防超卖配置"看起来是能。
     // effective / pools / pools/{poolKey} 是字面量，排在 {id} 之前判别，两者不会互相吃掉。
+    // expiry 是 7.3.1.2 效期与先进先出：alerts（效期预警清单）、policies（策略列表）、
+    // policy 与 policy/{skuId}（生效策略读 + 写）、allocation（POST 分配推荐试算）、
+    // warehouses（仓库参照）、lots/{skuId}（指定批次下拉）。
+    // 刻意**没有** DELETE 段：停用走 enabled=false，策略行是审计凭据，
+    // 放行删除形状会让"能不能物理删掉一条分配策略"看起来是能。
     prefix: 'warehouse/',
     env: 'WAREHOUSE_URL',
     fallback: 'http://127.0.0.1:8084',
     pattern:
-      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?|calculation)|[0-9a-f-]+(?:\/(?:versions|retire))?)?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
+      /^(inventory\/(?:overview|buckets|bucket-actions|capabilities|policies(?:\/[0-9a-f-]+)?|sellable-policies(?:\/(?:effective|pools(?:\/[^/]+)?|calculation)|[0-9a-f-]+(?:\/(?:versions|retire))?)?|expiry(?:\/(?:alerts|policies|allocation|policy(?:\/[0-9a-f-]+)?|warehouses|lots(?:\/[0-9a-f-]+)?))?)|warehouses|legal-entities|skus|quality-statuses|locations|lots)$/,
   },
 ];
 

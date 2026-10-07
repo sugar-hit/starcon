@@ -62,6 +62,31 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
       params: { path: ['warehouse', 'inventory', 'policies', id] },
     })).status,
   ).toBe(200);
+  // 7.3.1.2 效期与先进先出的七个形状：alerts / policies / policy/{skuId} 读，
+  // policy 写（停用改配置而不是删行），allocation POST 试算，warehouses 与 lots/{skuId} 参照。
+  for (const path of [
+    'warehouse/inventory/expiry/alerts',
+    'warehouse/inventory/expiry/policies',
+    'warehouse/inventory/expiry/policy',
+    `warehouse/inventory/expiry/policy/${id}`,
+    'warehouse/inventory/expiry/warehouses',
+    `warehouse/inventory/expiry/lots/${id}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  expect(
+    (await POST(request('warehouse/inventory/expiry/allocation', 'POST'), {
+      params: { path: ['warehouse', 'inventory', 'expiry', 'allocation'] },
+    })).status,
+  ).toBe(200);
+  expect(
+    (await POST(request('warehouse/inventory/expiry/policy', 'POST'), {
+      params: { path: ['warehouse', 'inventory', 'expiry', 'policy'] },
+    })).status,
+  ).toBe(200);
+  // 刻意**不在这里**断言 DELETE 被代理拒绝：代理只按路径形状放行、不看方法，
+  // 「策略行不可删除」的两道真实防线是后端控制器没有 DELETE 形状（返回 405）
+  // 与迁移里的 REVOKE DELETE，两者都由 InventoryExpiryIntegrationTest 实跑证明。
 });
 
 it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
