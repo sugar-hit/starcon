@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 57 |
+| 已交付 | 58 |
 | 进行中 | 0 |
-| **未开发** | **408** |
-| 完成率 | 12.3% |
+| **未开发** | **407** |
+| 完成率 | 12.5% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 55 | 0 | 25 | 80 |
+| **D1–D2** | 56 | 0 | 24 | 80 |
 | **D3** | 2 | 0 | 38 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
-| 03 | 商品主数据系统 | D1–D2 | 26 | 40 |
+| 03 | 商品主数据系统 | D1–D2 | 27 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
@@ -173,7 +173,7 @@
 | 3.7.1.1 | HS 编码与申报要素 | — | D1–D2 | 未开发 | 阻塞：product_compliance 同为 `LIKE product_research INCLUDING ALL` 复制，装不了 HS 编码与认证要素。须先拆表。 |
 | 3.7.1.2 | 目的地报关版本 | — | D1–D2 | 未开发 | — |
 | 3.7.2.1 | 物理与安全属性 | — | D1–D2 | 未开发 | — |
-| 3.8.1.1 | 导入向导 | — | D1–D2 | 未开发 | — |
+| 3.8.1.1 | 导入向导 | — | D1–D2 | 已交付 | V29__import_wizard.sql（import_template/import_template_column 模板字典与列定义（field_key 稳定标识 + header 可改 + data_type + required + match_key + sample_value + help，下载模板与字段映射共用同一份列定义）、import_field_mapping 可复用映射配置（mapping jsonb 存 {field_key: 上传文件列头}，名字租户内唯一）、import_job 异步任务（状态机 PENDING→PREVALIDATING→PREVALIDATED→RUNNING→SUCCEEDED/PARTIAL/FAILED/CANCELLED，mapping 快照冻结本次按哪几列解析、worker_claimed_at 领取标记由 DB 裁决一任务一主人、file_name/byte_size/content_sha256 记「导进去的是哪份文件」）、import_job_row 逐行（row_no 为文件物理行号表头=1、cells 存文件原样表头→单元格而非已映射值、改映射无需重传）、import_row_error 逐行错误明细（field_key 空串为整行级、code 机器码、severity ERROR=必须修正不落库 / WARNING=可跳过照常落库，UNIQUE(job,row_no,field_key,code) 让重跑预校验覆盖而非堆积）；**互斥由 DB 裁决**：部分唯一索引 import_job_one_active_per_entity UNIQUE(tenant_id,target_entity) WHERE status IN 活跃态 —— 不用「先查再插」（并发有窗口期），绕过服务层直连 SQL 也插不进去；guard_import_job_status 触发器钉死合法状态迁移 + 模板/目标对象/租户不可漂移 + 时间戳自动维护；refuse_import_template_column_delete 拒绝删被任务引用的列；6 表 ENABLE+FORCE RLS isolation + GRANT catalog_app/starcon_app；**报价（3.6.2.1）有意不含**：target_entity 的 CHECK 不含 QUOTE —— 价格的唯一写入所有者是定价服务，catalog 建报价表等于造出第二个价格事实来源；校验报告（3.8.1.2）只提供结构化落库与查询端点，报告页归其所有）；ImportCsvParser（纯 JDK 手写 RFC 4180：UTF-8 严格模式 + GBK 兜底、剥 UTF-8 BOM、CRLF/LF/CR 三种行尾、字段内换行与逗号、"" 字面引号、尾随逗号算列、被引号字段保留首尾空白；生成时加 BOM 供 Excel 直接打开；**只支持 CSV 不支持 xlsx** —— 仓库无 POI/EasyExcel/OpenCSV 依赖，手写半可靠的 OOXML 解析器只会得到「能读自己写的文件」，前端与本报告均已显式声明）；ImportRules（纯函数：必填/类型/枚举/长度/自然键重复（属性为 spu_code+attribute_code 复合键）/引用完整性/模式语义，ERROR-WARNING 分界即「这行落不落库」的单一判据 blocking()，预校验与执行共用同一判据）；ImportJobExecutor（固定线程池真异步，HTTP 只推进状态即返回；**以 AccessService.Access 而非裸 tenantId 开事务** —— 目标表 spu 被 V3 stamp_record_owner 与 data_scope 要求 app.actor/permission/grants，只绑租户会被逐行拒绝；分批 keyset 游标分页 row_no>? 而非 offset（判定后行离开 PENDING 结果集，offset 分页会每批跳过整段数据）；领取互斥由 worker_claimed_at 裁决；失败行单独事务不影响同批其它行）；五类对象执行写入：SPU（草稿才允许改状态，批量导入不是批量改状态）、SKU（variant_signature 用 IMPORT:编码 满足同 SPU 规格组合唯一）、ATTRIBUTE（只写值不新建属性定义、OPTION 校验选项字典、按 value_mode 决定公共/SKU 值）、PACKAGE（upsert、毛重不小于净重与 DB CHECK 同口径）、BARCODE（条码跨 SKU 占用检查、撤旧主条码、source=IMPORT，V7 触发器同步 sku.barcode）；ImportJobService/ImportTemplateService/ImportWizardController（GET /catalog/import-templates[/{id}[/file]]、POST/PUT/DELETE /import-templates、GET/POST/DELETE /import-field-mappings、POST /catalog/import-jobs（multipart，真文件通道带文件名与大小）、PUT /import-jobs/{id}/mapping、POST /{id}/prevalidate、POST /{id}/execute、POST /{id}/cancel、GET /import-jobs[/{id}[/rows |
 | 3.8.1.2 | 校验报告 | — | D1–D2 | 未开发 | — |
 | 3.8.2.1 | 导出 | — | D1–D2 | 未开发 | — |
 | 3.9.1.1 | 重复 SKU 识别 | — | D1–D2 | 未开发 | — |
