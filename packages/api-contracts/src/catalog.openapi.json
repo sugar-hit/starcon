@@ -2547,7 +2547,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "detail_4",
+        "operationId": "detail_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -2585,7 +2585,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "update_4",
+        "operationId": "update_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -2633,7 +2633,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "delete_3",
+        "operationId": "delete_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -4430,7 +4430,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "detail_5",
+        "operationId": "detail_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -4468,7 +4468,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "update_5",
+        "operationId": "update_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -4516,7 +4516,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "delete_4",
+        "operationId": "delete_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -5198,7 +5198,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "update_6",
+        "operationId": "update_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -5246,7 +5246,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "delete_5",
+        "operationId": "delete_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -8469,7 +8469,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "list_3",
+        "operationId": "list_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -10317,7 +10317,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "list_4",
+        "operationId": "list_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -10407,7 +10407,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "create_3",
+        "operationId": "create_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -10984,7 +10984,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "list_5",
+        "operationId": "list_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -11081,7 +11081,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "create_4",
+        "operationId": "create_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -12495,7 +12495,7 @@
         "tags": [
           "sku-list-controller"
         ],
-        "operationId": "list_6",
+        "operationId": "list_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -12985,7 +12985,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "candidates",
+        "operationId": "candidates_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -14214,7 +14214,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "candidates_1",
+        "operationId": "candidates_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -14353,7 +14353,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "versions_2",
+        "operationId": "versions_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -14624,7 +14624,7 @@
         "tags": [
           "attribute-option-controller"
         ],
-        "operationId": "list_7",
+        "operationId": "list_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -15024,7 +15024,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "delete_6",
+        "operationId": "delete_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -15366,6 +15366,1086 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/PhysicalSafetyPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/contacts/{contactId}": {
+      "get": {
+        "tags": [
+          "party-contact-controller"
+        ],
+        "operationId": "detail_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyContact"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "party-contact-controller"
+        ],
+        "operationId": "update_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyContactInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyContactSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "party-contact-controller"
+        ],
+        "operationId": "delete_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/contacts/{contactId}/primary": {
+      "put": {
+        "tags": [
+          "party-contact-controller"
+        ],
+        "operationId": "setPrimary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyContactPrimaryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyContactSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/addresses/{addressId}": {
+      "get": {
+        "tags": [
+          "party-address-controller"
+        ],
+        "operationId": "detail_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "addressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyAddress"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "party-address-controller"
+        ],
+        "operationId": "update_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "addressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyAddressInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyAddressSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "party-address-controller"
+        ],
+        "operationId": "delete_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "addressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/addresses/{addressId}/usages": {
+      "put": {
+        "tags": [
+          "party-address-controller"
+        ],
+        "operationId": "saveUsages",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "addressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyAddressUsageSaveInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyAddressSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/addresses/{addressId}/default": {
+      "put": {
+        "tags": [
+          "party-address-controller"
+        ],
+        "operationId": "setDefault",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "addressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyAddressDefaultInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyAddressSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/contacts": {
+      "get": {
+        "tags": [
+          "party-contact-controller"
+        ],
+        "operationId": "list_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "primaryOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartyContact"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "party-contact-controller"
+        ],
+        "operationId": "create_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyContactInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyContactSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/addresses": {
+      "get": {
+        "tags": [
+          "party-address-controller"
+        ],
+        "operationId": "list_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "usage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyAddressPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "party-address-controller"
+        ],
+        "operationId": "create_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyAddressInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyAddressSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/contacts/default": {
+      "get": {
+        "tags": [
+          "party-contact-controller"
+        ],
+        "operationId": "primary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyContact"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/contacts/candidates": {
+      "get": {
+        "tags": [
+          "party-contact-controller"
+        ],
+        "operationId": "candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeBlocked",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartyContact"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/addresses/{addressId}/versions": {
+      "get": {
+        "tags": [
+          "party-address-controller"
+        ],
+        "operationId": "versions_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "addressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartyAddressVersion"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/addresses/{addressId}/versions/{versionNo}": {
+      "get": {
+        "tags": [
+          "party-address-controller"
+        ],
+        "operationId": "version_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "addressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "versionNo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyAddressVersion"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/addresses/defaults": {
+      "get": {
+        "tags": [
+          "party-address-controller"
+        ],
+        "operationId": "defaultAddress",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "usage",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyAddress"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/addresses/candidates": {
+      "get": {
+        "tags": [
+          "party-address-controller"
+        ],
+        "operationId": "candidates_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "usage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeBlocked",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartyAddress"
+                  }
                 }
               }
             }
@@ -28694,6 +29774,484 @@
             }
           },
           "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyContactInput": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "position": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "maxLength": 254,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "mobile": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PartyContactSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "isPrimary": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PartyContactPrimaryInput": {
+        "type": "object",
+        "properties": {
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PartyAddressInput": {
+        "required": [
+          "city",
+          "countryCode",
+          "streetLine1"
+        ],
+        "type": "object",
+        "properties": {
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string"
+          },
+          "stateProvince": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "district": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "postalCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "streetLine1": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "streetLine2": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "label": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "changeNote": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "usages": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PartyAddressUsageInput"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PartyAddressUsageInput": {
+        "required": [
+          "usage"
+        ],
+        "type": "object",
+        "properties": {
+          "usage": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          }
+        },
+        "nullable": true
+      },
+      "PartyAddressSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "defaultUsages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "latestVersionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "oneLine": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyAddressUsageSaveInput": {
+        "required": [
+          "usages"
+        ],
+        "type": "object",
+        "properties": {
+          "usages": {
+            "maxItems": 3,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartyAddressUsageInput"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PartyAddressDefaultInput": {
+        "required": [
+          "usage"
+        ],
+        "type": "object",
+        "properties": {
+          "usage": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "isDefault": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PartyContact": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "position": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "mobile": {
+            "type": "string",
+            "nullable": true
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectionBlockCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectionBlockMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyAddress": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "stateProvince": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string"
+          },
+          "district": {
+            "type": "string",
+            "nullable": true
+          },
+          "postalCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "streetLine1": {
+            "type": "string"
+          },
+          "streetLine2": {
+            "type": "string",
+            "nullable": true
+          },
+          "oneLine": {
+            "type": "string"
+          },
+          "usages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "defaultUsages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "usageSummary": {
+            "type": "string"
+          },
+          "latestVersionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "versionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "selectionBlockCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "selectionBlockMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyAddressPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartyAddress"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "defaultCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unassignedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyAddressVersion": {
+        "type": "object",
+        "properties": {
+          "addressId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "current": {
+            "type": "boolean"
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "stateProvince": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string"
+          },
+          "district": {
+            "type": "string",
+            "nullable": true
+          },
+          "postalCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "streetLine1": {
+            "type": "string"
+          },
+          "streetLine2": {
+            "type": "string",
+            "nullable": true
+          },
+          "oneLine": {
+            "type": "string"
+          },
+          "changeNote": {
+            "type": "string"
+          },
+          "changedAt": {
+            "type": "string"
+          },
+          "changedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
             "type": "string"
           }
         }
