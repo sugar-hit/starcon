@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **359** |
 | 完成率 | 22.8% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 20 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -345,7 +328,7 @@
 | 10.3.1.2 | 异常件 | — | D5 | 未开发 | — |
 | 10.3.2.1 | 交运批次 | — | D5 | 未开发 | — |
 | 10.3.2.2 | 揽收与签收确认 | — | D5 | 未开发 | — |
-| 10.4.1.1 | 头程发运单 | — | D7 | 未开发 | — |
+| 10.4.1.1 | 头程发运单 | — | D7 | 已交付 | 迁移 warehouse `V80__warehouse_first_mile_shipment.sql`（first_mile_shipment 发运单头 + first_mile_shipment_line 明细行（SKU × **批次** × 报关口径申报信息，申报品名独立必填、不照搬销售标题）+ first_mile_shipment_leg_receipt 在途腿登记回执 + first_mile_shipment_event 事件时间线，四张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT 与 starcon_app REVOKE，另 GRANT USAGE ON SEQUENCE 发号器；**纯新建表、零 ALTER 既有表**，因此跨车道 DDL 回归面 = 0）· **货权与成本节点入库进契约**：`incoterm`（11 个贸易术语）与 `risk_bearer` NOT NULL，DB 两条 CHECK 钉死真实 Incoterms 一致性（EXW 只能配 BUYER、DDP 只能配 SELLER），并出现在列表行 / 详情 / capabilities 词表三处 —— 蓝图关系段原文「从这一刻起成本转嫁方式（FOB/CIF）与风险承担方确定，直接影响利润口径」，不是页面上写死的展示项 · **发出不扣在手**：照抄 7.5.1.2 台账原文的头程口径（头程/采购登记时不动在手，到货才入库目的仓），本模块**没有一行 SQL** 写 stock_bucket / inventory_balance / inventory_entry / inventory_transaction；越界去改在手余额会造成虚增在手，比缺功能严重得多 · **在途腿只调 7.5.1.2 的公开端点**（POST /warehouse/inventory/in-transit，transitKind=FIRST_MILE、sourceSystem=FIRST_MILE、sourceReference=发运单号-行号），**从不直写 inventory_transfer / in_transit_event**（写入所有者是 7.5.1.2，直写会双记在途）；回执表对 inventory_transfer 建**逻辑引用不建外键**，交接时结构不用再变 · 端点 10 个挂在 /warehouse/first-mile-shipments：GET /capabilities（2 类来源 + **5 个未交付依赖逐条声明** + 16 条状态机转换（含两个标注为「改单」的自环）+ 运输方式与贸易术语词表 + 四条口径说明）、GET /source-candidates（**可发批次候选**：精确到 8.2.1.1 逐次实收行而不是 SKU，可发量 = 实收 − 拒收 − 已被其他发运单占用）、GET 列表（真分页 + 全量汇总不受分页影响 + 筛选状态/运输方式/术语/起止仓/目的国/在路上 + 关键词 + 排序白名单 5 键）、GET /{id} 详情（头 + 明细 + 发货分录 + 事件时间线 + 合法下一步）、GET /{id}/transit-legs 发货分录（并排读 7.5.1.2 的未达/已了结量）、POST 建单、PUT 改单、POST /confirm、POST /dispatch、POST /cancel · **四态状态机只有一处真相**（DRAFT / CONFIRMED / DISPATCHED / CANCELLED），**已发出与已取消都是终态**：货权已转、在途腿已在 7.5.1.2 名下，回退会让两者对不上，要改这批货走 7.5.1.2 的差异登记；DB 触发器 guard_first_mile_state 钉死「终态不许离开」且**只拦离开不拦进入**（写成「不许进入 DISPATCHED」会把合法的CONFIRMED→DISPATCHED 发出动作一起挡掉，货永远发不出去）· **同一批货不能发两次**：延迟约束触发器 guard_first_mile_over_ship 钉死「同一实收批次的累计发运量 ≤ 实收 − 拒收」（拒收部分从未入库，算进可发量就是凭空多出一批不存在的货）；guard_first_mile_leg 钉死「发出量 > 0 的行必须在 7.5.1.2 有且只有一条在途腿」；guard_first_mile_line_source 钉死「批次必须属于该 SKU、批次与实收行一致、计划量不超实收量」；guard_first_mile_eta 钉死 ETA 不早于开船 · **发出时逐行可部分发运**（lines 是发出量覆盖值不是选择集，所以不会出现「已发出但某行发 0」——那行会永远留在计划里发不出去；余量另开一张单，按批次累计不会双发）；发出量对齐 7.5.1.2 在途腿的 numeric(19,4) 口径，**超 4 位小数直接报错而不是静默四舍五入** · 数量 numeric(19,6)（沿用 8.2.1.1）、成本与货值 numeric(19,4) + BigDecimal，全程禁浮点；timestamptz 全部 `?::timestamptz` 绑定 · 测试 FirstMileShipmentIntegrationTest **29 例全绿**（实跑 Testcontainers PostgreSQL 16，连接池压到 1）覆盖：**发出后在手余额与分录数**逐字节不变（且 inventory_entry 一条不增）、在途腿真的落在 inventory_transfer 且 transit_kind/source 锚点/数量/批次/起止仓/承运运单逐项断言、已发出与已取消两个终态的改单/重复发出/取消全被拒且**不双记在途**、Incoterm × 风险承担方 4 种不自洽组合全被拒而 2 种自洽组合通过、确认前申报完整性四项（货值 0 / 毛重 0 / 箱数 0 / 缺申报品名）逐项被拒且缺 ETA 被拒、部分发运与跨单累计上限（60 + 41 被拒后事务干净回滚、60 + 40 正好发完、之后连建单都过不了）、**绕过服务层直改状态与发出量被 DB 触发器挡下**、timestamptz 带 +08:00 写入后断言读回 Instant 与墙钟零漂移（含 7.5.1.2 那一侧的 ETA 与回执）、真分页两页不重叠且汇总不受分页、筛选与排序白名单真实生效（注入串静默回落到默认键且表还在）、逐张表断言 relforcerowsecurity、租户隔离三断言（两租户互不可见、伪造 X-Tenant-Id 无效、连接池归还后不串租户）、端点 400/401/403/404/409 · **上游依赖实查结论**：8.2.1.1 收货（V70 六张表）**已交付**故 GOODS_RECEIPT 来源真通（建单真校验来源收货单存在、每行的实收批次真属于那张收货单、SKU 与批次对得上、计划量不超可发量）；6 采购（6.1–6.6 全部 36 个模块未交付）、3.7.1.1 HS 编码字典（台账记为阻塞）、10.5.1.1 报关单、10.4.2.1 海外仓连接、10.4.1.2 在途跟踪、12 落地成本**均未交付**，全部在 capabilities 里 `available=false` + 原因 + ownerModule + href，**不建占位表、不返回空集冒充成功**，建单直接拒绝 SUPPLIER_PURCHASE 来源 · **前端**：页面 /logistics/first-mile（apps/web/src/app/logistics/first-mile/page.tsx + components/logistics/first-mile-shipment.tsx + first-mile-shipment-model.ts）汇总卡 / 筛选 / 列表 / 详情弹窗（明细 + 发货分录 + 事件时间线 + 可执行动作）/ 建单对话框（含可发批次选入器）、**货权与风险是列表里的列而不是页脚**、**「发出不扣在手」口径常驻页面**、每行同时给计划/已发/余量、未交付来源与下游直接禁用并写明归属模块、已发出/已取消两个终态不再给动作并说明该走 7.5.1.2 差异登记、加载 / 空 / 错误三态 · 前端模型测试 **28 例**：查询串逐条落参、10 个真实调用点从模型文件反向抽取逐条断言 URL 与方法、风险承担方**从前端不抄一份枚举**（读 capabilities 的 allowedRiskBearers，抄了会在后端加值时静默漂移）、在途腿守恒等式自检、终态动作表、金额数量空值与 0 的区分 · 白名单 api-proxy.ts **求和**追加 first-mile-shipments 分支（capabilities / source-candidates / {id} / {id}/transit-legs + POST 建单与 confirm·dispatch·cancel + PUT 改单），route.test.ts 里**从模型文件反向抽取**的调用点逐条断言放行，并断言 5 条**后端不存在**的子路径（tracking / customs / dispatch/reverse / capabilities/{id} / source-candidates/{id}）仍被拒 · **契约已重新生成**：./mvnw -Dtest=OpenApiContractTest test 刷新 backend/target/openapi，再 python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi；真新增 17 个 FirstMile* DTO（**修掉一个静默覆盖**：最初把维度接入情况命名为 DimensionCapability，与 7.1.1.2 的同名类型在拍平命名空间里被**静默覆盖且无任何警告**，改名 FirstMileDimension 后两者并存）· **验证（实跑）**：`./mvnw verify` **662 例全绿**（4 服务 BUILD SUCCESS，含 8.2.1.1 的 29 例与 7.5.1.2 的 24 例回归全过）· pnpm typecheck 3/3 零错误 · pnpm lint 3/3（无新增 warning）· npx vitest run **79 文件 / 1433 例全过**（本车道新增 30 例：模型 28 + 白名单 2）· NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build 成功（/logistics/first-mile 9.52 kB）· node tools/module-progress/sync.mjs --check 一致 · **跨车道回归（并行车道最容易漏的一处，本车道实查并修掉）**：7.5.1.2 有一条回归断言扫 `information_schema` 里 `table_name like '%transit%'`，断言只允许 inventory_transfer 与 in_transit_event 两张（「在途只有一个事实表」）。初版把回执表命名为 first_mile_shipment_transit_leg，被它判成「有人建了第二张在途表」。本表**不是**第二张在途账（它只存「我向 7.5.1.2 登记了哪条腿」，在途余量一律从 inventory_transfer 读，且本表从不被任何求和口径引用），因此把**自己的**表改名为 first_mile_shipment_leg_receipt 并在迁移里写明理由；**没有改 7.5.1.2 的任何一行** · **本车道未做**：① 侧栏/搜索导航未登记 /logistics/first-mile（packages/ui 的共享任务页表未改，避免重排他人条目，与 7.5.1.1 / 8.2.1.1 现状一致）· ② 改单对话框与逐行部分发运对话框**后端与模型已完整、前端只给了「按计划量整行发出」这一条路径**（部分发运需在详情里逐行改发出量，当前 UI 未开放该输入）· ③ 错误提示文案受仓库既有 ApiErrorHandler 限制：IllegalArgumentException 统一翻成一句泛化 400「字段格式不正确」，不指出具体字段（该 handler 为 warehouse 全服务共用，改它会动到 8.2.1.1 / 7.5.1.2 的错误体，本车道刻意不改）· ④ 到货与短少不由本模块处理（7.5.1.2 的 arrive / discrepancy），在途跟踪看板属 10.4.1.2（未交付） |
 | 10.4.1.2 | 在途跟踪 | — | D7 | 未开发 | — |
 | 10.4.2.1 | 海外仓连接 | — | D7 | 未开发 | — |
 | 10.4.2.2 | 备货预报 | — | D7 | 未开发 | — |
@@ -557,3 +540,12 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 103 |
+| **未开发** | **362** |
+| 完成率 | 22.2% |
+| **D3** | 21 | 0 | 19 | 40 |
+| **D4** | 3 | 0 | 57 | 60 |
+| **D7** | 1 | 0 | 154 | 155 |
+| 07 | 库存核算系统 | D3 | 19 | 31 |
+| 08 | 仓储作业系统 | D3 / D4 | 5 | 22 |
+| 10 | 物流与头程系统 | D5 / D7 | 1 | 27 |

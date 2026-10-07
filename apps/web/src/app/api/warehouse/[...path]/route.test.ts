@@ -187,6 +187,62 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
   }
 });
 
+it('10.4.1.1 头程发运单白名单：从模型文件反向抽取的每条调用点都被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // 路径是从 first-mile-shipment-model.ts 里反向抽取的，不是照着正则抄的 ——
+  // 少放行一个，页面就只在浏览器里静默 404（typecheck / lint / vitest 全绿都发现不了）。
+  for (const path of [
+    'warehouse/first-mile-shipments',
+    'warehouse/first-mile-shipments/capabilities',
+    'warehouse/first-mile-shipments/source-candidates',
+    `warehouse/first-mile-shipments/${id}`,
+    `warehouse/first-mile-shipments/${id}/transit-legs`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  // 建单与三个写动作走 POST：白名单只看路径形状不看方法，
+  // 这里显式跑 POST 证明写动作也真的被转发（而不是只放行了读）。
+  for (const path of [
+    'warehouse/first-mile-shipments',
+    `warehouse/first-mile-shipments/${id}/confirm`,
+    `warehouse/first-mile-shipments/${id}/dispatch`,
+    `warehouse/first-mile-shipments/${id}/cancel`,
+  ]) {
+    expect(
+      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+    ).toBe(200);
+  }
+  // 改单走 PUT：后端 FirstMileShipmentController 的改单端点是 @PutMapping
+  expect(
+    (await PUT(request(`warehouse/first-mile-shipments/${id}`, 'PUT'), {
+      params: { path: ['warehouse', 'first-mile-shipments', id] },
+    })).status,
+  ).toBe(200);
+});
+
+it('头程发运单白名单：后端不存在的子路径仍被拒绝', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  // 后端只有上面那 10 个端点。多一段 / 少一个动作后缀、以及看起来合理的推导路径
+  // （tracking / customs / forecast）后端都不存在，放行它们等于让界面以为已交付 ——
+  // 放行不该存在的路径比 404 更糟。
+  for (const path of [
+    `warehouse/first-mile-shipments/${'11111111-1111-1111-1111-111111111111'}/tracking`,
+    `warehouse/first-mile-shipments/${'11111111-1111-1111-1111-111111111111'}/customs`,
+    `warehouse/first-mile-shipments/${'11111111-1111-1111-1111-111111111111'}/dispatch/reverse`,
+    // capabilities / source-candidates 是字面量子路径，不能再往下挂一段
+    `warehouse/first-mile-shipments/capabilities/${'11111111-1111-1111-1111-111111111111'}`,
+    `warehouse/first-mile-shipments/source-candidates/${'11111111-1111-1111-1111-111111111111'}`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+    ).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
 it('在途库存白名单：未交付的子路径仍被拒绝', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);

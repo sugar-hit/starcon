@@ -6951,7 +6951,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "list_3",
+        "operationId": "list_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -13330,6 +13330,571 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/GoodsReceiptDiscrepancyCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments/{shipmentId}": {
+      "get": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "detail_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shipmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMileDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "update_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shipmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstMileUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMileSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments": {
+      "get": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "page_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "transportMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "incoterm",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "originWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "destinationWarehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "destinationCountryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inTransitOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMilePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "create_8",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstMileCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMileSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments/{shipmentId}/dispatch": {
+      "post": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "dispatch",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shipmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstMileDispatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMileSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments/{shipmentId}/confirm": {
+      "post": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "confirm_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shipmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstMileConfirmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMileSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments/{shipmentId}/cancel": {
+      "post": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "cancel_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shipmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirstMileCancelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMileSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments/{shipmentId}/transit-legs": {
+      "get": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "transitLegs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shipmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FirstMileTransitLegRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments/source-candidates": {
+      "get": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "sourceCandidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "receiptId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/first-mile-shipments/capabilities": {
+      "get": {
+        "tags": [
+          "first-mile-shipment-controller"
+        ],
+        "operationId": "capabilities_9",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirstMileCapabilities"
                 }
               }
             }
@@ -29964,6 +30529,1192 @@
             "type": "string"
           },
           "revisionNote": {
+            "type": "string"
+          }
+        }
+      },
+      "FirstMileLineRequest": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceReceiptEventLineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "declaredItemName": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "originCountryCode": {
+            "type": "string"
+          },
+          "declaredUnitValue": {
+            "type": "number"
+          },
+          "declaredValue": {
+            "type": "number"
+          },
+          "grossWeightKg": {
+            "type": "number"
+          },
+          "netWeightKg": {
+            "type": "number"
+          },
+          "volumeCbm": {
+            "type": "number"
+          },
+          "cartonCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FirstMileUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "destinationWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationName": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "bookingNo": {
+            "type": "string"
+          },
+          "vesselOrFlightNo": {
+            "type": "string"
+          },
+          "incoterm": {
+            "type": "string"
+          },
+          "riskBearer": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "freightCost": {
+            "type": "number"
+          },
+          "insuranceCost": {
+            "type": "number"
+          },
+          "dutyEstimate": {
+            "type": "number"
+          },
+          "handlingCost": {
+            "type": "number"
+          },
+          "customsBroker": {
+            "type": "string"
+          },
+          "departAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FirstMileLineRequest"
+            }
+          }
+        }
+      },
+      "FirstMileSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shipmentCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "shippedQuantity": {
+            "type": "number"
+          },
+          "declaredValue": {
+            "type": "number"
+          },
+          "totalCost": {
+            "type": "number"
+          },
+          "incoterm": {
+            "type": "string"
+          },
+          "incotermLabel": {
+            "type": "string"
+          },
+          "riskBearer": {
+            "type": "string"
+          },
+          "riskBearerLabel": {
+            "type": "string"
+          },
+          "transitLegCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "departAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "FirstMileCreateRequest": {
+        "type": "object",
+        "properties": {
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationName": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "bookingNo": {
+            "type": "string"
+          },
+          "vesselOrFlightNo": {
+            "type": "string"
+          },
+          "incoterm": {
+            "type": "string"
+          },
+          "riskBearer": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "freightCost": {
+            "type": "number"
+          },
+          "insuranceCost": {
+            "type": "number"
+          },
+          "dutyEstimate": {
+            "type": "number"
+          },
+          "handlingCost": {
+            "type": "number"
+          },
+          "customsBroker": {
+            "type": "string"
+          },
+          "departAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FirstMileLineRequest"
+            }
+          }
+        }
+      },
+      "FirstMileDispatchLineRequest": {
+        "type": "object",
+        "properties": {
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shippedQuantity": {
+            "type": "number"
+          }
+        }
+      },
+      "FirstMileDispatchRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FirstMileDispatchLineRequest"
+            }
+          }
+        }
+      },
+      "FirstMileConfirmRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "departAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "FirstMileCancelRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "FirstMilePage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/FirstMileSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FirstMileRow"
+            }
+          },
+          "statusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentStatusOption"
+            }
+          },
+          "transportModes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransportModeOption"
+            }
+          },
+          "warehouseOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FirstMileRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shipmentCode": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string"
+          },
+          "sourceRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityName": {
+            "type": "string"
+          },
+          "originWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originWarehouseCode": {
+            "type": "string"
+          },
+          "originWarehouseName": {
+            "type": "string"
+          },
+          "destinationWarehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationWarehouseCode": {
+            "type": "string"
+          },
+          "destinationWarehouseName": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationName": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "transportModeLabel": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "bookingNo": {
+            "type": "string"
+          },
+          "incoterm": {
+            "type": "string"
+          },
+          "incotermLabel": {
+            "type": "string"
+          },
+          "riskBearer": {
+            "type": "string"
+          },
+          "riskBearerLabel": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "freightCost": {
+            "type": "number"
+          },
+          "insuranceCost": {
+            "type": "number"
+          },
+          "dutyEstimate": {
+            "type": "number"
+          },
+          "handlingCost": {
+            "type": "number"
+          },
+          "totalCost": {
+            "type": "number"
+          },
+          "declaredValue": {
+            "type": "number"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "shippedQuantity": {
+            "type": "number"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transitLegCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "departAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dispatchedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FirstMileSummary": {
+        "type": "object",
+        "properties": {
+          "shipmentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "declaredValue": {
+            "type": "number"
+          },
+          "totalCost": {
+            "type": "number"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "shippedQuantity": {
+            "type": "number"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "confirmedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dispatchedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inTransitShipmentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inTransitQuantity": {
+            "type": "number"
+          },
+          "seaCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "airCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "railCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expressCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "earliestCreatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ShipmentStatusOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "shipmentCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TransportModeOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "shipmentCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "typicalTransitDays": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WarehouseOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          }
+        }
+      },
+      "FirstMileDetail": {
+        "type": "object",
+        "properties": {
+          "shipment": {
+            "$ref": "#/components/schemas/FirstMileRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FirstMileLineRow"
+            }
+          },
+          "transitLegs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FirstMileTransitLegRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FirstMileEventRow"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentTransition"
+            }
+          },
+          "transitNote": {
+            "type": "string"
+          },
+          "titleTransferNote": {
+            "type": "string"
+          }
+        }
+      },
+      "FirstMileEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "FirstMileLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "qualityStatusName": {
+            "type": "string"
+          },
+          "sourceReceiptEventLineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceReceiptCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceWaybillNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceReceivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "lotExpiryDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "shippedQuantity": {
+            "type": "number"
+          },
+          "pendingQuantity": {
+            "type": "number"
+          },
+          "declaredItemName": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "originCountryCode": {
+            "type": "string"
+          },
+          "declaredUnitValue": {
+            "type": "number"
+          },
+          "declaredValue": {
+            "type": "number"
+          },
+          "grossWeightKg": {
+            "type": "number"
+          },
+          "netWeightKg": {
+            "type": "number"
+          },
+          "volumeCbm": {
+            "type": "number"
+          },
+          "cartonCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "transitLegId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "transitLegStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "transitSettledQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "FirstMileTransitLegRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "transitLegId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transitKind": {
+            "type": "string"
+          },
+          "transitStatus": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "settledQuantity": {
+            "type": "number"
+          },
+          "outstandingQuantity": {
+            "type": "number"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expectedArriveAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "trackingNo": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "registeredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShipmentTransition": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SourceCandidatePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceCandidateRow"
+            }
+          },
+          "totalShippableQuantity": {
+            "type": "number"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SourceCandidateRow": {
+        "type": "object",
+        "properties": {
+          "receiptEventLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptCode": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "waybillNo": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "qualityStatusName": {
+            "type": "string"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "lotExpiryDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "receivedQuantity": {
+            "type": "number"
+          },
+          "alreadyShippedQuantity": {
+            "type": "number"
+          },
+          "shippableQuantity": {
+            "type": "number"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          }
+        }
+      },
+      "FirstMileCapabilities": {
+        "type": "object",
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FirstMileDimension"
+            }
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FirstMileDimension"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentTransition"
+            }
+          },
+          "statusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShipmentStatusOption"
+            }
+          },
+          "transportModes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransportModeOption"
+            }
+          },
+          "incoterms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncotermOption"
+            }
+          },
+          "riskBearers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RiskBearerOption"
+            }
+          },
+          "transitRegistrationNote": {
+            "type": "string"
+          },
+          "titleTransferNote": {
+            "type": "string"
+          },
+          "declarationNote": {
+            "type": "string"
+          },
+          "costNote": {
+            "type": "string"
+          }
+        }
+      },
+      "FirstMileDimension": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "IncotermOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "riskPoint": {
+            "type": "string"
+          },
+          "allowedRiskBearers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "RiskBearerOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
             "type": "string"
           }
         }
