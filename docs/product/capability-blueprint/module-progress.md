@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 67 |
+| 已交付 | 68 |
 | 进行中 | 0 |
-| **未开发** | **398** |
-| 完成率 | 14.4% |
+| **未开发** | **397** |
+| 完成率 | 14.6% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 65 | 0 | 15 | 80 |
+| **D1–D2** | 66 | 0 | 14 | 80 |
 | **D3** | 2 | 0 | 38 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -48,7 +48,7 @@
 | 14 | 广告与增长系统 | D7 | 0 | 22 |
 | 15 | 客户与客服系统 | D7 | 0 | 24 |
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 10 | 29 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 11 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
 
 ## 判定「已交付」的标准
@@ -506,7 +506,7 @@
 | 16.6.2.1 | 数据出境与留存 | — | D7 | 未开发 | — |
 | 17.1.1.1 | 租户列表 | — | D1–D2 | 已交付 | V40__tenant_list_context.sql（membership 加 last_login_at timestamptz，**挂在 membership 而不是 app_user**：它回答「我上次进入**这个**租户是什么时候」，同一个人在 3 个租户各有各的时刻，挂在用户上会把三者显示成同一个时间；login 与 switch 两处都打点，漏掉切换就会让「只切换不重新登录」的用户永远为空；两个索引 membership_user 供 memberships_for(uid) 走索引、membership_tenant_status 供成员计数；四个 SECURITY DEFINER 函数 switchable_tenants / tenant_context / update_tenant_profile 全部只收会话令牌哈希，**签名里没有任何 tenant_id 参数**，改的是 create_session 与 switch_membership 让它们打点）+ /identity/tenants 列表 + /identity/tenants/current 档案与基本信息维护 + /org/tenants 工作区（窄权限路径见下）；**窄权限语义由三层保证**：① 函数签名只有 hash，客户端想传租户也无处可传，不是「不校验」而是结构上无落点；② 集合一律从 memberships_for(user_id) 起算再按 membership 聚合角色，没有成员关系的租户进不了 FROM，而不是靠租户表 join 出去再在前端过滤；③ 运行时角色 identity_app 是 nosuperuser nobypassrls，membership/role/role_assignment 全部 FORCE RLS，且**运行时角色对 tenant 表连读权限都没有**——租户快照只能经 tenant_context 这条窄路径读，租户目录无法被枚举（这正是实现中撞到的真问题：直查 tenant 快照会 permission denied）；管理员同样只能看到自己有 membership 的租户，**刻意不提供按 tenant_id 任意查询的端点**，api-proxy 白名单也只放行 tenants 与 tenants/current 两个形状、不接 {uuid} 段，用例同时钉住正反两面；基本信息维护复用 administration_tenant（Owner + ALL）这道既有闸，与成员管理/子租户同口径，code 不可改（全局唯一且被外部集成引用）；**踩到并修掉一个自引入的真问题**：变更后快照原本再查一次 tenant_context，但把本租户停用会让会话当场失效，于是「停用」永远存不下来（事务回滚 + 403），改为直接由入参拼出 after 快照，这也正是停用不可逆、界面必须二次确认的原因；集成测试 10 项实跑 Testcontainers PostgreSQL 16（连接池压到 1），覆盖：子租户对父租户不可见、伪造 X-Tenant-Id 不能扩大范围、无 tenant id 端点、无 membership 会话失效、最后登录断言写回的值（漂移 8 小时即失败）、切换只刷新新进入的租户、Owner 可改非 Owner 403（403/400 真校验）、停用后父租户不受影响、租户隔离三断言、运行时角色不可绕过 RLS |
 | 17.1.1.2 | 子租户 | — | D1–D2 | 已交付 | tenant + tenant_closure 闭包表 + /children CRUD（含审计与 outbox）+ /org/children 层级工作区 |
-| 17.1.1.3 | 层级授权 | — | D1–D2 | 未开发 | — |
+| 17.1.1.3 | 层级授权 | — | D1–D2 | 已交付 | tenant_hierarchy_grant 表（tenant_id 记**授权方父租户**且 NOT NULL + FORCE RLS，授权行归属于父租户；domains text[] 按数据域开、access_level READ 与 WRITE、valid_from/valid_until 有效期、status 终态 REVOKED 且 CHECK 保证 revoked_at/revoked_by 随状态对齐）+ 页面权限 tenant.hierarchy 的 read/create/update 走既有 page_resource 与 role 模型（不另造一套授权身份）+ 5 个 SECURITY DEFINER 函数：hierarchy_grants / create / update / revoke 与 evaluate_hierarchy_access 判定，**签名只收会话令牌哈希、没有任何 tenant_id 参数**，X-Tenant-Id 在整条链路无读取点+ /identity/hierarchy-authorizations 增改查与 /check 判定 + /org/hierarchy 授权配置与访问判定工作区（api-proxy 白名单放行 check 与 {id}/revoke，判别字面量 check 与 UUID 段）；**默认拒绝是本模块的立场**：父子关系不自动赋权（ADR-0005），没有授权记录就是拒绝，判定返回 reason 枚举（NO_GRANT、EXPIRED、NOT_YET_VALID、REVOKED、DOMAIN_NOT_GRANTED、WRITE_NOT_GRANTED、ROLE_NOT_AUTHORIZED）而不是笼统 false，调用方才能区分「没配过」与「配了但过期」；判定按 (目标租户, 数据域, 所需级别) 逐次鉴权，**刻意不提供「进入一个子租户就等于拿到全部后代」的开关**（ADR-0005：不扩大 RLS 为全部后代，汇总查询按目标逐一鉴权）；授权配置是 Owner + ALL 专属（复用 administration_tenant，与 17.1.1.2 子租户同一道闸），而能否**使用**这处开口另看该租户自己的角色是否带 tenant.hierarchy.read —— 配了授权不等于租户里每个人都能用；撤销是终态：撤销后立即失效且不能改回 ACTIVE，重复撤销与修改已撤销记录都 403；踩到并修掉两个真问题：① jOOQ 在纯文本语句里无法为 OffsetDateTime 推断类型，不显式写 ?::timestamptz 会被驱动按 varchar 处理、函数解析直接报 does not exist（与 AuditController 同一纪律）；② PL/pgSQL 的 RETURN QUERY 不接受 varchar(500) 到 text 的赋值转换，note 必须写 ::text，否则整条列表报 structure of query does not match function result type；集成测试 12 项实跑 Testcontainers PostgreSQL 16（连接池压到 1），覆盖：**未授权的父租户访问子租户被拒绝（核心断言，reason 必须是 NO_GRANT）**、域外数据域与只读请求写均被拒、有效期写回值零漂移（同时断言 API 回读与直接查库的 Instant，Timestamp.valueOf 那种 -28800s 会当场失败）、过期与未生效分别报 EXPIRED 与 NOT_YET_VALID、撤销终态且列表里 status 与 effectiveStatus 分开显形、授权目标必须是真后代（授权给自己 403）、倒挂有效期与非法域名 400、级别非法 400、非 Owner 配置 403、**无层级角色的普通成员即使授权已配好、父子关系也是真的，仍然被拒（ROLE_NOT_AUTHORIZED）**、租户隔离三断言（父→子→父三次请求复用同一条物理连接不串租户、子租户侧看不到父租户配置的授权行）、审计与 outbox 同事务落库且快照能还原授权给了哪个子租户、哪些域、到什么时候 |
 | 17.1.2.1 | 法人档案 | — | D1–D2 | 已交付 | identity V5 legal_entity + CRUD + 删除保护触发器 + /org/legal-entities |
 | 17.1.2.2 | 本位币与账簿 | — | D1–D2 | 未开发 | — |
 | 17.2.1.1 | 部门树 | — | D1–D2 | 已交付 | 迁移 `backend/services/identity/src/main/resources/db/migration/V6__department_tree.sql`（code/parent_id/legal_entity_id/leader_membership_id + 自引用与法人/成员复合外键 + 树索引 + `department_tree()` SECURITY DEFINER 递归 CTE）；端点 `GET/POST/PUT/DELETE /identity/departments` + `PUT /identity/departments/{id}/parent`（防环校验、删除拒绝并回报具体数量）；页面 `apps/web/src/components/iam/department-tree.tsx` + `administration-panel.tsx`（真实树视图、HTML5 拖拽移动、成员分布计数）；测试 `IdentityIntegrationTest` 5 个部门专项用例（层级树/移动/防环/跨租户/删除保护） |
