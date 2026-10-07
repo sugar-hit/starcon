@@ -887,10 +887,41 @@ it('catalog/parties 的全部路由被放行（3.6.1.1 往来单位档案）', a
     ).status,
   ).toBe(200);
 
-  // 放行不能是前缀通配：角色特有信息归 3.6.1.2，路径由它自己开，
-  // 不该由本模块的 allowlist 顺手放开（那会让一个还不存在的模块看起来像已交付）。
+  // 3.6.1.2 角色档案：汇总读出口 + 三个字面量档案路径（GET / PUT / DELETE）。
+  expect(
+    (
+      await GET(request(`catalog/parties/${party}/role-profiles`), {
+        params: { path: ['catalog', 'parties', party, 'role-profiles'] },
+      })
+    ).status,
+  ).toBe(200);
+  for (const kind of ['supplier', 'customer', 'carrier']) {
+    const segments4 = ['catalog', 'parties', party, `${kind}-profile`];
+    expect((await GET(request(`catalog/parties/${party}/${kind}-profile`), { params: { path: segments4 } })).status).toBe(200);
+    expect((await PUT(request(`catalog/parties/${party}/${kind}-profile`, 'PUT'), { params: { path: segments4 } })).status).toBe(200);
+    expect((await DELETE(request(`catalog/parties/${party}/${kind}-profile`, 'DELETE'), { params: { path: segments4 } })).status).toBe(200);
+  }
+  // 档案台账：overview / options / 列表
+  for (const suffix of ['overview', 'options']) {
+    expect(
+      (
+        await GET(request(`catalog/role-profiles/${suffix}`), {
+          params: { path: ['catalog', 'role-profiles', suffix] },
+        })
+      ).status,
+    ).toBe(200);
+  }
+  expect(
+    (await GET(request('catalog/role-profiles'), { params: { path: ['catalog', 'role-profiles'] } }))
+      .status,
+  ).toBe(200);
+
+  // 放行仍然不能是前缀通配：3.6.1.2 只开了上面那几条**字面量**路径，
+  // 任意子段仍然拒绝 —— 放行 {id}/xxx 任意组合会让「一个还没实现的子路径」看起来像已交付。
   for (const path of [
-    `catalog/parties/${party}/supplier-profile`,
+    `catalog/parties/${party}/vendor-profile`,
+    `catalog/parties/${party}/supplier-profiles`,
+    `catalog/parties/${party}/role-profile`,
     `catalog/parties/${party}/status/extra`,
     `catalog/parties/${party}/roles/${role}/profiles`,
     // id 段用宽松的 [0-9a-f-]+（与 brands / categories 同一口径），所以 abc 这种
