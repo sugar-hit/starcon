@@ -19,6 +19,28 @@
 现在已经改成 **N 条车道并行**：每条车道 = 独立 git worktree + 独立分支 + 独立依赖，
 由 `tools/module-progress/lane.mjs` 统一编排、预分配 Flyway 版本号、并入集成头。
 
+## ⛔ 停机协议（最高优先级）
+
+**本流水线硬停机时刻：2026-10-08 00:00（Asia/Shanghai）。**
+
+每次运行**第一步先看时间**：`date '+%H:%M'`
+
+- **时间 < 00:00** → 照常执行下面第 1–5 步，8 条车道继续跑。
+- **时间 >= 00:00** → 进入**收尾模式**，**绝对不要派发任何新车道**：
+  1. `node tools/module-progress/lane.mjs merge-ready`（并进赶在零点前落地的车道）
+  2. `node tools/module-progress/sync.mjs`
+  3. `node tools/module-progress/lane.mjs gc`
+  4. 出**最终收尾报告**：总数/已交付/进行中/未开发/完成率、今晚累计交付与平均吞吐、
+     分阶段进度表、仍在 in-flight 的车道（模块 ID + 名称 + 心跳年龄，必须点名它们未完成）、
+     今日未解决的阻塞项与下一步建议、集成头 commit hash
+  5. **关闭两个定时任务**（A `fcf14c15-6744-4ec2-b733-fc31d5babf44`、
+     B `f029d0bf-f94a-4aa4-8633-6dd220fe2ce7`，都要关，否则会一直空转），
+     关法：`mcp_invoke(tool_name="cron_update", arguments={"cron_id":"<id>","enabled":false})`
+  6. 在报告里明确写「两个定时任务已关闭」。**关不掉就写明失败原因，不要假装关掉了。**
+
+若某次运行已是收尾之后（任务没关成功又被触发）：不要再做任何改动，
+只需确认两个任务已是 `enabled: false`，然后直接结束。
+
 ## 你的并发配额
 
 **本实例每次 `plan --lanes 4`。全局并发 8 条车道，由两个定时任务各管 4 条**，
