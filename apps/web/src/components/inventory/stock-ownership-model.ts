@@ -7,15 +7,23 @@ import type {
   OwnershipRulePage,
   OwnershipRuleSaved,
   OwnerInventoryReport,
-  OwnerRefType,
   StockOwnerInput,
-  StockOwnerKind,
   StockOwnerPage,
+  StockOwnerRow,
   StockOwnerSaved,
   StockOwnershipCapabilities,
   StockOwnershipResolved,
 } from '../../../../../packages/api-contracts/src/catalog';
 import { ApiError, api } from './api';
+
+/**
+ * 后端 `StockOwnershipModels` 里货主种类与指向类型是**两个不同的枚举**
+ * （`StockOwnerKind` / `OwnerRefType`），但 codegen 只把枚举内联成 `StockOwnerRow` 上的
+ * 字面量联合，不会生成具名类型别名。所以这里从契约的行类型反推出别名：
+ * 契约仍是唯一来源，也不用在前端复制一份手写枚举。
+ */
+export type StockOwnerKind = NonNullable<StockOwnerRow>['ownerKind'];
+export type OwnerRefType = NonNullable<StockOwnerRow>['ownerRefType'];
 
 /**
  * 7.7.1.1 货主与所有权前端模型。
@@ -175,12 +183,12 @@ export const scopeTypeLabels: Record<string, string> = {
 };
 
 /** 解析优先级：数字越小越优先（SKU 最具体，DEFAULT 兜底）。与后端保持同一套约定。 */
-export const scopePriority: Record<string, number> = {
+export const scopePriority = {
   SKU: 0,
   LEGAL_ENTITY: 1,
   WAREHOUSE: 2,
   DEFAULT: 3,
-};
+} as const;
 
 /** 每种所有权类型允许的指向类型 —— 与后端同一套规则，用来在建档表单里就地拦下自相矛盾的组合。 */
 export function allowedRefTypes(kind: string): OwnerRefType[] {
@@ -299,5 +307,3 @@ export function errorText(error: unknown): string {
   if (error instanceof Error) return error.message;
   return '请求失败，请稍后重试';
 }
-
-export type { StockOwnerKind };

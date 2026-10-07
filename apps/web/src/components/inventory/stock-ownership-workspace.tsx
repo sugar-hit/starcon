@@ -91,11 +91,13 @@ export function StockOwnershipWorkspace() {
   const [skuFilter, setSkuFilter] = useState('');
   const [page, setPage] = useState(0);
 
+  // 空筛选项不落到键上：`exactOptionalPropertyTypes` 下「键存在但值为 undefined」
+  // 和「键不存在」不是一回事，下游签名一律是 `?:`。
   const filterParams = useMemo(
     () => ({
-      warehouseId: warehouseFilter || undefined,
-      legalEntityId: legalEntityFilter || undefined,
-      skuId: skuFilter || undefined,
+      ...(warehouseFilter ? { warehouseId: warehouseFilter } : {}),
+      ...(legalEntityFilter ? { legalEntityId: legalEntityFilter } : {}),
+      ...(skuFilter ? { skuId: skuFilter } : {}),
     }),
     [warehouseFilter, legalEntityFilter, skuFilter],
   );
@@ -386,15 +388,7 @@ export function StockOwnershipWorkspace() {
                 setError(message);
                 setSaving(false);
               }}
-              onRetire={async (id: string) => {
-                try {
-                  const saved = await retireRule(id);
-                  setNotice(saved.message);
-                  void load();
-                } catch (e) {
-                  setError(errorText(e));
-                }
-              }}
+              onRetire={doRetire}
             />
           </div>
         }
@@ -455,7 +449,7 @@ export function StockOwnershipWorkspace() {
                         variant="outline"
                         size="sm"
                         disabled={!writable || saving}
-                        onClick={() => void onRetire(rule.id)}
+                        onClick={() => void doRetire(rule.id)}
                       >
                         作废
                       </Button>
@@ -587,6 +581,20 @@ export function StockOwnershipWorkspace() {
     }
   }
 
+  /**
+   * 作废某一档。列表里的「作废」按钮和建档表单的回调是同一份实现 ——
+   * 之前它只以内联 prop 的形式存在，列表那一侧拿不到这个绑定。
+   */
+  async function doRetire(id: string) {
+    try {
+      const saved = await retireRule(id);
+      setNotice(saved.message);
+      void load();
+    } catch (e) {
+      setError(errorText(e));
+    }
+  }
+
   async function doToggleStatus(ownerId: string, status: string) {
     setSaving(true);
     setError('');
@@ -633,7 +641,10 @@ function ScopeFilter({
       <select
         className="border-control-border bg-card rounded-md border px-3 py-2 text-sm"
         value={filter.warehouseId ?? ''}
-        onChange={(e) => onChange({ ...filter, warehouseId: e.target.value || undefined })}
+        onChange={(e) => {
+          const { warehouseId: _cleared, ...rest } = filter;
+          onChange({ ...rest, ...(e.target.value ? { warehouseId: e.target.value } : {}) });
+        }}
       >
         <option value="">全部仓库</option>
         {warehouses.map((w) => (
@@ -645,7 +656,10 @@ function ScopeFilter({
       <select
         className="border-control-border bg-card rounded-md border px-3 py-2 text-sm"
         value={filter.legalEntityId ?? ''}
-        onChange={(e) => onChange({ ...filter, legalEntityId: e.target.value || undefined })}
+        onChange={(e) => {
+          const { legalEntityId: _cleared, ...rest } = filter;
+          onChange({ ...rest, ...(e.target.value ? { legalEntityId: e.target.value } : {}) });
+        }}
       >
         <option value="">全部法人</option>
         {entities.map((l) => (
@@ -657,7 +671,10 @@ function ScopeFilter({
       <select
         className="border-control-border bg-card rounded-md border px-3 py-2 text-sm"
         value={filter.skuId ?? ''}
-        onChange={(e) => onChange({ ...filter, skuId: e.target.value || undefined })}
+        onChange={(e) => {
+          const { skuId: _cleared, ...rest } = filter;
+          onChange({ ...rest, ...(e.target.value ? { skuId: e.target.value } : {}) });
+        }}
       >
         <option value="">全部 SKU</option>
         {skus.map((s) => (
@@ -681,6 +698,7 @@ function RuleEditor({
   onError,
   onCancelSupersede,
   onRetire,
+  superseding,
 }: {
   writable: boolean;
   saving: boolean;
@@ -809,7 +827,7 @@ function RuleEditor({
                 </option>
               ))}
             </select>
-            <Button variant="primary" size="sm" disabled={saving || !ownerId} onClick={() => void submit()}>
+            <Button variant="outline" size="sm" disabled={saving || !ownerId} onClick={() => void submit()}>
               保存
             </Button>
           </div>
@@ -958,7 +976,7 @@ function OwnerEditor({
               />
             )}
             <Button
-              variant="primary"
+              variant="outline"
               size="sm"
               disabled={
                 saving ||
