@@ -41,6 +41,15 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
     'warehouse/quality-statuses',
     'warehouse/locations',
     'warehouse/lots',
+    // 7.5.1.1 调拨单：列表 / 详情 / 分录，以及四个动作端点。
+    // 动作路径必须逐个钉住 —— 少放行一个，页面上的按钮就会变成静默 404。
+    'warehouse/inventory/transfers',
+    `warehouse/inventory/transfers/${id}`,
+    `warehouse/inventory/transfers/${id}/movements`,
+    `warehouse/inventory/transfers/${id}/confirm`,
+    `warehouse/inventory/transfers/${id}/ship`,
+    `warehouse/inventory/transfers/${id}/receive`,
+    `warehouse/inventory/transfers/${id}/close`,
   ]) {
     const response = await GET(request(path), { params: { path: path.split('/') } });
     expect(response.status).toBe(200);
