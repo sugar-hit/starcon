@@ -49,22 +49,22 @@ public class ZombieCandidateService {
    * 界面上未接入的维度不允许被启用（会一直判"无法判定"），运营由此知道差的是哪个上游事件，
    * 而不是以为配置没保存成功。
    */
-  public Options options() {
-    return new Options(
+  public ZombieOptions options() {
+    return new ZombieOptions(
         ZombieEntityType.ordered().stream()
-            .map(t -> new EntityTypeOption(t.name(), t.label(), t.table()))
+            .map(t -> new ZombieEntityTypeOption(t.name(), t.label(), t.table()))
             .toList(),
         ZombieMetric.ordered().stream()
             .map(
                 m ->
-                    new MetricOption(
+                    new ZombieMetricOption(
                         m.name(), m.label(), m.owner(), m.source(), upstreamWired(m.source())))
             .toList(),
         List.of(
-            new VerdictOption(ZombieVerdict.CANDIDATE.name(), ZombieVerdict.CANDIDATE.label(), true),
-            new VerdictOption(
+            new ZombieVerdictOption(ZombieVerdict.CANDIDATE.name(), ZombieVerdict.CANDIDATE.label(), true),
+            new ZombieVerdictOption(
                 ZombieVerdict.NOT_ZOMBIE.name(), ZombieVerdict.NOT_ZOMBIE.label(), false),
-            new VerdictOption(
+            new ZombieVerdictOption(
                 ZombieVerdict.INCOMPLETE.name(), ZombieVerdict.INCOMPLETE.label(), false)),
         List.of("INACTIVE"));
   }
@@ -77,12 +77,12 @@ public class ZombieCandidateService {
   // ================================================================ 规则配置
 
   /** 全部三类主体的规则。没配过的返回默认规则（**不落库**，configured=false）。 */
-  public List<CleanupRuleView> rules() {
+  public List<ZombieCleanupRuleView> rules() {
     var rows = sql.fetch(
         "select * from master_data_cleanup_rule order by entity_type");
     var byType = new LinkedHashMap<String, org.jooq.Record>();
     for (var row : rows) byType.put(row.get("entity_type", String.class), row);
-    var result = new ArrayList<CleanupRuleView>();
+    var result = new ArrayList<ZombieCleanupRuleView>();
     for (var type : ZombieEntityType.ordered()) {
       var row = byType.get(type.name());
       result.add(row == null ? defaultRuleView(type) : ruleView(row));
@@ -90,16 +90,16 @@ public class ZombieCandidateService {
     return List.copyOf(result);
   }
 
-  public CleanupRuleView rule(ZombieEntityType type) {
+  public ZombieCleanupRuleView rule(ZombieEntityType type) {
     var row =
         sql.fetchOne(
             "select * from master_data_cleanup_rule where entity_type=?", type.name());
     return row == null ? defaultRuleView(type) : ruleView(row);
   }
 
-  private CleanupRuleView defaultRuleView(ZombieEntityType type) {
+  private ZombieCleanupRuleView defaultRuleView(ZombieEntityType type) {
     var defaults = ZombieCandidateRules.defaultConfig(type);
-    return new CleanupRuleView(
+    return new ZombieCleanupRuleView(
         type.name(),
         type.label(),
         defaults.inactiveDays(),
@@ -111,8 +111,8 @@ public class ZombieCandidateService {
         false);
   }
 
-  private CleanupRuleView ruleView(org.jooq.Record row) {
-    return new CleanupRuleView(
+  private ZombieCleanupRuleView ruleView(org.jooq.Record row) {
+    return new ZombieCleanupRuleView(
         row.get("entity_type", String.class),
         ZombieEntityType.parse(row.get("entity_type", String.class)).label(),
         row.get("inactive_days", Integer.class),
@@ -128,8 +128,8 @@ public class ZombieCandidateService {
   }
 
   /** 保存规则（首次保存走 INSERT，之后走带乐观锁的 UPDATE）。 */
-  public CleanupRuleView saveRule(
-      AccessService.Access actor, ZombieEntityType type, CleanupRuleInput input) {
+  public ZombieCleanupRuleView saveRule(
+      AccessService.Access actor, ZombieEntityType type, ZombieCleanupRuleInput input) {
     var note = input.deactivateNote() == null || input.deactivateNote().isBlank()
         ? "按僵尸主数据清理规则批量停用"
         : input.deactivateNote().trim();
@@ -186,7 +186,7 @@ public class ZombieCandidateService {
    *
    * <p>{@code keyword} 覆盖编码与名称，LIKE 通配符转义（与 PartyService 同一份实现）。
    */
-  public CandidatePage list(CandidateQuery query) {
+  public ZombieCandidatePage list(ZombieCandidateQuery query) {
     var type = query.entityType() == null || query.entityType().isBlank()
         ? ZombieEntityType.SKU
         : ZombieEntityType.parse(query.entityType());
@@ -198,7 +198,7 @@ public class ZombieCandidateService {
     if (!config.enabled()) {
       // 规则被关掉意味着"这个类型不参与扫描"。返回空页而不是回退到默认规则 ——
       // 回退会让运营以为规则没保存成功，而真相是它被有意关掉了。
-      return new CandidatePage(List.of(), 0, page, size, type.name(), 0, 0, 0);
+      return new ZombieCandidatePage(List.of(), 0, page, size, type.name(), 0, 0, 0);
     }
 
     var now = now();
@@ -229,13 +229,13 @@ public class ZombieCandidateService {
     }
 
     var observations = loadObservations(type, rows.stream().map(r -> r.get("id", UUID.class)).toList());
-    var items = new ArrayList<Candidate>(rows.size());
+    var items = new ArrayList<ZombieCandidate>(rows.size());
     for (var row : rows) {
       var evaluation =
           evaluateInMemory(config, row, observations, now);
       var lastMaintained = row.get("last_maintained_at", OffsetDateTime.class);
       items.add(
-          new Candidate(
+          new ZombieCandidate(
               row.get("id", UUID.class),
               type.name(),
               row.get("code", String.class),
@@ -253,7 +253,7 @@ public class ZombieCandidateService {
               config.enabled()));
     }
     long total = counts.values().stream().mapToLong(Long::longValue).sum();
-    return new CandidatePage(
+    return new ZombieCandidatePage(
         List.copyOf(items),
         total,
         page,
@@ -265,8 +265,8 @@ public class ZombieCandidateService {
   }
 
   /** 概览：三种主体各自的活跃数与三态分布，以及每个规则的参数与依赖维度数。 */
-  public CandidateOverview overview() {
-    var rows = new ArrayList<OverviewRow>();
+  public ZombieCandidateOverview overview() {
+    var rows = new ArrayList<ZombieOverviewRow>();
     int coveredEntities = 0;
     int coveredDimensions = 0;
     var unmapped = new ArrayList<String>();
@@ -288,7 +288,7 @@ public class ZombieCandidateService {
         }
       }
       rows.add(
-          new OverviewRow(
+          new ZombieOverviewRow(
               type.name(),
               type.label(),
               activeCount,
@@ -310,7 +310,7 @@ public class ZombieCandidateService {
         unmapped.add(metric.label() + "（归属 " + metric.owner() + "，该服务尚未接入）");
       }
     }
-    return new CandidateOverview(List.copyOf(rows), coveredEntities, coveredDimensions,
+    return new ZombieCandidateOverview(List.copyOf(rows), coveredEntities, coveredDimensions,
         List.copyOf(unmapped));
   }
 
@@ -542,7 +542,7 @@ public class ZombieCandidateService {
   // ================================================================ 详情与证据
 
   /** 单条主数据的引用证据 + 停用历史。 */
-  public ReferenceEvidence evidence(ZombieEntityType type, UUID entityId) {
+  public ZombieReferenceEvidence evidence(ZombieEntityType type, UUID entityId) {
     var config = configOf(type);
     var now = now();
     org.jooq.Record row;
@@ -563,7 +563,7 @@ public class ZombieCandidateService {
     var evaluation =
         evaluateInMemory(
             config, row, loadObservations(type, List.of(entityId)), now);
-    return new ReferenceEvidence(
+    return new ZombieReferenceEvidence(
         type.name(),
         entityId,
         row.get("code", String.class),
@@ -595,8 +595,8 @@ public class ZombieCandidateService {
    * 触发器并被拒绝，记入 rejectedReasons 而不是整批静默丢弃 —— 静默丢弃会让上游
    * 以为推送成功了，而那一维永远停留在"未知"。
    */
-  public ReferenceStatPushResult pushStats(
-      AccessService.Access actor, ZombieEntityType type, ReferenceStatPush push) {
+  public ZombieReferenceStatPushResult pushStats(
+      AccessService.Access actor, ZombieEntityType type, ZombieReferenceStatPush push) {
     var now = now();
     int written = 0;
     var rejected = new ArrayList<String>();
@@ -626,7 +626,7 @@ public class ZombieCandidateService {
     if (written > 0) {
       audit(actor, type.name(), "zombie-reference-push");
     }
-    return new ReferenceStatPushResult(
+    return new ZombieReferenceStatPushResult(
         push.items().size(), written, rejected.size(), List.copyOf(rejected));
   }
 
@@ -658,8 +658,8 @@ public class ZombieCandidateService {
    *
    * <p>准入失败**整批 409** 而不是逐条跳过（规则 Z4）：跳过会让运营以为这批都处理完了。
    */
-  public DeactivateResult deactivate(
-      AccessService.Access actor, ZombieEntityType type, DeactivateInput input) {
+  public ZombieDeactivateResult deactivate(
+      AccessService.Access actor, ZombieEntityType type, ZombieDeactivateInput input) {
     var config = configOf(type);
     var ids = input.entityIds().stream().distinct().toList();
     var now = now();
@@ -696,7 +696,7 @@ public class ZombieCandidateService {
         : input.reason().trim();
     var ruleSnapshot = ruleSnapshot(config, view);
 
-    var entriesOut = new ArrayList<DeactivatedEntry>(ids.size());
+    var entriesOut = new ArrayList<ZombieDeactivatedEntry>(ids.size());
     for (var id : ids) {
       var row = found.get(id);
       var evaluation = evaluations.get(id);
@@ -735,10 +735,10 @@ public class ZombieCandidateService {
           type.inactiveStatus(), actor.userId(), reason, lastMaintained,
           json(ruleSnapshot), json(evidence), ids.size(), now);
       entriesOut.add(
-          new DeactivatedEntry(code, name, previous, type.inactiveStatus()));
+          new ZombieDeactivatedEntry(code, name, previous, type.inactiveStatus()));
     }
     audit(actor, type.name(), "zombie-deactivate");
-    return new DeactivateResult(type.name(), ids.size(), List.copyOf(entriesOut), note);
+    return new ZombieDeactivateResult(type.name(), ids.size(), List.copyOf(entriesOut), note);
   }
 
   private List<org.jooq.Record> loadEntities(ZombieEntityType type, List<UUID> ids) {
@@ -755,40 +755,45 @@ public class ZombieCandidateService {
   }
 
   /** 规则冻结快照（规则 Z5）：记录要回答"凭什么"，而规则会变。 */
-  private Map<String, Object> ruleSnapshot(
-      ZombieCandidateRules.Config config, CleanupRuleView view) {
-    var map = new LinkedHashMap<String, Object>();
-    map.put("entityType", config.entityType().name());
-    map.put("inactiveDays", config.inactiveDays());
-    map.put("snapshotStaleDays", config.snapshotStaleDays());
-    map.put("deactivateNote", view.deactivateNote());
-    map.put("ruleVersion", config.version());
-    var dims = new LinkedHashMap<String, Object>();
-    for (var metric : ZombieMetric.ordered()) dims.put(metric.name(), config.requires(metric));
-    map.put("requiredDimensions", dims);
-    return map;
+  private ZombieRuleSnapshot ruleSnapshot(
+      ZombieCandidateRules.Config config, ZombieCleanupRuleView view) {
+    return new ZombieRuleSnapshot(
+        config.entityType().name(),
+        config.inactiveDays(),
+        config.snapshotStaleDays(),
+        view.deactivateNote(),
+        config.version(),
+        config.requires(ZombieMetric.ORDER_LINE_COUNT),
+        config.requires(ZombieMetric.INVENTORY_ON_HAND),
+        config.requires(ZombieMetric.LISTING_COUNT),
+        config.requires(ZombieMetric.UNIT_COST));
   }
 
   /** 证据冻结快照：四个维度当时的取值、观测时刻与判定状态。 */
-  private Map<String, Object> evidenceJson(ZombieCandidateRules.Evaluation evaluation) {
-    var map = new LinkedHashMap<String, Object>();
+  private ZombieEvidenceSnapshot evidenceJson(ZombieCandidateRules.Evaluation evaluation) {
+    var byMetric = new EnumMap<ZombieMetric, ZombieDimensionEvidence>(ZombieMetric.class);
     for (var dimension : evaluation.dimensions()) {
       if (dimension.metric() == null) continue;
-      var item = new LinkedHashMap<String, Object>();
-      item.put("state", dimension.state());
-      item.put("value", dimension.value() == null ? null : dimension.value().toPlainString());
-      item.put("observedAt", dimension.observedAt() == null ? null : dimension.observedAt().toString());
-      item.put("stale", dimension.stale());
-      map.put(dimension.metric().name(), item);
+      byMetric.put(
+          dimension.metric(),
+          new ZombieDimensionEvidence(
+              dimension.state(),
+              dimension.value() == null ? null : dimension.value().toPlainString(),
+              dimension.observedAt() == null ? null : dimension.observedAt().toString(),
+              dimension.stale()));
     }
-    map.put("verdict", evaluation.verdict().name());
-    return map;
+    return new ZombieEvidenceSnapshot(
+        evaluation.verdict().name(),
+        byMetric.get(ZombieMetric.ORDER_LINE_COUNT),
+        byMetric.get(ZombieMetric.INVENTORY_ON_HAND),
+        byMetric.get(ZombieMetric.LISTING_COUNT),
+        byMetric.get(ZombieMetric.UNIT_COST));
   }
 
   // ================================================================ 停用记录
 
   /** 停用台账：时间倒序 + 主体类型 / 主体 / 操作人筛选。 */
-  public CleanupRecordPage records(RecordQuery query) {
+  public ZombieCleanupRecordPage records(ZombieRecordQuery query) {
     var type = query.entityType() == null || query.entityType().isBlank()
         ? null
         : ZombieEntityType.parse(query.entityType());
@@ -822,10 +827,10 @@ public class ZombieCandidateService {
                 + where
                 + " order by created_at desc, id limit ? offset ?",
             pageBinds.toArray());
-    var items = new ArrayList<CleanupRecord>(rows.size());
+    var items = new ArrayList<ZombieCleanupRecord>(rows.size());
     for (var row : rows) {
       items.add(
-          new CleanupRecord(
+          new ZombieCleanupRecord(
               row.get("id", UUID.class),
               row.get("entity_type", String.class),
               row.get("entity_id", UUID.class),
@@ -837,23 +842,23 @@ public class ZombieCandidateService {
               row.get("reason", String.class),
               row.get("last_maintained_at", OffsetDateTime.class),
               row.get("affected_count", Integer.class),
-              readJson(row.get("rule_snapshot")),
-              readJson(row.get("evidence")),
+              readJson(row.get("rule_snapshot"), ZombieRuleSnapshot.class),
+              readJson(row.get("evidence"), ZombieEvidenceSnapshot.class),
               row.get("created_at", OffsetDateTime.class)));
     }
-    return new CleanupRecordPage(List.copyOf(items), total, page, size);
+    return new ZombieCleanupRecordPage(List.copyOf(items), total, page, size);
   }
 
-  private List<CleanupRecord> recentRecords(ZombieEntityType type, UUID entityId) {
+  private List<ZombieCleanupRecord> recentRecords(ZombieEntityType type, UUID entityId) {
     var rows =
         sql.fetch(
             "select * from master_data_cleanup_record where tenant_id=? and entity_type=?"
                 + " and entity_id=? order by created_at desc, id limit 10",
             currentTenantId(), type.name(), entityId);
-    var items = new ArrayList<CleanupRecord>(rows.size());
+    var items = new ArrayList<ZombieCleanupRecord>(rows.size());
     for (var row : rows) {
       items.add(
-          new CleanupRecord(
+          new ZombieCleanupRecord(
               row.get("id", UUID.class),
               row.get("entity_type", String.class),
               row.get("entity_id", UUID.class),
@@ -865,19 +870,25 @@ public class ZombieCandidateService {
               row.get("reason", String.class),
               row.get("last_maintained_at", OffsetDateTime.class),
               row.get("affected_count", Integer.class),
-              readJson(row.get("rule_snapshot")),
-              readJson(row.get("evidence")),
+              readJson(row.get("rule_snapshot"), ZombieRuleSnapshot.class),
+              readJson(row.get("evidence"), ZombieEvidenceSnapshot.class),
               row.get("created_at", OffsetDateTime.class)));
     }
     return List.copyOf(items);
   }
 
-  private Object readJson(Object value) {
+  /**
+   * 读回冻结快照。
+   *
+   * <p>解析失败返回 null 而不是把原始字符串塞回去：停用记录是审计证据，
+   * 一个解析不出来却"看起来有内容"的字段比空值更危险（运营会以为证据还在）。
+   */
+  private <T> T readJson(Object value, Class<T> type) {
     if (value == null) return null;
     try {
-      return json.readValue(String.valueOf(value), Object.class);
+      return json.readValue(String.valueOf(value), type);
     } catch (Exception e) {
-      return Map.of("unreadable", String.valueOf(value));
+      return null;
     }
   }
 

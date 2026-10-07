@@ -95,7 +95,7 @@ class ZombieCandidateRulesTest {
     assertThat(result.verdict()).isEqualTo(ZombieVerdict.INCOMPLETE);
     assertThat(result.verdict().actionable()).isFalse();
     var dimension = result.dimensions().get(0);
-    assertThat(dimension.state()).isEqualTo(ZombieCandidateRules.DimensionStatus.UNKNOWN);
+    assertThat(dimension.state()).isEqualTo(ZombieCandidateRules.ZombieDimensionStatus.UNKNOWN);
     assertThat(dimension.note()).contains("未知不等于零");
   }
 
@@ -108,9 +108,9 @@ class ZombieCandidateRulesTest {
             obs(missing(), at(BigDecimal.ZERO, 1)));
     assertThat(result.verdict()).isEqualTo(ZombieVerdict.CANDIDATE);
     assertThat(result.dimensions().get(0).state())
-        .isEqualTo(ZombieCandidateRules.DimensionStatus.NOT_REQUIRED);
+        .isEqualTo(ZombieCandidateRules.ZombieDimensionStatus.NOT_REQUIRED);
     assertThat(result.dimensions().get(1).state())
-        .isEqualTo(ZombieCandidateRules.DimensionStatus.SATISFIED);
+        .isEqualTo(ZombieCandidateRules.ZombieDimensionStatus.SATISFIED);
   }
 
   // ------------------------------------------------------------ 违反优先于未知
@@ -134,7 +134,7 @@ class ZombieCandidateRulesTest {
                 at(BigDecimal.ZERO, 1), at(new BigDecimal("0"), 1)));
     assertThat(result.verdict()).isEqualTo(ZombieVerdict.CANDIDATE);
     assertThat(result.dimensions())
-        .allMatch(d -> d.state().equals(ZombieCandidateRules.DimensionStatus.SATISFIED));
+        .allMatch(d -> d.state().equals(ZombieCandidateRules.ZombieDimensionStatus.SATISFIED));
   }
 
   // ------------------------------------------------------------ Z7 过期

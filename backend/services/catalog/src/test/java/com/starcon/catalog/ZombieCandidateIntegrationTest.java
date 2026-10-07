@@ -223,12 +223,12 @@ class ZombieCandidateIntegrationTest {
    * <p>刻意**不**在这里无条件吞掉版本冲突：那会把「乐观锁根本没生效」也一起测成绿的。
    * 真正验证乐观锁的用例显式传一个错的版本号。
    */
-  void configure(ZombieEntityType type, CleanupRuleInput input) {
-    final CleanupRuleInput effective;
+  void configure(ZombieEntityType type, ZombieCleanupRuleInput input) {
+    final ZombieCleanupRuleInput effective;
     if (input.version() < 0) {
       var current = call(actor, "catalog.spu.read", () -> zombies.rule(type));
       effective =
-          new CleanupRuleInput(
+          new ZombieCleanupRuleInput(
               input.inactiveDays(),
               input.snapshotStaleDays(),
               input.requireZeroOrderReference(),
@@ -248,26 +248,26 @@ class ZombieCandidateIntegrationTest {
   void ruleOnly(int inactiveDays) {
     configure(
         ZombieEntityType.SKU,
-new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理测试", -1L));
+new ZombieCleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理测试", -1L));
   }
 
-  ReferenceStatPushResult push(UUID tenant, ZombieEntityType type, ReferenceStatItem... items) {
+  ZombieReferenceStatPushResult push(UUID tenant, ZombieEntityType type, ZombieReferenceStatItem... items) {
     return call(
         actor(tenant),
         "catalog.spu.update",
-        () -> zombies.pushStats(actor(tenant), type, new ReferenceStatPush(List.of(items))));
+        () -> zombies.pushStats(actor(tenant), type, new ZombieReferenceStatPush(List.of(items))));
   }
 
-  ReferenceStatItem stat(UUID entityId, ZombieMetric metric, String value, OffsetDateTime at) {
-    return new ReferenceStatItem(
+  ZombieReferenceStatItem stat(UUID entityId, ZombieMetric metric, String value, OffsetDateTime at) {
+    return new ZombieReferenceStatItem(
         entityId, metric.name(), new BigDecimal(value), metric.source(), at);
   }
 
-  CandidatePage list(UUID tenant, String entityType, String keyword, String verdict, int page, int size) {
+  ZombieCandidatePage list(UUID tenant, String entityType, String keyword, String verdict, int page, int size) {
     return call(
         actor(tenant),
         "catalog.spu.read",
-        () -> zombies.list(new CandidateQuery(entityType, keyword, verdict, page, size)));
+        () -> zombies.list(new ZombieCandidateQuery(entityType, keyword, verdict, page, size)));
   }
 
   // ================================================================ 判定与规则
@@ -293,7 +293,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     configure(
 
     ZombieEntityType.SKU,
-    new CleanupRuleInput(200, 60, false, true, false, false, true, "改了", saved.version()));
+    new ZombieCleanupRuleInput(200, 60, false, true, false, false, true, "改了", saved.version()));
     var again = call(actor, "catalog.spu.read", () -> zombies.rule(ZombieEntityType.SKU));
     assertThat(again.inactiveDays()).isEqualTo(200);
     assertThat(again.snapshotStaleDays()).isEqualTo(60);
@@ -309,7 +309,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
             () ->
                 configure(
                     ZombieEntityType.SKU,
-                    new CleanupRuleInput(300, 90, false, false, false, false, true, "x", 99L)))
+                    new ZombieCleanupRuleInput(300, 90, false, false, false, false, true, "x", 99L)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("刷新后重试");
     // 冲突之后状态没被写坏。
@@ -330,7 +330,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     // 候选清单的时间窗口只看「超出维护阈值」的：FRESH 才维护过 3 天，
     // 它连 scored CTE 都进不去（而不是"进去了被标成在用"）——
     // 两种口径在计数上等价，但后者会让运营以为刚维护过的也要逐条复核。
-    assertThat(page.items()).extracting(Candidate::code)
+    assertThat(page.items()).extracting(ZombieCandidate::code)
         .contains(codeOf(old)).doesNotContain(codeOf(fresh));
   }
 
@@ -339,13 +339,13 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     ruleOnly(365);
     configure(
     ZombieEntityType.SKU,
-    new CleanupRuleInput(365, 90, true, false, false, false, true, "x", -1L));
+    new ZombieCleanupRuleInput(365, 90, true, false, false, false, true, "x", -1L));
     var product = spu(a, "P-" + UUID.randomUUID());
     var orphan = sku(a, product, "NOOBS-" + UUID.randomUUID().toString().substring(0, 8));
     backdate("sku", a, orphan, 400);
 
     var page = list(a, "SKU", null, "INCOMPLETE", 0, 50);
-    assertThat(page.items()).extracting(Candidate::code).contains(codeOf(orphan));
+    assertThat(page.items()).extracting(ZombieCandidate::code).contains(codeOf(orphan));
     assertThat(page.items().get(0).verdict()).isEqualTo("INCOMPLETE");
     assertThat(page.items().get(0).verdictLabel()).isEqualTo("无法判定");
   }
@@ -355,7 +355,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     ruleOnly(365);
     configure(
     ZombieEntityType.SKU,
-    new CleanupRuleInput(365, 90, false, true, false, false, true, "x", -1L));
+    new ZombieCleanupRuleInput(365, 90, false, true, false, false, true, "x", -1L));
     // 每个 SKU 挂各自的 SPU：同一 SPU 下两个无属性 SKU 的 variant_signature 相同，
     // 会撞 UNIQUE(tenant_id,spu_id,variant_signature)（与本模块无关，但不改这里全是无关的红）。
     var withStock = sku(a, spu(a, "P-" + UUID.randomUUID()), "STK-" + UUID.randomUUID().toString().substring(0, 8));
@@ -373,9 +373,9 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     assertThat(pushed.written()).isEqualTo(2);
 
     var candidates = list(a, "SKU", null, "CANDIDATE", 0, 50);
-    assertThat(candidates.items()).extracting(Candidate::code).contains(codeOf(noStock));
+    assertThat(candidates.items()).extracting(ZombieCandidate::code).contains(codeOf(noStock));
     var inUse = list(a, "SKU", null, "NOT_ZOMBIE", 0, 50);
-    assertThat(inUse.items()).extracting(Candidate::code).contains(codeOf(withStock)).doesNotContain(codeOf(noStock));
+    assertThat(inUse.items()).extracting(ZombieCandidate::code).contains(codeOf(withStock)).doesNotContain(codeOf(noStock));
   }
 
   @Test
@@ -383,7 +383,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     ruleOnly(365);
     configure(
     ZombieEntityType.SKU,
-    new CleanupRuleInput(365, 30, false, true, false, false, true, "x", -1L));
+    new ZombieCleanupRuleInput(365, 30, false, true, false, false, true, "x", -1L));
     var product = spu(a, "P-" + UUID.randomUUID());
     var stale = sku(a, product, "STALE-" + UUID.randomUUID().toString().substring(0, 8));
     backdate("sku", a, stale, 400);
@@ -403,7 +403,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     assertThat(dimension.observedAt()).isNotNull();
     // 且**不能**被当成候选停用。
     assertThat(list(a, "SKU", null, "CANDIDATE", 0, 50).items())
-        .extracting(Candidate::code).doesNotContain(codeOf(stale));
+        .extracting(ZombieCandidate::code).doesNotContain(codeOf(stale));
   }
 
   @Test
@@ -413,7 +413,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     var hit = sku(a, product, "FINDME-" + UUID.randomUUID().toString().substring(0, 8));
     backdate("sku", a, hit, 400);
     assertThat(list(a, "SKU", "FINDME-", null, 0, 50).items())
-        .extracting(Candidate::code).contains(codeOf(hit));
+        .extracting(ZombieCandidate::code).contains(codeOf(hit));
     // 不转义的话 "%" 会变成"匹配所有"。
     assertThat(list(a, "SKU", "%", null, 0, 500).total())
         .isLessThanOrEqualTo(list(a, "SKU", null, null, 0, 500).total());
@@ -475,9 +475,9 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
             "catalog.spu.update",
             () ->
                 zombies.deactivate(
-                    actor, ZombieEntityType.SKU, new DeactivateInput(List.of(one, two), "长期未使用")));
+                    actor, ZombieEntityType.SKU, new ZombieDeactivateInput(List.of(one, two), "长期未使用")));
     assertThat(result.affected()).isEqualTo(2);
-    assertThat(result.entries()).extracting(DeactivatedEntry::previousStatus).containsOnly("ACTIVE");
+    assertThat(result.entries()).extracting(ZombieDeactivatedEntry::previousStatus).containsOnly("ACTIVE");
 
     // 真的改成了 INACTIVE（停用而非删除：行还在）。
     for (var id : List.of(one, two)) {
@@ -491,8 +491,8 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     }
 
     // 停用记录：逐条一行，冻结了规则与证据。
-    var records = call(actor, "catalog.spu.read", () -> zombies.records(new RecordQuery("SKU", null, null, 0, 50)));
-    assertThat(records.items()).extracting(CleanupRecord::entityId).contains(one, two);
+    var records = call(actor, "catalog.spu.read", () -> zombies.records(new ZombieRecordQuery("SKU", null, null, 0, 50)));
+    assertThat(records.items()).extracting(ZombieCleanupRecord::entityId).contains(one, two);
     var record = records.items().stream().filter(r -> r.entityId().equals(one)).findFirst().orElseThrow();
     assertThat(record.reason()).isEqualTo("长期未使用");
     assertThat(record.newStatus()).isEqualTo("INACTIVE");
@@ -514,7 +514,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
         "catalog.spu.update",
         () ->
             zombies.deactivate(
-                actor, ZombieEntityType.SKU, new DeactivateInput(List.of(target), "原始理由")));
+                actor, ZombieEntityType.SKU, new ZombieDeactivateInput(List.of(target), "原始理由")));
 
     // 停用记录只授 SELECT/INSERT；UPDATE/DELETE 必须在 DB 层被拒（可篡改审计是不允许的）。
     assertThatThrownBy(
@@ -574,7 +574,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
                     () ->
                         zombies.deactivate(
                             actor, ZombieEntityType.SKU,
-                            new DeactivateInput(List.of(stale, fresh), "批量"))))
+                            new ZombieDeactivateInput(List.of(stale, fresh), "批量"))))
         .isInstanceOf(ZombieCandidateService.ZombieBatchRejectedException.class);
 
     // Z4：整批拒绝，**一条都不动**（不能跳过后继续停用其余）。
@@ -591,7 +591,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     ruleOnly(365);
     configure(
     ZombieEntityType.SKU,
-    new CleanupRuleInput(365, 90, true, false, false, false, true, "x", -1L));
+    new ZombieCleanupRuleInput(365, 90, true, false, false, false, true, "x", -1L));
     var product = spu(a, "P-" + UUID.randomUUID());
     var target = sku(a, product, "I-" + UUID.randomUUID().toString().substring(0, 8));
     backdate("sku", a, target, 400);
@@ -604,7 +604,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
                     () ->
                         zombies.deactivate(
                             actor, ZombieEntityType.SKU,
-                            new DeactivateInput(List.of(target), "停用"))))
+                            new ZombieDeactivateInput(List.of(target), "停用"))))
         .isInstanceOf(ZombieCandidateService.ZombieBatchRejectedException.class);
   }
 
@@ -619,7 +619,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
         "catalog.spu.update",
         () ->
             zombies.deactivate(
-                actor, ZombieEntityType.SKU, new DeactivateInput(List.of(target), "第一次")));
+                actor, ZombieEntityType.SKU, new ZombieDeactivateInput(List.of(target), "第一次")));
     // 第二次：Z6 —— 已经是 INACTIVE，不再重复停用、不再产生重复记录。
     assertThatThrownBy(
             () ->
@@ -629,7 +629,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
                     () ->
                         zombies.deactivate(
                             actor, ZombieEntityType.SKU,
-                            new DeactivateInput(List.of(target), "第二次"))))
+                            new ZombieDeactivateInput(List.of(target), "第二次"))))
         .isInstanceOf(ZombieCandidateService.ZombieBatchRejectedException.class);
     var count =
         call(
@@ -650,15 +650,15 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     var target = sku(a, product, "G-" + UUID.randomUUID().toString().substring(0, 8));
     backdate("sku", a, target, 400);
     assertThat(list(a, "SKU", null, "CANDIDATE", 0, 50).items())
-        .extracting(Candidate::code).contains(codeOf(target));
+        .extracting(ZombieCandidate::code).contains(codeOf(target));
     call(
         actor,
         "catalog.spu.update",
         () ->
             zombies.deactivate(
-                actor, ZombieEntityType.SKU, new DeactivateInput(List.of(target), "停用")));
+                actor, ZombieEntityType.SKU, new ZombieDeactivateInput(List.of(target), "停用")));
     assertThat(list(a, "SKU", null, "CANDIDATE", 0, 50).items())
-        .extracting(Candidate::code).doesNotContain(codeOf(target));
+        .extracting(ZombieCandidate::code).doesNotContain(codeOf(target));
   }
 
   // ================================================================ 供应商与客户
@@ -674,10 +674,10 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     for (var type : List.of(ZombieEntityType.SUPPLIER, ZombieEntityType.CUSTOMER)) {
       configure(
           type,
-          new CleanupRuleInput(365, 90, false, false, false, false, true, "清理", -1L));
+          new ZombieCleanupRuleInput(365, 90, false, false, false, false, true, "清理", -1L));
       var page = list(a, type.name(), null, "CANDIDATE", 0, 50);
       var expected = type == ZombieEntityType.SUPPLIER ? supplier : customer;
-      assertThat(page.items()).extracting(Candidate::entityId).contains(expected);
+      assertThat(page.items()).extracting(ZombieCandidate::entityId).contains(expected);
     }
   }
 
@@ -688,14 +688,14 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     backdate("party", a, supplier, 400);
     configure(
     ZombieEntityType.SUPPLIER,
-    new CleanupRuleInput(365, 90, false, false, false, false, true, "默认停用文案", -1L));
+    new ZombieCleanupRuleInput(365, 90, false, false, false, false, true, "默认停用文案", -1L));
     call(
         actor,
         "catalog.spu.update",
         () ->
             zombies.deactivate(
                 actor, ZombieEntityType.SUPPLIER,
-                new DeactivateInput(List.of(supplier), "僵尸供应商")));
+                new ZombieDeactivateInput(List.of(supplier), "僵尸供应商")));
     var row =
         call(
             actor,
@@ -750,7 +750,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
         push(
             a,
             ZombieEntityType.CUSTOMER,
-            new ReferenceStatItem(
+            new ZombieReferenceStatItem(
                 supplier, ZombieMetric.ORDER_LINE_COUNT.name(), BigDecimal.ZERO, "trade",
                 OffsetDateTime.now(ZoneOffset.UTC)));
     assertThat(result.rejected()).isEqualTo(1);
@@ -795,7 +795,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
             .header("Authorization", "Bearer reader")
             .param("entityType", "SKU")
             .contentType("application/json")
-            .content(json.writeValueAsString(new DeactivateInput(List.of(target), "x"))))
+            .content(json.writeValueAsString(new ZombieDeactivateInput(List.of(target), "x"))))
         .andExpect(status().isForbidden());
     // 缺 token → 401。
     http.perform(get("/catalog/zombie-candidates")).andExpect(status().isUnauthorized());
@@ -844,7 +844,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
             .contentType("application/json")
             .content(
                 json.writeValueAsString(
-                    new DeactivateInput(List.of(stale), "x"))))
+                    new ZombieDeactivateInput(List.of(stale), "x"))))
         .andExpect(status().isOk());
     // 再来一次 → 409 + blocked 清单
     http.perform(post("/catalog/zombie-candidates/deactivate")
@@ -853,7 +853,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
             .contentType("application/json")
             .content(
                 json.writeValueAsString(
-                    new DeactivateInput(List.of(stale), "x"))))
+                    new ZombieDeactivateInput(List.of(stale), "x"))))
         .andExpect(status().isConflict())
         .andExpect(content().string(org.hamcrest.Matchers.containsString("blocked")));
   }
@@ -872,12 +872,12 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
 
     // 1) 两租户互不可见：候选清单、快照、停用记录三处都不含对方数据
     var mine = list(a, "SKU", null, null, 0, 500);
-    assertThat(mine.items()).extracting(Candidate::entityId).contains(mySku).doesNotContain(theirSku);
+    assertThat(mine.items()).extracting(ZombieCandidate::entityId).contains(mySku).doesNotContain(theirSku);
     var theirs = list(b, "SKU", null, null, 0, 500);
-    assertThat(theirs.items()).extracting(Candidate::entityId).contains(theirSku).doesNotContain(mySku);
+    assertThat(theirs.items()).extracting(ZombieCandidate::entityId).contains(theirSku).doesNotContain(mySku);
 
-    var myRecords = call(actor, "catalog.spu.read", () -> zombies.records(new RecordQuery("SKU", null, null, 0, 200)));
-    assertThat(myRecords.items()).extracting(CleanupRecord::entityId).doesNotContain(theirSku);
+    var myRecords = call(actor, "catalog.spu.read", () -> zombies.records(new ZombieRecordQuery("SKU", null, null, 0, 200)));
+    assertThat(myRecords.items()).extracting(ZombieCleanupRecord::entityId).doesNotContain(theirSku);
 
     // 2) 伪造 X-Tenant-Id 头无效：租户只来自已认证成员关系
     http.perform(get("/catalog/zombie-candidates/evidence")
@@ -898,7 +898,7 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
             .header("X-Tenant-Id", b)
             .param("entityType", "SKU")
             .contentType("application/json")
-            .content(json.writeValueAsString(new DeactivateInput(List.of(theirSku), "伪造"))))
+            .content(json.writeValueAsString(new ZombieDeactivateInput(List.of(theirSku), "伪造"))))
         .andExpect(status().isNotFound());
     // 伪造头也不能借道推快照到别人的租户。
     http.perform(post("/catalog/zombie-candidates/reference-stats")
@@ -930,9 +930,9 @@ new CleanupRuleInput(inactiveDays, 90, false, false, false, false, true, "清理
     // 3) 连接池归还后不串租户（单连接反复交替），逐轮断言快照集合不相交
     for (int i = 0; i < 5; i++) {
       assertThat(list(a, "SKU", null, null, 0, 500).items())
-          .extracting(Candidate::entityId).doesNotContain(theirSku);
+          .extracting(ZombieCandidate::entityId).doesNotContain(theirSku);
       assertThat(list(b, "SKU", null, null, 0, 500).items())
-          .extracting(Candidate::entityId).doesNotContain(mySku);
+          .extracting(ZombieCandidate::entityId).doesNotContain(mySku);
     }
   }
 

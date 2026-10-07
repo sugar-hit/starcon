@@ -69,7 +69,7 @@ public final class ZombieCandidateRules {
   }
 
   /** 单个维度的判定明细。界面逐条渲染"凭什么"用的就是它。 */
-  public record DimensionStatus(
+  public record ZombieDimensionStatus(
       ZombieMetric metric,
       String state,
       BigDecimal value,
@@ -90,7 +90,7 @@ public final class ZombieCandidateRules {
 
   /** 判定结果。 */
   public record Evaluation(
-      ZombieVerdict verdict, List<DimensionStatus> dimensions, List<String> reasons) {}
+      ZombieVerdict verdict, List<ZombieDimensionStatus> dimensions, List<String> reasons) {}
 
   /**
    * 判定一条主数据。
@@ -119,7 +119,7 @@ public final class ZombieCandidateRules {
       OffsetDateTime now,
       Map<ZombieMetric, Observation> observations) {
 
-    var dimensions = new ArrayList<DimensionStatus>(ZombieMetric.values().length);
+    var dimensions = new ArrayList<ZombieDimensionStatus>(ZombieMetric.values().length);
     var reasons = new ArrayList<String>();
 
     // Z6：已经是非活跃状态的主体不是候选。这里只说明原因并给出 NOT_ZOMBIE ——
@@ -127,9 +127,9 @@ public final class ZombieCandidateRules {
     // 只是这个结论与引用维度无关。
     if (!rule.entityType().activeStatus().equals(currentStatus)) {
       dimensions.add(
-          new DimensionStatus(
+          new ZombieDimensionStatus(
               null,
-              DimensionStatus.NOT_REQUIRED,
+              ZombieDimensionStatus.NOT_REQUIRED,
               null,
               lastMaintainedAt,
               false,
@@ -145,9 +145,9 @@ public final class ZombieCandidateRules {
     // Z2 先行返回：还在维护期内的主数据不需要任何引用统计就能确定它不是僵尸。
     if (!staleByTime) {
       dimensions.add(
-          new DimensionStatus(
+          new ZombieDimensionStatus(
               null,
-              DimensionStatus.SATISFIED,
+              ZombieDimensionStatus.SATISFIED,
               null,
               lastMaintainedAt,
               false,
@@ -168,9 +168,9 @@ public final class ZombieCandidateRules {
         // 于是每个维度只能靠猜着开、开着发现全是"无法判定"再关掉。
         var observedButUnused = observations.getOrDefault(metric, Observation.missing());
         dimensions.add(
-            new DimensionStatus(
+            new ZombieDimensionStatus(
                 metric,
-                DimensionStatus.NOT_REQUIRED,
+                ZombieDimensionStatus.NOT_REQUIRED,
                 observedButUnused.value(),
                 observedButUnused.observedAt(),
                 false,
@@ -184,9 +184,9 @@ public final class ZombieCandidateRules {
       if (!observation.present()) {
         unknown = true;
         dimensions.add(
-            new DimensionStatus(
+            new ZombieDimensionStatus(
                 metric,
-                DimensionStatus.UNKNOWN,
+                ZombieDimensionStatus.UNKNOWN,
                 null,
                 null,
                 false,
@@ -197,9 +197,9 @@ public final class ZombieCandidateRules {
       if (isStale) {
         unknown = true;
         dimensions.add(
-            new DimensionStatus(
+            new ZombieDimensionStatus(
                 metric,
-                DimensionStatus.UNKNOWN,
+                ZombieDimensionStatus.UNKNOWN,
                 observation.value(),
                 observation.observedAt(),
                 true,
@@ -209,9 +209,9 @@ public final class ZombieCandidateRules {
       boolean isZero = observation.value().compareTo(ZombieMetric.zero()) == 0;
       if (isZero) {
         dimensions.add(
-            new DimensionStatus(
+            new ZombieDimensionStatus(
                 metric,
-                DimensionStatus.SATISFIED,
+                ZombieDimensionStatus.SATISFIED,
                 observation.value(),
                 observation.observedAt(),
                 false,
@@ -219,9 +219,9 @@ public final class ZombieCandidateRules {
       } else {
         violated = true;
         dimensions.add(
-            new DimensionStatus(
+            new ZombieDimensionStatus(
                 metric,
-                DimensionStatus.VIOLATED,
+                ZombieDimensionStatus.VIOLATED,
                 observation.value(),
                 observation.observedAt(),
                 false,

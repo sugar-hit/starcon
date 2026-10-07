@@ -53,14 +53,14 @@ public class ZombieCandidateController {
    * 同一处理方式。
    */
   @GetMapping("/options")
-  public Options options(
+  public ZombieOptions options(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
     return call(auth, "spu.read", a -> service.options());
   }
 
   /** 概览：三种主体各自的活跃数与三态分布 + 规则参数 + 未接入的上游维度清单。 */
   @GetMapping("/overview")
-  public CandidateOverview overview(
+  public ZombieCandidateOverview overview(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
     return call(auth, "spu.read", a -> service.overview());
   }
@@ -69,17 +69,17 @@ public class ZombieCandidateController {
 
   /** 三种主体的规则（没配过的返回默认值并带 {@code configured=false}）。 */
   @GetMapping("/rules")
-  public List<CleanupRuleView> rules(
+  public List<ZombieCleanupRuleView> rules(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
     return call(auth, "spu.read", a -> service.rules());
   }
 
   /** 保存某个主体类型的清理规则（首次保存即 INSERT，之后走乐观锁）。 */
   @PutMapping("/rules/{entityType}")
-  public CleanupRuleView saveRule(
+  public ZombieCleanupRuleView saveRule(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable String entityType,
-      @Valid @RequestBody CleanupRuleInput input) {
+      @Valid @RequestBody ZombieCleanupRuleInput input) {
     return call(
         auth, "spu.update", a -> service.saveRule(a, type(entityType), input));
   }
@@ -94,7 +94,7 @@ public class ZombieCandidateController {
    * 去接上游事件或刷新快照，后者是"这条有人在用，别动"。
    */
   @GetMapping
-  public CandidatePage list(
+  public ZombieCandidatePage list(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestParam(required = false) String entityType,
       @RequestParam(required = false) String keyword,
@@ -102,12 +102,12 @@ public class ZombieCandidateController {
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer size) {
     return call(
-        auth, "spu.read", a -> service.list(new CandidateQuery(entityType, keyword, verdict, page, size)));
+        auth, "spu.read", a -> service.list(new ZombieCandidateQuery(entityType, keyword, verdict, page, size)));
   }
 
   /** 单条主数据的引用证据 + 最近停用记录（详情面板）。 */
   @GetMapping("/evidence")
-  public ReferenceEvidence evidence(
+  public ZombieReferenceEvidence evidence(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestParam String entityType,
       @RequestParam UUID entityId) {
@@ -128,10 +128,10 @@ public class ZombieCandidateController {
    * 而那一维会永远停留在"未知"。
    */
   @PostMapping("/reference-stats")
-  public ReferenceStatPushResult pushStats(
+  public ZombieReferenceStatPushResult pushStats(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestParam String entityType,
-      @Valid @RequestBody ReferenceStatPush push) {
+      @Valid @RequestBody ZombieReferenceStatPush push) {
     return call(
         auth, "spu.update", a -> service.pushStats(a, type(entityType), push));
   }
@@ -147,10 +147,10 @@ public class ZombieCandidateController {
    * <p>整批原子，准入失败返回 409 且带 {@code blocked} 清单 —— 不跳过、不部分成功。
    */
   @PostMapping("/deactivate")
-  public DeactivateResult deactivate(
+  public ZombieDeactivateResult deactivate(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestParam String entityType,
-      @Valid @RequestBody DeactivateInput input) {
+      @Valid @RequestBody ZombieDeactivateInput input) {
     return call(
         auth, "spu.update", a -> service.deactivate(a, type(entityType), input));
   }
@@ -159,7 +159,7 @@ public class ZombieCandidateController {
 
   /** 停用台账：时间倒序 + 主体类型 / 主体 / 操作人筛选（蓝图「输出」里的"停用记录"）。 */
   @GetMapping("/records")
-  public CleanupRecordPage records(
+  public ZombieCleanupRecordPage records(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestParam(required = false) String entityType,
       @RequestParam(required = false) UUID entityId,
@@ -167,7 +167,7 @@ public class ZombieCandidateController {
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer size) {
     return call(
-        auth, "spu.read", a -> service.records(new RecordQuery(entityType, entityId, decidedBy, page, size)));
+        auth, "spu.read", a -> service.records(new ZombieRecordQuery(entityType, entityId, decidedBy, page, size)));
   }
 
   // ------------------------------------------------------------ 停用目标（供下游核对）
