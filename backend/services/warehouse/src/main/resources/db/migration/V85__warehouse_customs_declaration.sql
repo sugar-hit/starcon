@@ -653,10 +653,14 @@ CREATE TRIGGER customs_line_source BEFORE INSERT OR UPDATE ON customs_declaratio
 
 -- 7.6 明细行数不超过发运单明细行数（同一批货不能拆成超出实发的申报行数）
 CREATE FUNCTION guard_customs_line_count() RETURNS trigger LANGUAGE plpgsql AS $$
-DECLARE src_lines integer; decl_lines integer;
+DECLARE src_lines integer; decl_lines integer; src_shipment uuid;
 BEGIN
+ -- 发运单 id 在**单头**上，明细行只有 declaration_id：必须先从单头取，不能读 NEW.source_shipment_id
+ -- （customs_declaration_line 没有这一列，直接读会报 record "new" has no field）。
+ SELECT d.source_shipment_id INTO src_shipment FROM customs_declaration d
+  WHERE d.tenant_id = NEW.tenant_id AND d.id = NEW.declaration_id;
  SELECT count(*) INTO src_lines FROM first_mile_shipment_line l
-  WHERE l.tenant_id = NEW.tenant_id AND l.shipment_id = NEW.source_shipment_id;
+  WHERE l.tenant_id = NEW.tenant_id AND l.shipment_id = src_shipment;
  SELECT count(*) INTO decl_lines FROM customs_declaration_line l
   WHERE l.tenant_id = NEW.tenant_id AND l.declaration_id = NEW.id;
  IF decl_lines > src_lines THEN
