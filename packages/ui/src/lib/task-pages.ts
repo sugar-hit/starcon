@@ -570,7 +570,7 @@ export const TASK_PAGES: TaskPage[] = [
   },
   {
     href: '/warehouse/outbound',
-    implemented: false,
+    implemented: true,
     domain: 'warehouse',
     label: '拣货与出库',
     description: '按波次完成拣货、复核、包装和出库交接。',

@@ -2031,7 +2031,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "create_1",
+        "operationId": "create_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -7983,6 +7983,358 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ConsignmentCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/outbound-orders": {
+      "get": {
+        "tags": [
+          "outbound-order-controller"
+        ],
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseIds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "sourceTypes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "statuses",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "createdFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "createdTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "outbound-order-controller"
+        ],
+        "operationId": "create_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutboundOrderCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundOrderSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/outbound-orders/{orderId}/transition": {
+      "post": {
+        "tags": [
+          "outbound-order-controller"
+        ],
+        "operationId": "transition",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutboundTransitionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundOrderSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/outbound-orders/print": {
+      "post": {
+        "tags": [
+          "outbound-order-controller"
+        ],
+        "operationId": "print",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutboundPrintInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundPrintResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/outbound-orders/pick-requests": {
+      "post": {
+        "tags": [
+          "outbound-order-controller"
+        ],
+        "operationId": "requestPicking",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutboundPickRequestInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundPickRequestResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/outbound-orders/cancel": {
+      "post": {
+        "tags": [
+          "outbound-order-controller"
+        ],
+        "operationId": "cancel_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutboundCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundCancelResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/outbound-orders/capabilities": {
+      "get": {
+        "tags": [
+          "outbound-order-controller"
+        ],
+        "operationId": "capabilities_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundOrderCapabilities"
                 }
               }
             }
@@ -17476,6 +17828,464 @@
           },
           "createsPayable": {
             "type": "boolean"
+          }
+        }
+      },
+      "OutboundOrderCreateInput": {
+        "type": "object",
+        "properties": {
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTransferOrderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceExternalRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "carrierCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundOrderLineInput"
+            }
+          }
+        }
+      },
+      "OutboundOrderLineInput": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      },
+      "OutboundOrderSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string"
+          },
+          "sourceTransferOrderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceTransferCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceExternalRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "skuLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPieceCount": {
+            "type": "number"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pickRequested": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OutboundTransitionInput": {
+        "type": "object",
+        "properties": {
+          "targetStatus": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "OutboundPrintInput": {
+        "type": "object",
+        "properties": {
+          "orderIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "document": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundPrintDocumentLine": {
+        "type": "object",
+        "properties": {
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      },
+      "OutboundPrintOrder": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "sourceExternalRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalPieceCount": {
+            "type": "number"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundPrintDocumentLine"
+            }
+          }
+        }
+      },
+      "OutboundPrintResult": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "string"
+          },
+          "documentLabel": {
+            "type": "string"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundPrintOrder"
+            }
+          }
+        }
+      },
+      "OutboundPickRequestInput": {
+        "type": "object",
+        "properties": {
+          "orderIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "OutboundBulkFailure": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundPickRequestResult": {
+        "type": "object",
+        "properties": {
+          "requestedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundOrderSummary"
+            }
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundBulkFailure"
+            }
+          }
+        }
+      },
+      "OutboundCancelInput": {
+        "type": "object",
+        "properties": {
+          "orderIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundCancelResult": {
+        "type": "object",
+        "properties": {
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundOrderSummary"
+            }
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundBulkFailure"
+            }
+          }
+        }
+      },
+      "OutboundOrderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundOrderSummary"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "OutboundEnumOption": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundFilterView": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "multiValued": {
+            "type": "boolean"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OutboundOrderCapabilities": {
+        "type": "object",
+        "properties": {
+          "sourceTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundEnumOption"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundEnumOption"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundTransitionView"
+            }
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundFilterView"
+            }
+          },
+          "printDocuments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundEnumOption"
+            }
+          },
+          "pickingHandoverNote": {
+            "type": "string"
+          },
+          "orderFulfillmentNote": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          },
+          "printScopeNote": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundTransitionView": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "fromLabel": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "toLabel": {
+            "type": "string"
+          },
+          "reasonRequired": {
+            "type": "boolean"
+          },
+          "requiresCarrier": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
           }
         }
       }
