@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { Boxes, PackageCheck, Printer, RefreshCw, Truck, XCircle } from 'lucide-react';
 import {
   Badge,
@@ -44,6 +45,7 @@ import {
   transitionOutboundOrder,
   volumeText,
 } from './outbound-order-model';
+import { detailHref } from './outbound-order-detail-model';
 import { useIdentity } from '../iam/identity-shell';
 
 /**
@@ -467,7 +469,10 @@ export function OutboundOrderWorkspace() {
                       />
                     </td>
                     <td className="py-2">
-                      <div className="font-medium">{order.orderCode}</div>
+                      {/* 8.3.1.2 出库单详情：单号可点进去 —— 详情页串联整条出库链路。 */}
+                      <Link href={detailHref(order.id)} className="font-medium hover:underline">
+                        {order.orderCode}
+                      </Link>
                       {order.sourceExternalRef && order.sourceType !== 'TRANSFER' && (
                         <div className="text-copy-12 text-muted-foreground">
                           外部单号 {order.sourceExternalRef}

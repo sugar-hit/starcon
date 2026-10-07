@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **361** |
 | 完成率 | 22.4% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 20 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -292,7 +275,7 @@
 | 8.2.2.1 | 上架任务 | — | D3 | 未开发 | — |
 | 8.2.2.2 | 待检处理 | — | D3 | 未开发 | — |
 | 8.3.1.1 | 出库单列表 | /warehouse/outbound | D4 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V72__outbound_order_list.sql`（outbound_order 单头 / outbound_order_line 明细计划快照 / outbound_pick_request 拣货交接请求 / outbound_order_event 作业留痕 四表，tenant_id NOT NULL + ENABLE/FORCE RLS + GRANT + REVOKE DELETE/UPDATE + REVOKE ALL FROM starcon_app；版本按调度器预分配取 V72；**纯新建表、不 ALTER 任何既有表，无跨车道回归面**）；**8.3 的第一块地基**：8.3 此前无任何出库单/拣货/打包/发货表，本模块建并拥有 outbound_order / outbound_order_line，后续 8.3.2.1 拣货、8.3.3.x 复核打包、8.3.4.1 发货交接都引用这两张表；**「出库单 ≠ 销售订单」做进数据形状**：外部单号存 varchar(64) 且**刻意不加** (tenant_id, source_external_ref) 唯一索引 —— 加了就等于把「分仓/分批拆多张出库单」在数据上禁掉了，集成测试实跑同一外部单号下并排挂两张单；**四类来源按可信度分三种表达**：SALES/PURCHASE_RETURN/PRODUCTION（9 订单 / 6 采购 / 10 加工均未交付）只存外部单号字符串、跨服务不建 FK；TRANSFER（7.5.1.1 已交付且同服务）走真复合外键到 transfer_order，建单时校验发货仓 = 调拨单 from_warehouse_id 且每个明细 SKU 都在该调拨单明细里，CHECK 钉死两者互斥；**七态状态机 Java 枚举 + V72 触发器双实现**：PENDING_PICKING 待拣 → PICKING 拣货中 → PENDING_RECHECK 待复核 → PENDING_PACKING 待打包 → PENDING_SHIPMENT 待发货 → SHIPPED 已发货，另有 CANCELLED 取消；两条返工边 PENDING_RECHECK→PICKING（复核不通过退回重做）与 PENDING_PACKING→PENDING_RECHECK（打包缺件回复核），复核不通过**不**退回待拣（待拣含义是「一件都没拣」，退回会让待拣同时表达「没开始」与「拣错重来」）；SHIPPED/CANCELLED 终态在 DB 层冻结来源/发货仓/承运渠道/创建人；集成测试逐条比对 Java 转换矩阵与触发器白名单没有分叉（7 态 × 6 目标 = 42 个组合全部实测，**每个探测开独立事务** —— PostgreSQL 任何报错都会中止整个事务，把探测与复位放同事务会让测试因错误原因永远绿）；**「生成拣货任务」只做到交接为止且不假数据**：不建 picking_task（归 8.3.2.1），真实做三件事 —— 校验待拣、落一行 outbound_pick_request（含行数与件数快照）、状态推进到拣货中并留审计，一张单只交接一次（UNIQUE(tenant_id,order_id)）；**SKU 行数与件数现算不存列**（LATERAL 派生表会让 jOOQ 无法为列命名而抛 "Field is not contained in row type"，改用相关标量子查询），避免与明细漂移 —— 这两个数恰恰是作业员最先会对着明细核对的；**打印返回真正要印的内容**（单头 + 明细行）而非「已提交打印」空壳，只支持出库单与拣货单两种，面单/箱唛/标签属 8.3.4.2 并行车道故一个不列；**批量操作逐单独立处理**，成功与失败逐条回报原因，不做「部分成功」这种含糊表达；**用户数据范围**按已认证身份生效（SELF 收窄到本人创建），复用 InventoryController.selfOnly 且必须传完整 `warehouse.` 前缀权限码；**刻意没有 GET /{id} 详情**（属 8.3.1.2）与**没有 DELETE**（出库单是履约凭证只能取消留痕）；端点 7 个挂 `/warehouse/inventory/outbound-orders`：GET /capabilities（报出未接入能力与原因）、GET /（四维度真分页真筛选：仓库/来源/状态/时间 + 关键字跨五处）、POST /（建单，含零行/重复 SKU/数量非正/调拨对不上的拒绝）、POST /pick-requests、POST /print、POST /cancel、POST /{id}/transition；页面 `/outbound` 为真实工作区（筛选 / 批量操作 / 打印预览 / 状态推进 + 加载态、空态、错误态、逐条失败提示），路由白名单在 api-proxy.ts 只追加 `outbound-orders` 一支未重写整段正则；集成测试 `OutboundOrderIntegrationTest` 32 项真实 PostgreSQL 16 + Testcontainers（池容量 1）+ 租户隔离三断言全跑，含 timestamptz 写回断言与 numeric(19,6) 口径断言；验证：`cd backend && ./mvnw verify` 全绿、`pnpm typecheck` / `pnpm lint` / `pnpm test`(1169) 全绿、`NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` 成功、`node tools/module-progress/sync.mjs --check` 通过 |
-| 8.3.1.2 | 出库单详情 | — | D4 | 未开发 | — |
+| 8.3.1.2 | 出库单详情 | — | D4 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V79__outbound_order_detail.sql`（**只建一条索引、零新建表、零 ALTER 既有表** —— 本模块是纯读投影，见下）；**核心交付物是 8.3.1.1 刻意留白的 GET /outbound-orders/{id}**：一次调用返回整屏 = 单头 + 明细行 + 已拣/已发口径 + 拣货交接 + 作业时间线 + 四段不可得能力 + 作业操作入口，对应蓝图那句「**详情页串联整条出库链路**，作业人员不需要在多个页面跳」；**为什么零新建表**（边界纪律，不是省事）：蓝图给本模块的六段内容逐段核对后全部落在 8.3.1.1 的 V72 四张表里，预占引用归 7.2.1、包裹归 8.3.4.1、买家地址归 9 订单履约 —— 在这里建引用表就是给别人的事实抢第二个写入所有者，上游交付后它们自己写入、本端点立即读到，无需迁移；**已拣量逐行返回 null 而不是 0**（本模块最要紧的一条）：8.3.1.1 刻意没建 picking_task（归 8.3.2.1），只做到 outbound_pick_request 交接为止，那是**请求量快照**不是实拣量；填 0 会让作业员以为一件都没拣然后重复拣一遍，所以逐行 pickedQuantity 恒 null，并由 OutboundQuantityAvailability 给出 ownerModule=8.3.2.1 与原因；**已发量只在 SHIPPED 时是真数**：SHIPPED 终态且 DB 层冻结（V72 §4.2）+ 明细行不可改（V72 §4.4）⇒ 已发量 = 计划件数成立，其余状态一律 null，**绝不按拣货进度推算发货进度**；**四段拿不到的数据显式 available=false**（照 8.2.1.1 既有约定）：关联销售订单（9.1.1.2）、买家地址（9.1.1.2）、预占引用（7.2.1.1）、包裹列表（8.3.4.1），各带 ownerModule + href + 原因，**不建占位表、不返回空集冒充成功** —— 空的包裹列表会被读成「这单没有包裹」而不是「这段能力还没接入」；刻意**不按 ref_type 猜**去 join inventory_transaction（预占侧自己的引用键，当前没有任何指向出库单的形态）或 print_target（按 external_ref 字符串索引、与出库单无 FK），那只是把「没数据」伪装成「查过了」；**作业操作入口直接取 OutboundOrderStatus.transitionsFrom()**，与 8.3.1.1 共用同一个转换矩阵不另写一份，集成测试逐状态比对两者没有分叉（防并行开发最常见的分叉），并给每个去向标注归属模块与前置条件；**刻意没有写端点**：状态推进/取消/打印/生成拣货任务由 8.3.1.1 已有的四个端点执行，本模块只负责讲清「现在能做什么、去哪个模块做、前置条件是什么」—— 再开一套写端点就是让同一状态跃迁有两个入口；时间线按 (occurred_at, id) 升序读 —— id 兜底是必要的，同一毫秒发生的事件光看 occurred_at 顺序不确定，界面上会随机跳行；跨租户与不存在**返回同一个 404**（让 A 拿 B 的 id 探测存在性本身就是泄露面）；端点 2 个挂 `/warehouse/inventory/outbound-orders`：GET /detail-capabilities（详情页六段边界与两条数量口径，刻意与 8.3.1.1 的集合级 /capabilities 分开）、GET /{id}；页面 `/warehouse/outbound/[id]` 为真实工作区（单头 + 已拣/已发口径卡 + 明细行 + 拣货交接 + 作业时间线 + 关联对象灰块 + 作业操作入口，含加载态、错误态、空态），列表页单号可点进详情；前端模型 `quantityCell` 对拿不到的数量返回 null 而非 '0'，并有单测钉死这条；路由白名单在 api-proxy.ts 对既有 `outbound-orders` 分支做**联合**（追加 detail-capabilities 与 /{id}，未替换 8.3.1.1 已登记的 capabilities/pick-requests/print/cancel/transition 五支），并在 api-proxy.test.ts 里既验新增两支放行、也**反验 8.3.1.1 已交付的分支没被改掉**（取错一侧会静默删掉已交付路由，表现为页面 404 而 typecheck/lint/vitest 全绿）；集成测试 `OutboundOrderDetailIntegrationTest` 20 项真实 PostgreSQL 16 + Testcontainers（池容量 1）+ 租户隔离三断言全跑，含 timestamptz 写回断言与 numeric(19,6) 口径断言；验证：`cd backend && ./mvnw verify` 全绿、`pnpm typecheck` / `pnpm lint` / `pnpm test`(1417) 全绿、`NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` 成功、`node tools/module-progress/sync.mjs --check` 通过 |
 | 8.3.2.1 | 拣货任务 | — | D4 | 未开发 | — |
 | 8.3.2.2 | 波次与合并拣货 | — | D4 | 未开发 | — |
 | 8.3.3.1 | 复核扫描 | — | D4 | 未开发 | — |
@@ -557,3 +540,9 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 103 |
+| **未开发** | **362** |
+| 完成率 | 22.2% |
+| **D3** | 21 | 0 | 19 | 40 |
+| **D4** | 4 | 0 | 56 | 60 |
+| 07 | 库存核算系统 | D3 | 19 | 31 |
