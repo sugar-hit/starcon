@@ -1653,6 +1653,148 @@
           }
         }
       }
+    },
+    "/warehouse/inventory/platform-observations": {
+      "post": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "recordPlatformObservation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformObservationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformObservationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/distribution": {
+      "get": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "distribution",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "spuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lookbackDays",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultiWarehouseDistribution"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/distribution/spus": {
+      "get": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "distributionSpus",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DistributionSpuRef"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3684,6 +3826,347 @@
           "size": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "PlatformObservationInput": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string"
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedOnHand": {
+            "type": "number"
+          },
+          "observedReserved": {
+            "type": "number"
+          },
+          "observedAvailable": {
+            "type": "number"
+          },
+          "observedInbound": {
+            "type": "number"
+          },
+          "rawReference": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlatformObservationSaved": {
+        "type": "object",
+        "properties": {
+          "observationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseKind": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "storedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DistributionAction": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DistributionRow": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "warehouseKind": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "onHand": {
+            "type": "number",
+            "nullable": true
+          },
+          "reserved": {
+            "type": "number",
+            "nullable": true
+          },
+          "available": {
+            "type": "number",
+            "nullable": true
+          },
+          "inTransit": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformOnHand": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformReserved": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformAvailable": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformInbound": {
+            "type": "number",
+            "nullable": true
+          },
+          "source": {
+            "type": "string",
+            "nullable": true
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "observationAgeSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "turnoverDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "turnoverComputable": {
+            "type": "boolean"
+          },
+          "turnoverBasis": {
+            "type": "string"
+          },
+          "turnoverNote": {
+            "type": "string"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastMovementAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DistributionSkuScope": {
+        "type": "object",
+        "properties": {
+          "matchedSkuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unregisteredSpuCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DistributionSubject": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "spuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "DistributionTotals": {
+        "type": "object",
+        "properties": {
+          "ownOnHand": {
+            "type": "number"
+          },
+          "ownReserved": {
+            "type": "number"
+          },
+          "ownAvailable": {
+            "type": "number"
+          },
+          "ownInTransit": {
+            "type": "number"
+          },
+          "ownWarehouseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ownZeroWarehouseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "platformOnHand": {
+            "type": "number"
+          },
+          "platformReserved": {
+            "type": "number"
+          },
+          "platformAvailable": {
+            "type": "number"
+          },
+          "platformInbound": {
+            "type": "number"
+          },
+          "platformWarehouseCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "earliestCollectedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DistributionWindow": {
+        "type": "object",
+        "properties": {
+          "lookbackDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "outboundKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MultiWarehouseDistribution": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "$ref": "#/components/schemas/DistributionSubject"
+          },
+          "window": {
+            "$ref": "#/components/schemas/DistributionWindow"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/DistributionTotals"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DistributionRow"
+            }
+          },
+          "skuScope": {
+            "$ref": "#/components/schemas/DistributionSkuScope"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DistributionAction"
+            }
+          }
+        }
+      },
+      "DistributionSpuRef": {
+        "type": "object",
+        "properties": {
+          "spuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       }

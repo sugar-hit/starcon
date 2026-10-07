@@ -14,6 +14,12 @@ import {
   parseDetailHref,
   parseLedgerHref,
   pickableNote,
+  isPlatformRow,
+  observationFreshness,
+  rowSourceNote,
+  turnoverBasisLabels,
+  turnoverText,
+  warehouseKindLabels,
   qty,
   query,
   roleLabels,
@@ -519,5 +525,123 @@ describe('账实核对的前端口径', () => {
     expect(statusLabels.CONSISTENT).toBe('账实一致');
     expect(statusLabels.DISCREPANT).toBe('存在差异');
     expect(severityLabels.HIGH).toBe('严重');
+  });
+});
+
+// ================================================================ 7.1.3.1 多仓分布视图
+
+/**
+ * 构造一条矩阵行。自有仓与平台仓两组列互斥有值 —— 这正是本模块要守住的口径。
+ */
+function ownRow(overrides: Record<string, unknown> = {}) {
+  return {
+    warehouseId: 'w1',
+    warehouseCode: 'WH-SH',
+    warehouseName: '上海仓',
+    warehouseKind: 'LOCAL',
+    countryCode: 'CN',
+    timezone: 'Asia/Shanghai',
+    onHand: 100,
+    reserved: 30,
+    available: 70,
+    inTransit: 10,
+    platformOnHand: null,
+    platformReserved: null,
+    platformAvailable: null,
+    platformInbound: null,
+    source: null,
+    collectedAt: null,
+    observationAgeSeconds: null,
+    turnoverDays: 12.5,
+    turnoverComputable: true,
+    turnoverBasis: 'OWN_OUTBOUND',
+    turnoverNote: '在手 ÷（近 30 天发货出库 240 ÷ 30）',
+    bucketCount: 2,
+    locationCount: 2,
+    lotCount: 1,
+    lastMovementAt: '2026-10-01T00:00:00+08:00',
+    ...overrides,
+  } as never;
+}
+
+function platformRow(overrides: Record<string, unknown> = {}) {
+  return ownRow({
+    warehouseKind: 'PLATFORM_FBA',
+    onHand: null,
+    reserved: null,
+    available: null,
+    inTransit: null,
+    platformOnHand: 80,
+    platformReserved: 5,
+    platformAvailable: 75,
+    platformInbound: 25,
+    source: 'AMAZON_FBA',
+    collectedAt: '2026-10-07T10:00:00+08:00',
+    observationAgeSeconds: 3600,
+    bucketCount: 0,
+    locationCount: 0,
+    lotCount: 0,
+    lastMovementAt: null,
+    ...overrides,
+  });
+}
+
+describe('7.1.3.1 多仓分布：自有账本量与平台观测量必须分区', () => {
+  it('仓库性质标签覆盖蓝图点名的四类仓', () => {
+    expect(warehouseKindLabels.LOCAL).toBe('本地自营仓');
+    expect(warehouseKindLabels.OVERSEAS).toBe('海外自营仓');
+    expect(warehouseKindLabels.PLATFORM_FBA).toBe('平台仓（FBA）');
+    expect(warehouseKindLabels.THIRD_PARTY).toBe('三方仓');
+  });
+
+  it('自有仓与平台仓的判定只看 kind，不看有没有数量', () => {
+    // 平台仓缺货时数量是 0，仍然是平台仓 —— 判定不能被数量带偏
+    expect(isPlatformRow(platformRow({ platformOnHand: 0 }))).toBe(true);
+    expect(isPlatformRow(ownRow())).toBe(false);
+  });
+
+  it('来源标注如实说明这一行的数字是账还是快照', () => {
+    expect(rowSourceNote(ownRow())).toBe('自有账本量');
+    // 平台行必须点名"观测值、不是自有账本"并带出来源，否则用户会把它当账用
+    const note = rowSourceNote(platformRow());
+    expect(note).toContain('观测值');
+    expect(note).toContain('不是自有账本');
+    expect(note).toContain('AMAZON_FBA');
+  });
+
+  it('周转天数算不出时显示「—」而不是 0', () => {
+    // 0 会被读成「瞬间卖完」；空值加原因才是"没算出来"
+    const t = turnoverText(
+      ownRow({ turnoverComputable: false, turnoverDays: null, turnoverBasis: 'NONE', turnoverNote: '没有发货出库记录' }),
+    );
+    expect(t.value).toBe('—');
+    expect(t.basis).toBe(turnoverBasisLabels.NONE);
+    expect(t.title).toBe('没有发货出库记录');
+  });
+
+  it('周转天数两个口径分开标注，不能直接比大小', () => {
+    expect(turnoverBasisLabels.OWN_OUTBOUND).toBe('自有发货速度');
+    expect(turnoverBasisLabels.PLATFORM_OBSERVATION_DIFF).toBe('平台观测差分');
+    const own = turnoverText(ownRow());
+    const fba = turnoverText(
+      platformRow({ turnoverBasis: 'PLATFORM_OBSERVATION_DIFF', turnoverNote: '观测快照差分，与自有仓口径不可直接比较' }),
+    );
+    expect(own.basis).not.toBe(fba.basis);
+    expect(own.value).toBe('12.5 天');
+  });
+
+  it('观测新鲜度超过一天要标出数据较旧', () => {
+    const now = Date.parse('2026-10-07T12:00:00+08:00');
+    const fresh = observationFreshness(platformRow(), now);
+    expect(fresh).toContain('2 小时前');
+    expect(fresh).not.toContain('数据较旧');
+
+    const stale = observationFreshness(
+      platformRow({ collectedAt: '2026-10-01T10:00:00+08:00' }),
+      now,
+    );
+    expect(stale).toContain('数据较旧');
+    // 自有仓没有"采集时间"这个概念，返回破折号而不是编一个时间
+    expect(observationFreshness(ownRow(), now)).toBe('—');
   });
 });

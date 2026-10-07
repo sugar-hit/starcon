@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **382** |
 | 完成率 | 17.8% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 20 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -256,7 +239,7 @@
 | 7.1.1.3 | 可用量计算 | /inventory | D3 | 未开发 | — |
 | 7.1.2.1 | 库存流水台账 | — | D3 | 已交付 | 迁移 warehouse V51__warehouse_inventory_ledger.sql（**不建新表**：台账是 append-only 台账的只读面，事实表与 append-only 触发器、RLS、REVOKE 在 V1 已成立；只补台账查询路径索引：occurred_at 倒序翻页、kind 与 ref_type 两个低基数字段的时间复合索引、entry 带 INCLUDE 的聚合索引）+ 端点 GET /warehouse/inventory/ledger（时间范围左闭右开、SKU、仓库、业务类型、来源单据类型、关键字、排序、分页；返回行口径与分录口径**两套净变动**并在无维度筛选时恒等，即 7.1.2.2 核对基线）、GET /warehouse/inventory/ledger/{id} 分录下钻（跨仓户 404 不泄露存在性）、GET /warehouse/inventory/ledger/ref-types 来源单据类型词表 + 页面 /inventory/ledger（7.1.1.2「查看流水」入口契约地址）与 /inventory 页内第三个页签（筛选、期间净变动、按类型分组、列表、下钻分录、空分录告警、数据范围 SELF 提示、加载/空/错误三态）+ 测试 InventoryLedgerIntegrationTest 21 例（数量符号正负、跨仓一笔不被维度筛选切成半个数、时间范围左闭右开与 +08:00 时区零漂移、非法业务类型与排序键 400、翻页决胜键不重不漏、流水与分录 UPDATE/DELETE 被 DB 拒绝、空分录业务单独计数、租户隔离三断言）+ inventory-model.test.ts 16 例 |
 | 7.1.2.2 | 账实核对 | — | D3 | 已交付 | 迁移 warehouse V54__warehouse_inventory_reconciliation.sql（**不建累计值表**：核对两侧都现算，Σ 分录与余额快照各只有一个真相来源，再存一份累计值会让核对时无法判断该信谁；只落核对**结论**：inventory_reconciliation_run 批次头 + inventory_reconciliation_finding 发现表，两表 tenant_id NOT NULL、ENABLE+FORCE RLS isolation 策略、GRANT SELECT/INSERT 给 warehouse_app、REVOKE UPDATE/DELETE 并挂 V1 的 append-only 触发器，结论写下即不可改、只能重跑并存新旧两批）+ 端点 POST /warehouse/inventory/reconciliation 发起核对（**写权限 warehouse.inventory.update**，因为它落不可变结论；区间左闭右开，范围仓库/SKU/货权法人三选一，缺省近 30 天）、GET 同路径批次列表（真分页、按结论筛）、GET /{runId} 结论加可疑区间排名、GET /{runId}/findings 差异明细与可疑流水分页（跨租户 404 不泄露存在性）+ 页面 /inventory 工作区第四个页签「账实核对」（发起核对、结论条含期初+区间内+区间后=应等于快照的口径公式、按天分桶的可疑区间排名、差异明细、可疑流水定位，点可疑流水经 /inventory/ledger?transactionId= 直达那笔分录；加载/空/错误三态，差异为零也占满版面并写明核了哪个区间多少笔分录）+ 测试 InventoryReconciliationIntegrationTest 30 例实跑 Testcontainers PG16（账实一致也出可追溯结论、三桶恰好分完全部历史、差异等于累计减快照、漏记 transactionId 必为 null、重复记与并发丢失成对给出另一笔流水与相差秒数、超过 60 秒窗口不算重复/并发、迟到补记未到一天不报、一笔可同时命中多类信号、结论不可改删且超级用户也改不动、+08:00 时间零漂移、范围三选一与倒置区间 400、租户隔离三断言） |
-| 7.1.3.1 | 多仓分布视图 | — | D3 | 未开发 | — |
+| 7.1.3.1 | 多仓分布视图 | — | D3 | 已交付 | 迁移 warehouse V55__warehouse_multi_warehouse_distribution.sql（补三件「不建就做不出这个视图」的事：warehouse.kind 仓库性质列 LOCAL／OVERSEAS／PLATFORM_FBA／THIRD_PARTY 让分类真在数据里、platform_stock_observation 平台仓观测表 source 与 collected_at 均 NOT NULL 强制标注来源与采集时间、sku_ref.spu_id 补 SPU 引用登记；四条 DB 级强制：guard_platform_warehouse_no_ledger 平台仓不得写 balance/bucket、guard_platform_kind_change 有余额的仓不得改成平台仓、guard_observation_requires_platform_warehouse 非平台仓不得写观测、观测表 append-only 挂 V1 触发器并 REVOKE UPDATE/DELETE；ENABLE+FORCE RLS isolation 策略、GRANT SELECT/INSERT 给 warehouse_app）+ 端点 GET /warehouse/inventory/distribution（skuId 与 spuId 互斥必居其一、在手／预占／可用聚合自 inventory_balance、在途按收货仓取 inventory_transfer IN_TRANSIT、bucket 分解度与最近变动时间、带法人过滤与 1–180 天回看窗口）、GET /warehouse/inventory/distribution/spus SPU 下拉、POST /warehouse/inventory/platform-observations 观测录入（写权限 warehouse.inventory.update）+ 页面 /inventory/distribution（自有账本仓与平台仓两个区块分区展示、在途单列、周转天数算不出显示「—」并挂原因、观测新鲜度超一天标「数据较旧」、同仓多来源分行不混加、SPU 覆盖缺口如实报出、平台观测录入表单、加载／空／错误三态）与 /inventory 第五个页签「多仓分布」+ 测试 InventoryDistributionIntegrationTest 37 例（矩阵分区与合计两组不相加、零库存仓保留、在途不与在手相加且已收货不再计、平台行自带来源与采集时间、DB 级四条强制的拒绝、自有周转天数=在手÷日均发货出库、调拨出库不计入、无出库与样本不足时留空而非 0、+08:00 采集时间写回零漂移、SPU 聚合与未登记 SPU 缺口、租户隔离三断言）＋ inventory-model.test.ts 6 例 |
 | 7.2.1.1 | 预占需求列表 | /inventory/reservation | D3 | 未开发 | — |
 | 7.2.1.2 | 预占分配明细 | /inventory/reservation | D3 | 未开发 | — |
 | 7.2.1.3 | 释放与过期 | /inventory/reservation | D3 | 未开发 | — |

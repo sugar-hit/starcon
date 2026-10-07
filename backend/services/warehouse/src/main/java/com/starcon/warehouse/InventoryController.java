@@ -1,5 +1,6 @@
 package com.starcon.warehouse;
 
+import static com.starcon.warehouse.DistributionModels.*;
 import static com.starcon.warehouse.InventoryBucketModels.*;
 import static com.starcon.warehouse.InventoryLedgerModels.*;
 import static com.starcon.warehouse.InventoryReconciliationModels.*;
@@ -42,6 +43,7 @@ public class InventoryController {
   private final InventoryLedgerService ledger;
   private final InventoryReconciliationService reconciliation;
   private final SellablePolicyService sellablePolicies;
+  private final InventoryDistributionService distributionService;
 
   public InventoryController(
       AccessService access,
@@ -51,7 +53,8 @@ public class InventoryController {
       InventoryAvailabilityService availability,
       InventoryLedgerService ledger,
       InventoryReconciliationService reconciliation,
-      SellablePolicyService sellablePolicies) {
+      SellablePolicyService sellablePolicies,
+      InventoryDistributionService distributionService) {
     this.access = access;
     this.overview = overview;
     this.buckets = buckets;
@@ -60,6 +63,7 @@ public class InventoryController {
     this.ledger = ledger;
     this.reconciliation = reconciliation;
     this.sellablePolicies = sellablePolicies;
+    this.distributionService = distributionService;
   }
 
   /**
@@ -358,6 +362,56 @@ public class InventoryController {
   public List<DimensionCapability> capabilities(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
     return call(auth, "inventory.read", a -> overview.capabilities());
+  }
+
+  /**
+   * 7.1.3.1 多仓分布视图：同一 SKU（或 SPU）在所有仓库的对照矩阵。
+   *
+   * <p>读权限沿用 {@code warehouse.inventory.read}：矩阵是纯聚合视图，与总览/明细同源同权。
+   *
+   * <p>{@code skuId} 与 {@code spuId} 互斥且必居其一 —— 蓝图输入是「SKU 或 SPU」，
+   * 两者都不给等于要求一次拉出全租户所有 SKU 的全仓分布，那既不是矩阵也不是分页。
+   */
+  @GetMapping("/inventory/distribution")
+  public MultiWarehouseDistribution distribution(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestParam(required = false) UUID skuId,
+      @RequestParam(required = false) UUID spuId,
+      @RequestParam(required = false) UUID legalEntityId,
+      @RequestParam(required = false) Integer lookbackDays) {
+    return call(
+        auth,
+        "inventory.read",
+        a -> distributionService.distribution(new DistributionQuery(skuId, spuId, legalEntityId, lookbackDays)));
+  }
+
+  /**
+   * 记录一条平台仓（FBA）库存观测。
+   *
+   * <p>用 POST 且权限为 {@code warehouse.inventory.update}：它**写**一条观测行，
+   * 与读权限分开。挂成 GET + read 就等于声明 read 权限能改数据，那道闸门等于没有。
+   *
+   * <p>{@code collectedAt} 按 ISO-8601 带偏移量解析，与台账端点同一套规则；
+   * 绑定时用 {@code OffsetDateTime} 直传（见 V55 与服务的注释：{@code Timestamp.valueOf}
+   * 会按 JVM 默认时区静默偏 8 小时）。
+   */
+  @PostMapping("/inventory/platform-observations")
+  public PlatformObservationSaved recordPlatformObservation(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestBody PlatformObservationInput input) {
+    return call(auth, "inventory.update", a -> distributionService.recordObservation(input));
+  }
+
+  /**
+   * SPU 下拉（矩阵的「按 SPU 看」入口）。
+   *
+   * <p>只列出本租户 {@code sku_ref} 上登记过 spu_id 的 SPU。没有登记的 SKU 不会出现在这里，
+   * 缺口由矩阵响应里的 unregisteredSpuCount 如实报出，不在下拉里假装"只有这些 SKU"。
+   */
+  @GetMapping("/inventory/distribution/spus")
+  public List<DistributionSpuRef> distributionSpus(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
+    return call(auth, "inventory.read", a -> distributionService.spus());
   }
 
   // ------------------------------------------------------------ 参照数据
