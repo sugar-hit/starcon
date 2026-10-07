@@ -21,14 +21,16 @@
 
 ## 你的并发配额
 
-**本实例每次 `plan --lanes 3`。全局并发 6 条车道，由两个定时任务各管 3 条**，
-两个任务的触发时刻错开 10 分钟（一个跑 `0,20,40`，另一个跑 `10,30,50`），
-所以调度闸几乎不会撞上 —— 闸只在派发窗口持有（秒级），不会把并行开发变回串行。
+**本实例每次 `plan --lanes 4`。全局并发 8 条车道，由两个定时任务各管 4 条**，
+两个任务错开 7 分钟（A 组 `0,15,30,45`，B 组 `7,22,37,52`），调度闸几乎不会撞上。
 
-**为什么是 6 而不是 8**：单会话子 Agent 并发上限是 4，要突破只能靠多个任务实例。
-但本机是 10 核 / 24GB，其中 **Docker 只分到 11.7GB**，且已有 4 个常驻容器。
-每条车道跑验证时同时压着 JVM + Testcontainers 的 PostgreSQL 16 + `next build`，
-8 条并发会在这 11.7GB 上互相踩。**首个波次请回报实际峰值占用**，确认有富余再谈加到 8。
+**为什么是 8**：单会话子 Agent 并发上限就是 4，要 8 条只能靠两个任务实例。
+实测过资源（2026-10-07 19:17）：3 条车道时 java+node 共 1.8GB、Docker 1.4GB / 11.67GB、
+load 2.55 / 10 核，**单个 Testcontainers PG 容器只占 ~40MB**。
+按 8 条外推约 4.8GB RAM、Docker 2.5GB —— 内存和磁盘都不是墙，**CPU 才是**。
+所以 tick 间隔同时从 20 分钟压到 15 分钟，让车道一落地就能被回收重派，不在空等里浪费产能。
+
+若 load 持续 > 8 或有车道报 `RESOURCE_BLOCKED`，把两组的 `--lanes` 降回 3。
 
 ## 第 1 步：同步台账
 
@@ -72,7 +74,7 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs gc
 ## 第 4 步：排车道并派发
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs plan --lanes 3
+cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs plan --lanes 4
 ```
 
 它会：读台账 + 读蓝图「关系」字段 → 挑出**上游已交付且 L3 锚点互不相同**的模块 →
@@ -198,9 +200,9 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs plan --la
 - **进度**：总数 / 已交付 / 进行中 / 未开发 / 完成率
 - **本轮回收**：并入了哪些车道（模块 ID + 名称）；有冲突就点名冲突文件
 - **本轮派发**：派发了哪些车道（模块 ID + 名称 + 迁移版本号），或「车道全忙，本轮未派发」
-- **资源占用**：`sysctl -n hw.ncpu`、`uptime`、`docker stats --no-stream --format '{{.Name}} {{.MemUsage}}' | head -6`
+- **资源占用**：`uptime`、`docker stats --no-stream --format '{{.Name}} {{.MemUsage}}' | head -6`
   的实际读数。判断要不要把全局并发从 6 提到 8 靠的就是这几个数，不要凭感觉。
-- **吞吐预期**：按「6 条车道 × 约 40 分钟/模块」估算，说明当前节奏下剩余模块需要多久
+- **吞吐预期**：按「8 条车道 × 约 40 分钟/模块」估算，说明当前节奏下剩余模块需要多久
 - **风险提示**（可选）：台账与代码实际不符、车道心跳失联、验证失败、内存吃紧等
 
 ## 禁止事项
