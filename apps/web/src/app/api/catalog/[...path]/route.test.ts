@@ -1299,8 +1299,8 @@ it('3.8.1.1 导入向导已有的路径没有被报告子段改坏', async () =>
  * 3.9.1.1 重复 SKU 识别：catalog allowlist 必须放行 duplicate-scans / duplicate-candidates 全路径。
  *
  * <p>allowlist 是**锚定**正则，没放进分支的路径一律 404，页面只会进错误态，
- * 看起来像「后端没实现」。这里把每条路由钉住，并钉住**不该**放行的近邻路径 ——
- * 尤其是 merge（决定只登记，执行合并是 3.9.1.2，现在放行会让那个子路径看起来像已交付）。
+ * 看起来像「后端没实现」。这里把每条路由钉住，并钉住**不该**放行的近邻路径。
+ * （3.9.1.2 交付后 {@code merge} 与 {@code merge-preview} 已转入上面的放行清单。）
  */
 it('catalog/duplicate-* 的全部路由被放行且转发到 catalog 服务', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
@@ -1330,6 +1330,11 @@ it('catalog/duplicate-* 的全部路由被放行且转发到 catalog 服务', as
   expect((await POST(request('catalog/duplicate-scans'), { params: { path: ['catalog', 'duplicate-scans'] } })).status).toBe(200);
   const decide = `catalog/duplicate-candidates/${id}/decision`;
   expect((await POST(request(decide), { params: { path: decide.split('/') } })).status).toBe(200);
+  // 3.9.1.2 交付之后，merge / merge-preview 子路径才允许放行（此前刻意不放行）
+  const preview = `catalog/duplicate-candidates/${id}/merge-preview`;
+  expect((await GET(request(preview), { params: { path: preview.split('/') } })).status).toBe(200);
+  const merge = `catalog/duplicate-candidates/${id}/merge`;
+  expect((await POST(request(merge), { params: { path: merge.split('/') } })).status).toBe(200);
 });
 
 it('duplicate-* 放行不等于放行任意 catalog 子路径', async () => {
@@ -1337,8 +1342,6 @@ it('duplicate-* 放行不等于放行任意 catalog 子路径', async () => {
   vi.stubGlobal('fetch', fetcher);
   const id = '11111111-1111-1111-1111-111111111111';
   for (const path of [
-    // 决定只登记，执行合并是 3.9.1.2 —— 现在放行 merge 会让那个子路径看起来像已交付
-    `catalog/duplicate-candidates/${id}/merge`,
     `catalog/duplicate-candidates/${id}/decision/extra`,
     `catalog/duplicate-scans/${id}/candidates/extra`,
     'catalog/duplicate-scans/unknown',
@@ -1451,4 +1454,60 @@ it('3.9.2.1 完整度评分的路径逐条放行且未实现的子路径仍被�
   // 白名单是 allowlist：不在名单里的路径必须在这里 404 **且不发出请求** ——
   // 转发出去等于让上游去猜这个路径该不该存在。
   expect(fetcher.mock.calls.length, '被拒的路径不许发出任何请求').toBe(forwardedAfterAllowed);
+});
+
+/**
+ * 3.9.1.2 SKU 合并：catalog allowlist 必须放行 sku-merges 全路径。
+ *
+ * <p>同时钉住**不该**放行的近邻：`sku-merges/overview/extra`（概览没有子路径）、
+ * `by-candidate` 后面必须跟一个 id 段。少一段 = 该组端点前端 404，
+ * 而正则语法写错会让整份白名单退化成前缀匹配，波及所有模块。
+ */
+it('catalog/sku-merges 的全部路由被放行且转发到 catalog 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'catalog/sku-merges',
+    'catalog/sku-merges/overview',
+    `catalog/sku-merges/${id}`,
+    `catalog/sku-merges/by-candidate/${id}`,
+    `catalog/sku-merges/by-sku/${id}`,
+    `catalog/duplicate-candidates/${id}/merge-preview`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 必须放行`,
+    ).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8082/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 执行合并是 POST
+  const merge = `catalog/duplicate-candidates/${id}/merge`;
+  expect((await POST(request(merge), { params: { path: merge.split('/') } })).status).toBe(200);
+});
+
+it('sku-merges 放行不等于放行任意 catalog 子路径', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'catalog/sku-merges/overview/extra',
+    // by-candidate / by-sku 后面必须跟一个 id 段
+    'catalog/sku-merges/by-candidate',
+    'catalog/sku-merges/by-sku',
+    // 预演与执行只在候选下，没有 sku-merges/{id}/merge
+    `catalog/sku-merges/${id}/merge`,
+    `catalog/duplicate-candidates/${id}/merge-preview/extra`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: segments(path) } })).status,
+      `${path} 不该被放行`,
+    ).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
 });
