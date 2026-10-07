@@ -16,6 +16,18 @@ import {
   componentCountProblem,
   componentSummary,
   componentsProblem,
+  DEFAULT_MAX_DEPTH,
+  MAX_DEPTH_LIMIT,
+  emptyExplosionFilter,
+  explosionProblem,
+  explosionStatusLabel,
+  explosionStatusTone,
+  gapText,
+  indentOf,
+  lineRoleLabel,
+  lineRoleTone,
+  maxDepthProblem,
+  runSummary,
   effectiveLabel,
   emptyComponentDraft,
   errorText,
@@ -369,5 +381,130 @@ describe('错误文案直接透传后端原因', () => {
     expect(errorText(new ApiError(409, '生效区间与已发布版本 v2 冲突'))).toContain('冲突');
     expect(errorText(new Error('boom'))).toBe('boom');
     expect(errorText('奇怪的东西')).toBe('请求失败，请稍后重试');
+  });
+});
+
+// ================================================================ 3.5.2.2 展开工作区
+
+describe('展开深度上限的本地预判', () => {
+  it('留空不是错误（后端取默认值）', () => {
+    expect(maxDepthProblem(null)).toBeNull();
+    expect(maxDepthProblem('')).toBeNull();
+    expect(maxDepthProblem('  ')).toBeNull();
+  });
+
+  it('合法值放行', () => {
+    expect(maxDepthProblem('1')).toBeNull();
+    expect(maxDepthProblem('10')).toBeNull();
+    expect(maxDepthProblem(String(MAX_DEPTH_LIMIT))).toBeNull();
+  });
+
+  it('非整数、小于 1、超上界都被拒且说清为什么', () => {
+    expect(maxDepthProblem('1.5')).toContain('整数层数');
+    expect(maxDepthProblem('abc')).toContain('整数层数');
+    expect(maxDepthProblem('0')).toContain('至少是 1');
+    const over = maxDepthProblem(String(MAX_DEPTH_LIMIT + 1));
+    expect(over).toContain(String(MAX_DEPTH_LIMIT));
+    // 越界理由要说明「为什么有上界」，而不只是「超了」。
+    expect(over).toContain('作业单');
+  });
+
+  it('默认深度与上界常量与后端一致', () => {
+    expect(DEFAULT_MAX_DEPTH).toBe(10);
+    expect(MAX_DEPTH_LIMIT).toBe(25);
+  });
+});
+
+describe('展开前置校验', () => {
+  it('展开对象与成品数量都必须有', () => {
+    const base = emptyExplosionFilter();
+    expect(explosionProblem(base)).toContain('请先选一个 BOM 版本');
+    expect(explosionProblem({ ...base, versionId: 'v1' })).toBeNull();
+    expect(explosionProblem({ ...base, versionId: 'v1', outputQuantity: '0' })).toContain('必须大于 0');
+    expect(explosionProblem({ ...base, versionId: 'v1', outputQuantity: '1.5' })).toContain('必须是整数');
+    // bomId 与 versionId 二选一即可。
+    expect(explosionProblem({ ...base, bomId: 'b1' })).toBeNull();
+  });
+
+  it('深度上限的问题也会被前置校验看到', () => {
+    const base = { ...emptyExplosionFilter(), versionId: 'v1' };
+    expect(explosionProblem({ ...base, maxDepth: '99' })).toContain('展开深度上限最多');
+  });
+});
+
+describe('展开树的层级呈现', () => {
+  it('缩进每层两格且第 1 层不加', () => {
+    expect(indentOf(1)).toBe('');
+    expect(indentOf(2)).toBe('　');
+    expect(indentOf(3)).toBe('　　');
+    // 越界输入不产生负缩进（不渲染出乱码）。
+    expect(indentOf(0)).toBe('');
+  });
+});
+
+describe('展开行的角色标签', () => {
+  const base = {
+    subBomCode: 'BOM-SUB',
+    subVersionNo: 'v2',
+    isSubAssembly: false,
+    expanded: false,
+    truncated: false,
+    covered: false,
+  };
+
+  it('四种形态各有各的说法', () => {
+    // 截断必须一眼可见 —— 它意味着这份清单不完整。
+    expect(lineRoleLabel({ ...base, isSubAssembly: true, truncated: true })).toContain('截断');
+    expect(lineRoleLabel({ ...base, isSubAssembly: true, expanded: true })).toContain('BOM-SUB v2');
+    expect(lineRoleLabel({ ...base, isSubAssembly: true })).toBe('子装配（未展开）');
+    expect(lineRoleLabel({ ...base, covered: true })).toContain('库存已覆盖');
+    expect(lineRoleLabel(base)).toBe('叶子件');
+  });
+
+  it('调子与 @starcon/ui 的 Badge tone 词表对齐', () => {
+    expect(lineRoleTone({ ...base, truncated: true })).toBe('warning');
+    expect(lineRoleTone({ ...base, expanded: true })).toBe('success');
+    expect(lineRoleTone(base)).toBe('neutral');
+  });
+});
+
+describe('缺口列的呈现', () => {
+  it('缺口为 0 的两种原因必须能分开', () => {
+    expect(gapText({ gap: 3, covered: false, requiredQuantity: 10 })).toContain('要买');
+    // 「被库存覆盖」与「需求量本来就是 0」不是一回事。
+    expect(gapText({ gap: 0, covered: true, requiredQuantity: 10 })).toContain('可用 + 在途已够');
+    expect(gapText({ gap: 0, covered: false, requiredQuantity: 0 })).toContain('需求量是 0');
+  });
+
+  it('缺口数直接来自后端，前端不重算', () => {
+    // 后端给的缺口原样显示；前端没有再减一次可用/在途。
+    expect(gapText({ gap: 6.7, covered: false, requiredQuantity: 7.7 }).startsWith('6.7')).toBe(true);
+  });
+});
+
+describe('展开结果状态', () => {
+  it('TRUNCATED 必须显眼', () => {
+    expect(explosionStatusLabel('TRUNCATED')).toContain('不完整');
+    expect(explosionStatusTone('TRUNCATED')).toBe('warning');
+    expect(explosionStatusLabel('COMPLETED')).toBe('完整');
+    expect(explosionStatusTone('COMPLETED')).toBe('success');
+  });
+});
+
+describe('展开记录摘要', () => {
+  const row = {
+    versionNo: 'v1',
+    outputQuantity: 10,
+    lineCount: 6,
+    purchaseLineCount: 4,
+    totalGap: 12.5,
+    status: 'COMPLETED',
+  };
+
+  it('完整与不完整要一眼分得开', () => {
+    expect(runSummary(row)).toContain('6 行');
+    expect(runSummary(row)).toContain('采购对象 4 行');
+    expect(runSummary(row)).not.toContain('不完整');
+    expect(runSummary({ ...row, status: 'TRUNCATED' })).toContain('不完整');
   });
 });

@@ -173,6 +173,47 @@
         }
       }
     },
+    "/warehouse/inventory/availability": {
+      "post": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "availability",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvailabilityQuery"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/warehouses": {
       "get": {
         "tags": [
@@ -797,6 +838,65 @@
           "version": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "AvailabilityQuery": {
+        "type": "object",
+        "properties": {
+          "skuIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "AvailabilityRow": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "available": {
+            "type": "number"
+          },
+          "inTransit": {
+            "type": "number"
+          }
+        }
+      },
+      "AvailabilityView": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "requestedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityRow"
+            }
+          },
+          "note": {
+            "type": "string"
           }
         }
       },

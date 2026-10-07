@@ -11,12 +11,14 @@ import {
   Clock,
   Copy,
   Factory,
+  GitBranch,
   Layers,
   Loader2,
   Plus,
   RefreshCw,
   Search,
   Trash2,
+  Warehouse,
 } from 'lucide-react';
 import type {
   BomDetail,
@@ -28,8 +30,11 @@ import type {
   BomRow,
   BomUsagePage,
   BomVersionDetail,
+  BomExplosionRun,
+  BomExplosionRunPage,
   BomVersionInput,
   BomVersionRow,
+  WarehouseRef,
 } from '../../../../../packages/api-contracts/src/catalog';
 import { Editor, Field, control } from '../common/fields';
 import { useIdentity } from '../iam/identity-shell';
@@ -38,12 +43,14 @@ import {
   SCRAP_UNIT_HINT,
   VERSION_STATUSES,
   type ComponentDraft,
+  type ExplosionFilter,
   bomStatusLabel,
   bomStatusTone,
   canCloseVersion,
   canEditVersion,
   closeHint,
   closeToProblem,
+  DEFAULT_MAX_DEPTH,
   closeVersion,
   codeProblem,
   componentSummary,
@@ -55,8 +62,22 @@ import {
   effectiveLabel,
   emptyBomInput,
   emptyComponentDraft,
+  emptyExplosionFilter,
   emptyVersionInput,
   errorText,
+  explodeBom,
+  explosionProblem,
+  explosionStatusLabel,
+  explosionStatusTone,
+  fetchExplosionRun,
+  fetchExplosionRuns,
+  fetchWarehouses,
+  gapText,
+  indentOf,
+  lineRoleLabel,
+  lineRoleTone,
+  maxDepthProblem,
+  runSummary,
   fetchBom,
   fetchBomOverview,
   fetchBoms,
@@ -146,6 +167,14 @@ export function BomWorkspace() {
   const [copyVersionNo, setCopyVersionNo] = useState('');
   const [componentDraft, setComponentDraft] = useState<ComponentDraft[]>([]);
 
+  // 3.5.2.2 展开工作区
+  const [explosion, setExplosion] = useState<ExplosionFilter>(emptyExplosionFilter());
+  const [explosionRun, setExplosionRun] = useState<BomExplosionRun | null>(null);
+  const [explosionHistory, setExplosionHistory] = useState<BomExplosionRunPage | null>(null);
+  const [explosionBusy, setExplosionBusy] = useState(false);
+  const [explosionError, setExplosionError] = useState('');
+  const [warehouses, setWarehouses] = useState<WarehouseRef[]>([]);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -183,6 +212,51 @@ export function BomWorkspace() {
         setSkus([]);
       }
     })();
+  }, []);
+
+  // 仓库下拉：按仓库过滤可用量与在途（缺口只认你要的那个仓）。
+  useEffect(() => {
+    void (async () => {
+      try {
+        setWarehouses(await fetchWarehouses());
+      } catch {
+        setWarehouses([]);
+      }
+    })();
+  }, []);
+
+  /**
+   * 执行一次展开。
+   *
+   * <p>错误态要把后端的中文原因原样显示：循环引用那条消息里点名了绕回路径
+   *（成品A → 半成品B → 成品A）与所在层级，运营要靠它知道改哪一行组件。
+   * 包一层「展开失败」等于把可执行的信息丢掉。
+   */
+  const runExplosion = useCallback(async () => {
+    setExplosionBusy(true);
+    setExplosionError('');
+    try {
+      const run = await explodeBom(explosion);
+      setExplosionRun(run);
+      setExplosionHistory(await fetchExplosionRuns({ bomId: run.bomId, size: 20 }));
+    } catch (e) {
+      setExplosionRun(null);
+      setExplosionError(errorText(e));
+    } finally {
+      setExplosionBusy(false);
+    }
+  }, [explosion]);
+
+  const openExplosionHistory = useCallback(async (id: string) => {
+    setExplosionBusy(true);
+    setExplosionError('');
+    try {
+      setExplosionRun(await fetchExplosionRun(id));
+    } catch (e) {
+      setExplosionError(errorText(e));
+    } finally {
+      setExplosionBusy(false);
+    }
   }, []);
 
   const probeEffective = useCallback(async (bomId: string, at: string) => {
@@ -891,6 +965,275 @@ export function BomWorkspace() {
             </div>
           </div>
         )}
+      </SectionCard>
+
+      {/* ------------------------------------------------ 3.5.2.2 展开工作区 */}
+      <SectionCard
+        title="BOM 展开：生产这些成品要哪些料、缺多少"
+        description="按 BOM 版本与需求量多层递归展开，子 BOM 当作组件继续往下走；需求量、可用、在途、缺口逐层给出。展开结果是建议不是事实 —— 实际采购由 06 生成单据后成立。"
+      >
+        <div className="space-y-4">
+          {/* 选择展开对象：优先用上面选中的版本，否则用选中的 BOM。 */}
+          <div className="flex flex-wrap items-end gap-2">
+            <Field
+              label="展开对象"
+              hint={
+                versionDetail
+                  ? `默认用上面选中的版本 ${versionDetail.version.versionNo}`
+                  : '默认用上面选中的 BOM（后端取展开基准时刻生效的那一版）'
+              }
+            >
+              <select
+                className={control}
+                value={explosion.versionId ?? ''}
+                onChange={(e) =>
+                  setExplosion((f) => ({
+                    ...f,
+                    versionId: e.target.value || null,
+                    bomId: e.target.value ? null : (detail?.bom.id ?? null),
+                  }))
+                }
+              >
+                <option value="">
+                  按 BOM 取生效版本
+                  {detail ? `（${detail.bom.code}）` : '（先在上面选一个 BOM）'}
+                </option>
+                {versions.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    版本 {v.versionNo}
+                    {v.status === 'DRAFT' ? '（草稿，试算）' : ''}
+                    {v.effective ? ' · 此刻生效' : ''}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="要生产多少个成品">
+              <input
+                className={control}
+                value={explosion.outputQuantity}
+                inputMode="numeric"
+                onChange={(e) => setExplosion((f) => ({ ...f, outputQuantity: e.target.value }))}
+              />
+            </Field>
+            <Field
+              label="按仓库过滤"
+              hint="留空 = 全仓合计。在途取的是发往该仓的货"
+            >
+              <select
+                className={control}
+                value={explosion.warehouseId ?? ''}
+                onChange={(e) =>
+                  setExplosion((f) => ({ ...f, warehouseId: e.target.value || null }))
+                }
+              >
+                <option value="">全部仓库</option>
+                {warehouses.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.code} {w.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="展开深度上限" hint={`留空 = ${DEFAULT_MAX_DEPTH} 层`}>
+              <input
+                className={control}
+                value={explosion.maxDepth ?? ''}
+                inputMode="numeric"
+                onChange={(e) =>
+                  setExplosion((f) => ({ ...f, maxDepth: e.target.value || null }))
+                }
+              />
+            </Field>
+            <Field label="展开基准时刻" hint="留空 = 此刻。决定每一层子 BOM 取哪一版">
+              <input
+                className={control}
+                value={explosion.asOf ?? ''}
+                placeholder="2026-03-01T00:00:00Z"
+                onChange={(e) => setExplosion((f) => ({ ...f, asOf: e.target.value || null }))}
+              />
+            </Field>
+            <Button
+              disabled={explosionBusy || explosionProblem(explosion) !== null}
+              onClick={() => void runExplosion()}
+            >
+              {explosionBusy ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <GitBranch className="mr-2 size-4" />
+              )}
+              展开
+            </Button>
+          </div>
+
+          {maxDepthProblem(explosion.maxDepth) && (
+            <p className="text-destructive text-copy-13">{maxDepthProblem(explosion.maxDepth)}</p>
+          )}
+          {explosionProblem(explosion) && !maxDepthProblem(explosion.maxDepth) && (
+            <p className="text-muted-foreground text-copy-13">{explosionProblem(explosion)}</p>
+          )}
+
+          {/* 错误态：循环引用 / 库存服务不可用 的原因原样显示。 */}
+          {explosionError && (
+            <div className="border-destructive bg-destructive/5 text-destructive rounded-md border p-3 text-copy-13">
+              {explosionError}
+            </div>
+          )}
+
+          {!explosionRun && !explosionError && !explosionBusy && (
+            <EmptyState
+              icon={<GitBranch className="size-7" />}
+              title="还没有展开"
+              description="在上面选好展开对象与成品数量后点「展开」。子 BOM 的料会自动继续往下展开，子级的需求量按上一行的缺口递推 —— 半成品有库存时只展开缺的那部分。"
+            />
+          )}
+
+          {explosionBusy && !explosionRun && (
+            <p className="text-muted-foreground flex items-center gap-2 text-copy-13">
+              <Loader2 className="size-4 animate-spin" />
+              正在展开并向库存服务取可用量与在途…
+            </p>
+          )}
+
+          {explosionRun && (
+            <div className="space-y-3">
+              {/* 截断必须显眼：这份清单不完整。 */}
+              {explosionRun.truncated && (
+                <div className="border-destructive bg-destructive/5 text-destructive rounded-md border p-3 text-copy-13">
+                  <p className="font-medium">
+                    这份清单不完整 —— 命中了展开深度上限（{explosionRun.maxDepth} 层），
+                    仍有下级 BOM 没有展开。逐成品的采购量会偏小，请调高深度上限后重试，
+                    或检查是不是把工艺步骤做成了物料清单。
+                  </p>
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center gap-2 text-copy-13">
+                <Badge tone={explosionStatusTone(explosionRun.status)}>
+                  {explosionStatusLabel(explosionRun.status)}
+                </Badge>
+                <span>
+                  BOM <span className="font-medium">{explosionRun.bomCode}</span> 版本{' '}
+                  <span className="font-medium">{explosionRun.versionNo}</span>
+                </span>
+                <span className="text-muted-foreground">
+                  成品 {explosionRun.outputSkuCode} × {explosionRun.outputQuantity} 个
+                </span>
+                <span className="text-muted-foreground">
+                  {explosionRun.lineCount} 行 · 采购对象 {explosionRun.purchaseLineCount} 行 · 合计缺口{' '}
+                  {explosionRun.totalGap}
+                </span>
+                <span className="text-muted-foreground">
+                  深度上限 {explosionRun.maxDepth} / 实际到达第 {explosionRun.reachedDepth} 层 · 基准时刻{' '}
+                  {explosionRun.asOf}
+                </span>
+              </div>
+
+              {explosionRun.lines.length === 0 ? (
+                <EmptyState
+                  icon={<ClipboardList className="size-7" />}
+                  title="这个版本展开不出任何组件行"
+                  description="版本详情里的组件清单是空的。空组件的 BOM 算不出任何需求量，08 加工单按它领不出任何料。"
+                />
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-copy-13">
+                    <thead className="text-muted-foreground text-copy-12">
+                      <tr>
+                        <th className="py-1 pr-2 font-medium">组件 SKU</th>
+                        <th className="py-1 pr-2 font-medium">角色</th>
+                        <th className="py-1 pr-2 font-medium">单位用量</th>
+                        <th className="py-1 pr-2 font-medium">损耗率</th>
+                        <th className="py-1 pr-2 font-medium">需求量</th>
+                        <th className="py-1 pr-2 font-medium">可用</th>
+                        <th className="py-1 pr-2 font-medium">在途</th>
+                        <th className="py-1 pr-2 font-medium">缺口</th>
+                        <th className="py-1 pr-2 font-medium">来源版本</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-border divide-y">
+                      {explosionRun.lines.map((l) => (
+                        <tr key={l.id} className={l.truncated ? 'text-destructive' : undefined}>
+                          <td className="py-1 pr-2 whitespace-nowrap">
+                            <span className="text-muted-foreground">{indentOf(l.depth)}</span>
+                            {l.skuCode}{' '}
+                            <span className="text-muted-foreground">{l.skuName}</span>
+                          </td>
+                          <td className="py-1 pr-2">
+                            <Badge tone={lineRoleTone(l)}>{lineRoleLabel(l)}</Badge>
+                            {l.ambiguousSubBom && (
+                              <Badge tone="warning" className="ml-1">
+                                子 BOM 歧义
+                              </Badge>
+                            )}
+                          </td>
+                          <td className="py-1 pr-2">{String(l.unitQuantity)}</td>
+                          <td className="py-1 pr-2">{String(l.scrapRate)}%</td>
+                          <td className="py-1 pr-2 font-medium">{String(l.requiredQuantity)}</td>
+                          <td className="py-1 pr-2">{String(l.available)}</td>
+                          <td className="py-1 pr-2">{String(l.inTransit)}</td>
+                          <td className="py-1 pr-2 font-medium">{gapText(l)}</td>
+                          <td className="text-muted-foreground py-1 pr-2 whitespace-nowrap">
+                            {l.sourceBomCode} {l.sourceVersionNo}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <div className="space-y-1">
+                {explosionRun.lines
+                  .filter((l) => l.truncated || l.ambiguousSubBom || !l.expanded)
+                  .map((l) => (
+                    <p key={l.id} className="text-muted-foreground text-copy-12">
+                      · {indentOf(l.depth)}
+                      {l.skuCode}：{l.note}
+                    </p>
+                  ))}
+              </div>
+
+              <p className="text-muted-foreground text-copy-12">{explosionRun.calculationNote}</p>
+            </div>
+          )}
+
+          {/* 展开运行记录：06 的采购单引用的是某一次展开的 id。 */}
+          {explosionHistory && explosionHistory.items.length > 0 && (
+            <div className="border-muted space-y-2 rounded-md border p-3">
+              <p className="text-copy-13 font-medium">展开记录（这份建议的凭据）</p>
+              <p className="text-muted-foreground text-copy-12">
+                展开结果是建议不是事实，实际采购由 06 生成单据后成立。采购单引用的是某一次展开的
+                id ——「现在的 BOM × 现在的库存」随时会变，单子发出去之后就无法解释「当时为什么按这个数下单」。
+              </p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-copy-13">
+                  <thead className="text-muted-foreground text-copy-12">
+                    <tr>
+                      <th className="py-1 pr-2 font-medium">摘要</th>
+                      <th className="py-1 pr-2 font-medium">基准时刻</th>
+                      <th className="py-1 pr-2 font-medium">落库时刻</th>
+                      <th className="py-1 pr-2 font-medium">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-border divide-y">
+                    {explosionHistory.items.map((r) => (
+                      <tr key={r.id}>
+                        <td className="py-1 pr-2">{runSummary(r)}</td>
+                        <td className="text-muted-foreground py-1 pr-2">{r.asOf}</td>
+                        <td className="text-muted-foreground py-1 pr-2">{r.createdAt}</td>
+                        <td className="py-1 pr-2">
+                          <Button size="sm" onClick={() => void openExplosionHistory(r.id)}>
+                            查看
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       </SectionCard>
 
       {/* ------------------------------------------------ 倒排：谁在用这个料 */}
