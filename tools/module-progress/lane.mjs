@@ -67,6 +67,17 @@ function git(args, cwd = ROOT, allowFail = false) {
 const sh = (cmd, cwd = ROOT) =>
   execFileSync('bash', ['-lc', cmd], { cwd, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }).trim();
 
+/**
+ * 取文件原始字节，不做任何裁剪。
+ *
+ * 不能用 git()：它会 trim 掉末尾换行。拿 trim 过的内容去和磁盘上的文件比，
+ * 永远差一个换行符，于是「内容完全一致」的判断恒为假 —— 安全检查会一直拒绝删除，
+ * 切换分支永远走不到。实测就是这个坑：三个文件 md5 与集成头完全相同，
+ * 却因为 trim 全部被判为「内容不同」。
+ */
+const gitRaw = (args, cwd = ROOT) =>
+  execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+
 /* ── 状态读写 ─────────────────────────────────────────────────────────── */
 
 const readState = () => {
@@ -648,7 +659,13 @@ if (cmd === 'merge-ready') {
     .filter(Boolean);
   for (const f of untracked) {
     if (!TOOLING.includes(f)) continue;
-    const inBranch = git(['show', `${state.integrationBranch}:${f}`], ROOT, true);
+    const inBranch = (() => {
+      try {
+        return gitRaw(['show', `${state.integrationBranch}:${f}`]);
+      } catch {
+        return null;
+      }
+    })();
     const abs = join(ROOT, f);
     const onDisk = existsSync(abs) ? readFileSync(abs, 'utf8') : null;
     if (inBranch !== null && inBranch === onDisk) rmSync(abs);
