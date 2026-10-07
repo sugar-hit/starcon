@@ -19,7 +19,10 @@ const destinations = [
   ['audit', '审计日志', '检索关键操作留痕、变更详情与导出'],
 ] as const;
 /** 17.2.2.2 成员开通有自己的页面权限码，不与成员管理共用一组。 */
-type WorkspaceKind = AdministrationKind | 'onboarding' | 'hierarchy';
+// 'hierarchy' 只出现在导航目的地里（点击跳 /org/hierarchy 独立页面），
+// 不是 AdministrationPanel 的一种 kind，所以不进这个联合类型；
+// 它只需要在 visible() 里能被判出来（visible 的 key 是 string）。
+type WorkspaceKind = AdministrationKind | 'onboarding';
 
 function visible(session: Access, key: string) {
   if (key === 'tenants') return true;
