@@ -6,25 +6,32 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
+
 ## 总览
+
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 106 |
-| 进行中 | 0 |
-| **未开发** | **359** |
-| 完成率 | 22.8% |
+| 已交付 | 108 |
+| 进行中 | 1 |
+| **未开发** | **356** |
+| 完成率 | 23.2% |
+
 ## 分阶段进度（交付顺序看这里）
+
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
 | **D3** | 24 | 0 | 16 | 40 |
-| **D4** | 4 | 0 | 56 | 60 |
+| **D4** | 5 | 0 | 55 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
-| **D6** | 0 | 0 | 78 | 78 |
-| **D7** | 0 | 0 | 155 | 155 |
+| **D6** | 0 | 1 | 77 | 78 |
+| **D7** | 1 | 0 | 154 | 155 |
+
 ## 分系统进度
+
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
+| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
@@ -34,31 +41,39 @@
 | 07 | 库存核算系统 | D3 | 20 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 8 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
-| 10 | 物流与头程系统 | D5 / D7 | 0 | 27 |
+| 10 | 物流与头程系统 | D5 / D7 | 1 | 27 |
 | 11 | 售后与退货系统 | D4 / D7 | 0 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
 | 14 | 广告与增长系统 | D7 | 0 | 22 |
 | 15 | 客户与客服系统 | D7 | 0 | 24 |
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
-| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 20 | 29 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 21 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
+
 ## 判定「已交付」的标准
+
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
+
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
+
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
+
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
+
 ## 跨期说明
+
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
+
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -72,7 +87,9 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
+
 ## 模块明细
+
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -502,7 +519,7 @@
 | 17.3.2.1 | 角色分配 | — | D1–D2 | 已交付 | identity V47 role_assignment 增生效时间与撤销终态、role_assignment_scope 范围表、「有角色必有范围」延迟约束触发器、/identity/role-assignments 增改查与 /effective-permissions 合并预览、/org/role-assignments 角色分配页 |
 | 17.3.2.2 | 数据范围 | — | D1–D2 | 已交付 | catalog V3 record_data_scopes + RLS scopeMode 数据范围隔离 |
 | 17.3.3.1 | 越权检测 | — | D1–D2 | 已交付 | RLS FORCE + isolation；三条断言实跑（互不可见/伪造头无效/归还不串租户） |
-| 17.4.1.1 | 审批流定义 | — | D4 | 未开发 | — |
+| 17.4.1.1 | 审批流定义 | — | D4 | 已交付 | identity V83 approval_flow/node/amount_branch/escalation + /approval-flows CRUD + /org/approval-flows；角色/岗位/指定人三选一，阶段串行+条件分支+金额阈值+超时规则；一条单据类型只能一条生效流程（未注册=默认放行，registrations 可查）；27 集成测试含多租户三断言 |
 | 17.4.1.2 | 审批规则 | — | D4 | 未开发 | — |
 | 17.4.2.1 | 待我审批 | — | D4 | 未开发 | — |
 | 17.4.2.2 | 审批记录 | — | D4 | 未开发 | — |
@@ -511,7 +528,7 @@
 | 17.5.2.1 | 数据字典 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V53__data_dictionary.sql（dict_catalog 出厂字典目录含 8 项覆盖状态枚举·原因码·分类标签·单位类型四类、不带 tenant_id 按先例只授予 SELECT；dict_item 租户私有字典项；dict_item_usage 引用台账；dict_history 追加不可改变更历史；三张业务表 tenant_id NOT NULL 加 FORCE RLS；禁删四道防线：控制器无 DELETE 端点、迁移不授予 identity_app DELETE、dict_item_usage 外键 ON DELETE RESTRICT、dict_item_delete_guard 触发器；dict_item_update_guard 触发器锁死被引用编码；出厂目录 code_locked=true）· 端点 GET /identity/dict-catalog、/dict-items、/dict-items/options/{dictCode} 下拉选项只给 ACTIVE、/dict-items/{id}、/dict-items/{id}/usage、/dict-history，POST /dict-items、/dict-items/{id}/deactivate 停用、/dict-items/{id}/reactivate 恢复、/dict-items/{id}/usage 引用登记，PUT /dict-items/{id} 改名改说明、被引用时改编码 409（DictionaryController.java；jOOQ 显式 SQL，无 DELETE 端点）· 页面 apps/web/src/app/org/dictionary/page.tsx（DictionaryWorkspace：字典目录、字典项分组、引用明细、变更历史，无删除按钮）· 测试 DictionaryIntegrationTest.java（15 项：四类目录齐备、租户级扩展跨租户不可见、引用统计真实聚合与来源系统数、计数归零仍算被引用、四道防线逐层验证含 has_table_privilege 断言、停用恢复保持 id 与台账、编码锁死控制器与触发器两道、变更历史前后值与不可篡改、下拉选项只给 ACTIVE、搜索过滤、租户隔离三断言实跑）与 dictionary-model.test.ts（24 项编码校验与展示口径） |
 | 17.5.3.1 | 审计日志 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V7__audit_log.sql（补 resource_type/actor_name/authorization_context/changes 列、三组检索索引、SELECT+INSERT 授权、UPDATE/DELETE 触发器拒绝）· 端点 GET /identity/audit、/identity/audit/{id}、/identity/audit/export（AuditController.java）· 页面 apps/web/src/app/org/audit/page.tsx · 测试 AuditIntegrationTest.java（10 项：检索/详情/CSV 导出、租户隔离三断言、不可篡改、明文不入库）与 AuditRedactorTest.java（7 项脱敏） |
 | 17.5.3.2 | 操作日志 | — | D1–D2 | 已交付 | 迁移 backend/services/identity/src/main/resources/db/migration/V49__operation_log.sql（operation_log 表：request_id/trace_id 链路键、API 调用摘要、任务执行、错误堆栈上限、expires_at 留存期；五组检索索引；FORCE RLS；SELECT+INSERT+DELETE 授权，与审计日志的不可篡改策略形成对照）· 端点 GET /identity/operation-log、/{id}、/trace/{requestId} 链路聚合、/export、POST /purge（OperationLogController.java；写入侧 OperationLog.java、采集 OperationLogInterceptor.java、链路键 RequestTrace.java）· 页面 apps/web/src/app/org/operation-log/page.tsx（操作日志 + 链路关联视图）· 测试 OperationLogIntegrationTest.java（14 项：四类事件落库、链路聚合、堆栈截断与无 secret、可删对照审计不可删、租户隔离三断言、时间无漂移） |
-| 17.6.1.1 | 账簿与本位币 | — | D6 | 未开发 | — |
+| 17.6.1.1 | 账簿与本位币 | — | D6 | 进行中 | **缺前端页面与 OpenAPI 契约重生成**，后端已绿。identity `V81__ledger_book_category_default_and_fact_ownership.sql`（**不重做账簿**：在 17.1.2.2 已交付的 accounting_book 上补 4 列 —— book_category 业务账/法定账（与 book_type 总账/现金/银行是两条正交轴，一本法定账同样可以是银行账簿）、base_currency_mode INHERIT/OWN、chart_of_accounts_source 科目体系来源、is_default；唯一总账口径从"一法人一本"放宽为"**一法人一个本位币**一本总账"（业务账 CNY 与海外账 USD 才可能并存，同一本位币下行为不变）；新表 book_fact_assignment 把"同一笔业务事实只在归属账簿记一次"落成 UNIQUE(tenant_id,fact_source,fact_ref) 的**数据库约束**，FORCE RLS）；端点新增 `GET /identity/legal-entities/{id}/ledger-books`（业务账/法定账分组）、`GET·PUT /identity/legal-entities/{id}/default-book`（**缺默认显式 409 不静默挑一本**）、`GET·POST /identity/accounting-books/{id}/fact-assignments` + `DELETE .../{assignmentId}`（混记时 409 并指明事实已在哪本账）；`AccountingBookController` 的输入/读出口**只做加法**（4 个新字段全部可空、缺省即 17.1.2.2 老行为，INHERIT 模式下 409 本位币纪律原样保留）；测试 `LedgerBookIntegrationTest` 8 例实跑 Testcontainers PostgreSQL 16（多本位币并存与 INHERIT 纪律不退化、业务/法定分组、缺默认 409 与至多一本默认、**同一事实第二本账登记被拒且解除后可改记**、金额 BigDecimal 与 booked_at 按值往返、OWNER 闸、租户隔离三断言）。**待补**：① 蓝图把 17.6 的页面路由定在 `/settings/books`，该路由不存在（17.1.2.2 的页面在 `/org/accounting-books`，且只调 `identity/accounting-books`，**未触及本模块任何新端点**，因此本模块能力目前零 UI 入口）；② `pnpm contracts:generate` 未重生成，前端无新契约 |
 | 17.7.1.1 | 套餐与权益 | — | D7 | 未开发 | — |
 | 17.7.1.2 | 用量统计 | — | D7 | 未开发 | — |
 | 17.7.2.1 | 平台参数与开关 | — | D7 | 未开发 | — |
@@ -540,12 +557,3 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
-| 已交付 | 103 |
-| **未开发** | **362** |
-| 完成率 | 22.2% |
-| **D3** | 21 | 0 | 19 | 40 |
-| **D4** | 3 | 0 | 57 | 60 |
-| **D7** | 1 | 0 | 154 | 155 |
-| 07 | 库存核算系统 | D3 | 19 | 31 |
-| 08 | 仓储作业系统 | D3 / D4 | 5 | 22 |
-| 10 | 物流与头程系统 | D5 / D7 | 1 | 27 |

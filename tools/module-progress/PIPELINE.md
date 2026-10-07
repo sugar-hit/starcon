@@ -131,9 +131,27 @@ cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs gc
 cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs plan --lanes 2
 ```
 
-它会：读台账 + 读蓝图「关系」字段 → 挑出**上游已交付且 L3 锚点互不相同**的模块 →
-预分配 Flyway 版本号 → 建分支 → 建 worktree → 装依赖（实测 3 秒）。输出每条车道的
+它会：读台账 + 读蓝图「关系」字段 → 挑出**上游已交付、L3 锚点互不相同、
+且落地微服务已存在于集成头**的模块 → 预分配 Flyway 版本号 → 建分支 → 建 worktree →
+装依赖（实测 3 秒）。输出每条车道的
 `id / name / stage / blueprint / branch / worktree / migrationVersion`。
+
+**微服务闸（2026-10-07 23:0x 新增）**：模块该落的微服务必须已经在集成头里。
+判据读蓝图 README 的「后端主责服务」列，取**列表第一项**（列表顺序即优先级，
+「trade + channel」表示履约归 trade）；存在性查 `git ls-tree <集成分支> backend/services/`。
+没有这道闸时，卷 09 / 11（主责 trade）在 trade 服务落地前会一直排车道、一直注定 BLOCK ——
+一晚白烧 3 条车道位和 3 个 Flyway 版本号。
+
+输出里的 `serviceBlocked` 列出被挡的卷、原因与样本模块。
+**`newlyPlanned` 为空时先看这个字段**：空数组 + 非空 `serviceBlocked`
+说明是服务缺口堵死（该并入服务或修 `plan`），空数组 + 空 `serviceBlocked`
+说明是真的上游未就绪。
+
+**排不出来想看原因而不留副作用时，用 `--dry-run`**（只算不建，不写 worktree / 分支 / 状态）：
+
+```bash
+node tools/module-progress/lane.mjs plan --lanes 2 --dry-run
+```
 
 **不要再自己挑模块、不要自己排顺序、不要自己定基线分支。** 编排逻辑在脚本里，
 改脚本才会改行为；你在 prompt 里另立一套规则只会让它和脚本互相打架。

@@ -28,6 +28,7 @@
     <module>services/catalog</module>
     <module>services/channel</module>
     <module>services/warehouse</module>
+    <module>services/trade</module>
   </modules>
   <build>
     <plugins>
