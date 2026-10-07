@@ -12,17 +12,17 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 85 |
+| 已交付 | 86 |
 | 进行中 | 0 |
-| **未开发** | **380** |
-| 完成率 | 18.3% |
+| **未开发** | **379** |
+| 完成率 | 18.5% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
-| **D3** | 7 | 0 | 33 | 40 |
+| **D3** | 8 | 0 | 32 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
@@ -38,7 +38,7 @@
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
-| 07 | 库存核算系统 | D3 | 7 | 31 |
+| 07 | 库存核算系统 | D3 | 8 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 0 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 0 | 27 |
@@ -263,7 +263,7 @@
 | 7.2.2.1 | 可售量口径 | — | D3 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V56__warehouse_sellable_policy.sql`（sellable_policy 口径分档 + sellable_policy_warehouse 挂仓，两表 tenant_id NOT NULL + FORCE RLS isolation + GRANT 与 starcon_app REVOKE；**口径内容写定后不可改**由 guard_sellable_policy_immutable 触发器钉死，改口径只能收口旧档 + 开新档，与 17.5.1.1 业务参数的 effective_from 分档生效同一套约定 —— 因此刻意不建第二张变更历史表，已关区间的那些行就是历史，它永远是「当时真正生效的防线」的凭据；guard_sellable_policy_interval 触发器挡住同槽位生效区间重叠并报出冲突档 id（重叠的区间在解析时没有唯一答案）；缓冲比例 numeric(9,6) 且 CHECK 取值 0~1 落在 DB 层（禁浮点）；独占池键由服务按 EXCL-{referenceId} 派生并由 CHECK 钉死（人手填才可能把独占池写成共享池），共享池名不得占用 EXCL- 命名空间；REVOKE DELETE 挡住物理删除） · 端点 9 个挂在 `/warehouse/inventory/sellable-policies`：GET 列表（真分页 + effectiveOnly + 关键字）、GET `/effective`（按时刻解析生效档，SHOP > CHANNEL > DEFAULT 优先级，回退兜底与完全未配置都**如实报出**而不是静默按 0 处理）、GET `/pools`（池名册与安全判定）、GET `/pools/{poolKey}`（成员清单 + 仓构成 + 被平台口径排除掉的 FBA 量）、GET `/{id}` 详情、POST 新建、POST `/{id}/versions` 换版、POST `/{id}/retire` 作废、POST `/calculation` 按 SKU 试算（`InventoryController.java` + `SellablePolicyService.java` + `SellablePolicyModels.java`） · 页面 `/inventory/sellable-policies`（`apps/web/src/app/inventory/sellable-policies/page.tsx` + `components/inventory/sellable-policy-workspace.tsx` + `sellable-policy-model.ts`），api-proxy 放行 5 个读形状与 3 个动作、刻意不设 DELETE 段（能不能物理删掉一条防超卖配置的答案是不能） · 测试 `SellablePolicyIntegrationTest.java` 17 例实跑 Testcontainers PostgreSQL 16（连接池压到 1） **共享池与缓冲作为一组不可拆开测**：allocationRatio = 成员数 − 缓冲比例之和，两店铺各留 50% 缓冲时恰好为 1.0、余量为 0（判定 NO_HEADROOM），任一提到 80% 后回到 0.7、余量 30（GUARDED），各留 10% 时为 1.8、余量 −80（OVERSOLD）；超卖容忍额度内的负余量判 TOLERATED（有意为之）而不是配置错误。**口径逐项可计算**：仅自有仓时 FBA 的 60 件不进池容量且被排除量如实报出、改含 FBA 后容量变 160；include_in_transit 为真时发往该仓的在途 40 件计入、残次 500 件被**排除而不是扣减**（蓝图 7.1.1.3 原文）、buffer_ratio 边界 0/1/越界由 DB CHECK 拒；池容量按去重后的仓集合聚合（同一仓被两个共享成员引用只算一次）。其余用例覆盖分档生效（按时刻解析出不同档、旧档值原样保留）、未配置时拒绝回写、输入校验拒绝共享池名占用 EXCL- 命名空间与挂不存在的仓、effective_from 带 +08:00 偏移写入后断言读回 Instant 与偏移零漂移、端点权限码（改防超卖的最后一道防线挂 warehouse.inventory.update 而非 read，只有读权限返回 403）、逐张表断言 relforcerowsecurity 为真 · 跨服务边界（AGENTS.md 禁止跨服务 SQL/FK/视图）：店铺与渠道属 channel 服务，本模块只用 source_system + reference_id 逻辑定位键与写入时的可读名快照，不建外键也不查它的表；池容量所需的「哪些仓计入」挂在口径自己的挂仓表上，且 warehouse 没有 type 列（FBA 分类归 7.1.3.1 那条车道），因此 OWN/PLATFORM_FBA 分类标注在口径侧而不去改 warehouse 表语义 |
 | 7.2.2.2 | 安全库存 | — | D3 | 未开发 | — |
 | 7.3.1.1 | 批次管理 | /inventory/lots | D3 | 已交付 | 迁移 warehouse V57__warehouse_inventory_lot_archive.sql（**只补列、不另建批次档案表**：V2 的 inventory_lot 已被 stock_bucket 外键接成一等事实单位，另建表等于给同一批次制造两个真相来源；补 produced_on（date 业务日期）、origin（RECEIPT/MANUAL）、source_system + source_ref_id + source_ref_code 与 supplier_ref_id + supplier_name（**跨服务定位键，不建外键不联查**采购 6/收货 8）、notes，加 ck_lot_origin_source 等三条 CHECK 与到期/来源/供应商三个部分索引；**本迁移刻意不写 RLS/GRANT**：inventory_lot 的 FORCE RLS 与授权在 V2 已成立，ADD COLUMN 不失效，由租户隔离三断言实跑证明）+ 端点 GET /warehouse/inventory/lots（档案列表 + 全量汇总 + 三组下拉词表，筛选 SKU/仓库/状态/建立方式/来源系统/供应商/关键字/N 天内到期/在手大于 0，排序白名单 7 键，非法码当场 400）、GET /warehouse/inventory/lots/{id} 档案详情、GET /warehouse/inventory/lots/{id}/distribution（**真从 stock_bucket 按批次 LEFT JOIN LATERAL 聚合**仓库级与库位级切片，仓库合计与库位合计均须等于总计）、GET /warehouse/inventory/lots/{id}/movements（**复用 7.1.2.1 台账** page(query, lotId) 重载，不另写流水查询；因 inventory_entry/inventory_balance 均无 lot_id，响应带 attribution=BALANCE_GRANULAR 与口径说明）、POST 建批次（收货生成与手工建共用，RECEIPT 必须给来源单据，批号冲突 DB 裁决后翻成 409）、PUT 改属性（批号/SKU/origin 为身份不可改，null 表示不修改）+ 页面 /inventory/lots（汇总卡、筛选、列表、展开看库存分布与出入库历史、新建批次对话框、过期与状态分列、无效期批次不消失、归属口径常驻显示、加载/空/错误三态）+ 测试 InventoryLotIntegrationTest 14 例（业务日期原样落库、RECEIPT 必带来源、批号冲突 409、效期写反 400、跨租户 SKU 拒绝、部分更新与 updated_at 推进、仓库与库位合计双等于总计、同库位两种质量状态分行、零库存批次仍在列表、过期按日历事实而 status 仍 ACTIVE、效期排序 nulls last、合计不受分页影响、非法筛选 400、流水复用只列本批次所在余额行、端点 400/403/401、租户隔离三断言池压到 1）+ inventory-lot-model.test.ts 10 例。批次与序列号保持两个独立实体（序列号属 7.3.1.2，本模块无任何序列号字段） |
-| 7.3.1.2 | 效期与先进先出 | /inventory/lots | D3 | 未开发 | — |
+| 7.3.1.2 | 效期与先进先出 | /inventory/lots | D3 | 已交付 | 迁移 warehouse V60__warehouse_inventory_expiry_policy.sql 新建 inventory_expiry_policy 一张表（tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT/REVOKE 与 starcon_app REVOKE、REVOKE DELETE）；**效期数据本身刻意不建表**：expires_on(V2) 与 stock_bucket(V2) 已分别是效期事实与批次粒度数量事实，重复建模等于造第二个真相来源，真正缺的是「策略」这一配置；列为 strategy(FEFO/FIFO/SPECIFIED_LOT) + enabled + lead_days + specified_lot_id + notes，UNIQUE(tenant_id,sku_id) 因为**策略主体是 SKU 不是批次**（同一箱奶每一批共用一条策略，塞进 inventory_lot 会让改策略变成逐批改，新建批次漏抄一批那批货就静默退回先进先出）；**enabled 默认 false**：系统不知道哪个 SKU 是效期品（品类属性属 catalog），默认打开等于凭空替租户做判断，蓝图「第一期是否启用可延后，但维度已保留」落到 schema 上就是这一列，关着时出库退回按库位顺序并在响应里 policyEnabled=false 如实报出；guard_expiry_policy_lot_sku 触发器补上复合外键挡不住的「指定批次必须属于该 SKU」（错配会让拣货单指向别的品），guard_expiry_policy_no_delete + REVOKE DELETE 让停用走 enabled=false 而非删行（策略行是「曾按 FEFO 出过货」的审计凭据）；lead_days CHECK 0~3650 禁掉「填 999999 把临期变成全部批次」；两个部分索引按 enabled 与效期查询走，失效日期热路径复用 V57 的 inventory_lot_expiry 不重复建设 + 端点 7 个挂在 /warehouse/inventory/expiry：GET /alerts 效期预警清单、GET /policies 策略列表、GET /policy/{skuId} 生效策略、POST /policy 按 SKU 幂等 upsert、POST /allocation 分配推荐试算、GET /warehouses 与 GET /lots/{skuId} 参照下拉；刻意没有 DELETE 端点、刻意不挂在 /lots 下（消费批次但不拥有批次）+ 页面 **/inventory/expiry**（apps/web/src/app/inventory/expiry/page.tsx + components/inventory/inventory-expiry.tsx + inventory-expiry-model.ts），api-proxy 白名单放行七个形状 + 测试 InventoryExpiryIntegrationTest 24 例实跑 Testcontainers PostgreSQL 16（连接池压到 1）+ inventory-expiry-model.test.ts 14 例。**分配真从 stock_bucket 排序算出来**，给到库位级取用量（只给批次级的话拣货还要自己选库位，那正是 FEFO 该替人做的决定）——这是本模块与 7.3.1.1 的关键差别：流水无法按批次拆分（response 带 attribution=BALANCE_GRANULAR），而 FEFO/FIFO 的取用量是批次精确的。**FEFO 与 FIFO 是两种不同排序且分别有测试钉住**：FEFO 按 expires_on 升序、FIFO 按 coalesce(received_on, bucket.created_at::date) 升序，夹具刻意让失效顺序与入库顺序完全相反（先到期的后入库），两种策略排出的序列必然不同，断言才是同义反复之外的真断言；**刻意不用 last_movement_at**——它是「最近一次变动的业务时间」，每动一次就前移，拿它排序等于按「最近被碰过的先后」出库。**过期库存在任何策略下都不出库**（最紧急的那批会被优先发出去是最不能错的地方），量单列进 ineligible.expiredAvailable，且 ineligible 拆成过期/非效期/非可售/不可拣/无批次五项，因为处置动作各不相同（过期走 6.4.2 临期品处理、待检走质检、不可拣走移库），只报一句「缺 20 件」等于没法派工；FEFO 下无失效日期批次不参与排序（不适用 ≠ 最晚到期）但量照实报出；**提前天数逐 SKU 取**coalesce(本次覆盖, 该 SKU 策略, 默认 30) 且响应带 leadDaysSource 如实标明 POLICY 还是 DEFAULT（同样是 3 天到期配 7 天报临期配 1 天报正常，不标来源用户会以为系统算错了），临时覆盖不改各 SKU 策略；预警汇总**不受档位筛选影响**（否则 healthyLotCount 恒为 0，等于没有这个字段），默认只看需要处理的两档；分配只读不写，扣减留给 8 拣货的单据。**踩到并修掉四个真问题**：①coalesce(?,p.lead_days,?) 里覆盖值永不为 null，恒取第一个非空参数，p.lead_days 成了永远走不到的死代码，表现只是「配了 7 天按 30 天算」不看返回值发现不了，改 coalesce(nullif(?,?),p.lead_days,?) + -1 哨兵；②占位符随之从 1 个变 3 个，驱动报「未设定参数值 N」看起来像 SQL 语法问题根因却在绑定，现全部从同一数组派生不手数；③WITH 子句必须拼在语句最前且外层要有 FROM scoped，两处顺序都错过一次；④批次数原为 count(*) 数的是 bucket 行，同批次跨库位重复计数，改为 count(distinct l.id)。daysToExpiry 沿用 7.3.1.1 的坑：纯文本 SQL 里 jOOQ 拿不到列类型会静默返回 null（过期批次显示成没有效期），测试断言读回真实负数 -5。租户隔离三断言实跑：两租户互不可见（A 的 SKU 在 B 处 404）、伪造 X-Tenant-Id 无效（读与写两端点都验）、池压到 1 后归还 20 轮不串租户。验证：./mvnw verify 全服务通过、pnpm typecheck 与 lint 全绿、pnpm test 基线 1056 例 → 1070 例（新增 14 例无回归）、NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build 通过、契约语义比对新增 18 类型 0 消失新增 7 路径 0 消失无静默覆盖。遗留：warehouse/inventory/lots（7.3.1.1）不在 api-proxy 白名单里，该模块页面在浏览器里会拿代理 404，属他人模块端点本车道未改动，待并入后由协调方指派；inventory_entry/inventory_balance 仍无 lot_id，流水仍只能到 balance 口径（7.3.1.1 已记录，分配不受影响因为它建在 stock_bucket 上） |
 | 7.3.2.1 | 序列号 | /inventory/serials | D3 | 未开发 | — |
 | 7.4.1.1 | 调整单管理 | /inventory/adjustments | D3 | 未开发 | — |
 | 7.4.1.2 | 调整审批 | /inventory/adjustments | D3 | 未开发 | — |
