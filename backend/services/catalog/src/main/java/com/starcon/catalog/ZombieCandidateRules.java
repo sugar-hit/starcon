@@ -163,9 +163,20 @@ public final class ZombieCandidateRules {
 
     for (var metric : ZombieMetric.ordered()) {
       if (!rule.requires(metric)) {
+        // 未启用也要把**已观测到的值显示出来**：运营正是靠这一格判断"要不要把这个维度打开"，
+        // 把它藏起来的话，界面对"接入了哪些上游"就完全没有任何提示，
+        // 于是每个维度只能靠猜着开、开着发现全是"无法判定"再关掉。
+        var observedButUnused = observations.getOrDefault(metric, Observation.missing());
         dimensions.add(
             new DimensionStatus(
-                metric, DimensionStatus.NOT_REQUIRED, null, null, false, "规则未启用该维度"));
+                metric,
+                DimensionStatus.NOT_REQUIRED,
+                observedButUnused.value(),
+                observedButUnused.observedAt(),
+                false,
+                observedButUnused.present()
+                    ? "规则未启用该维度，但上游已有观测值（可作为是否启用的参考）"
+                    : "规则未启用该维度，且上游尚未推送观测"));
         continue;
       }
       var observation =

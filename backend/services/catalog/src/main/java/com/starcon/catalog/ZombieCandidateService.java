@@ -233,6 +233,7 @@ public class ZombieCandidateService {
     for (var row : rows) {
       var evaluation =
           evaluateInMemory(config, row, observations, now);
+      var lastMaintained = row.get("last_maintained_at", OffsetDateTime.class);
       items.add(
           new Candidate(
               row.get("id", UUID.class),
@@ -240,8 +241,10 @@ public class ZombieCandidateService {
               row.get("code", String.class),
               row.get("name", String.class),
               row.get("status", String.class),
-              row.get("last_maintained_at", OffsetDateTime.class),
-              row.get("days_since", Long.class),
+              lastMaintained,
+              ZombieCandidateRules.daysSince(lastMaintained, now) < 0
+                  ? null
+                  : ZombieCandidateRules.daysSince(lastMaintained, now),
               evaluation.verdict().name(),
               evaluation.verdict().label(),
               evaluation.reasons(),
@@ -428,20 +431,15 @@ public class ZombieCandidateService {
         .append(".status, ")
         .append(alias)
         .append(".updated_at as last_maintained_at, ");
-    statement.append("(extract(epoch from (?-").append(alias).append(".updated_at))/86400)::bigint as days_since, ");
-    binds.add(now);
+    // 刻意**不在 SQL 里算 days_since**：那需要在投影里绑一个 `?`（`? - s.updated_at`），
+    // 而 jOOQ 对投影表达式里的无名参数计数并不可靠（报"未设定参数值 N"而 N 指向 limit/offset）。
+    // 「距今天数」由 ZombieCandidateRules.daysSince 从 last_maintained_at 现算 ——
+    // 同一份口径、分页与逐条判定不会因为两处算法不同而对不上。
     statement.append(verdictSql(config)).append(" as verdict");
-    for (var metric : ZombieMetric.ordered()) {
-      statement
-          .append(", st.v_")
-          .append(metric.name())
-          .append(" as raw_")
-          .append(metric.name())
-          .append(", st.t_")
-          .append(metric.name())
-          .append(" as raw_at_")
-          .append(metric.name());
-    }
+    // 刻意**不**把 st.v_* / st.t_* 一并 select 出来逐行返回：逐条的原始观测由
+    // loadObservations() 一次批量取回（同一张表、同一批 id）。两处各存一份的话，
+    // "判定用的数"与"展示用的数"有机会不一致 —— 而那种不一致不会报错，
+    // 只会让界面显示「库存为 0」而判定用的其实是另一个值。
     statement.append(" from ");
     if (type.partyBacked()) {
       statement
@@ -477,7 +475,10 @@ public class ZombieCandidateService {
       statement.append(" and ").append(verdictSql(config)).append("=?");
       binds.add(verdictFilter.name());
     }
-    statement.append("),");
+    // 收尾**不带逗号**：scoredCte 后面直接接 `select ... from scored`，
+    // 多一个逗号会让整个 WITH 列表语法错误（而症状是 jOOQ 报"未设定参数值 N"，
+    // 指向的却是占位符本身，最难查的一种）。
+    statement.append(")");
   }
 
   private static ZombieVerdict parseVerdict(String value) {
@@ -512,7 +513,17 @@ public class ZombieCandidateService {
     return result;
   }
 
-  /** 用纯规则重算一条（SQL 负责筛选与分页，这里负责"为什么"）。 */
+  /**
+   * 用纯规则重算一条，产出「为什么」。
+   *
+   * <p>观测值一律从 {@code observations} 取（候选清单、详情、停用三个出口共用同一份来源），
+   * **不**从 SQL 行里按列名读 —— jOOQ 对 {@code Record.field(String)} 的缺列行为不可靠
+   * （可能返回非 null 的 Field，随后 {@code get} 抛 "Field X is not contained in row type"），
+   * 而那种异常只在某一类查询路径上出现，极难定位。
+   *
+   * <p>SQL 侧的判定表达式与本方法算的是同一件事（{@link #verdictSql}），但 SQL 那份只用来
+   * 筛选与分页，逐条明细与原因以本方法为准。
+   */
   private ZombieCandidateRules.Evaluation evaluateInMemory(
       ZombieCandidateRules.Config config,
       org.jooq.Record row,
@@ -520,24 +531,12 @@ public class ZombieCandidateService {
       OffsetDateTime now) {
     var id = row.get("id", UUID.class);
     var raw = observations.getOrDefault(id, Map.of());
-    var effective = new EnumMap<ZombieMetric, ZombieCandidateRules.Observation>(ZombieMetric.class);
-    for (var metric : ZombieMetric.ordered()) {
-      var value = row.get("raw_" + metric.name(), BigDecimal.class);
-      var at = row.get("raw_at_" + metric.name(), OffsetDateTime.class);
-      if (value == null || at == null) {
-        var observed = raw.get(metric);
-        effective.put(
-            metric,
-            observed == null
-                ? new ZombieCandidateRules.Observation(null, null)
-                : observed);
-      } else {
-        effective.put(metric, new ZombieCandidateRules.Observation(value, at));
-      }
-    }
     return ZombieCandidateRules.evaluate(
-        config, row.get("status", String.class), row.get("last_maintained_at", OffsetDateTime.class),
-        now, effective);
+        config,
+        row.get("status", String.class),
+        row.get("last_maintained_at", OffsetDateTime.class),
+        now,
+        raw);
   }
 
   // ================================================================ 详情与证据
@@ -607,7 +606,7 @@ public class ZombieCandidateService {
         sql.execute(
             "insert into master_data_reference_stats(tenant_id,entity_type,entity_id,metric,"
                 + "metric_value,source,observed_at,received_at)"
-                + " values(?,?,?,?,?,?,?,now())"
+                + " values(?,?,?,?,?,?,?::timestamptz,now())"
                 + " on conflict (tenant_id,entity_type,entity_id,metric) do update set"
                 + " metric_value=excluded.metric_value,source=excluded.source,"
                 + "observed_at=excluded.observed_at,received_at=now()",
@@ -731,7 +730,7 @@ public class ZombieCandidateService {
           "insert into master_data_cleanup_record(tenant_id,id,entity_type,entity_id,entity_code,"
               + "entity_name,previous_status,new_status,decided_by,reason,last_maintained_at,"
               + "rule_snapshot,evidence,affected_count,created_at)"
-              + " values(?,?,?,?,?,?,?,?,?,?,?,?::jsonb,?::jsonb,?,?)",
+              + " values(?,?,?,?,?,?,?,?,?,?,?::timestamptz,?::jsonb,?::jsonb,?,?::timestamptz)",
           currentTenantId(), Ids.next(), type.name(), id, code, name, previous,
           type.inactiveStatus(), actor.userId(), reason, lastMaintained,
           json(ruleSnapshot), json(evidence), ids.size(), now);
