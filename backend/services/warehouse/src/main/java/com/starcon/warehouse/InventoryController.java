@@ -2,6 +2,7 @@ package com.starcon.warehouse;
 
 import static com.starcon.warehouse.InventoryBucketModels.*;
 import static com.starcon.warehouse.InventoryLedgerModels.*;
+import static com.starcon.warehouse.InventoryReconciliationModels.*;
 import static com.starcon.warehouse.WarehouseModels.*;
 
 import jakarta.validation.Valid;
@@ -38,6 +39,7 @@ public class InventoryController {
   private final WarehouseReferenceService references;
   private final InventoryAvailabilityService availability;
   private final InventoryLedgerService ledger;
+  private final InventoryReconciliationService reconciliation;
 
   public InventoryController(
       AccessService access,
@@ -45,13 +47,15 @@ public class InventoryController {
       InventoryBucketService buckets,
       WarehouseReferenceService references,
       InventoryAvailabilityService availability,
-      InventoryLedgerService ledger) {
+      InventoryLedgerService ledger,
+      InventoryReconciliationService reconciliation) {
     this.access = access;
     this.overview = overview;
     this.buckets = buckets;
     this.references = references;
     this.availability = availability;
     this.ledger = ledger;
+    this.reconciliation = reconciliation;
   }
 
   /**
@@ -213,6 +217,70 @@ public class InventoryController {
   public List<InventoryRefType> ledgerRefTypes(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
     return call(auth, "inventory.read", a -> ledger.refTypes());
+  }
+
+  // ------------------------------------------------------------ 7.1.2.2 账实核对
+
+  /**
+   * 执行一次账实核对。
+   *
+   * <p>用 POST 而不是 GET：核对会**落一份不可变的结论**（run + findings），是写操作而不是查询。
+   * 这也决定了它的权限码是 {@code warehouse.inventory.update} 而不是 read ——
+   * 权限码要如实反映动作，哪怕这次动作并不改动任何库存数量。把「写审计记录」挂在 read 上，
+   * 就等于声明 read 权限包含写操作，那道闸门等于没有。
+   *
+   * <p>幂等性刻意**不**做：同一区间核两次会得到两条记录。核对结论是时点事实，
+   * 「昨天核过什么」和「刚才核过什么」是两条不同的记录才对，去重反而会让人以为看到了旧的。
+   *
+   * <p>时间参数按 ISO-8601 带偏移量解析，与台账端点同一套规则。
+   */
+  @PostMapping("/inventory/reconciliation")
+  public ReconciliationResult runReconciliation(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestBody ReconciliationRequest request) {
+    return call(
+        auth,
+        "inventory.update",
+        a -> reconciliation.run(request == null ? new ReconciliationRequest(null, null, null, null, null) : request, a.userId()));
+  }
+
+  /** 核对批次列表（真分页）。status 可选：CONSISTENT / DISCREPANT。 */
+  @GetMapping("/inventory/reconciliation")
+  public ReconciliationRunPage reconciliationRuns(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @RequestParam(required = false) String status,
+      @RequestParam(required = false, defaultValue = "0") int page,
+      @RequestParam(required = false, defaultValue = "20") int size) {
+    return call(auth, "inventory.read", a -> reconciliation.runs(page, size, status));
+  }
+
+  /** 某次核对的结论 + 可疑区间排名。跨租户在 RLS 下查不到 → 404，不泄露存在性。 */
+  @GetMapping("/inventory/reconciliation/{runId}")
+  public ReconciliationResult reconciliationRun(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID runId) {
+    return call(
+        auth,
+        "inventory.read",
+        a ->
+            new ReconciliationResult(
+                reconciliation.runOf(runId), List.of(), List.of(), reconciliation.suspectWindows(runId)));
+  }
+
+  /**
+   * 某次核对的发现分页。
+   *
+   * <p>{@code kind} 决定翻的是差异明细（DISCREPANCY）还是可疑流水（SUSPECT，不传即 SUSPECT）。
+   * 分页是必要的：一次大范围核对可能定位出成百上千条线索，界面必须能翻。
+   */
+  @GetMapping("/inventory/reconciliation/{runId}/findings")
+  public ReconciliationFindingPage reconciliationFindings(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID runId,
+      @RequestParam(required = false) String kind,
+      @RequestParam(required = false, defaultValue = "0") int page,
+      @RequestParam(required = false, defaultValue = "50") int size) {
+    return call(auth, "inventory.read", a -> reconciliation.findings(runId, kind, page, size));
   }
 
   /**

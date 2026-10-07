@@ -92,6 +92,104 @@
         }
       }
     },
+    "/warehouse/inventory/reconciliation": {
+      "get": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "reconciliationRuns",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationRunPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "runReconciliation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReconciliationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/policies": {
       "get": {
         "tags": [
@@ -445,6 +543,114 @@
                   "items": {
                     "$ref": "#/components/schemas/LegalEntityRef"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reconciliation/{runId}": {
+      "get": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "reconciliationRun",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reconciliation/{runId}/findings": {
+      "get": {
+        "tags": [
+          "inventory-controller"
+        ],
+        "operationId": "reconciliationFindings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationFindingPage"
                 }
               }
             }
@@ -1038,6 +1244,363 @@
           }
         }
       },
+      "ReconciliationRequest": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "ReconciliationFinding": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "DISCREPANCY",
+              "SUSPECT"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "MISSING",
+              "BACKFILL",
+              "DUPLICATE",
+              "LOST_UPDATE"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "INFO",
+              "WARN",
+              "HIGH"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusCode": {
+            "type": "string"
+          },
+          "transactionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "refType": {
+            "type": "string"
+          },
+          "refId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "txKind": {
+            "type": "string"
+          },
+          "relatedTransactionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "gapSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "latenessSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "entryCreatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "onHandSum": {
+            "type": "number"
+          },
+          "reservedSum": {
+            "type": "number"
+          },
+          "snapshotOnHand": {
+            "type": "number"
+          },
+          "snapshotReserved": {
+            "type": "number"
+          },
+          "onHandDiff": {
+            "type": "number"
+          },
+          "reservedDiff": {
+            "type": "number"
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "transactionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "windowStart": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "windowEnd": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ReconciliationResult": {
+        "type": "object",
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/ReconciliationRun"
+          },
+          "discrepancies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationFinding"
+            }
+          },
+          "suspects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationFinding"
+            }
+          },
+          "suspectWindows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationSuspectWindow"
+            }
+          }
+        }
+      },
+      "ReconciliationRun": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeType": {
+            "type": "string",
+            "enum": [
+              "ALL",
+              "WAREHOUSE",
+              "SKU",
+              "LEGAL_ENTITY"
+            ]
+          },
+          "scopeKey": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "scopeLabel": {
+            "type": "string"
+          },
+          "windowFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CONSISTENT",
+              "DISCREPANT"
+            ]
+          },
+          "checkedBalanceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "checkedEntryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "checkedTransactionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openingOnHand": {
+            "type": "number"
+          },
+          "periodOnHand": {
+            "type": "number"
+          },
+          "afterWindowOnHand": {
+            "type": "number"
+          },
+          "expectedOnHand": {
+            "type": "number"
+          },
+          "snapshotOnHand": {
+            "type": "number"
+          },
+          "onHandDiff": {
+            "type": "number"
+          },
+          "openingReserved": {
+            "type": "number"
+          },
+          "periodReserved": {
+            "type": "number"
+          },
+          "afterWindowReserved": {
+            "type": "number"
+          },
+          "expectedReserved": {
+            "type": "number"
+          },
+          "snapshotReserved": {
+            "type": "number"
+          },
+          "reservedDiff": {
+            "type": "number"
+          },
+          "discrepancyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "suspectCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "firstSuspectAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastSuspectAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "verdictNote": {
+            "type": "string"
+          },
+          "triggeredBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReconciliationSuspectWindow": {
+        "type": "object",
+        "properties": {
+          "windowStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "windowEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "suspectCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "discrepancyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHandDelta": {
+            "type": "number"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "INFO",
+              "WARN",
+              "HIGH"
+            ]
+          }
+        }
+      },
       "AvailabilityQuery": {
         "type": "object",
         "properties": {
@@ -1236,6 +1799,52 @@
           },
           "status": {
             "type": "string"
+          }
+        }
+      },
+      "ReconciliationRunPage": {
+        "type": "object",
+        "properties": {
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationRun"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ReconciliationFindingPage": {
+        "type": "object",
+        "properties": {
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReconciliationFinding"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
