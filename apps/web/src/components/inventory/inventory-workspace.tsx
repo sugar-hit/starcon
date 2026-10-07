@@ -25,25 +25,8 @@ import type {
   QualityStatusRef,
   WarehouseRef,
 } from '../../../../../packages/api-contracts/src/catalog';
-import {
-  deletePolicy,
-  errorText,
-  fetchCapabilities,
-  fetchLegalEntities,
-  fetchOverview,
-  fetchPolicies,
-  fetchQualityStatuses,
-  fetchWarehouses,
-  groupByDimension,
-  groupLabel,
-  qty,
-  roleBadge,
-  roleLabels,
-  rowComposition,
-  savePolicy,
-  scopeLabels,
-  type OverviewParams,
-} from './inventory-model';
+import { deletePolicy, errorText, fetchCapabilities, fetchLegalEntities, fetchOverview, fetchPolicies, fetchQualityStatuses, fetchWarehouses, groupByDimension, groupLabel, parseDetailHref, qty, roleBadge, roleLabels, rowComposition, savePolicy, scopeLabels, type BucketDrill, type OverviewParams } from './inventory-model';
+import { InventoryBucketDetail } from './inventory-bucket-detail';
 import { useIdentity } from '../iam/identity-shell';
 
 /**
@@ -61,8 +44,8 @@ import { useIdentity } from '../iam/identity-shell';
  *       把两者都画成 0 会让人以为已经查过、没问题。
  *   <li>**合计不受分页影响**，且页面上标出它是全量合计 —— 否则翻页时数字变小会被当成丢数据。
  *   <li>**跨服务筛选（类目/品牌/店铺）禁用并说明归属**，而不是发一个必然 422 的请求。
- *   <li>**行点击就地展开仓库/状态级拆解**，数据来自同一份聚合响应，不额外造数；
- *       7.1.1.2 明细路由尚未落地，所以不给死链，路由待落地记在 docs/backlog/。
+ *   <li>**行点击切换到 7.1.1.2 明细并带上该行的全部维度**，把 `detailHref` 的路由契约接成
+ *       真实下钻：点哪一行，明细就只看那一行。
  * </ul>
  */
 export function InventoryWorkspace() {
@@ -80,6 +63,9 @@ export function InventoryWorkspace() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
+  // 7.1.1.1 总览 / 7.1.1.2 明细：同一页面内切换，行内下钻时带上四个维度
+  const [view, setView] = useState<'OVERVIEW' | 'BUCKET'>('OVERVIEW');
+  const [drill, setDrill] = useState<BucketDrill | null>(null);
 
   const [warehouseId, setWarehouseId] = useState('');
   const [legalEntityId, setLegalEntityId] = useState('');
@@ -240,13 +226,39 @@ export function InventoryWorkspace() {
         title="库存总览"
         description="按仓库 / 货权法人 / SKU 汇总在手、预占、可用、在途、待检与残次数量，并识别零库存与超储。"
         actions={
-          <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
-            <RefreshCw className={loading ? 'mr-2 h-3.5 w-3.5 animate-spin' : 'mr-2 h-3.5 w-3.5'} />
-            刷新
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="flex rounded-md border border-control-border p-0.5">
+              {(
+                [
+                  ['OVERVIEW', '库存总览'],
+                  ['BUCKET', '库位明细'],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setView(key)}
+                  aria-pressed={view === key}
+                  className={`rounded px-3 py-1.5 text-sm transition-colors ${
+                    view === key ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
+              <RefreshCw className={loading ? 'mr-2 h-3.5 w-3.5 animate-spin' : 'mr-2 h-3.5 w-3.5'} />
+              刷新
+            </Button>
+          </div>
         }
       />
 
+      {view === 'BUCKET' ? (
+        <InventoryBucketDetail drill={drill} readable={readable} />
+      ) : (
+        <>
       {/* 跨服务筛选未接入：显式说明，而不是让用户填完收一个 422 */}
       {unavailable.length > 0 && (
         <div className="flex items-start gap-3 rounded-md border border-warning/40 bg-warning-soft p-4 text-sm">
@@ -538,6 +550,14 @@ export function InventoryWorkspace() {
                         current === row.balanceId ? null : row.balanceId,
                       )
                     }
+                    onDrill={() => {
+                      // 下钻参数取自行上的 detailHref 契约，而不是在前端另拼一份：
+                      // 参数名只存在后端一处，两边不会各说各话。
+                      const parsed = parseDetailHref(row.detailHref);
+                      if (!parsed) return;
+                      setDrill(parsed);
+                      setView('BUCKET');
+                    }}
                   />
                 ))}
               </tbody>
@@ -649,9 +669,12 @@ export function InventoryWorkspace() {
       )}
 
       <p className="text-muted-foreground text-xs">
-        质量状态维度共 {statuses.length} 项；总览行与 7.1.1.2 库存明细同形（法人货权 × SKU × 仓库 ×
-        质量状态），点击行可就地展开仓库级与状态级构成。
+        质量状态维度共 {statuses.length} 项；总览行为法人货权 × SKU × 仓库 × 质量状态，
+        点击行可展开构成，或切到「库位明细」按该行四个维度逐级下钻（法人货权 × SKU × 仓库 ×
+        库位 × 批次 × 质量状态）。
       </p>
+        </>
+      )}
     </div>
   );
 }
@@ -661,10 +684,12 @@ function Row({
   row,
   open,
   onToggle,
+  onDrill,
 }: {
   row: OverviewRow;
   open: boolean;
   onToggle: () => void;
+  onDrill: () => void;
 }) {
   return (
     <>
@@ -746,9 +771,14 @@ function Row({
               <Detail label="版本" value={String(row.version)} />
               <Detail label="最近更新" value={new Date(row.updatedAt).toLocaleString('zh-CN')} />
               <Detail
-                label="下钻路由契约"
-                value={`7.1.1.2 明细将消费本行全部维度（SKU ${row.skuCode} / 仓库 ${row.warehouseCode}）`}
+                label="下钻到 7.1.1.2"
+                value={`本行四个维度（SKU ${row.skuCode} / 仓库 ${row.warehouseCode} / 法人 ${row.legalEntityCode} / 质量 ${row.qualityStatusName}）`}
               />
+            </div>
+            <div className="mt-3">
+              <Button variant="outline" size="sm" onClick={onDrill}>
+                查看该行的库位明细
+              </Button>
             </div>
           </td>
         </tr>

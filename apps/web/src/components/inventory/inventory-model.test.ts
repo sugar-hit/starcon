@@ -1,8 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  actionNote,
+  bucketPlacement,
+  bucketQuery,
   errorText,
   groupByDimension,
   groupLabel,
+  lotLabel,
+  parseDetailHref,
+  pickableNote,
   qty,
   query,
   roleLabels,
@@ -10,8 +16,63 @@ import {
   scopeLabels,
   type OverviewParams,
 } from './inventory-model';
-import type { OverviewGroup, OverviewRow } from '../../../../../packages/api-contracts/src/catalog';
+import type {
+  BucketAction,
+  BucketRow,
+  OverviewGroup,
+  OverviewRow,
+} from '../../../../../packages/api-contracts/src/catalog';
 import { ApiError } from './api';
+
+function bucketRow(partial: Partial<BucketRow>): BucketRow {
+  return {
+    bucketId: 'k1',
+    balanceId: 'b1',
+    skuId: 's1',
+    skuCode: 'SKU-1',
+    skuName: '商品一',
+    warehouseId: 'w1',
+    warehouseCode: 'WH-1',
+    warehouseName: '上海仓',
+    locationId: 'loc1',
+    locationCode: 'A-01-01',
+    locationName: 'A区01排01',
+    locationType: 'STORAGE',
+    pickable: true,
+    lotId: 'lot1',
+    lotCode: 'LOT-1',
+    expiresOn: '2027-01-01',
+    lotStatus: 'ACTIVE',
+    expired: false,
+    legalEntityId: 'l1',
+    legalEntityCode: 'LE-1',
+    legalEntityName: '主体一',
+    qualityStatusId: 'q1',
+    qualityStatusCode: 'SELLABLE',
+    qualityStatusName: '可售',
+    qualityRole: 'SELLABLE',
+    onHand: 100,
+    reserved: 30,
+    available: 70,
+    zeroStock: false,
+    version: 0,
+    lastMovementAt: '2026-10-07T00:00:00Z',
+    updatedAt: '2026-10-07T00:00:00Z',
+    ...partial,
+  };
+}
+
+function bucketAction(partial: Partial<BucketAction>): BucketAction {
+  return {
+    action: 'ADJUST',
+    label: '发起调整',
+    href: '/inventory/adjustments?skuId={skuId}',
+    available: false,
+    ownerModule: '7.4.1.1',
+    note: '目标模块 7.4.1.1 尚未交付，入口契约已就位但暂不可用',
+    ...partial,
+  };
+}
 
 function group(partial: Partial<OverviewGroup>): OverviewGroup {
   return {
@@ -171,5 +232,96 @@ describe('库存总览 · 错误文案', () => {
 
   it('未知异常有兜底文案', () => {
     expect(errorText(new Error('boom'))).toBe('加载失败，请稍后重试');
+  });
+});
+
+describe('7.1.1.2 库存明细 · 查询串', () => {
+  it('空条件不产生查询串', () => {
+    expect(bucketQuery({})).toBe('');
+  });
+
+  it('逐级下钻的六个维度各自独立拼进查询串', () => {
+    const q = bucketQuery({
+      warehouseId: 'w1',
+      legalEntityId: 'l1',
+      locationId: 'loc1',
+      skuId: 's1',
+      lotId: 'lot1',
+      qualityStatusId: 'q1',
+    });
+    expect(q).toContain('warehouseId=w1');
+    expect(q).toContain('legalEntityId=l1');
+    expect(q).toContain('locationId=loc1');
+    expect(q).toContain('skuId=s1');
+    expect(q).toContain('lotId=lot1');
+    expect(q).toContain('qualityStatusId=q1');
+  });
+
+  it('关键字首尾空白在拼串时就被 trim 掉', () => {
+    expect(bucketQuery({ keyword: '  A-01  ' })).toBe('?keyword=A-01');
+  });
+
+  it('只看可拣库位只在勾选时出现，未勾选与 false 同义（后端按未传处理）', () => {
+    expect(bucketQuery({})).not.toContain('onlyPickable');
+    expect(bucketQuery({ onlyPickable: false })).not.toContain('onlyPickable');
+    expect(bucketQuery({ onlyPickable: true })).toContain('onlyPickable=true');
+  });
+
+  it('总览的查询串不会误带明细独有的库位与批次参数', () => {
+    // 两套拼装刻意分开：共用一个函数就得给两边都塞可选字段，读起来分不清哪条路支持哪个条件
+    expect(query({ warehouseId: 'w1' })).toBe('?warehouseId=w1');
+  });
+});
+
+describe('7.1.1.2 库存明细 · 行展示口径', () => {
+  it('库位·批次·质量状态合成一列，三样都能看到', () => {
+    const r = bucketRow({ locationCode: 'A-01-01', lotCode: 'LOT-1', qualityRole: 'SELLABLE' });
+    expect(bucketPlacement(r)).toBe('A-01-01 · LOT-1 · 可售');
+  });
+
+  it('无批次显示成"无批次"而不是空白格', () => {
+    // 空白在表里会被读成"数据缺失"，而无批次是一个真实取值
+    expect(lotLabel(null)).toBe('无批次');
+    expect(lotLabel('LOT-1')).toBe('LOT-1');
+    expect(bucketPlacement(bucketRow({ lotCode: null }))).toContain('无批次');
+  });
+
+  it('不可拣库位给出"为什么发不出去"的理由', () => {
+    expect(pickableNote(bucketRow({ pickable: true }))).toBe('可拣，可发货');
+    expect(pickableNote(bucketRow({ pickable: false, locationType: 'QUARANTINE' }))).toBe(
+      '待检库位，不可发货',
+    );
+  });
+
+  it('未交付的操作入口显示原因，不给点下去 404 的入口', () => {
+    const action = bucketAction({ available: false });
+    expect(actionNote(action)).toContain('7.4.1.1');
+    expect(actionNote(bucketAction({ available: true }))).toContain('7.4.1.1');
+  });
+});
+
+describe('7.1.1.1 → 7.1.1.2 下钻契约', () => {
+  const href =
+    '/inventory?skuId=s1&warehouseId=w1&legalEntityId=l1&qualityStatusId=q1';
+
+  it('解析后端给的 detailHref，取出四个行级维度', () => {
+    expect(parseDetailHref(href)).toEqual({
+      skuId: 's1',
+      warehouseId: 'w1',
+      legalEntityId: 'l1',
+      qualityStatusId: 'q1',
+    });
+  });
+
+  it('缺任一维度都按"无下钻"处理，而不是只带一半条件', () => {
+    // 带一半条件会让用户以为看到的就是那一行，实际是整个仓库
+    expect(parseDetailHref('/inventory?skuId=s1&warehouseId=w1')).toBeNull();
+    expect(parseDetailHref('')).toBeNull();
+    expect(parseDetailHref(null)).toBeNull();
+  });
+
+  it('非 /inventory 的 href 不解析，且不抛异常', () => {
+    expect(parseDetailHref('/somewhere-else?skuId=s1')).toBeNull();
+    expect(parseDetailHref('/inventory')).toBeNull();
   });
 });
