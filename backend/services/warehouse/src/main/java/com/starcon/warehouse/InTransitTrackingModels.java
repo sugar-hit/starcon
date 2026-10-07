@@ -41,6 +41,21 @@ public final class InTransitTrackingModels {
   private InTransitTrackingModels() {}
 
   /**
+   * 「有编码 + 有中文名」的最小约束，供 {@code options()} 一处把枚举摊成词表。
+   *
+   * <p>刻意声明成接口而不是 {@code Function<Object,String>}：后者会把枚举擦成 Object，
+   * 编译器再也发现不了「往里传了一个没有 {@code label()} 的类型」。{@link Enum#name()}
+   * 已由 {@code java.lang.Enum} 提供，只需枚举各自实现 {@code label()}。
+   */
+  public interface Labelled {
+    /** 词表编码（等于 {@code name()}）。 */
+    String name();
+
+    /** 中文名。 */
+    String label();
+  }
+
+  /**
    * 跟踪生命周期状态。与 {@code first_mile_tracking.status} 的 CHECK 逐值对应。
    *
    * <p>刻意与 {@link TrackingStage} 分成**两个维度**：
@@ -48,7 +63,7 @@ public final class InTransitTrackingModels {
    * {@code trackingStage} 是这批货走到哪了。混成一个字段就无法表达
    * 「跟踪已关闭但清关仍在扣关中」这类真实组合。
    */
-  public enum TrackingStatus {
+  public enum TrackingStatus implements Labelled {
     /** 在跟踪中。 */
     TRACKING("在跟踪"),
     /** 已闭环：目的仓确认收货后关闭。终态。 */
@@ -88,7 +103,7 @@ public final class InTransitTrackingModels {
    * {@code EXCEPTION} 是例外分支 —— 它不是推进中的一站，而是
    * 「这一批货出问题了」的标记，DB 里给了最高序号，所以从任何阶段都能进。
    */
-  public enum TrackingStage {
+  public enum TrackingStage implements Labelled {
     AT_ORIGIN("在起运地", 1),
     IN_TRANSIT("在途", 2),
     ARRIVED_ORIGIN_PORT("已到起运港/起运地", 3),
@@ -135,7 +150,7 @@ public final class InTransitTrackingModels {
    * <p>{@code HELD}（扣关）与 {@code REJECTED}（退单）必须有原因，DB 层 CHECK 钉死：
    * 这两个状态意味着货被卡住了，没有原因的「扣关」事后没人知道该找谁、该补什么材料。
    */
-  public enum CustomsStatus {
+  public enum CustomsStatus implements Labelled {
     NOT_STARTED("未开始"),
     DECLARED("已申报"),
     UNDER_REVIEW("清关审核中"),
@@ -174,7 +189,7 @@ public final class InTransitTrackingModels {
    * 「三档都没命中」，所以它只出现在**评估结果**里，不落在
    * {@code first_mile_delay_alert} 表上（表上只有真需要人管的三档）。
    */
-  public enum DelayLevel {
+  public enum DelayLevel implements Labelled {
     ON_TRACK("正常在途", 0),
     WATCH("临近到港提示", 1),
     WARNING("延误预警", 2),
@@ -214,7 +229,7 @@ public final class InTransitTrackingModels {
    * 当前由人工代录 —— DB 层要求这三者必须带 {@code referenceId}（来源单号），
    * 写不出出处的外部事实一条都不许入库。
    */
-  public enum TrackingSource {
+  public enum TrackingSource implements Labelled {
     /** 人工登记（actor 必填）。 */
     MANUAL("人工登记"),
     /** 货代（连接器未交付，当前人工代录）。 */
@@ -254,7 +269,7 @@ public final class InTransitTrackingModels {
   }
 
   /** 事件类型。与 {@code first_mile_tracking_event.kind} 逐值对应。 */
-  public enum TrackingEventKind {
+  public enum TrackingEventKind implements Labelled {
     /** 建立跟踪（人工）。 */
     CREATED("建立跟踪"),
     /** 位置更新。 */

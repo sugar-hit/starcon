@@ -198,16 +198,10 @@ public class InTransitTrackingService {
   /**
    * 枚举 → 词表。
    *
-   * <p>刻意用「枚举有 {@code name()}/{@code label()}」这个约束而不是
-   * {@code Function<Object,String>}：后者会把枚举擦成 Object，
-   * 编译器再也发现不了「往里传了一个没有 label() 的类型」。
+   * <p>入参是 {@link Labelled[]}（{@code InTransitTrackingModels.Labelled}）而不是
+   * {@code Function<Object,String>}：后者会把枚举擦成 Object，编译器再也发现不了
+   * 「往里传了一个没有 label() 的类型」。数组协变让 {@code CustomsStatus[]} 直接可用。
    */
-  private interface Labelled {
-    String name();
-
-    String label();
-  }
-
   private static List<TrackingOption> options(Labelled[] values) {
     var out = new ArrayList<TrackingOption>();
     for (var v : values) {
@@ -221,7 +215,8 @@ public class InTransitTrackingService {
   /** 跟踪生命周期合法转换。终态返回空表。 */
   static List<TrackingStatus> allowedNextStatus(TrackingStatus current) {
     return switch (current) {
-      case TRACKING -> List.of(TRACKING, CLOSED, CANCELLED);
+      case TRACKING ->
+          List.of(TrackingStatus.TRACKING, TrackingStatus.CLOSED, TrackingStatus.CANCELLED);
       case CLOSED, CANCELLED -> List.of();
     };
   }
@@ -237,13 +232,13 @@ public class InTransitTrackingService {
     var out = new ArrayList<TrackingStage>();
     out.add(current); // 自环：重复报同一阶段的位置更新是常态
     for (var s : TrackingStage.values()) {
-      if (s == EXCEPTION) {
+      if (s == TrackingStage.EXCEPTION) {
         // EXCEPTION 是例外分支而不是推进中的一站：任何阶段都能进，
         // 但它本身**不**排在正常链路里（否则在途 1 就会「顺理成章」变成异常）。
-        if (current != EXCEPTION) {
-          out.add(EXCEPTION);
+        if (current != TrackingStage.EXCEPTION) {
+          out.add(TrackingStage.EXCEPTION);
         }
-      } else if (s.rank > current.rank() && current != EXCEPTION) {
+      } else if (s.rank() > current.rank() && current != TrackingStage.EXCEPTION) {
         // EXCEPTION 之后可以恢复到任何后续阶段（问题排除，货继续走）。
         out.add(s);
       }
@@ -266,7 +261,7 @@ public class InTransitTrackingService {
     if (from == to) {
       return "同一阶段的重复上报";
     }
-    if (to == EXCEPTION) {
+    if (to == TrackingStage.EXCEPTION) {
       return "标记节点异常：任何阶段都可进入，异常排除后可继续推进";
     }
     return "推进：" + from.label() + " → " + to.label();
@@ -297,6 +292,7 @@ public class InTransitTrackingService {
           sql.fetchOne(
               "select * from first_mile_delay_threshold"
                   + " where tenant_id=? and transport_mode=? and country_code=?",
+              currentTenant(),
               pair.get(0),
               pair.get(1));
       if (hit != null) {
@@ -388,6 +384,9 @@ public class InTransitTrackingService {
 
   /** 阈值清单（标出哪一行正被在途批次命中）。 */
   public List<DelayThresholdRow> thresholds() {
+    // 全新租户还没有任何阈值行：不补的话运营打开阈值页看到空列表，
+    // 而「空」与「没有口径」在这里是同一件事 —— 读路径又会补行，两边口径必须一致。
+    ensureDefaultThreshold();
     var rows = sql.fetch("select * from first_mile_delay_threshold order by transport_mode,country_code");
     // 统计每条阈值行当前命中多少个在途跟踪，用于标 inUse。
     var usage = new HashMap<UUID, Long>();
@@ -427,6 +426,7 @@ public class InTransitTrackingService {
     var hit =
         sql.fetchOne(
             "select * from first_mile_delay_threshold where tenant_id=? and id=? for update",
+            currentTenant(),
             thresholdId);
     if (hit == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "阈值行不存在或无权修改");
@@ -454,7 +454,7 @@ public class InTransitTrackingService {
             + " critical_lead_days=?,notes=?,version=version+1,updated_at=now(),"
             + " updated_by=nullif(current_setting('app.actor',true),'')::uuid"
             + " where tenant_id=? and id=?",
-        watch, warning, critical, notes, thresholdId);
+        watch, warning, critical, notes, currentTenant(), thresholdId);
     // 改完直接从 thresholds() 重读（它会标 inUse），不重复拼一遍映射。
     return thresholds().stream()
         .filter(t -> t.id().equals(thresholdId))
@@ -505,11 +505,13 @@ public class InTransitTrackingService {
         "with base as ("
             + " select t.*, s.shipment_code, s.transport_mode, s.carrier_name, s.booking_no,"
             + "   s.vessel_or_flight_no, s.destination_warehouse_id, s.destination_country_code,"
+            + "   w.name as destination_warehouse_name,"
             + "   coalesce(t.revised_eta,t.original_eta) as effective_eta,"
             + "   extract(epoch from (coalesce(t.revised_eta,t.original_eta) - now()))/86400.0"
             + "     as remaining_days_raw"
             + " from first_mile_tracking t"
             + " join first_mile_shipment s on s.tenant_id=t.tenant_id and s.id=t.shipment_id"
+            + " join warehouse w on w.tenant_id=s.tenant_id and w.id=s.destination_warehouse_id"
             + where
             + ") select * from base";
 
@@ -517,7 +519,7 @@ public class InTransitTrackingService {
     var graded = new ArrayList<Object[]>();
     var stats = new long[4]; // watch / warning / critical / overdue
     var heldCount = 0L;
-    Set<UUID> alertCounts = alertCountByTracking();
+    Map<String, Long> alertCounts = alertCountByTracking();
 
     for (Record r : rowsAll) {
       var remaining = days(r.get("remaining_days_raw", BigDecimal.class));
@@ -568,7 +570,7 @@ public class InTransitTrackingService {
       var item = graded.get(i);
       pageRows.add(
           rowOf((Record) item[0], (BigDecimal) item[1], (DelayLevel) item[2],
-              (Map<String, BigDecimal>) item[4], legs));
+              (Map<String, Long>) item[4], legs));
     }
 
     var stages =
@@ -585,10 +587,10 @@ public class InTransitTrackingService {
         stats[2],
         stats[3],
         heldCount,
-        options(TrackingStatus.values(), s -> s.name(), s -> s.label()),
+        options(TrackingStatus.values()),
         stages,
-        options(CustomsStatus.values(), s -> s.name(), s -> s.label()),
-        options(DelayLevel.values(), d -> d.name(), d -> d.label()),
+        options(CustomsStatus.values()),
+        options(DelayLevel.values()),
         warehouseOptions());
   }
 
@@ -633,14 +635,6 @@ public class InTransitTrackingService {
       Map<String, BigDecimal> legs) {
     var shipmentId = r.get("shipment_id", UUID.class);
     var key = shipmentId.toString();
-    var wh =
-        shipmentId == null
-            ? null
-            : sql.fetchOne(
-                "select w.code,w.name from first_mile_shipment s"
-                    + " join warehouse w on w.tenant_id=s.tenant_id and w.id=s.destination_warehouse_id"
-                    + " where s.tenant_id=? and s.id=?",
-                shipmentId);
     var legCount =
         legs.containsKey(key + "#count")
             ? legs.get(key + "#count").longValue()
@@ -653,7 +647,8 @@ public class InTransitTrackingService {
         r.get("carrier_name", String.class),
         r.get("booking_no", String.class),
         r.get("destination_warehouse_id", UUID.class),
-        wh == null ? "" : wh.get("name", String.class),
+        // 目的仓名随主查询一次 join 出来：逐行回查既慢又容易少绑租户。
+        nz(r.get("destination_warehouse_name", String.class)),
         r.get("destination_country_code", String.class),
         r.get("status", String.class),
         r.get("tracking_stage", String.class),
@@ -768,10 +763,13 @@ public class InTransitTrackingService {
         sql.fetchOne(
             "select t.*, s.shipment_code, s.transport_mode, s.carrier_name, s.booking_no,"
                 + " s.vessel_or_flight_no, s.destination_warehouse_id, s.destination_country_code,"
+                + " w.name as destination_warehouse_name,"
+                + " coalesce(t.revised_eta,t.original_eta) as effective_eta,"
                 + " extract(epoch from (coalesce(t.revised_eta,t.original_eta) - now()))/86400.0"
                 + "   as remaining_days_raw"
                 + " from first_mile_tracking t"
                 + " join first_mile_shipment s on s.tenant_id=t.tenant_id and s.id=t.shipment_id"
+                + " join warehouse w on w.tenant_id=s.tenant_id and w.id=s.destination_warehouse_id"
                 + " where t.id=?",
             trackingId);
     if (r == null) {
@@ -934,7 +932,7 @@ public class InTransitTrackingService {
         "insert into first_mile_tracking"
             + " (id,tenant_id,shipment_id,current_location,location_occurred_at,original_eta,"
             + " customs_status,customs_status_at,customs_hold_reason,status,tracking_stage,"
-            + " notes,created_by) values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            + " notes,created_by) values (?,?,?,?,?::timestamptz,?::timestamptz,?,?::timestamptz,?,?,?,?,?)",
         id,
         currentTenant(),
         r.shipmentId(),
@@ -1097,8 +1095,9 @@ public class InTransitTrackingService {
 
     sql.execute(
         "update first_mile_tracking set"
-            + " current_location=?, location_occurred_at=?, revised_eta=?, eta_revised_count=?,"
-            + " customs_status=?, customs_status_at=?, customs_hold_reason=?,"
+            + " current_location=?, location_occurred_at=?::timestamptz, revised_eta=?::timestamptz,"
+            + " eta_revised_count=?,"
+            + " customs_status=?, customs_status_at=?::timestamptz, customs_hold_reason=?,"
             + " tracking_stage=?, notes=?, version=version+1, updated_at=now()"
             + " where tenant_id=? and id=?",
         newLocation,
@@ -1117,7 +1116,7 @@ public class InTransitTrackingService {
         "insert into first_mile_tracking_event"
             + " (id,tenant_id,tracking_id,kind,to_stage,from_stage,location_text,detail,"
             + " eta_before,eta_after,source_system,reference_id,occurred_at,actor_id)"
-            + " values (?,?,?,?,?,?,?,?,?,?::timestamptz,?,?::timestamptz,?,?::timestamptz,?)",
+            + " values (?,?,?,?,?,?,?,?,?,?::timestamptz,?,?,?::timestamptz,?)",
         UUID.randomUUID(),
         currentTenant(),
         trackingId,
@@ -1292,7 +1291,7 @@ public class InTransitTrackingService {
         watch,
         warning,
         critical,
-        options(DelayLevel.values(), d -> d.name(), d -> d.label()));
+        options(DelayLevel.values()));
   }
 
   private DelayAlertRow alertOf(Record r) {
