@@ -4028,7 +4028,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "create",
+        "operationId": "create_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -4712,7 +4712,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "report",
+        "operationId": "report_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -4896,7 +4896,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "capabilities",
+        "operationId": "capabilities_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -9344,6 +9344,647 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/LabelPrintCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/labor/work-tasks": {
+      "get": {
+        "tags": [
+          "labor-efficiency-controller"
+        ],
+        "operationId": "tasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "workType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "operatorUserId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaborWorkTaskPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "labor-efficiency-controller"
+        ],
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LaborWorkTaskCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaborWorkTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/labor/work-tasks/{taskId}/start": {
+      "post": {
+        "tags": [
+          "labor-efficiency-controller"
+        ],
+        "operationId": "start",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LaborWorkTaskStartInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaborWorkTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/labor/work-tasks/{taskId}/exception": {
+      "post": {
+        "tags": [
+          "labor-efficiency-controller"
+        ],
+        "operationId": "reportException",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LaborWorkTaskExceptionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaborWorkTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/labor/work-tasks/{taskId}/complete": {
+      "post": {
+        "tags": [
+          "labor-efficiency-controller"
+        ],
+        "operationId": "complete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LaborWorkTaskCompleteInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaborWorkTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/labor/work-tasks/{taskId}/assign": {
+      "post": {
+        "tags": [
+          "labor-efficiency-controller"
+        ],
+        "operationId": "assign",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LaborWorkTaskAssignInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaborWorkTask"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/labor/work-tasks/{taskId}": {
+      "get": {
+        "tags": [
+          "labor-efficiency-controller"
+        ],
+        "operationId": "task",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaborWorkTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/labor/trend": {
+      "get": {
+        "tags": [
+          "labor-efficiency-controller"
+        ],
+        "operationId": "trend",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operatorUserId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "workType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaborTrend"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/labor/report": {
+      "get": {
+        "tags": [
+          "labor-efficiency-controller"
+        ],
+        "operationId": "report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "workType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaborReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/labor/ranking": {
+      "get": {
+        "tags": [
+          "labor-efficiency-controller"
+        ],
+        "operationId": "ranking",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "workType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "metric",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaborRanking"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/labor/capabilities": {
+      "get": {
+        "tags": [
+          "labor-efficiency-controller"
+        ],
+        "operationId": "capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LaborCapabilities"
                 }
               }
             }
@@ -20164,6 +20805,808 @@
           }
         },
         "description": "判定区间"
+      },
+      "LaborWorkTaskCreateInput": {
+        "type": "object",
+        "properties": {
+          "workType": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "referenceNo": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "pieceCount": {
+            "type": "number",
+            "nullable": true
+          },
+          "operatorUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LaborWorkTask": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "workType": {
+            "type": "string",
+            "enum": [
+              "PICKING",
+              "PACKING",
+              "REVIEW"
+            ]
+          },
+          "sourceModule": {
+            "type": "string"
+          },
+          "referenceNo": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "operatorUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "assignedByUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "assignedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "RUNNING",
+              "COMPLETED",
+              "EXCEPTION"
+            ]
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pieceCount": {
+            "type": "number"
+          },
+          "travelDistanceM": {
+            "type": "number",
+            "nullable": true
+          },
+          "errorPieceCount": {
+            "type": "number"
+          },
+          "errorOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "exceptionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "exceptionNote": {
+            "type": "string"
+          },
+          "durationSeconds": {
+            "type": "number",
+            "nullable": true
+          },
+          "workDay": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LaborWorkTaskStartInput": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LaborWorkTaskExceptionInput": {
+        "type": "object",
+        "properties": {
+          "exceptionCode": {
+            "type": "string"
+          },
+          "exceptionNote": {
+            "type": "string"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "pieceCount": {
+            "type": "number",
+            "nullable": true
+          },
+          "errorPieceCount": {
+            "type": "number",
+            "nullable": true
+          },
+          "errorOrderCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "LaborWorkTaskCompleteInput": {
+        "type": "object",
+        "properties": {
+          "orderCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "pieceCount": {
+            "type": "number",
+            "nullable": true
+          },
+          "travelDistanceM": {
+            "type": "number",
+            "nullable": true
+          },
+          "errorPieceCount": {
+            "type": "number",
+            "nullable": true
+          },
+          "errorOrderCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LaborWorkTaskAssignInput": {
+        "type": "object",
+        "properties": {
+          "operatorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LaborWorkTaskPage": {
+        "type": "object",
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LaborWorkTask"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LaborWorkEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "actorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "exceptionCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "LaborWorkTaskDetail": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/LaborWorkTask"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LaborWorkEvent"
+            }
+          }
+        }
+      },
+      "LaborTrend": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "operatorUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "scopeNote": {
+            "type": "string"
+          },
+          "dayBasisNote": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LaborTrendPoint"
+            }
+          }
+        }
+      },
+      "LaborTrendPoint": {
+        "type": "object",
+        "properties": {
+          "workDay": {
+            "type": "string",
+            "format": "date"
+          },
+          "taskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeOperators": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickedPieces": {
+            "type": "number"
+          },
+          "pickedOrders": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "travelDistanceM": {
+            "type": "number"
+          },
+          "packingTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgPackingSeconds": {
+            "type": "number",
+            "nullable": true
+          },
+          "reviewedPieces": {
+            "type": "number"
+          },
+          "reviewAccuracy": {
+            "type": "number",
+            "nullable": true
+          },
+          "errorPieces": {
+            "type": "number"
+          },
+          "errorOrders": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "errorRateByPiece": {
+            "type": "number"
+          },
+          "errorRateByOrder": {
+            "type": "number"
+          }
+        }
+      },
+      "LaborEfficiencyRow": {
+        "type": "object",
+        "properties": {
+          "operatorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workDay": {
+            "type": "string",
+            "format": "date"
+          },
+          "taskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickedPieces": {
+            "type": "number"
+          },
+          "pickedOrders": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "travelDistanceM": {
+            "type": "number"
+          },
+          "packingTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "packingSecondsTotal": {
+            "type": "number"
+          },
+          "avgPackingSeconds": {
+            "type": "number"
+          },
+          "reviewedPieces": {
+            "type": "number"
+          },
+          "reviewErrorPieces": {
+            "type": "number"
+          },
+          "reviewAccuracy": {
+            "type": "number"
+          },
+          "errorPieces": {
+            "type": "number"
+          },
+          "errorOrders": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "errorRateByPiece": {
+            "type": "number"
+          },
+          "errorRateByOrder": {
+            "type": "number"
+          }
+        }
+      },
+      "LaborReport": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "dayBasis": {
+            "type": "string"
+          },
+          "workTypeFilter": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseFilter": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "$ref": "#/components/schemas/LaborSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LaborEfficiencyRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LaborSummary": {
+        "type": "object",
+        "properties": {
+          "headcount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "workDays": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickedPieces": {
+            "type": "number"
+          },
+          "pickedOrders": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgPickedPiecesPerPersonDay": {
+            "type": "number",
+            "nullable": true
+          },
+          "avgPickedOrdersPerPersonDay": {
+            "type": "number",
+            "nullable": true
+          },
+          "travelDistanceM": {
+            "type": "number"
+          },
+          "packingTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "packingSecondsTotal": {
+            "type": "number"
+          },
+          "avgPackingSeconds": {
+            "type": "number",
+            "nullable": true
+          },
+          "reviewedPieces": {
+            "type": "number"
+          },
+          "reviewErrorPieces": {
+            "type": "number"
+          },
+          "reviewAccuracy": {
+            "type": "number",
+            "nullable": true
+          },
+          "errorPieces": {
+            "type": "number"
+          },
+          "errorOrders": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "errorRateByPiece": {
+            "type": "number"
+          },
+          "errorRateByOrder": {
+            "type": "number"
+          }
+        }
+      },
+      "LaborRanking": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "metric": {
+            "type": "string"
+          },
+          "metricLabel": {
+            "type": "string"
+          },
+          "higherIsBetter": {
+            "type": "boolean"
+          },
+          "metricBasis": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LaborRankingRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LaborRankingRow": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "operatorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "workDays": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickedPieces": {
+            "type": "number"
+          },
+          "pickedOrders": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "travelDistanceM": {
+            "type": "number"
+          },
+          "packingTaskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgPackingSeconds": {
+            "type": "number",
+            "nullable": true
+          },
+          "reviewedPieces": {
+            "type": "number"
+          },
+          "reviewAccuracy": {
+            "type": "number",
+            "nullable": true
+          },
+          "errorPieces": {
+            "type": "number"
+          },
+          "errorOrders": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "errorRateByPiece": {
+            "type": "number"
+          },
+          "errorRateByOrder": {
+            "type": "number"
+          },
+          "metricValue": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "LaborCapabilities": {
+        "type": "object",
+        "properties": {
+          "workTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LaborWorkTypeOption"
+            }
+          },
+          "rankingMetrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LaborRankingMetricOption"
+            }
+          },
+          "exceptionCodes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LaborExceptionOption"
+            }
+          },
+          "metricBasis": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LaborMetricBasis"
+            }
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "dayBasisNote": {
+            "type": "string"
+          },
+          "packingEfficiencyBasisNote": {
+            "type": "string"
+          },
+          "reviewAccuracyBasisNote": {
+            "type": "string"
+          },
+          "errorBasisNote": {
+            "type": "string"
+          },
+          "perCapitaBasisNote": {
+            "type": "string"
+          },
+          "errorVsExceptionNote": {
+            "type": "string"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "ownershipNote": {
+            "type": "string"
+          }
+        }
+      },
+      "LaborExceptionOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "LaborMetricBasis": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "definition": {
+            "type": "string"
+          },
+          "denominator": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "LaborRankingMetricOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "higherIsBetter": {
+            "type": "boolean"
+          },
+          "unit": {
+            "type": "string"
+          }
+        }
+      },
+      "LaborWorkTypeOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
       }
     }
   }
