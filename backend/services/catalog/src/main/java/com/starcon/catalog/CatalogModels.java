@@ -4610,5 +4610,248 @@ public final class CatalogModels {
       long usableCount,
       long noRoleCount,
       String note) {}
+
+  // ================================================================ 3.6.1.2 角色档案
+
+  /**
+   * 供应商角色档案的写入请求（{@code PUT /catalog/parties/{id}/supplier-profile}）。
+   *
+   * <p>字段就是蓝图职责点名的四项：账期、MOQ、合作等级、结算方式，外加备注。
+   * MOQ 拆成 {@code moqQuantity} + {@code moqUnitCode} 两个字段而不是一个字符串，
+   * 因为「100」在「件」和「箱」下差几十倍，只存数字等于没存。
+   *
+   * <p>{@code version} 是行级乐观锁：更新时必须回传详情里拿到的版本号，
+   * 建档时不传（默认 0）。两个枚举字段留空时各自取 V30 的 DEFAULT，
+   * 所以「先建个空档案再慢慢填」是合法路径。
+   */
+  public record PartySupplierProfileInput(
+      @Schema(nullable = true) @Min(0) @Max(365) Integer paymentTermsDays,
+      @Schema(nullable = true) BigDecimal moqQuantity,
+      @Schema(nullable = true) @Size(max = 32) String moqUnitCode,
+      @Schema(nullable = true) String cooperationLevel,
+      @Schema(nullable = true) String settlementMethod,
+      @Schema(nullable = true) @Size(max = 2000) String note,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 客户角色档案的写入请求（{@code PUT /catalog/parties/{id}/customer-profile}）。
+   *
+   * <p>蓝图职责点名的是「客户分级、默认币种、信用额度」三项，
+   * 这里多一个 {@code paymentTermsDays}：蓝图的「输入」行写的是「账期与信用额度设置」，
+   * 而 12 应收的到期日 = 单据日 + 账期天数 —— 那个天数是算式里的 N，
+   * 把它留在 12 财务自己家就等于让 12 拥有了一份本该属于往来单位的默认值。
+   *
+   * <p>{@code defaultCreditLimit} 可空 = <b>不设额度（不限制赊账）</b>；
+   * 0 是非法值，因为「额度 0」与「没设额度」在业务上是<b>相反</b>的两种默认（规则 **R2**）。
+   */
+  public record PartyCustomerProfileInput(
+      @Schema(nullable = true) String customerLevel,
+      @Schema(nullable = true) @Size(max = 3) String defaultCurrency,
+      @Schema(nullable = true) BigDecimal defaultCreditLimit,
+      @Schema(nullable = true) @Min(0) @Max(365) Integer paymentTermsDays,
+      @Schema(nullable = true) @Size(max = 2000) String note,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 承运商角色档案的写入请求（{@code PUT /catalog/parties/{id}/carrier-profile}）。
+   *
+   * <p>{@code accountRef} 必填（不是 {@code @NotBlank} 而是 {@code @NotBlank} 的服务层同源判定，
+   * 这里用 {@code @NotBlank} 让 400 早于业务逻辑触发，两处文案一致）。
+   *
+   * <p>{@code serviceCapabilities} 是<b>数组</b>而不是逗号串：逗号串在
+   * {@code like '%,SEA,%'} 那种筛选里会因为 SEA 排在第一个而漏匹配（与 V27 第四节
+   * 拒绝拼接索引的同一个坑）。
+   */
+  public record PartyCarrierProfileInput(
+      @Schema(nullable = true) String interfaceType,
+      @NotBlank @Size(max = 128) String accountRef,
+      @Schema(nullable = true) List<String> serviceCapabilities,
+      @Schema(nullable = true) @Size(max = 2000) String serviceScopeNote,
+      /** 通用备注。与另两张档案表同形 —— 列表页的「备注」列按 roleType 统一渲染。 */
+      @Schema(nullable = true) @Size(max = 2000) String note,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 供应商角色档案的读出记录：主体身份 + 角色身份 + 档案字段 + 默认取值提示。
+   *
+   * <p>带主体身份（code / name）而不是只给 roleId：06 采购单要显示「供应商：星尘科技（账期 30 天）」，
+   * 一次查询就该够，不必再回查一次主体。
+   *
+   * <p>{@code warnings} 是<b>给下游单据看的提示</b>，不是校验错误：
+   * 「该供应商未设置最小起订量」这类信息在页面上是提醒，在 06 建单时是「别按 MOQ 校验这一行」。
+   * 它放在这里而不是让每个下游各判一次，与 {@code PartyRules.usableBlock} 单一实现的纪律同源。
+   */
+  public record PartySupplierProfile(
+      UUID partyId,
+      String partyCode,
+      String partyName,
+      @Schema(nullable = true) UUID roleId,
+      String roleType,
+      String roleTypeLabel,
+      @Schema(nullable = true) String roleStatus,
+      boolean profileFound,
+      int paymentTermsDays,
+      String paymentTermsLabel,
+      @Schema(nullable = true) BigDecimal moqQuantity,
+      @Schema(nullable = true) String moqUnitCode,
+      @Schema(nullable = true) String moqUnitName,
+      @Schema(nullable = true) String moqLabel,
+      String cooperationLevel,
+      String cooperationLevelLabel,
+      String settlementMethod,
+      String settlementMethodLabel,
+      @Schema(nullable = true) String note,
+      long version,
+      List<String> warnings,
+      @Schema(nullable = true) String createdAt,
+      String updatedAt) {}
+
+  /** 客户角色档案的读出记录（与 {@link PartySupplierProfile} 同一纪律）。 */
+  public record PartyCustomerProfile(
+      UUID partyId,
+      String partyCode,
+      String partyName,
+      @Schema(nullable = true) UUID roleId,
+      String roleType,
+      String roleTypeLabel,
+      @Schema(nullable = true) String roleStatus,
+      boolean profileFound,
+      String customerLevel,
+      String customerLevelLabel,
+      @Schema(nullable = true) String defaultCurrency,
+      @Schema(nullable = true) BigDecimal defaultCreditLimit,
+      @Schema(nullable = true) String creditLimitLabel,
+      int paymentTermsDays,
+      String paymentTermsLabel,
+      @Schema(nullable = true) String note,
+      long version,
+      List<String> warnings,
+      @Schema(nullable = true) String createdAt,
+      String updatedAt) {}
+
+  /** 承运商角色档案的读出记录（与 {@link PartySupplierProfile} 同一纪律）。 */
+  public record PartyCarrierProfile(
+      UUID partyId,
+      String partyCode,
+      String partyName,
+      @Schema(nullable = true) UUID roleId,
+      String roleType,
+      String roleTypeLabel,
+      @Schema(nullable = true) String roleStatus,
+      boolean profileFound,
+      String interfaceType,
+      String interfaceTypeLabel,
+      @Schema(nullable = true) String accountRef,
+      List<String> serviceCapabilities,
+      List<PartyRoleProfileRules.Option> serviceCapabilityOptions,
+      String serviceCapabilitiesLabel,
+      @Schema(nullable = true) String serviceScopeNote,
+      @Schema(nullable = true) String note,
+      long version,
+      List<String> warnings,
+      @Schema(nullable = true) String createdAt,
+      String updatedAt) {}
+
+  /**
+   * 一个主体的三张角色档案汇总（{@code GET /catalog/parties/{id}/role-profiles}）。
+   *
+   * <p>合成一个 record 而不是三个端点：详情页要显示的就是这三块的<b>同一瞬间</b>。
+   * 拆开的话，运营在「供应商身份刚被别人解掉」之后看到的页面会是拼接出来的旧数据。
+   *
+   * <p>没有对应角色时对应槽位为 null（而不是一个空档案）：
+   * 「没有供应商档案」与「有供应商档案但账期是 0」在界面上必须长得不一样。
+   */
+  public record PartyRoleProfiles(
+      UUID partyId,
+      String partyCode,
+      String partyName,
+      @Schema(nullable = true) PartySupplierProfile supplier,
+      @Schema(nullable = true) PartyCustomerProfile customer,
+      @Schema(nullable = true) PartyCarrierProfile carrier,
+      String note) {}
+
+  /**
+   * 列表页的一行：一个主体的某个角色的档案摘要。
+   *
+   * <p>{@code headline} 是服务端算好的中文串（"账期 30 天 · 常规供应商" 这类）。
+   * 在服务端算而不是让前端拼，是因为三张表的 headline 口径完全不同，
+   * 散到三个组件里就会漂移 —— 而"这一列到底显示什么"正是运营判断档案全不全的唯一依据。
+   */
+  public record PartyRoleProfileRow(
+      UUID partyId,
+      String partyCode,
+      String partyName,
+      @Schema(nullable = true) UUID roleId,
+      String roleType,
+      String roleTypeLabel,
+      @Schema(nullable = true) String roleStatus,
+      @Schema(nullable = true) String roleStatusLabel,
+      boolean profileFound,
+      @Schema(nullable = true) String level,
+      @Schema(nullable = true) String levelLabel,
+      @Schema(nullable = true) String headline,
+      @Schema(nullable = true) String note,
+      long version,
+      /** 没建档案时服务端返回 null（这一行还没有 updated_at），所以必须可空。 */
+      @Schema(nullable = true) String updatedAt) {}
+
+  /** 角色档案列表的分页结果。 */
+  public record PartyRoleProfilePage(
+      List<PartyRoleProfileRow> items, long total, int page, int size, String note) {}
+
+  /** 角色档案列表的筛选条件。null 表示不筛；空串按「不过滤」处理。 */
+  public record PartyRoleProfileQuery(
+      @Schema(nullable = true) @Size(max = 16) String roleType,
+      @Schema(nullable = true) @Size(max = 200) String keyword,
+      /** 合作等级 / 客户分级 / 接口类型 —— 按 roleType 解释成对应的枚举列。 */
+      @Schema(nullable = true) @Size(max = 24) String level,
+      /** 服务能力（承运商专用）：筛选"至少具备这一项能力"的承运商。 */
+      @Schema(nullable = true) @Size(max = 24) String capability,
+      /** 结算方式（供应商专用）。 */
+      @Schema(nullable = true) @Size(max = 24) String settlementMethod,
+      /** 默认币种（客户专用）。 */
+      @Schema(nullable = true) @Size(max = 3) String defaultCurrency,
+      /** 只看还没建档案的角色（治理视图：哪些身份该补档案还没补）。 */
+      @Schema(nullable = true) Boolean missingProfile,
+      /** 只看 ACTIVE 角色；默认 true —— 已停用的身份不该占着默认取值的主位。 */
+      @Schema(nullable = true) Boolean activeOnly,
+      int page,
+      int size) {}
+
+  /**
+   * 角色档案概览：三种角色的覆盖率与两个治理缺口指标。
+   *
+   * <p>{@code missingProfileCount} 是最该被盯住的数字：它等于「已经指派了身份、
+   * 却没建角色档案」的条数，也就是 06 采购 / 12 应收**取不到默认值**的那些对手方。
+   */
+  public record PartyRoleProfileOverview(
+      long supplierRoleCount,
+      long supplierProfileCount,
+      long customerRoleCount,
+      long customerProfileCount,
+      long carrierRoleCount,
+      long carrierProfileCount,
+      long missingProfileCount,
+      /** 风险客户里仍然留着信用额度的条数（规则 R4 生效后应为 0，是发现脏数据的探针）。 */
+      long riskyCustomerWithCreditCount,
+      /** 有账期但结算方式不是账期结算的供应商条数（规则 R1 的 DB 兜底生效后应为 0）。 */
+      long termsWithoutCreditCount,
+      String note) {}
+
+  /**
+   * 词表选项：前端下拉的数据源。
+   *
+   * <p>刻意<b>不</b>在这里给币种列表：ISO 4217 的完整词表是 12 财务的资产，
+   * 在本模块硬编码一份就等于复制了别人的写入所有权，而两份列表迟早会不一样
+   * （一方加了新币种时另一方不会跟）。所以 {@code defaultCurrency} 走自由输入 + 格式校验。
+   */
+  public record PartyRoleProfileOptions(
+      String roleType,
+      String roleTypeLabel,
+      List<PartyRoleProfileRules.Option> levels,
+      List<PartyRoleProfileRules.Option> settlementMethods,
+      List<PartyRoleProfileRules.Option> interfaceTypes,
+      List<PartyRoleProfileRules.Option> serviceCapabilities,
+      String note) {}
 }
 

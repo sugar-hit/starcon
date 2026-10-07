@@ -57,6 +57,10 @@ import {
   type UsableFilter,
 } from './party-model';
 import { useIdentity } from '../iam/identity-shell';
+import {
+  PartyRoleProfileLedger,
+  PartyRoleProfilePanels,
+} from './party-role-profile-workspace';
 
 const PAGE_SIZE = 20;
 
@@ -878,6 +882,23 @@ export function PartyWorkspace() {
           </div>
         </SectionCard>
       )}
+
+      {/* 3.6.1.2 角色档案：挂在详情里而不是另开一个页面 ——
+          档案是「这个主体的这个身份」的属性，与角色指派在同一张上下文里才说得清
+          「为什么这个供应商还没有账期」：因为上面刚指派了供应商身份。 */}
+      {detail && (
+        <PartyRoleProfilePanels
+          partyId={detail.id}
+          writable={writable}
+          onChanged={() => {
+            void fetchDetail(detail.id)
+              .then(setDetail)
+              .catch(() => undefined);
+          }}
+        />
+      )}
+
+      <PartyRoleProfileLedger writable={writable} />
 
       <SectionCard
         title="引用候选（下游下拉的数据源）"

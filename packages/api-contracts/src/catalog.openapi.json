@@ -2239,6 +2239,102 @@
         }
       }
     },
+    "/catalog/physical-safety/skus/{skuId}": {
+      "get": {
+        "tags": [
+          "physical-safety-controller"
+        ],
+        "operationId": "profile",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "divisorCm3PerKg",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhysicalSafetyProfile"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "physical-safety-controller"
+        ],
+        "operationId": "save",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PhysicalSafetyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhysicalSafetySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/parties/{id}": {
       "get": {
         "tags": [
@@ -2370,6 +2466,94 @@
                   "additionalProperties": {
                     "type": "boolean"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/supplier-profile": {
+      "get": {
+        "tags": [
+          "party-role-profile-controller"
+        ],
+        "operationId": "supplier",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartySupplierProfile"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "party-role-profile-controller"
+        ],
+        "operationId": "saveSupplier",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartySupplierProfileInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartySupplierProfile"
                 }
               }
             }
@@ -2535,6 +2719,182 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/PartySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/customer-profile": {
+      "get": {
+        "tags": [
+          "party-role-profile-controller"
+        ],
+        "operationId": "customer",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyCustomerProfile"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "party-role-profile-controller"
+        ],
+        "operationId": "saveCustomer",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyCustomerProfileInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyCustomerProfile"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/carrier-profile": {
+      "get": {
+        "tags": [
+          "party-role-profile-controller"
+        ],
+        "operationId": "carrier",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyCarrierProfile"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "party-role-profile-controller"
+        ],
+        "operationId": "saveCarrier",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartyCarrierProfileInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyCarrierProfile"
                 }
               }
             }
@@ -8227,6 +8587,97 @@
         }
       }
     },
+    "/catalog/physical-safety/skus/{skuId}/channel-verdict": {
+      "post": {
+        "tags": [
+          "physical-safety-controller"
+        ],
+        "operationId": "verdict",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelVerdictInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelVerdictView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/physical-safety/carton-calc": {
+      "post": {
+        "tags": [
+          "physical-safety-controller"
+        ],
+        "operationId": "cartonCalc",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartonCalcInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartonCalcView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/parties": {
       "get": {
         "tags": [
@@ -12949,12 +13400,352 @@
         }
       }
     },
+    "/catalog/role-profiles": {
+      "get": {
+        "tags": [
+          "party-role-profile-controller"
+        ],
+        "operationId": "list_7",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "roleType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "capability",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "settlementMethod",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "defaultCurrency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "missingProfile",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "activeOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyRoleProfilePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/role-profiles/overview": {
+      "get": {
+        "tags": [
+          "party-role-profile-controller"
+        ],
+        "operationId": "overview_7",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyRoleProfileOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/role-profiles/options": {
+      "get": {
+        "tags": [
+          "party-role-profile-controller"
+        ],
+        "operationId": "options_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "roleType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyRoleProfileOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/physical-safety/profiles": {
+      "get": {
+        "tags": [
+          "physical-safety-controller"
+        ],
+        "operationId": "profiles",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "containsBattery",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "containsLiquid",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "dangerousGoods",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "isMagnetic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "safetyCollected",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "requiresDeclaration",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "packagingType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhysicalSafetyPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/parties/{id}/role-profiles": {
+      "get": {
+        "tags": [
+          "party-role-profile-controller"
+        ],
+        "operationId": "aggregate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartyRoleProfiles"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/parties/overview": {
       "get": {
         "tags": [
           "party-controller"
         ],
-        "operationId": "overview_7",
+        "operationId": "overview_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -13147,7 +13938,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "overview_8",
+        "operationId": "overview_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -13304,7 +14095,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "overview_9",
+        "operationId": "overview_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -13812,7 +14603,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "overview_10",
+        "operationId": "overview_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -13928,7 +14719,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "overview_11",
+        "operationId": "overview_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -13959,7 +14750,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "overview_12",
+        "operationId": "overview_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -14033,7 +14824,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "overview_13",
+        "operationId": "overview_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -14112,7 +14903,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "overview_14",
+        "operationId": "overview_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -14183,7 +14974,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "overview_15",
+        "operationId": "overview_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -14322,7 +15113,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "overview_16",
+        "operationId": "overview_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -14593,7 +15384,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_17",
+        "operationId": "overview_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -14624,7 +15415,7 @@
         "tags": [
           "attribute-option-controller"
         ],
-        "operationId": "list_7",
+        "operationId": "list_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -14918,6 +15709,66 @@
         }
       }
     },
+    "/catalog/parties/{id}/{roleType}-profile": {
+      "delete": {
+        "tags": [
+          "party-role-profile-controller"
+        ],
+        "operationId": "delete_6",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "roleType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/media/{id}/references/{referenceId}": {
       "delete": {
         "tags": [
@@ -15024,7 +15875,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "delete_6",
+        "operationId": "delete_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -15064,308 +15915,6 @@
                   "additionalProperties": {
                     "type": "boolean"
                   }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/physical-safety/skus/{skuId}": {
-      "get": {
-        "tags": [
-          "physical-safety-controller"
-        ],
-        "operationId": "profile",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "divisorCm3PerKg",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PhysicalSafetyProfile"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "physical-safety-controller"
-        ],
-        "operationId": "save",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PhysicalSafetyInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PhysicalSafetySaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/physical-safety/skus/{skuId}/channel-verdict": {
-      "post": {
-        "tags": [
-          "physical-safety-controller"
-        ],
-        "operationId": "verdict",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ChannelVerdictInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChannelVerdictView"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/physical-safety/carton-calc": {
-      "post": {
-        "tags": [
-          "physical-safety-controller"
-        ],
-        "operationId": "cartonCalc",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CartonCalcInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CartonCalcView"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/physical-safety/profiles": {
-      "get": {
-        "tags": [
-          "physical-safety-controller"
-        ],
-        "operationId": "profiles",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "containsBattery",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "containsLiquid",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "dangerousGoods",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "isMagnetic",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "safetyCollected",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "requiresDeclaration",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "packagingType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/PhysicalSafetyPage"
                 }
               }
             }
@@ -16802,6 +17351,178 @@
           }
         }
       },
+      "PhysicalSafetyInput": {
+        "type": "object",
+        "properties": {
+          "lengthMm": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "widthMm": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "heightMm": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "netWeightG": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "grossWeightG": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "packagingType": {
+            "type": "string",
+            "nullable": true
+          },
+          "safetyCollected": {
+            "type": "boolean"
+          },
+          "containsBattery": {
+            "type": "boolean"
+          },
+          "containsLiquid": {
+            "type": "boolean"
+          },
+          "dangerousGoods": {
+            "type": "boolean"
+          },
+          "isMagnetic": {
+            "type": "boolean"
+          },
+          "safetyNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "safetyVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "packagingVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PhysicalSafetyProfile": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "lengthMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "widthMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "heightMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "netWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "packagingType": {
+            "type": "string"
+          },
+          "safetyCollected": {
+            "type": "boolean"
+          },
+          "containsBattery": {
+            "type": "boolean"
+          },
+          "containsLiquid": {
+            "type": "boolean"
+          },
+          "dangerousGoods": {
+            "type": "boolean"
+          },
+          "isMagnetic": {
+            "type": "boolean"
+          },
+          "safetyNote": {
+            "type": "string"
+          },
+          "safetyVersion": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "volumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "divisorCm3PerKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "volumetricWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "chargeableWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "activeFlags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requiredDeclarations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hasVolume": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PhysicalSafetySaved": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/PhysicalSafetyProfile"
+          },
+          "packagingChanged": {
+            "type": "boolean"
+          }
+        }
+      },
       "PartyInput": {
         "required": [
           "code",
@@ -16919,6 +17640,135 @@
           }
         }
       },
+      "PartySupplierProfileInput": {
+        "type": "object",
+        "properties": {
+          "paymentTermsDays": {
+            "maximum": 365,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "moqQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "moqUnitCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "cooperationLevel": {
+            "type": "string",
+            "nullable": true
+          },
+          "settlementMethod": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PartySupplierProfile": {
+        "type": "object",
+        "properties": {
+          "partyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partyCode": {
+            "type": "string"
+          },
+          "partyName": {
+            "type": "string"
+          },
+          "roleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "roleType": {
+            "type": "string"
+          },
+          "roleTypeLabel": {
+            "type": "string"
+          },
+          "roleStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "profileFound": {
+            "type": "boolean"
+          },
+          "paymentTermsDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "paymentTermsLabel": {
+            "type": "string"
+          },
+          "moqQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "moqUnitCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "moqUnitName": {
+            "type": "string",
+            "nullable": true
+          },
+          "moqLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "cooperationLevel": {
+            "type": "string"
+          },
+          "cooperationLevelLabel": {
+            "type": "string"
+          },
+          "settlementMethod": {
+            "type": "string"
+          },
+          "settlementMethodLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
       "PartyStatusInput": {
         "required": [
           "status"
@@ -16965,6 +17815,256 @@
           "version": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "PartyCustomerProfileInput": {
+        "type": "object",
+        "properties": {
+          "customerLevel": {
+            "type": "string",
+            "nullable": true
+          },
+          "defaultCurrency": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "defaultCreditLimit": {
+            "type": "number",
+            "nullable": true
+          },
+          "paymentTermsDays": {
+            "maximum": 365,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PartyCustomerProfile": {
+        "type": "object",
+        "properties": {
+          "partyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partyCode": {
+            "type": "string"
+          },
+          "partyName": {
+            "type": "string"
+          },
+          "roleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "roleType": {
+            "type": "string"
+          },
+          "roleTypeLabel": {
+            "type": "string"
+          },
+          "roleStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "profileFound": {
+            "type": "boolean"
+          },
+          "customerLevel": {
+            "type": "string"
+          },
+          "customerLevelLabel": {
+            "type": "string"
+          },
+          "defaultCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "defaultCreditLimit": {
+            "type": "number",
+            "nullable": true
+          },
+          "creditLimitLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentTermsDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "paymentTermsLabel": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyCarrierProfileInput": {
+        "required": [
+          "accountRef"
+        ],
+        "type": "object",
+        "properties": {
+          "interfaceType": {
+            "type": "string",
+            "nullable": true
+          },
+          "accountRef": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "serviceCapabilities": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "serviceScopeNote": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Option": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyCarrierProfile": {
+        "type": "object",
+        "properties": {
+          "partyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partyCode": {
+            "type": "string"
+          },
+          "partyName": {
+            "type": "string"
+          },
+          "roleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "roleType": {
+            "type": "string"
+          },
+          "roleTypeLabel": {
+            "type": "string"
+          },
+          "roleStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "profileFound": {
+            "type": "boolean"
+          },
+          "interfaceType": {
+            "type": "string"
+          },
+          "interfaceTypeLabel": {
+            "type": "string"
+          },
+          "accountRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "serviceCapabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "serviceCapabilityOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "serviceCapabilitiesLabel": {
+            "type": "string"
+          },
+          "serviceScopeNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string"
           }
         }
       },
@@ -20681,6 +21781,236 @@
             "type": "string"
           },
           "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "ChannelVerdictInput": {
+        "required": [
+          "allowBattery",
+          "allowDangerousGoods",
+          "allowLiquid",
+          "allowMagnetic",
+          "channelCode",
+          "requirePhysicalParameters"
+        ],
+        "type": "object",
+        "properties": {
+          "channelCode": {
+            "type": "string"
+          },
+          "allowBattery": {
+            "type": "boolean"
+          },
+          "allowLiquid": {
+            "type": "boolean"
+          },
+          "allowDangerousGoods": {
+            "type": "boolean"
+          },
+          "allowMagnetic": {
+            "type": "boolean"
+          },
+          "requirePhysicalParameters": {
+            "type": "boolean"
+          },
+          "divisorCm3PerKg": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "ChannelVerdictView": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "channelCode": {
+            "type": "string"
+          },
+          "shippable": {
+            "type": "boolean"
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blockerLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "declarations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "declarationLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "volumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "divisorCm3PerKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "volumetricWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "chargeableWeightKg": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CartonCalcInput": {
+        "required": [
+          "cartonMaxGrossWeightG",
+          "cartonVolumeCm3",
+          "lines"
+        ],
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartonLineInput"
+            }
+          },
+          "cartonVolumeCm3": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "cartonMaxGrossWeightG": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          }
+        }
+      },
+      "CartonLineInput": {
+        "required": [
+          "quantity",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          }
+        }
+      },
+      "CartonCalcView": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartonLineView"
+            }
+          },
+          "cartonVolumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "cartonMaxGrossWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "totalCartons": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalVolumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "volumeUtilizationPercent": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CartonLineView": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitVolumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "netWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitsPerCartonByVolume": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unitsPerCartonByWeight": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unitsPerCarton": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limitedByWeight": {
+            "type": "boolean"
+          },
+          "cartonsNeeded": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalVolumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "note": {
             "type": "string"
           }
         }
@@ -24475,6 +25805,175 @@
           }
         }
       },
+      "PartyRoleProfilePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartyRoleProfileRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyRoleProfileRow": {
+        "type": "object",
+        "properties": {
+          "partyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partyCode": {
+            "type": "string"
+          },
+          "partyName": {
+            "type": "string"
+          },
+          "roleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "roleType": {
+            "type": "string"
+          },
+          "roleTypeLabel": {
+            "type": "string"
+          },
+          "roleStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "roleStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "profileFound": {
+            "type": "boolean"
+          },
+          "level": {
+            "type": "string",
+            "nullable": true
+          },
+          "levelLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "headline": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updatedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PartyRoleProfileOverview": {
+        "type": "object",
+        "properties": {
+          "supplierRoleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "supplierProfileCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "customerRoleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "customerProfileCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "carrierRoleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "carrierProfileCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "missingProfileCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "riskyCustomerWithCreditCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "termsWithoutCreditCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyRoleProfileOptions": {
+        "type": "object",
+        "properties": {
+          "roleType": {
+            "type": "string"
+          },
+          "roleTypeLabel": {
+            "type": "string"
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "settlementMethods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "interfaceTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "serviceCapabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
       "ProductRecord": {
         "type": "object",
         "properties": {
@@ -24749,6 +26248,89 @@
           }
         }
       },
+      "PhysicalSafetyPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PhysicalSafetyRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PhysicalSafetyRow": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "safetyCollected": {
+            "type": "boolean"
+          },
+          "containsBattery": {
+            "type": "boolean"
+          },
+          "containsLiquid": {
+            "type": "boolean"
+          },
+          "dangerousGoods": {
+            "type": "boolean"
+          },
+          "isMagnetic": {
+            "type": "boolean"
+          },
+          "flagsText": {
+            "type": "string"
+          },
+          "volumeCm3": {
+            "type": "number",
+            "nullable": true
+          },
+          "grossWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "packagingType": {
+            "type": "string"
+          },
+          "requiredDeclarations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
       "PartyPage": {
         "type": "object",
         "properties": {
@@ -24985,6 +26567,33 @@
             "type": "string"
           },
           "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "PartyRoleProfiles": {
+        "type": "object",
+        "properties": {
+          "partyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partyCode": {
+            "type": "string"
+          },
+          "partyName": {
+            "type": "string"
+          },
+          "supplier": {
+            "$ref": "#/components/schemas/PartySupplierProfile"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/PartyCustomerProfile"
+          },
+          "carrier": {
+            "$ref": "#/components/schemas/PartyCarrierProfile"
+          },
+          "note": {
             "type": "string"
           }
         }
@@ -28194,491 +29803,6 @@
             }
           },
           "createdAt": {
-            "type": "string"
-          }
-        }
-      },
-      "PhysicalSafetyInput": {
-        "type": "object",
-        "properties": {
-          "lengthMm": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "widthMm": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "heightMm": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "netWeightG": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "grossWeightG": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          },
-          "packagingType": {
-            "type": "string",
-            "nullable": true
-          },
-          "safetyCollected": {
-            "type": "boolean"
-          },
-          "containsBattery": {
-            "type": "boolean"
-          },
-          "containsLiquid": {
-            "type": "boolean"
-          },
-          "dangerousGoods": {
-            "type": "boolean"
-          },
-          "isMagnetic": {
-            "type": "boolean"
-          },
-          "safetyNote": {
-            "type": "string",
-            "nullable": true
-          },
-          "safetyVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "packagingVersion": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "PhysicalSafetyProfile": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "spuCode": {
-            "type": "string"
-          },
-          "lengthMm": {
-            "type": "number",
-            "nullable": true
-          },
-          "widthMm": {
-            "type": "number",
-            "nullable": true
-          },
-          "heightMm": {
-            "type": "number",
-            "nullable": true
-          },
-          "netWeightG": {
-            "type": "number",
-            "nullable": true
-          },
-          "grossWeightG": {
-            "type": "number",
-            "nullable": true
-          },
-          "packagingType": {
-            "type": "string"
-          },
-          "safetyCollected": {
-            "type": "boolean"
-          },
-          "containsBattery": {
-            "type": "boolean"
-          },
-          "containsLiquid": {
-            "type": "boolean"
-          },
-          "dangerousGoods": {
-            "type": "boolean"
-          },
-          "isMagnetic": {
-            "type": "boolean"
-          },
-          "safetyNote": {
-            "type": "string"
-          },
-          "safetyVersion": {
-            "type": "integer",
-            "format": "int64",
-            "nullable": true
-          },
-          "volumeCm3": {
-            "type": "number",
-            "nullable": true
-          },
-          "divisorCm3PerKg": {
-            "type": "number",
-            "nullable": true
-          },
-          "volumetricWeightKg": {
-            "type": "number",
-            "nullable": true
-          },
-          "chargeableWeightKg": {
-            "type": "number",
-            "nullable": true
-          },
-          "activeFlags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "requiredDeclarations": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "hasVolume": {
-            "type": "boolean"
-          }
-        }
-      },
-      "PhysicalSafetySaved": {
-        "type": "object",
-        "properties": {
-          "profile": {
-            "$ref": "#/components/schemas/PhysicalSafetyProfile"
-          },
-          "packagingChanged": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ChannelVerdictInput": {
-        "required": [
-          "allowBattery",
-          "allowDangerousGoods",
-          "allowLiquid",
-          "allowMagnetic",
-          "channelCode",
-          "requirePhysicalParameters"
-        ],
-        "type": "object",
-        "properties": {
-          "channelCode": {
-            "type": "string"
-          },
-          "allowBattery": {
-            "type": "boolean"
-          },
-          "allowLiquid": {
-            "type": "boolean"
-          },
-          "allowDangerousGoods": {
-            "type": "boolean"
-          },
-          "allowMagnetic": {
-            "type": "boolean"
-          },
-          "requirePhysicalParameters": {
-            "type": "boolean"
-          },
-          "divisorCm3PerKg": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number",
-            "nullable": true
-          }
-        }
-      },
-      "ChannelVerdictView": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "channelCode": {
-            "type": "string"
-          },
-          "shippable": {
-            "type": "boolean"
-          },
-          "blockers": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "blockerLabels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "declarations": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "declarationLabels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "volumeCm3": {
-            "type": "number",
-            "nullable": true
-          },
-          "divisorCm3PerKg": {
-            "type": "number",
-            "nullable": true
-          },
-          "volumetricWeightKg": {
-            "type": "number",
-            "nullable": true
-          },
-          "chargeableWeightKg": {
-            "type": "number",
-            "nullable": true
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "CartonCalcInput": {
-        "required": [
-          "cartonMaxGrossWeightG",
-          "cartonVolumeCm3",
-          "lines"
-        ],
-        "type": "object",
-        "properties": {
-          "lines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CartonLineInput"
-            }
-          },
-          "cartonVolumeCm3": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number"
-          },
-          "cartonMaxGrossWeightG": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number"
-          }
-        }
-      },
-      "CartonLineInput": {
-        "required": [
-          "quantity",
-          "skuId"
-        ],
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "minimum": 0,
-            "exclusiveMinimum": false,
-            "type": "number"
-          }
-        }
-      },
-      "CartonCalcView": {
-        "type": "object",
-        "properties": {
-          "lines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CartonLineView"
-            }
-          },
-          "cartonVolumeCm3": {
-            "type": "number",
-            "nullable": true
-          },
-          "cartonMaxGrossWeightG": {
-            "type": "number",
-            "nullable": true
-          },
-          "totalCartons": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalVolumeCm3": {
-            "type": "number",
-            "nullable": true
-          },
-          "volumeUtilizationPercent": {
-            "type": "number",
-            "nullable": true
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "CartonLineView": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "unitVolumeCm3": {
-            "type": "number",
-            "nullable": true
-          },
-          "netWeightG": {
-            "type": "number",
-            "nullable": true
-          },
-          "grossWeightG": {
-            "type": "number",
-            "nullable": true
-          },
-          "unitsPerCartonByVolume": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "unitsPerCartonByWeight": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "unitsPerCarton": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "limitedByWeight": {
-            "type": "boolean"
-          },
-          "cartonsNeeded": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalVolumeCm3": {
-            "type": "number",
-            "nullable": true
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "PhysicalSafetyPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PhysicalSafetyRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "PhysicalSafetyRow": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "spuCode": {
-            "type": "string"
-          },
-          "safetyCollected": {
-            "type": "boolean"
-          },
-          "containsBattery": {
-            "type": "boolean"
-          },
-          "containsLiquid": {
-            "type": "boolean"
-          },
-          "dangerousGoods": {
-            "type": "boolean"
-          },
-          "isMagnetic": {
-            "type": "boolean"
-          },
-          "flagsText": {
-            "type": "string"
-          },
-          "volumeCm3": {
-            "type": "number",
-            "nullable": true
-          },
-          "grossWeightG": {
-            "type": "number",
-            "nullable": true
-          },
-          "packagingType": {
-            "type": "string"
-          },
-          "requiredDeclarations": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "updatedAt": {
             "type": "string"
           }
         }
