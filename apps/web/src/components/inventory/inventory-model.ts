@@ -2,6 +2,8 @@ import type {
   BucketAction,
   BucketRow,
   DimensionCapability,
+  DistributionRow,
+  DistributionSpuRef,
   InventoryBucketDetail,
   InventoryLedgerDrill,
   InventoryLedgerPage,
@@ -14,8 +16,11 @@ import type {
   LegalEntityRef,
   LocationRef,
   LotRef,
+  MultiWarehouseDistribution,
   OverviewGroup,
   OverviewRow,
+  PlatformObservationInput,
+  PlatformObservationSaved,
   QualityStatusRef,
   ReconciliationFindingPage,
   ReconciliationRequest,
@@ -624,4 +629,126 @@ export function errorText(error: unknown): string {
     return error.message;
   }
   return '加载失败，请稍后重试';
+}
+
+// ================================================================ 7.1.3.1 多仓分布视图
+
+/** 矩阵查询参数：skuId 与 spuId 互斥且必居其一（后端 400）。 */
+export interface DistributionParams {
+  skuId?: string;
+  spuId?: string;
+  legalEntityId?: string;
+  lookbackDays?: number;
+}
+
+/**
+ * 取多仓对照矩阵。
+ *
+ * <p>矩阵一次只查一个 SKU 或一个 SPU：后端不接受「全租户所有 SKU 的全仓分布」，
+ * 那既不是矩阵也不是分页，所以这里不做「什么都不传」的兜底请求。
+ */
+export function fetchDistribution(params: DistributionParams) {
+  return api<MultiWarehouseDistribution>(
+    `warehouse/inventory/distribution${distributionQuery(params)}`,
+  );
+}
+
+/**
+ * 取 SPU 下拉。
+ *
+ * <p>只列出本租户登记过 spu_id 的 SPU。没有登记的 SKU 不在这里 —— 那个覆盖缺口由矩阵响应里的
+ * unregisteredSpuCount 如实报出，不在下拉里假装「只有这些 SKU」。
+ */
+export function fetchDistributionSpus() {
+  return api<DistributionSpuRef[]>('warehouse/inventory/distribution/spus');
+}
+
+/** 记录一条平台仓（FBA）观测。来源与采集时间必填 —— 后端会显式拒绝缺失。 */
+export function savePlatformObservation(input: PlatformObservationInput) {
+  return api<PlatformObservationSaved>('warehouse/inventory/platform-observations', 'POST', input);
+}
+
+function distributionQuery(params: DistributionParams): string {
+  const q = new URLSearchParams();
+  if (params.skuId) q.set('skuId', params.skuId);
+  if (params.spuId) q.set('spuId', params.spuId);
+  if (params.legalEntityId) q.set('legalEntityId', params.legalEntityId);
+  if (params.lookbackDays !== undefined) q.set('lookbackDays', String(params.lookbackDays));
+  const s = q.toString();
+  return s ? `?${s}` : '';
+}
+
+/** 仓库性质标签。取值受 V55 的 CHECK 约束锁死，不是自由文本。 */
+export const warehouseKindLabels: Record<string, string> = {
+  LOCAL: '本地自营仓',
+  OVERSEAS: '海外自营仓',
+  PLATFORM_FBA: '平台仓（FBA）',
+  THIRD_PARTY: '三方仓',
+};
+
+/** 平台仓的行判定：这类仓的数量来自观测，不是自有账本。 */
+export function isPlatformRow(row: DistributionRow): boolean {
+  return row.warehouseKind === 'PLATFORM_FBA';
+}
+
+/** 周转天数依据标签。两个口径的数不能直接比大小，界面上必须分开显示。 */
+export const turnoverBasisLabels: Record<string, string> = {
+  OWN_OUTBOUND: '自有发货速度',
+  PLATFORM_OBSERVATION_DIFF: '平台观测差分',
+  NONE: '不可计算',
+};
+
+/**
+ * 周转天数的展示。
+ *
+ * <p>算不出时返回「—」并把原因放在 title 上，而不是显示 0：0 会被读成「瞬间卖完」，
+ * 而空值 + 原因才是"没算出来"。返回结构带上 basis，让界面对两个口径做视觉区分。
+ */
+export function turnoverText(row: DistributionRow): {
+  value: string;
+  basis: string;
+  title: string;
+} {
+  if (!row.turnoverComputable || row.turnoverDays === null) {
+    return { value: '—', basis: turnoverBasisLabels.NONE ?? '不可计算', title: row.turnoverNote };
+  }
+  return {
+    value: `${row.turnoverDays.toLocaleString('zh-CN', { maximumFractionDigits: 1 })} 天`,
+    basis: turnoverBasisLabels[row.turnoverBasis] ?? row.turnoverBasis,
+    title: row.turnoverNote,
+  };
+}
+
+/**
+ * 观测新鲜度文案。
+ *
+ * <p>平台数量是某时刻的快照，所以"多久之前采的"和数量本身一样重要。
+ * 超过一天就标成"数据较旧"——调拨决策建在一个几小时前的快照上是常见事故。
+ */
+export function observationFreshness(row: DistributionRow, now = Date.now()): string {
+  if (!row.collectedAt) return '—';
+  const at = Date.parse(row.collectedAt);
+  if (Number.isNaN(at)) return '—';
+  const seconds = Math.max(0, Math.round((now - at) / 1000));
+  const stamp = new Date(at).toLocaleString('zh-CN', { hour12: false });
+  const age =
+    seconds < 3600
+      ? `${Math.floor(seconds / 60)} 分钟前`
+      : seconds < 86400
+        ? `${Math.floor(seconds / 3600)} 小时前`
+        : `${Math.floor(seconds / 86400)} 天前`;
+  return `${stamp}（${age}${seconds > 86400 ? '，数据较旧' : ''}）`;
+}
+
+/**
+ * 矩阵行的来源标注。
+ *
+ * <p>自有仓与平台仓的量不能混在一个无差别求和里，界面上也必须让用户一眼看出
+ * 「这一行的数字是账，还是某时刻的平台快照」。
+ */
+export function rowSourceNote(row: DistributionRow): string {
+  if (isPlatformRow(row)) {
+    return `平台观测值（来源 ${row.source ?? '未标注'}），不是自有账本`;
+  }
+  return '自有账本量';
 }

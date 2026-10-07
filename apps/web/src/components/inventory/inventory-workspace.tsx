@@ -29,6 +29,7 @@ import { deletePolicy, errorText, fetchCapabilities, fetchLegalEntities, fetchOv
 import { InventoryBucketDetail } from './inventory-bucket-detail';
 import { InventoryLedger } from './inventory-ledger';
 import { InventoryReconciliation } from './inventory-reconciliation';
+import { InventoryDistribution } from './inventory-distribution';
 import { useIdentity } from '../iam/identity-shell';
 
 /**
@@ -68,7 +69,7 @@ export function InventoryWorkspace() {
   // 7.1.1.1 总览 / 7.1.1.2 明细 / 7.1.2.1 流水台账 / 7.1.2.2 账实核对：同一页面内切换，
   // 行内下钻时带上维度。台账与核对另有独立路由（7.1.1.2「查看流水」与核对记录的契约地址），
   // 页内这个入口是同一工作区内的就地切换，少一次跳转。
-  const [view, setView] = useState<'OVERVIEW' | 'BUCKET' | 'LEDGER' | 'RECONCILE'>('OVERVIEW');
+  const [view, setView] = useState<'OVERVIEW' | 'BUCKET' | 'LEDGER' | 'RECONCILE' | 'DISTRIBUTION'>('OVERVIEW');
   const [drill, setDrill] = useState<BucketDrill | null>(null);
 
   const [warehouseId, setWarehouseId] = useState('');
@@ -238,6 +239,7 @@ export function InventoryWorkspace() {
                   ['BUCKET', '库位明细'],
                   ['LEDGER', '流水台账'],
                   ['RECONCILE', '账实核对'],
+                  ['DISTRIBUTION', '多仓分布'],
                 ] as const
               ).map(([key, label]) => (
                 <button
@@ -261,7 +263,9 @@ export function InventoryWorkspace() {
         }
       />
 
-      {view === 'RECONCILE' ? (
+      {view === 'DISTRIBUTION' ? (
+        <InventoryDistribution initialSkuId={drill?.skuId ?? null} />
+      ) : view === 'RECONCILE' ? (
         <InventoryReconciliation />
       ) : view === 'LEDGER' ? (
         <InventoryLedger
