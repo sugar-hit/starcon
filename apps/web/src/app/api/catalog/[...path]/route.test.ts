@@ -902,6 +902,114 @@ it('catalog/parties 的全部路由被放行（3.6.1.1 往来单位档案）', a
   }
 });
 
+it('catalog/parties/{id}/addresses 与 /contacts 的全部路由被放行（3.6.3.1 地址与联系人）', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const party = '77777777-7777-7777-7777-777777777777';
+  const address = '88888888-8888-8888-8888-888888888888';
+  const contact = '99999999-9999-9999-9999-999999999999';
+  // 读：地址列表（含筛选查询串）、默认地址、引用候选、地址详情、版本链与某一版、
+  // 联系人列表、默认联系人、引用候选、联系人详情。
+  for (const path of [
+    `catalog/parties/${party}/addresses`,
+    `catalog/parties/${party}/addresses?keyword=仓库&usage=PICKUP&includeDeleted=true`,
+    `catalog/parties/${party}/addresses/defaults?usage=SHIP_TO`,
+    `catalog/parties/${party}/addresses/candidates?usage=PICKUP&includeBlocked=true`,
+    `catalog/parties/${party}/addresses/${address}`,
+    `catalog/parties/${party}/addresses/${address}/versions`,
+    `catalog/parties/${party}/addresses/${address}/versions/3`,
+    `catalog/parties/${party}/contacts`,
+    `catalog/parties/${party}/contacts?keyword=张三&primaryOnly=true`,
+    `catalog/parties/${party}/contacts/default`,
+    `catalog/parties/${party}/contacts/candidates`,
+    `catalog/parties/${party}/contacts/${contact}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(200);
+  }
+  // 写：新建 / 改地址（内容变了才追加版本）、只改用途、设默认、软删除；
+  // 新建 / 改联系人、设默认、删除。
+  expect(
+    (
+      await POST(request(`catalog/parties/${party}/addresses`, 'POST'), {
+        params: { path: ['catalog', 'parties', party, 'addresses'] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await PUT(request(`catalog/parties/${party}/addresses/${address}`, 'PUT'), {
+        params: { path: ['catalog', 'parties', party, 'addresses', address] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await PUT(request(`catalog/parties/${party}/addresses/${address}/usages`, 'PUT'), {
+        params: { path: ['catalog', 'parties', party, 'addresses', address, 'usages'] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await PUT(request(`catalog/parties/${party}/addresses/${address}/default`, 'PUT'), {
+        params: { path: ['catalog', 'parties', party, 'addresses', address, 'default'] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await DELETE(request(`catalog/parties/${party}/addresses/${address}`, 'DELETE'), {
+        params: { path: ['catalog', 'parties', party, 'addresses', address] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await POST(request(`catalog/parties/${party}/contacts`, 'POST'), {
+        params: { path: ['catalog', 'parties', party, 'contacts'] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await PUT(request(`catalog/parties/${party}/contacts/${contact}`, 'PUT'), {
+        params: { path: ['catalog', 'parties', party, 'contacts', contact] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await PUT(request(`catalog/parties/${party}/contacts/${contact}/primary`, 'PUT'), {
+        params: { path: ['catalog', 'parties', party, 'contacts', contact, 'primary'] },
+      })
+    ).status,
+  ).toBe(200);
+  expect(
+    (
+      await DELETE(request(`catalog/parties/${party}/contacts/${contact}`, 'DELETE'), {
+        params: { path: ['catalog', 'parties', party, 'contacts', contact] },
+      })
+    ).status,
+  ).toBe(200);
+
+  // 放行不能是前缀通配：
+  //  * 版本号段是 [0-9]+ 而不是宽松的 hex —— 一条比整数更长的版本号要 404，
+  //    否则「取回第 N 版」这条读出口的入参边界就没有约束了；
+  //  * 用途/默认/版本都是**动作**子路径，不能被当成资源 id 之后再挂子路径。
+  for (const path of [
+    `catalog/parties/${party}/addresses/${address}/versions/1/extra`,
+    `catalog/parties/${party}/addresses/${address}/versions/not-a-number`,
+    `catalog/parties/${party}/addresses/${address}/usages/extra`,
+    `catalog/parties/${party}/addresses/${address}/default/extra`,
+    `catalog/parties/${party}/addresses/not-a-uuid`,
+    `catalog/parties/${party}/contacts/${contact}/primary/extra`,
+    `catalog/parties/${party}/contacts/not-a-uuid`,
+    `catalog/parties/${party}/addressesx`,
+  ]) {
+    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(404);
+  }
+});
+
 it('catalog/components 与 catalog/bundle-skus 的全部路由被放行（3.5.1.2 组件维护）', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
   vi.stubGlobal('fetch', fetcher);
