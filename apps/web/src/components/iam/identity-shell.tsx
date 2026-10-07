@@ -32,7 +32,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import type { Access, LoginResult } from '../../../../../packages/api-contracts/src/catalog';
-import { api, ApiError } from '@/lib/api';
+import { api, ApiError, blockWorkspaceRequests } from '@/lib/api';
 import { loginDestination } from '@/lib/identity-navigation';
 import { Field, control } from '../common/fields';
 import { LoginScene } from './login-scene';
@@ -45,7 +45,11 @@ export function useIdentity() {
   return value;
 }
 
-function announceIdentityChange() {
+/**
+ * 切换租户后必须让整个工作空间重新认身份：清掉按租户缓存的工作区页签，
+ * 并广播一次身份变更。导出给 17.1.1.1 租户列表复用，避免两处各写一份而其中一份漏掉。
+ */
+export function announceIdentityChange() {
   try {
     window.localStorage.removeItem('starcon.workspace.tabs.v2');
     window.localStorage.setItem('starcon.identity.changed', crypto.randomUUID());
@@ -61,6 +65,7 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Access | null>(null);
   const [memberships, setMemberships] = useState<LoginResult['memberships']>([]);
   const [choices, setChoices] = useState<LoginResult['memberships']>([]);
+  const [confirmingWorkspace, setConfirmingWorkspace] = useState(false);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -87,6 +92,8 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
       })
       .finally(() => setReady(true));
     const expire = () => {
+      blockWorkspaceRequests(false);
+      setConfirmingWorkspace(false);
       setSession(null);
       setMemberships([]);
       setEpoch((n) => n + 1);
@@ -133,6 +140,66 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
     }
   }, [ready, session, error, pathname, router]);
+  const confirmWorkspace = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      await reload();
+      setEpoch((n) => n + 1);
+      setConfirmingWorkspace(false);
+      blockWorkspaceRequests(false);
+      router.replace('/');
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        setSession(null);
+        setConfirmingWorkspace(false);
+        blockWorkspaceRequests(false);
+      } else {
+        setError('无法确认当前工作空间，请重试。业务操作已暂停。');
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+  const switchMembership = async (nextMembershipId: string) => {
+    // Close the request gate before React renders so old async callbacks cannot submit writes.
+    blockWorkspaceRequests(true);
+    setConfirmingWorkspace(true);
+    setBusy(true);
+    setError('');
+    setAccountOpen(false);
+    setPendingMembershipId(null);
+    try {
+      await api('auth/switch', 'POST', { membershipId: nextMembershipId });
+    } catch (e) {
+      if (e instanceof ApiError && [400, 401, 403, 404, 409, 422, 429].includes(e.status)) {
+        blockWorkspaceRequests(false);
+        setConfirmingWorkspace(false);
+        setError(e.message);
+        setBusy(false);
+        return;
+      }
+      // Transport and server errors cannot tell us whether the mutation committed.
+    }
+    announceIdentityChange();
+    await confirmWorkspace();
+  };
+  if (confirmingWorkspace)
+    return (
+      <main className="bg-background flex h-dvh items-center justify-center">
+        <div className="max-w-md space-y-4 p-6" aria-busy={busy}>
+          <p role="status">正在确认工作空间</p>
+          {error && (
+            <p role="alert" className="text-destructive text-sm">
+              {error}
+            </p>
+          )}
+          <Button disabled={busy} onClick={() => void confirmWorkspace()}>
+            {busy ? '正在核验…' : '重试核验'}
+          </Button>
+        </div>
+      </main>
+    );
   if (pathname === '/styleguide') return <AppShell>{children}</AppShell>;
   if (!ready)
     return (
@@ -257,26 +324,6 @@ export function IdentityShell({ children }: { children: React.ReactNode }) {
         </div>
       </LoginScene>
     );
-  const switchMembership = async (nextMembershipId: string) => {
-    setBusy(true);
-    setError('');
-    try {
-      await api('auth/switch', 'POST', { membershipId: nextMembershipId });
-      announceIdentityChange();
-      setSession(null);
-      setReady(false);
-      setAccountOpen(false);
-      setPendingMembershipId(null);
-      await reload();
-      setEpoch((n) => n + 1);
-      router.replace('/');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : '切换失败');
-    } finally {
-      setReady(true);
-      setBusy(false);
-    }
-  };
   const owner = session.grants.some(
     (grant) => grant.roleCode === 'OWNER' && grant.scopeMode === 'ALL',
   );

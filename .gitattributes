@@ -17,3 +17,10 @@ yarn.lock linguist-generated=true
 **/dist/** linguist-generated=true
 **/.next/** linguist-generated=true
 **/coverage/** linguist-generated=true
+
+# 并行车道合并：这些是纯追加式生成物，多条车道会同时改到同一批文件，
+# 按「键」（类型名 / OpenAPI 路径 / 模块 ID）求并集，避免人工解冲突。
+# 驱动器由 tools/module-progress/lane.mjs init 注册到 merge.contract-union.driver。
+packages/api-contracts/src/*.ts merge=contract-union
+packages/api-contracts/src/*.openapi.json merge=contract-union
+docs/product/capability-blueprint/module-progress.md merge=contract-union

@@ -104,3 +104,26 @@
   `sync_failure` 幂等键同源，重放去重口径要保持一致。
 - 调度器本身（真正按 cron 拉起 `beginRun`）尚未实现；当前只有可被调度的端点与不变量。
 - `sync_run` 的日志保留期（2.4.1.2「超期只保留聚合统计」）未做，需要定时归档作业。
+---
+
+## 后续：本次合并的去重处理（2026-10-07）
+
+本文档提出的「提交门控游标推进」设计成立，但**本分支的实现在合并时被去重移除**。
+
+原因：本分支与 `main` 已交付的 2.4（`V2__sync_runtime_and_platform_operations.sql`）
+是同能力的两套并行实现，三层全部冲突——
+
+| 层 | `main`（已交付 2.4） | 本分支 |
+| --- | --- | --- |
+| Flyway | `V2__sync_runtime_and_platform_operations.sql` | `V2__channel_sync_cursor_run_failure.sql`（版本号重复） |
+| 表 | `sync_cursor` / `sync_run` / `sync_failure` | 同样三张表（完全重复） |
+| API | `/channel/sync-cursors|sync-runs|sync-failures` | `/channel/sync/runs|tasks|failures`（形状不同） |
+| OpenAPI | `SyncCursorView` / `SyncRunView` / `SyncFailureView` | 同名（schema 命名空间撞车，弄坏 `main` 前端） |
+
+合并时已移除本分支的 `ChannelSyncController` / `ChannelSyncModels` /
+`ChannelSyncService` / `V2__channel_sync_cursor_run_failure.sql` /
+`ChannelSyncIntegrationTest`，仅保留本文档。
+
+**本文档中的设计价值需单独落地**：游标与运行终态同事务提交、`guard_cursor_direction`
+触发器防倒退写、人工回退只走可审计的 `rewindCursor` 端点——这套三重保证比 `main`
+现有的「游标仅 SUCCEEDED 推进」更严谨，将以新迁移落到 `main` 现有同步表上。

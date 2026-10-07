@@ -1,106 +1,57 @@
 # 关键数据流
 
-> 配套 `overview.md`，逐流画清。本文档随功能上线持续补充。
+> 更新：2026-09-30。本文描述目标设计，不代表平台适配器、消息设施或交易服务已上线。
+> 以 [ADR-0004](../decisions/0004-java-spring-boot-microservices.md) 和 [V2 数据设计](../../db/schemas/v2/README.md) 为准。
 
-## 1. 订单接入流（Amazon SP-API 为例）
+## 1. 事实归属与传递
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Seller as 商家后台
-    participant AMZ as Amazon SP-API
-    participant Webhook as K8s Ingress
-    participant Con as platform-connectors/amazon
-    participant Q as Kafka (order.created.v1)
-    participant Ord as modules/order
-    participant Inv as modules/inventory
+channel 负责外部适配与投递，trade 负责订单和履约协调，warehouse 负责数量账和实发事实，finance 负责资金与价值账。各服务独立数据库，只通过授权 API / 事件交换数据，不共享业务表。
 
-    Seller->>AMZ: 下单
-    AMZ->>Webhook: POST /webhooks/amazon/order-created
-    Webhook->>Con: 验签 + 反规范化
-    Con->>Con: Amazon Order → Unified OrderDTO
-    Con->>Q: produce (tenant_id, payload)
-    Q->>Ord: 消费事件
-    Ord->>Ord: 落库 + 去重 (idempotency_key)
-    Ord->>Inv: RPC 预占库存
-    Inv-->>Ord: reserved
-    Ord->>Q: emit order.reserved.v1
-```
+业务事实与 outbox 在产生方同一本地事务提交；消费方 inbox 去重与本地业务变更同事务提交。初期可用 relay + 内部 HTTP，不把 Kafka、Flink 或 ClickHouse 作为前置条件。不承诺跨库事务或 exactly-once。
 
-幂等性：每条消息带 `idempotency_key`（Amazon 原生 order_id），下游表 `UNIQUE(tenant_id, idempotency_key)` 保证不重复消费。
+事件去重使用租户、来源和事件标识；订单来源唯一键另外包含平台、店铺与外部订单号。订单号不能充当所有更新事件的去重键，否则后续取消/变更会被误丢。增量事实逐条消费；完整快照才允许按版本淘汰旧值，缺口须补取或对账。
 
-## 2. 库存同步流
+## 2. 订单接入与预占
 
 ```mermaid
 sequenceDiagram
-    autonumber
-    participant WMS as 仓库 WMS
-    participant API as apps/api
-    participant Inv as modules/inventory
-    participant DB as Postgres
-    participant Q as Kafka (inventory.changed.v1)
-    participant Ord as modules/order
-
-    WMS->>API: POST /webhooks/wms/stock-changed
-    API->>Inv: 调 WMS 适配器
-    Inv->>DB: 写库存变更日志（append-only）
-    Inv->>DB: 更新 inventory_levels (with version)
-    Inv->>Q: emit inventory.changed.v1
-    Q->>Ord: 触发关联订单状态更新
+    participant Ext as 外部平台
+    participant Ch as channel
+    participant Tr as trade
+    participant Wh as warehouse
+    Ext->>Ch: 通知或轮询结果（按平台能力）
+    Ch->>Ch: 验证来源、解析店铺租户、持久化接收记录
+    Ch->>Tr: 可靠投递标准化订单
+    Tr->>Tr: 去重、冻结快照、持久化履约需求
+    Tr->>Wh: 授权的预占请求（稳定业务标识）
+    Wh->>Wh: 全部行原子分配、占用流水与结果
+    Wh-->>Tr: 预占结果
+    Tr->>Tr: 更新履约进度；丢响应则核验
 ```
 
-乐观锁：每次库存写带 `version`，DB 层 `UPDATE ... WHERE version = $1`，失败重试。
+具体平台接入机制由适配器另行验证，本文不假定存在某个订单 Webhook。租户从已登记店铺关系解析，不信任外部 tenant header。映射缺失进入待映射，不按商品名称猜 SKU。
 
-## 3. 履约出库流
+## 3. 出库、取消与外部回写
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Ord as modules/order
-    participant Ful as modules/fulfillment
-    participant Ship as modules/shipment
-    participant DHL as DHL API
-    participant Q as Kafka
+warehouse 接受作业后承诺分配，停止普通 TTL 释放；确认实发时，同事务消费预占、扣减在手、记录流水与待发事件。trade 消费实发事实更新已发数量；channel 根据平台能力回传物流。面单创建不等于实发，回传失败不撤销实发。
 
-    Ord->>Ful: 触发履约 (RPC)
-    Ful->>Ful: 拣货单生成（按仓库分单）
-    Ful->>Ship: 申请运单 (DHL/FedEx/...)
-    Ship->>DHL: create shipment
-    DHL-->>Ship: tracking_number, label_url
-    Ship->>Q: emit shipment.created.v1
-    Ship->>Ful: 回调，附 tracking_number
-    Ful->>Q: emit fulfillment.shipped.v1
-```
+取消由 trade 协调 warehouse 停止未发货作业并释放对应数量；取消与实发在仓库侧裁决。已发数量转售后，未知结果先查询，不靠再次提交新命令猜测。取消终态阻止迟到预占复活。
 
-## 4. 财务结算流
+外部调用由持久化操作记录驱动，保留业务幂等标识、尝试记录与平台结果。超时进入待核验；若平台不支持查询或幂等且无法确认是否生效，转人工，禁止盲重发。
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Ship as modules/shipment
-    participant Fin as modules/finance
-    participant FX as packages/money (汇率服务)
-    participant DB as Postgres
-    participant Q as Kafka (finance.recorded.v1)
+## 4. 库存回写、退货与价值账
 
-    Ship->>Fin: 履约完成事件
-    Fin->>FX: 拉取结算日汇率（USD → CNY）
-    FX-->>Fin: rate, source, timestamp
-    Fin->>DB: 写应收记录（amount, currency, base_currency, rate）
-    Fin->>Q: emit finance.recorded.v1
-```
+- 可售量由 warehouse 统一计算；channel 消费带版本的完整可售快照并跟踪回写结果。旧快照不得覆盖新快照，回写成功不保证平台库存实时一致，需要定期核对。
+- 售后授权由 trade 拥有；warehouse 实收进入待检，再按质检处置。退货入库不隐含退款成功。
+- finance 消费出入库、结算及支付事实，按已确认业务政策形成价值记录；发货不是统一收入确认规则，汇率时点也不统一硬编码为结算日。
+- 支付/退款未知结果仍保留占用，查证完成或确认未支付且执行终止后才收敛。资金事实由 finance 唯一确认，外部平台退款纳入对账。
 
-汇率来源：ECB / 央行公开数据 + 内部加权平均，每日快照存 `fx_rates` 表。
+## 5. 分析与跨租户汇总
 
-## 5. 跨租户数据汇总流（BI）
+reporting 消费授权范围内的事件构建可重建投影，展示数据截止时间与延迟，不写回业务事实。租户用户查询始终受目标租户授权约束；父级不能自动读全部后代，平台运营身份也不默认获得客户业务明细。
 
-```mermaid
-graph LR
-    A["apps/api<br/>(业务库写入)"] -->|"binlog / outbox"| B["Kafka<br/>(cdc topic)"]
-    B --> C["services/data-pipeline<br/>(Debezium + Flink)"]
-    C --> D["ClickHouse<br/>(BI 库)"]
-    D --> E["apps/admin<br/>(BI 报表)"]
-    D --> F["apps/web<br/>(租户自查看)"]
-```
+集团汇总需逐目标租户验证显式访问权，并在查询/导出时重新核验；撤权后不可继续从旧投影暴露数据。业务事实与脱敏分析用途分开，原始地址与凭据不得随着通用事件无差别扩散。
 
-为避免 ClickHouse 写入影响业务库，采用 **outbox 模式**：业务写入同事务下写 outbox 表，独立 worker 把 outbox 投递到 Kafka，下游异步消费。
+## 6. 验收入口
+
+订单、库存、取消、退货的用户流程与故障验收见 [D3–D4 闭环 PRD](../product/prds/order-inventory-fulfillment.md)。技术实现仍需证明本地事务失败无半笔账、重复/乱序/丢响应可恢复，以及真实 PostgreSQL 下的三项租户隔离断言。

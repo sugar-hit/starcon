@@ -66,8 +66,15 @@ export function Editor({
     </Modal>
   );
 }
+/**
+ * SKU 与资料记录沿用四值域；SPU 自 3.1.1.3 起走五态生命周期，两者共用同一张标签表。
+ */
 export const statuses: Record<string, string> = {
   DRAFT: '草稿',
+  PENDING_LISTING: '待上架',
+  ON_SALE: '在售',
+  SUSPENDED: '停售',
+  DISCONTINUED: '停产',
   ACTIVE: '启用',
   INACTIVE: '停用',
   ARCHIVED: '已归档',

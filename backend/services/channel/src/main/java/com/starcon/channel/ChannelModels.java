@@ -1,6 +1,7 @@
 package com.starcon.channel;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -46,15 +47,31 @@ public final class ChannelModels {
       int currencyScale,
       boolean vatRequired) {}
 
-  /** 2.1.2.1 平台枚举映射：平台枚举 → 内部枚举。映射缺失必须显式暴露，不落兜底。 */
+  /**
+   * 2.1.2.1 平台枚举映射：平台枚举 → 内部枚举。映射缺失必须显式暴露，不落兜底。
+   *
+   * <p>一条记录是"平台默认"还是"本租户覆盖"由 {@code source} 说清：平台默认来自全局码表
+   * {@code platform_enum_mapping}，所有租户一致且不可改写；租户覆盖来自
+   * {@code platform_enum_override}，只有本租户可见可改。前端据此决定能不能删。
+   * {@code id} 是这条记录来源行的 id——平台默认行删不掉，它的 id 只能用于定位。
+   */
   public record EnumMappingView(
-      UUID id, String platformCode, String enumKind, String externalValue, String internalValue) {}
+      UUID id,
+      String platformCode,
+      String enumKind,
+      String externalValue,
+      String internalValue,
+      /** {@code PLATFORM} = 平台默认（全局只读）；{@code TENANT} = 本租户覆盖。 */
+      String source) {}
 
-  public record EnumMappingInput(
-      @NotBlank String platformCode,
-      @NotBlank String enumKind,
-      @NotBlank String externalValue,
-      @NotBlank String internalValue) {}
+  /**
+   * 2.1.2.1 登记租户覆盖。平台由路径上的 {@code platformCode} 决定，不在 body 里重复传，
+   * 避免两处写不一致。
+   */
+  public record EnumOverrideInput(
+      @NotBlank @Size(max = 64) String enumKind,
+      @NotBlank @Size(max = 128) String externalValue,
+      @NotBlank @Size(max = 64) String internalValue) {}
 
   // ---- 2.2 授权与连接 ----
 
@@ -94,6 +111,87 @@ public final class ChannelModels {
       @NotBlank String platformCode,
       @NotBlank @Pattern(regexp = ".+@.+\\..+|^[0-9]{6,}$", message = "平台账号格式不正确") String authorizedAccount,
       String displayName) {}
+
+  // ---- 2.2.1.2 授权向导 ----
+
+  /**
+   * 2.2.1.2 第 1、2、3 步：发起授权。
+   *
+   * <p>{@code loginHint} 就是向导第 2 步「选账号」的落点：有的平台用它预选账号，有的平台
+   * （eBay）用 {@code prompt=select_account} 强制在授权页重新选，适配器按平台协议处理。
+   *
+   * <p>{@code scopes} 留空表示用平台配置的默认范围。{@code idempotencyKey} 必填：重复提交
+   * 同一个键会拿回同一个会话，不会重复跳转、也不会产生第二条会话。
+   */
+  public record OAuthStartInput(
+      @NotBlank String platformCode,
+      @Size(max = 255) String loginHint,
+      @Size(max = 2000) String scopes,
+      @NotBlank @Size(max = 128) String idempotencyKey) {}
+
+  /**
+   * 2.2.1.2 第 3 步结果：授权跳转地址。
+   *
+   * <p>{@code authorizeUrl} 是完整可用的跳转地址（含 state 与 PKCE challenge），前端只需要
+   * {@code window.location.href = authorizeUrl}。令牌与 client_secret 不会出现在这里。
+   */
+  public record OAuthStartView(
+      UUID sessionId,
+      String platformCode,
+      String platformName,
+      String authorizeUrl,
+      String requestedScopes,
+      Instant expiresAt,
+      String status) {}
+
+  /**
+   * 2.2.1.2 第 4 步：授权会话状态。
+   *
+   * <p>前端在跳转后回到页面时轮询它，判断是"还在等用户授权""平台拒绝了"还是"已拿到令牌、
+   * 可以进入第 5 步"。{@code failureCode} / {@code failureMessage} 只在 FAILED 时有值，
+   * 且是可直接展示给用户的原因（凭据错、权限不足、店铺已被其他租户绑定）。
+   */
+  public record OAuthSessionView(
+      UUID id,
+      String platformCode,
+      String platformName,
+      String status,
+      @Schema(nullable = true) String failureCode,
+      String failureMessage,
+      @Schema(nullable = true) String authorizedAccount,
+      String authorizedAccountName,
+      String requestedScopes,
+      String grantedScopes,
+      @Schema(nullable = true) UUID connectionId,
+      @Schema(nullable = true) UUID credentialId,
+      int shopCandidateCount,
+      int selectedShopCount,
+      @Schema(nullable = true) Instant expiresAt,
+      @Schema(nullable = true) Instant completedAt) {}
+
+  /** 2.2.1.2 第 5 步：账号下的店铺候选，用户勾选要纳管的那些。 */
+  public record OAuthShopCandidateView(
+      UUID id, String externalShopId, String shopName, String marketplaceCode, boolean selected) {}
+
+  /**
+   * 2.2.1.2 第 5、6 步输入：确认店铺范围并完成。
+   *
+   * <p>{@code shopIds} 为空表示"全部候选都要"，但必须至少确认一个店铺：授权成功却一个店铺
+   * 都不纳管，会留下一条永远不参与同步的空连接，比直接失败更难排查。
+   */
+  public record OAuthConfirmInput(
+      @Schema(nullable = true) List<UUID> shopIds,
+      @Size(max = 100) String shopCodePrefix,
+      @NotBlank @Size(max = 128) String idempotencyKey) {}
+
+  /**
+   * 2.2.1.2 第 6 步结果。
+   *
+   * <p>{@code shopIds} 指向新建的 2.3.1.1 店铺档案，前端据此跳转"店铺配置"。
+   * {@code connectionId} / {@code credentialId} 让页面能立刻回连到 2.2.1.1 连接列表。
+   */
+  public record OAuthCompletedView(
+      UUID sessionId, UUID connectionId, UUID credentialId, List<UUID> shopIds, int shopCount, String nextRoute) {}
 
   /**
    * 2.2.1.3 凭据轮换：调用方只提交密钥管理器写入后的引用，绝不接受明文令牌。
@@ -174,4 +272,164 @@ public final class ChannelModels {
 
   /** 2.3.2.2 负责人与数据范围：负责人用于业绩归属，可见性由 17 的数据范围单独控制。 */
   public record ShopOwnerTransferInput(@NotNull UUID newOwnerId, @NotNull UUID departmentId) {}
+
+  // ---- 2.4 同步运行 ----
+
+  /**
+   * 2.4.1.1 同步任务。
+   *
+   * <p>粒度固定为（连接, 站点, 资源类型, 分区）——不允许整店一把梭，否则部分失败无法续传。
+   */
+  public record SyncCursorView(
+      UUID id,
+      UUID connectionId,
+      String connectionAccount,
+      String platformCode,
+      @Schema(nullable = true) String marketplaceCode,
+      String resourceType,
+      String partitionKey,
+      String cursorValue,
+      String status,
+      int consecutiveFailures,
+      @Schema(nullable = true) String lastRunStatus,
+      int openFailures,
+      @Schema(nullable = true) Instant lastSuccessAt,
+      @Schema(nullable = true) Instant lastFailureAt,
+      long version) {}
+
+  public record SyncCursorInput(
+      @NotNull UUID connectionId,
+      @Schema(nullable = true) UUID marketplaceId,
+      @NotBlank String resourceType,
+      @Pattern(regexp = "[A-Za-z0-9_.:-]{0,64}") String partitionKey) {}
+
+  /** 2.4.1.2 运行日志。已结束的运行不可修改，只能创建新的重放运行。 */
+  public record SyncRunView(
+      UUID id,
+      UUID cursorId,
+      String platformCode,
+      @Schema(nullable = true) String marketplaceCode,
+      String resourceType,
+      String partitionKey,
+      String triggerSource,
+      String status,
+      Instant startedAt,
+      @Schema(nullable = true) Instant finishedAt,
+      int fetchedCount,
+      int writtenCount,
+      int skippedCount,
+      int failedCount,
+      String cursorAfter,
+      @Schema(nullable = true) Integer durationMs) {}
+
+  public record SyncRunResult(
+      String status,
+      int fetchedCount,
+      int writtenCount,
+      int skippedCount,
+      String cursorAfter,
+      @Schema(nullable = true) Integer durationMs) {}
+
+  /** 2.4.1.3 回退目标游标值。 */
+  public record CursorRewindInput(@NotBlank String cursorValue) {}
+
+  /** 结束一次运行：结果计数 + 本次失败明细。 */
+  public record SyncRunCompletionInput(
+      @NotNull @Valid SyncRunResult result, List<@Valid SyncFailureInput> failures) {}
+
+  /**
+   * 2.4.2.1 失败记录。
+   *
+   * <p>{@code externalKey} 是外部系统主键，重放去重靠它——同一 external_key 在同一游标下
+   * 只会有一条失败记录，因此重复重放不会产生第二张订单。
+   */
+  public record SyncFailureInput(
+      @NotBlank @Size(max = 200) String externalKey,
+      @NotBlank String resourceType,
+      @NotNull FailureReason reason,
+      @Size(max = 2000) String detail,
+      @Size(max = 64) String payloadDigest,
+      @Size(max = 500) String lastError) {}
+
+  public enum FailureReason {
+    /** 授权失效会导致持续漏单，必须升级为工作台待办。 */
+    AUTHORIZATION_EXPIRED,
+    FIELD_PARSE_FAILED,
+    MAPPING_MISSING,
+    RATE_LIMITED,
+    NETWORK_ERROR,
+    PLATFORM_ERROR
+  }
+
+  public record SyncFailureView(
+      UUID id,
+      UUID cursorId,
+      String platformCode,
+      @Schema(nullable = true) String marketplaceCode,
+      String externalKey,
+      String resourceType,
+      String reason,
+      String detail,
+      String payloadDigest,
+      int attempts,
+      String status,
+      String lastError,
+      Instant occurredAt) {}
+
+  /** 2.4.2.1 失败原因分布。 */
+  public record SyncFailureSummary(String reason, long total, @Schema(nullable = true) Instant oldest) {}
+
+  // ---- 2.5 平台回写 ----
+
+  /**
+   * 2.5.1.1 回写任务。
+   *
+   * <p>状态 UNKNOWN 表示"请求已发出但没收到明确结果"，它不是失败：
+   * 必须先核验平台实际状态再决定重发，否则会造成重复发货或库存错扣。
+   */
+  public record PlatformOperationView(
+      UUID id,
+      UUID shopId,
+      String shopName,
+      String platformCode,
+      @Schema(nullable = true) String marketplaceCode,
+      String operation,
+      String idempotencyKey,
+      String payload,
+      String status,
+      String platformRequestId,
+      String verification,
+      @Schema(nullable = true) Instant verifiedAt,
+      int attempts,
+      String lastError,
+      Instant occurredAt) {}
+
+  public record PlatformOperationInput(
+      @NotNull UUID shopId,
+      @Schema(nullable = true) UUID marketplaceId,
+      @NotNull OperationKind operation,
+      /** 业务幂等键：重发同一条回写不会产生第二次平台侧动作。 */
+      @NotBlank @Size(max = 128) String idempotencyKey,
+      @Size(max = 20000) String payload) {}
+
+  public enum OperationKind {
+    PUBLISH,
+    UPDATE_PRICE,
+    UPDATE_STOCK,
+    SHIP_UPDATE,
+    CANCEL_ORDER
+  }
+
+  /** 2.5.1.2 核验结论。 */
+  public enum Verification {
+    CONFIRMED_APPLIED,
+    CONFIRMED_NOT_APPLIED,
+    STILL_UNKNOWN
+  }
+
+  public record OperationAckInput(@Size(max = 128) String platformRequestId) {}
+
+  public record OperationFailInput(@NotBlank @Size(max = 500) String reason) {}
+
+  public record VerificationInput(@NotNull Verification verification) {}
 }

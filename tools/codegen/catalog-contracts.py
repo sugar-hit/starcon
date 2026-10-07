@@ -11,7 +11,7 @@ parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--spec-dir',type=Path,help='Spring OpenAPI snapshots exported by the service contract tests')
 args=parser.parse_args()
 all_schemas={}
-for service,port in [('identity',8081),('catalog',8082),('channel',8083)]:
+for service,port in [('identity',8081),('catalog',8082),('channel',8083),('warehouse',8084)]:
     if args.spec_dir:
         spec=json.loads((args.spec_dir/f'{service}.openapi.json').read_text())
     else:

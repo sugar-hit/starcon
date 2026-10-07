@@ -175,105 +175,12 @@
         }
       }
     },
-    "/channel/sync/runs": {
-      "get": {
-        "tags": [
-          "channel-sync-controller"
-        ],
-        "operationId": "runs",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "cursorId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SyncRunView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
+    "/channel/sync-runs/{id}/resolve": {
       "post": {
         "tags": [
-          "channel-sync-controller"
+          "sync-controller"
         ],
-        "operationId": "runStart",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SyncRunInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/sync/runs/{id}/fail": {
-      "post": {
-        "tags": [
-          "channel-sync-controller"
-        ],
-        "operationId": "runFail",
+        "operationId": "runResolve",
         "parameters": [
           {
             "name": "Authorization",
@@ -294,11 +201,11 @@
             }
           },
           {
-            "name": "error",
+            "name": "succeeded",
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "boolean"
             }
           }
         ],
@@ -309,12 +216,12 @@
         }
       }
     },
-    "/channel/sync/runs/{id}/commit": {
+    "/channel/sync-runs/{id}/complete": {
       "post": {
         "tags": [
-          "channel-sync-controller"
+          "sync-controller"
         ],
-        "operationId": "runCommit",
+        "operationId": "runComplete",
         "parameters": [
           {
             "name": "Authorization",
@@ -339,7 +246,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SyncRunCommit"
+                "$ref": "#/components/schemas/SyncRunCompletionInput"
               }
             }
           },
@@ -347,114 +254,15 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/SyncRunView"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
     },
-    "/channel/sync/failures": {
-      "get": {
-        "tags": [
-          "channel-sync-controller"
-        ],
-        "operationId": "failures",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "reason",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "openOnly",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": true
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SyncFailureView"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
+    "/channel/sync-failures/{id}/replay": {
       "post": {
         "tags": [
-          "channel-sync-controller"
-        ],
-        "operationId": "failureRecord",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SyncFailureRecordInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/channel/sync/failures/{id}/replay": {
-      "post": {
-        "tags": [
-          "channel-sync-controller"
+          "sync-controller"
         ],
         "operationId": "failureReplay",
         "parameters": [
@@ -477,11 +285,84 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/sync-cursors": {
+      "get": {
+        "tags": [
+          "sync-controller"
+        ],
+        "operationId": "cursors",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "connectionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SyncCursorView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "sync-controller"
+        ],
+        "operationId": "cursorCreate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SyncFailureReplayInput"
+                "$ref": "#/components/schemas/SyncCursorInput"
               }
             }
           },
@@ -493,7 +374,8 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/SyncFailureView"
+                  "type": "string",
+                  "format": "uuid"
                 }
               }
             }
@@ -501,10 +383,51 @@
         }
       }
     },
-    "/channel/sync/cursors/{id}/rewind": {
+    "/channel/sync-cursors/{id}/trigger": {
       "post": {
         "tags": [
-          "channel-sync-controller"
+          "sync-controller"
+        ],
+        "operationId": "cursorTrigger",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/sync-cursors/{id}/rewind": {
+      "post": {
+        "tags": [
+          "sync-controller"
         ],
         "operationId": "cursorRewind",
         "parameters": [
@@ -531,12 +454,78 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SyncCursorRewindInput"
+                "$ref": "#/components/schemas/CursorRewindInput"
               }
             }
           },
           "required": true
         },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/sync-cursors/{id}/resume": {
+      "post": {
+        "tags": [
+          "sync-controller"
+        ],
+        "operationId": "cursorResume",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/sync-cursors/{id}/pause": {
+      "post": {
+        "tags": [
+          "sync-controller"
+        ],
+        "operationId": "cursorPause",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -713,6 +702,525 @@
         }
       }
     },
+    "/channel/platforms/{platformCode}/enums": {
+      "get": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "enumMappings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnumMappingView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "enumOverrideCreate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnumOverrideInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/platform-operations": {
+      "get": {
+        "tags": [
+          "sync-controller"
+        ],
+        "operationId": "operations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformOperationView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "sync-controller"
+        ],
+        "operationId": "operationEnqueue",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformOperationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/platform-operations/{id}/verify": {
+      "post": {
+        "tags": [
+          "sync-controller"
+        ],
+        "operationId": "operationVerify",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerificationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/platform-operations/{id}/unknown": {
+      "post": {
+        "tags": [
+          "sync-controller"
+        ],
+        "operationId": "operationUnknown",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperationFailInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/platform-operations/{id}/succeed": {
+      "post": {
+        "tags": [
+          "sync-controller"
+        ],
+        "operationId": "operationSucceed",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperationAckInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/platform-operations/{id}/start": {
+      "post": {
+        "tags": [
+          "sync-controller"
+        ],
+        "operationId": "operationStart",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/platform-operations/{id}/fail": {
+      "post": {
+        "tags": [
+          "sync-controller"
+        ],
+        "operationId": "operationFail",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperationFailInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/oauth/sessions": {
+      "post": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "oauthStart",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthStartInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthStartView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/oauth/sessions/{id}/confirm": {
+      "post": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "oauthConfirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthConfirmInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthCompletedView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/oauth/sessions/{id}/cancel": {
+      "post": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "oauthCancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/channel/connections": {
       "get": {
         "tags": [
@@ -838,12 +1346,12 @@
         }
       }
     },
-    "/channel/sync/tasks": {
+    "/channel/sync-runs": {
       "get": {
         "tags": [
-          "channel-sync-controller"
+          "sync-controller"
         ],
-        "operationId": "tasks",
+        "operationId": "runs",
         "parameters": [
           {
             "name": "Authorization",
@@ -855,12 +1363,22 @@
             }
           },
           {
-            "name": "resourceType",
+            "name": "cursorId",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string",
-              "default": ""
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
             }
           }
         ],
@@ -872,7 +1390,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/SyncCursorView"
+                    "$ref": "#/components/schemas/SyncRunView"
                   }
                 }
               }
@@ -881,12 +1399,64 @@
         }
       }
     },
-    "/channel/sync/failures/clusters": {
+    "/channel/sync-failures": {
       "get": {
         "tags": [
-          "channel-sync-controller"
+          "sync-controller"
         ],
-        "operationId": "failureClusters",
+        "operationId": "failures",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SyncFailureView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/sync-failures/summary": {
+      "get": {
+        "tags": [
+          "sync-controller"
+        ],
+        "operationId": "failureSummary",
         "parameters": [
           {
             "name": "Authorization",
@@ -906,8 +1476,48 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/FailureClusterView"
+                    "$ref": "#/components/schemas/SyncFailureSummary"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/sync-cursors/{id}": {
+      "get": {
+        "tags": [
+          "sync-controller"
+        ],
+        "operationId": "cursor",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncCursorView"
                 }
               }
             }
@@ -949,12 +1559,12 @@
         }
       }
     },
-    "/channel/platforms/{platformCode}/enums": {
+    "/channel/oauth/sessions/{id}": {
       "get": {
         "tags": [
           "channel-controller"
         ],
-        "operationId": "enumMappings",
+        "operationId": "oauthSession",
         "parameters": [
           {
             "name": "Authorization",
@@ -966,20 +1576,52 @@
             }
           },
           {
-            "name": "platformCode",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
-          },
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthSessionView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/oauth/sessions/{id}/shops": {
+      "get": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "oauthShops",
+        "parameters": [
           {
-            "name": "kind",
-            "in": "query",
+            "name": "Authorization",
+            "in": "header",
             "required": false,
             "schema": {
               "type": "string",
               "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -991,8 +1633,71 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/EnumMappingView"
+                    "$ref": "#/components/schemas/OAuthShopCandidateView"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/oauth/callback": {
+      "get": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "oauthCallback",
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "application/json"
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "errorDescription",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
                 }
               }
             }
@@ -1125,6 +1830,47 @@
           }
         }
       }
+    },
+    "/channel/platforms/{platformCode}/enums/{id}": {
+      "delete": {
+        "tags": [
+          "channel-controller"
+        ],
+        "operationId": "enumOverrideDelete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1197,10 +1943,99 @@
           }
         }
       },
-      "SyncRunInput": {
+      "SyncFailureInput": {
+        "required": [
+          "externalKey",
+          "reason",
+          "resourceType"
+        ],
+        "type": "object",
+        "properties": {
+          "externalKey": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "resourceType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "AUTHORIZATION_EXPIRED",
+              "FIELD_PARSE_FAILED",
+              "MAPPING_MISSING",
+              "RATE_LIMITED",
+              "NETWORK_ERROR",
+              "PLATFORM_ERROR"
+            ]
+          },
+          "detail": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "payloadDigest": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "lastError": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "SyncRunCompletionInput": {
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "result": {
+            "$ref": "#/components/schemas/SyncRunResult"
+          },
+          "failures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SyncFailureInput"
+            }
+          }
+        }
+      },
+      "SyncRunResult": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "fetchedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "writtenCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cursorAfter": {
+            "type": "string"
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "SyncCursorInput": {
         "required": [
           "connectionId",
-          "marketplaceId",
           "resourceType"
         ],
         "type": "object",
@@ -1211,306 +2046,27 @@
           },
           "marketplaceId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "nullable": true
           },
           "resourceType": {
-            "type": "string",
-            "enum": [
-              "ORDER",
-              "LISTING",
-              "INVENTORY",
-              "SETTLEMENT"
-            ]
-          },
-          "partitionKey": {
-            "type": "string"
-          },
-          "triggerKind": {
-            "pattern": "SCHEDULED|MANUAL|RESUME|ROLLBACK_REPLAY",
-            "type": "string"
-          },
-          "from": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "externalMarkerFrom": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "SyncRunCommit": {
-        "required": [
-          "status"
-        ],
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string"
-          },
-          "fetchedCount": {
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32"
-          },
-          "writtenCount": {
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32"
-          },
-          "updatedCount": {
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32"
-          },
-          "skippedCount": {
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32"
-          },
-          "warningCount": {
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32"
-          },
-          "errorCount": {
-            "minimum": 0,
-            "type": "integer",
-            "format": "int32"
-          },
-          "errorMessage": {
-            "type": "string"
-          },
-          "cursorValue": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "externalMarkerTo": {
-            "type": "string"
-          }
-        }
-      },
-      "SyncRunView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "task": {
-            "$ref": "#/components/schemas/SyncTaskKey"
-          },
-          "triggerKind": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "startedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "finishedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "durationMs": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "fetchedCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "writtenCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "updatedCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skippedCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "warningCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "errorCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "errorMessage": {
-            "type": "string"
-          },
-          "cursorBefore": {
-            "$ref": "#/components/schemas/SyncWatermark"
-          },
-          "cursorAfter": {
-            "$ref": "#/components/schemas/SyncWatermark"
-          },
-          "openFailureCount": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "SyncTaskKey": {
-        "type": "object",
-        "properties": {
-          "connectionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "marketplaceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "resourceType": {
-            "type": "string",
-            "enum": [
-              "ORDER",
-              "LISTING",
-              "INVENTORY",
-              "SETTLEMENT"
-            ]
-          },
-          "partitionKey": {
-            "type": "string"
-          }
-        }
-      },
-      "SyncWatermark": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "externalMarker": {
-            "type": "string"
-          }
-        },
-        "nullable": true
-      },
-      "SyncFailureRecordInput": {
-        "required": [
-          "externalRecordKey",
-          "failureReason",
-          "runId"
-        ],
-        "type": "object",
-        "properties": {
-          "runId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "failureReason": {
-            "type": "string",
-            "enum": [
-              "AUTH_EXPIRED",
-              "FIELD_PARSE_FAILED",
-              "MAPPING_MISSING",
-              "RATE_LIMITED",
-              "NETWORK_ERROR",
-              "UNKNOWN"
-            ]
-          },
-          "externalRecordKey": {
-            "maxLength": 255,
-            "minLength": 0,
-            "type": "string"
-          },
-          "externalPayloadRef": {
-            "type": "string"
-          },
-          "lastError": {
-            "type": "string"
-          }
-        }
-      },
-      "SyncFailureReplayInput": {
-        "required": [
-          "outcome"
-        ],
-        "type": "object",
-        "properties": {
-          "outcome": {
             "minLength": 1,
             "type": "string"
           },
-          "lastError": {
-            "type": "string",
-            "nullable": true
-          },
-          "attemptCount": {
-            "minimum": 1,
-            "type": "integer",
-            "format": "int32"
+          "partitionKey": {
+            "pattern": "[A-Za-z0-9_.:-]{0,64}",
+            "type": "string"
           }
         }
       },
-      "SyncFailureView": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "runId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "task": {
-            "$ref": "#/components/schemas/SyncTaskKey"
-          },
-          "failureReason": {
-            "type": "string"
-          },
-          "externalRecordKey": {
-            "type": "string"
-          },
-          "externalPayloadRef": {
-            "type": "string"
-          },
-          "attemptCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "status": {
-            "type": "string"
-          },
-          "escalated": {
-            "type": "boolean"
-          },
-          "lastError": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "resolvedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "SyncCursorRewindInput": {
+      "CursorRewindInput": {
         "required": [
-          "to"
+          "cursorValue"
         ],
         "type": "object",
         "properties": {
-          "to": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "externalMarker": {
+          "cursorValue": {
+            "minLength": 1,
             "type": "string"
           }
         }
@@ -1547,6 +2103,223 @@
           }
         }
       },
+      "EnumOverrideInput": {
+        "required": [
+          "enumKind",
+          "externalValue",
+          "internalValue"
+        ],
+        "type": "object",
+        "properties": {
+          "enumKind": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "externalValue": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "internalValue": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "PlatformOperationInput": {
+        "required": [
+          "idempotencyKey",
+          "operation",
+          "shopId"
+        ],
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "marketplaceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "PUBLISH",
+              "UPDATE_PRICE",
+              "UPDATE_STOCK",
+              "SHIP_UPDATE",
+              "CANCEL_ORDER"
+            ]
+          },
+          "idempotencyKey": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "payload": {
+            "maxLength": 20000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "VerificationInput": {
+        "required": [
+          "verification"
+        ],
+        "type": "object",
+        "properties": {
+          "verification": {
+            "type": "string",
+            "enum": [
+              "CONFIRMED_APPLIED",
+              "CONFIRMED_NOT_APPLIED",
+              "STILL_UNKNOWN"
+            ]
+          }
+        }
+      },
+      "OperationFailInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "OperationAckInput": {
+        "type": "object",
+        "properties": {
+          "platformRequestId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "OAuthStartInput": {
+        "required": [
+          "idempotencyKey",
+          "platformCode"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "loginHint": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          },
+          "scopes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "OAuthStartView": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "authorizeUrl": {
+            "type": "string"
+          },
+          "requestedScopes": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "OAuthConfirmInput": {
+        "required": [
+          "idempotencyKey"
+        ],
+        "type": "object",
+        "properties": {
+          "shopIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          },
+          "shopCodePrefix": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "OAuthCompletedView": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "connectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "credentialId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "shopCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nextRoute": {
+            "type": "string"
+          }
+        }
+      },
       "ConnectionInput": {
         "required": [
           "authorizedAccount",
@@ -1568,6 +2341,137 @@
           }
         }
       },
+      "SyncRunView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cursorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "marketplaceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "resourceType": {
+            "type": "string"
+          },
+          "partitionKey": {
+            "type": "string"
+          },
+          "triggerSource": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "fetchedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "writtenCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cursorAfter": {
+            "type": "string"
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "SyncFailureView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cursorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "marketplaceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalKey": {
+            "type": "string"
+          },
+          "resourceType": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "payloadDigest": {
+            "type": "string"
+          },
+          "attempts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SyncFailureSummary": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "oldest": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
       "SyncCursorView": {
         "type": "object",
         "properties": {
@@ -1575,48 +2479,55 @@
             "type": "string",
             "format": "uuid"
           },
-          "task": {
-            "$ref": "#/components/schemas/SyncTaskKey"
+          "connectionId": {
+            "type": "string",
+            "format": "uuid"
           },
-          "watermark": {
-            "$ref": "#/components/schemas/SyncWatermark"
+          "connectionAccount": {
+            "type": "string"
           },
-          "backlogCount": {
-            "type": "integer",
-            "format": "int32"
+          "platformCode": {
+            "type": "string"
+          },
+          "marketplaceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "resourceType": {
+            "type": "string"
+          },
+          "partitionKey": {
+            "type": "string"
+          },
+          "cursorValue": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
           },
           "consecutiveFailures": {
             "type": "integer",
             "format": "int32"
           },
           "lastRunStatus": {
-            "type": "string"
-          },
-          "lastRunAt": {
             "type": "string",
-            "format": "date-time"
+            "nullable": true
+          },
+          "openFailures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastSuccessAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastFailureAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           },
           "version": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "FailureClusterView": {
-        "type": "object",
-        "properties": {
-          "reason": {
-            "type": "string"
-          },
-          "open": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "escalated": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "total": {
             "type": "integer",
             "format": "int64"
           }
@@ -1800,6 +2711,153 @@
           },
           "internalValue": {
             "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        }
+      },
+      "PlatformOperationView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "marketplaceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "operation": {
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "platformRequestId": {
+            "type": "string"
+          },
+          "verification": {
+            "type": "string"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "attempts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OAuthSessionView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "platformName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "failureCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "failureMessage": {
+            "type": "string"
+          },
+          "authorizedAccount": {
+            "type": "string",
+            "nullable": true
+          },
+          "authorizedAccountName": {
+            "type": "string"
+          },
+          "requestedScopes": {
+            "type": "string"
+          },
+          "grantedScopes": {
+            "type": "string"
+          },
+          "connectionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "credentialId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shopCandidateCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "selectedShopCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "OAuthShopCandidateView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "externalShopId": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "marketplaceCode": {
+            "type": "string"
+          },
+          "selected": {
+            "type": "boolean"
           }
         }
       },
