@@ -110,7 +110,108 @@ Docker MemTotal         11.67 GB
 **峰值仍未采到**，本轮结论维持：证据不足以支持把全局并发从 6 提到 8。
 下一轮应在车道跑验证时补测 Docker 内存峰值，并同时观察 load average 的真实上限。
 
+## 🚨 关键发现：`land` 与 `merge-ready` 之间存在竞态，会把半成品并入集成头
+
+**本轮最重要的问题，比三个模块本身都重要。**
+
+### 现象
+
+14:29:59（本轮 14:20 派发之后 10 分钟），另一个 cron tick（跑 `10,30,50`）执行
+`merge-ready`，产出：
+
+```
+a8d78e5  merge(3.7.2.1): 物理与安全属性
+b56c62d  merge(3.6.1.1): 往来单位档案
+```
+
+但**此刻 3.7.2.1 的 worker 还在跑**（`task_query status=running` 实测确认）。
+
+### 根因
+
+`lane.mjs land` 只校验两件事：**工作区干净** + **有新提交**。
+它**不知道 worker 是否还在跑**。
+
+3.7.2.1 的 worker 在 14:28:59 提交 `2187a02`（V28 = 127 行版本）后调用了 `land`，
+lane 立刻进入可并入状态。worker 随后继续补 DB 约束（未提交），
+而另一个 tick 的 `merge-ready` 在这一窗口内把**当时的 HEAD** sweep 了。
+
+结果：`integration/module-dev` 里的 V28 **只有 2 个 CHECK**，
+worker 正在补的那 96 行（`sku_safety_dangerous_needs_class`、
+`sku_safety_class_needs_dangerous`、`sku_package_dims_positive`、
+`sku_package_net_weight_positive` + 触发器层）**全部没进去**。
+
+**即：台账已标 3.7.2.1「已交付」，但集成头里是一份缺 DB 约束的实现。**
+这正是「台账与代码实际不符」，且它不是人手写错，是编排器竞态。
+
+### 已采取的处置
+
+用 `task_append`（`mode: steered`）向 3.7.2.1 的 worker 发了紧急通知：
+补完约束 → 跑完整验证 → **再次 `land`** → 会话日志注明首次 land 被提前并入。
+不 land 的话这 96 行会永远烂在 worktree 里。
+
+### 与「succeeded ≠ 真做完」的区别
+
+上一轮教训是 **Worker 声称做完但没做完**。
+这一轮相反：**Worker 做得对，但编排器抢在它做完之前就把它的中间态并进了集成头**。
+前者要靠实证复核发现，后者要靠 `land` 的语义修正根治。
+
+### 建议的修复（未自行执行，需改 `lane.mjs`）
+
+1. **`land` 增加 worker 存活校验**：land 时记录 worker session id / 心跳，
+   `merge-ready` 只并入「land 之后心跳已停止」的车道；或
+2. **`land` 增加二次确认**：要求「land 后等待 N 分钟内无新提交且无心跳更新」才可并入；或
+3. **最简单可靠**：`land` 之后 worker 若还要继续干活，就不该 land。
+   把「land」明确定义为**该车道的最终交付**，任务书里已写明，
+   但 Worker 仍在 land 后继续改代码 —— 应该在任务书里补一句
+   「**land 之后禁止再改任何文件；要继续改就先别 land**」。
+
+## 3.6.1.1 的交付复核结论（已实证，非采信报告）
+
+Worker 报告称遇到「改动突然消失」的惊吓场面并归因于「上一轮 Worker 已提交」。
+**这个归因是错的**，用 commit 时间戳证伪：
+
+```
+ec3781a  14:26:16   feat(catalog): 3.6.1.1 party profile
+4262c03  14:26:23   feat(web): /partners workspace
+fe9afc0  14:26:28   chore(contracts): regenerate catalog OpenAPI
+06933bd  14:26:28   docs: ledger + session log
+32c6f1e  14:29:14   docs(session): 反向验证证据
+```
+
+五个提交全部落在 **14:26–14:29**，即本轮派发（14:21）之后 ——
+是 Worker **自己**的提交，它把自己做的事误记成上一轮的功劳，
+并因此一度以为工作丢失而慌乱。代码本身没问题。
+
+独立复核（`git show integration/module-dev:<path>` 直接读并入后的内容）：
+
+| 复核项 | 结果 |
+| --- | --- |
+| V27 CHECK 约束数 | **14** |
+| `ENABLE ROW LEVEL SECURITY` | ✅ |
+| `FORCE ROW LEVEL SECURITY` | ✅ |
+| GRANT | 2 处 |
+| 集成测试 `@Test` 数 | 24 |
+| 租户隔离三断言 | 真实存在，**且带非空前置断言**防「空断言恒真」 |
+| 工作区未提交文件 | 0 |
+| 原子提交数 | 5 |
+
+worker 还做了**两处反向验证**并逐字还原：
+① 把 RLS policy 改成 `USING(true) WITH CHECK(true)` → `Tests run: 24, Failures: 2, Errors: 1` 转红，
+证明隔离靠的是 DB 层 RLS 而不是应用层恰好带了 tenant 条件；
+② 改坏 `requiresReason` → 前端 1 failed / 620 passed 转红。
+
+**这是本轮质量最高的一份交付**，值得作为其他车道的样板。
+
 ## 后续待办
+
+- **[P0] 修 `land`/`merge-ready` 竞态**（见上节 3 条建议），否则每个整点都会把半成品并进集成头
+- **[P0] 确认 3.7.2.1 第二次 land 之后，`integration/module-dev` 的 V28 真的带上了那 4 个 CHECK 与触发器**
+- **[P1] 任务书补一句**「land 之后禁止再改任何文件；要继续改就先别 land」
+- **[P1] 并发上限重新评估**：本轮采到 load **6.57**（14:21 派发瞬间）与 **2.51**（14:31，车道跑验证期间），
+  Docker 常驻容器仅 ~1.3GB / 11.67GB。**压力远低于预期**，
+  因为车道主要吃 JVM 与本机内存、不吃 Docker 配额。
+  但样本只有两轮且未覆盖「三条车道同时跑 next build」的时刻，
+  建议并发上调到 **8** 前先让一轮 6 条车道全部进入验证高峰再采一次。
 
 - 下一轮先跑 `merge-ready`：三条车道若 `land` 成功应能并入（3.7.2.1 / 3.8.1.1 缺口最大，风险最高）
 - 采三条车道跑 `./mvnw verify` 与 `next build` 期间的 **Docker 内存峰值与 load average 峰值**，
