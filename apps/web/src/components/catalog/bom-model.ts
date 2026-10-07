@@ -15,6 +15,9 @@ import type {
   BomVersionPage,
   BomVersionRow,
   BomVersionSummary,
+  BomExplosionRun,
+  BomExplosionRunPage,
+  WarehouseRef,
 } from '../../../../../packages/api-contracts/src/catalog';
 import { ApiError, api } from './api';
 
@@ -525,3 +528,188 @@ export function errorText(error: unknown): string {
 
 /** 版本摘要的兼容导出：类型别名让下拉复用时不必再从契约里引一次。 */
 export type { BomVersionSummary };
+
+// ================================================================ 3.5.2.2 BOM 展开
+
+/**
+ * 展开工作区的输入。与后端 `BomExplosionInput` 逐字对应。
+ */
+export type ExplosionFilter = {
+  /** 按这一版展开（可含草稿：试算是纯计算不是事实）。 */
+  versionId: string | null;
+  /** 按 BOM 展开时，后端取「展开基准时刻生效的那一版」。 */
+  bomId: string | null;
+  outputQuantity: string;
+  /** 仓库过滤。null = 全仓合计。 */
+  warehouseId: string | null;
+  /** 展开基准时刻（ISO）。空 = 此刻。 */
+  asOf: string | null;
+  /** 展开深度上限。空 = 后端默认 10。 */
+  maxDepth: string | null;
+  note: string;
+};
+
+/** 展开深度上限默认值。与后端 `BomExplosionRules.DEFAULT_MAX_DEPTH` 一致。 */
+export const DEFAULT_MAX_DEPTH = 10;
+
+/** 展开深度上限的绝对上限。与后端 `BomExplosionRules.MAX_DEPTH_LIMIT` 一致。 */
+export const MAX_DEPTH_LIMIT = 25;
+
+/**
+ * 3.5.2.2 展开工作区前端模型。
+ *
+ * <p>这个页面最容易出错的三处，**前端一个都不重算**：
+ *
+ * <ul>
+ *   <li><b>缺口不是前端减出来的。</b>`gap = max(0, 需求量 − 可用 − 在途)` 由后端算好，
+ *       在途可抵扣（货权已归本租户、只是没到）。前端若自己减一遍，两边的
+ *       BigDecimal 舍入规则稍有不同就会差 0.000001，而采购单是照着这个数下的。
+ *   <li><b>「子装配」不是「多了一行」。</b>组件 SKU 本身是另一个 BOM 的成品时，
+ *       它的下级料会继续展开，且下级的驱动量是**父行的缺口**而不是需求量 ——
+ *       半成品有库存时只展开缺的那部分。前端只负责把 `isSubAssembly / expanded /
+ *       covered / truncated` 画出来，不自己判断该不该继续。
+ *   <li><b>截断必须显眼。</b>`truncated` 为真的行意味着「这份清单不完整」。
+ *       静默截断是未完成 —— 页面上必须显红，而不是让运营拿一份缺了下级的清单去下采购单。
+ * </ul>
+ */
+
+export function emptyExplosionFilter(outputQuantity = '100'): ExplosionFilter {
+  return {
+    versionId: null,
+    bomId: null,
+    outputQuantity,
+    warehouseId: null,
+    asOf: null,
+    maxDepth: null,
+    note: '',
+  };
+}
+
+/** 展开深度上限的本地预判。权威判定在后端。 */
+export function maxDepthProblem(raw: string | null): string | null {
+  const value = (raw ?? '').trim();
+  // 空 = 不传 = 用后端默认，不是错误。
+  if (!value) return null;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed)) return '展开深度上限必须是整数层数';
+  if (parsed < 1) return '展开深度上限至少是 1';
+  if (parsed > MAX_DEPTH_LIMIT)
+    return `展开深度上限最多 ${MAX_DEPTH_LIMIT} 层（默认 ${DEFAULT_MAX_DEPTH}）：再深的 BOM 树多半是把工艺步骤做成了物料清单，那属于 08 加工单的作业单，展开出来也没人核得对`;
+  return null;
+}
+
+/** 展开请求的前置校验：返回第一条问题（没有则 null）。 */
+export function explosionProblem(filter: ExplosionFilter): string | null {
+  if (!filter.versionId && !filter.bomId)
+    return '请先选一个 BOM 版本（或一个 BOM 让系统按展开基准时刻取生效版本）：两个都不给就无从判断展开哪一份物料清单';
+  const quantity = outputQuantityProblem(filter.outputQuantity);
+  if (quantity) return quantity;
+  return maxDepthProblem(filter.maxDepth);
+}
+
+// ------------------------------------------------------------ 行渲染辅助
+
+/** 树形缩进：每层 2 个空格，第 1 层不加。缩进只是呈现，层级本身由后端的 depth/path 给出。 */
+export function indentOf(depth: number): string {
+  return '　'.repeat(Math.max(0, depth - 1));
+}
+
+/** 行的角色标签：子装配 / 叶子件 / 截断。 */
+export function lineRoleLabel(line: {
+  isSubAssembly: boolean;
+  subBomCode: string | null;
+  subVersionNo: string | null;
+  expanded: boolean;
+  truncated: boolean;
+  covered: boolean;
+}): string {
+  if (line.truncated) return `截断（${line.subBomCode} ${line.subVersionNo} 还有下级没展开）`;
+  if (line.expanded) return `子装配 → ${line.subBomCode} ${line.subVersionNo}`;
+  if (line.isSubAssembly) return '子装配（未展开）';
+  if (line.covered) return '叶子件（库存已覆盖）';
+  return '叶子件';
+}
+
+/** 角色标签的视觉调子。与 {@code @starcon/ui} 的 Badge tone 词表对齐。 */
+export function lineRoleTone(line: {
+  isSubAssembly: boolean;
+  expanded: boolean;
+  truncated: boolean;
+  covered: boolean;
+}): 'success' | 'warning' | 'neutral' {
+  if (line.truncated) return 'warning';
+  if (line.expanded) return 'success';
+  return 'neutral';
+}
+
+/**
+ * 缺口列的展示。**不重算**，只补一句「够/不够」的人话。
+ *
+ * <p>缺口为 0 有两种完全不同的原因，页面上必须能分开：
+ * 「已被库存与在途覆盖」与「需求量本来就是 0」不是一回事。
+ */
+export function gapText(line: { gap: number; covered: boolean; requiredQuantity: number }): string {
+  const gap = String(line.gap);
+  if (line.gap > 0) return `${gap}（要买/要备）`;
+  if (line.requiredQuantity === 0) return `${gap}（需求量是 0）`;
+  return line.covered ? `${gap}（可用 + 在途已够）` : `${gap}`;
+}
+
+/** 结果状态标签。TRUNCATED 必须显眼 —— 它意味着清单不完整。 */
+export function explosionStatusLabel(status: string): string {
+  return status === 'TRUNCATED' ? '不完整（命中深度上限）' : '完整';
+}
+
+export function explosionStatusTone(status: string): 'warning' | 'success' {
+  return status === 'TRUNCATED' ? 'warning' : 'success';
+}
+
+/** 运行记录列表里的一行摘要。 */
+export function runSummary(row: {
+  versionNo: string;
+  outputQuantity: number;
+  lineCount: number;
+  purchaseLineCount: number;
+  totalGap: number;
+  status: string;
+}): string {
+  const head = `${row.versionNo} × ${row.outputQuantity} 个 · ${row.lineCount} 行（采购对象 ${row.purchaseLineCount} 行）· 合计缺口 ${row.totalGap}`;
+  return row.status === 'TRUNCATED' ? `${head} · **不完整**` : head;
+}
+
+// ------------------------------------------------------------ 接口
+
+/** 展开一次。会落一条运行记录（建议要能被 06 的采购单引用）。 */
+export async function explodeBom(filter: ExplosionFilter): Promise<BomExplosionRun> {
+  return api<BomExplosionRun>('catalog/bom-explosions', 'POST', {
+    versionId: filter.versionId,
+    bomId: filter.bomId,
+    outputQuantity: Number(filter.outputQuantity),
+    warehouseId: filter.warehouseId,
+    asOf: filter.asOf,
+    maxDepth: filter.maxDepth === null || filter.maxDepth.trim() === '' ? null : Number(filter.maxDepth),
+    note: filter.note,
+  });
+}
+
+/** 读回一次展开（含完整展开树）。 */
+export async function fetchExplosionRun(id: string): Promise<BomExplosionRun> {
+  return api<BomExplosionRun>(`catalog/bom-explosions/${id}`);
+}
+
+/** 展开运行记录列表（只带摘要，不带展开树）。 */
+export async function fetchExplosionRuns(
+  filter: { bomId?: string | null; skuId?: string | null; page?: number; size?: number } = {},
+): Promise<BomExplosionRunPage> {
+  const query = new URLSearchParams();
+  if (filter.bomId) query.set('bomId', filter.bomId);
+  if (filter.skuId) query.set('skuId', filter.skuId);
+  query.set('page', String(filter.page ?? 0));
+  query.set('size', String(filter.size ?? 20));
+  return api<BomExplosionRunPage>(`catalog/bom-explosions?${query.toString()}`);
+}
+
+/** 仓库下拉（按仓库过滤可用量与在途）。复用 7.1.1.1 的仓库参照。 */
+export async function fetchWarehouses(): Promise<WarehouseRef[]> {
+  return api<WarehouseRef[]>('warehouse/warehouses');
+}

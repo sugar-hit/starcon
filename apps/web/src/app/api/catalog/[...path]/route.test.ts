@@ -784,6 +784,34 @@ it('catalog/boms、catalog/bom-versions 与 catalog/bom-components 的全部路�
   ).toBe(404);
 });
 
+it('catalog/bom-explosions 被放行且只放行展开与读回（3.5.2.2 BOM 展开）', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const run = '88888888-8888-8888-8888-888888888888';
+  const bom = '55555555-5555-5555-5555-555555555555';
+  // 读：展开运行记录列表、读回一次展开（含完整展开树）。
+  for (const path of [
+    'catalog/bom-explosions',
+    `catalog/bom-explosions?bomId=${bom}`,
+    `catalog/bom-explosions/${run}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(200);
+  }
+  // POST：执行一次展开。
+  expect(
+    (await POST(request('catalog/bom-explosions', 'POST'), { params: { path: ['catalog', 'bom-explosions'] } }))
+      .status,
+  ).toBe(200);
+  // 放行不能是前缀通配：展开只有 {id} 段，没有子资源。
+  for (const path of [`catalog/bom-explosions/${run}/unknown`, 'catalog/bom-explosions/abc']) {
+    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(404);
+  }
+  // 注意：代理只按**路径**放行，不按 HTTP 方法。所以「展开只有 POST、没有 PUT/DELETE」
+  // 不是这里的断言范围 —— 那是后端的映射问题（未映射的方法回 405），
+  // 由 packages/api-contracts 里 codegen 出来的 OpenAPI 快照证明。
+  // 代理这一层要保证的是：路径不被前缀通配放开（上面那两条 404）。
+});
+
 it('catalog/components 与 catalog/bundle-skus 的全部路由被放行（3.5.1.2 组件维护）', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
   vi.stubGlobal('fetch', fetcher);
