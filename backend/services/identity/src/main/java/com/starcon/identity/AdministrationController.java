@@ -5,6 +5,7 @@ import com.starcon.tenancy.TenantTransactions;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.function.Function;
 import org.jooq.DSLContext;
@@ -170,6 +171,28 @@ public class AdministrationController {
                       g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
               "当前角色没有此操作权限");
           if (mutation) require(a.owner(), "授权与组织变更需由当前租户所有者执行");
+          return work.apply(a);
+        });
+  }
+
+  /**
+   * 17.1.1.1 租户上下文的读路径：不挂页面权限码。
+   *
+   * <p>与 {@link #call} 的区别是少了权限码这道闸——「我属于哪些租户」对每个成员都必须可读，
+   * 否则普通成员连自己在哪个租户都看不到。能读到哪些租户仍由 {@code switchable_tenants}
+   * 从会话成员关系推导，不是这里放开的。
+   *
+   * <p>仍然要在租户事务里跑（而不是裸调）：会话锁定与租户二次校验要和写路径同口径，
+   * 否则切换租户与读取会撞在一起，读到切换一半的上下文。
+   */
+  private <T> T context(String auth, Function<IdentityController.Access, T> work) {
+    var initial = identity.resolve(auth);
+    return tenants.run(
+        initial.tenantId(),
+        () -> {
+          sql.fetch("select lock_session(?)", hash(auth));
+          var a = identity.resolve(auth);
+          require(a.tenantId().equals(initial.tenantId()), "租户已切换，请重试");
           return work.apply(a);
         });
   }
@@ -1221,6 +1244,156 @@ public class AdministrationController {
               new Object[] {a.tenantId(), input.legalEntityId(), input.source(), input.referenceId()});
           return null;
         });
+  }
+
+  // ------------------------------------------------------------------
+  // 17.1.1.1 租户列表
+  // ------------------------------------------------------------------
+
+  /**
+   * 可切换租户的一行：名称、标识、状态、角色、最后登录。
+   *
+   * <p>{@code membershipId} 而不是 {@code tenantId} 才是切换时该传的东西——切换的是「我在这个
+   * 租户的身份」，租户 id 是被成员关系带着走的，单独传租户 id 等于允许在没有成员关系的租户
+   * 上建立会话。
+   */
+  public record TenantSummaryView(
+      UUID membershipId,
+      UUID tenantId,
+      String code,
+      String name,
+      String status,
+      List<String> roles,
+      @Schema(nullable = true) OffsetDateTime lastLoginAt,
+      boolean current) {}
+
+  /**
+   * 当前租户上下文档案。
+   *
+   * <p>{@code managed} 表示当前身份能不能维护基本信息（Owner + ALL），由会话授权直接得出，
+   * 前端用它决定要不要渲染表单——服务端仍然会再判一次。
+   */
+  public record TenantContextView(
+      UUID tenantId,
+      String code,
+      String name,
+      String status,
+      @Schema(nullable = true) UUID parentTenantId,
+      int memberCount,
+      int childCount,
+      @Schema(nullable = true) OffsetDateTime lastLoginAt,
+      boolean managed) {}
+
+  /** 基本信息只开放名称与状态：code 全局唯一且被外部集成引用，改了会让既有映射指向不存在的租户。 */
+  public record TenantProfileInput(
+      @NotBlank @Size(max = 100) String name,
+      @NotNull @Pattern(regexp = "ACTIVE|SUSPENDED") String status) {}
+
+  /**
+   * 可切换租户列表。
+   *
+   * <p>全系统唯一允许的跨租户列表查询路径，租户集合只由 {@code switchable_tenants} 从当前用户的
+   * membership 关系推导：端点签名里没有 tenantId 参数，{@code X-Tenant-Id} 头也没有任何读取点，
+   * 管理员同样只能看到自己有成员关系的租户。
+   */
+  @GetMapping("/tenants")
+  public List<TenantSummaryView> tenants(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
+    return context(
+        auth,
+        a ->
+            sql.fetch("select * from switchable_tenants(?)", hash(auth))
+                .map(
+                    r ->
+                        new TenantSummaryView(
+                            r.get("membership_id", UUID.class),
+                            r.get("tenant_id", UUID.class),
+                            r.get("code", String.class),
+                            r.get("name", String.class),
+                            r.get("status", String.class),
+                            Arrays.asList(r.get("roles", String[].class)),
+                            r.get("last_login_at", OffsetDateTime.class),
+                            r.get("is_current", Boolean.class))));
+  }
+
+  /** 当前上下文标识：本租户的档案与规模，同样不接受调用方指定租户。 */
+  @GetMapping("/tenants/current")
+  public TenantContextView tenantContext(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
+    return context(
+        auth,
+        a -> {
+          var r = sql.fetchOne("select * from tenant_context(?)", hash(auth));
+          if (r == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "租户上下文不存在");
+          return new TenantContextView(
+              r.get("tenant_id", UUID.class),
+              r.get("code", String.class),
+              r.get("name", String.class),
+              r.get("status", String.class),
+              r.get("parent_tenant_id", UUID.class),
+              r.get("member_count", Integer.class),
+              r.get("child_count", Integer.class),
+              r.get("last_login_at", OffsetDateTime.class),
+              a.owner());
+        });
+  }
+
+  /**
+   * 租户管理员维护本租户基本信息。
+   *
+   * <p>归属判定在 {@code update_tenant_profile} 内部走 {@code administration_tenant}（Owner + ALL），
+   * 与成员管理、子租户同一道闸；非管理员会拿到 403 而不是静默成功。
+   *
+   * <p>把本租户停用会同时让该租户所有现存会话失效（{@code memberships_for} 会把它从可切换集合里
+   * 剔除），所以停用是不可逆的一步，界面上必须先讲清楚。
+   *
+   * <p>因此变更后的快照直接由入参拼出，而不是再查一次：一旦把本租户停用，会话当场失效，
+   * 再经会话去读 {@code tenant_context} 只会拿到「会话不可用」，并把这次停用一起回滚——
+   * 结果就是停用永远存不下来。code 不可改，所以只有 name/status 变化。
+   */
+  @PutMapping("/tenants/current")
+  public void updateTenantProfile(
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @Valid @RequestBody TenantProfileInput input) {
+    context(
+        auth,
+        a -> {
+          var before = tenantSnapshot(auth);
+          sql.fetch(
+              "select update_tenant_profile(?,?,?)",
+              hash(auth),
+              input.name().trim(),
+              input.status());
+          var after = new LinkedHashMap<String, Object>(before);
+          after.put("name", input.name().trim());
+          after.put("status", input.status());
+          audit(
+              a,
+              auth,
+              "tenant.profile",
+              a.tenantId(),
+              (String) before.get("code"),
+              "TenantProfileUpdated",
+              before,
+              after);
+          return null;
+        });
+  }
+
+  /**
+   * 租户基本信息快照：名称与状态进审计，否则事后答不出「当时这个租户叫什么、是否启用」。
+   *
+   * <p>刻意经 {@code tenant_context} 而不是直查 {@code tenant} 表：运行时角色本来就没有
+   * {@code tenant} 的读权限（租户目录不允许被枚举），这条窄权限路径是它唯一的读法。
+   */
+  private Map<String, Object> tenantSnapshot(String auth) {
+    var r = sql.fetchOne("select * from tenant_context(?)", hash(auth));
+    if (r == null) return null;
+    var snapshot = new LinkedHashMap<String, Object>();
+    snapshot.put("code", r.get("code", String.class));
+    snapshot.put("name", r.get("name", String.class));
+    snapshot.put("status", r.get("status", String.class));
+    return snapshot;
   }
 
   private static String trim(String value) {

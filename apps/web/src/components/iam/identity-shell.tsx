@@ -45,7 +45,11 @@ export function useIdentity() {
   return value;
 }
 
-function announceIdentityChange() {
+/**
+ * 切换租户后必须让整个工作空间重新认身份：清掉按租户缓存的工作区页签，
+ * 并广播一次身份变更。导出给 17.1.1.1 租户列表复用，避免两处各写一份而其中一份漏掉。
+ */
+export function announceIdentityChange() {
   try {
     window.localStorage.removeItem('starcon.workspace.tabs.v2');
     window.localStorage.setItem('starcon.identity.changed', crypto.randomUUID());

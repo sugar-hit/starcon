@@ -523,3 +523,6 @@ export type ExportSortInfo = { "key": string; "label": string };
 export type ExportSortInput = { "key": string | null; "order": string | null } | null;
 export type ExportSourceInfo = { "key": string; "label": string; "upstreamModule": string; "permission": string; "available": boolean; "note": string; "fields": Array<ExportFieldInfo>; "sorts": Array<ExportSortInfo>; "filters": Array<ExportFilterInfo>; "defaultSortKey": string; "maxRows": number; "downloadTtlHours": number };
 export type ExportSourcePage = { "items": Array<ExportSourceInfo> };
+export type TenantContextView = { "tenantId": string; "code": string; "name": string; "status": string; "parentTenantId": string | null; "memberCount": number; "childCount": number; "lastLoginAt": string | null; "managed": boolean };
+export type TenantProfileInput = { "name": string; "status": string };
+export type TenantSummaryView = { "membershipId": string; "tenantId": string; "code": string; "name": string; "status": string; "roles": Array<string>; "lastLoginAt": string | null; "current": boolean };

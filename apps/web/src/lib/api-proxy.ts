@@ -32,7 +32,10 @@ const services: readonly {
     pattern:
       // audit 是 17.5.3.1 审计日志：列表、变更详情与 CSV 导出。
       // 导出走 GET + query（与列表同一套条件），所以 allowlist 只需放行读路径。
-      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/references|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|audit(?:\/(?:export|[0-9a-f-]+))?)$/,
+      // tenants 是 17.1.1.1 租户列表：只有 tenants 与 tenants/current 两个形状，
+      //   **刻意不接 {uuid} 段** —— 按任意 tenant id 读取租户不是这个模块该有的能力，
+      //   可切换集合只能由服务端从成员关系推导（实体目录 §4 的窄权限路径）。
+      /^(permissions|owner-transfer|legal-entities(?:\/[0-9a-f-]+)?|legal-entities\/references|(?:roles|members|departments|children)(?:\/[0-9a-f-]+)?|tenants(?:\/current)?|audit(?:\/(?:export|[0-9a-f-]+))?)$/,
   },
   {
     prefix: 'catalog/',
