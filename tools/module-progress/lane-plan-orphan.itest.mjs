@@ -51,6 +51,26 @@ g(['config', 'user.name', 'test'], SANDBOX);
 writeFileSync(join(SANDBOX, 'README.md'), 'base\n');
 g(['add', '-A'], SANDBOX);
 g(['commit', '-qm', 'base'], SANDBOX);
+// 微服务闸的前置件：plan 会问「卷的主责服务在不在集成头里」，
+// 数据读蓝图 README 的「后端主责服务」列，存在性读集成分支的已提交树。
+// 两样都得先提交再建集成分支，否则闸门 fail-loud，本用例一条断言都跑不到。
+// 用例里的模块都在卷 1 与卷 9，统一映射到 warehouse。
+const svcBp = join(SANDBOX, 'docs', 'product', 'capability-blueprint');
+mkdirSync(svcBp, { recursive: true });
+writeFileSync(
+  join(svcBp, 'README.md'),
+  [
+    '| # | 系统 | 层级归类 | 一句话职责 | 后端主责服务 | 卷 |',
+    '| --- | --- | --- | --- | --- | --- |',
+    ...['01', '09'].map((n) => `| ${n}  | 卷${n} | 核心业务域 | 测试 | warehouse | [${n}](x.md) |`),
+    '',
+  ].join('\n'),
+);
+const svcDir = join(SANDBOX, 'backend', 'services', 'warehouse');
+mkdirSync(svcDir, { recursive: true });
+writeFileSync(join(svcDir, 'pom.xml'), '<project/>\n');
+g(['add', '-A'], SANDBOX);
+g(['commit', '-qm', 'blueprint readme + warehouse service'], SANDBOX);
 g(['branch', 'integration/module-dev'], SANDBOX);
 
 // 蓝图目录：plan 会扫它建上游依赖图，空目录即可

@@ -200,7 +200,103 @@ function readUpstreamMap() {
   return map;
 }
 
-/* ── 模块选取：L3 锚点互不相同 + 上游必须已交付 ───────────────────────── */
+/* ── 卷 → 后端主责服务（微服务盲区闸）─────────────────────────────────────
+ *
+ * 为什么需要这道闸（2026-10-07 22:52 / 23:03 实测）：
+ * `plan` 原来只检查「上游已交付 + L3 锚点不同」，**不检查模块该落到哪个微服务**，
+ * 而那个服务可能压根不在集成头里。集成头 backend/services 当时只有
+ * catalog / channel / identity / warehouse —— 没有 trade。
+ *
+ * 于是卷 09（订单履约，主责 trade）与卷 11（售后，主责 trade）的车道**注定 BLOCK**：
+ * 一条车道 40 分钟、烧掉一个 worktree 和一个 Flyway 版本号，产出为零。
+ * 2026-10-07 一晚白烧了 9.3.2.2(V84)、11.4.2.2(V85)、7.8.1.1 三条。
+ *
+ * 数据源不是在这里硬编码一张表，而是读蓝图 README 里本来就有的
+ * 「后端主责服务」列（docs/product/capability-blueprint/README.md）。
+ * 那张表由人维护、与蓝图同步；在这里另抄一份只会漂移。
+ *
+ * 判定规则：**卷的主责服务（列表第一项）必须已存在于集成头**。
+ * 列表顺序即优先级 —— 「trade + channel」表示履约归 trade、channel 只是协同方。
+ * 若改成「任一存在即可」，卷 09 会因为 channel 存在而被放行，
+ * worker 就会把履约逻辑写进 channel（平台接入服务），那才是真正的架构事故。
+ *
+ * 读不到 / 解析不出映射时**直接失败**，绝不静默放行 ——
+ * 静默放行正是这道闸要消灭的那种失败。
+ */
+
+/** 卷号（01..18）→ 主责服务标识；主责服务不是 ASCII 标识符（如「前端聚合」）时返回 null */
+function readVolumeOwners() {
+  const readme = join(BLUEPRINT_DIR, 'README.md');
+  if (!existsSync(readme)) {
+    throw new Error(
+      `找不到 ${readme}：无法判定卷的后端主责服务，微服务盲区闸拒绝放行任何模块。`,
+    );
+  }
+  const owners = new Map();
+  for (const line of readFileSync(readme, 'utf8').split('\n')) {
+    // | 09  | **订单履约** | 核心业务域 | ... | trade + channel | [09](...) |
+    const cells = line.split('|').map((c) => c.trim());
+    if (cells.length < 6) continue;
+    const vol = /^(\d{1,2})$/.exec(cells[1])?.[1];
+    if (!vol) continue; // 表头行（cells[1] 是 '#'）与分隔行（'---'）都会在这里被滤掉，
+    // 不需要再靠「单元格加粗」这种排版特征去猜 —— 2026-10-07 实测那种启发式
+    // 会把任何未加粗的卷名整行丢掉。
+    const raw = cells[5]; // 「后端主责服务」列
+    // 去掉括注（catalog（finance 供数）→ catalog），再按 + 拆开取第一项
+    const primary = raw
+      .replace(/[（(][^）)]*[）)]/g, '')
+      .split('+')
+      .map((s) => s.trim())
+      .filter(Boolean)[0];
+    // README 里卷号是零填充的 `09`，模块 ID 是 `9.3.2.2` —— 两侧都归一到不填充才查得到。
+    // 不归一时卷 4/6/8/9 会被判成「README 里没有这一卷」而全被误封。
+    owners.set(String(Number(vol)), primary ?? null);
+  }
+  if (owners.size === 0) {
+    throw new Error(`${readme} 里一行「后端主责服务」都没解析出来，闸门失效，拒绝放行。`);
+  }
+  return owners;
+}
+
+/** 该服务是否已经存在于集成头（**不是**磁盘上有没有目录 —— 那可能是别人 worktree 里的半成品） */
+function serviceInHead(name) {
+  if (!/^[a-z][a-z0-9_-]*$/.test(name)) return false;
+  const out = git(['ls-tree', '--name-only', INTEGRATION, 'backend/services/'], ROOT, true);
+  // ls-tree 返回的是完整路径 `backend/services/<name>`，不是裸目录名 ——
+  // 2026-10-07 实测：不剥前缀时 channel 会被判成「不在集成头」，
+  // 于是卷 16/14/15 这些真正可做的卷全被误封。
+  return (out ?? '')
+    .split('\n')
+    .map((s) => s.trim().replace(/^backend\/services\//, ''))
+    .includes(name);
+}
+
+/**
+ * 预判一个模块所属卷的服务是否可落地。
+ * 返回 null = 可排；返回字符串 = 不可排的原因。
+ */
+function serviceGate() {
+  const owners = readVolumeOwners();
+  const memo = new Map();
+  return (id) => {
+    const vol = String(Number(id.split('.')[0]));
+    if (memo.has(vol)) return memo.get(vol);
+    const primary = owners.get(vol);
+    let verdict = null;
+    if (!owners.has(vol)) {
+      verdict = `卷 ${vol} 在蓝图 README 里没有「后端主责服务」条目，无法判定落地服务`;
+    } else if (!primary) {
+      // 主责不是服务标识符（如卷 01「前端聚合 + 各服务投影」）→ 纯前端聚合层，照排
+      verdict = null;
+    } else if (!serviceInHead(primary)) {
+      verdict = `卷 ${vol} 主责服务 ${primary} 不在集成头`;
+    }
+    memo.set(vol, verdict);
+    return verdict;
+  };
+}
+
+/* ── 模块选取：L3 锚点互不相同 + 上游必须已交付 + 落地服务必须已存在 ─────── */
 
 const l3Of = (id) => id.split('.').slice(0, 3).join('.');
 
@@ -224,6 +320,11 @@ function pickModules(count, ledger, state) {
 
   const delivered = new Set(ledger.filter((r) => r.status === '已交付').map((r) => r.id));
   const upstream = readUpstreamMap();
+  const gate = serviceGate();
+
+  // 服务未落地的卷：既不排车道，也不烧版本号。顺带把原因带出去，
+  // 否则 plan 返回空数组时，调度器只会以为「没活了」，看不出是整体被服务缺口堵死。
+  const serviceBlocked = new Map();
 
   const unfinished = ledger.filter(
     (r) => (r.status === '未开发' || r.status === '进行中') && !taken.has(r.id),
@@ -246,6 +347,17 @@ function pickModules(count, ledger, state) {
       if (picked.length >= count) return;
       const l3 = l3Of(r.id);
       if (usedL3.has(l3)) continue;
+      // 落地微服务必须已存在于集成头，否则这条车道注定 BLOCK
+      const blocked = gate(r.id);
+      if (blocked) {
+        const vol = String(Number(r.id.split('.')[0]));
+        if (!serviceBlocked.has(vol)) {
+          serviceBlocked.set(vol, { reason: blocked, sample: [r.id] });
+        } else {
+          serviceBlocked.get(vol).sample.push(r.id);
+        }
+        continue;
+      }
       // 已知阻塞项（证据列带「阻塞：」）先跳过，除非实在凑不满
       if (/^阻塞[：:]/.test(r.evidence)) continue;
       usedL3.add(l3);
@@ -301,7 +413,7 @@ function pickModules(count, ledger, state) {
     tryTake(unfinished.filter((r) => /^阻塞[：:]/.test(r.evidence)));
   }
 
-  return picked;
+  return { picked, serviceBlocked: [...serviceBlocked].map(([volume, v]) => ({ volume, ...v })) };
 }
 
 /* ── 车道生命周期 ─────────────────────────────────────────────────────── */
@@ -514,11 +626,14 @@ if (cmd === 'plan') {
     l.reDispatched = (l.reDispatched ?? 0) + 1;
   }
 
-  const picks = pickModules(count - orphaned.length, ledger, state);
+  const { picked, serviceBlocked } = pickModules(count - orphaned.length, ledger, state);
   const base = git(['rev-parse', state.integrationBranch]);
   const planned = [];
 
-  for (const row of picks) {
+  // --dry-run：只算不建。用来回答「为什么 plan 排不出来」而不留 worktree 和分支。
+  const dryRun = flag('--dry-run') === true;
+
+  for (const row of picked) {
     const id = row.id;
     if (state.lanes[id] && ['running', 'ready'].includes(state.lanes[id].state)) continue;
 
@@ -526,15 +641,17 @@ if (cmd === 'plan') {
     const wt = laneWorktree(id);
     const version = nextFree();
 
-    // 车道分支已存在（上一次跑崩了留的）就直接复用，不重新切
-    const branchExists = git(['rev-parse', '--verify', branch], ROOT, true);
-    if (!branchExists) git(['branch', branch, base]);
+    if (!dryRun) {
+      // 车道分支已存在（上一次跑崩了留的）就直接复用，不重新切
+      const branchExists = git(['rev-parse', '--verify', branch], ROOT, true);
+      if (!branchExists) git(['branch', branch, base]);
 
-    // worktree 已存在就直接复用
-    if (!existsSync(wt)) {
-      mkdirSync(WORKTREE_DIR, { recursive: true });
-      git(['worktree', 'add', wt, branch]);
-      sh('pnpm install --prefer-offline', wt);
+      // worktree 已存在就直接复用
+      if (!existsSync(wt)) {
+        mkdirSync(WORKTREE_DIR, { recursive: true });
+        git(['worktree', 'add', wt, branch]);
+        sh('pnpm install --prefer-offline', wt);
+      }
     }
 
     state.lanes[id] = {
@@ -554,15 +671,19 @@ if (cmd === 'plan') {
       heartbeatAt: new Date().toISOString(),
       note: null,
     };
+    // dry-run 也要把「本该排出来的」报出来 —— 只 push 不落盘。
+    // 早先写成 `if (!dryRun) planned.push(...)`，结果 --dry-run 的 newlyPlanned 恒为空，
+    // 看起来像「闸门把能干的活也挡掉了」，其实是自己把结果吞了（2026-10-07 实测）。
     planned.push(state.lanes[id]);
   }
 
-  writeState(state);
+  if (!dryRun) writeState(state);
   console.log(
     JSON.stringify(
       {
         ok: true,
         integration: state.integrationBranch,
+        dryRun: dryRun || undefined,
         toDispatch: [...orphaned, ...planned].map((l) => ({
           id: l.id,
           name: l.name,
@@ -575,6 +696,7 @@ if (cmd === 'plan') {
           redispatched: l.reDispatched ?? 0,
         })),
         newlyPlanned: planned.map((l) => l.id),
+        serviceBlocked,
         note: planned.length === 0 && orphaned.length === 0 ? '没有可并行的未开发模块' : null,
       },
       null,
