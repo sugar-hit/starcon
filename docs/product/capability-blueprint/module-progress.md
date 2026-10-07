@@ -6,9 +6,7 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
-
 ## 总览
-
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
@@ -16,9 +14,7 @@
 | 进行中 | 0 |
 | **未开发** | **393** |
 | 完成率 | 15.5% |
-
 ## 分阶段进度（交付顺序看这里）
-
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 70 | 0 | 10 | 80 |
@@ -27,11 +23,8 @@
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 0 | 0 | 78 | 78 |
 | **D7** | 0 | 0 | 155 | 155 |
-
 ## 分系统进度
-
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
-| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
@@ -50,30 +43,22 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 12 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
-
 ## 判定「已交付」的标准
-
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
-
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
-
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
-
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
-
 ## 跨期说明
-
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
-
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -87,9 +72,7 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
-
 ## 模块明细
-
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -557,3 +540,13 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
+| 已交付 | 70 |
+| **未开发** | **395** |
+| 完成率 | 15.1% |
+| **D1–D2** | 68 | 0 | 12 | 80 |
+| 03 | 商品主数据系统 | D1–D2 | 37 | 40 |
+| 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 11 | 29 |
+| 3.9.1.2 | SKU 合并 | — | D1–D2 | 未开发 | — |
+| 17.1.1.3 | 层级授权 | — | D1–D2 | 未开发 | — |
+| 17.1.2.2 | 本位币与账簿 | — | D1–D2 | 未开发 | — |
+| 17.2.2.2 | 成员开通与入职 | — | D1–D2 | 已交付 | 迁移 `backend/services/identity/src/main/resources/db/migration/V45__member_onboarding.sql`（member_onboarding 表带 tenant_id NOT NULL + FORCE RLS + isolation 策略 + 两个索引；account_mode 区分 CREATED 新建账号与 LINKED 关联已有全局账号；四条 CHECK 把「发过凭据必须有时刻」「建了账号就必须发过凭据」「完成的记录必须同时有时刻和操作人」写成数据库不变量；三个 SECURITY DEFINER 函数 onboardings / onboard_member / complete_onboarding 签名里**没有任何 tenant_id 参数**，伪造 X-Tenant-Id 结构上无处可传；独立页面权限 identity.onboarding.read/create/update，不与 identity.member 共用一组——「改在册的人」和「放人进来」风险面不同）+ 端点 `MemberOnboardingController`（GET /identity/onboardings 列表、POST /identity/onboardings 开通、POST /identity/onboardings/{id}/complete 完成入职；沿用 call() 的租户事务 + 会话锁 + 租户二次校验，开通与完成均为当前租户所有者专属）+ 页面 `apps/web/src/components/iam/member-onboarding-workspace.tsx` + `onboarding-model.ts` + `/org/onboarding` 开通工作区（真实列表、开通表单、完成入职、加载/失败重试/空态三态，api-proxy 白名单只放行 onboardings 与 onboardings/{id}/complete 两个字面量形状、刻意不放行 onboardings/{id} 因为后端没有该端点）+ 测试 `MemberOnboardingIntegrationTest` 8 个用例实跑 Testcontainers PostgreSQL 16（连接池压到 1）；**凭据纪律是本模块的核心**：初始凭据由服务端 SecureRandom 生成（20 位、去掉 I/l/1/O/0 等易混字符），bcrypt 哈希只落 app_user.password_hash 一份，member_onboarding 上**只有 credential_issued 布尔位与时刻、没有任何凭据或哈希列**（information_schema 断言钉住，且断言表里不存在 password/token/secret/invitation 任何列），明文只在创建那一次响应里返回，列表 DTO 形状上就没有凭据字段、审计快照也不构造 credential 键、用例断言列表 JSON 与审计 changes 里都搜不到明文且审计行不含 `$2a$`；LINKED 关联时服务端根本不知道对方密码所以返回 null 而不是编一个，关联不改动原密码（用例用原凭据重新登录验证）；**蓝图点名排除的邮件邀请、接受令牌、自助激活刻意不做**，库里没有邀请态列，将来补齐时必须连同令牌摘要、有效期、单次使用、防枚举与撤销规则一起加而不是只加一列 token；租户隔离三断言实跑（两租户入职记录互不可见、伪造 X-Tenant-Id 指向真实存在的对方租户也换不来记录、A→B→A 交替后直查 member_onboarding 只见自己租户的行），另有拿对方入职 id 去完成得到 404 而不是把它改掉 |

@@ -17883,7 +17883,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "overview_16",
+        "operationId": "overview_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -17957,7 +17957,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "overview_17",
+        "operationId": "overview_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -18036,7 +18036,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "overview_18",
+        "operationId": "overview_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -18107,7 +18107,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "overview_19",
+        "operationId": "overview_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -18246,7 +18246,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "overview_20",
+        "operationId": "overview_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -18517,7 +18517,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_21",
+        "operationId": "overview_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -18548,7 +18548,7 @@
         "tags": [
           "attribute-option-controller"
         ],
-        "operationId": "list_13",
+        "operationId": "list_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -20379,7 +20379,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "list_12",
+        "operationId": "list_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -20559,7 +20559,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "overview_14",
+        "operationId": "overview_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -20590,7 +20590,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "options_4",
+        "operationId": "options_5",
         "parameters": [
           {
             "name": "Authorization",

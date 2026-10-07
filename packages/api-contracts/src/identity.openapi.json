@@ -1742,6 +1742,112 @@
           }
         }
       }
+    },
+    "/identity/onboardings": {
+      "get": {
+        "tags": [
+          "member-onboarding-controller"
+        ],
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OnboardingView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "member-onboarding-controller"
+        ],
+        "operationId": "create",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/identity/onboardings/{id}/complete": {
+      "post": {
+        "tags": [
+          "member-onboarding-controller"
+        ],
+        "operationId": "complete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2930,6 +3036,141 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "OnboardingInput": {
+        "required": [
+          "roles",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "departmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentInput"
+            }
+          }
+        }
+      },
+      "RoleAssignmentInput": {
+        "required": [
+          "roleId",
+          "scopeMode"
+        ],
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeMode": {
+            "pattern": "ALL|DEPARTMENT|SELF",
+            "type": "string"
+          }
+        }
+      },
+      "OnboardingResult": {
+        "type": "object",
+        "properties": {
+          "onboardingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountMode": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "initialCredential": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OnboardingView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "membershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountMode": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "departmentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "departmentName": {
+            "type": "string",
+            "nullable": true
+          },
+          "roleCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "credentialIssued": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
           }
         }
       }
