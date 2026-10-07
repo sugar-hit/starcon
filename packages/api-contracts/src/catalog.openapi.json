@@ -13993,7 +13993,7 @@
         "tags": [
           "variant-combination-controller"
         ],
-        "operationId": "overview",
+        "operationId": "overview_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -14024,7 +14024,7 @@
         "tags": [
           "unit-group-controller"
         ],
-        "operationId": "overview_1",
+        "operationId": "overview_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -14095,7 +14095,7 @@
         "tags": [
           "unit-conversion-controller"
         ],
-        "operationId": "overview_2",
+        "operationId": "overview_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -14296,7 +14296,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "overview_3",
+        "operationId": "overview_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -14635,7 +14635,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "records_1",
+        "operationId": "records_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -14784,7 +14784,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "overview_4",
+        "operationId": "overview_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -14941,7 +14941,7 @@
         "tags": [
           "supplier-quote-controller"
         ],
-        "operationId": "overview_5",
+        "operationId": "overview_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -14972,7 +14972,7 @@
         "tags": [
           "supplier-quote-controller"
         ],
-        "operationId": "options_2",
+        "operationId": "options_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -15175,7 +15175,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "overview_6",
+        "operationId": "overview_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -15206,7 +15206,7 @@
         "tags": [
           "sku-list-controller"
         ],
-        "operationId": "list_10",
+        "operationId": "list_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -15554,7 +15554,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "overview_7",
+        "operationId": "overview_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -15665,7 +15665,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "list_11",
+        "operationId": "list_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -15780,7 +15780,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "overview_8",
+        "operationId": "overview_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -15811,7 +15811,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "options_3",
+        "operationId": "options_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -16331,7 +16331,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "overview_9",
+        "operationId": "overview_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -16524,7 +16524,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "overview_10",
+        "operationId": "overview_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -16681,7 +16681,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "overview_11",
+        "operationId": "overview_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -18548,7 +18548,7 @@
         "tags": [
           "attribute-option-controller"
         ],
-        "operationId": "list_12",
+        "operationId": "list_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -19349,6 +19349,479 @@
                 "schema": {
                   "type": "string",
                   "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/rules/{entityType}": {
+      "put": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "saveRule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZombieCleanupRuleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieCleanupRuleView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/reference-stats": {
+      "post": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "pushStats",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZombieReferenceStatPush"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieReferenceStatPushResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/deactivate": {
+      "post": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "deactivate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZombieDeactivateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieDeactivateResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "list_10",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "verdict",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/rules": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "rules_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ZombieCleanupRuleView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/records": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "records_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "decidedBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieCleanupRecordPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/overview": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieCandidateOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/options": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "options_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/evidence": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "evidence",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entityId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZombieReferenceEvidence"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/zombie-candidates/deactivation-targets": {
+      "get": {
+        "tags": [
+          "zombie-candidate-controller"
+        ],
+        "operationId": "deactivationTargets",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object"
+                  }
                 }
               }
             }
@@ -35803,6 +36276,695 @@
           "size": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ZombieCleanupRuleInput": {
+        "type": "object",
+        "properties": {
+          "inactiveDays": {
+            "maximum": 3650,
+            "minimum": 30,
+            "type": "integer",
+            "format": "int32"
+          },
+          "snapshotStaleDays": {
+            "maximum": 3650,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "requireZeroOrderReference": {
+            "type": "boolean"
+          },
+          "requireZeroInventory": {
+            "type": "boolean"
+          },
+          "requireZeroListing": {
+            "type": "boolean"
+          },
+          "requireZeroCost": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "deactivateNote": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ZombieCleanupRuleView": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string"
+          },
+          "entityTypeLabel": {
+            "type": "string"
+          },
+          "inactiveDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "snapshotStaleDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requireZeroOrderReference": {
+            "type": "boolean"
+          },
+          "requireZeroInventory": {
+            "type": "boolean"
+          },
+          "requireZeroListing": {
+            "type": "boolean"
+          },
+          "requireZeroCost": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "deactivateNote": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "configured": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ZombieReferenceStatItem": {
+        "required": [
+          "entityId",
+          "metric",
+          "metricValue",
+          "observedAt",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "metric": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "metricValue": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "source": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ZombieReferenceStatPush": {
+        "required": [
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 500,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieReferenceStatItem"
+            }
+          }
+        }
+      },
+      "ZombieReferenceStatPushResult": {
+        "type": "object",
+        "properties": {
+          "received": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "written": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rejectedReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ZombieDeactivateInput": {
+        "required": [
+          "entityIds"
+        ],
+        "type": "object",
+        "properties": {
+          "entityIds": {
+            "maxItems": 500,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "ZombieDeactivateResult": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string"
+          },
+          "affected": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieDeactivatedEntry"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ZombieDeactivatedEntry": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "previousStatus": {
+            "type": "string"
+          },
+          "newStatus": {
+            "type": "string"
+          }
+        }
+      },
+      "ZombieCandidate": {
+        "type": "object",
+        "properties": {
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityType": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lastMaintainedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "daysSinceMaintained": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "verdictLabel": {
+            "type": "string"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieDimensionStatus"
+            }
+          },
+          "ruleInactiveDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ruleEnabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ZombieCandidatePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieCandidate"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entityType": {
+            "type": "string"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inUseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "incompleteCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ZombieDimensionStatus": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "ORDER_LINE_COUNT",
+              "INVENTORY_ON_HAND",
+              "LISTING_COUNT",
+              "UNIT_COST"
+            ]
+          },
+          "state": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number",
+            "nullable": true
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stale": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ZombieCleanupRecord": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityType": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entityCode": {
+            "type": "string"
+          },
+          "entityName": {
+            "type": "string"
+          },
+          "previousStatus": {
+            "type": "string"
+          },
+          "newStatus": {
+            "type": "string"
+          },
+          "decidedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "lastMaintainedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "affectedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ruleSnapshot": {
+            "$ref": "#/components/schemas/ZombieRuleSnapshot"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/ZombieEvidenceSnapshot"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ZombieCleanupRecordPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieCleanupRecord"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ZombieDimensionEvidence": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "observedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "stale": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ZombieEvidenceSnapshot": {
+        "type": "object",
+        "properties": {
+          "verdict": {
+            "type": "string"
+          },
+          "orderLineCount": {
+            "$ref": "#/components/schemas/ZombieDimensionEvidence"
+          },
+          "inventoryOnHand": {
+            "$ref": "#/components/schemas/ZombieDimensionEvidence"
+          },
+          "listingCount": {
+            "$ref": "#/components/schemas/ZombieDimensionEvidence"
+          },
+          "unitCost": {
+            "$ref": "#/components/schemas/ZombieDimensionEvidence"
+          }
+        }
+      },
+      "ZombieRuleSnapshot": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string"
+          },
+          "inactiveDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "snapshotStaleDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deactivateNote": {
+            "type": "string"
+          },
+          "ruleVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requireZeroOrderReference": {
+            "type": "boolean"
+          },
+          "requireZeroInventory": {
+            "type": "boolean"
+          },
+          "requireZeroListing": {
+            "type": "boolean"
+          },
+          "requireZeroCost": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ZombieCandidateOverview": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieOverviewRow"
+            }
+          },
+          "coveredEntities": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "coveredDimensions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unmappedDimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ZombieOverviewRow": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string"
+          },
+          "entityTypeLabel": {
+            "type": "string"
+          },
+          "totalActive": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "candidates": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inUse": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "incomplete": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inactiveDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "snapshotStaleDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requiredDimensionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ruleEnabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ZombieEntityTypeOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "targetTable": {
+            "type": "string"
+          }
+        }
+      },
+      "ZombieMetricOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "wired": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ZombieOptions": {
+        "type": "object",
+        "properties": {
+          "entityTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieEntityTypeOption"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieMetricOption"
+            }
+          },
+          "verdicts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieVerdictOption"
+            }
+          },
+          "deactivateTargets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ZombieVerdictOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "actionable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ZombieReferenceEvidence": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lastMaintainedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "daysSinceMaintained": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "verdict": {
+            "type": "string"
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieDimensionStatus"
+            }
+          },
+          "recentRecords": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ZombieCleanupRecord"
+            }
           }
         }
       }

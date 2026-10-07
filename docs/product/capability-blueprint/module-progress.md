@@ -12,16 +12,16 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 67 |
+| 已交付 | 68 |
 | 进行中 | 0 |
-| **未开发** | **398** |
-| 完成率 | 14.4% |
+| **未开发** | **397** |
+| 完成率 | 14.6% |
 
 ## 分阶段进度（交付顺序看这里）
 
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
-| **D1–D2** | 65 | 0 | 15 | 80 |
+| **D1–D2** | 66 | 0 | 14 | 80 |
 | **D3** | 2 | 0 | 38 | 40 |
 | **D4** | 0 | 0 | 60 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
@@ -34,7 +34,7 @@
 | --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
-| 03 | 商品主数据系统 | D1–D2 | 35 | 40 |
+| 03 | 商品主数据系统 | D1–D2 | 36 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
@@ -179,7 +179,7 @@
 | 3.9.1.1 | 重复 SKU 识别 | — | D1–D2 | 已交付 | V36__sku_duplicate_candidate.sql（四张新表：sku_duplicate_scan 扫描运行 / sku_duplicate_candidate 候选（一对 SKU 一行）/ sku_duplicate_signal 逐维度得分与证据 / sku_duplicate_decision 人工决定 MERGE·KEEP；**候选粒度是「一对 SKU」而不是「一条线」**：蓝图输出点名的「重叠维度」要求同一对被多条线命中时仍能读出「中了几条」，按维度各存一行会让同一对散成四行、这一栏无处可查；left/right 按 uuid 字符串升序存放并用 CHECK 钉死，否则 (X,Y) 与 (Y,X) 能各插一行、候选数与决策数凭空翻倍；overlap_dimension_count 与信号行数跨表一致由服务层保证、集成测试逐候选断言；**决定只登记不执行**（执行归 3.9.1.2），同时记下登记那一刻两个 SKU 的 `sku.version` 作为 `expected_version` 留给下游比对，KEEP 时留 null（没有要执行的动作就不该留一个会过期的锁）；引用数按九类 catalog 自有引用**逐项拆分**（条码/属性值/素材/报价/套装/BOM/包装/安全属性/单位换算），04 映射·07 库存·09 订单在别的服务的库、不跨库读（模块边界纪律），那部分留给 3.9.1.2 走各自授权 API；相似度与阈值一律 NUMERIC(5,4)（禁浮点），四表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT catalog_app/starcon_app）；端点 GET /catalog/duplicate-scans/overview（概览 + 四维分布 + 三态计数）、POST /catalog/duplicate-scans（发起扫描，阈值 + 可选类目/品牌范围）、GET /catalog/duplicate-scans[/{id}[/candidates]]（扫描历史各自留档，治理前后可对比；候选清单分页 + dimension/decision/minSimilarity 三种筛选可组合，维度筛选用 exists 而不是 join，否则命中多条线时分页 total 与候选数对不上）、GET /catalog/duplicate-candidates/{id}（两侧身份 + 现算规格组合 + 全部条码 + 逐维度证据 + 引用逐项拆分 + 已登记决定）、POST |
 | 3.9.1.2 | SKU 合并 | — | D1–D2 | 未开发 | — |
 | 3.9.2.1 | 完整度评分 | — | D1–D2 | 未开发 | — |
-| 3.9.2.2 | 僵尸主数据清理 | — | D1–D2 | 未开发 | — |
+| 3.9.2.2 | 僵尸主数据清理 | — | D1–D2 | 已交付 | V39__zombie_master_data_cleanup.sql（三张表，均 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT；**master_data_cleanup_record 只授 SELECT/INSERT 并 REVOKE UPDATE/DELETE** —— 它是一次决定的留痕，可改即篡改审计，与 V1 对 audit_event 同一纪律）；**「从未被订单引用」等四个引用维度一律不跨库查询**（AGENTS.md 禁止跨服务 SQL/FK/视图），改为 catalog 内本地快照表 master_data_reference_stats（PK=tenant+entity_type+entity_id+metric，metric_value numeric(19,6)，source 标明推送方，observed_at 是**观测时刻**而非写库时刻，UPSERT 覆盖旧值），由上游经授权 API POST /catalog/zombie-candidates/reference-stats 推送；**触发器按 entity_type 解析目标表校验主体真实存在且持有对应 party_role**（多态外键表达不了，供应商身份的主体推 CUSTOMER 引用会被拒）；master_data_cleanup_rule（inactive_days 30~3650、snapshot_stale_days 1~3650、四个引用维度开关**默认全 false**、deactivate_note 非空、每类型一行的 PK 使「改」而不是「再加一条」）；master_data_cleanup_record（冻结 entity_code/name 与 previous_status→new_status，**rule_snapshot jsonb 与 evidence jsonb 冻结停用当时的规则与观测** —— 只存 id 则三个月后回答不了「凭什么」）；**Z1~Z7 七条语义**（Z1 未知≠零判 INCOMPLETE 而非候选、Z2 长期未维护用 catalog 自有 updated_at、Z3 停用留痕、Z4 批量整批拒收不跳过、Z5 规则与证据随记录冻结、Z6 已非活跃不重复停用、Z7 过期判 UNKNOWN 但显式返回 stale）；ZombieCandidateRules（纯函数判定，**三态 CANDIDATE/NOT_ZOMBIE/INCOMPLETE**，顺序为 违反优先于未知：已观测到「有订单」的主体一定 NOT_ZOMBIE，哪怕另一维度缺观测，否则界面会把确凿无疑的非僵尸标成灰）；ZombieCandidateService（jOOQ 显式 SQL，**三态判定整体下推到 SQL 的 verdictSql** —— 僵尸是派生结论，内存过滤后分页会出现「第 1 页 20 条里 3 条是候选而总数 50」的假分页；逐条「为什么」由纯规则在内存算）；ZombieCandidateController（读 catalog.spu.read 写 catalog.spu.update，租户来自已认证成员关系**不读 X-Tenant-Id 头**）；ApiErrorHandler 追加 ZombieBatchRejectedException 的 409 + blocked 结构化清单；端点 GET /catalog/zombie-candidates（entityType/keyword/verdict 筛选 + 分页）、/overview、/options（维度选项带 wired 标注上游是否已存在）、/rules[/{entityType}]（PUT 带乐观锁）、/evidence、/reference-stats（上游推送）、/deactivate（批量停用）、/records（停用台账分页）、/deactivation-targets；**停用而非删除**：SKU 改 sku.status=INACTIVE、供应商/客户改 party.status=INACTIVE 并写 status_reason 与 status_changed_at，无任何物理删除端点（实体目录 §5）；**未接入上游的维度现状（默认关闭并在界面标注归属）**：INVENTORY 归 warehouse（07 库存）**服务已交付**，接入只差推送方；ORDER_LINE_COUNT 归 trade **服务不存在**；UNIT_COST 归 purchase（06 采购）**服务不存在**；LISTING_COUNT 归 channel（04 刊登），该服务只有平台/连接/店铺/同步**无刊登实体**。四个开关默认全 false，词表与概览都把未接入维度逐条列出；前端 /products/master-data-cleanup（zombie-candidate-model.ts + -workspace.tsx + model.test.ts，规则配置表 + 候选清单 + 逐维证据 + 停用台账，**「无法判定」与「在用」各有不同徽标与下一步动作且都不可停用**，未启用维度也显示已观测到的值供运营判断要不要打开，未接入维度的开关禁用并标注归属服务；api-proxy 放行 zombie-candidates 十条路径并补 route.test.ts 断言）；契约 packages/api-contracts 重新生成（+23 个 Zombie* DTO，类型集合 500→523 且**移除 0 个**）；**DTO 一律带 Zombie 前缀是硬约束**：codegen 把四个服务的 schemas 拍平进同一命名空间，重名后者覆盖前者 —— 第一版用 Options/OverviewRow/DimensionStatus 时 warehouse 的 OverviewRow 就把本模块同名类型覆盖了，生成物里看不出异常而前端会拿到字段完全不相干的类型；**可空列必须标 @Schema(nullable=true)**：codegen 只认这个注解产出 null 联合类型，不标的话 ZombieDimensionStatus.value/observedAt 在 TS 里是非空 number/string，前端会开始相信「未观测的维度取值是 0」—— 正是本模块要避免的错误；测试 ZombieCandidateRulesTest 16 例（缺观测/过期判 INCOMPLETE、违反优先于未知、过期与从未观测可区分、恰好等于阈值仍算维护期内、批量准入逐条原因）+ ZombieCandidateIntegrationTest 28 例（真实 PG16 Testcontainers、连接池固定 1 条、强制 RLS）；**租户隔离三断言实跑**：两租户候选/快照/停用记录互不可见、伪造 X-Tenant-Id 无效且断言行确实没写进对方租户（推快照按设计返回 200+rejected 而非 404）、单连接反复交替 5 轮不串租户；**timestamptz 往返断言写回值**：推送东八区时刻后断言写回的 instant 与 offset 逐位相等（VALUES 列表里裸 ? 会让 jOOQ 把 OffsetDateTime 当 varchar 发，PG 报 character varying，全部写入改 ?::timestamptz）；停用记录 UPDATE/DELETE 在 DB 层被拒且断言理由**没被改掉**（只断言抛异常不够——万一抛的是别的错）；**边界**：与 3.9.2.1 完整度评分独立不共享表（评分是「缺什么」，本模块是「没人用」）；只读 sku/party 的状态与 updated_at，不改 V4 的 spu_lifecycle 五态（两个层级不同，不混）；本车道未修改 warehouse 任何文件 |
 | 4.1.1.1 | Listing 列表 | /listings | D5 | 未开发 | — |
 | 4.1.1.2 | Listing 详情 | /listings | D5 | 未开发 | — |
 | 4.1.1.3 | 生命周期与下架 | /listings | D5 | 未开发 | — |

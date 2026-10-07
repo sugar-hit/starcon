@@ -981,6 +981,59 @@ it('catalog/parties 的全部路由被放行（3.6.1.1 往来单位档案）', a
   }
 });
 
+it('catalog/zombie-candidates 的全部路由被放行，且不放行更深的子路径（3.9.2.2 僵尸主数据清理）', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+
+  const base = 'catalog/zombie-candidates';
+  expect((await GET(request(base), { params: { path: segments(base) } })).status).toBe(200);
+  for (const suffix of [
+    'overview',
+    'options',
+    'evidence',
+    'reference-stats',
+    'deactivate',
+    'records',
+    'deactivation-targets',
+  ]) {
+    expect(
+      (await GET(request(`${base}/${suffix}`), { params: { path: segments(`${base}/${suffix}`) } }))
+        .status,
+    ).toBe(200);
+    expect(
+      (
+        await POST(request(`${base}/${suffix}`, 'POST'), {
+          params: { path: segments(`${base}/${suffix}`) },
+        })
+      ).status,
+    ).toBe(200);
+  }
+  // 规则配置：列表 + 按主体类型的 PUT（entityType 是枚举字面量，不是 uuid）
+  expect(
+    (await GET(request(`${base}/rules`), { params: { path: segments(`${base}/rules`) } })).status,
+  ).toBe(200);
+  for (const entityType of ['SKU', 'SUPPLIER', 'CUSTOMER']) {
+    expect(
+      (
+        await PUT(request(`${base}/rules/${entityType}`, 'PUT'), {
+          params: { path: segments(`${base}/rules/${entityType}`) },
+        })
+      ).status,
+    ).toBe(200);
+  }
+
+  // 白名单不能是前缀通配：本模块没有第三层资源，放开 id 段会让还不存在的端点
+  // 看起来像已交付（与 supplier-quotes/{id}/unknown-sub 同一纪律）。
+  for (const path of [
+    `${base}/whatever`,
+    `${base}/rules/SKU/extra`,
+    `${base}/overview/extra`,
+    'catalog/zombie-candidatesx',
+  ]) {
+    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(404);
+  }
+});
+
 it('catalog/parties/{id}/addresses 与 /contacts 的全部路由被放行（3.6.3.1 地址与联系人）', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
   vi.stubGlobal('fetch', fetcher);

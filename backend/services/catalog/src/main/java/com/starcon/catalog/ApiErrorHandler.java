@@ -105,4 +105,23 @@ public class ApiErrorHandler {
     body.setProperty("candidatesSkuId", result.skuId());
     return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
   }
+
+  /**
+   * 3.9.2.2 僵尸主数据批量停用被拒（规则 **Z4**）。
+   *
+   * <p>批量停用**整批拒收**而不是逐条跳过：跳过会让运营以为这一批都处理完了，
+   * 而被跳过的那几条不会有人回来处理。所以 body 里带 {@code blocked} 清单，
+   * 界面逐条显示「哪一条、为什么不算僵尸」。
+   *
+   * <p>「无法判定」必须能和「在用」分开显示 —— 前者的下一步动作是去接上游事件或刷新快照，
+   * 后者是"这条有人在用，别动"。混成一句话的话，运营只会当成"系统不让我停"。
+   */
+  @ExceptionHandler(ZombieCandidateService.ZombieBatchRejectedException.class)
+  ResponseEntity<ProblemDetail> zombieBatchRejected(
+      ZombieCandidateService.ZombieBatchRejectedException e) {
+    var body = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+    body.setProperty("blocked", e.blocked());
+    body.setProperty("blockedCount", e.blocked().size());
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+  }
 }
