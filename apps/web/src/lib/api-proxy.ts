@@ -289,8 +289,27 @@ const services: readonly {
     prefix: 'channel/',
     env: 'CHANNEL_URL',
     fallback: 'http://127.0.0.1:8083',
+    // warehouse-providers 是 10.4.2.1 海外仓连接：服务商目录、连接、仓账户、
+    // 库存同步与外部库存观测（只读）。
+    // 形状逐个列出：
+    //   warehouse-providers                     服务商目录（集合读）
+    //   connections / connections/{id}           连接读写
+    //   connections/{id}/sync-paused             暂停/恢复同步（POST + query）
+    //   connections/{id}/accounts                建仓账户（POST）
+    //   accounts / accounts/{id}                 仓账户读
+    //   accounts/{id}/inbound-stock-lines        登记服务商报送（POST）——适配器的真实输入
+    //   accounts/{id}/sync                       触发库存同步（POST）
+    //   sync-runs                                同步记录（集合读）
+    //   accounts/{id}/observations               观测流水（集合读）
+    //   accounts/{id}/observations/latest        各 SKU 最新观测
+    // ⚠️ sync-runs 与 connections / accounts 是**兄弟**不是子路径：
+    //    早先一版把它写进了 connections 的组里，warehouse-providers/sync-runs
+    //    被静默拦成 404（typecheck/lint 全绿，只有真跑 proxy 才看得见）。
+    // 动作段逐字列出而不是通配：多放一层会让「一个还不存在的动作」看起来像已交付。
+    // 刻意**没有** DELETE 段：观测快照不可删（蓝图「不能覆盖」），连接/仓账户也不靠物理删收回。
+    // 字面量段（latest）排在 [0-9a-f-]+ 之前判别，两类不会互相吃掉。
     pattern:
-      /^(platforms(?:\/[A-Za-z0-9_]+\/enums(?:\/[0-9a-f-]+)?)?|connections(?:\/(?:reminders|[0-9a-f-]+(?:\/(?:credential|health|revoke))?))?|shops(?:\/[0-9a-f-]+(?:\/(?:marketplaces(?:\/[0-9a-f-]+)?|transfer))?)?|sync-cursors(?:\/[0-9a-f-]+(?:\/(?:pause|resume|rewind|trigger))?)?|sync-runs(?:\/[0-9a-f-]+(?:\/(?:complete|resolve))?)?|sync-failures(?:\/summary|[0-9a-f-]+\/replay)?|platform-operations(?:\/[0-9a-f-]+(?:\/(?:start|succeed|fail|unknown|verify))?)?|oauth\/(?:callback|sessions(?:\/[0-9a-f-]+(?:\/(?:shops|confirm|cancel))?)?))$/,
+      /^(platforms(?:\/[A-Za-z0-9_]+\/enums(?:\/[0-9a-f-]+)?)?|connections(?:\/(?:reminders|[0-9a-f-]+(?:\/(?:credential|health|revoke))?))?|shops(?:\/[0-9a-f-]+(?:\/(?:marketplaces(?:\/[0-9a-f-]+)?|transfer))?)?|sync-cursors(?:\/[0-9a-f-]+(?:\/(?:pause|resume|rewind|trigger))?)?|sync-runs(?:\/[0-9a-f-]+(?:\/(?:complete|resolve))?)?|sync-failures(?:\/summary|[0-9a-f-]+\/replay)?|platform-operations(?:\/[0-9a-f-]+(?:\/(?:start|succeed|fail|unknown|verify))?)?|oauth\/(?:callback|sessions(?:\/[0-9a-f-]+(?:\/(?:shops|confirm|cancel))?)?)|warehouse-providers(?:\/(?:connections(?:\/[0-9a-f-]+(?:\/(?:sync-paused|accounts))?)?|sync-runs|accounts(?:\/[0-9a-f-]+(?:\/(?:inbound-stock-lines|sync|observations(?:\/latest)?))?)?))?)$/,
   },
   {
     // 07 库存：库存总览（7.1.1.1）、库存明细 bucket（7.1.1.2）、筛选下拉参照数据与超储阈值。
