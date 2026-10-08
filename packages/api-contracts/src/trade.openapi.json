@@ -1,0 +1,1925 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Same-origin service base"
+    }
+  ],
+  "paths": {
+    "/trade/fulfillment/routing/stock-snapshots": {
+      "get": {
+        "tags": [
+          "fulfillment-routing-controller"
+        ],
+        "operationId": "stockSnapshots",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pathKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stockSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockSnapshotPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "fulfillment-routing-controller"
+        ],
+        "operationId": "saveStockSnapshot",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockSnapshotInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockSnapshotSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/routing/mcf-authorizations": {
+      "get": {
+        "tags": [
+          "fulfillment-routing-controller"
+        ],
+        "operationId": "mcfList",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/McfPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "fulfillment-routing-controller"
+        ],
+        "operationId": "saveMcf",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/McfAuthorizationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/McfSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/routing/evaluations": {
+      "post": {
+        "tags": [
+          "fulfillment-routing-controller"
+        ],
+        "operationId": "evaluate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoutingEvaluationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutingEvaluation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/routing/decisions": {
+      "get": {
+        "tags": [
+          "fulfillment-routing-controller"
+        ],
+        "operationId": "decisions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chosenPath",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reasonCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "fulfillment-routing-controller"
+        ],
+        "operationId": "decide",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoutingDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutingDecisionSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/routing/decisions/{decisionId}/status": {
+      "post": {
+        "tags": [
+          "fulfillment-routing-controller"
+        ],
+        "operationId": "advanceStatus",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "decisionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutingDecisionSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/routing/cost-profiles": {
+      "get": {
+        "tags": [
+          "fulfillment-routing-controller"
+        ],
+        "operationId": "costProfiles",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pathKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "destinationCountryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "effectiveOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostProfilePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "fulfillment-routing-controller"
+        ],
+        "operationId": "saveCostProfile",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CostProfileInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostProfileSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/routing/switches": {
+      "get": {
+        "tags": [
+          "fulfillment-routing-controller"
+        ],
+        "operationId": "switches",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "decisionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "triggerReason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwitchPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/routing/decisions/{decisionId}": {
+      "get": {
+        "tags": [
+          "fulfillment-routing-controller"
+        ],
+        "operationId": "decision",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "decisionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutingDecisionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/routing/capabilities": {
+      "get": {
+        "tags": [
+          "fulfillment-routing-controller"
+        ],
+        "operationId": "capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FulfillmentRoutingCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "StockSnapshotInput": {
+        "required": [
+          "availableQty",
+          "collectedAt",
+          "pathKind",
+          "platformCode",
+          "shopCode",
+          "skuRef"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "pathKind": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "warehouseRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "warehouseName": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          },
+          "availableQty": {
+            "type": "number"
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stockSource": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceReference": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "notes": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "StockSnapshotSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "pathKind": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_FBA",
+              "MERCHANT_OWN",
+              "THIRD_PARTY"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "McfAuthorizationInput": {
+        "required": [
+          "platformCode",
+          "shopCode",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "sourceReference": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "McfSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AUTHORIZED",
+              "DENIED",
+              "PENDING",
+              "UNKNOWN"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "RoutingEvaluationRequest": {
+        "required": [
+          "orderRef",
+          "platformCode",
+          "requestedQty",
+          "shopCode",
+          "skuRef"
+        ],
+        "type": "object",
+        "properties": {
+          "orderRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "orderLineRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "platformAvailableQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "RoutingCandidateRow": {
+        "type": "object",
+        "properties": {
+          "pathKind": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_FBA",
+              "MERCHANT_OWN",
+              "THIRD_PARTY"
+            ]
+          },
+          "availableQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "unitCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "leadTimeDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "feasible": {
+            "type": "boolean"
+          },
+          "infeasibleReasonCode": {
+            "type": "string"
+          },
+          "infeasibleReason": {
+            "type": "string"
+          },
+          "chosen": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RoutingEvaluation": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "policy": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_FIRST",
+              "COST_FIRST",
+              "MERCHANT_FIRST"
+            ]
+          },
+          "mcfStatus": {
+            "type": "string",
+            "enum": [
+              "AUTHORIZED",
+              "DENIED",
+              "PENDING",
+              "UNKNOWN"
+            ]
+          },
+          "mcfUsable": {
+            "type": "boolean"
+          },
+          "platformEligible": {
+            "type": "boolean"
+          },
+          "platformAvailableQty": {
+            "type": "number"
+          },
+          "platformUnitCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "merchantUnitCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "selectedUnitCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "chosenPath": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_FBA",
+              "MERCHANT_OWN",
+              "THIRD_PARTY"
+            ]
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoutingCandidateRow"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RoutingDecisionRequest": {
+        "required": [
+          "orderRef",
+          "platformCode",
+          "requestedQty",
+          "selectedPolicy",
+          "shopCode",
+          "skuRef"
+        ],
+        "type": "object",
+        "properties": {
+          "orderRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "orderLineRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "selectedPolicy": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "policySource": {
+            "type": "string",
+            "nullable": true
+          },
+          "forceMerchantPath": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "RoutingDecisionSaved": {
+        "type": "object",
+        "properties": {
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "chosenPath": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_FBA",
+              "MERCHANT_OWN",
+              "THIRD_PARTY"
+            ]
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "switchId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "switchTrigger": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_STOCK_SHORTAGE",
+              "PLATFORM_STOCK_MISSING",
+              "MCF_NOT_AUTHORIZED",
+              "COST_ADVANTAGE",
+              "LEAD_TIME_ADVANTAGE",
+              "MANUAL_OVERRIDE"
+            ]
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "DecisionStatusInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CostProfileInput": {
+        "required": [
+          "destinationCountryCode",
+          "pathKind",
+          "platformCode",
+          "unitCost"
+        ],
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "pathKind": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string"
+          },
+          "unitCost": {
+            "type": "number"
+          },
+          "leadTimeDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformFee": {
+            "type": "number"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CostProfileSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "pathKind": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_FBA",
+              "MERCHANT_OWN",
+              "THIRD_PARTY"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "RoutingSwitchRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decisionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "fromPath": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_FBA",
+              "MERCHANT_OWN",
+              "THIRD_PARTY"
+            ]
+          },
+          "toPath": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_FBA",
+              "MERCHANT_OWN",
+              "THIRD_PARTY"
+            ]
+          },
+          "triggerReason": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_STOCK_SHORTAGE",
+              "PLATFORM_STOCK_MISSING",
+              "MCF_NOT_AUTHORIZED",
+              "COST_ADVANTAGE",
+              "LEAD_TIME_ADVANTAGE",
+              "MANUAL_OVERRIDE"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "platformAvailableQty": {
+            "type": "number"
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "switchedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "switchSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          }
+        }
+      },
+      "SwitchPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoutingSwitchRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "StockSnapshotPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StockSnapshotRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "StockSnapshotRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "pathKind": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_FBA",
+              "MERCHANT_OWN",
+              "THIRD_PARTY"
+            ]
+          },
+          "warehouseRef": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "availableQty": {
+            "type": "number"
+          },
+          "collectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stockSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "McfAuthorizationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AUTHORIZED",
+              "DENIED",
+              "PENDING",
+              "UNKNOWN"
+            ]
+          },
+          "expired": {
+            "type": "boolean"
+          },
+          "authorizationSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "McfPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/McfAuthorizationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DecisionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoutingDecisionRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "platformPathCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "merchantPathCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "switchedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "RoutingDecisionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderRef": {
+            "type": "string"
+          },
+          "orderLineRef": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "selectedPolicy": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_FIRST",
+              "COST_FIRST",
+              "MERCHANT_FIRST"
+            ]
+          },
+          "policySource": {
+            "type": "string"
+          },
+          "chosenPath": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_FBA",
+              "MERCHANT_OWN",
+              "THIRD_PARTY"
+            ]
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "platformAvailableQty": {
+            "type": "number"
+          },
+          "platformUnitCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "merchantUnitCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "selectedUnitCost": {
+            "type": "number",
+            "nullable": true
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "mcfStatus": {
+            "type": "string",
+            "enum": [
+              "AUTHORIZED",
+              "DENIED",
+              "PENDING",
+              "UNKNOWN"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DECIDED",
+              "CONFIRMED",
+              "CANCELLED"
+            ]
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RoutingDecisionDetail": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "$ref": "#/components/schemas/RoutingDecisionRow"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoutingCandidateRow"
+            }
+          },
+          "switches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoutingSwitchRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoutingEventRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "RoutingEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CostProfilePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostProfileRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CostProfileRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "pathKind": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_FBA",
+              "MERCHANT_OWN",
+              "THIRD_PARTY"
+            ]
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "unitCost": {
+            "type": "number"
+          },
+          "leadTimeDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "platformFee": {
+            "type": "number"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Dimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "FulfillmentRoutingCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Dimension"
+            }
+          },
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PLATFORM_FBA",
+                "MERCHANT_OWN",
+                "THIRD_PARTY"
+              ]
+            }
+          },
+          "policies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PLATFORM_FIRST",
+                "COST_FIRST",
+                "MERCHANT_FIRST"
+              ]
+            }
+          },
+          "switchTriggers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PLATFORM_STOCK_SHORTAGE",
+                "PLATFORM_STOCK_MISSING",
+                "MCF_NOT_AUTHORIZED",
+                "COST_ADVANTAGE",
+                "LEAD_TIME_ADVANTAGE",
+                "MANUAL_OVERRIDE"
+              ]
+            }
+          },
+          "crossServiceReadAvailable": {
+            "type": "boolean"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

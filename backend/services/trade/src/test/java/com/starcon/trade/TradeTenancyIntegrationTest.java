@@ -72,6 +72,10 @@ class TradeTenancyIntegrationTest {
     r.add("DB_MIGRATION_USER", pg::getUsername);
     r.add("DB_MIGRATION_PASSWORD", pg::getPassword);
     r.add("spring.datasource.hikari.maximum-pool-size", () -> 1);
+    // AccessService（9.3.2.2 随第一条业务端点引入）是 @Value 注入的 Bean，
+    // 没有这两个属性时**整个上下文起不来** —— 与数据源无关，是构造器注入就失败。
+    r.add("IDENTITY_URL", () -> "http://localhost:8081");
+    r.add("INTERNAL_KEY", () -> "test-key");
   }
 
   @Autowired TenantTransactions tenants;
