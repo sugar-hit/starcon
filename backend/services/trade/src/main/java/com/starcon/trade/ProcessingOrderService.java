@@ -163,7 +163,7 @@ public class ProcessingOrderService {
                     + " from processing_factory"
                     + clause
                     + " order by code, id limit ? offset ?",
-                append(binds, size, page * size))
+                append(binds, size, page * size).toArray())
             .map(ProcessingOrderService::factoryRow);
     return new FactoryPage(
         items,
@@ -319,7 +319,7 @@ public class ProcessingOrderService {
         sql.fetch(
                 "select " + ORDER_COLUMNS + from + clause
                     + " order by o.due_on, o.id limit ? offset ?",
-                append(binds, size, page * size))
+                append(binds, size, page * size).toArray())
             .map(ProcessingOrderService::orderRow);
     return new ProcessingOrderPage(
         items,
@@ -566,9 +566,14 @@ public class ProcessingOrderService {
   }
 
   /**
-   * 入库实收回写：加工单转已入库，入库需求通知按实收数量转部分 / 全部入库。
+   * 入库实收回写：入库需求通知按实收数量转部分 / 全部入库。
    *
    * <p>实收不得超过需求（DB CHECK 也钉了这一条）：超收是凭空多出成品。
+   *
+   * <p><b>部分入库时加工单停在「已完工」，不转「已入库」</b>：已入库是终态
+   * （DB 触发器 6.6 钉死不可离开），若 10 件里先收 8 件就把单子推到终态，
+   * 剩下的 2 件将**永远没有地方登记** —— 那正是仓库账实不符的起点。
+   * 只有实收累计等于待入库量时才转已入库。
    */
   private void markReceived(
       UUID tenantId, UUID orderId, BigDecimal quantity, OffsetDateTime now,
@@ -602,10 +607,12 @@ public class ProcessingOrderService {
         now,
         ref,
         request.get("id", UUID.class));
+    // 部分入库：通知转 PARTIAL，加工单**留在已完工**，剩下的量还能继续登记。
+    // 全额入库：通知与加工单一起转已入库（终态）。
     sql.execute(
-        "update processing_order set status='RECEIVED',received_at=?::timestamptz,"
+        "update processing_order set status=?,received_at=?::timestamptz,"
             + "version=version+1,updated_at=now() where id=?",
-        now, orderId);
+        full ? "RECEIVED" : "COMPLETED", now, orderId);
   }
 
   /** 进度登记：只记「推进到哪、报了多少」，不改生命周期。 */
