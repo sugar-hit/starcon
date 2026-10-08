@@ -695,8 +695,15 @@ class CustomsAttributeIntegrationTest {
   void 裸sql写非法原产地被库层拒绝() {
     UUID sku = skuOf(actor, unique("DBORIGIN"));
     write(actor, () -> customs.save(actor, sku, defaultInput(0)));
+    // 入参用 **两位但非大写** 的 'c1'，而不是超长的 'CHN'：
+    // origin_country_code 是 varchar(2)（见 新表强制rls且数量列精度正确 与 V94 第一节），
+    // 超长值在 PostgreSQL 构造新元组时就被输入函数挡掉，报的是
+    // 「value too long for type character varying(2)」——
+    // 那条路径根本到不了 BEFORE 触发器与 CHECK，也就拿不到本断言要的可读中文。
+    // 'c1' 装得下 varchar(2)，于是它真正走到库层的规则 A1 CHECK 与触发器，
+    // 这才是本测试要证明的那一层。
     assertThatThrownBy(() -> tx(actor, () -> sql.execute(
-        "update customs_attribute set origin_country_code='CHN' where sku_id=?", sku)))
+        "update customs_attribute set origin_country_code='c1' where sku_id=?", sku)))
         .hasMessageContaining("原产地");
     assertThat(tx(actor, () -> customs.profile(sku)).originCountryCode()).isEqualTo("CN");
   }
@@ -732,7 +739,13 @@ class CustomsAttributeIntegrationTest {
   @Test
   void 裸sql审核通过但申报要素为空被触发器拒绝() {
     UUID sku = skuOf(actor, unique("DBA4"));
-    write(actor, () -> customs.save(actor, sku, defaultInput(0)));
+    // **要素必须是空的**：规则 A4 之一要求「审核通过前至少填写一条申报要素」，
+    // 而这条跨表约束只有触发器能钉（CHECK 看不到子表）。
+    // 这里必须用空清单而不是 defaultInput —— defaultInput 带的是两条已填齐的要素，
+    // 那样裸 SQL 审核通过本来就合法，触发器也就不会拒（与同文件的
+    // 审核通过前必须至少有一条申报要素 同一形状）。
+    write(actor, () -> customs.save(actor, sku,
+        input("851712", "CN", "手机", "1", "PCE", false, "", List.of(), 0)));
     write(actor, () -> customs.submit(actor, sku, new SubmitInput(1)));
     // 规则 A4 是跨表约束，只能靠触发器。
     assertThatThrownBy(() -> tx(actor, () -> sql.execute(
@@ -810,8 +823,13 @@ class CustomsAttributeIntegrationTest {
       var info = tx(actor, () -> sql.fetchOne(
           "select relrowsecurity,relforcerowsecurity from pg_class"
               + " where relname=? and relkind='r'", table));
-      assertThat(Boolean.TRUE.equals(info.get("relrowsecurity", Boolean.class)), table).isTrue();
-      assertThat(Boolean.TRUE.equals(info.get("relforcerowsecurity", Boolean.class)), table).isTrue();
+      // 注意：AssertJ 没有 assertThat(boolean, String) 这个重载，描述要用 .as() 挂。
+      assertThat(Boolean.TRUE.equals(info.get("relrowsecurity", Boolean.class)))
+          .as("表 %s 必须 ENABLE ROW LEVEL SECURITY", table)
+          .isTrue();
+      assertThat(Boolean.TRUE.equals(info.get("relforcerowsecurity", Boolean.class)))
+          .as("表 %s 必须 FORCE ROW LEVEL SECURITY —— 否则表 owner 可绕过策略", table)
+          .isTrue();
     }
     // 申报价值参考保持 NUMERIC(19,6)：禁浮点，且多给的小数位不该被静默四舍五入。
     var columns = tx(actor, () -> sql.fetch(
