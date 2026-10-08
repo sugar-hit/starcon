@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 112 |
+| 已交付 | 113 |
 | 进行中 | 0 |
-| **未开发** | **353** |
-| 完成率 | 24.1% |
+| **未开发** | **352** |
+| 完成率 | 24.3% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -26,7 +26,7 @@
 | **D4** | 6 | 0 | 54 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 1 | 0 | 77 | 78 |
-| **D7** | 3 | 0 | 152 | 155 |
+| **D7** | 4 | 0 | 151 | 155 |
 
 ## 分系统进度
 
@@ -41,7 +41,7 @@
 | 07 | 库存核算系统 | D3 | 20 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 8 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
-| 10 | 物流与头程系统 | D5 / D7 | 3 | 27 |
+| 10 | 物流与头程系统 | D5 / D7 | 4 | 27 |
 | 11 | 售后与退货系统 | D4 / D7 | 0 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
@@ -351,7 +351,7 @@
 | 10.4.2.2 | 备货预报 | — | D7 | 未开发 | — |
 | 10.5.1.1 | 报关单管理 | — | D7 | 已交付 | 迁移 warehouse `V85__warehouse_customs_declaration.sql`（customs_declaration 单头 + customs_declaration_line 申报明细行（HS 编码 / 申报要素 jsonb / 货值 / 毛净重 / 体积 / 箱数 / 计量单位）+ customs_document 三单据版本链 + customs_submission 提交回执 + customs_result 海关结果回执 + customs_declaration_event 事件时间线，六张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation）· **人工复核是硬闸**（蓝图原文：报关数据错误导致的扣货与罚款由卖家承担）：DB 触发器 guard_customs_state 钉死「只有已复核才能提交报关行」且判据是「本次要变 SUBMITTED」而不是「当前状态是什么」（后者会把 REVIEWED→SUBMITTED 这条合法提交误判）；guard_customs_review_completeness 在复核通过时逐行检查申报要素齐备性（只有 MANUAL_COMPLETE / MODULE_3_7_1_1_COMPLETE 放行）· **一票货只报一次关**：唯一约束 customs_declaration_tenant_id_source_shipment_id_key 钉死，来源是 10.4.1.1 头程发运单（同服务复合外键）· 端点 18 个挂在 /warehouse/customs-declarations：GET /capabilities、GET 列表（真分页 + **全量汇总不受分页影响**）、GET /{id}、GET /{id}/(documents |
 | 10.5.1.2 | 申报要素 | — | D7 | 未开发 | — |
-| 10.5.1.3 | 关税与税费 | — | D7 | 未开发 | — |
+| 10.5.1.3 | 关税与税费 | — | D7 | 已交付 | 迁移 warehouse `V90__warehouse_duty_and_tax.sql`（duty_tax_rate 税则税率表（目的国 + 适用范围 COUNTRY/HS + HS 前缀 + 生效期，带 tax_source 与出处，**税率是真实落库数据不是代码常量**）+ duty_tax_estimate 税费估算单头 + duty_tax_estimate_line 逐行明细（逐行按 HS 最长前缀匹配税率、把命中的税率值**抄进本行**、按申报货值比例分摊完税价/运费/保险、末行吃余数保证合计精确）+ duty_tax_payment 实际缴纳（**append-only**：REVOKE UPDATE/DELETE + 触发器，多缴走新增 REFUND/ADJUSTMENT 行）+ duty_tax_variance 估算与实缴差异（**append-only**，每次缴款落一条「对到本次为止」的快照 + 归因 + 复核痕迹），五张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation · **「估算与实缴差异要记录」钉进 DB**：蓝图原文加粗要求，延迟约束触发器 duty_payment_has_variance 在提交时核对「有实缴却没有对应差异记录」就报 23514 —— 绕过服务层直接写 SQL 同样被挡，所以「先存实缴、差异以后再补」在本模块做不到；归因建在差异那一刻，不提供事后改写（已归因的差异是纠错闭环的证据）· **0% 税率合法、「没匹配到税率」不合法**：tax_source CHECK 允许 0%（英国零税率/免税供货是真实配置），而 guard_duty_estimate_lock_completeness 拒绝带 NO_MATCH 关税行、无 HS 码行或未配 VAT 税率行的锁定 —— 按 0 税锁定的估算单会让报价与到岸成本少算税 · **DDP/DDU 改变成本归属不改变税率**：guard_duty_landed_cost 钉死 DDU 下 landed_cost_seller 必须等于不含税的货值+运费+保险+其他（否则 `DDP⟹SELLER`/`DDU⟹BUYER` CHECK 也会拒）· 金额 numeric(19,4) + 税率 numeric(9,6) + 数量 numeric(19,6)，结算口径**统一 HALF_UP 到分**（Java setScale(2,HALF_UP) 与 DB round(x,2) 两处一致，延迟约束在提交时复核）· 上游 10.5.1.1 报关单（V85）**只读**、建复合外键，跨车道回归面 = 0；本迁移**不 ALTER 任何既有表** · 端点 13 个挂在 /warehouse/duty-taxes：GET /capabilities、GET 集合读（真分页 + **全量汇总不受分页影响**）、GET /{id}、GET /{id}/(lines |
 | 10.5.2.1 | 贸易单证 | — | D7 | 未开发 | — |
 | 10.6.1.1 | 成本分析 | — | D5 | 未开发 | — |
 | 10.6.2.1 | 时效分析 | — | D5 | 未开发 | — |
