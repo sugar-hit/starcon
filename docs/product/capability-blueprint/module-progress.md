@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 113 |
+| 已交付 | 114 |
 | 进行中 | 0 |
-| **未开发** | **352** |
-| 完成率 | 24.3% |
+| **未开发** | **351** |
+| 完成率 | 24.5% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -26,7 +26,7 @@
 | **D4** | 6 | 0 | 54 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 1 | 0 | 77 | 78 |
-| **D7** | 4 | 0 | 151 | 155 |
+| **D7** | 5 | 0 | 150 | 155 |
 
 ## 分系统进度
 
@@ -41,7 +41,7 @@
 | 07 | 库存核算系统 | D3 | 20 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 8 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
-| 10 | 物流与头程系统 | D5 / D7 | 4 | 27 |
+| 10 | 物流与头程系统 | D5 / D7 | 5 | 27 |
 | 11 | 售后与退货系统 | D4 / D7 | 0 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
@@ -352,7 +352,7 @@
 | 10.5.1.1 | 报关单管理 | — | D7 | 已交付 | 迁移 warehouse `V85__warehouse_customs_declaration.sql`（customs_declaration 单头 + customs_declaration_line 申报明细行（HS 编码 / 申报要素 jsonb / 货值 / 毛净重 / 体积 / 箱数 / 计量单位）+ customs_document 三单据版本链 + customs_submission 提交回执 + customs_result 海关结果回执 + customs_declaration_event 事件时间线，六张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation）· **人工复核是硬闸**（蓝图原文：报关数据错误导致的扣货与罚款由卖家承担）：DB 触发器 guard_customs_state 钉死「只有已复核才能提交报关行」且判据是「本次要变 SUBMITTED」而不是「当前状态是什么」（后者会把 REVIEWED→SUBMITTED 这条合法提交误判）；guard_customs_review_completeness 在复核通过时逐行检查申报要素齐备性（只有 MANUAL_COMPLETE / MODULE_3_7_1_1_COMPLETE 放行）· **一票货只报一次关**：唯一约束 customs_declaration_tenant_id_source_shipment_id_key 钉死，来源是 10.4.1.1 头程发运单（同服务复合外键）· 端点 18 个挂在 /warehouse/customs-declarations：GET /capabilities、GET 列表（真分页 + **全量汇总不受分页影响**）、GET /{id}、GET /{id}/(documents |
 | 10.5.1.2 | 申报要素 | — | D7 | 未开发 | — |
 | 10.5.1.3 | 关税与税费 | — | D7 | 已交付 | 迁移 warehouse `V90__warehouse_duty_and_tax.sql`（duty_tax_rate 税则税率表（目的国 + 适用范围 COUNTRY/HS + HS 前缀 + 生效期，带 tax_source 与出处，**税率是真实落库数据不是代码常量**）+ duty_tax_estimate 税费估算单头 + duty_tax_estimate_line 逐行明细（逐行按 HS 最长前缀匹配税率、把命中的税率值**抄进本行**、按申报货值比例分摊完税价/运费/保险、末行吃余数保证合计精确）+ duty_tax_payment 实际缴纳（**append-only**：REVOKE UPDATE/DELETE + 触发器，多缴走新增 REFUND/ADJUSTMENT 行）+ duty_tax_variance 估算与实缴差异（**append-only**，每次缴款落一条「对到本次为止」的快照 + 归因 + 复核痕迹），五张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation · **「估算与实缴差异要记录」钉进 DB**：蓝图原文加粗要求，延迟约束触发器 duty_payment_has_variance 在提交时核对「有实缴却没有对应差异记录」就报 23514 —— 绕过服务层直接写 SQL 同样被挡，所以「先存实缴、差异以后再补」在本模块做不到；归因建在差异那一刻，不提供事后改写（已归因的差异是纠错闭环的证据）· **0% 税率合法、「没匹配到税率」不合法**：tax_source CHECK 允许 0%（英国零税率/免税供货是真实配置），而 guard_duty_estimate_lock_completeness 拒绝带 NO_MATCH 关税行、无 HS 码行或未配 VAT 税率行的锁定 —— 按 0 税锁定的估算单会让报价与到岸成本少算税 · **DDP/DDU 改变成本归属不改变税率**：guard_duty_landed_cost 钉死 DDU 下 landed_cost_seller 必须等于不含税的货值+运费+保险+其他（否则 `DDP⟹SELLER`/`DDU⟹BUYER` CHECK 也会拒）· 金额 numeric(19,4) + 税率 numeric(9,6) + 数量 numeric(19,6)，结算口径**统一 HALF_UP 到分**（Java setScale(2,HALF_UP) 与 DB round(x,2) 两处一致，延迟约束在提交时复核）· 上游 10.5.1.1 报关单（V85）**只读**、建复合外键，跨车道回归面 = 0；本迁移**不 ALTER 任何既有表** · 端点 13 个挂在 /warehouse/duty-taxes：GET /capabilities、GET 集合读（真分页 + **全量汇总不受分页影响**）、GET /{id}、GET /{id}/(lines |
-| 10.5.2.1 | 贸易单证 | — | D7 | 未开发 | — |
+| 10.5.2.1 | 贸易单证 | — | D7 | 已交付 | 迁移 warehouse `V91__warehouse_trade_documents.sql`（trade_document_rule 目的地国家单证要求（目的国 × 单证类型 × 必备程度 MANDATORY/CONDITIONAL/OPTIONAL × 有效期，**要求是数据不是代码常量**）+ trade_document_template 单证模板（**版本链** supersedes_template_id，空模板体被拒——空模板生成出来的单证等于没备证）+ trade_certification_status 认证状态登记（**16 合规尚未交付的替代来源**，每行带 certification_source TENANT_MAINTAINED/MODULE_16 + source_reference 如实标注）+ trade_origin_preference_rule FTA 优惠规则（RCEP/CO/FTA + PSR + **substantive_change_criterion 人读条件口径** + requires_business_confirmation）+ trade_document_set 单证包头 + trade_document 单证本体（内容快照 + 版本链 supersedes_document_id + FTA 字段与确认痕迹）+ trade_document_check 完整性校验结论（**append-only**）+ trade_document_reminder 缺失提醒（可处理工作项，处理必须写说明）+ trade_document_event 事件时间线，九张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation）· **「实质性改变」系统不下结论**（蓝图加粗句是硬边界）：本模块**不存在任何自动判定逻辑**，「CONFIRMED」的语义明确是「有人留痕确认过」而非「系统判定法律上成立」；落法是四件事且每件都落库 —— ① 规则表存**条件描述**（人读口径，不做成可执行表达式，否则等于让运营在无评审的情况下定义报关规则）+ requires_business_confirmation 默认 true；② 只校验**流程**事实（有没有 confirmed_at/confirmed_by、确认依据是否非空），不校验法律事实；③ 留档（单证上落 substantive_change_status/note/business_confirmed_at/by/preference_rule_version 并进事件时间线）；④ **把待确认项显式标出来**：DB 触发器 guard_trade_3_preference 钉死「主张优惠但没业务确认 → 不许进 APPROVED/SUBMITTED/ACKNOWLEDGED」，同时写一条 reminder_type='UNCONFIRMED_SUBSTANTIVE_CHANGE' + severity='BLOCKER' · **「待业务确认」刻意不是「通过」**：CheckResult 枚举单列 PENDING_BUSINESS_CONFIRMATION（没有 NOT_CHECKED 混入「查过但没过」），DB CHECK 钉死 result<>'PASS' OR (missing_count=0 AND pending_business_count=0)，前端 checkPassed() 只认 PASS、substantiveChangeBlocking() 只认 PENDING_BUSINESS_CONFIRMATION —— 这样界面不会许诺「优惠已通过」这种还没人拍板的结论 · **有条件必备（CONDITIONAL）的条件是人口径，系统不执行**：缺失时只报 WARNING 级提醒请人判断（items 里标 CONDITIONAL_REVIEW_REQUIRED），**不自动判成必备或可省** · **「没配规则」= 校验不通过**，不是「没有要求就算通过」：没有定义要求就无法断言齐不齐，故此场景 required 与 missing 同时 +1（同时满足 satisfied+missing<=required 的 DB CHECK）· **来源判据用状态机不用时间戳**：`submitted_at` 一旦打上就永不消失（被退回的单也留着），用它判「是否已报关」会把退回草稿的单错判成已报关，所以 createSet 拒绝 DRAFT/PENDING_REVIEW/REJECTED/CANCELLED 的报关单 · **单证内容快照不被报关明细改写**：单证生成时把行明细抄进 content jsonb 并锁版本链，上游报关明细后续变更不会回改已出的单证 · **金额 numeric(19,4) + 数量 numeric(19,6)**，结算口径**统一 HALF_UP 到分**（Java setScale(2,HALF_UP) 与 DB round(x,2) 两处一致；建包金额从报关单快照按 HALF_UP 到分，测试同时断言 Java 侧 2000.01 与读回 2000.0100）· 时间字段一律 timestamptz + `?::timestamptz` 绑 OffsetDateTime（**禁 Timestamp.valueOf(LocalDateTime…)**，会静默偏 −28800s），测试断言往返零漂移 · DEFERRABLE 约束触发器里**不使用 NEW**、回表读当前行（照抄 V85 guard_customs_rate_snapshot 写法；另 UPDATE SET col=(select … 引用本表) 因目标列在子查询不可见会报 column does not exist，故 refreshTotals 改成先 SELECT 算好再 UPDATE）· 提交两道闸：guard_trade_2_submit_gate 要求「最近一次校验 PASS 且无未处理 BLOCKER 提醒」，优惠确认是第一道；校验重跑时把上一轮不再报的提醒**显式自动结清**（带说明与处理人），否则历史阻断会永久挡住已补齐的单证包 · 上游 10.5.1.1 报关单（V85）与 10.5.1.3 关税（V90）**只读** + 建在复合唯一键上的外键，本迁移**不 ALTER 任何既有表**，跨车道回归面 = 0 · 端点挂在 /warehouse/trade-documents（与 customs-declarations / duty-taxes / first-mile-shipments 同级，**不进 inventory/**）：GET /capabilities、GET 集合读（真分页 + **全量汇总不受分页影响**）、GET /{id}、GET /{id}/(documents |
 | 10.6.1.1 | 成本分析 | — | D5 | 未开发 | — |
 | 10.6.2.1 | 时效分析 | — | D5 | 未开发 | — |
 | 10.7.1.1 | 退货接收与处置决策 | — | D5 | 未开发 | — |

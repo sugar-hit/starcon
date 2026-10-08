@@ -61,12 +61,300 @@
         }
       }
     },
+    "/warehouse/trade-documents/{setId}": {
+      "get": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeSetDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeSetUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/templates/{templateId}": {
+      "put": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "updateTemplate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "templateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeTemplateUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeTemplateSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/rules/{ruleId}": {
+      "put": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "updateRule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeRuleUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeRuleSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/preference-rules/{ruleId}": {
+      "put": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "updatePreferenceRule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradePreferenceRuleUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradePreferenceRuleSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/certifications/{certificationId}": {
+      "put": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "updateCertification",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "certificationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeCertificationUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeCertificationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/transfers/{orderId}": {
       "get": {
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "detail",
+        "operationId": "detail_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -104,7 +392,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "update",
+        "operationId": "update_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -192,7 +480,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "update_1",
+        "operationId": "update_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -311,7 +599,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "updateTemplate",
+        "operationId": "updateTemplate_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -618,7 +906,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "update_2",
+        "operationId": "update_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -668,7 +956,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "detail_1",
+        "operationId": "detail_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -706,7 +994,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "update_3",
+        "operationId": "update_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -756,7 +1044,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "detail_2",
+        "operationId": "detail_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -794,7 +1082,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "update_4",
+        "operationId": "update_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -844,7 +1132,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "detail_3",
+        "operationId": "detail_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -882,7 +1170,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "update_5",
+        "operationId": "update_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -932,7 +1220,7 @@
         "tags": [
           "warehouse-detail-controller"
         ],
-        "operationId": "detail_4",
+        "operationId": "detail_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -970,7 +1258,7 @@
         "tags": [
           "warehouse-detail-controller"
         ],
-        "operationId": "update_6",
+        "operationId": "update_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -1020,7 +1308,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "detail_5",
+        "operationId": "detail_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -1058,7 +1346,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "update_7",
+        "operationId": "update_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -1158,7 +1446,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "detail_6",
+        "operationId": "detail_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -1196,7 +1484,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "update_8",
+        "operationId": "update_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -1760,6 +2048,1435 @@
         }
       }
     },
+    "/warehouse/trade-documents": {
+      "get": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "page_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "destinationCountryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceDeclarationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "latestCheckResult",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "blockedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeSetPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "create_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeSetCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/withdraw-review": {
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "withdrawReview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeSetWithdrawReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/submit": {
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "submit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeSetSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/submit-for-review": {
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "submitForReview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeSetReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/send-back": {
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "sendBack",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeSetSendBackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/review": {
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "review",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeSetReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/reject-review": {
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "rejectReview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeSetRejectReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/documents": {
+      "get": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "documents",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TradeDocumentRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "generateDocument",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeDocumentCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeDocumentSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/documents/{documentId}/preference-confirm": {
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "confirmPreference",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradePreferenceClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeDocumentSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/documents/{documentId}/preference-claim": {
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "claimPreference",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradePreferenceClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeDocumentSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/documents/{documentId}/finalize": {
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "finalizeDocument",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeDocumentFinalizeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeDocumentSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/check": {
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "runCheck",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/cancel": {
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "cancel",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeSetCancelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/acknowledge": {
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "acknowledge_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeSetAcknowledgeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/templates": {
+      "get": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "templates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "documentKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeTemplatePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "createTemplate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeTemplateCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeTemplateSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/rules": {
+      "get": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "rules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requirementLevel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "createRule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeRuleCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeRuleSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/reminders/{reminderId}/resolve": {
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "resolveReminder",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reminderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeReminderResolveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeReminderSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/preference-rules": {
+      "get": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "preferenceRules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "scheme",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "destinationCountryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradePreferenceRulePage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "createPreferenceRule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradePreferenceRuleCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradePreferenceRuleSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/certifications": {
+      "get": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "certifications",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "certificationSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeCertificationPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "createCertification",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeCertificationCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeCertificationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/labor/work-tasks": {
       "get": {
         "tags": [
@@ -1856,7 +3573,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "create_1",
+        "operationId": "create_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -2096,7 +3813,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "page_1",
+        "operationId": "page_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -2199,7 +3916,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "create_2",
+        "operationId": "create_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -2781,7 +4498,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "submit",
+        "operationId": "submit_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -2931,7 +4648,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "cancel",
+        "operationId": "cancel_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -3673,7 +5390,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "templates",
+        "operationId": "templates_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -3738,7 +5455,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "createTemplate",
+        "operationId": "createTemplate_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -3902,7 +5619,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "rules",
+        "operationId": "rules_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -4373,7 +6090,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "rules_1",
+        "operationId": "rules_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -4483,7 +6200,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "createRule",
+        "operationId": "createRule_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -4950,7 +6667,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "create_3",
+        "operationId": "create_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -5123,7 +6840,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "cancel_1",
+        "operationId": "cancel_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -5306,7 +7023,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "create_4",
+        "operationId": "create_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -5347,7 +7064,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "page_2",
+        "operationId": "page_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -5729,7 +7446,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "page_3",
+        "operationId": "page_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -5850,7 +7567,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "create_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -6141,7 +7858,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "cancel_2",
+        "operationId": "cancel_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -6264,7 +7981,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "create_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -7077,7 +8794,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "create_7",
+        "operationId": "create_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -7351,7 +9068,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "create_8",
+        "operationId": "create_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -7685,7 +9402,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "page_4",
+        "operationId": "page_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -7781,7 +9498,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "create_9",
+        "operationId": "create_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -7922,7 +9639,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "page_5",
+        "operationId": "page_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -8390,7 +10107,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "page_6",
+        "operationId": "page_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -8516,7 +10233,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "create_10",
+        "operationId": "create_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -8657,7 +10374,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "cancel_3",
+        "operationId": "cancel_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -8805,7 +10522,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "create_11",
+        "operationId": "create_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -8846,7 +10563,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "page_7",
+        "operationId": "page_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -8971,7 +10688,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "create_12",
+        "operationId": "create_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -9409,7 +11126,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "page_8",
+        "operationId": "page_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -9526,7 +11243,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "create_13",
+        "operationId": "create_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -9567,7 +11284,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "withdrawReview",
+        "operationId": "withdrawReview_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -9617,7 +11334,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "submit_1",
+        "operationId": "submit_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -9667,7 +11384,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "submitForReview",
+        "operationId": "submitForReview_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -9717,7 +11434,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "review",
+        "operationId": "review_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -9858,7 +11575,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "rejectReview",
+        "operationId": "rejectReview_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -9908,7 +11625,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "documents",
+        "operationId": "documents_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -9949,7 +11666,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "generateDocument",
+        "operationId": "generateDocument_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -9999,7 +11716,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "finalizeDocument",
+        "operationId": "finalizeDocument_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -10058,7 +11775,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "cancel_4",
+        "operationId": "cancel_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -10192,7 +11909,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "detail_7",
+        "operationId": "detail_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -10366,6 +12083,358 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/DelayAlertPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/reminders": {
+      "get": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "remindersOf",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TradeReminderRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/events": {
+      "get": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TradeEventRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/{setId}/checks": {
+      "get": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "checks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TradeCheckRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/reminders": {
+      "get": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "reminders",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reminderType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeReminderPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/preference-confirmations": {
+      "get": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "preferenceConfirmations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "setId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "substantiveChangeStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ftaScheme",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "claimedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradePreferenceConfirmationPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/trade-documents/capabilities": {
+      "get": {
+        "tags": [
+          "trade-document-controller"
+        ],
+        "operationId": "capabilities_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeDocumentCapabilities"
                 }
               }
             }
@@ -10861,7 +12930,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "capabilities_1",
+        "operationId": "capabilities_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -11361,7 +13430,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "capabilities_2",
+        "operationId": "capabilities_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -12433,7 +14502,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "capabilities_3",
+        "operationId": "capabilities_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -12718,7 +14787,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "capabilities_4",
+        "operationId": "capabilities_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -12895,7 +14964,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "detail_8",
+        "operationId": "detail_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -12935,7 +15004,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -12966,7 +15035,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -13357,7 +15426,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_9",
+        "operationId": "detail_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -13505,7 +15574,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "page_9",
+        "operationId": "page_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -14325,7 +16394,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_10",
+        "operationId": "detail_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -14781,7 +16850,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -14812,7 +16881,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -15096,7 +17165,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "detail_11",
+        "operationId": "detail_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -15136,7 +17205,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -15312,7 +17381,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -15738,7 +17807,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -15769,7 +17838,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "detail_12",
+        "operationId": "detail_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -15809,7 +17878,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_12",
+        "operationId": "capabilities_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -15969,7 +18038,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "capabilities_13",
+        "operationId": "capabilities_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -16166,7 +18235,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_14",
+        "operationId": "capabilities_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -16343,7 +18412,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "capabilities_15",
+        "operationId": "capabilities_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -16374,7 +18443,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "events",
+        "operationId": "events_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -16417,7 +18486,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "capabilities_16",
+        "operationId": "capabilities_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -16506,6 +18575,284 @@
           "inUse": {
             "type": "boolean",
             "description": "是否当前在途批次实际命中的那一行"
+          }
+        }
+      },
+      "TradeSetUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "submittedTo": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "setCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeTemplateUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "templateBody": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeTemplateSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeRuleUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requirementLevel": {
+            "type": "string"
+          },
+          "conditionExpression": {
+            "type": "string"
+          },
+          "requiresCertification": {
+            "type": "boolean"
+          },
+          "ruleSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeRuleSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "documentKind": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "TradePreferenceRuleUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "preferenceCriteria": {
+            "type": "string"
+          },
+          "substantiveChangeCriterion": {
+            "type": "string"
+          },
+          "requiresBusinessConfirmation": {
+            "type": "boolean"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "ruleSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "TradePreferenceRuleSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scheme": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeCertificationUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          },
+          "certificateNo": {
+            "type": "string"
+          },
+          "issuingBody": {
+            "type": "string"
+          },
+          "issuedOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "documentRef": {
+            "type": "string"
+          },
+          "certificationSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeCertificationSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "certificationCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "message": {
+            "type": "string"
           }
         }
       },
@@ -18160,6 +20507,370 @@
           "note": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "TradeSetCreateRequest": {
+        "type": "object",
+        "properties": {
+          "sourceDeclarationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeSetWithdrawReviewRequest": {
+        "type": "object",
+        "properties": {
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeSetSubmitRequest": {
+        "type": "object",
+        "properties": {
+          "submittedTo": {
+            "type": "string"
+          },
+          "submissionReference": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeSetReviewRequest": {
+        "type": "object",
+        "properties": {
+          "reviewNotes": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeSetSendBackRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeSetRejectReviewRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeDocumentCreateRequest": {
+        "type": "object",
+        "properties": {
+          "documentKind": {
+            "type": "string"
+          },
+          "templateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentNo": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "quantityTotal": {
+            "type": "number"
+          },
+          "packageCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeDocumentSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "setId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentKind": {
+            "type": "string"
+          },
+          "documentKindLabel": {
+            "type": "string"
+          },
+          "documentVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "TradePreferenceClaimRequest": {
+        "type": "object",
+        "properties": {
+          "ftaScheme": {
+            "type": "string"
+          },
+          "originCountryCode": {
+            "type": "string"
+          },
+          "preferenceRuleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "substantiveChangeNote": {
+            "type": "string"
+          },
+          "confirmed": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TradeDocumentFinalizeRequest": {
+        "type": "object",
+        "properties": {
+          "documentNo": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeSetCancelRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeSetAcknowledgeRequest": {
+        "type": "object",
+        "properties": {
+          "acknowledgementReference": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeTemplateCreateRequest": {
+        "type": "object",
+        "properties": {
+          "templateCode": {
+            "type": "string"
+          },
+          "documentKind": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "templateBody": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeRuleCreateRequest": {
+        "type": "object",
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "documentKind": {
+            "type": "string"
+          },
+          "requirementLevel": {
+            "type": "string"
+          },
+          "conditionExpression": {
+            "type": "string"
+          },
+          "requiresCertification": {
+            "type": "boolean"
+          },
+          "ruleSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeReminderResolveRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "resolutionNote": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeReminderSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "TradePreferenceRuleCreateRequest": {
+        "type": "object",
+        "properties": {
+          "scheme": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "productScope": {
+            "type": "string"
+          },
+          "hsPrefix": {
+            "type": "string"
+          },
+          "preferenceCriteria": {
+            "type": "string"
+          },
+          "substantiveChangeCriterion": {
+            "type": "string"
+          },
+          "requiresBusinessConfirmation": {
+            "type": "boolean"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "ruleSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeCertificationCreateRequest": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "certificationCode": {
+            "type": "string"
+          },
+          "certificationName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "certificateNo": {
+            "type": "string"
+          },
+          "issuingBody": {
+            "type": "string"
+          },
+          "issuedOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "documentRef": {
+            "type": "string"
+          },
+          "certificationSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
           }
         }
       },
@@ -25495,6 +28206,1286 @@
             "items": {
               "$ref": "#/components/schemas/TrackingOption"
             }
+          }
+        }
+      },
+      "TradeCheckResultOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeSetPage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/TradeSetSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeSetRow"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeStatusOption"
+            }
+          },
+          "checkResults": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeCheckResultOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TradeSetRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "setCode": {
+            "type": "string"
+          },
+          "sourceDeclarationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceDeclarationCode": {
+            "type": "string"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "exporterName": {
+            "type": "string"
+          },
+          "consigneeName": {
+            "type": "string"
+          },
+          "consigneeCountryCode": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "documentCurrency": {
+            "type": "string"
+          },
+          "totalDeclaredValue": {
+            "type": "number"
+          },
+          "totalDocumentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requiredDocumentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingDocumentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingBusinessCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "latestCheckResult": {
+            "type": "string"
+          },
+          "latestCheckResultLabel": {
+            "type": "string"
+          },
+          "latestCheckAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "reviewRound": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TradeSetSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draft": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "underReview": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "approved": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "submitted": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "blocked": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingBusiness": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalDeclaredValue": {
+            "type": "number"
+          },
+          "documentCurrency": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeStatusOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeCheckRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "setId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "checkRound": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "result": {
+            "type": "string"
+          },
+          "resultLabel": {
+            "type": "string"
+          },
+          "requiredCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "satisfiedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "missingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendingBusinessCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ruleCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "missingSummary": {
+            "type": "string"
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "checkedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TradeDocumentKindOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "originCertificate": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TradeDocumentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "setId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "documentKind": {
+            "type": "string"
+          },
+          "documentKindLabel": {
+            "type": "string"
+          },
+          "documentNo": {
+            "type": "string"
+          },
+          "documentVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "templateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "quantityTotal": {
+            "type": "number"
+          },
+          "packageCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "ftaScheme": {
+            "type": "string"
+          },
+          "preferenceClaimed": {
+            "type": "boolean"
+          },
+          "originCountryCode": {
+            "type": "string"
+          },
+          "preferenceRuleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "substantiveChangeStatus": {
+            "type": "string"
+          },
+          "substantiveChangeStatusLabel": {
+            "type": "string"
+          },
+          "substantiveChangeNote": {
+            "type": "string"
+          },
+          "businessConfirmedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "businessConfirmedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "preferenceRuleVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          },
+          "supersedesDocumentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "preparedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TradeEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "setId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "kindLabel": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetKind": {
+            "type": "string"
+          },
+          "targetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TradeReminderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "setId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "checkId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentKind": {
+            "type": "string"
+          },
+          "documentKindLabel": {
+            "type": "string"
+          },
+          "reminderType": {
+            "type": "string"
+          },
+          "reminderTypeLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "severityLabel": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resolutionNote": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TradeSetDetail": {
+        "type": "object",
+        "properties": {
+          "set": {
+            "$ref": "#/components/schemas/TradeSetRow"
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeDocumentRow"
+            }
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeCheckRow"
+            }
+          },
+          "reminders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeReminderRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeEventRow"
+            }
+          },
+          "allowedNext": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeTransition"
+            }
+          },
+          "documentKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeDocumentKindOption"
+            }
+          }
+        }
+      },
+      "TradeTransition": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "fromLabel": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "toLabel": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeTemplatePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeTemplateRow"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeStatusOption"
+            }
+          },
+          "documentKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeDocumentKindOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TradeTemplateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "documentKind": {
+            "type": "string"
+          },
+          "documentKindLabel": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "templateVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "templateBody": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "supersedesTemplateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TradeRequirementOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeRulePage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/TradeRuleSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeRuleRow"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeStatusOption"
+            }
+          },
+          "requirementLevels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeRequirementOption"
+            }
+          },
+          "documentKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeDocumentKindOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TradeRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "documentKind": {
+            "type": "string"
+          },
+          "documentKindLabel": {
+            "type": "string"
+          },
+          "requirementLevel": {
+            "type": "string"
+          },
+          "requirementLevelLabel": {
+            "type": "string"
+          },
+          "conditionExpression": {
+            "type": "string"
+          },
+          "requiresCertification": {
+            "type": "boolean"
+          },
+          "ruleSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TradeRuleSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "active": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "retired": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mandatory": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "certificationRequired": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TradeCheckSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pass": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fail": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingBusiness": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openBlockers": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openWarnings": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TradeReminderPage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/TradeCheckSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeReminderRow"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeStatusOption"
+            }
+          },
+          "documentKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeDocumentKindOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TradePreferenceRulePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradePreferenceRuleRow"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeStatusOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TradePreferenceRuleRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scheme": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "productScope": {
+            "type": "string"
+          },
+          "hsPrefix": {
+            "type": "string"
+          },
+          "preferenceCriteria": {
+            "type": "string"
+          },
+          "substantiveChangeCriterion": {
+            "type": "string"
+          },
+          "requiresBusinessConfirmation": {
+            "type": "boolean"
+          },
+          "validFrom": {
+            "type": "string",
+            "format": "date"
+          },
+          "validTo": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "ruleSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TradePreferenceConfirmationPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradePreferenceConfirmationRow"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeSubstantiveChangeOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TradePreferenceConfirmationRow": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentKind": {
+            "type": "string"
+          },
+          "documentKindLabel": {
+            "type": "string"
+          },
+          "documentNo": {
+            "type": "string"
+          },
+          "ftaScheme": {
+            "type": "string"
+          },
+          "originCountryCode": {
+            "type": "string"
+          },
+          "preferenceClaimed": {
+            "type": "boolean"
+          },
+          "substantiveChangeStatus": {
+            "type": "string"
+          },
+          "substantiveChangeStatusLabel": {
+            "type": "string"
+          },
+          "substantiveChangeNote": {
+            "type": "string"
+          },
+          "businessConfirmedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "businessConfirmedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "preferenceRuleVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TradeSubstantiveChangeOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "blocking": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TradeCertificationOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeCertificationPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeCertificationRow"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeCertificationOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TradeCertificationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "certificationCode": {
+            "type": "string"
+          },
+          "certificationName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "certificateNo": {
+            "type": "string"
+          },
+          "issuingBody": {
+            "type": "string"
+          },
+          "issuedOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "expiresOn": {
+            "type": "string",
+            "format": "date"
+          },
+          "documentRef": {
+            "type": "string"
+          },
+          "certificationSource": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TradeDimension": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeDocumentCapabilities": {
+        "type": "object",
+        "properties": {
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeDimension"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeTransition"
+            }
+          },
+          "statusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeStatusOption"
+            }
+          },
+          "documentKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeDocumentKindOption"
+            }
+          },
+          "requirementLevels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeRequirementOption"
+            }
+          },
+          "substantiveChangeStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeSubstantiveChangeOption"
+            }
+          },
+          "checkResults": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeCheckResultOption"
+            }
+          },
+          "certificationStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeCertificationOption"
+            }
+          },
+          "reminderTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeReminderTypeOption"
+            }
+          },
+          "substantiveChangeNote": {
+            "type": "string"
+          },
+          "submitGateNote": {
+            "type": "string"
+          },
+          "ruleDataNote": {
+            "type": "string"
+          },
+          "certificationSourceNote": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeReminderTypeOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
           }
         }
       },
