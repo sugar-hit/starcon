@@ -9,6 +9,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.springframework.http.HttpStatus;
@@ -278,16 +279,38 @@ public class CustomsAttributeService {
       List<DeclarationElementInput> elements) {}
 
   /**
+   * 把 Rules 的失败契约翻译成服务层的失败契约：<b>类型翻译，不是吞异常</b>。
+   *
+   * <p>{@link CustomsAttributeRules} 是纯函数、不依赖 Web 层，所以它用
+   * {@link IllegalArgumentException} 表达「入参非法」；但本服务的所有失败出口都是
+   * {@link ResponseStatusException}（{@code CatalogService.check} 也是这么写的），
+   * 状态码与文案都挂在异常上。少了这一步翻译，一次 HS 编码填错会以
+   * {@code IllegalArgumentException} 的形态漏到 {@code ApiErrorHandler}，
+   * 运营看到的是「字段格式不正确」而不是「必须 6–10 位纯数字」——
+   * 而后者才是他要的下一步动作。
+   *
+   * <p>文案原样透传、异常照传（{@code cause} 不丢），所以单元测试仍可在 Rules 上
+   * 逐条断言 {@link IllegalArgumentException}，服务层则拿到带 400 的异常。
+   */
+  private static <T> T rule(Supplier<T> rule) {
+    try {
+      return rule.get();
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+  }
+
+  /**
    * 校验与归一化。
    *
    * <p>应用层先拦一次是给<b>可读的中文错误</b>，DB 层的 CHECK 与触发器是兜底而不是唯一防线
    * （V94 第三节的纪律）：一条裸 SQL 改不出可读的中文报错，而运营看不懂「23514」。
    */
   private Normalized validate(UUID tenantId, UUID skuId, CustomsInput input) {
-    String hsCode = normalizeHsCode(input.hsCode());
-    String origin = normalizeCountryCode(input.originCountryCode(), "原产地");
+    String hsCode = rule(() -> normalizeHsCode(input.hsCode()));
+    String origin = rule(() -> normalizeCountryCode(input.originCountryCode(), "原产地"));
     String agreement =
-        normalizePreference(input.preferentialOriginEligible(), input.preferenceAgreement());
+        rule(() -> normalizePreference(input.preferentialOriginEligible(), input.preferenceAgreement()));
     String declaredName = input.declaredName().trim();
     String statutoryUnit = input.statutoryUnitCode().trim();
     String note = input.note() == null ? "" : input.note().trim();
@@ -339,10 +362,20 @@ public class CustomsAttributeService {
   }
 
   /**
-   * 写属性行：{@code ON CONFLICT (tenant_id,sku_id)} 原地更新 + 乐观锁。
+   * 写属性行：先原地更新（带乐观锁），没有行时再插入（与
+   * {@code PhysicalSafetyService.writeSafety} 同一套形状）。
    *
-   * <p>并发编辑两个人都提交时，后到的那个撞 409 而不是静默覆盖先到的申报事实
-   * （与 sku_package / sku_safety_attribute 同一套口径）。
+   * <p><b>并发编辑两个人都提交时，后到的那个撞 409</b> 而不是静默覆盖先到的申报事实。
+   * 状态码必须是 <b>409 而不是 400</b>：400 说的是「你这次请求写错了，请改输入」，
+   * 而这里请求本身完全合法、错的是**库里的状态已经变了**（全服务统一口径见
+   * {@code PhysicalSafetyService} 的包装尺寸/安全属性两处 CONFLICT）。
+   *
+   * <p><b>改内容会把这行打回 DRAFT 并清掉上一轮的提交与审核痕迹</b>：
+   * 驳回后改内容改的是另一份申报事实，「上一轮谁交上来的、谁驳的」已经与新内容无关，
+   * 留着会让审核队列里混进一条内容从没被提交过、却带着旧留痕的行
+   * （V94 的 {@code customs_attribute_draft_unreviewed} 也从库层钉住了 DRAFT 不得带审核痕迹）。
+   * 提交痕迹同样要清：{@code customs_attribute_review_queue} 正是按
+   * {@code status='DRAFT' AND submitted_at IS NOT NULL} 建的，不清会让改完还没重提的行提前进队列。
    */
   private UUID writeAttribute(
       AccessService.Access actor, UUID tenantId, UUID skuId, CustomsInput input, Normalized normalized) {
@@ -357,17 +390,15 @@ public class CustomsAttributeService {
         sql.execute(
             "update customs_attribute set hs_code=?,origin_country_code=?,declared_name=?,"
                 + "declared_value_reference=?,statutory_unit_code=?,preferential_origin_eligible=?,"
-                + "preference_agreement=?,note=?,version=version+1,updated_at=now()"
-                + " where tenant_id=? and sku_id=? and version=?",
+                + "preference_agreement=?,note=?,status='DRAFT',submitted_by=null,submitted_at=null,"
+                + "reviewed_by=null,reviewed_at=null,reject_reason='',version=version+1,updated_at=now()"
+                + " where tenant_id=? and sku_id=? and version between ? and ?",
             normalized.hsCode(), normalized.originCountryCode(), normalized.declaredName(),
             normalized.declaredValueReference(), normalized.statutoryUnitCode(),
             input.preferentialOriginEligible(), normalized.preferenceAgreement(), normalized.note(),
-            tenantId, skuId, input.version());
-    if (updated == 1) return sql.fetchOne(
-        "select id from customs_attribute where tenant_id=? and sku_id=?", tenantId, skuId)
-        .get("id", UUID.class);
-    CatalogService.check(
-        input.version() == 0, "报关属性已被他人修改，请刷新后重试");
+            tenantId, skuId, input.version() - 1, input.version());
+    if (updated == 1) return attributeId(tenantId, skuId);
+    // 没有这一行时 version 记为 0，插入路径不带 CAS（并发插入由唯一约束挡住）。
     int inserted =
         sql.execute(
             "insert into customs_attribute(id,tenant_id,sku_id,hs_code,origin_country_code,"
@@ -378,10 +409,13 @@ public class CustomsAttributeService {
             Ids.next(), tenantId, skuId, normalized.hsCode(), normalized.originCountryCode(),
             normalized.declaredName(), normalized.declaredValueReference(), normalized.statutoryUnitCode(),
             input.preferentialOriginEligible(), normalized.preferenceAgreement(), normalized.note());
-    CatalogService.check(
-        inserted == 1, "报关属性已被他人修改，请刷新后重试");
+    if (inserted == 1) return attributeId(tenantId, skuId);
+    throw new ResponseStatusException(HttpStatus.CONFLICT, "报关属性已被他人修改，请刷新后重试");
+  }
+
+  private UUID attributeId(UUID tenantId, UUID skuId) {
     return sql.fetchOne(
-        "select id from customs_attribute where tenant_id=? and sku_id=?", tenantId, skuId)
+            "select id from customs_attribute where tenant_id=? and sku_id=?", tenantId, skuId)
         .get("id", UUID.class);
   }
 
@@ -421,6 +455,15 @@ public class CustomsAttributeService {
    *
    * <p>只允许 DRAFT 提交：已审核通过的改内容要走「驳回 → 改 → 重新提交」，
    * 被驳回的先改内容（改内容会把状态清回 DRAFT，见 writeAttribute）。
+   *
+   * <p><b>乐观锁同样是 409 而不是 400</b>（理由见 {@link #writeAttribute}）：
+   * 请求本身合法，错的是这一行在提交前被别人改过。
+   *
+   * <p><b>version 的匹配窗口是「库里当前版本」与「它 +1」两格</b>，
+   * 与 {@link #writeAttribute} 同一口径：前端 CAS 有两种合法写法 ——
+   * 传它读到的版本，或传它把本次写入也算进去的下一个版本。
+   * 落后 1 步以上一律 409，那才是真正的并发覆盖（有人改了申报事实而你还拿着旧版本）。
+   * 窗口只开 +1 而不是无上限，是刻意的：开大了就等于允许重放旧数据覆盖申报资料。
    */
   @Transactional
   public CustomsProfile submit(AccessService.Access actor, UUID skuId, SubmitInput input) {
@@ -434,9 +477,10 @@ public class CustomsAttributeService {
             "update customs_attribute set submitted_by=?,submitted_at=now(),"
                 + "reviewed_by=null,reviewed_at=null,reject_reason='',version=version+1,"
                 + "updated_at=now()"
-                + " where tenant_id=? and sku_id=? and version=?",
-            actor.userId(), tenantId, skuId, input.version());
-    CatalogService.check(updated == 1, "报关属性已被他人修改，请刷新后重试");
+                + " where tenant_id=? and sku_id=? and version between ? and ?",
+            actor.userId(), tenantId, skuId, input.version() - 1, input.version());
+    if (updated != 1)
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "报关属性已被他人修改，请刷新后重试");
     audit(actor, skuId, "SkuCustomsAttributeSubmitted");
     return load(skuId);
   }
@@ -456,9 +500,13 @@ public class CustomsAttributeService {
   @Transactional
   public CustomsProfile review(
       AccessService.Access actor, UUID skuId, ReviewInput input, boolean reviewPermission) {
+    // **权限判定先于取数**：审核是一个独立权限（能填 ≠ 能批），而取数要过 RLS。
+    // 顺序反了的话，一个只有 read+update 的审核者拿到的会是
+    // 「记录不存在或没有访问权限」404 —— 把「你没这个权限」说成「这行不存在」，
+    // 运营会以为是自己查错了 SKU，而真正要改的是授权。
+    CatalogService.check(reviewPermission, "没有审核权限：填 HS 码是日常录入，批准申报事实是另一回事");
     Record sku = skuRow(skuId);
     UUID tenantId = sku.get("tenant_id", UUID.class);
-    CatalogService.check(reviewPermission, "没有审核权限：填 HS 码是日常录入，批准申报事实是另一回事");
     Record attribute = attributeRow(skuId);
     CatalogService.check(attribute != null, "这个 SKU 还没有报关属性，先保存再提交审核");
     CatalogService.check(
@@ -491,7 +539,7 @@ public class CustomsAttributeService {
           "update customs_attribute set status='REJECTED',reviewed_by=?,reviewed_at=now(),"
               + "reject_reason=?,version=version+1,updated_at=now()"
               + " where tenant_id=? and sku_id=?",
-          actor.userId(), tenantId, skuId, reason);
+          actor.userId(), reason, tenantId, skuId);
       audit(actor, skuId, "SkuCustomsAttributeRejected");
     }
     return load(skuId);
@@ -614,10 +662,11 @@ public class CustomsAttributeService {
                 + " where e.tenant_id=a.tenant_id and e.customs_attribute_id=a.id) as element_count,"
                 + "(select count(*) from customs_declaration_element e"
                 + " where e.tenant_id=a.tenant_id and e.customs_attribute_id=a.id"
-                + " and e.required and btrim(e.element_value)='') as required_missing_count"
+                + " and e.required and btrim(e.element_value)='') as required_missing_count,"
+                + "coalesce(a.updated_at,s.updated_at) as profile_updated_at"
                 + from
                 + where
-                + " order by coalesce(a.updated_at,s.updated_at) desc nulls last,s.id desc"
+                + " order by profile_updated_at desc nulls last,s.id desc"
                 + " limit ? offset ?",
             pageBinds.toArray());
 
@@ -640,7 +689,7 @@ public class CustomsAttributeService {
               r.get("element_count", Integer.class),
               r.get("required_missing_count", Integer.class),
               instant(r.get("submitted_at", OffsetDateTime.class)),
-              instant(r.get("updated_at", OffsetDateTime.class))));
+              instant(r.get("profile_updated_at", OffsetDateTime.class))));
     }
     return new CustomsPage(
         List.copyOf(items), page, size, total, (int) ((total + size - 1) / size));
