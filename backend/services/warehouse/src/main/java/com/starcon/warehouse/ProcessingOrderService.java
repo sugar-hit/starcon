@@ -208,14 +208,19 @@ public class ProcessingOrderService {
     int safePage = Math.max(0, page);
     int safeSize = Math.min(MAX_PAGE_SIZE, Math.max(1, size));
     List<Object> binds = new ArrayList<>();
+    // ref_type 已经在语句里带了 where，所以可选条件只能用 and 续写 ——
+    // 写成 " where ref_id = ?" 会拼出两个 where（SQL 直接语法错）。
     String clause = "";
     if (processingOrderId != null) {
-      clause = " where ref_id = ?";
+      clause = " and ref_id = ?";
       binds.add(processingOrderId);
     }
+    // 占位符顺序必须与语句里出现的顺序一致：ref_type →（可选）ref_id。
+    var countBinds = prepend(binds, REF_TYPE);
     long total =
-        sql.fetchOne("select count(*) from inventory_transaction where ref_type = ?" + clause,
-                prepend(binds, REF_TYPE))
+        sql.fetchOne(
+                "select count(*) from inventory_transaction where ref_type = ?" + clause,
+                countBinds.toArray())
             .get(0, Long.class);
     Record summary =
         sql.fetchOne(
@@ -227,12 +232,14 @@ public class ProcessingOrderService {
                 + " on t.tenant_id = e.tenant_id and t.id = e.transaction_id"
                 + " where t.ref_type = ?",
             REF_TYPE);
+    // 占位符顺序必须与语句里出现的顺序一致：ref_type →（可选）ref_id → limit → offset。
+    var listBinds = prepend(binds, REF_TYPE);
     List<ProcessingStockRow> items =
         sql.fetch(
                 "select id,ref_id,occurred_at,actor_id,notes from inventory_transaction"
                     + " where ref_type = ?" + clause
                     + " order by occurred_at desc, id limit ? offset ?",
-                append(binds, REF_TYPE, safeSize, safePage * safeSize))
+                append(listBinds, safeSize, safePage * safeSize).toArray())
             .map(this::executionRow);
     return new ProcessingStockPage(
         items,
@@ -448,7 +455,7 @@ public class ProcessingOrderService {
     Record row =
         sql.fetchOne(
             "select 1 from warehouse_location where id = ? and warehouse_id = ?"
-                + " and enabled = true",
+                + " and status = 'ACTIVE'",
             locationId, warehouseId);
     if (row == null) {
       throw new ResponseStatusException(
