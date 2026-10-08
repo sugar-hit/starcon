@@ -355,7 +355,12 @@ CREATE TRIGGER guard_customs_element_under_review
 
 -- ============================================================ 四、A5：不提供物理删除接口（本模块的边界，不是不够）
 --
--- **本模块没有 DELETE 端点，也没有给运行时角色授 DELETE 权限**，只有「驳回后改」。
+-- **本模块没有 DELETE 端点，也不给 `customs_attribute` 授 DELETE 权限**，
+-- 只有「驳回后改」。
+--
+-- ⚠️ 这条边界**只针对报关属性本身**，**不包括它的申报要素子表**：
+-- 子表 `customs_declaration_element` 是授了 DELETE 的，因为草稿态改清单
+-- 必须能删行（见第五节末尾对两张表授权差异的完整说明）。
 --
 -- 理由（照抄任务书的设计论证，写在这里免得以后有人当成缺口来补）：
 -- 蓝图把本模块的下游点名成 10 报关，而 10 报关的 `customs_declaration_line` 在
@@ -368,8 +373,11 @@ CREATE TRIGGER guard_customs_element_under_review
 -- 留在库里可追溯（audit_event 记着每一轮审核），这与 V25
 -- 「已发布版本不可删」是同一条纪律。
 --
--- 所以 runtime GRANT **刻意不含 DELETE**。FK 的 ON DELETE CASCADE 仍然照常工作：
--- PostgreSQL 的引用完整性动作由系统执行，不受删除者对该子表权限的影响。
+-- 所以 `customs_attribute` 的 runtime GRANT **不含 DELETE**。
+-- FK 的 ON DELETE CASCADE 仍然照常工作：PostgreSQL 的引用完整性动作由系统执行，
+-- 不受删除者对该子表权限的影响 —— 这也是子表仍需要自己授 DELETE 的原因：
+-- 级联删的是「属性没了」，而子表授 DELETE 服务的是「属性还在、清单要改」，
+-- 两者是不同的操作，权限必须分开考虑。
 --
 -- **留待 10 报关车道跟进**（本模块只做到「能接上」，不越界去改 warehouse）：
 -- 交付后 10.5.1.1 应把回填来源从 MANUAL 改成 MODULE_3_7_1_1，
@@ -403,11 +411,24 @@ DO $$ DECLARE tbl text; BEGIN
 END $$;
 
 -- V2 之后运行时角色是 catalog_app（nologin 组角色 starcon_app 仍保留 V1 的授权语义）。
--- **刻意不含 DELETE**：见第四节 A5 的论证。
+--
+-- **两张表的 DELETE 授权是有意不同的，不要「对齐」成一致**：
+--
+--   * `customs_attribute` **不给 DELETE**：本模块确实没有删除报关属性的端点，
+--     改内容一律走「驳回 → 改 → 重新提交」（A5 的论证）。
+--   * `customs_declaration_element` **给 DELETE**：保存时申报要素是**全量替换**
+--     语义（Models 里有说明），运营在草稿态删掉填错的一行是合法且必要的操作。
+--     扣掉这个权限只会让草稿永远改不干净，却**保护不了任何东西** ——
+--     「已审核通过的申报资料不可增删改」是由 `guard_customs_element_under_review`
+--     触发器强制，而该触发器是 `BEFORE INSERT OR UPDATE OR DELETE`，
+--     连裸 SQL 的 DELETE 都在它的 A4 判定里被点名拒绝（见第三节之二之二）。
+--     换句话说：保护来自触发器，不来自权限。用权限当保护是把纵深防线用反了 ——
+--     触发器能被有 DDL 权限的人绕过，但那是另一个量级的威胁；
+--     而误伤合法草稿编辑是**每一次保存**都会发生的。
 GRANT SELECT,INSERT,UPDATE ON customs_attribute TO catalog_app;
 GRANT SELECT,INSERT,UPDATE ON customs_attribute TO starcon_app;
-GRANT SELECT,INSERT,UPDATE ON customs_declaration_element TO catalog_app;
-GRANT SELECT,INSERT,UPDATE ON customs_declaration_element TO starcon_app;
+GRANT SELECT,INSERT,UPDATE,DELETE ON customs_declaration_element TO catalog_app;
+GRANT SELECT,INSERT,UPDATE,DELETE ON customs_declaration_element TO starcon_app;
 
 -- ============================================================ 六、留给下游的口子（不是本模块的缺口）
 --
