@@ -84,12 +84,16 @@ function visible(session: Access, key: string) {
   // 少了这条会落到 canManage 兜底，而 AdministrationKind 里没有 'operation-log'，
   // 于是有 identity.operation_log.read 的人反而在导航里看不到入口。
   if (key === 'operation-log') return hasPermission(session, 'identity.operation_log.read');
-  // 审批流定义（17.4.1.1）是独立页面权限码，不走 AdministrationPanel 的四类管理，
+// 审批流定义（17.4.1.1）是独立页面权限码，不走 AdministrationPanel 的四类管理，
   // 也不走 canManage 的页面映射 —— AdministrationKind 里没有它，落到 canManage 会把入口藏掉。
   if (key === 'approval-flows') return hasPermission(session, 'identity.approval_flow.read');
   // 审批规则（17.4.1.2）是独立页面权限码：改「这次提交要不要走审批」能绕开 17.4.1.1 配好的流程，
   // 所以不复用 identity.approval_flow.*，与 canManage 的页面映射也无关。
   if (key === 'approval-rules') return hasPermission(session, 'identity.approval_rule.read');
+  // 17.6.1.1 账簿与本位币是独立页面权限码（路由在 /settings/books），
+  // 不走 canManage 的页面映射 —— AdministrationKind 里没有 'books'，
+  // 少了这条会落到 canManage 兜底并恒为 false，于是有权限的人也看不到入口。
+  if (key === 'books') return hasPermission(session, 'identity.accounting_book.read');
   return canManage(session, key as AdministrationKind);
 }
 export function IdentityWorkspace({
@@ -225,6 +229,18 @@ export function IdentityWorkspace({
                   <p className="text-muted-foreground mt-2 text-sm">{description}</p>
                 </Link>
               ))}
+            {/* 17.6.1.1 账簿与本位币：蓝图的路由是 `/settings/books` 而不是 `/org/...`，
+                所以它不进 destinations（那张表的 href 是写死的 `/org/${key}` 模板），
+                单开一张卡挂同一个 visible() 权限码。少这张卡页面就没人能进 ——
+                17.1.2.2 的账簿页正是因此长期零入口。 */}
+            {visible(session, 'books') && (
+              <Link href="/settings/books" className="bg-card hover:border-brand rounded-lg border p-5">
+                <h2 className="font-semibold">账簿与本位币</h2>
+                <p className="text-muted-foreground mt-2 text-sm">
+                  一个法人可以同时用人民币业务账与美元海外账记账：按业务账 / 法定账分组，指定默认账簿，并登记业务事实的归属账簿
+                </p>
+              </Link>
+            )}
           </div>
           <p className="text-muted-foreground text-sm">
             用户账号可加入多个租户。成员停用仅影响该租户；父子租户之间不会自动获得数据访问权。
