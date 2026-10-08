@@ -965,6 +965,94 @@
         }
       }
     },
+    "/warehouse/customs-declarations/{declarationId}": {
+      "get": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "detail_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsDeclarationDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "update_7",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/labor/work-tasks": {
       "get": {
         "tags": [
@@ -8046,6 +8134,755 @@
         }
       }
     },
+    "/warehouse/customs-declarations": {
+      "get": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "page_6",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "tradeMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transportMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "destinationCountryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceShipmentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pendingReviewOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsDeclarationPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "create_11",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/customs-declarations/{declarationId}/withdraw-review": {
+      "post": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "withdrawReview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsWithdrawReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/customs-declarations/{declarationId}/submit": {
+      "post": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "submit_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/customs-declarations/{declarationId}/submit-for-review": {
+      "post": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "submitForReview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsSubmitForReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/customs-declarations/{declarationId}/review": {
+      "post": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "review",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/customs-declarations/{declarationId}/results": {
+      "get": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "results",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomsResultRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "recordResult",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsResultRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/customs-declarations/{declarationId}/reject-review": {
+      "post": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "rejectReview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsRejectReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/customs-declarations/{declarationId}/documents": {
+      "get": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "documents",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomsDocumentRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "generateDocument",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsGenerateDocumentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/customs-declarations/{declarationId}/documents/{documentId}/finalize": {
+      "post": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "finalizeDocument",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsFinalizeDocumentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/customs-declarations/{declarationId}/cancel": {
+      "post": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "cancel_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsCancelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/customs-declarations/{declarationId}/amend": {
+      "post": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "amend",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsAmendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/warehouses": {
       "get": {
         "tags": [
@@ -10602,7 +11439,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "detail_5",
+        "operationId": "detail_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -11064,7 +11901,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_6",
+        "operationId": "detail_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -11212,7 +12049,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "page_6",
+        "operationId": "page_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -12032,7 +12869,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_7",
+        "operationId": "detail_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -12803,7 +13640,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "detail_8",
+        "operationId": "detail_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -13476,7 +14313,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "detail_9",
+        "operationId": "detail_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -13895,6 +14732,80 @@
                   "items": {
                     "$ref": "#/components/schemas/WorkVolumeCapability"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/customs-declarations/{declarationId}/events": {
+      "get": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "declarationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomsEventRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/customs-declarations/capabilities": {
+      "get": {
+        "tags": [
+          "customs-declaration-controller"
+        ],
+        "operationId": "capabilities_14",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsCapabilities"
                 }
               }
             }
@@ -14953,6 +15864,178 @@
             "format": "date-time"
           },
           "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsLineRequest": {
+        "type": "object",
+        "properties": {
+          "sourceLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "declaredItemName": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "declarationElementStatus": {
+            "type": "string"
+          },
+          "declarationElements": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "specMaterial": {
+            "type": "string"
+          },
+          "usage": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "modelNo": {
+            "type": "string"
+          },
+          "originCountryCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "uom": {
+            "type": "string"
+          },
+          "declaredUnitValue": {
+            "type": "number"
+          },
+          "declaredValue": {
+            "type": "number"
+          },
+          "grossWeightKg": {
+            "type": "number"
+          },
+          "netWeightKg": {
+            "type": "number"
+          },
+          "volumeCbm": {
+            "type": "number"
+          },
+          "packageCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CustomsUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "tradeMode": {
+            "type": "string"
+          },
+          "exporterName": {
+            "type": "string"
+          },
+          "exporterCountryCode": {
+            "type": "string"
+          },
+          "consigneeName": {
+            "type": "string"
+          },
+          "consigneeCountryCode": {
+            "type": "string"
+          },
+          "iorName": {
+            "type": "string"
+          },
+          "iorCountryCode": {
+            "type": "string"
+          },
+          "brokerName": {
+            "type": "string"
+          },
+          "brokerCode": {
+            "type": "string"
+          },
+          "brokerContact": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationCustomsDistrict": {
+            "type": "string"
+          },
+          "departurePort": {
+            "type": "string"
+          },
+          "destinationPort": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "billOfLadingNo": {
+            "type": "string"
+          },
+          "declarationCurrency": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "exchangeRate": {
+            "type": "number"
+          },
+          "exchangeRateScale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "exchangeRateDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsLineRequest"
+            }
+          }
+        }
+      },
+      "CustomsSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "declarationCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "message": {
             "type": "string"
           }
         }
@@ -21396,6 +22479,204 @@
               "THIRD_PARTY",
               "BONDED"
             ]
+          }
+        }
+      },
+      "CustomsCreateRequest": {
+        "type": "object",
+        "properties": {
+          "sourceShipmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tradeMode": {
+            "type": "string"
+          },
+          "exporterName": {
+            "type": "string"
+          },
+          "exporterCountryCode": {
+            "type": "string"
+          },
+          "consigneeName": {
+            "type": "string"
+          },
+          "consigneeCountryCode": {
+            "type": "string"
+          },
+          "iorName": {
+            "type": "string"
+          },
+          "iorCountryCode": {
+            "type": "string"
+          },
+          "brokerName": {
+            "type": "string"
+          },
+          "brokerCode": {
+            "type": "string"
+          },
+          "brokerContact": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationCustomsDistrict": {
+            "type": "string"
+          },
+          "departurePort": {
+            "type": "string"
+          },
+          "destinationPort": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "billOfLadingNo": {
+            "type": "string"
+          },
+          "declarationCurrency": {
+            "type": "string"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "exchangeRate": {
+            "type": "number"
+          },
+          "exchangeRateScale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "exchangeRateDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsLineRequest"
+            }
+          }
+        }
+      },
+      "CustomsWithdrawReviewRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsSubmitRequest": {
+        "type": "object",
+        "properties": {
+          "submissionReference": {
+            "type": "string"
+          },
+          "brokerName": {
+            "type": "string"
+          },
+          "submissionResult": {
+            "type": "string"
+          },
+          "resultReason": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsSubmitForReviewRequest": {
+        "type": "object",
+        "properties": {
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsReviewRequest": {
+        "type": "object",
+        "properties": {
+          "reviewNotes": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsResultRequest": {
+        "type": "object",
+        "properties": {
+          "resultType": {
+            "type": "string"
+          },
+          "resultReference": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "resultAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsRejectReviewRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsGenerateDocumentRequest": {
+        "type": "object",
+        "properties": {
+          "documentType": {
+            "type": "string"
+          },
+          "documentNo": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsFinalizeDocumentRequest": {
+        "type": "object",
+        "properties": {
+          "documentNo": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsCancelRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsAmendRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "resultReference": {
+            "type": "string"
           }
         }
       },
@@ -31715,6 +32996,687 @@
             "type": "string"
           },
           "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsDeclarationPage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/CustomsSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsDeclarationRow"
+            }
+          },
+          "statusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsStatusOption"
+            }
+          },
+          "tradeModes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsTradeModeOption"
+            }
+          },
+          "transportModes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsTransportModeOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CustomsDeclarationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "declarationCode": {
+            "type": "string"
+          },
+          "sourceShipmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceShipmentCode": {
+            "type": "string"
+          },
+          "tradeMode": {
+            "type": "string"
+          },
+          "tradeModeLabel": {
+            "type": "string"
+          },
+          "exporterName": {
+            "type": "string"
+          },
+          "consigneeName": {
+            "type": "string"
+          },
+          "consigneeCountryCode": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "transportMode": {
+            "type": "string"
+          },
+          "declarationCurrency": {
+            "type": "string"
+          },
+          "declarationValue": {
+            "type": "number"
+          },
+          "baseCurrency": {
+            "type": "string"
+          },
+          "exchangeRate": {
+            "type": "number"
+          },
+          "exchangeRateScale": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "exchangeRateDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "declarationValueBase": {
+            "type": "number"
+          },
+          "totalLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reviewRound": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "amendmentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "clearedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CustomsStatusOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draft": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingReview": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reviewed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "submitted": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cleared": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "customsRejected": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalDeclarationValue": {
+            "type": "number"
+          },
+          "totalDeclarationCurrency": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsTradeModeOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsTransportModeOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsDeclarationDetail": {
+        "type": "object",
+        "properties": {
+          "declaration": {
+            "$ref": "#/components/schemas/CustomsDeclarationRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsLineRow"
+            }
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsDocumentRow"
+            }
+          },
+          "submissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsSubmissionRow"
+            }
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsResultRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsEventRow"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsTransition"
+            }
+          },
+          "sourceShipmentNote": {
+            "type": "string"
+          },
+          "reviewGateNote": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsDocumentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentType": {
+            "type": "string"
+          },
+          "documentTypeLabel": {
+            "type": "string"
+          },
+          "documentNo": {
+            "type": "string"
+          },
+          "documentVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "content": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "supersedesDocumentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "preparedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CustomsEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CustomsLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "sourceLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceLineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "declaredItemName": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "hsCodeSource": {
+            "type": "string"
+          },
+          "hsCodeVerified": {
+            "type": "boolean"
+          },
+          "declarationElements": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "declarationElementStatus": {
+            "type": "string"
+          },
+          "declarationElementStatusLabel": {
+            "type": "string"
+          },
+          "declarationElementsSource": {
+            "type": "string"
+          },
+          "declarationElementsRef": {
+            "type": "string"
+          },
+          "specMaterial": {
+            "type": "string"
+          },
+          "usage": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "modelNo": {
+            "type": "string"
+          },
+          "originCountryCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "uom": {
+            "type": "string"
+          },
+          "declaredUnitValue": {
+            "type": "number"
+          },
+          "declaredValue": {
+            "type": "number"
+          },
+          "grossWeightKg": {
+            "type": "number"
+          },
+          "netWeightKg": {
+            "type": "number"
+          },
+          "volumeCbm": {
+            "type": "number"
+          },
+          "packageCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CustomsResultRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "submissionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resultType": {
+            "type": "string"
+          },
+          "resultTypeLabel": {
+            "type": "string"
+          },
+          "fromResult": {
+            "type": "string"
+          },
+          "toResult": {
+            "type": "string"
+          },
+          "resultReference": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "resultAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsSubmissionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "submissionRound": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "documentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "submissionReference": {
+            "type": "string"
+          },
+          "brokerName": {
+            "type": "string"
+          },
+          "submissionResult": {
+            "type": "string"
+          },
+          "submissionResultLabel": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submittedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "sourceReference": {
+            "type": "string"
+          },
+          "resultReason": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsTransition": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "fromLabel": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "toLabel": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsCapabilities": {
+        "type": "object",
+        "properties": {
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsDimension"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsTransition"
+            }
+          },
+          "statusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsStatusOption"
+            }
+          },
+          "tradeModes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsTradeModeOption"
+            }
+          },
+          "transportModes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsTransportModeOption"
+            }
+          },
+          "documentTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsDocumentTypeOption"
+            }
+          },
+          "elementStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsElementStatusOption"
+            }
+          },
+          "reviewGateNote": {
+            "type": "string"
+          },
+          "rateSnapshotNote": {
+            "type": "string"
+          },
+          "oneShipmentOneDeclarationNote": {
+            "type": "string"
+          },
+          "hsCodeNote": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsDimension": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsDocumentTypeOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsElementStatusOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
             "type": "string"
           }
         }
