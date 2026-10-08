@@ -254,7 +254,7 @@ public class CustomsAttributeService {
    * 这里返回 409 而不是默默改掉。
    */
   @Transactional
-  public CustomsSaved save(AccessService.Access actor, UUID skuId, CustomsInput input) {
+  public CustomsProfileSaved save(AccessService.Access actor, UUID skuId, CustomsInput input) {
     Record sku = skuRow(skuId);
     UUID tenantId = sku.get("tenant_id", UUID.class);
     Normalized normalized = validate(tenantId, skuId, input);
@@ -264,7 +264,7 @@ public class CustomsAttributeService {
     writeElements(actor, tenantId, attributeId, normalized);
 
     audit(actor, skuId, "SkuCustomsAttributeSaved");
-    return new CustomsSaved(load(skuId));
+    return new CustomsProfileSaved(load(skuId));
   }
 
   /** 归一化后的入参（校验与归一在同一处完成，避免两处各写一遍规则）。 */

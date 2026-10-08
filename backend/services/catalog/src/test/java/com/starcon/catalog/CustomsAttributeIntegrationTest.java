@@ -203,7 +203,7 @@ class CustomsAttributeIntegrationTest {
 
   /** 保存 + 提交 + 审核通过，返回档案 id（供 declaration-ready 用）。 */
   UUID approved(AccessService.Access who, UUID skuId) {
-    CustomsSaved saved = write(who, () -> customs.save(who, skuId, defaultInput(0)));
+    CustomsProfileSaved saved = write(who, () -> customs.save(who, skuId, defaultInput(0)));
     CustomsProfile submitted =
         write(who, () -> customs.submit(who, skuId, new SubmitInput(saved.profile().version())));
     assertThat(submitted.status()).isEqualTo("DRAFT");

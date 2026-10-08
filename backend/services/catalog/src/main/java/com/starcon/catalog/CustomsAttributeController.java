@@ -57,7 +57,7 @@ public class CustomsAttributeController {
    * <p><b>已审核通过的行不可直接改</b>（409）：正确路径是「审核里驳回 → 改 → 重新提交」。
    */
   @PutMapping("/skus/{skuId}")
-  public CustomsSaved save(
+  public CustomsProfileSaved save(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID skuId,
       @Valid @RequestBody CustomsInput input) {

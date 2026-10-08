@@ -121,8 +121,18 @@ public final class CustomsAttributeModels {
       /** 必填却还空着：规则 A4 的未满足项，页面高亮它。 */
       boolean incomplete) {}
 
-  /** 写入结果。回传写入后的档案，界面不必为了看结果再拉一次。 */
-  public record CustomsSaved(CustomsProfile profile) {}
+  /**
+   * 写入结果。回传写入后的档案，界面不必为了看结果再拉一次。
+   *
+   * <p><b>名字里带 {@code Profile} 是被迫的</b>：契约生成器把**所有服务**的 schema
+   * 拍平进同一个 {@code packages/api-contracts/src/catalog.ts}，而 10.5.1.1
+   * （warehouse 的报关单据）已经有一个叫 {@code CustomsSaved} 的记录。重名时
+   * 后合并的 warehouse 会把本模块的这个**静默覆盖**掉，于是 {@code catalog.ts} 里
+   * 那个 {@code CustomsSaved} 指的根本不是本端点的返回形状 ——
+   * 前端 import 到它会拿到字段完全不相干的类型，且 typecheck 全绿。
+   * 改名只影响 OpenAPI 的 component 名字，JSON 字段名仍是 {@code profile}，接口行为不变。
+   */
+  public record CustomsProfileSaved(CustomsProfile profile) {}
 
   // ============================================================ 审核
 
