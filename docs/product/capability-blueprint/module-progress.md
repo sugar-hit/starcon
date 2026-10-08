@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 114 |
+| 已交付 | 115 |
 | 进行中 | 0 |
-| **未开发** | **351** |
-| 完成率 | 24.5% |
+| **未开发** | **350** |
+| 完成率 | 24.7% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -23,7 +23,7 @@
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
 | **D3** | 24 | 0 | 16 | 40 |
-| **D4** | 6 | 0 | 54 | 60 |
+| **D4** | 7 | 0 | 53 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 1 | 0 | 77 | 78 |
 | **D7** | 5 | 0 | 150 | 155 |
@@ -40,7 +40,7 @@
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
 | 07 | 库存核算系统 | D3 | 20 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 8 | 22 |
-| 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
+| 09 | 订单履约系统 | D4 / D5 | 1 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 5 | 27 |
 | 11 | 售后与退货系统 | D4 / D7 | 0 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
@@ -317,7 +317,7 @@
 | 9.3.1.1 | 拆单 | — | D4 | 未开发 | — |
 | 9.3.1.2 | 合单 | — | D4 | 未开发 | — |
 | 9.3.2.1 | 分仓规则 | — | D4 | 未开发 | — |
-| 9.3.2.2 | FBA 与自发货选择 | — | D4 | 未开发 | — |
+| 9.3.2.2 | FBA 与自发货选择 | — | D4 | 已交付 | 迁移 trade `V92__trade_fulfillment_routing.sql`（**归属 trade**：蓝图 09 卷「后端归属：trade 服务拥有订单与售后单据」＋ L2 表「9.3 履约编排 → 主责服务 trade」；本迁移是 trade 的第一条业务迁移，**不 ALTER V1 的 trade_tenancy_probe**，跨车道回归面 = 0）七张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation：fulfillment_mcf_authorization（店铺级多渠道配送资质，UNKNOWN 是**缺省值**，「没核验」≠「有资质」）· fulfillment_path_cost_profile（成本与时效参数，**金额与费率是租户可维护的数据不是代码常量**，10.1.2.1 运费试算未开发故不从代码取任何金额）· fulfillment_platform_stock_snapshot（各渠道库存快照，强制带 stock_source 与 collected_at）· fulfillment_routing_decision（一次决策一行，**append-only**：REVOKE UPDATE/DELETE + 触发器）· fulfillment_routing_candidate（三条候选路径当时的库存与成本快照；**候选落库而不是查询时联算** —— 库存会被补上、成本参数会被改，联算会让「当时为什么切」永远答不出来）· fulfillment_routing_switch（缺货切换留痕，append-only）· fulfillment_routing_event（事件时间线，append-only）· **「缺货时切换记录」钉成 DB 不变量**（蓝图输出的第二项）：延迟约束触发器 guard_routing_decision_switch 在提交时**回表读当前行**核对「选了非平台仓 ⇒ 必须存在一条 switch」，没有就报 23514 —— 绕过服务层直接写 SQL 同样被挡，「先存决策、切换以后再补」在本模块做不到；guard_routing_switch_consistency 另钉「切换目标必须正是该决策选定路径」（留痕与决策互相矛盾，复盘时两说并存）· **无资质不许切自发货**（蓝图加粗句「必须先验证该店铺的多渠道配送资质」）：BEFORE 触发器 guard_routing_switch_mcf 在**写入路径**上核对资质为 AUTHORIZED 且未过期，不是靠服务层先查一次（那会被并发下的资质撤回绕过）；「有资质但已过期」与「从未核验」在响应里分两列，因为前者要续期、后者要核验，运维要做的事不同 · **判定顺序是「资格 → 库存 → 成本」**：MCF 闸门排在成本比较之前，「有货有便宜但没资质」在平台上是非法的，不是可权衡项 · 三条策略（PLATFORM_FIRST / COST_FIRST / MERCHANT_FIRST）都是**租户口径落库存档**，不是 Java if；两条自发货路径同价时按 path_kind 字典序定序，否则同样输入会给出不同结论 · 无可行路径时**逐条列出每条候选被排除的原因**并显式报错，绝不悄悄回落到平台仓（那会让「这单没货」显示成「已决策走 FBA」）· 未来采集时间的库存快照不参与判定（拿不到当前值就是「没有库存记录」，不是「可行但数量为 null」）· 金额 numeric(19,4) + 数量 numeric(19,6)，结算口径**统一 HALF_UP 到分**（Java setScale(2,HALF_UP)，读回 scale 4 由测试断言）；时间一律 timestamptz + `?::timestamptz` 绑 OffsetDateTime，测试断言往返零漂移与 +08:00 偏移· DEFERRABLE 触发器里**不使用 NEW 的可变列**、一律回表读当前行（照抄 V85/V90 同一解法）；状态推进经 SECURITY DEFINER 窄函数 advance_routing_decision_status，append-only 的开窗用 transaction-local GUC 而不是「看 NEW.status 放行」—— 后者会把「改 reason」也一起放行，append-only 就只剩注释了· **上游依赖实查结论**：7.1.3.1 多仓分布（warehouse，**已交付**）与 2.1.1.2 能力矩阵（channel，**已交付**）分属两个服务的独立数据库，按模块边界纪律**不得跨库读**，故本模块把渠道库存与 MCF 资质登记为租户可维护的真实表，并用 stock_source / authorization_source 如实标注来源（MODULE_7_1_3_1 / MODULE_2_1_1_2 / TENANT_MAINTAINED）；9.1.1.2 订单行与 9.3.3.1 履约请求**未开发**，故只存 orderRef 逻辑引用、不校验订单存在性，并在 capabilities 里**显式报出不可用**而不是从 404 或空数组里让人猜哪一环没通；16 合规与渠道侧正式接口到位后由同步器按同一形状写入并改来源枚举，**表结构与判定逻辑都不需要改**· 端点挂在 `/trade/fulfillment/routing`（13 个）：GET /capabilities、GET+POST /mcf-authorizations、GET+POST /cost-profiles、GET+POST /stock-snapshots、POST /evaluations（只读试算，**不落库** —— 试算留痕会污染决策历史）、GET+POST /decisions、GET /decisions/{id}、POST /decisions/{id}/status、GET /switches· 前端：trade 服务**首次**有浏览器出口（新增 app/api/trade/[...path]/route.ts，此前白名单里 trade/ 是空模式、任何 trade 路径都 404）+ 白名单逐条放行七个形状（**两层 alternation 都看过了**：外层仓库级 trade/ 段 + 内层 fulfillment/routing 组；裸路径 fulfillment/routing 刻意不放行）+ 页面 /orders/fulfillment/routing（四个区块按「先问资格、再问库存、最后才问成本」排序：资质登记 → 路径试算 → 决策与缺货切换 → 决策详情；加载/空/错误三态齐全；**刻意不占用 /orders/fulfillment** —— 那个路由在 task-pages 里已登记给 9.3.3.1 待发货订单，两条车道各写 page.tsx 会互相覆盖）+ 测试 FulfillmentRoutingIntegrationTest 32 例（平台仓充足走平台仓、缺货切自发货且**切换记录可查**、成本优先、同价定序、无路径时逐条报出排除原因、资质未核验/已过期均不许切、**绕过服务层写 SQL 同样被挡**、无切换记录的非平台仓决策提交不了、切换留痕与决策矛盾被拒、自发货决策却记未知资质被拒、未来快照不参与判定、金额 HALF_UP 到分与时间往返零漂移、状态机终态不可离开、决策/切换不可改写或删除、非法输入被拒、真分页而汇总不受分页影响、关键字搜索、HTTP 边界未认证/只读角色被拒、**租户隔离三断言**）＋ OpenApiContractTest（trade 契约导出，codegen 清单新增 trade）+ fulfillment-routing-allowlist.test.ts 5 例（源码反向抽取调用点逐条断言放行 + 反向形状断言 404 + 真跑 proxy 断言转发到 8085）+ fulfillment-routing-model.test.ts 7 例· trade 引导测试 TradeTenancyIntegrationTest 补 IDENTITY_URL/INTERNAL_KEY（AccessService 是 @Value 注入的 Bean，没有这两个属性时整个上下文起不来，与数据源无关） |
 | 9.3.3.1 | 履约请求 | — | D4 | 未开发 | — |
 | 9.3.3.2 | 履约流程监控 | — | D4 | 未开发 | — |
 | 9.4.1.1 | 待发货 | — | D4 | 未开发 | — |
