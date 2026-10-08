@@ -432,9 +432,24 @@ BEGIN
   RAISE EXCEPTION '状态「%」与提交时间不自洽：只有已提交才可能已经送到报关行', NEW.status
    USING ERRCODE='23514';
  END IF;
+ -- 「提交痕迹」的来路必须可查，只放行两种：① 状态本身就是送出去之后的状态；
+ -- ② **这单本来就提交过**（OLD.submitted_at 非空），此时退单 / 改单退回 DRAFT、
+ -- PENDING_REVIEW、REVIEWED、REJECTED 都必须留着 submitted_at ——
+ -- 「曾经把这张单子交到报关行没有」是海关事后追责（12 个月复核、扣货罚款）的举证，
+ -- 擦掉等于销毁证据，而蓝图写明报关数据错误导致的扣货与罚款由卖家承担。
+ -- ② 的判据是 **OLD**（提交痕迹是不是本来就有），不是「当前状态是什么」；
+ -- 写成后者会把「退单后回草稿」这条合法路径误判成不合法（服务层 recordResult(AMENDED)
+ -- 正是这么写的：status='DRAFT' 且不清 submitted_at）。
+ -- 反向那条单向守卫因此**没有被放松**：从没提交过的单在 DRAFT/PENDING_REVIEW/REVIEWED/
+ -- REJECTED 下仍然不许凭空带 submitted_at（INSERT 时 OLD 为 NULL，恒不放行）。
+ -- CANCELLED **不在**放行集合里：取消是作废整张单，不是「改完再报」，
+ -- 放行它等于允许「一张报过的单被抹成从没有报过」。
  IF NEW.submitted_at IS NOT NULL
-    AND NEW.status NOT IN ('SUBMITTED','CLEARED','CUSTOMS_REJECTED','AMENDED') THEN
-  RAISE EXCEPTION '状态「%」没有提交过，不允许带提交痕迹', NEW.status USING ERRCODE='23514';
+    AND NEW.status NOT IN ('SUBMITTED','CLEARED','CUSTOMS_REJECTED','AMENDED')
+    AND NOT (TG_OP = 'UPDATE' AND OLD.submitted_at IS NOT NULL
+             AND NEW.status IN ('DRAFT','PENDING_REVIEW','REVIEWED','REJECTED')) THEN
+  RAISE EXCEPTION '状态「%」的提交痕迹来路不明：这单从未提交过报关行，不允许带提交痕迹',
+   NEW.status USING ERRCODE='23514';
  END IF;
  IF NEW.cleared_at IS NULL AND NEW.status = 'CLEARED' THEN
   RAISE EXCEPTION '状态「%」与放行时间不自洽', NEW.status USING ERRCODE='23514';
@@ -759,8 +774,13 @@ CREATE TRIGGER customs_result_submission BEFORE INSERT ON customs_result
 CREATE FUNCTION guard_customs_amendment_count() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE counted integer;
 BEGIN
- IF NEW.status = 'DRAFT' THEN
-  RETURN NULL; -- 退单后回草稿时计数保持不变
+ -- 退单/改单退回 DRAFT 时计数**保持不变** —— 但「保持不变」说的是**不写新值**，
+ -- 不是「这一行从此不校验」。原写法 status='DRAFT' 就 RETURN NULL，等于宣布
+ -- 「凡是草稿行，改单次数可以随便手填」——那正是这条闸要防的事（改单次数是海关
+ -- 回执条数，不是页面上一个输入框）。所以判据必须是**这个值有没有被改动**：
+ -- 没改 → 放行；改了 → 照样拿 customs_result 的 AMENDED 条数来核对。
+ IF NEW.status = 'DRAFT' AND NEW.amendment_count IS NOT DISTINCT FROM OLD.amendment_count THEN
+  RETURN NULL;
  END IF;
  SELECT count(*) INTO counted FROM customs_result r
   WHERE r.tenant_id = NEW.tenant_id AND r.declaration_id = NEW.id AND r.result_type = 'AMENDED';

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -176,7 +177,11 @@ class CustomsDeclarationIntegrationTest {
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
                 idFor(tenant, 6), tenant, "SELLABLE", "可售", "SELLABLE");
-            seedShipment(tenant);
+            // 三票货备好：多数用例只用第一票，但「放行/退单/改单三种结果都落审计」
+            // 需要三张**不同**的报关单，而「一票货只报一次关」是 DB 唯一约束
+            // （customs_declaration_tenant_id_source_shipment_id_key），
+            // 所以必须备三张发运单，不能拿同一张反复建单。
+            for (int slot = 0; slot < 3; slot++) seedShipment(tenant, slot);
             return null;
           });
     }
@@ -188,7 +193,8 @@ class CustomsDeclarationIntegrationTest {
    * <p>逐行登记 7.5.1.2 在途腿回执：V80 的延迟约束触发器 {@code first_mile_leg} 钉死
    * 「已发出量 &gt; 0 的明细行必须恰好有一条在途腿」。这里必须与明细行写在**同一事务**里。
    */
-  private void seedShipment(UUID tenant) {
+  private void seedShipment(UUID tenant, int slot) {
+    // 每票货的 id 段互不重叠：单头 10+10·slot，明细 100+10·slot+i，在途腿回执 200+10·slot+i
     sql.execute(
         "insert into first_mile_shipment(id,tenant_id,shipment_code,source_type,source_ref_code,"
             + "legal_entity_id,origin_warehouse_id,destination_warehouse_id,destination_country_code,"
@@ -197,8 +203,8 @@ class CustomsDeclarationIntegrationTest {
             + "customs_broker,status,created_by,dispatched_at)"
             + " values(?,?,?,'SUPPLIER_PURCHASE','PO-1',?,?,?,'US','洛杉矶海外仓','SEA','COSCO',"
             + "'BK-1','Vessel-1','FOB','BUYER','USD',0,0,0,0,'代理行','DISPATCHED',?,now())",
-        idFor(tenant, 10), tenant, "FMS-1", idFor(tenant, 1), idFor(tenant, 4), idFor(tenant, 5),
-        user);
+        idFor(tenant, 10 + slot * 10), tenant, "FMS-" + (slot + 1), idFor(tenant, 1), idFor(tenant, 4),
+        idFor(tenant, 5), user);
     for (int i = 1; i <= 2; i++) {
       sql.execute(
           "insert into first_mile_shipment_line(id,tenant_id,shipment_id,line_no,sku_id,"
@@ -206,14 +212,15 @@ class CustomsDeclarationIntegrationTest {
               + "origin_country_code,declared_unit_value,declared_value,gross_weight_kg,net_weight_kg,"
               + "volume_cbm,carton_count)"
               + " values(?,?,?,?,?,?,?,?,'棉质衬衫','610910','A','CN',10,1000,120,100,0.5,10)",
-          idFor(tenant, 20 + i), tenant, idFor(tenant, 10), i, idFor(tenant, 2), idFor(tenant, 6),
-          100, 100);
+          idFor(tenant, 100 + slot * 10 + i), tenant, idFor(tenant, 10 + slot * 10), i, idFor(tenant, 2),
+          idFor(tenant, 6), 100, 100);
       sql.execute(
           "insert into first_mile_shipment_leg_receipt(id,tenant_id,shipment_id,line_id,"
               + "transit_leg_id,source_reference,sku_id,quantity,shipped_at,registered_at,registered_by)"
               + " values(?,?,?,?,gen_random_uuid(),?,?,100,now(),now(),?)",
-          idFor(tenant, 30 + i), tenant, idFor(tenant, 10), idFor(tenant, 20 + i),
-          "LEG-" + tenant + "-" + i, idFor(tenant, 2), user);
+          idFor(tenant, 200 + slot * 10 + i), tenant, idFor(tenant, 10 + slot * 10),
+          idFor(tenant, 100 + slot * 10 + i),
+          "LEG-" + tenant + "-" + slot + "-" + i, idFor(tenant, 2), user);
     }
   }
 
@@ -231,8 +238,13 @@ class CustomsDeclarationIntegrationTest {
 
   /** 一条内容齐备的明细：HS 编码、申报要素、货值、毛重、箱数、计量单位都在。 */
   private CustomsLineRequest goodLine(UUID tenant, int lineNo) {
+    return goodLine(tenant, lineNo, 0);
+  }
+
+  /** slot 决定来源行落在第几票货上：必须与 seedShipment 的明细行 id 对得上。 */
+  private CustomsLineRequest goodLine(UUID tenant, int lineNo, int slot) {
     return new CustomsLineRequest(
-        idFor(tenant, 20 + lineNo),
+        idFor(tenant, 100 + slot * 10 + lineNo),
         "棉质衬衫 100% 棉",
         "610910",
         "MANUAL_COMPLETE",
@@ -253,6 +265,10 @@ class CustomsDeclarationIntegrationTest {
   }
 
   private CustomsCreateRequest createRequest(UUID tenant, UUID shipmentId) {
+    return createRequest(tenant, shipmentId, 0);
+  }
+
+  private CustomsCreateRequest createRequest(UUID tenant, UUID shipmentId, int slot) {
     return new CustomsCreateRequest(
         shipmentId,
         idFor(tenant, 1),
@@ -278,12 +294,17 @@ class CustomsDeclarationIntegrationTest {
         6,
         LocalDate.of(2026, 10, 1),
         "首批出口",
-        List.of(goodLine(tenant, 1), goodLine(tenant, 2)));
+        List.of(goodLine(tenant, 1, slot), goodLine(tenant, 2, slot)));
   }
 
-  /** 建单 → 送复核 → 复核通过，返回已复核的报关单 id。 */
+  /** 建单 → 送复核 → 复核通过，返回已复核的报关单 id。slot 选第几票货（默认第一票）。 */
   private UUID reviewed(UUID tenant) {
-    CustomsSaved saved = asA(() -> service.create(tenant, createRequest(tenant, idFor(tenant, 10))));
+    return reviewed(tenant, 0);
+  }
+
+  private UUID reviewed(UUID tenant, int slot) {
+    CustomsSaved saved =
+        asA(() -> service.create(tenant, createRequest(tenant, idFor(tenant, 10 + slot * 10), slot)));
     UUID id = saved.id();
     asA(() -> service.submitForReview(id, new CustomsSubmitForReviewRequest("请复核")));
     asA(() -> service.review(id, new CustomsReviewRequest("申报资料逐项核对无误")));
@@ -479,9 +500,14 @@ class CustomsDeclarationIntegrationTest {
     UUID id = reviewed(a);
     // 只生成一份单据就提交 → DB 层报出缺哪几份
     asA(() -> service.generateDocument(id, new CustomsGenerateDocumentRequest("CUSTOMS_DECLARATION", "")));
+    // 这单已经复核过，所以拦下它的**不是**复核闸，而是「三单据必须齐备」那道 DB 闸，
+    // 报错必须点名缺哪几份 —— 「缺哪份不能提交」正是这道闸存在的意义。
     assertThatThrownBy(
             () -> asA(() -> service.submit(id, new CustomsSubmitRequest("BR-REF-3", "代理行", "ACCEPTED", ""))))
-        .hasMessageContaining("必须人工复核").isInstanceOf(IllegalArgumentException.class);
+        .isInstanceOf(DataIntegrityViolationException.class)
+        .hasMessageContaining("三单据不齐备")
+        .hasMessageContaining("PACKING_LIST")
+        .hasMessageContaining("COMMERCIAL_INVOICE");
   }
 
   @Test
@@ -524,8 +550,11 @@ class CustomsDeclarationIntegrationTest {
 
   @Test
   void clearedRejectedAmendedAllAudited() {
-    for (var type : List.of("CLEARED", "REJECTED", "AMENDED")) {
-      UUID id = reviewed(a);
+    List<String> types = List.of("CLEARED", "REJECTED", "AMENDED");
+    for (int i = 0; i < types.size(); i++) {
+      String type = types.get(i);
+      // 三种结果各用一票货：「一票货只报一次关」是 DB 唯一约束，同一票建第二张单会被拒
+      UUID id = reviewed(a, i);
       finalizeDocuments(id);
       asA(() -> service.submit(id, new CustomsSubmitRequest("BR-" + type, "代理行", "ACCEPTED", "")));
       asA(
