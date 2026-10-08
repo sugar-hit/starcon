@@ -109,4 +109,62 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     const res = await callProxy(path, 'warehouse');
     expect(res.status, `warehouse path ${path} should be blocked`).toBe(404);
   });
+
+  // --- channel layer: 10.4.2.1 warehouse-providers appended to the SAME
+  //     alternation as the pre-existing channel routes (platforms /
+  //     connections / shops / sync-* / oauth). This is the known trap:
+  //     a mistake here silently 404s an ALREADY DELIVERED channel route
+  //     while typecheck/lint/vitest all stay green, so the pre-existing
+  //     channel paths are re-asserted below as regression guards.
+  const CH_ALLOW = [
+    // 10.4.2.1 (this lane)
+    'warehouse-providers',
+    'warehouse-providers/connections',
+    `warehouse-providers/connections/${UUID}`,
+    `warehouse-providers/connections/${UUID}/accounts`,
+    `warehouse-providers/connections/${UUID}/sync-paused`,
+    'warehouse-providers/sync-runs',
+    `warehouse-providers/accounts/${UUID}`,
+    `warehouse-providers/accounts/${UUID}/inbound-stock-lines`,
+    `warehouse-providers/accounts/${UUID}/sync`,
+    `warehouse-providers/accounts/${UUID}/observations`,
+    `warehouse-providers/accounts/${UUID}/observations/latest`,
+    // pre-existing channel baseline (must not regress)
+    'platforms',
+    // NOTE: platform code is NOT a uuid — the allowlist uses [A-Za-z0-9_]+ here.
+    'platforms/AMAZON/enums',
+    `platforms/AMAZON/enums/${UUID}`,
+    'connections',
+    `connections/${UUID}`,
+    `connections/${UUID}/health`,
+    'shops',
+    `shops/${UUID}/marketplaces`,
+    'sync-cursors',
+    `sync-cursors/${UUID}/trigger`,
+    `sync-runs/${UUID}/complete`,
+    'sync-failures/summary',
+    `platform-operations/${UUID}/verify`,
+    'oauth/sessions',
+  ];
+
+  const CH_BLOCK = [
+    // one segment more than exists -> must not look delivered
+    `warehouse-providers/accounts/${UUID}/observations/latest/extra`,
+    `warehouse-providers/connections/${UUID}/accounts/bogus-shape`,
+    // singular typo of an existing segment
+    'warehouse-provider',
+    `warehouse-providers/accountz/${UUID}`,
+    // observations are append-only: there is deliberately NO delete surface
+    `warehouse-providers/accounts/${UUID}/observations/${UUID}/delete`,
+  ];
+
+  it.each(CH_ALLOW)('CHANNEL ALLOWS %s', async (path) => {
+    const res = await callProxy(path, 'channel');
+    expect(res.status, `channel path ${path} was blocked (${res.status})`).not.toBe(404);
+  });
+
+  it.each(CH_BLOCK)('CHANNEL STILL BLOCKS %s', async (path) => {
+    const res = await callProxy(path, 'channel');
+    expect(res.status, `channel path ${path} should be blocked`).toBe(404);
+  });
 });
