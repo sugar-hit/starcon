@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 111 |
+| 已交付 | 112 |
 | 进行中 | 0 |
-| **未开发** | **354** |
-| 完成率 | 23.9% |
+| **未开发** | **353** |
+| 完成率 | 24.1% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -26,7 +26,7 @@
 | **D4** | 6 | 0 | 54 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
 | **D6** | 1 | 0 | 77 | 78 |
-| **D7** | 2 | 0 | 153 | 155 |
+| **D7** | 3 | 0 | 152 | 155 |
 
 ## 分系统进度
 
@@ -41,7 +41,7 @@
 | 07 | 库存核算系统 | D3 | 20 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 8 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 0 | 27 |
-| 10 | 物流与头程系统 | D5 / D7 | 2 | 27 |
+| 10 | 物流与头程系统 | D5 / D7 | 3 | 27 |
 | 11 | 售后与退货系统 | D4 / D7 | 0 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
@@ -349,7 +349,7 @@
 | 10.4.1.2 | 在途跟踪 | — | D7 | 已交付 | 迁移 warehouse `V84__warehouse_in_transit_tracking.sql`（first_mile_tracking 跟踪头 + first_mile_tracking_event 节点事件流 + first_mile_delay_alert 延误预警 + first_mile_delay_threshold 预警阈值四张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT 与 starcon_app REVOKE；**四张表名一律不含 `transit` 子串**，因为 7.5.1.2 有一条跨车道回归断言扫 `information_schema` 里 table_name like '%transit%' 并断言只允许 inventory_transfer 与 in_transit_event 两张（初版命名会当场让那条属于别的车道的测试变红）；对 first_mile_shipment 建复合外键、**对 inventory_transfer 刻意不建**（7.5.1.2 的 truncate 不带本表，建了 FK 会让那条 truncate 因依赖直接失败，与 V80 同一条纪律）· **不建第二张在途账**：四张表里**没有任何数量余额列**，发运/已了结/未达三个数一律 join 7.5.1.2 的 inventory_transfer 现算后随响应返回；本表只记跟踪维度的事实（位置、清关、ETA、收货确认），这些在途表上根本没有 · **两级状态机分两个维度**（status = TRACKING→CLOSED/CANCELLED 的记录生死；tracking_stage = AT_ORIGIN→…→RECEIVED/EXCEPTION 的位置推进），混成一个字段就无法表达「跟踪已关闭但清关仍在扣关中」；DB 触发器 guard_first_mile_tracking_stage 用 stage_rank() 钉死**阶段只进不退**，EXCEPTION 给最高序号因而从任何阶段都能进（出事不需要先走到某一步）· **预警按剩余窗口提前分级，不是到港当天才发现**：蓝图关系段原文「头程延误是断货的主要外因，预警必须提前到预计到港前若干天」，而「若干」是业务口径所以**落库可配置** —— first_mile_delay_threshold 是租户级真实表，按 (运输方式, 目的国) 逐级回落匹配（(SEA,US) > (SEA,*) > (*,US) > (*,*)），取阈值前幂等补出默认行（on conflict do nothing），**代码里没有任何 if 里的天数常量**；DB CHECK 钉死三档递减（否则「进观察区」反而比「进提示区」晚，分级会静默倒挂）· **预警可逐条 ack/close 而不是挂一个 level 字段**：挂字段只剩「现在是延误」这一个瞬间，预警历史全部丢失；未结预警用部分唯一索引钉死「一张跟踪同一档位最多一条」，评估幂等只刷新不堆行，档位回落自动关掉更轻的旧档 · **外部同步未接入如实承载**：10.4.2.1 货代/船司连接器与 10.5.1.1 清关连接器**均未交付**，因此本模块**不建任何「同步任务」表、也没有定时器**（没有调度器就建表只会让人以为已经有东西在跑了）；外部事实靠 source_system（FORWARDER/CARRIER/CUSTOMS_BROKER）+ reference_id + 事件流承载，DB CHECK 钉死「外部来源必须有单号、人工来源必须有操作人」，写不出出处的外部事实一条都不许入库；capabilities 里三条外部连接器逐条标 available=false + 原因 + ownerModule · **只记「目的仓确认收到了」不写库存**：入库落账归 7.5.1.2 的 arrive，本模块越界去写会出现第二个写入所有者 · 端点 13 个挂在 /warehouse/transit-trackings：GET /capabilities（2 类来源 + **5 个未交付依赖逐条声明** + 两级状态机 + 四张词表 + 四条口径）、GET 列表（真分页 + 全量汇总不受分页影响 + 筛选状态/阶段/清关/档位/发运单/目的仓/目的国/运输方式 + delayedOnly + 关键词 + 排序白名单 5 键）、GET /{id} 详情（头 + 节点事件流 + 在途腿 + 预警 + 合法下一步 + 当前生效阈值）、GET /alerts 预警清单、GET /thresholds、PUT /thresholds/{id} 改口径、POST 建跟踪、POST /{id}/events 登记节点（位置/改期/清关/阶段/备注五合一）、POST /{id}/receipt 收货确认、POST /{id}/close 关闭、POST /{id}/alerts/evaluate、POST /alerts/evaluate-all、POST /alerts/{id}/acknowledge、POST /alerts/{id}/close · 读 warehouse.inventory.read / 写 warehouse.inventory.update，租户来自 identity 已认证成员关系（AccessService）而**非任何客户端头** · 数量 NUMERIC(19,6) + BigDecimal 禁浮点；时间一律 timestamptz + ?::timestamptz 绑定 · 测试 InTransitTrackingIntegrationTest **18 例全绿**（实跑 Testcontainers PostgreSQL 16，连接池压到 1）覆盖：**改一行阈值同一条跟踪的档位立刻随之改变**（证明分级不是代码常量，且读回来是改后的值）、剩余 40/5/2/已过港四档分级、全量汇总不受分页影响、预警幂等与档位回落自动解除、**发运 100 / 已了结 60 / 未达 40 三个数真的 join 7.5.1.2 现算**（到货 60 是真走了 arrive 登记）、收货确认后 inventory_transfer 一行未改、timestamptz 带 -07:00/+08:00 写入后**断言写回值**（位置发生时间、改期后的 ETA、收货确认时刻都比 Instant 而非只断言非空）、阶段倒退被拒而任何阶段都能进 EXCEPTION、外部来源无单号/扣关无原因全被拒、逐张表断言 relforcerowsecurity、端点 401/403/400/404/409、端点串通全程经 HTTP、**租户隔离三断言**（两租户互不可见含 B 建得出自己的、伪造 X-Tenant-Id 无效含阈值行只能看到自己那份、连接池归还后不串租户交替读写 20 轮）· **本车道修掉的真 bug（接手时 18 例红 9 例，逐一判定是真 bug 还是断言错）**：① days() 把 SQL 已换算成「天」的 remaining_days_raw 又除了一次 86400 —— 「还剩 40 天」被算成 0.0046 天，于是**每一条在途记录都会被判成已进预警区**，提前量口径整个失去意义；② recordEvent 的事件 insert 15 个 ? 对 14 列且 eta_before 漏 ::timestamptz，改期类事件一律 BadSqlGrammar；③ confirmReceipt 的 receipt_confirmed_at/closed_at 同样漏 cast；④ reloadAlert 用 select * 却让 alertOf 读 shipment_code —— jOOQ 抛 IllegalArgumentException 被翻成 **400「字段格式不正确」**，现象完全指不到「回读时少查了一列」；⑤ confirmReceipt 先 UPDATE 关记录再 INSERT 事件，被自己的 DB 触发器 guard_first_mile_tracking_event_source（已闭环不接受 RECEIPT 类更新）当场拒掉、整笔回滚 —— **顺序反了**；⑥ 迁移里 guard_first_mile_tracking_state 的条件写反（status <> CANCELLED 应为 = CANCELLED），结果正常收货确认被自己的约束拒绝；⑦ delayedOnly=true 把 WATCH 行过滤掉了 —— 而 WATCH（默认到港前 7 天进区）恰恰是蓝图要求的「提前若干天」里提前量最大的那一档，这个筛选正好把本模块最该被看见的那批货藏起来 · **上游依赖实查结论**：10.4.1.1 头程发运单（V80）**已交付**故跟踪真的挂在真实发运单上，且 DB 触发器钉死「只有已发出的发运单才谈得上在途」（草稿建跟踪会让看板把没发的单混进在途）；7.5.1.2 在途库存（V63）**已交付**故在途余量是 join 现算的真值；6.2.1.1 补货与 6 采购（6.1–6.6 全部 36 个模块）**均未交付**，标 available=false 且**不代算缺口、不反向调用** · **前端**：页面 /logistics/transit-tracking（apps/web/src/app/logistics/transit-tracking/page.tsx + components/logistics/transit-tracking.tsx + transit-tracking-model.ts）预警口径常驻说明 + 汇总卡 + 筛选 / 在途看板（发运单·当前位置·阶段与清关·预计到港与改期次数·剩余窗口·档位·在途与已了结量）/ 延误预警页签（未结·已确认·已关闭，可逐条 ack 与关闭）/ **阈值口径页签（可直接改三档提前量，改完立刻换口径）**/ 详情弹窗（节点事件流 + 在途腿 + 预警 + 当前生效阈值口径 + 位置/改期/备注三种登记入口）/ 建跟踪对话框、**剩余窗口与「已经晚了」分开显示**、在途腿守恒等式自检对不上直接写「对不上，请刷新」、外部同步未接入如实写明且**不提供假「同步中」按钮**、清关被扣/退单时不给「已收货」动作、加载 / 空 / 错误三态 · 前端模型测试 **27 例**：查询串逐条落参、**15 个真实调用点捕获 api() 实际发出的请求**逐条断言 URL 与方法（白名单漏登记时页面只在浏览器里静默 404，typecheck/lint/vitest 全绿都发现不了）、筛选参数真的进了 URL、档位/色调/动作表、剩余窗口负数语义、守恒等式、外部来源留单号、未交付依赖标注 · 白名单 api-proxy.ts **求和**追加 transit-trackings 分支，route.test.ts 里逐条断言放行并断言 **8 条后端不存在的子路径仍被拒**（含 sync —— 外部连接器未交付，放行它们等于界面上出现一个点下去必然 404 的「同步」按钮）· **契约已重新生成**：./mvnw -Dtest=OpenApiContractTest test 刷新 backend/target/openapi，再 python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi；真新增 23 个 Tracking*/TransitTrack*/DelayAlert*/DelayThreshold* DTO；请求 DTO 的可选字段补 @Schema(nullable = true)（否则前端只能被迫给「没填」的字段塞空串，契约说了谎）· **验证（实跑）**：`./mvnw verify` **BUILD SUCCESS，7 模块全绿**（identity 43.7s / catalog 1:26 / channel 7.8s / warehouse 2:19 共 820 例零失败，含本模块 18 例与 7.5.1.2 的 24 例、10.4.1.1 的 29 例回归全过；Flyway 日志 Successfully applied 30 migrations … now at version v84）· pnpm typecheck 3/3 零错误 · pnpm lint 3/3 零错误零新增 warning · pnpm test **86 文件 / 1587 例全过**（本车道新增 49 例：模型 27 + 白名单 22）· NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build 成功（/logistics/transit-tracking 11 kB）· node tools/module-progress/sync.mjs --check 一致 · **本车道未做**：① 侧栏/搜索导航未登记 /logistics/transit-tracking（packages/ui 的共享任务页表未改，避免重排他人条目，与 10.4.1.1 / 7.5.1.1 / 8.2.1.1 现状一致）· ② 清关状态与阶段推进目前只在**后端端点**上完整可用，详情弹窗只开了位置/改期/备注三个登记入口，清关与阶段推进的 UI 表单未开放 · ③ 错误提示文案受仓库既有 ApiErrorHandler 限制：IllegalArgumentException 统一翻成一句泛化 400「字段格式不正确」，不指出具体字段（该 handler 为 warehouse 全服务共用，改它会动到 10.4.1.1 / 7.5.1.2 的错误体，本车道刻意不改）· ④ 到货与短少不由本模块处理（7.5.1.2 的 arrive / discrepancy） |
 | 10.4.2.1 | 海外仓连接 | — | D7 | 未开发 | — |
 | 10.4.2.2 | 备货预报 | — | D7 | 未开发 | — |
-| 10.5.1.1 | 报关单管理 | — | D7 | 未开发 | — |
+| 10.5.1.1 | 报关单管理 | — | D7 | 已交付 | 迁移 warehouse `V85__warehouse_customs_declaration.sql`（customs_declaration 单头 + customs_declaration_line 申报明细行（HS 编码 / 申报要素 jsonb / 货值 / 毛净重 / 体积 / 箱数 / 计量单位）+ customs_document 三单据版本链 + customs_submission 提交回执 + customs_result 海关结果回执 + customs_declaration_event 事件时间线，六张表 tenant_id NOT NULL + ENABLE/FORCE RLS isolation）· **人工复核是硬闸**（蓝图原文：报关数据错误导致的扣货与罚款由卖家承担）：DB 触发器 guard_customs_state 钉死「只有已复核才能提交报关行」且判据是「本次要变 SUBMITTED」而不是「当前状态是什么」（后者会把 REVIEWED→SUBMITTED 这条合法提交误判）；guard_customs_review_completeness 在复核通过时逐行检查申报要素齐备性（只有 MANUAL_COMPLETE / MODULE_3_7_1_1_COMPLETE 放行）· **一票货只报一次关**：唯一约束 customs_declaration_tenant_id_source_shipment_id_key 钉死，来源是 10.4.1.1 头程发运单（同服务复合外键）· 端点 18 个挂在 /warehouse/customs-declarations：GET /capabilities、GET 列表（真分页 + **全量汇总不受分页影响**）、GET /{id}、GET /{id}/(documents |
 | 10.5.1.2 | 申报要素 | — | D7 | 未开发 | — |
 | 10.5.1.3 | 关税与税费 | — | D7 | 未开发 | — |
 | 10.5.2.1 | 贸易单证 | — | D7 | 未开发 | — |

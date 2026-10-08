@@ -54,18 +54,18 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     vi.unstubAllGlobals();
   });
 
-  async function callProxy(path: string) {
+  async function callProxy(path: string, service = 'identity') {
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => new Response(JSON.stringify({ ok: true }), { status: 200 })),
     );
     const { proxy } = await import('./api-proxy');
     const { NextRequest } = await import('next/server');
-    const req = new NextRequest(`http://localhost/api/identity/${path}`, {
+    const req = new NextRequest(`http://localhost/api/${service}/${path}`, {
       headers: { cookie: 'starcon_session=test' },
     });
-    // the identity service matches on prefix 'identity/' then tests the remainder
-    return proxy(req, { params: { path: ['identity', ...path.split('/')] } } as never);
+    // the service matches on its prefix (e.g. 'identity/') then tests the remainder
+    return proxy(req, { params: { path: [service, ...path.split('/')] } } as never);
   }
 
   it('extracts a non-empty allow-set (guards against a broken extractor)', () => {
@@ -81,5 +81,32 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
   it.each(BLOCK)('STILL BLOCKS %s', async (path) => {
     const res = await callProxy(path);
     expect(res.status, `path ${path} should be blocked`).toBe(404);
+  });
+
+  // --- warehouse layer: 10.5.1.1 customs declarations merged against
+  //     10.4.1.2 transit-trackings. Both sides appended to the SAME group,
+  //     so this is the second occurrence of the known trap.
+  const WH_ALLOW = [
+    'customs-declarations/capabilities',
+    `customs-declarations/${UUID}`,
+    `customs-declarations/${UUID}/documents`,
+    `customs-declarations/${UUID}/results`,
+    `customs-declarations/${UUID}/submit-for-review`,
+    `customs-declarations/${UUID}/submit`,
+    'transit-trackings/capabilities',
+    `transit-trackings/${UUID}`,
+    `transit-trackings/${UUID}/receipt`,
+    'first-mile-shipments',
+  ];
+  const WH_BLOCK = ['customs-declarationz', `transit-trackings/${UUID}/bogus-shape`];
+
+  it.each(WH_ALLOW)('WAREHOUSE ALLOWS %s', async (path) => {
+    const res = await callProxy(path, 'warehouse');
+    expect(res.status, `warehouse path ${path} was blocked (${res.status})`).not.toBe(404);
+  });
+
+  it.each(WH_BLOCK)('WAREHOUSE STILL BLOCKS %s', async (path) => {
+    const res = await callProxy(path, 'warehouse');
+    expect(res.status, `warehouse path ${path} should be blocked`).toBe(404);
   });
 });
