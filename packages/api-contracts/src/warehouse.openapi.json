@@ -789,6 +789,94 @@
         }
       }
     },
+    "/warehouse/facilities/{id}": {
+      "get": {
+        "tags": [
+          "warehouse-detail-controller"
+        ],
+        "operationId": "detail_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "warehouse-detail-controller"
+        ],
+        "operationId": "update_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseUpdated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/labor/work-tasks": {
       "get": {
         "tags": [
@@ -6946,6 +7034,474 @@
         }
       }
     },
+    "/warehouse/goods-receipt-discrepancies": {
+      "get": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "page_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "receiptId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "disposition",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "discrepancyType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "claimStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "intake",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyHandlingIntakeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/evidence": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "addEvidence",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyEvidenceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyEvidenceRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/decide": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "decide",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/close": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "close_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyHandlingCloseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "claim",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim/withdraw": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "withdrawClaim",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyClaimWithdrawRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim/submit": {
+      "post": {
+        "tags": [
+          "goods-receipt-discrepancy-controller"
+        ],
+        "operationId": "submitClaim",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "handlingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyClaimSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyClaimRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/facilities": {
       "get": {
         "tags": [
@@ -9636,6 +10192,77 @@
         }
       }
     },
+    "/warehouse/inventory/outbound-orders/{orderId}": {
+      "get": {
+        "tags": [
+          "outbound-order-detail-controller"
+        ],
+        "operationId": "detail_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/outbound-orders/detail-capabilities": {
+      "get": {
+        "tags": [
+          "outbound-order-detail-controller"
+        ],
+        "operationId": "capabilities_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundOrderDetailCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/outbound-orders/capabilities": {
       "get": {
         "tags": [
@@ -10032,7 +10659,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_4",
+        "operationId": "detail_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -11000,7 +11627,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_5",
+        "operationId": "detail_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -11771,7 +12398,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "detail_5",
+        "operationId": "detail_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -11811,7 +12438,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -11987,7 +12614,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -12413,7 +13040,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -12439,77 +13066,12 @@
         }
       }
     },
-    "/warehouse/facilities/options": {
+    "/warehouse/goods-receipt-discrepancies/{handlingId}": {
       "get": {
         "tags": [
-          "warehouse-facility-controller"
+          "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "options",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/FacilityOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/facilities/capabilities": {
-      "get": {
-        "tags": [
-          "warehouse-facility-controller"
-        ],
-        "operationId": "capabilities_10",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/WorkVolumeCapability"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/facilities/{id}": {
-      "get": {
-        "tags": [
-          "warehouse-detail-controller"
-        ],
-        "operationId": "detail_3",
+        "operationId": "detail_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -12521,7 +13083,7 @@
             }
           },
           {
-            "name": "id",
+            "name": "handlingId",
             "in": "path",
             "required": true,
             "schema": {
@@ -12536,18 +13098,20 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/WarehouseDetail"
+                  "$ref": "#/components/schemas/DiscrepancyHandlingDetail"
                 }
               }
             }
           }
         }
-      },
-      "put": {
+      }
+    },
+    "/warehouse/goods-receipt-discrepancies/capabilities": {
+      "get": {
         "tags": [
-          "warehouse-detail-controller"
+          "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "update_5",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -12557,34 +13121,15 @@
               "type": "string",
               "default": ""
             }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WarehouseUpdateInput"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/WarehouseUpdated"
+                  "$ref": "#/components/schemas/GoodsReceiptDiscrepancyCapabilities"
                 }
               }
             }
@@ -12727,12 +13272,12 @@
         }
       }
     },
-    "/warehouse/inventory/outbound-orders/{orderId}": {
+    "/warehouse/facilities/options": {
       "get": {
         "tags": [
-          "outbound-order-detail-controller"
+          "warehouse-facility-controller"
         ],
-        "operationId": "detail_3",
+        "operationId": "options",
         "parameters": [
           {
             "name": "Authorization",
@@ -12742,15 +13287,6 @@
               "type": "string",
               "default": ""
             }
-          },
-          {
-            "name": "orderId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
           }
         ],
         "responses": {
@@ -12759,7 +13295,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/OutboundOrderDetail"
+                  "$ref": "#/components/schemas/FacilityOptions"
                 }
               }
             }
@@ -12767,12 +13303,12 @@
         }
       }
     },
-    "/warehouse/inventory/outbound-orders/detail-capabilities": {
+    "/warehouse/facilities/capabilities": {
       "get": {
         "tags": [
-          "outbound-order-detail-controller"
+          "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_4",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -12790,546 +13326,10 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/OutboundOrderDetailCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies": {
-      "get": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "page_4",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "receiptId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "disposition",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "discrepancyType",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "claimStatus",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyHandlingPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "intake",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyHandlingIntakeRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}/evidence": {
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "addEvidence",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyEvidenceRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyEvidenceRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}/decide": {
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "decide",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyDecisionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}/close": {
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "close_4",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyHandlingCloseRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim": {
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "claim",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyClaimRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyHandlingSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim/withdraw": {
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "withdrawClaim",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyClaimWithdrawRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyClaimRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}/claim/submit": {
-      "post": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "submitClaim",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DiscrepancyClaimSubmitRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyClaimRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/{handlingId}": {
-      "get": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "detail_5",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "handlingId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DiscrepancyHandlingDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/goods-receipt-discrepancies/capabilities": {
-      "get": {
-        "tags": [
-          "goods-receipt-discrepancy-controller"
-        ],
-        "operationId": "capabilities_9",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/GoodsReceiptDiscrepancyCapabilities"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WorkVolumeCapability"
+                  }
                 }
               }
             }
@@ -14099,6 +14099,92 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          }
+        }
+      },
+      "WarehouseUpdateInput": {
+        "required": [
+          "countryCode",
+          "name",
+          "timezone"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "countryCode": {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string"
+          },
+          "timezone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "addressLine1": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine2": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "region": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "postalCode": {
+            "maxLength": 20,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "WarehouseUpdated": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
           }
         }
       },
@@ -19996,6 +20082,319 @@
           }
         }
       },
+      "DiscrepancyHandlingIntakeRequest": {
+        "type": "object",
+        "properties": {
+          "discrepancyId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "DiscrepancyHandlingSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "disposition": {
+            "type": "string",
+            "nullable": true
+          },
+          "dispositionLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "acceptedQuantity": {
+            "type": "number"
+          },
+          "rejectedQuantity": {
+            "type": "number"
+          },
+          "evidenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimed": {
+            "type": "boolean"
+          },
+          "claimStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DiscrepancyEvidenceRequest": {
+        "type": "object",
+        "properties": {
+          "evidenceType": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "contentBase64": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyEvidenceRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "evidenceType": {
+            "type": "string"
+          },
+          "evidenceTypeLabel": {
+            "type": "string"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "uploadedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          },
+          "dataUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyDecisionRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disposition": {
+            "type": "string"
+          },
+          "acceptedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "rejectedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "inboundQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fromQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyHandlingCloseRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyClaimRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimType": {
+            "type": "string"
+          },
+          "claimedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "claimedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyClaimWithdrawRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyClaimRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimCode": {
+            "type": "string"
+          },
+          "claimType": {
+            "type": "string"
+          },
+          "claimTypeLabel": {
+            "type": "string"
+          },
+          "claimedQuantity": {
+            "type": "number"
+          },
+          "claimedAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "sourceRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceRefCode": {
+            "type": "string"
+          },
+          "claimRefId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "withdrawnAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DiscrepancyClaimSubmitRequest": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
       "WarehouseCreateInput": {
         "required": [
           "code",
@@ -23367,6 +23766,348 @@
           "size": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "OutboundDetailAction": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "toStatusLabel": {
+            "type": "string"
+          },
+          "reasonRequired": {
+            "type": "boolean"
+          },
+          "requiresCarrier": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundDetailEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "fromStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "toStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "toStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "actorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundDetailLine": {
+        "type": "object",
+        "properties": {
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "pickedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "shippedQuantity": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "OutboundDetailPickRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPieceCount": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          },
+          "requestedByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "nullable": true
+      },
+      "OutboundOrderDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string"
+          },
+          "sourceTransferOrderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceTransferCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceExternalRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdByUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "skuLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPieceCount": {
+            "type": "number"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundDetailLine"
+            }
+          },
+          "quantities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundQuantityAvailability"
+            }
+          },
+          "pickRequested": {
+            "type": "boolean"
+          },
+          "pickRequest": {
+            "$ref": "#/components/schemas/OutboundDetailPickRequest"
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundDetailEvent"
+            }
+          },
+          "timelineEventCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "linkedOrder": {
+            "$ref": "#/components/schemas/OutboundUnavailableLink"
+          },
+          "shipToAddress": {
+            "$ref": "#/components/schemas/OutboundUnavailableLink"
+          },
+          "reservationRefs": {
+            "$ref": "#/components/schemas/OutboundUnavailableLink"
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundUnavailableLink"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundDetailAction"
+            }
+          }
+        }
+      },
+      "OutboundQuantityAvailability": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number",
+            "nullable": true
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundUnavailableLink": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "OutboundOrderDetailCapabilities": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundUnavailableLink"
+            }
+          },
+          "quantityPolicies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutboundQuantityAvailability"
+            }
+          },
+          "actionOwnerModules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pickedQuantityNote": {
+            "type": "string"
+          },
+          "shippedQuantityNote": {
+            "type": "string"
+          },
+          "linkedOrderNote": {
+            "type": "string"
+          },
+          "reservationNote": {
+            "type": "string"
+          },
+          "packageNote": {
+            "type": "string"
           }
         }
       },
@@ -27781,6 +28522,507 @@
           }
         }
       },
+      "DiscrepancyDependencyCapability": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyHandlingOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DiscrepancyHandlingPage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/DiscrepancyHandlingSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingRow"
+            }
+          },
+          "statusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
+            }
+          },
+          "downstream": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyDependencyCapability"
+            }
+          },
+          "qualityStatusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyQualityStatusOption"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DiscrepancyHandlingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "discrepancyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptCode": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "discrepancyType": {
+            "type": "string"
+          },
+          "discrepancyTypeLabel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "disposition": {
+            "type": "string",
+            "nullable": true
+          },
+          "dispositionLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "acceptedQuantity": {
+            "type": "number"
+          },
+          "rejectedQuantity": {
+            "type": "number"
+          },
+          "inboundQualityStatusName": {
+            "type": "string"
+          },
+          "evidenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "stockMoveCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimed": {
+            "type": "boolean"
+          },
+          "claimStatus": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DiscrepancyHandlingSummary": {
+        "type": "object",
+        "properties": {
+          "handlingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "decidedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "closedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "riskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "discrepancyQuantity": {
+            "type": "number"
+          },
+          "acceptedQuantity": {
+            "type": "number"
+          },
+          "rejectedQuantity": {
+            "type": "number"
+          },
+          "claimedAmount": {
+            "type": "number"
+          },
+          "evidenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unclaimedRiskCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "earliestCreatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DiscrepancyQualityStatusOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyDispositionOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "allowedForRiskTypes": {
+            "type": "boolean"
+          },
+          "requiresInboundQualityStatus": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyFactRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "discrepancyType": {
+            "type": "string"
+          },
+          "discrepancyTypeLabel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonNote": {
+            "type": "string"
+          },
+          "evidenceNote": {
+            "type": "string"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "DiscrepancyHandlingDetail": {
+        "type": "object",
+        "properties": {
+          "handling": {
+            "$ref": "#/components/schemas/DiscrepancyHandlingRow"
+          },
+          "discrepancy": {
+            "$ref": "#/components/schemas/DiscrepancyFactRow"
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyEvidenceRow"
+            }
+          },
+          "stockMoves": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyStockMoveRow"
+            }
+          },
+          "claim": {
+            "$ref": "#/components/schemas/DiscrepancyClaimRow"
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingTransition"
+            }
+          },
+          "allowedDispositions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyDispositionOption"
+            }
+          },
+          "sellableRuleNote": {
+            "type": "string"
+          },
+          "notPostedNote": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyHandlingTransition": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "allowed": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscrepancyStockMoveRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "directionLabel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "fromQualityStatusName": {
+            "type": "string"
+          },
+          "toQualityStatusName": {
+            "type": "string"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "lotCode": {
+            "type": "string"
+          },
+          "transactionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "GoodsReceiptDiscrepancyCapabilities": {
+        "type": "object",
+        "properties": {
+          "statusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingTransition"
+            }
+          },
+          "dispositionOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyDispositionOption"
+            }
+          },
+          "riskDiscrepancyTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claimTypeOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
+            }
+          },
+          "evidenceTypeOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
+            }
+          },
+          "stockMoveDirectionOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
+            }
+          },
+          "downstream": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyDependencyCapability"
+            }
+          },
+          "qualityStatusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscrepancyQualityStatusOption"
+            }
+          },
+          "sellableRuleNote": {
+            "type": "string"
+          },
+          "claimNote": {
+            "type": "string"
+          },
+          "notPostedNote": {
+            "type": "string"
+          },
+          "revisionNote": {
+            "type": "string"
+          }
+        }
+      },
       "FacilitySummary": {
         "type": "object",
         "properties": {
@@ -28004,198 +29246,6 @@
           "openWorkOrderCount": {
             "type": "integer",
             "format": "int64"
-          }
-        }
-      },
-      "CountryOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          }
-        }
-      },
-      "FacilityOptions": {
-        "type": "object",
-        "properties": {
-          "kinds": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/KindOption"
-            }
-          },
-          "countries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CountryOption"
-            }
-          },
-          "legalEntities": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LegalEntityOption"
-            }
-          },
-          "statuses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StatusOption"
-            }
-          },
-          "timezoneNote": {
-            "type": "string"
-          },
-          "countryNote": {
-            "type": "string"
-          }
-        }
-      },
-      "KindOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "platformObserved": {
-            "type": "boolean"
-          }
-        }
-      },
-      "LegalEntityOption": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          }
-        }
-      },
-      "StatusOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          }
-        }
-      },
-      "WorkVolumeCapability": {
-        "type": "object",
-        "properties": {
-          "dimension": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "WarehouseUpdateInput": {
-        "required": [
-          "countryCode",
-          "name",
-          "timezone"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string"
-          },
-          "countryCode": {
-            "maxLength": 2,
-            "minLength": 0,
-            "type": "string"
-          },
-          "timezone": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string"
-          },
-          "addressLine1": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "addressLine2": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "city": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "region": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "postalCode": {
-            "maxLength": 20,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "WarehouseUpdated": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "note": {
-            "type": "string"
           }
         }
       },
@@ -28812,912 +29862,64 @@
           }
         }
       },
-      "OutboundDetailAction": {
+      "CountryOption": {
         "type": "object",
         "properties": {
-          "action": {
-            "type": "string"
-          },
-          "toStatus": {
-            "type": "string"
-          },
-          "toStatusLabel": {
-            "type": "string"
-          },
-          "reasonRequired": {
-            "type": "boolean"
-          },
-          "requiresCarrier": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          },
-          "ownerModule": {
+          "code": {
             "type": "string"
           }
         }
       },
-      "OutboundDetailEvent": {
+      "FacilityOptions": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
+          "kinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KindOption"
+            }
           },
-          "eventType": {
+          "countries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CountryOption"
+            }
+          },
+          "legalEntities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityOption"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatusOption"
+            }
+          },
+          "timezoneNote": {
             "type": "string"
           },
-          "eventTypeLabel": {
-            "type": "string"
-          },
-          "fromStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "fromStatusLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "toStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "toStatusLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "actorUserId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "detail": {
+          "countryNote": {
             "type": "string"
           }
         }
       },
-      "OutboundDetailLine": {
+      "KindOption": {
         "type": "object",
         "properties": {
-          "lineNo": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "plannedQuantity": {
-            "type": "number"
-          },
-          "pickedQuantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "shippedQuantity": {
-            "type": "number",
-            "nullable": true
-          }
-        }
-      },
-      "OutboundDetailPickRequest": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "lineCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPieceCount": {
-            "type": "number"
-          },
-          "note": {
-            "type": "string"
-          },
-          "requestedByUserId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "requestedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "nullable": true
-      },
-      "OutboundOrderDetail": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderCode": {
-            "type": "string"
-          },
-          "sourceType": {
-            "type": "string"
-          },
-          "sourceTypeLabel": {
-            "type": "string"
-          },
-          "sourceTransferOrderId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "sourceTransferCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "sourceExternalRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "warehouseCode": {
-            "type": "string"
-          },
-          "warehouseName": {
-            "type": "string"
-          },
-          "carrierCode": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "terminal": {
-            "type": "boolean"
-          },
-          "shippedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "cancelledAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "cancelReason": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdByUserId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "skuLineCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPieceCount": {
-            "type": "number"
-          },
-          "lines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundDetailLine"
-            }
-          },
-          "quantities": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundQuantityAvailability"
-            }
-          },
-          "pickRequested": {
-            "type": "boolean"
-          },
-          "pickRequest": {
-            "$ref": "#/components/schemas/OutboundDetailPickRequest"
-          },
-          "timeline": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundDetailEvent"
-            }
-          },
-          "timelineEventCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "linkedOrder": {
-            "$ref": "#/components/schemas/OutboundUnavailableLink"
-          },
-          "shipToAddress": {
-            "$ref": "#/components/schemas/OutboundUnavailableLink"
-          },
-          "reservationRefs": {
-            "$ref": "#/components/schemas/OutboundUnavailableLink"
-          },
-          "packages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundUnavailableLink"
-            }
-          },
-          "actions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundDetailAction"
-            }
-          }
-        }
-      },
-      "OutboundQuantityAvailability": {
-        "type": "object",
-        "properties": {
-          "quantity": {
+          "code": {
             "type": "string"
           },
           "label": {
             "type": "string"
           },
-          "value": {
-            "type": "number",
-            "nullable": true
-          },
-          "available": {
+          "platformObserved": {
             "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
           }
         }
       },
-      "OutboundUnavailableLink": {
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string",
-            "nullable": true
-          },
-          "href": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "OutboundOrderDetailCapabilities": {
-        "type": "object",
-        "properties": {
-          "sections": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundUnavailableLink"
-            }
-          },
-          "quantityPolicies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OutboundQuantityAvailability"
-            }
-          },
-          "actionOwnerModules": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "pickedQuantityNote": {
-            "type": "string"
-          },
-          "shippedQuantityNote": {
-            "type": "string"
-          },
-          "linkedOrderNote": {
-            "type": "string"
-          },
-          "reservationNote": {
-            "type": "string"
-          },
-          "packageNote": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyHandlingIntakeRequest": {
-        "type": "object",
-        "properties": {
-          "discrepancyId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "DiscrepancyHandlingSaved": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "disposition": {
-            "type": "string",
-            "nullable": true
-          },
-          "dispositionLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "acceptedQuantity": {
-            "type": "number"
-          },
-          "rejectedQuantity": {
-            "type": "number"
-          },
-          "evidenceCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "claimed": {
-            "type": "boolean"
-          },
-          "claimStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "decidedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "closedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "DiscrepancyEvidenceRequest": {
-        "type": "object",
-        "properties": {
-          "evidenceType": {
-            "type": "string"
-          },
-          "fileName": {
-            "type": "string"
-          },
-          "contentType": {
-            "type": "string"
-          },
-          "contentBase64": {
-            "type": "string"
-          },
-          "capturedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyEvidenceRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "evidenceType": {
-            "type": "string"
-          },
-          "evidenceTypeLabel": {
-            "type": "string"
-          },
-          "fileName": {
-            "type": "string"
-          },
-          "contentType": {
-            "type": "string"
-          },
-          "byteSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "sha256": {
-            "type": "string"
-          },
-          "capturedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "uploadedBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "note": {
-            "type": "string"
-          },
-          "dataUrl": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyDecisionRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "disposition": {
-            "type": "string"
-          },
-          "acceptedQuantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "rejectedQuantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "inboundQualityStatusId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "fromQualityStatusId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "locationId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "lotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyHandlingCloseRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyClaimRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "claimType": {
-            "type": "string"
-          },
-          "claimedQuantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "claimedAmount": {
-            "type": "number",
-            "nullable": true
-          },
-          "currency": {
-            "type": "string",
-            "nullable": true
-          },
-          "sourceRefId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "sourceRefCode": {
-            "type": "string"
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyClaimWithdrawRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyClaimRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "claimCode": {
-            "type": "string"
-          },
-          "claimType": {
-            "type": "string"
-          },
-          "claimTypeLabel": {
-            "type": "string"
-          },
-          "claimedQuantity": {
-            "type": "number"
-          },
-          "claimedAmount": {
-            "type": "number",
-            "nullable": true
-          },
-          "currency": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "sourceRefId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "sourceRefCode": {
-            "type": "string"
-          },
-          "claimRefId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          },
-          "submittedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "withdrawnAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "DiscrepancyClaimSubmitRequest": {
-        "type": "object",
-        "properties": {
-          "expectedVersion": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "DiscrepancyDependencyCapability": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "href": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyHandlingOption": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "DiscrepancyHandlingPage": {
-        "type": "object",
-        "properties": {
-          "summary": {
-            "$ref": "#/components/schemas/DiscrepancyHandlingSummary"
-          },
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyHandlingRow"
-            }
-          },
-          "statusOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
-            }
-          },
-          "downstream": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyDependencyCapability"
-            }
-          },
-          "qualityStatusOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyQualityStatusOption"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "DiscrepancyHandlingRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "discrepancyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "receiptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "receiptCode": {
-            "type": "string"
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "warehouseCode": {
-            "type": "string"
-          },
-          "lineId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "discrepancyType": {
-            "type": "string"
-          },
-          "discrepancyTypeLabel": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "disposition": {
-            "type": "string",
-            "nullable": true
-          },
-          "dispositionLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "acceptedQuantity": {
-            "type": "number"
-          },
-          "rejectedQuantity": {
-            "type": "number"
-          },
-          "inboundQualityStatusName": {
-            "type": "string"
-          },
-          "evidenceCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "stockMoveCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "claimed": {
-            "type": "boolean"
-          },
-          "claimStatus": {
-            "type": "string"
-          },
-          "decidedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "closedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "DiscrepancyHandlingSummary": {
-        "type": "object",
-        "properties": {
-          "handlingCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pendingCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "decidedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "claimedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "closedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "openCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "riskCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "discrepancyQuantity": {
-            "type": "number"
-          },
-          "acceptedQuantity": {
-            "type": "number"
-          },
-          "rejectedQuantity": {
-            "type": "number"
-          },
-          "claimedAmount": {
-            "type": "number"
-          },
-          "evidenceCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "claimCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unclaimedRiskCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "earliestCreatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "DiscrepancyQualityStatusOption": {
+      "LegalEntityOption": {
         "type": "object",
         "properties": {
           "id": {
@@ -29730,240 +29932,38 @@
           "name": {
             "type": "string"
           },
-          "role": {
+          "status": {
             "type": "string"
           }
         }
       },
-      "DiscrepancyDispositionOption": {
+      "StatusOption": {
         "type": "object",
         "properties": {
-          "value": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkVolumeCapability": {
+        "type": "object",
+        "properties": {
+          "dimension": {
             "type": "string"
           },
           "label": {
             "type": "string"
           },
-          "allowedForRiskTypes": {
+          "available": {
             "type": "boolean"
           },
-          "requiresInboundQualityStatus": {
+          "ownerModule": {
             "type": "string"
           },
           "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyFactRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "lineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "discrepancyType": {
-            "type": "string"
-          },
-          "discrepancyTypeLabel": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "reasonCode": {
-            "type": "string"
-          },
-          "reasonNote": {
-            "type": "string"
-          },
-          "evidenceNote": {
-            "type": "string"
-          },
-          "recordedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "actorId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "DiscrepancyHandlingDetail": {
-        "type": "object",
-        "properties": {
-          "handling": {
-            "$ref": "#/components/schemas/DiscrepancyHandlingRow"
-          },
-          "discrepancy": {
-            "$ref": "#/components/schemas/DiscrepancyFactRow"
-          },
-          "evidence": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyEvidenceRow"
-            }
-          },
-          "stockMoves": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyStockMoveRow"
-            }
-          },
-          "claim": {
-            "$ref": "#/components/schemas/DiscrepancyClaimRow"
-          },
-          "transitions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyHandlingTransition"
-            }
-          },
-          "allowedDispositions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyDispositionOption"
-            }
-          },
-          "sellableRuleNote": {
-            "type": "string"
-          },
-          "notPostedNote": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyHandlingTransition": {
-        "type": "object",
-        "properties": {
-          "from": {
-            "type": "string"
-          },
-          "to": {
-            "type": "string"
-          },
-          "allowed": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscrepancyStockMoveRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "direction": {
-            "type": "string"
-          },
-          "directionLabel": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "fromQualityStatusName": {
-            "type": "string"
-          },
-          "toQualityStatusName": {
-            "type": "string"
-          },
-          "locationCode": {
-            "type": "string"
-          },
-          "lotCode": {
-            "type": "string"
-          },
-          "transactionId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "GoodsReceiptDiscrepancyCapabilities": {
-        "type": "object",
-        "properties": {
-          "statusOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
-            }
-          },
-          "transitions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyHandlingTransition"
-            }
-          },
-          "dispositionOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyDispositionOption"
-            }
-          },
-          "riskDiscrepancyTypes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "claimTypeOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
-            }
-          },
-          "evidenceTypeOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
-            }
-          },
-          "stockMoveDirectionOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyHandlingOption"
-            }
-          },
-          "downstream": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyDependencyCapability"
-            }
-          },
-          "qualityStatusOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DiscrepancyQualityStatusOption"
-            }
-          },
-          "sellableRuleNote": {
-            "type": "string"
-          },
-          "claimNote": {
-            "type": "string"
-          },
-          "notPostedNote": {
-            "type": "string"
-          },
-          "revisionNote": {
             "type": "string"
           }
         }

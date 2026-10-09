@@ -4213,6 +4213,394 @@
         }
       }
     },
+    "/catalog/kb/rule-versions/{id}": {
+      "put": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "updateRuleVersion",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleVersionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "deleteRuleVersion",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/review-tasks/{taskId}": {
+      "put": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "updateReviewTask",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewTaskUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/entries/{id}": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "entry_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeEntryDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "updateEntry_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeEntryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "deleteEntry_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/entries/{id}/enabled": {
+      "put": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "setEntryEnabled",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/entries/{entryId}/translations/{translationId}": {
+      "put": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "updateTranslation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "translationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntryTranslationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryTranslation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/import-templates/{id}": {
       "get": {
         "tags": [
@@ -4397,7 +4785,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "updateTranslation",
+        "operationId": "updateTranslation_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -11393,6 +11781,453 @@
         }
       }
     },
+    "/catalog/kb/rule-versions": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "ruleVersions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platform",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleVersionPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "createRuleVersion",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleVersionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/entries": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "entries",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reviewState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeEntryPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "createEntry",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeEntryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/entries/{id}/usages": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "entryUsages",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KbUsageRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "recordUsage",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsageInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/KbUsageRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/entries/{entryId}/translations": {
+      "post": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "createTranslation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntryTranslationInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryTranslation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/entries/{entryId}/rule-bindings": {
+      "post": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "bindEntry",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleBindingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryRuleBinding"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/import-templates": {
       "get": {
         "tags": [
@@ -12453,7 +13288,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "createTranslation",
+        "operationId": "createTranslation_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -15571,7 +16406,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "entries",
+        "operationId": "entries_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -18214,6 +19049,408 @@
         }
       }
     },
+    "/catalog/kb/usages": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "usages",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/KbUsagePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/review-tasks": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "reviewTasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reviewStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platform",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewTaskPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/overview": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "overview_14",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeBaseOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/options": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "options_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeBaseOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/hit-rates": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "hitRates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntryHitRateRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/entries/{id}/translations": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "translations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntryTranslation"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/entries/{id}/translation-coverage": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "translationCoverage",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryTranslationCoverage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/entries/{id}/rule-bindings": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "bindings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntryRuleBinding"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/import-templates/{id}/file": {
       "get": {
         "tags": [
@@ -18807,7 +20044,7 @@
         "tags": [
           "duplicate-detection-controller"
         ],
-        "operationId": "overview_14",
+        "operationId": "overview_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -18918,7 +20155,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "translations",
+        "operationId": "translations_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -18961,7 +20198,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "translationCoverage",
+        "operationId": "translationCoverage_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -19303,7 +20540,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "overview_15",
+        "operationId": "overview_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -19419,7 +20656,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "overview_16",
+        "operationId": "overview_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -19630,7 +20867,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "overview_17",
+        "operationId": "overview_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -19661,7 +20898,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "options_5",
+        "operationId": "options_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -19887,7 +21124,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "overview_18",
+        "operationId": "overview_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -19961,7 +21198,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "overview_19",
+        "operationId": "overview_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -20040,7 +21277,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "overview_20",
+        "operationId": "overview_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -20111,7 +21348,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "overview_21",
+        "operationId": "overview_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -20250,7 +21487,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "overview_22",
+        "operationId": "overview_23",
         "parameters": [
           {
             "name": "Authorization",
@@ -20521,7 +21758,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_23",
+        "operationId": "overview_24",
         "parameters": [
           {
             "name": "Authorization",
@@ -20955,6 +22192,104 @@
         }
       }
     },
+    "/catalog/kb/translations/{translationId}": {
+      "delete": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "deleteTranslation",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "translationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/kb/entries/{entryId}/rule-bindings/{bindingId}": {
+      "delete": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "unbindEntry",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "bindingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/import-field-mappings/{id}": {
       "delete": {
         "tags": [
@@ -21003,7 +22338,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "deleteTranslation",
+        "operationId": "deleteTranslation_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -24189,6 +25524,256 @@
           "version": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "RuleVersionInput": {
+        "required": [
+          "effectiveFrom",
+          "platform",
+          "policyKey",
+          "title",
+          "versionLabel"
+        ],
+        "type": "object",
+        "properties": {
+          "platform": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "policyKey": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "versionLabel": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "changeSummary": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "KnowledgeSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReviewTaskUpdateInput": {
+        "required": [
+          "reviewStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "reviewStatus": {
+            "minLength": 1,
+            "type": "string",
+            "description": "PENDING / REVIEWING / DONE"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReviewTaskRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryCode": {
+            "type": "string"
+          },
+          "entryTitle": {
+            "type": "string"
+          },
+          "ruleVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platform": {
+            "type": "string"
+          },
+          "policyKey": {
+            "type": "string"
+          },
+          "versionLabel": {
+            "type": "string"
+          },
+          "ruleChangeSummary": {
+            "type": "string"
+          },
+          "supersedingRuleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supersedingRuleLabel": {
+            "type": "string"
+          },
+          "supersedingChangeSummary": {
+            "type": "string"
+          },
+          "reviewStatus": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "assignedTo": {
+            "type": "string"
+          },
+          "assignedAt": {
+            "type": "string"
+          },
+          "reviewedBy": {
+            "type": "string"
+          },
+          "reviewedAt": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "KnowledgeEntryInput": {
+        "required": [
+          "body",
+          "code",
+          "enabled",
+          "entryType",
+          "sourceLocale",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "entryType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "body": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sourceLocale": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "triggerKeywords": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "EntryTranslationInput": {
+        "required": [
+          "body",
+          "locale",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "locale": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 120,
+            "minLength": 0,
+            "type": "string"
+          },
+          "body": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "EntryTranslation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
           }
         }
       },
@@ -28726,6 +30311,132 @@
             "format": "int32"
           },
           "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "UsageInput": {
+        "required": [
+          "outcome"
+        ],
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "minLength": 1,
+            "type": "string",
+            "description": "RESOLVED / PARTIAL / UNRESOLVED / ABANDONED / REJECTED"
+          },
+          "entryTranslationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversationRef": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "KbUsageRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryCode": {
+            "type": "string"
+          },
+          "entryTitle": {
+            "type": "string"
+          },
+          "entryTranslationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "agentId": {
+            "type": "string"
+          },
+          "conversationRef": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "outcomeLabel": {
+            "type": "string"
+          },
+          "countsAsHit": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "RuleBindingInput": {
+        "required": [
+          "ruleVersionId"
+        ],
+        "type": "object",
+        "properties": {
+          "ruleVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "EntryRuleBinding": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ruleVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platform": {
+            "type": "string"
+          },
+          "policyKey": {
+            "type": "string"
+          },
+          "versionLabel": {
+            "type": "string"
+          },
+          "ruleTitle": {
+            "type": "string"
+          },
+          "ruleStatus": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "boundAt": {
             "type": "string"
           }
         }
@@ -36071,6 +37782,557 @@
           }
         }
       },
+      "KbUsagePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KbUsageRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RuleVersionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RuleVersionRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RuleVersionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platform": {
+            "type": "string"
+          },
+          "policyKey": {
+            "type": "string"
+          },
+          "versionLabel": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "changeSummary": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string"
+          },
+          "bindingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "ReviewTaskPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewTaskRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "KnowledgeBaseOverview": {
+        "type": "object",
+        "properties": {
+          "entryTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "entryEnabled": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "entryDisabled": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "entryUntranslated": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "translationTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "translationDraft": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleVersionTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ruleVersionActive": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bindingTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reviewPending": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reviewReviewing": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reviewDone": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usageTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usageHit": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usageRejected": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usageAbandoned": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hitEntryCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hitRate": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "KnowledgeBaseOptions": {
+        "type": "object",
+        "properties": {
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "platformOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "entryTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entryTypeOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "usageOutcomes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "outcomeOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "reviewStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reviewStatusOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "translationOrigins": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "translationOriginOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "EntryHitRateRow": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "entryType": {
+            "type": "string"
+          },
+          "entryTypeLabel": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "usageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hitUsageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hitRate": {
+            "type": "number"
+          },
+          "reviewPendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastUsedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "KnowledgeEntryPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeEntryRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "KnowledgeEntryRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "entryType": {
+            "type": "string"
+          },
+          "entryTypeLabel": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "sourceLocale": {
+            "type": "string"
+          },
+          "triggerKeywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "translationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "usageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reviewPendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "EntryEffect": {
+        "type": "object",
+        "properties": {
+          "usageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resolvedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partialCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unresolvedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "abandonedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hitUsageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hitRate": {
+            "type": "number"
+          },
+          "lastUsedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "KnowledgeEntryDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "entryType": {
+            "type": "string"
+          },
+          "entryTypeLabel": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "sourceLocale": {
+            "type": "string"
+          },
+          "triggerKeywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntryTranslation"
+            }
+          },
+          "ruleBindings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntryRuleBinding"
+            }
+          },
+          "recentUsages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KbUsageRow"
+            }
+          },
+          "effect": {
+            "$ref": "#/components/schemas/EntryEffect"
+          }
+        }
+      },
+      "EntryTranslationCoverage": {
+        "type": "object",
+        "properties": {
+          "sourceLocale": {
+            "type": "string"
+          },
+          "locales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocaleCoverage"
+            }
+          },
+          "readyCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LocaleCoverage": {
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": "string"
+          },
+          "translated": {
+            "type": "boolean"
+          },
+          "reviewed": {
+            "type": "boolean"
+          },
+          "usable": {
+            "type": "boolean"
+          }
+        }
+      },
       "ImportTemplatePage": {
         "type": "object",
         "properties": {
@@ -39661,6 +41923,14 @@
           },
           "createdAt": {
             "type": "string"
+          }
+        }
+      },
+      "DeletedResponse": {
+        "type": "object",
+        "properties": {
+          "deleted": {
+            "type": "boolean"
           }
         }
       }
