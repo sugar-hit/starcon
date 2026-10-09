@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 116 |
+| 已交付 | 117 |
 | 进行中 | 0 |
-| **未开发** | **349** |
-| 完成率 | 24.9% |
+| **未开发** | **348** |
+| 完成率 | 25.2% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -25,7 +25,7 @@
 | **D3** | 24 | 0 | 16 | 40 |
 | **D4** | 7 | 0 | 53 | 60 |
 | **D5** | 0 | 0 | 52 | 52 |
-| **D6** | 1 | 0 | 77 | 78 |
+| **D6** | 2 | 0 | 76 | 78 |
 | **D7** | 6 | 0 | 149 | 155 |
 
 ## 分系统进度
@@ -37,7 +37,7 @@
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
 | 04 | 刊登与内容系统 | D5 | 0 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
-| 06 | 采购与供应系统 | D6 | 0 | 26 |
+| 06 | 采购与供应系统 | D6 | 1 | 26 |
 | 07 | 库存核算系统 | D3 | 20 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 8 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 1 | 27 |
@@ -241,7 +241,7 @@
 | 6.3.1.3 | 采购单审批 | — | D6 | 未开发 | — |
 | 6.3.2.1 | 跟单与交期 | — | D6 | 未开发 | — |
 | 6.3.2.2 | 到货与逾期 | — | D6 | 未开发 | — |
-| 6.4.1.1 | 加工单 | /purchase/processing | D6 | 未开发 | — |
+| 6.4.1.1 | 加工单 | /purchase/processing | D6 | 已交付 | 迁移 trade `V97__trade_processing_order.sql`（五张表：processing_factory 加工厂档案 + processing_order 加工单 + processing_order_component 组件领用记录 + processing_order_event 状态与进度事件流 + processing_inbound_request 入库需求通知；全部 tenant_id NOT NULL + FORCE RLS + GRANT trade_app/starcon_app，事件流额外 REVOKE UPDATE/DELETE）。**归属 trade 而非新建 purchase 服务**：蓝图 README 系统地图 06 行写死「后端主责服务：trade + catalog（party）」，本仓不存在 purchase 服务，lane.mjs 的微服务盲区闸也是读这张表判卷能否落地；前端路由 /purchase/processing，后端命名空间按服务走（与 9.3.2.2 前端 /orders、后端 /trade/fulfillment/routing 同一纪律）。**组件领用量只有一个来源**：经 `BomVersionPort` 调 catalog 授权接口 GET /catalog/bom-versions/{id}/requirement（3.5.2.1 V25 已交付）取回 R7 三元组（单位用量 × 产量 × (1 + 损耗率/100)，6 位小数 HALF_UP；**损耗率是百分数不是比率**，R6）并原样冻结，trade 不重算、不取整（取整是 3.5.2.2 与 06 采购建议的职责）；catalog 不可达显式 503，不返回空组件冒充「这个 BOM 没有组件」。**进度不靠一个 status 字段**：生命周期 DRAFT→RELEASED→IN_PROCESS→COMPLETED→RECEIVED（+CANCELLED）由 DB 触发器钉死合法迁移，每条组件 issued_quantity 独立推进（差额=还欠多少料），事件流 append-only 留痕；**完工数量（工厂报）与实收数量（仓库收）分列记**，未收满时加工单停在 COMPLETED 而非终态 RECEIVED（否则余量永远无处登记）。**入库需求通知 8 是真实可查表**，随「下达」生成、随作废取消。模块边界加粗句是验收项：trade **一张库存表都不碰**，组件出库与成品入库由 warehouse 的 `POST /warehouse/processing-orders/issues` 在**一个本地事务**里完成，复用 V1 既有 inventory_transaction/inventory_entry（kind='ADJUSTMENT'、ref_type='PROCESSING_ORDER'），UNIQUE(tenant_id,ref_type,ref_id) 顺带幂等，warehouse 侧**不新建表**（与 8.2.1.2 同一纪律）；两服务独立数据库，无跨库 FK/视图/JOIN。端点 13 个：trade 9 个（capabilities/requirements/factories/factories/{id}/orders/orders/{id}/orders/{id}/status/progress/components/issue）+ warehouse 4 个（capabilities/boundary/issues/executions）；页面 /purchase/processing（apps/web/src/app/purchase/processing/page.tsx + components/purchase/processing-order-workspace.tsx + processing-order-model.ts），api-proxy 白名单**求并**追加 trade/processing 与 warehouse/processing-orders 两支（两层 alternation 都求并），并实测反例确认守卫非空转。测试 ProcessingOrderIntegrationTest 27 例（trade）+ 16 例（warehouse），连接池压到 1，实跑 Testcontainers PostgreSQL 16，覆盖**组件出库与成品入库的同事务原子性专测**（组件不足整体回滚且一件未动、入库环节失败连带回滚已执行的出库、重复投递被幂等锚点挡住）、R7 口径、草稿 BOM 拒绝、DB 触发器直连绕过、租户隔离三断言与逐表 relforcerowsecurity；前端 processing-order-model.test.ts 24 例 + api-proxy 双向断言 6 例（真跑 proxy 断言 HTTP 状态码）。**顺带修掉三个真问题**：①apps/web/src/lib/api.ts 的 backends 漏了 trade 一项（9.3.2.2 的模型已在调 trade/ 却会抛「未知的接口路径」，本车道追加修复，union-safe）；②pageOrders/pageFactories 与 warehouse pageExecutions 的 jOOQ fetch 收到 List 未 toArray，静默按单参数绑定；③部分入库原本把加工单推进终态 RECEIVED。V97 不 ALTER 任何既有表，跨车道 DDL 回归面 = 0。**下游缺口**：8.4.1.1 组装单与 6.4.1.2 BOM 关联均未交付（后者效果上已被下达时冻结覆盖），capabilities 显式 available=false 并写明 ownerModule 与影响 |
 | 6.4.1.2 | BOM 关联 | /purchase/processing | D6 | 未开发 | — |
 | 6.4.2.1 | 质检单 | /purchase/quality | D6 | 未开发 | — |
 | 6.4.2.2 | 不良品处理 | /purchase/quality | D6 | 未开发 | — |
