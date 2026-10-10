@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 116 |
+| 已交付 | 117 |
 | 进行中 | 0 |
-| **未开发** | **349** |
-| 完成率 | 24.9% |
+| **未开发** | **348** |
+| 完成率 | 25.2% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -24,7 +24,7 @@
 | **D1–D2** | 78 | 0 | 2 | 80 |
 | **D3** | 24 | 0 | 16 | 40 |
 | **D4** | 7 | 0 | 53 | 60 |
-| **D5** | 0 | 0 | 52 | 52 |
+| **D5** | 1 | 0 | 51 | 52 |
 | **D6** | 1 | 0 | 77 | 78 |
 | **D7** | 6 | 0 | 149 | 155 |
 
@@ -35,7 +35,7 @@
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 38 | 40 |
-| 04 | 刊登与内容系统 | D5 | 0 | 26 |
+| 04 | 刊登与内容系统 | D5 | 1 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 0 | 26 |
 | 07 | 库存核算系统 | D3 | 20 | 31 |
@@ -189,7 +189,7 @@
 | 4.2.1.1 | 刊登编辑器 | /listings/editor | D5 | 未开发 | — |
 | 4.2.1.2 | 批量编辑 | /listings/editor | D5 | 未开发 | — |
 | 4.2.2.1 | 刊登模板 | /listings/templates | D5 | 未开发 | — |
-| 4.2.2.2 | 描述模板 | /listings/templates | D5 | 未开发 | — |
+| 4.2.2.2 | 描述模板 | /listings/templates | D5 | 已交付 | V96（description_template / description_template_section / description_image_slot / description_render*，RLS + CHECK + 触发器；变量与多语言复用 V21 content_template*）；GET /catalog/description-templates/{overview,options,templates,renders} + POST/PUT/DELETE；页面 /listings/templates |
 | 4.2.3.1 | 平台类目映射 | — | D5 | 未开发 | — |
 | 4.2.3.2 | 合规预检（违禁词/侵权） | — | D5 | 未开发 | — |
 | 4.3.1.1 | 一键刊登 | /listings/publish | D5 | 未开发 | — |
