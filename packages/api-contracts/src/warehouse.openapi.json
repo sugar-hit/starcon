@@ -3477,6 +3477,47 @@
         }
       }
     },
+    "/warehouse/processing-orders/issues": {
+      "post": {
+        "tags": [
+          "processing-order-controller"
+        ],
+        "operationId": "issue",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessingOrderIssueInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessingOrderIssueSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/labor/work-tasks": {
       "get": {
         "tags": [
@@ -12510,6 +12551,128 @@
         }
       }
     },
+    "/warehouse/processing-orders/executions": {
+      "get": {
+        "tags": [
+          "processing-order-controller"
+        ],
+        "operationId": "executions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "processingOrderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessingStockPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/processing-orders/capabilities": {
+      "get": {
+        "tags": [
+          "processing-order-controller"
+        ],
+        "operationId": "capabilities_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessingStockCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/processing-orders/boundary": {
+      "get": {
+        "tags": [
+          "processing-order-controller"
+        ],
+        "operationId": "boundary",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockMovementBoundary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/lots": {
       "get": {
         "tags": [
@@ -12930,7 +13093,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "capabilities_2",
+        "operationId": "capabilities_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -13430,7 +13593,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "capabilities_3",
+        "operationId": "capabilities_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -14502,7 +14665,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "capabilities_4",
+        "operationId": "capabilities_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -14787,7 +14950,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -15004,7 +15167,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -15035,7 +15198,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -16850,7 +17013,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -16881,7 +17044,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -17205,7 +17368,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -17381,7 +17544,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -17807,7 +17970,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_12",
+        "operationId": "capabilities_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -17878,7 +18041,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_13",
+        "operationId": "capabilities_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -18038,7 +18201,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "capabilities_14",
+        "operationId": "capabilities_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -18235,7 +18398,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_15",
+        "operationId": "capabilities_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -18412,7 +18575,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "capabilities_16",
+        "operationId": "capabilities_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -18486,7 +18649,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "capabilities_17",
+        "operationId": "capabilities_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -20870,6 +21033,179 @@
             "type": "string"
           },
           "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "ComponentIssue": {
+        "required": [
+          "quantity",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "本次实发数量（不得超过加工单冻结的需求量）"
+          },
+          "note": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ProcessingOrderIssueInput": {
+        "required": [
+          "completedQuantity",
+          "componentIssues",
+          "legalEntityId",
+          "outputSkuId",
+          "processingOrderId",
+          "warehouseId"
+        ],
+        "type": "object",
+        "properties": {
+          "processingOrderId": {
+            "type": "string",
+            "description": "加工单 ID（trade V97 的逻辑 ID；跨服务不建外键，只作幂等锚点与追溯引用）",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inboundQualityStatusId": {
+            "type": "string",
+            "description": "成品入库到哪个质量状态；不传则取本租户唯一启用的可售状态",
+            "format": "uuid",
+            "nullable": true
+          },
+          "outputSkuId": {
+            "type": "string",
+            "description": "成品 SKU（catalog 逻辑 ID，跨服务不建外键）",
+            "format": "uuid"
+          },
+          "completedQuantity": {
+            "type": "number",
+            "description": "本次入库的成品数量"
+          },
+          "componentIssues": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ComponentIssue"
+            }
+          },
+          "outboundLocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "outboundQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "inboundLocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "outboundLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "inboundLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ComponentIssued": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "postedQuantity": {
+            "type": "number",
+            "description": "按库存刻度（4 位小数）实际出库的量"
+          }
+        }
+      },
+      "ProcessingOrderIssueSaved": {
+        "type": "object",
+        "properties": {
+          "processingOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "outputSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "completedQuantity": {
+            "type": "number"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ComponentIssued"
+            }
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
             "type": "string"
           }
         }
@@ -29527,6 +29863,172 @@
           },
           "enabled": {
             "type": "boolean"
+          }
+        }
+      },
+      "ProcessingStockEntry": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "onHandDelta": {
+            "type": "number"
+          },
+          "reservedDelta": {
+            "type": "number"
+          }
+        }
+      },
+      "ProcessingStockPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProcessingStockRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalCompletedQuantity": {
+            "type": "number"
+          },
+          "totalIssuedQuantity": {
+            "type": "number"
+          }
+        }
+      },
+      "ProcessingStockRow": {
+        "type": "object",
+        "properties": {
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "processingOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "outputSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "completedQuantity": {
+            "type": "number"
+          },
+          "issuedQuantity": {
+            "type": "number"
+          },
+          "componentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProcessingStockEntry"
+            }
+          }
+        }
+      },
+      "DownstreamGap": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "effect": {
+            "type": "string"
+          }
+        }
+      },
+      "ProcessingStockCapabilities": {
+        "type": "object",
+        "properties": {
+          "refType": {
+            "type": "string"
+          },
+          "atomicWithComponentAndProductMovements": {
+            "type": "boolean"
+          },
+          "supportsPartialComponentIssue": {
+            "type": "boolean"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "downstreamGaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DownstreamGap"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "StockMovementBoundary": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string"
+          },
+          "localTransaction": {
+            "type": "string"
+          },
+          "tradeResponsibility": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
           }
         }
       },
