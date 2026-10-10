@@ -98,6 +98,107 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     `transit-trackings/${UUID}/receipt`,
     'first-mile-shipments',
   ];
+  // --- catalog layer: 4.2.2.2 description-templates appended to the SAME
+  //     alternation as the pre-existing catalog routes (descriptions / titles /
+  //     products / ...). This is the known trap: taking the wrong side of a
+  //     merge silently 404s an ALREADY DELIVERED catalog route while
+  //     typecheck / lint / vitest / Playwright all stay green, because the
+  //     allowlist only takes effect in the browser.
+  //
+  //     So the pre-existing catalog paths are re-asserted below as regression
+  //     guards, and the BLOCK list proves the regex still rejects instead of
+  //     degenerating into "allow everything".
+  const CATALOG_ALLOW = [
+    // 4.2.2.2 (this lane)
+    'description-templates/overview',
+    'description-templates/options',
+    'description-templates/templates',
+    `description-templates/templates/${UUID}`,
+    `description-templates/templates/${UUID}/sections`,
+    `description-templates/templates/${UUID}/enabled`,
+    'description-templates/renders',
+    `description-templates/renders/${UUID}`,
+    // pre-existing catalog baseline (must not regress)
+    'descriptions/overview',
+    'descriptions/templates',
+    `descriptions/templates/${UUID}`,
+    'descriptions/phrases',
+    'descriptions/renders',
+    `descriptions/renders/${UUID}/skus`,
+    'descriptions/sections',
+    'titles/overview',
+    `titles/templates/${UUID}/enabled`,
+    'attributes/overview',
+    'media/overview',
+    // 3.7.1.2 (this lane) — 目的地报关版本。This lane appended to the SAME
+    // alternation as 4.2.2.2 and as the 3.7.1.1 `customs-attributes` branch
+    // that was already here, so all three had to survive the union.
+    'customs-destination-versions/effective',
+    'customs-destination-versions/requirements',
+    `customs-destination-versions/skus/${UUID}`,
+    `customs-destination-versions/${UUID}/publish`,
+    'customs-declaration/resolve',
+    // 3.7.1.1 (this lane) — must not regress across the union either.
+    'customs-attributes/profiles',
+    `customs-attributes/skus/${UUID}`,
+    `customs-attributes/skus/${UUID}/submit`,
+    `customs-attributes/skus/${UUID}/review`,
+    'customs-attributes/declaration-ready',
+  ];
+
+  const CATALOG_BLOCK = [
+    // one segment more than exists -> must not look delivered
+    `description-templates/templates/${UUID}/bogus-shape`,
+    `description-templates/renders/${UUID}/skus`,
+    `description-templates/templates/${UUID}/translation-coverage`,
+    // singular typo of an existing segment
+    'description-template',
+    `description-templates/renders/${UUID}/extra`,
+    // 3.7.1.2 negative cases: the wildcard destination must NOT become a
+    // routable path (the DB rejects '*', so the proxy must reject it too),
+    // and one segment more than the controller declares must not pass.
+    'customs-destination-versions',
+    'customs-destination-versions/*',
+    `customs-destination-versions/skus/${UUID}/publish`,
+    `customs-destination-versions/${UUID}/withdraw`,
+    'customs-declaration',
+  ];
+
+  it.each(CATALOG_ALLOW)('CATALOG ALLOWS %s', async (path) => {
+    const res = await callProxy(path, 'catalog');
+    expect(res.status, `catalog path ${path} was blocked (${res.status})`).not.toBe(404);
+  });
+
+  it.each(CATALOG_BLOCK)('CATALOG STILL BLOCKS %s', async (path) => {
+    const res = await callProxy(path, 'catalog');
+    expect(res.status, `catalog path ${path} should be blocked`).toBe(404);
+  });
+
+  // --- KNOWN PRE-EXISTING DEFECT, owned by 3.4.2.2 (not this lane) -----------
+  //
+  // The catalog allowlist literally contains the token
+  // `translation-coveragetranslations` (a lost `|` from an earlier union), so
+  // 3.4.2.2's own delivered route
+  //   descriptions/templates/{uuid}/translations
+  // is silently 404'd in the browser while typecheck / lint / vitest / Playwright
+  // all stay green — the exact failure mode this file exists to catch.
+  //
+  // It is asserted as BLOCKED here so the defect is recorded in a test instead of
+  // living only in someone's head. It is NOT fixed by 4.2.2.2: the `descriptions`
+  // branch belongs to 3.4.2.2's lane. When that lane fixes the token, this test
+  // goes red and the entry moves to CATALOG_ALLOW.
+  const CATALOG_KNOWN_BROKEN = [
+    `descriptions/templates/${UUID}/translations`,
+  ];
+
+  it.each(CATALOG_KNOWN_BROKEN)(
+    'CATALOG KNOWN-BROKEN (3.4.2.2 owns the fix) %s',
+    async (path) => {
+      const res = await callProxy(path, 'catalog');
+      expect(res.status, `${path} was expected to be blocked (known 3.4.2.2 defect)`).toBe(404);
+    },
+  );
+
   const WH_BLOCK = ['customs-declarationz', `transit-trackings/${UUID}/bogus-shape`];
 
   it.each(WH_ALLOW)('WAREHOUSE ALLOWS %s', async (path) => {

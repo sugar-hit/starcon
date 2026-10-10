@@ -5214,5 +5214,239 @@ public final class CatalogModels {
       List<SupplierQuoteRules.Option> statuses,
       List<SupplierQuoteRules.Option> selectionStates,
       String note) {}
+
+  // ================================================================== 4.2.2.2 描述模板
+
+  /**
+   * 描述模板写入（新建或改，id 为空即新建）。
+   *
+   * <p><b>段落整体替换</b>而不是增量增删：五段骨架是「这个模板长什么样」的完整口径，
+   * 增删式会让「当前有哪些段落」这个问题有两个答案（与 3.4.2.2 的变量整体替换同一纪律）。
+   */
+  public record DescriptionTemplateInput(
+      @NotBlank @Size(max = 32) String code,
+      @NotBlank @Size(max = 100) String name,
+      @Schema(nullable = true) String note,
+      @NotBlank @Size(max = 16) String sourceLocale,
+      @Schema(nullable = true) @Size(max = 5) List<@Valid DescriptionSectionInput> sections,
+      boolean enabled,
+      @PositiveOrZero long version) {}
+
+  /**
+   * 一个段落（五类之一）。
+   *
+   * <p><b>contentTemplateId 在新建时可以不传</b>：服务层会用 {@code body} + {@code variables}
+   * 自动在 V21 的 content_template 里建/改出对应的一行——段落内容仍然只有一份，
+   * 变量与译文的机制也仍然只有 3.4.2.2 那一套（见 V96 文件头的取舍说明）。
+   */
+  public record DescriptionSectionInput(
+      @NotBlank @Size(max = 32) String sectionType,
+      @NotBlank @Size(max = 20000) String body,
+      @Schema(nullable = true) @Size(max = 16) List<@Valid ContentTemplateVariableInput> variables,
+      @Schema(nullable = true) @Size(max = 8) List<@Valid DescriptionImageSlotInput> imageSlots,
+      boolean showHeading,
+      /** 新建时留空即由服务层新建 content_template；改已有段落时传回即可校验归属。 */
+      @Schema(nullable = true) UUID contentTemplateId) {}
+
+  /** 一个图片插入位（段落内）。{@code slotNo} 是渲染时的 data-slot-no。 */
+  public record DescriptionImageSlotInput(
+      @NotBlank @Size(max = 16) String bindSource,
+      @Schema(nullable = true) @Size(max = 500) String caption,
+      @Schema(nullable = true) UUID assetId,
+      boolean required,
+      @PositiveOrZero int slotNo) {}
+
+  /** 描述模板一行（骨架 + 逐段摘要）。段落详情（含变量与插图位）另查。 */
+  public record DescriptionTemplateRow(
+      UUID id,
+      String code,
+      String name,
+      String note,
+      String sourceLocale,
+      boolean enabled,
+      List<DescriptionSectionSummary> sections,
+      int localeCount,
+      long renderCount,
+      long version,
+      String createdAt,
+      String updatedAt) {}
+
+  /** 段落摘要：列表页要看「这个模板有哪几段、每段配了几个变量 / 几张图」。 */
+  public record DescriptionSectionSummary(
+      String sectionType,
+      String sectionTypeLabel,
+      int sortOrder,
+      UUID contentTemplateId,
+      int variableCount,
+      int imageSlotCount,
+      List<String> locales) {}
+
+  /** 段落详情（含变量、插图位与译文）。 */
+  public record DescriptionSectionRow(
+      UUID id,
+      UUID templateId,
+      String sectionType,
+      String sectionTypeLabel,
+      int sortOrder,
+      UUID contentTemplateId,
+      String body,
+      boolean showHeading,
+      List<ContentTemplateVariable> variables,
+      List<ContentTranslation> translations,
+      List<DescriptionImageSlotRow> imageSlots) {}
+
+  /** 图片插入位一行。{@code resolvedAssetName} 让页面在「还没绑素材」时也知道该绑哪张。 */
+  public record DescriptionImageSlotRow(
+      UUID id,
+      UUID sectionId,
+      int slotNo,
+      String bindSource,
+      String bindSourceLabel,
+      String caption,
+      UUID assetId,
+      boolean required,
+      boolean bound) {}
+
+  /** 模板保存结果。 */
+  public record DescriptionTemplateSaved(
+      UUID id, String code, long version, int sectionCount, int imageSlotCount, long renderCount) {}
+
+  /**
+   * 描述模板概览。
+   *
+   * <p>{@code incompleteRenderCount} 与 {@code issueCount} 放最前面：
+   * 「有多少份渲染出来的描述 HTML 还带着缺失」是这个模块唯一需要每天盯的数字。
+   */
+  public record DescriptionTemplateOverview(
+      long templateCount,
+      long enabledTemplateCount,
+      long sectionCount,
+      long imageSlotCount,
+      long missingSectionTypeCount,
+      long renderCount,
+      long succeededRenderCount,
+      long partialRenderCount,
+      long failedRenderCount,
+      long issueCount,
+      String note) {}
+
+  /**
+   * 渲染提交（一次渲染 = 一个模板 × 一个 SKU × 一种语言）。
+   *
+   * <p>images 按 {@code slotNo} 对上段落的插图位；同一 slotNo 出现在多个段落时取第一个，
+   * 因为 {@code data-position} 是渲染全局序号，同一张图落进两个位置会让人以为有两张。
+   */
+  public record DescriptionRenderInput(
+      @NotNull UUID templateId,
+      @NotNull UUID skuId,
+      @NotBlank @Size(max = 16) String locale,
+      @Schema(nullable = true) @Size(max = 16) List<@Valid DescriptionRenderInputImage> images) {}
+
+  /** 渲染时调用方给的一张图（已解析的对外 URL）。 */
+  public record DescriptionRenderInputImage(
+      @PositiveOrZero int slotNo,
+      @NotBlank @Size(max = 1000) String url,
+      @Schema(nullable = true) @Size(max = 500) String alt,
+      /** 指回本租户素材库的行；给了就校验它确实属于本租户（RLS 下查不到即失败）。 */
+      @Schema(nullable = true) UUID assetId,
+      @Schema(nullable = true) java.math.BigDecimal widthPx,
+      @Schema(nullable = true) java.math.BigDecimal heightPx) {}
+
+  /** 渲染批次一行（列表页用；html 字段很重，详情与可发布查询才取）。 */
+  public record DescriptionRenderRow(
+      UUID id,
+      UUID templateId,
+      String templateCode,
+      String templateName,
+      UUID skuId,
+      String skuCode,
+      String locale,
+      String status,
+      String statusLabel,
+      long sectionCount,
+      long completeCount,
+      long incompleteCount,
+      long imageCount,
+      long issueCount,
+      String note,
+      String createdAt) {}
+
+  /** 渲染后的描述 HTML 产物：这是蓝图写明的**输出**，直接给 4.2.1.1 与平台上传。 */
+  public record DescriptionRenderProduct(
+      UUID renderId,
+      UUID templateId,
+      String templateCode,
+      UUID skuId,
+      String skuCode,
+      String locale,
+      String status,
+      String statusLabel,
+      /** **拼装出来的整份详情页 HTML**，不是模板字符串。 */
+      String html,
+      long imageCount,
+      long issueCount,
+      List<DescriptionRenderSectionRow> sections,
+      List<DescriptionRenderIssueRow> issues,
+      String note,
+      String createdAt) {}
+
+  /** 渲染出的一段（HTML + 图片落点）。 */
+  public record DescriptionRenderSectionRow(
+      UUID id,
+      String sectionType,
+      String sectionTypeLabel,
+      int sortOrder,
+      String heading,
+      String html,
+      String status,
+      String statusLabel,
+      long imageCount,
+      List<DescriptionRenderImageRow> images,
+      List<DescriptionRenderIssueRow> issues) {}
+
+  /** 渲染出的一个 <img> 落点。{@code position} 是渲染全局序号（HTML 的 data-position）。 */
+  public record DescriptionRenderImageRow(
+      UUID id,
+      int position,
+      int slotNo,
+      UUID imageSlotId,
+      UUID assetId,
+      String src,
+      String alt,
+      java.math.BigDecimal widthPx,
+      java.math.BigDecimal heightPx) {}
+
+  /** 一条缺失报告（变量未绑定 / 短语池为空 / 缺译文 / 必填图位没图）。 */
+  public record DescriptionRenderIssueRow(
+      UUID id,
+      String variableName,
+      String issueKind,
+      String issueKindLabel,
+      String detail,
+      String createdAt) {}
+
+  public record DescriptionRenderQuery(
+      @Schema(nullable = true) @Size(max = 100) String keyword,
+      @Schema(nullable = true) @Size(max = 16) String status,
+      @Schema(nullable = true) UUID skuId,
+      int page,
+      int size) {}
+
+  public record DescriptionRenderPage(
+      List<DescriptionRenderRow> items,
+      long total,
+      int page,
+      int size,
+      String note) {}
+
+  /** 词表选项（前端下拉的数据源，与 {@link DescriptionTemplateRules} 同源）。 */
+  public record DescriptionTemplateOptions(
+      List<DescriptionTemplateRules.Option> sectionTypes,
+      List<DescriptionTemplateRules.Option> imageBindSources,
+      List<DescriptionTemplateRules.Option> renderStatuses,
+      List<DescriptionTemplateRules.Option> issueKinds,
+      List<DescriptionTemplateRules.Option> variableSources,
+      Map<String, String> defaultPhrasesBySectionType,
+      String note) {}
 }
 

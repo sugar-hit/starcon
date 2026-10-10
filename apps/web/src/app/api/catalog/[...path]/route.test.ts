@@ -1511,3 +1511,131 @@ it('sku-merges 放行不等于放行任意 catalog 子路径', async () => {
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
+
+it('catalog/kb 的全部路由被放行（11.4.2.2 客服知识库与话术）', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const entry = '44444444-4444-4444-4444-444444444444';
+  const rule = '55555555-5555-5555-5555-555555555555';
+  const translation = '66666666-6666-6666-6666-666666666666';
+  const binding = '77777777-7777-7777-7777-777777777777';
+  const task = '88888888-8888-8888-8888-888888888888';
+  // 读：概览、词表、话术列表与详情、译文与完整度、挂钩、引用历史、
+  // 规则版本台账、待复核任务、引用记录、命中率统计。
+  for (const path of [
+    'catalog/kb/overview',
+    'catalog/kb/options',
+    'catalog/kb/entries',
+    `catalog/kb/entries/${entry}`,
+    `catalog/kb/entries/${entry}/enabled?enabled=false`,
+    `catalog/kb/entries/${entry}/translations`,
+    `catalog/kb/entries/${entry}/translations/${translation}`,
+    `catalog/kb/entries/${entry}/translation-coverage?locale=en-US`,
+    `catalog/kb/entries/${entry}/rule-bindings`,
+    `catalog/kb/entries/${entry}/rule-bindings/${binding}`,
+    `catalog/kb/entries/${entry}/usages?size=20`,
+    `catalog/kb/translations/${translation}`,
+    'catalog/kb/rule-versions',
+    `catalog/kb/rule-versions/${rule}`,
+    `catalog/kb/rule-versions/${rule}?status=SUPERSEDED`,
+    'catalog/kb/review-tasks',
+    `catalog/kb/review-tasks/${task}`,
+    'catalog/kb/usages?outcome=REJECTED',
+    'catalog/kb/hit-rates?sort=LEAST_USED',
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: segments(path) } })).status,
+      `${path} 应被放行`,
+    ).toBe(200);
+  }
+  // POST：建话术、建译文、挂钩、建规则版本、记一次引用。
+  for (const path of [
+    'catalog/kb/entries',
+    `catalog/kb/entries/${entry}/translations`,
+    `catalog/kb/entries/${entry}/rule-bindings`,
+    `catalog/kb/entries/${entry}/usages`,
+    'catalog/kb/rule-versions',
+  ]) {
+    expect(
+      (await POST(request(path, 'POST'), { params: { path: segments(path) } })).status,
+      `${path} 应被放行`,
+    ).toBe(200);
+  }
+  // PUT：改话术、启停、改译文、改/发布规则版本、认领复核任务。
+  for (const path of [
+    `catalog/kb/entries/${entry}`,
+    `catalog/kb/entries/${entry}/enabled?enabled=true`,
+    `catalog/kb/entries/${entry}/translations/${translation}`,
+    `catalog/kb/rule-versions/${rule}`,
+    `catalog/kb/rule-versions/${rule}?status=ACTIVE`,
+    `catalog/kb/review-tasks/${task}`,
+  ]) {
+    expect(
+      (await PUT(request(path, 'PUT'), { params: { path: segments(path) } })).status,
+      `${path} 应被放行`,
+    ).toBe(200);
+  }
+  // DELETE：删话术、删译文、删规则版本、解除挂钩。
+  for (const path of [
+    `catalog/kb/entries/${entry}`,
+    `catalog/kb/translations/${translation}`,
+    `catalog/kb/rule-versions/${rule}`,
+    `catalog/kb/entries/${entry}/rule-bindings/${binding}`,
+  ]) {
+    expect(
+      (await DELETE(request(path, 'DELETE'), { params: { path: segments(path) } })).status,
+      `${path} 应被放行`,
+    ).toBe(200);
+  }
+});
+
+it('catalog/kb 不放行相邻的未知子路径，且引用记录没有改删端点', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const entry = '44444444-4444-4444-4444-444444444444';
+  const translation = '66666666-6666-6666-6666-666666666666';
+  for (const path of [
+    'catalog/kb/unknown',
+    `catalog/kb/entries/${entry}/unknown`,
+    `catalog/kb/entries/${entry}/translations/${translation}/unknown`,
+    `catalog/kb/rule-versions/${entry}/publish`,
+    `catalog/kb/review-tasks/${entry}/delete`,
+    // kb_usage 是 append-only：引用记录只允许 POST/GET，
+    // 不放行它的改删路径，否则界面会以为「改一条记录」是支持的。
+    `catalog/kb/usages/${entry}`,
+    `catalog/kb/usages/${entry}/outcome`,
+    // translations 一级寻址只接受 id，不接条目 id
+    'catalog/kb/translations',
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: segments(path) } })).status,
+      `${path} 不该被放行`,
+    ).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+  expect((await DELETE(request(`catalog/kb/usages/${entry}`, 'DELETE'), { params: { path: segments(`catalog/kb/usages/${entry}`) } })).status).toBe(404);
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it('放行 catalog/kb 绝不代表放行 descriptions 或其它相邻路径', async () => {
+  // 反向用例：白名单是逐字枚举的，放行 kb 不应顺带放行任何相邻的字面量。
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  for (const path of ['catalog/kbx', 'catalog/k', 'catalog/kb1/overview']) {
+    expect(
+      (await GET(request(path), { params: { path: segments(path) } })).status,
+      `${path} 不该被放行`,
+    ).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+  // 已被交付的相邻资产线仍然照常放行（求并而不是二选一）
+  for (const path of [
+    'catalog/descriptions/overview',
+    'catalog/boms/overview',
+    'catalog/supplier-quotes/overview',
+    'catalog/sku-merges/overview',
+    'catalog/completeness/overview',
+  ]) {
+    expect((await GET(request(path), { params: { path: segments(path) } })).status).toBe(200);
+  }
+});
