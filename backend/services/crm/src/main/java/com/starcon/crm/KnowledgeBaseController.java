@@ -2,18 +2,18 @@ package com.starcon.crm;
 
 import static com.starcon.crm.KnowledgeBaseModels.*;
 
-import com.starcon.crm.KnowledgeBaseModels.CloseVersionInput;
-import com.starcon.crm.KnowledgeBaseModels.CreateEntryInput;
-import com.starcon.crm.KnowledgeBaseModels.CreateVersionInput;
-import com.starcon.crm.KnowledgeBaseModels.KnowledgeCapabilities;
-import com.starcon.crm.KnowledgeBaseModels.KnowledgeEntry;
-import com.starcon.crm.KnowledgeBaseModels.KnowledgeEntryDetail;
-import com.starcon.crm.KnowledgeBaseModels.KnowledgeReference;
-import com.starcon.crm.KnowledgeBaseModels.KnowledgeScope;
-import com.starcon.crm.KnowledgeBaseModels.KnowledgeVersion;
-import com.starcon.crm.KnowledgeBaseModels.PublishVersionInput;
-import com.starcon.crm.KnowledgeBaseModels.RecordReferenceInput;
-import com.starcon.crm.KnowledgeBaseModels.ReviewDueReport;
+import com.starcon.crm.KnowledgeBaseModels.CrmCloseVersionInput;
+import com.starcon.crm.KnowledgeBaseModels.CrmCreateEntryInput;
+import com.starcon.crm.KnowledgeBaseModels.CrmCreateVersionInput;
+import com.starcon.crm.KnowledgeBaseModels.CrmKnowledgeCapabilities;
+import com.starcon.crm.KnowledgeBaseModels.CrmKnowledgeEntry;
+import com.starcon.crm.KnowledgeBaseModels.CrmKnowledgeEntryDetail;
+import com.starcon.crm.KnowledgeBaseModels.CrmKnowledgeReference;
+import com.starcon.crm.KnowledgeBaseModels.CrmKnowledgeScope;
+import com.starcon.crm.KnowledgeBaseModels.CrmKnowledgeVersion;
+import com.starcon.crm.KnowledgeBaseModels.CrmPublishVersionInput;
+import com.starcon.crm.KnowledgeBaseModels.CrmRecordReferenceInput;
+import com.starcon.crm.KnowledgeBaseModels.CrmReviewDueReport;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -63,7 +63,7 @@ public class KnowledgeBaseController {
 
   /** 能力声明：前端在渲染前就知道哪些动作存在，而不是靠试。 */
   @GetMapping("/capabilities")
-  public KnowledgeCapabilities capabilities(
+  public CrmKnowledgeCapabilities capabilities(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
     return call(auth, "knowledge.read", a -> knowledge.capabilities());
   }
@@ -75,7 +75,7 @@ public class KnowledgeBaseController {
    * 就退化成一个摆设。
    */
   @GetMapping("/scopes")
-  public List<KnowledgeScope> scopes(
+  public List<CrmKnowledgeScope> scopes(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
     return call(auth, "knowledge.read", a -> knowledge.scopes());
   }
@@ -89,7 +89,7 @@ public class KnowledgeBaseController {
    * @param at 判定时刻，省略即此刻。带偏移量（例如 {@code 2026-10-10T08:00:00+08:00}）。
    */
   @GetMapping("/entries")
-  public List<KnowledgeEntry> entries(
+  public List<CrmKnowledgeEntry> entries(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestParam(required = false) UUID shopId,
       @RequestParam(required = false) UUID categoryId,
@@ -115,7 +115,7 @@ public class KnowledgeBaseController {
    * 不是「存在的」。
    */
   @GetMapping("/entries/effective")
-  public List<KnowledgeEntry> effectiveEntries(
+  public List<CrmKnowledgeEntry> effectiveEntries(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestParam(required = false) UUID shopId,
       @RequestParam(required = false) UUID categoryId,
@@ -129,7 +129,7 @@ public class KnowledgeBaseController {
 
   /** 档案详情 = 档案本体 + 全部版本（按版本号倒序）。 */
   @GetMapping("/entries/{entryId}")
-  public KnowledgeEntryDetail entry(
+  public CrmKnowledgeEntryDetail entry(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID entryId) {
     return call(auth, "knowledge.read", a -> knowledge.detail(entryId));
@@ -137,15 +137,15 @@ public class KnowledgeBaseController {
 
   /** 新建知识档案（蓝图「输入：知识条目编辑」）。 */
   @PostMapping("/entries")
-  public KnowledgeEntry createEntry(
+  public CrmKnowledgeEntry createEntry(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
-      @Valid @RequestBody CreateEntryInput input) {
+      @Valid @RequestBody CrmCreateEntryInput input) {
     return call(auth, "knowledge.update", a -> knowledge.createEntry(input, a.userId()));
   }
 
   /** 某条知识的全部版本（按版本号倒序）。 */
   @GetMapping("/entries/{entryId}/versions")
-  public List<KnowledgeVersion> versions(
+  public List<CrmKnowledgeVersion> versions(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID entryId) {
     return call(auth, "knowledge.read", a -> knowledge.versions(entryId));
@@ -159,10 +159,10 @@ public class KnowledgeBaseController {
    * 建草稿是「知识条目编辑 + 版本管理」两个输入里的后者。
    */
   @PostMapping("/entries/{entryId}/versions")
-  public KnowledgeVersion createVersion(
+  public CrmKnowledgeVersion createVersion(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID entryId,
-      @Valid @RequestBody CreateVersionInput input) {
+      @Valid @RequestBody CrmCreateVersionInput input) {
     return call(auth, "knowledge.update", a -> knowledge.createVersion(entryId, input));
   }
 
@@ -172,10 +172,10 @@ public class KnowledgeBaseController {
    * <p><b>POST 而不是 PUT</b>：发布是一次不可逆的**状态流转**，不是「把这份资源改成这样」。
    */
   @PostMapping("/versions/{versionId}/publish")
-  public KnowledgeVersion publish(
+  public CrmKnowledgeVersion publish(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID versionId,
-      @Valid @RequestBody(required = false) PublishVersionInput input) {
+      @Valid @RequestBody(required = false) CrmPublishVersionInput input) {
     return call(auth, "knowledge.update", a -> knowledge.publish(versionId, input, a.userId()));
   }
 
@@ -185,16 +185,16 @@ public class KnowledgeBaseController {
    * <p>关闭也是一次不可逆的动作（终点只能往前收），所以同样走 POST 而不是 PUT。
    */
   @PostMapping("/versions/{versionId}/close")
-  public KnowledgeVersion close(
+  public CrmKnowledgeVersion close(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID versionId,
-      @Valid @RequestBody CloseVersionInput input) {
+      @Valid @RequestBody CrmCloseVersionInput input) {
     return call(auth, "knowledge.update", a -> knowledge.close(versionId, input));
   }
 
   /** 某版本的引用记录：谁在什么时候引用了它。 */
   @GetMapping("/versions/{versionId}/references")
-  public List<KnowledgeReference> references(
+  public List<CrmKnowledgeReference> references(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID versionId) {
     return call(auth, "knowledge.read", a -> knowledge.references(versionId));
@@ -209,16 +209,16 @@ public class KnowledgeBaseController {
    * <p>下游 15.1.1.2 发送与 15.5.1 自动回复（**两者当前都未开发**）调用的就是这个端点。
    */
   @PostMapping("/versions/{versionId}/references")
-  public KnowledgeReference recordReference(
+  public CrmKnowledgeReference recordReference(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID versionId,
-      @Valid @RequestBody RecordReferenceInput input) {
+      @Valid @RequestBody CrmRecordReferenceInput input) {
     return call(auth, "knowledge.read", a -> knowledge.recordReference(versionId, input, a.userId()));
   }
 
   /** 某条知识全部版本的引用记录。 */
   @GetMapping("/entries/{entryId}/references")
-  public List<KnowledgeReference> entryReferences(
+  public List<CrmKnowledgeReference> entryReferences(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID entryId) {
     return call(auth, "knowledge.read", a -> knowledge.entryReferences(entryId));
@@ -231,7 +231,7 @@ public class KnowledgeBaseController {
    * 且至今仍无接替版本的条目。判据原文一并返回，页面能自证它按什么查的。
    */
   @GetMapping("/review-due")
-  public ReviewDueReport reviewDue(
+  public CrmReviewDueReport reviewDue(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestParam String platformCode,
       @RequestParam String policyChangedAt) {

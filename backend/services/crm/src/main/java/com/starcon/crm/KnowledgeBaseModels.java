@@ -30,9 +30,9 @@ import java.util.UUID;
  *       理由见 V99 文件头第二节（允许通配会让「这个格子此刻该答哪一条」出现两个答案）。
  *   <li><b>生效区间用半开区间 {@code [from, to)}</b>，{@code effectiveTo} 为 null 表示 +∞，
  *       与 catalog V23 / V25 / V95 的 R1–R5 同一口径（规则 R1、规则 R4）。
- *   <li><b>版本是不可变的已发布事实</b>：{@link KnowledgeVersion#status()} 为 PUBLISHED 之后，
+ *   <li><b>版本是不可变的已发布事实</b>：{@link CrmKnowledgeVersion#status()} 为 PUBLISHED 之后，
  *       正文与生效起点都不能改，只能新建一版接替（规则 R5 只允许向前关闭终点）。
- *   <li><b>引用是只追加的事实行</b>：{@link KnowledgeReference} 不提供任何修改 / 删除入口，
+ *   <li><b>引用是只追加的事实行</b>：{@link CrmKnowledgeReference} 不提供任何修改 / 删除入口，
  *       因为「这条知识被用过没有」正是要回答的问题（V99 第五节）。
  * </ul>
  */
@@ -52,7 +52,7 @@ public final class KnowledgeBaseModels {
    * <p>{@code topicKey} 是格子内的稳定业务键，建后不可改；两行并存时
    * 「这个格子这条问题的标准答法是什么」会有两个都自称标准的答案。
    */
-  public record CreateEntryInput(
+  public record CrmCreateEntryInput(
       @NotBlank @Size(max = 64) String topicKey,
       @NotBlank @Size(max = 200) String title,
       @NotNull UUID shopId,
@@ -82,7 +82,7 @@ public final class KnowledgeBaseModels {
    * 服务层用 {@code OffsetDateTime.parse} 解析，用 {@code Timestamp.valueOf(LocalDateTime)}
    * 会在东八区静默偏 −28800 秒 —— 这是本仓库反复踩到的坑。
    */
-  public record CreateVersionInput(
+  public record CrmCreateVersionInput(
       @NotNull @Positive Integer versionNo,
       @NotBlank String question,
       @NotBlank String answer,
@@ -96,7 +96,7 @@ public final class KnowledgeBaseModels {
    * <p>发布是**单向**的：之后不能撤回（V99 第四节 guard 触发器），
    * 因为 15.1.1.2 已发出的消息与 15.5.1 自动回复都按那一版答复过买家。
    */
-  public record PublishVersionInput(@Size(max = 500) String note) {}
+  public record CrmPublishVersionInput(@Size(max = 500) String note) {}
 
   /**
    * 向前关闭生效区间（规则 R5）。
@@ -104,7 +104,7 @@ public final class KnowledgeBaseModels {
    * <p>这是已发布版本上**唯一**合法的写操作：把 {@code effectiveTo} 收紧到一个仍在未来的时刻，
    * 让接替它的版本从那一刻起独占。允许收回到 null 或往后延都会被触发器拒绝。
    */
-  public record CloseVersionInput(@NotBlank String effectiveTo) {}
+  public record CrmCloseVersionInput(@NotBlank String effectiveTo) {}
 
   /**
    * 记录一次引用。
@@ -112,13 +112,13 @@ public final class KnowledgeBaseModels {
    * <p>{@code referencedBy} <b>不</b>由客户端提供：服务层用 {@code AccessService.Access.userId()}，
    * 伪造一个别人的 id 不该让引用记录冒名。{@code consumer} 说明是人工发送还是自动回复。
    */
-  public record RecordReferenceInput(
+  public record CrmRecordReferenceInput(
       @NotBlank String consumer, @Size(max = 200) String sourceRef, @Size(max = 500) String note) {}
 
   // ------------------------------------------------------------ 输出
 
-  /** 知识档案在列表与详情里的形状（不含版本正文，正文在 {@link KnowledgeVersion}）。 */
-  public record KnowledgeEntry(
+  /** 知识档案在列表与详情里的形状（不含版本正文，正文在 {@link CrmKnowledgeVersion}）。 */
+  public record CrmKnowledgeEntry(
       UUID id,
       String topicKey,
       String title,
@@ -131,7 +131,7 @@ public final class KnowledgeBaseModels {
       String topicType,
       String status,
       /** 此刻生效的版本（规则 R4）。没有生效版本时为 null —— 这是一个**要显形**的状态。 */
-      @Schema(nullable = true) KnowledgeVersion effectiveVersion,
+      @Schema(nullable = true) CrmKnowledgeVersion effectiveVersion,
       int versionCount,
       long referenceCount,
       String note,
@@ -143,7 +143,7 @@ public final class KnowledgeBaseModels {
    *
    * <p>{@code effectiveTo} 为 null = 这一版还没有接替者（+∞），与规则 R1 的半开区间一致。
    */
-  public record KnowledgeVersion(
+  public record CrmKnowledgeVersion(
       UUID id,
       UUID entryId,
       int versionNo,
@@ -160,7 +160,7 @@ public final class KnowledgeBaseModels {
       String updatedAt) {}
 
   /** 档案详情 = 档案本体 + 全部版本（按版本号倒序）。 */
-  public record KnowledgeEntryDetail(KnowledgeEntry entry, List<KnowledgeVersion> versions) {}
+  public record CrmKnowledgeEntryDetail(CrmKnowledgeEntry entry, List<CrmKnowledgeVersion> versions) {}
 
   /**
    * 一次引用。
@@ -170,7 +170,7 @@ public final class KnowledgeBaseModels {
    * @param versionNo 冗余出来的版本号：引用面板要显示「第几版」，
    *     否则每行都要回查版本表才能读懂
    */
-  public record KnowledgeReference(
+  public record CrmKnowledgeReference(
       UUID id,
       UUID versionId,
       int versionNo,
@@ -192,7 +192,7 @@ public final class KnowledgeBaseModels {
    *     「当前生效版写于改版之前，且至今仍是开放区间（没有接替版本）」，
    *     即内容仍停留在旧政策口径下
    */
-  public record ReviewDueEntry(
+  public record CrmReviewDueEntry(
       UUID entryId,
       String topicKey,
       String title,
@@ -212,12 +212,12 @@ public final class KnowledgeBaseModels {
       long referenceCount) {}
 
   /** {@code review-due} 的整体回答：判定口径与命中条目一并返回，页面能自证它按什么查的。 */
-  public record ReviewDueReport(
+  public record CrmReviewDueReport(
       String platformCode,
       String policyChangedAt,
       String criterion,
       int count,
-      List<ReviewDueEntry> entries) {}
+      List<CrmReviewDueEntry> entries) {}
 
   /**
    * 组织范围（店铺 × 类目 × 语言）—— 页面上三个下拉框的**真实数据源**。
@@ -225,11 +225,11 @@ public final class KnowledgeBaseModels {
    * <p>刻意做成查询而不是常量：这三个维度在 V99 里是 NOT NULL 的真实列，
    * 下拉框列出的是**本租户库里真实存在过的格子**，不是一份写死在前端的列表。
    */
-  public record KnowledgeScope(
+  public record CrmKnowledgeScope(
       UUID shopId, String shopName, UUID categoryId, String categoryName, String locale, long entryCount) {}
 
   /** 端点能力声明：让前端在渲染前就知道哪些动作存在，而不是靠试。 */
-  public record KnowledgeCapabilities(
+  public record CrmKnowledgeCapabilities(
       boolean effectiveLookup,
       boolean versionManagement,
       boolean referenceRecords,

@@ -2,19 +2,19 @@ package com.starcon.crm;
 
 import static com.starcon.crm.KnowledgeBaseModels.*;
 
-import com.starcon.crm.KnowledgeBaseModels.CloseVersionInput;
-import com.starcon.crm.KnowledgeBaseModels.CreateEntryInput;
-import com.starcon.crm.KnowledgeBaseModels.CreateVersionInput;
-import com.starcon.crm.KnowledgeBaseModels.KnowledgeCapabilities;
-import com.starcon.crm.KnowledgeBaseModels.KnowledgeEntry;
-import com.starcon.crm.KnowledgeBaseModels.KnowledgeEntryDetail;
-import com.starcon.crm.KnowledgeBaseModels.KnowledgeReference;
-import com.starcon.crm.KnowledgeBaseModels.KnowledgeScope;
-import com.starcon.crm.KnowledgeBaseModels.KnowledgeVersion;
-import com.starcon.crm.KnowledgeBaseModels.PublishVersionInput;
-import com.starcon.crm.KnowledgeBaseModels.RecordReferenceInput;
-import com.starcon.crm.KnowledgeBaseModels.ReviewDueEntry;
-import com.starcon.crm.KnowledgeBaseModels.ReviewDueReport;
+import com.starcon.crm.KnowledgeBaseModels.CrmCloseVersionInput;
+import com.starcon.crm.KnowledgeBaseModels.CrmCreateEntryInput;
+import com.starcon.crm.KnowledgeBaseModels.CrmCreateVersionInput;
+import com.starcon.crm.KnowledgeBaseModels.CrmKnowledgeCapabilities;
+import com.starcon.crm.KnowledgeBaseModels.CrmKnowledgeEntry;
+import com.starcon.crm.KnowledgeBaseModels.CrmKnowledgeEntryDetail;
+import com.starcon.crm.KnowledgeBaseModels.CrmKnowledgeReference;
+import com.starcon.crm.KnowledgeBaseModels.CrmKnowledgeScope;
+import com.starcon.crm.KnowledgeBaseModels.CrmKnowledgeVersion;
+import com.starcon.crm.KnowledgeBaseModels.CrmPublishVersionInput;
+import com.starcon.crm.KnowledgeBaseModels.CrmRecordReferenceInput;
+import com.starcon.crm.KnowledgeBaseModels.CrmReviewDueEntry;
+import com.starcon.crm.KnowledgeBaseModels.CrmReviewDueReport;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -80,8 +80,8 @@ public class KnowledgeBaseService {
 
   // ================================================================ 能力声明
 
-  public KnowledgeCapabilities capabilities() {
-    return new KnowledgeCapabilities(
+  public CrmKnowledgeCapabilities capabilities() {
+    return new CrmKnowledgeCapabilities(
         true, true, true, true, TOPIC_TYPES, CONSUMERS);
   }
 
@@ -96,7 +96,7 @@ public class KnowledgeBaseService {
    * <p>{@code entryCount} 只统计 ACTIVE 档案：归档的知识不该继续出现在新建下拉框里，
    * 否则运营会建出一个与已归档知识同名的格子（UNIQUE 会拒绝，报错原因还很难看懂）。
    */
-  public List<KnowledgeScope> scopes() {
+  public List<CrmKnowledgeScope> scopes() {
     return sql.fetch(
             "select shop_id, max(shop_name) as shop_name,"
                 + " category_id, max(category_name) as category_name,"
@@ -108,7 +108,7 @@ public class KnowledgeBaseService {
             currentTenant())
         .map(
             r ->
-                new KnowledgeScope(
+                new CrmKnowledgeScope(
                     r.get("shop_id", UUID.class),
                     nz(r.get("shop_name", String.class)),
                     r.get("category_id", UUID.class),
@@ -129,7 +129,7 @@ public class KnowledgeBaseService {
    * 所以这个子查询**至多命中一行**；仍然写 LIMIT 1 并按 effective_from 倒序，
    * 是为了让「万一重叠了」（例如有人手工改过库）时的行为是确定的 newest-wins 而不是报错。
    */
-  public List<KnowledgeEntry> list(
+  public List<CrmKnowledgeEntry> list(
       UUID shopId, UUID categoryId, String locale, String platformCode, String topicType,
       String at, boolean includeArchived) {
     OffsetDateTime moment = at == null || at.isBlank() ? now() : parseMoment(at, "查询时刻");
@@ -174,7 +174,7 @@ public class KnowledgeBaseService {
   }
 
   /** 按格子取「此刻生效的条目」—— 只返回有生效版本的那些。 */
-  public List<KnowledgeEntry> effectiveEntries(
+  public List<CrmKnowledgeEntry> effectiveEntries(
       UUID shopId, UUID categoryId, String locale, String at) {
     return list(shopId, categoryId, locale, null, null, at, false).stream()
         .filter(e -> e.effectiveVersion() != null)
@@ -182,13 +182,13 @@ public class KnowledgeBaseService {
   }
 
   /** 档案详情：档案本体 + 全部版本（按版本号倒序）。 */
-  public KnowledgeEntryDetail detail(UUID entryId) {
-    KnowledgeEntry entry = requireEntry(entryId);
-    return new KnowledgeEntryDetail(entry, versions(entryId));
+  public CrmKnowledgeEntryDetail detail(UUID entryId) {
+    CrmKnowledgeEntry entry = requireEntry(entryId);
+    return new CrmKnowledgeEntryDetail(entry, versions(entryId));
   }
 
   /** 某条知识的全部版本（按版本号倒序）。 */
-  public List<KnowledgeVersion> versions(UUID entryId) {
+  public List<CrmKnowledgeVersion> versions(UUID entryId) {
     requireEntry(entryId);
     return versionRows(entryId);
   }
@@ -197,7 +197,7 @@ public class KnowledgeBaseService {
 
   /** 新建知识档案。建档案**不**自动建版本：草稿内容由运营在建完档案后按需补上。 */
   @Transactional
-  public KnowledgeEntry createEntry(CreateEntryInput input, UUID actorId) {
+  public CrmKnowledgeEntry createEntry(CrmCreateEntryInput input, UUID actorId) {
     String topicType = oneOf(TOPIC_TYPES, input.topicType(), "知识类型");
     UUID id = UUID.randomUUID();
     OffsetDateTime moment = now();
@@ -243,7 +243,7 @@ public class KnowledgeBaseService {
    * 这里给出人话。
    */
   @Transactional
-  public KnowledgeVersion createVersion(UUID entryId, CreateVersionInput input) {
+  public CrmKnowledgeVersion createVersion(UUID entryId, CrmCreateVersionInput input) {
     requireEntry(entryId);
     OffsetDateTime from = parseMoment(input.effectiveFrom(), "生效起点");
     OffsetDateTime to = input.effectiveTo() == null || input.effectiveTo().isBlank()
@@ -294,8 +294,8 @@ public class KnowledgeBaseService {
    * 这里把它翻译成 409 + 可读原因。
    */
   @Transactional
-  public KnowledgeVersion publish(UUID versionId, PublishVersionInput input, UUID actorId) {
-    KnowledgeVersion version = requireVersion(versionId);
+  public CrmKnowledgeVersion publish(UUID versionId, CrmPublishVersionInput input, UUID actorId) {
+    CrmKnowledgeVersion version = requireVersion(versionId);
     if ("PUBLISHED".equals(version.status())) {
       throw bad(
           "版本 "
@@ -334,8 +334,8 @@ public class KnowledgeBaseService {
    * <p>只允许收紧到一个**仍在未来**的时刻：收回到 null 或往后延都会被 V99 的触发器拒绝。
    */
   @Transactional
-  public KnowledgeVersion close(UUID versionId, CloseVersionInput input) {
-    KnowledgeVersion version = requireVersion(versionId);
+  public CrmKnowledgeVersion close(UUID versionId, CrmCloseVersionInput input) {
+    CrmKnowledgeVersion version = requireVersion(versionId);
     if (!"PUBLISHED".equals(version.status())) {
       throw bad(
           "版本 " + version.versionNo() + " 还是草稿，不需要关闭生效区间 —— 草稿还没生效。请先发布。");
@@ -373,9 +373,9 @@ public class KnowledgeBaseService {
    * <p>引用是**只追加**的（V99 第五节）：本模块刻意不提供修改 / 删除入口。
    */
   @Transactional
-  public KnowledgeReference recordReference(
-      UUID versionId, RecordReferenceInput input, UUID actorId) {
-    KnowledgeVersion version = requireVersion(versionId);
+  public CrmKnowledgeReference recordReference(
+      UUID versionId, CrmRecordReferenceInput input, UUID actorId) {
+    CrmKnowledgeVersion version = requireVersion(versionId);
     String consumer = oneOf(CONSUMERS, input.consumer(), "引用来源");
     if (!"PUBLISHED".equals(version.status())) {
       throw bad(
@@ -419,13 +419,13 @@ public class KnowledgeBaseService {
   }
 
   /** 某**版本**的引用记录（谁在什么时候引用了它）。 */
-  public List<KnowledgeReference> references(UUID versionId) {
+  public List<CrmKnowledgeReference> references(UUID versionId) {
     requireVersion(versionId);
     return referenceRows(" and r.version_id = ?", versionId);
   }
 
   /** 某**档案**全部版本的引用记录（这条知识历史上被用过没有）。 */
-  public List<KnowledgeReference> entryReferences(UUID entryId) {
+  public List<CrmKnowledgeReference> entryReferences(UUID entryId) {
     requireEntry(entryId);
     return referenceRows(" and v.entry_id = ?", entryId);
   }
@@ -446,7 +446,7 @@ public class KnowledgeBaseService {
    * <p>这依赖 (platform_code) × (effective_from, effective_to) 的倒排形状，
    * V99 第五节为它建了 {@code crm_knowledge_version_open_ended} 部分索引。
    */
-  public ReviewDueReport reviewDue(String platformCode, String policyChangedAt) {
+  public CrmReviewDueReport reviewDue(String platformCode, String policyChangedAt) {
     String platform = platformCode == null ? null : platformCode.trim();
     if (platform == null || platform.isEmpty()) {
       throw bad("必须指定平台码：改版定位是「按平台」问的，没有平台的答法不适用任何平台的政策。");
@@ -473,11 +473,11 @@ public class KnowledgeBaseService {
             platform,
             changedAt);
     OffsetDateTime moment = now();
-    var entries = new ArrayList<ReviewDueEntry>();
+    var entries = new ArrayList<CrmReviewDueEntry>();
     for (Record r : rows) {
       var from = r.get("effective_from", OffsetDateTime.class);
       entries.add(
-          new ReviewDueEntry(
+          new CrmReviewDueEntry(
               r.get("id", UUID.class),
               r.get("topic_key", String.class),
               r.get("title", String.class),
@@ -496,13 +496,13 @@ public class KnowledgeBaseService {
               "WRITTEN_BEFORE_CHANGE",
               r.get("reference_count", Long.class)));
     }
-    return new ReviewDueReport(
+    return new CrmReviewDueReport(
         platform, changedAt.toString(), REVIEW_CRITERION, entries.size(), List.copyOf(entries));
   }
 
   // ================================================================ 内部
 
-  private KnowledgeEntry requireEntry(UUID entryId) {
+  private CrmKnowledgeEntry requireEntry(UUID entryId) {
     var row =
         sql.fetchOne(
             "select e.id,e.topic_key,e.title,e.shop_id,e.shop_name,e.category_id,e.category_name,"
@@ -536,27 +536,27 @@ public class KnowledgeBaseService {
     return entry(row);
   }
 
-  private KnowledgeVersion requireVersion(UUID versionId) {
+  private CrmKnowledgeVersion requireVersion(UUID versionId) {
     var row = sql.fetchOne(versionColumns() + " where tenant_id = ? and id = ?",
         currentTenant(), versionId);
     if (row == null) throw notFound("知识版本不存在");
     return version(row);
   }
 
-  private List<KnowledgeVersion> versionRows(UUID entryId) {
+  private List<CrmKnowledgeVersion> versionRows(UUID entryId) {
     return sql.fetch(versionColumns() + " where tenant_id = ? and entry_id = ? order by version_no desc",
             currentTenant(), entryId)
         .map(KnowledgeBaseService::version);
   }
 
-  private KnowledgeReference referenceById(UUID id) {
+  private CrmKnowledgeReference referenceById(UUID id) {
     var row = sql.fetchOne(referenceColumns() + " where r.tenant_id = ? and r.id = ?",
         currentTenant(), id);
     if (row == null) throw notFound("引用记录不存在");
     return reference(row);
   }
 
-  private List<KnowledgeReference> referenceRows(String extraCondition, UUID argument) {
+  private List<CrmKnowledgeReference> referenceRows(String extraCondition, UUID argument) {
     return sql.fetch(referenceColumns() + " where r.tenant_id = ?" + extraCondition
             + " order by r.referenced_at desc, r.id",
             currentTenant(), argument)
@@ -580,8 +580,8 @@ public class KnowledgeBaseService {
         + " join crm_knowledge_entry e on e.tenant_id = v.tenant_id and e.id = v.entry_id";
   }
 
-  private static KnowledgeEntry entry(Record r) {
-    return new KnowledgeEntry(
+  private static CrmKnowledgeEntry entry(Record r) {
+    return new CrmKnowledgeEntry(
         r.get("id", UUID.class),
         r.get("topic_key", String.class),
         r.get("title", String.class),
@@ -611,8 +611,8 @@ public class KnowledgeBaseService {
    * updated_at），其余（version_no、question、answer、effective_*、published_*）保持原名，
    * 因为档案侧没有同名列，不需要前缀。
    */
-  private static KnowledgeVersion versionOf(Record r, String prefix) {
-    return new KnowledgeVersion(
+  private static CrmKnowledgeVersion versionOf(Record r, String prefix) {
+    return new CrmKnowledgeVersion(
         r.get(prefix + "id", UUID.class),
         r.get("id", UUID.class),
         r.get("version_no", Integer.class),
@@ -629,8 +629,8 @@ public class KnowledgeBaseService {
         str(r.get(prefix + "updated_at", OffsetDateTime.class)));
   }
 
-  private static KnowledgeVersion version(Record r) {
-    return new KnowledgeVersion(
+  private static CrmKnowledgeVersion version(Record r) {
+    return new CrmKnowledgeVersion(
         r.get("id", UUID.class),
         r.get("entry_id", UUID.class),
         r.get("version_no", Integer.class),
@@ -647,8 +647,8 @@ public class KnowledgeBaseService {
         str(r.get("updated_at", OffsetDateTime.class)));
   }
 
-  private static KnowledgeReference reference(Record r) {
-    return new KnowledgeReference(
+  private static CrmKnowledgeReference reference(Record r) {
+    return new CrmKnowledgeReference(
         r.get("id", UUID.class),
         r.get("version_id", UUID.class),
         r.get("version_no", Integer.class),
