@@ -6,6 +6,8 @@ import type { Access } from '../../../../../packages/api-contracts/src/catalog';
 import { useIdentity } from './identity-shell';
 import { AdministrationPanel } from './administration-panel';
 import { MemberOnboardingWorkspace } from './member-onboarding-workspace';
+import { ApprovalFlowWorkspace } from './approval-flow-workspace';
+import { ApprovalRuleWorkspace } from './approval-rule-workspace';
 import { canManage, hasPermission, isOwner, type AdministrationKind } from './administration-model';
 
 const destinations = [
@@ -32,6 +34,16 @@ const destinations = [
   ['dictionary', '数据字典', '维护状态枚举、原因码、分类标签与单位类型，被引用的字典项只能停用不能删除'],
   ['numbering-rules', '编号规则', '配置单据编号规则（前缀 + 日期 + 序号 + 后缀），序号按实体与日期重置，支持多级嵌套与预览'],
   [
+    'approval-flows',
+    '审批流定义',
+    '按单据类型注册审批流程：审批节点（角色/岗位/指定人）、串行/并行/条件分支、金额阈值与超时升级规则',
+  ],
+  [
+    'approval-rules',
+    '审批规则',
+    '按金额区间、跨法人、跨部门、新供应商、高风险商品配置审批触发条件与小额免审规则，免审必须设上限金额',
+  ],
+  [
     'operation-log',
     '操作日志',
     '按用户、时间与请求 ID 检索登录、API 调用、任务执行与错误堆栈，用于运维排障',
@@ -41,7 +53,7 @@ const destinations = [
 // 'hierarchy' 只出现在导航目的地里（点击跳 /org/hierarchy 独立页面），
 // 不是 AdministrationPanel 的一种 kind，所以不进这个联合类型；
 // 它只需要在 visible() 里能被判出来（visible 的 key 是 string）。
-type WorkspaceKind = AdministrationKind | 'onboarding';
+type WorkspaceKind = AdministrationKind | 'onboarding' | 'approval-flows' | 'approval-rules';
 
 function visible(session: Access, key: string) {
   if (key === 'tenants') return true;
@@ -72,6 +84,16 @@ function visible(session: Access, key: string) {
   // 少了这条会落到 canManage 兜底，而 AdministrationKind 里没有 'operation-log'，
   // 于是有 identity.operation_log.read 的人反而在导航里看不到入口。
   if (key === 'operation-log') return hasPermission(session, 'identity.operation_log.read');
+// 审批流定义（17.4.1.1）是独立页面权限码，不走 AdministrationPanel 的四类管理，
+  // 也不走 canManage 的页面映射 —— AdministrationKind 里没有它，落到 canManage 会把入口藏掉。
+  if (key === 'approval-flows') return hasPermission(session, 'identity.approval_flow.read');
+  // 审批规则（17.4.1.2）是独立页面权限码：改「这次提交要不要走审批」能绕开 17.4.1.1 配好的流程，
+  // 所以不复用 identity.approval_flow.*，与 canManage 的页面映射也无关。
+  if (key === 'approval-rules') return hasPermission(session, 'identity.approval_rule.read');
+  // 17.6.1.1 账簿与本位币是独立页面权限码（路由在 /settings/books），
+  // 不走 canManage 的页面映射 —— AdministrationKind 里没有 'books'，
+  // 少了这条会落到 canManage 兜底并恒为 false，于是有权限的人也看不到入口。
+  if (key === 'books') return hasPermission(session, 'identity.accounting_book.read');
   return canManage(session, key as AdministrationKind);
 }
 export function IdentityWorkspace({
@@ -106,6 +128,10 @@ export function IdentityWorkspace({
       )}
       {kind === 'onboarding' ? (
         <MemberOnboardingWorkspace session={session} onError={onError} />
+      ) : kind === 'approval-flows' ? (
+        <ApprovalFlowWorkspace />
+      ) : kind === 'approval-rules' ? (
+        <ApprovalRuleWorkspace />
       ) : kind ? (
         <AdministrationPanel
           key={`${session.tenantId}:${kind}`}
@@ -203,6 +229,18 @@ export function IdentityWorkspace({
                   <p className="text-muted-foreground mt-2 text-sm">{description}</p>
                 </Link>
               ))}
+            {/* 17.6.1.1 账簿与本位币：蓝图的路由是 `/settings/books` 而不是 `/org/...`，
+                所以它不进 destinations（那张表的 href 是写死的 `/org/${key}` 模板），
+                单开一张卡挂同一个 visible() 权限码。少这张卡页面就没人能进 ——
+                17.1.2.2 的账簿页正是因此长期零入口。 */}
+            {visible(session, 'books') && (
+              <Link href="/settings/books" className="bg-card hover:border-brand rounded-lg border p-5">
+                <h2 className="font-semibold">账簿与本位币</h2>
+                <p className="text-muted-foreground mt-2 text-sm">
+                  一个法人可以同时用人民币业务账与美元海外账记账：按业务账 / 法定账分组，指定默认账簿，并登记业务事实的归属账簿
+                </p>
+              </Link>
+            )}
           </div>
           <p className="text-muted-foreground text-sm">
             用户账号可加入多个租户。成员停用仅影响该租户；父子租户之间不会自动获得数据访问权。

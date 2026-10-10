@@ -175,6 +175,264 @@
         }
       }
     },
+    "/channel/warehouse-providers/connections": {
+      "get": {
+        "tags": [
+          "warehouse-connection-controller"
+        ],
+        "operationId": "connections",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WarehouseConnectionView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "warehouse-connection-controller"
+        ],
+        "operationId": "connectionCreate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseConnectionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/warehouse-providers/connections/{id}/sync-paused": {
+      "post": {
+        "tags": [
+          "warehouse-connection-controller"
+        ],
+        "operationId": "connectionSetPaused",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "paused",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/warehouse-providers/connections/{id}/accounts": {
+      "post": {
+        "tags": [
+          "warehouse-connection-controller"
+        ],
+        "operationId": "accountCreate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseAccountInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/warehouse-providers/accounts/{id}/sync": {
+      "post": {
+        "tags": [
+          "warehouse-connection-controller"
+        ],
+        "operationId": "syncTrigger",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/warehouse-providers/accounts/{id}/inbound-stock-lines": {
+      "post": {
+        "tags": [
+          "warehouse-connection-controller"
+        ],
+        "operationId": "inboundLine",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InboundStockLineInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/channel/sync-runs/{id}/resolve": {
       "post": {
         "tags": [
@@ -1226,7 +1484,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "connections",
+        "operationId": "connections_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1267,7 +1525,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "connectionCreate",
+        "operationId": "connectionCreate_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1342,6 +1600,312 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/channel/warehouse-providers": {
+      "get": {
+        "tags": [
+          "warehouse-connection-controller"
+        ],
+        "operationId": "providers",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WarehouseProviderView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/warehouse-providers/sync-runs": {
+      "get": {
+        "tags": [
+          "warehouse-connection-controller"
+        ],
+        "operationId": "syncRuns",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "connectionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WarehouseSyncRunView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/warehouse-providers/connections/{id}": {
+      "get": {
+        "tags": [
+          "warehouse-connection-controller"
+        ],
+        "operationId": "connection",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseConnectionView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/warehouse-providers/accounts": {
+      "get": {
+        "tags": [
+          "warehouse-connection-controller"
+        ],
+        "operationId": "accounts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "connectionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WarehouseAccountView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/warehouse-providers/accounts/{id}": {
+      "get": {
+        "tags": [
+          "warehouse-connection-controller"
+        ],
+        "operationId": "account",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseAccountView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/warehouse-providers/accounts/{id}/observations": {
+      "get": {
+        "tags": [
+          "warehouse-connection-controller"
+        ],
+        "operationId": "observations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalStockObservationView"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channel/warehouse-providers/accounts/{id}/observations/latest": {
+      "get": {
+        "tags": [
+          "warehouse-connection-controller"
+        ],
+        "operationId": "latestObservations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalStockLatestView"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1943,6 +2507,111 @@
           }
         }
       },
+      "WarehouseConnectionInput": {
+        "required": [
+          "authorizedAccount",
+          "credentialExternalRef",
+          "providerId"
+        ],
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "credentialExternalRef": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "authorizedAccount": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          },
+          "displayName": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          },
+          "apiEndpointRef": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseAccountInput": {
+        "required": [
+          "externalAccountCode",
+          "warehouseKind"
+        ],
+        "type": "object",
+        "properties": {
+          "externalAccountCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          },
+          "countryCode": {
+            "pattern": "^[A-Za-z]{2}$",
+            "type": "string"
+          },
+          "timezone": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "warehouseKind": {
+            "type": "string",
+            "enum": [
+              "OVERSEAS",
+              "PLATFORM_FBA",
+              "THIRD_PARTY"
+            ]
+          }
+        }
+      },
+      "InboundStockLineInput": {
+        "required": [
+          "externalSku",
+          "quantity",
+          "reportedAt",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "externalSku": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "unit": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "source": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reportedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "SyncFailureInput": {
         "required": [
           "externalKey",
@@ -2338,6 +3007,271 @@
           },
           "displayName": {
             "type": "string"
+          }
+        }
+      },
+      "WarehouseProviderView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "supportsInventorySync": {
+            "type": "boolean"
+          },
+          "supportsForecast": {
+            "type": "boolean"
+          },
+          "supportsStatusCallback": {
+            "type": "boolean"
+          },
+          "supportsBilling": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WarehouseSyncRunView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "connectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "triggerSource": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fetchedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "observedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errorDetail": {
+            "type": "string"
+          }
+        }
+      },
+      "CredentialReferenceView": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "externalRef": {
+            "type": "string"
+          },
+          "tokenType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WarehouseConnectionView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "providerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "providerCode": {
+            "type": "string"
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "authorizedAccount": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "apiEndpointRef": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "syncPaused": {
+            "type": "boolean"
+          },
+          "lastSyncAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "credential": {
+            "$ref": "#/components/schemas/CredentialReferenceView"
+          },
+          "accountCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WarehouseAccountView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "connectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "connectionName": {
+            "type": "string"
+          },
+          "providerCode": {
+            "type": "string"
+          },
+          "externalAccountCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "warehouseKind": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastSyncAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "latestObservedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observedSkuCount": {
+            "type": "number"
+          }
+        }
+      },
+      "ExternalStockObservationView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "externalSku": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "外部仓库存观测快照（append-only，非账本）"
+      },
+      "ExternalStockLatestView": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "externalSku": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
