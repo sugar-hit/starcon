@@ -504,6 +504,41 @@ const services: readonly {
     // 裸路径 fulfillment/routing 与 processing **刻意不放行**：后端没有对应映射，
     // 放行它会让界面以为「一条不存在的列表接口」可用。
   },
+  {
+    // crm 是 15 客户与客服的服务（端口 8086，数据库 starcon_crm），15.4.2.1 知识库
+    // 是它的第一条业务端点。本条目是**新增一条 services[] 元素**，
+    // 不是往既有分支的 alternation 里并 —— 所以前六个分支逐字未动
+    // （由 crm/knowledge-allowlist.test.ts 的「不误伤」一组反向钉住）。
+    //
+    // ⚠️ 与 catalog 那一支里的 `kb` **不是同一个东西**：那是 11.4.2.2「知识库与话术」
+    // （catalog 服务、按平台规则版本组织、页面 /aftersales/knowledge）。
+    // 本模块是 crm 服务的客服知识（按店铺/类目/语言组织、页面 /crm/knowledge）。
+    // 两个模块都叫「知识库」但回答的不是同一个问题，**刻意不共用命名空间**，
+    // 也不共用任何一张表（理由见 backend/services/crm/.../V99__crm_knowledge_base.sql 文件头第零节）。
+    //
+    // 形状逐条列出：
+    //   capabilities / scopes / review-due 是**字面量单段**（刻意不接 id 段 ——
+    //     那是能力声明与两条聚合查询，不按 id 寻址）；
+    //   entries 是集合读 + POST 新建；entries/effective 是「此刻生效的那些」；
+    //     entries/{uuid} 是单条详情；entries/{uuid}/versions 是版本列表 + 建草稿版本；
+    //     entries/{uuid}/references 是该知识全部版本的引用记录；
+    //   versions/{uuid} 刻意**不放行** —— 后端没有「按 id 取单条版本」的端点；
+    //     其下的 publish / close / references 是三个不同的动作，各自寻址，
+    //     所以这段后缀是**必需**的（写成可选会让裸的 versions/{uuid} 一起通过，
+    //     那等于放行一个后端不存在的映射）。
+    //   字面量段一律排在 [0-9a-f-]+ 之前判别：首段是字面量还是 UUID 两者不会互相吃掉。
+    //
+    // 刻意**没有** DELETE：引用记录是只追加的审计事实（V99 第五节），
+    // 已发布版本只能向前关闭（POST close）而不是被改写或删除。
+    // 放行删除形状等于让界面以为可以删掉一条引用 —— 那会把「没人用过」这个答案做出来。
+    prefix: 'crm/',
+    env: 'CRM_URL',
+    fallback: 'http://127.0.0.1:8086',
+    pattern:
+      /^knowledge\/(?:capabilities|scopes|review-due|entries(?:\/effective|\/[0-9a-f-]+(?:\/(?:versions|references))?)?|versions\/[0-9a-f-]+\/(?:publish|close|references))$/,
+    // 裸路径 knowledge **刻意不放行**：后端没有这个映射，
+    // 放行它会让界面以为「一条不存在的列表接口」可用。
+  },
 ];
 
 function resolve(path: string) {

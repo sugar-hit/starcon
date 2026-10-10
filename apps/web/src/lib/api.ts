@@ -27,6 +27,11 @@ export class ApiError extends Error {
  * `trade/fulfillment/routing/...`，而本表没有对应分支，`api()` 会直接抛
  * 「未知的接口路径」。本条目是**追加**的，不改动既有任何一项（并入时按分支求并，
  * 取错一侧也不会丢掉其它服务）。
+ *
+ * <p>`crm` 是 **15 客户与客服**的服务（端口 8086，数据库 starcon_crm）。
+ * 15.4.2.1 知识库是它的第一条业务端点，模型在调 `crm/knowledge/...`。
+ * 它与 catalog 的 `catalog/kb`（11.4.2.2 客服话术，按平台规则版本组织）是
+ * **两个不同的模块**，前缀不同、命名空间不同，不要互相调用。
  */
 const backends: readonly { prefix: string; route: string }[] = [
   { prefix: 'auth/', route: 'iam' },
@@ -35,6 +40,7 @@ const backends: readonly { prefix: string; route: string }[] = [
   { prefix: 'channel/', route: 'channel' },
   { prefix: 'warehouse/', route: 'warehouse' },
   { prefix: 'trade/', route: 'trade' },
+  { prefix: 'crm/', route: 'crm' },
 ];
 
 let workspaceBlocked = false;

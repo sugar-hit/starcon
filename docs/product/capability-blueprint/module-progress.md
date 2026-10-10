@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 122 |
+| 已交付 | 123 |
 | 进行中 | 0 |
-| **未开发** | **343** |
-| 完成率 | 26.2% |
+| **未开发** | **342** |
+| 完成率 | 26.5% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -26,7 +26,7 @@
 | **D4** | 8 | 0 | 52 | 60 |
 | **D5** | 1 | 0 | 51 | 52 |
 | **D6** | 3 | 0 | 75 | 78 |
-| **D7** | 6 | 0 | 149 | 155 |
+| **D7** | 7 | 0 | 148 | 155 |
 
 ## 分系统进度
 
@@ -46,7 +46,7 @@
 | 12 | 财务核算系统 | D6 | 0 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
 | 14 | 广告与增长系统 | D7 | 0 | 22 |
-| 15 | 客户与客服系统 | D7 | 0 | 24 |
+| 15 | 客户与客服系统 | D7 | 1 | 24 |
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 23 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
@@ -474,7 +474,7 @@
 | 15.3.2.2 | 接触记录 | — | D7 | 未开发 | — |
 | 15.4.1.1 | 工单列表 | — | D7 | 未开发 | — |
 | 15.4.1.2 | 工单处理 | — | D7 | 未开发 | — |
-| 15.4.2.1 | 知识库 | /crm/knowledge | D7 | 未开发 | — |
+| 15.4.2.1 | 知识库 | /crm/knowledge | D7 | 已交付 | 迁移 V99__crm_knowledge_base.sql（crm 服务首个迁移）：crm_knowledge_entry（知识档案，**店铺/类目/语言三个组织维度全部 NOT NULL**、platform_code 适用平台 NOT NULL + CHECK 平台码形状、locale CHECK BCP-47、UNIQUE(tenant_id,shop_id,category_id,locale,topic_key) 钉死「一个格子一条标准答法」）/ crm_knowledge_version（版本，**半开生效区间 [from,to)**，effective_to 为 NULL = +∞，CHECK 挡空区间与倒挂，CHECK 钉 PUBLISHED 必须带 published_by+published_at）/ crm_knowledge_reference（引用记录，指向具体版本而非档案，只追加不可改不可删）；三表均 tenant_id uuid NOT NULL + ENABLE/FORCE ROW LEVEL SECURITY isolation + GRANT。**生效区间口径沿用 catalog V23/V25/V95 的 R1–R5 不另立一套**：R2 重叠一律拒绝不做自动裁决（由 guard_crm_knowledge_version_interval BEFORE INSERT/UPDATE 触发器用 tstzrange '[)' 判重叠并点名撞的是哪一版）、R3 只有已发布版本参与判定（草稿区间随便重叠，发布那一刻才查）、R4 时刻查询至多命中一行、R5 已发布版本只能向前关闭到一个仍在未来的时刻（关回 NULL / 往后延 / 关到过去三条路径均被拒）。端点 11 个 /crm/knowledge：capabilities、scopes（三个下拉框的**真实**数据源，查本租户实际存在的格子）、entries（集合读 + POST 建档）、entries/effective（下游 15.1.1.2/15.5.1 走的「此刻生效的」）、entries/{uuid}、entries/{uuid}/versions（GET 列表 / POST 建草稿版本）、entries/{uuid}/references、versions/{uuid}/publish、versions/{uuid}/close（R5 向前关闭）、versions/{uuid}/references（GET 列表 / POST 记引用）、review-due。**「平台政策变更时快速定位过期内容」落成一条真实查询**：给定平台 P 与新政策生效时刻 T，列出「当前生效那一版写于 T 之前**且至今仍是开放区间**（无接替版本）」的条目 —— 依赖 platform_code × (effective_from, effective_to) 倒排形状，为此建了 crm_knowledge_version_open_ended 部分索引；已被接替过的与别的平台都**不**列出，判定口径原文随响应返回。**服务引导**：CRM 服务本次一并建立（backend/services/crm，端口 8086，数据库 starcon_crm，与 trade/warehouse 同构：jOOQ 显式 SQL + Flyway + springdoc + AccessService + 租户接线）。前端 apps/web/src/app/crm/knowledge/page.tsx + components/crm/knowledge-model.ts + knowledge-workspace.tsx（组织范围筛选 / 条目列表显形生效区间与「此刻没有生效版本」告警 / 平台改版待复核 / 版本与引用四个工作区，加载·空·错误三态齐全；引用记录**只读**，刻意不提供删除入口）。api-proxy 新增 crm/ 白名单一支（9 条分支），**不误伤**其余六支由脚本逐条比对证明逐字未变。测试 18 条：KnowledgeBaseIntegrationTest 13 条（半开区间边界——在 to 那一刻旧版本必须已失效、在 from 那一刻新版本必须已生效；to 为 NULL = 正无穷；timestamptz 带 +08:00 偏移量写入后**断言写回的值**等于同一绝对时刻、缺偏移量一律 400 拒绝而不是猜时区；草稿重叠可建、发布时被拒；相邻区间可依次发布；R5 三条反向路径；已发布正文不可改；review-due 命中/不误报三例；引用记录落库且不可改不可删；草稿不可被引用；三个组织维度真过滤；同格子同业务键不可重复）、CrmTenancyIntegrationTest 4 条（**三断言实跑于真实业务表**，非占位探针表：两租户互不可见含按主键直查、伪造 X-Tenant-Id 头无效且**断言行确实落在会话租户 a 名下**而不是只断言 A 看不见、连接池固定 1 条时 5 轮交替不串租户）、OpenApiContractTest 1 条；前端 knowledge-allowlist.test.ts 6 条（放行：从模型源码反向抽取真实调用点逐条断言，含 review-due 真实查询串；拒绝：同卷未开发的 messages/tickets/auto-replies、裸路径、字面量段不接 id、versions/{uuid}、非 UUID 段、多一段的假形状、单复数错拼，全部仍 404 且不触发上游调用；不误伤：catalog/channel/warehouse/trade/identity 代表形状）。**与 11.4.2.2 的边界结论：不复用、不扩展、不改名 kb_* 六张表，端点不进 /catalog/kb 命名空间。**两者回答的不是同一个问题：11.4.2.2 的主语是「这个平台政策这一版变了没有」（kb_rule_version + kb_review_task，读者是处理客诉的售后客服）；本模块的主语是「这家店这个类目这个语言此刻该给买家哪一条答法」（shop/category/locale 三维 + 半开生效区间，读者是应答所有买家消息的客服）。合并只能加一个 source 列把两套口径混在一张表里，而它们连生效区间都不同步。**另有一处契约级冲突已修**：本模块 DTO 原名 KnowledgeEntry/KnowledgeEntryDetail/KnowledgeVersion/KnowledgeReference/KnowledgeScope/KnowledgeCapabilities 与 11.4.2.2 **完全同名**，而 codegen 把五个服务的 schema 合并进同一个 packages/api-contracts/src/catalog.ts（后者按字母序覆盖前者）—— 直接生成会把 11.4.2.2 的类型打掉、打红它的 workspace。故本模块全部 DTO 改名加 Crm 前缀（CrmKnowledgeEntry/CrmKnowledgeEntryDetail/…），复验：11.4.2.2 的 KnowledgeEntryDetail 恢复原形、本模块并存，pnpm typecheck 全绿。**下游缺口（均未开发，本模块不代劳）**：15.1.1.2 消息发送、15.5.1.1 自动回复、15.4.1.1 工单列表、15.4.1.2 工单处理。本模块已为它们留出接口：按 (shopId, categoryId, locale, at) 取「此刻生效的那一条」（规则 R4 时刻查询），答复前用 POST versions/{id}/references 记一次引用并注明 consumer=MANUAL_REPLY / AUTO_REPLY（词表已按蓝图钉死）。「发送失败要保留原消息状态」「自动回复必须可一键关闭并留人工接管」都是它们自己的职责。 |
 | 15.5.1.1 | 自动回复 | — | D7 | 未开发 | — |
 | 15.5.2.1 | 关怀与催办 | — | D7 | 未开发 | — |
 | 15.6.1.1 | 会员与等级 | — | D7 | 未开发 | — |
