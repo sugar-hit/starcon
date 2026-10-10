@@ -455,12 +455,7 @@ function toLocalInput(iso: string): string {
  * 所以这里补上本机时区偏移（而不是当成 UTC）—— 当成 UTC 会让区间整体平移，
  * 而运营填的是当地时间。
  */
-export function draftToPayload(
-  draft: DestinationVersionDraft,
-): Omit<DestinationVersionInput, 'effectiveFrom' | 'effectiveTo'> & {
-  effectiveFrom: string;
-  effectiveTo?: string;
-} {
+export function draftToPayload(draft: DestinationVersionDraft): DestinationVersionInput {
   return {
     destinationCountryCode: draft.destinationCountryCode.trim().toUpperCase(),
     versionNo: Number(draft.versionNo.trim()),
@@ -468,9 +463,11 @@ export function draftToPayload(
     destinationDeclaredName: draft.destinationDeclaredName.trim(),
     preferentialApplicable: draft.preferentialApplicable,
     effectiveFrom: toIsoWithOffset(draft.effectiveFrom.trim()),
-    ...(draft.effectiveTo.trim() === ''
-      ? {}
-      : { effectiveTo: toIsoWithOffset(draft.effectiveTo.trim()) }),
+    // 留空 = 「一直有效」，发的是 **null 而不是省略该键**：契约里 effectiveTo 是
+    // `string | null`（键必在、值可空），与 V25 BomVersionInput / BundleVersionInput
+    // 同一口径。省略键会被当成「没传这个字段」，而 null 才是 +∞（规则 R1）。
+    effectiveTo:
+      draft.effectiveTo.trim() === '' ? null : toIsoWithOffset(draft.effectiveTo.trim()),
     note: draft.note.trim(),
     requirements: draft.requirements.map((item) => ({
       requirementCode: item.requirementCode.trim().toUpperCase(),
