@@ -130,6 +130,20 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     `titles/templates/${UUID}/enabled`,
     'attributes/overview',
     'media/overview',
+    // 3.7.1.2 (this lane) — 目的地报关版本。This lane appended to the SAME
+    // alternation as 4.2.2.2 and as the 3.7.1.1 `customs-attributes` branch
+    // that was already here, so all three had to survive the union.
+    'customs-destination-versions/effective',
+    'customs-destination-versions/requirements',
+    `customs-destination-versions/skus/${UUID}`,
+    `customs-destination-versions/${UUID}/publish`,
+    'customs-declaration/resolve',
+    // 3.7.1.1 (this lane) — must not regress across the union either.
+    'customs-attributes/profiles',
+    `customs-attributes/skus/${UUID}`,
+    `customs-attributes/skus/${UUID}/submit`,
+    `customs-attributes/skus/${UUID}/review`,
+    'customs-attributes/declaration-ready',
   ];
 
   const CATALOG_BLOCK = [
@@ -140,6 +154,14 @@ describe('api-proxy whitelist union (merge regression guard)', () => {
     // singular typo of an existing segment
     'description-template',
     `description-templates/renders/${UUID}/extra`,
+    // 3.7.1.2 negative cases: the wildcard destination must NOT become a
+    // routable path (the DB rejects '*', so the proxy must reject it too),
+    // and one segment more than the controller declares must not pass.
+    'customs-destination-versions',
+    'customs-destination-versions/*',
+    `customs-destination-versions/skus/${UUID}/publish`,
+    `customs-destination-versions/${UUID}/withdraw`,
+    'customs-declaration',
   ];
 
   it.each(CATALOG_ALLOW)('CATALOG ALLOWS %s', async (path) => {

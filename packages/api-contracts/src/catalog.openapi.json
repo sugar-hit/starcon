@@ -5359,6 +5359,190 @@
         }
       }
     },
+    "/catalog/customs-destination-versions/skus/{skuId}": {
+      "get": {
+        "tags": [
+          "customs-destination-version-controller"
+        ],
+        "operationId": "profile_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "destination",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DestinationVersionProfile"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "customs-destination-version-controller"
+        ],
+        "operationId": "save_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DestinationVersionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DestinationVersionSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/customs-attributes/skus/{skuId}": {
+      "get": {
+        "tags": [
+          "customs-attribute-controller"
+        ],
+        "operationId": "profile_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsProfile"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "customs-attribute-controller"
+        ],
+        "operationId": "save_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomsInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsProfileSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/components/{id}": {
       "get": {
         "tags": [
@@ -13927,6 +14111,156 @@
         }
       }
     },
+    "/catalog/customs-destination-versions/{versionId}/publish": {
+      "post": {
+        "tags": [
+          "customs-destination-version-controller"
+        ],
+        "operationId": "publish",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DestinationPublishInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DestinationVersionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/customs-attributes/skus/{skuId}/submit": {
+      "post": {
+        "tags": [
+          "customs-attribute-controller"
+        ],
+        "operationId": "submit_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsProfile"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/customs-attributes/skus/{skuId}/review": {
+      "post": {
+        "tags": [
+          "customs-attribute-controller"
+        ],
+        "operationId": "review",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsProfile"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/completeness/precheck/listing": {
       "post": {
         "tags": [
@@ -14432,7 +14766,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "save_1",
+        "operationId": "save_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -21085,6 +21419,313 @@
         }
       }
     },
+    "/catalog/customs-destination-versions/requirements": {
+      "get": {
+        "tags": [
+          "customs-destination-version-controller"
+        ],
+        "operationId": "requirements_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "destination",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DestinationRequirementList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/customs-destination-versions/effective": {
+      "get": {
+        "tags": [
+          "customs-destination-version-controller"
+        ],
+        "operationId": "effective_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "destination",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EffectiveDestinationVersion"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/customs-declaration/resolve": {
+      "get": {
+        "tags": [
+          "customs-declaration-resolve-controller"
+        ],
+        "operationId": "resolve_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "destination",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolvedDeclaration"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/customs-attributes/profiles": {
+      "get": {
+        "tags": [
+          "customs-attribute-controller"
+        ],
+        "operationId": "profiles_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hsCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "originCountryCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "preferenceAgreement",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "preferentialOriginEligible",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomsPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/customs-attributes/declaration-ready": {
+      "get": {
+        "tags": [
+          "customs-attribute-controller"
+        ],
+        "operationId": "declarationReady",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeclarationReady"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/components": {
       "get": {
         "tags": [
@@ -21674,7 +22315,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "effective_1",
+        "operationId": "effective_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -26984,6 +27625,427 @@
           "renderCount": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "DestinationRequirementInput": {
+        "required": [
+          "requirementCode"
+        ],
+        "type": "object",
+        "properties": {
+          "requirementCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requirementName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DestinationVersionInput": {
+        "required": [
+          "destinationCountryCode",
+          "effectiveFrom",
+          "requirements"
+        ],
+        "type": "object",
+        "properties": {
+          "destinationCountryCode": {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string"
+          },
+          "versionNo": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "destinationHsCode": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "destinationDeclaredName": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "preferentialApplicable": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "requirements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DestinationRequirementInput"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DestinationRequirement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requirementCode": {
+            "type": "string"
+          },
+          "requirementName": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DestinationVersionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationHsCode": {
+            "type": "string"
+          },
+          "destinationDeclaredName": {
+            "type": "string"
+          },
+          "preferentialApplicable": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "publishedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "publishedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "effective": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "requirements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DestinationRequirement"
+            }
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "DestinationVersionSaved": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "$ref": "#/components/schemas/DestinationVersionRow"
+          }
+        }
+      },
+      "CustomsInput": {
+        "required": [
+          "declaredName",
+          "elements",
+          "hsCode",
+          "originCountryCode",
+          "statutoryUnitCode"
+        ],
+        "type": "object",
+        "properties": {
+          "hsCode": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "originCountryCode": {
+            "maxLength": 2,
+            "minLength": 0,
+            "type": "string"
+          },
+          "declaredName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "declaredValueReference": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "statutoryUnitCode": {
+            "maxLength": 8,
+            "minLength": 0,
+            "type": "string"
+          },
+          "preferentialOriginEligible": {
+            "type": "boolean"
+          },
+          "preferenceAgreement": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "elements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeclarationElementInput"
+            }
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DeclarationElementInput": {
+        "required": [
+          "elementCode",
+          "elementName"
+        ],
+        "type": "object",
+        "properties": {
+          "ordinal": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "elementCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "elementName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "elementValue": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "required": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CustomsProfile": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "attributeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "hsCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "originCountryCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "declaredName": {
+            "type": "string",
+            "nullable": true
+          },
+          "declaredValueReference": {
+            "type": "number",
+            "nullable": true
+          },
+          "statutoryUnitCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "preferentialOriginEligible": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "preferenceAgreement": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "submittedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "submittedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "reviewedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reviewedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "rejectReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "elements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeclarationElement"
+            }
+          },
+          "declarationReady": {
+            "type": "boolean"
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blockerLabels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsProfileSaved": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/CustomsProfile"
+          }
+        }
+      },
+      "DeclarationElement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ordinal": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "elementCode": {
+            "type": "string"
+          },
+          "elementName": {
+            "type": "string"
+          },
+          "elementValue": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "incomplete": {
+            "type": "boolean"
           }
         }
       },
@@ -32297,6 +33359,38 @@
             "items": {
               "$ref": "#/components/schemas/DescriptionRenderIssueRow"
             }
+          }
+        }
+      },
+      "DestinationPublishInput": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SubmitInput": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReviewInput": {
+        "type": "object",
+        "properties": {
+          "approve": {
+            "type": "boolean"
+          },
+          "rejectReason": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -41009,6 +42103,436 @@
             "additionalProperties": {
               "type": "string"
             }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "BaseAttribute": {
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "hsCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "declaredName": {
+            "type": "string",
+            "nullable": true
+          },
+          "statutoryUnitCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "baseApproved": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DestinationVersionProfile": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "base": {
+            "$ref": "#/components/schemas/BaseAttribute"
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DestinationVersionRow"
+            }
+          },
+          "effectiveVersionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "DestinationRequirementList": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "effectiveAt": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DestinationRequirement"
+            }
+          },
+          "requiredOnlyCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "EffectiveDestinationVersion": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "effectiveAt": {
+            "type": "string"
+          },
+          "destinationHsCode": {
+            "type": "string"
+          },
+          "destinationDeclaredName": {
+            "type": "string"
+          },
+          "preferentialApplicable": {
+            "type": "boolean"
+          },
+          "publishedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "publishedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "requirements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DestinationRequirement"
+            }
+          }
+        }
+      },
+      "DeclarationElementsObject": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeclarationElement"
+            }
+          },
+          "byCode": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ResolvedDeclaration": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "destinationCountryCode": {
+            "type": "string"
+          },
+          "destinationVersionRef": {
+            "type": "string"
+          },
+          "destinationVersionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "effectiveAt": {
+            "type": "string"
+          },
+          "declaredName": {
+            "type": "string"
+          },
+          "declaredNameSource": {
+            "type": "string"
+          },
+          "declaredNameOverridden": {
+            "type": "boolean"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "hsCodeSource": {
+            "type": "string"
+          },
+          "hsCodeVerified": {
+            "type": "boolean"
+          },
+          "hsCodeOverridden": {
+            "type": "boolean"
+          },
+          "originCountryCode": {
+            "type": "string"
+          },
+          "statutoryUnitCode": {
+            "type": "string"
+          },
+          "declarationElements": {
+            "$ref": "#/components/schemas/DeclarationElementsObject"
+          },
+          "declarationElementsSource": {
+            "type": "string"
+          },
+          "declarationElementStatus": {
+            "type": "string"
+          },
+          "declarationElementsRef": {
+            "type": "string"
+          },
+          "declaredValueReference": {
+            "type": "number",
+            "nullable": true
+          },
+          "preferentialOriginEligible": {
+            "type": "boolean"
+          },
+          "preferentialApplicable": {
+            "type": "boolean"
+          },
+          "preferentialGranted": {
+            "type": "boolean"
+          },
+          "preferenceAgreement": {
+            "type": "string"
+          },
+          "requirements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DestinationRequirement"
+            }
+          },
+          "destinationPublishedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "destinationPublishedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "baseReviewedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "baseReviewedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomsPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomsRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CustomsRow": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "spuCode": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "originCountryCode": {
+            "type": "string"
+          },
+          "declaredName": {
+            "type": "string"
+          },
+          "declaredValueReference": {
+            "type": "number",
+            "nullable": true
+          },
+          "statutoryUnitCode": {
+            "type": "string"
+          },
+          "preferentialOriginEligible": {
+            "type": "boolean"
+          },
+          "preferenceAgreement": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "elementCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requiredMissingCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "submittedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DeclarationReady": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "declarationElementsRef": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "hsCodeSource": {
+            "type": "string"
+          },
+          "hsCodeVerified": {
+            "type": "boolean"
+          },
+          "declaredName": {
+            "type": "string"
+          },
+          "originCountryCode": {
+            "type": "string"
+          },
+          "statutoryUnitCode": {
+            "type": "string"
+          },
+          "declarationElements": {
+            "$ref": "#/components/schemas/DeclarationElementsObject"
+          },
+          "declarationElementsSource": {
+            "type": "string"
+          },
+          "declarationElementStatus": {
+            "type": "string"
+          },
+          "declaredValueReference": {
+            "type": "number",
+            "nullable": true
+          },
+          "preferentialOriginEligible": {
+            "type": "boolean"
+          },
+          "preferenceAgreement": {
+            "type": "string"
+          },
+          "reviewedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reviewedAt": {
+            "type": "string"
           },
           "note": {
             "type": "string"
