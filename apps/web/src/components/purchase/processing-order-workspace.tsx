@@ -49,6 +49,7 @@ import {
   type ProcessingOrderParams,
 } from './processing-order-model';
 import { errorText } from '../inventory/inventory-model';
+import { BomBindingPanel } from './bom-binding-panel';
 
 /**
  * 6.4.1.1 加工单工作区。
@@ -862,6 +863,9 @@ function OrderDetailDialog({
               </table>
             )}
           </section>
+
+          {/* 6.4.1.2 BOM 关联：冻结展开结果（与上面的组件领用记录不是同一份东西）*/}
+          <BomBindingPanel orderId={detail.order.id} orderStatus={detail.order.status} />
 
           <section>
             <h3 className="mb-2 text-sm font-medium">入库需求通知</h3>

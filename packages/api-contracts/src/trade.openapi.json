@@ -423,6 +423,94 @@
         }
       }
     },
+    "/trade/processing/orders/{orderId}/bom-binding": {
+      "get": {
+        "tags": [
+          "bom-binding-controller"
+        ],
+        "operationId": "binding",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomBinding"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "bom-binding-controller"
+        ],
+        "operationId": "freeze",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BomFreezeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BomFreezeResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/processing/factories": {
       "get": {
         "tags": [
@@ -1197,6 +1285,49 @@
         }
       }
     },
+    "/trade/processing/orders/{orderId}/bom-binding/lines": {
+      "get": {
+        "tags": [
+          "bom-binding-controller"
+        ],
+        "operationId": "lines",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BomSnapshotLine"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/processing/capabilities": {
       "get": {
         "tags": [
@@ -1770,6 +1901,250 @@
           "version": {
             "type": "integer",
             "format": "int64"
+          }
+        }
+      },
+      "BomFreezeInput": {
+        "required": [
+          "bomVersionId",
+          "outputQuantity"
+        ],
+        "type": "object",
+        "properties": {
+          "bomVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outputQuantity": {
+            "type": "number"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "asOf": {
+            "type": "string",
+            "nullable": true
+          },
+          "maxDepth": {
+            "maximum": 25,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "BomFreezeResult": {
+        "type": "object",
+        "properties": {
+          "snapshot": {
+            "$ref": "#/components/schemas/BomSnapshot"
+          },
+          "alreadyFrozen": {
+            "type": "boolean"
+          }
+        }
+      },
+      "BomSnapshot": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "explosionRunId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomVersionNo": {
+            "type": "string"
+          },
+          "outputSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outputSkuCode": {
+            "type": "string"
+          },
+          "outputQuantity": {
+            "type": "number"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "asOf": {
+            "type": "string"
+          },
+          "maxDepth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reachedDepth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "snapshotStatus": {
+            "type": "string"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "purchaseLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalRequired": {
+            "type": "number"
+          },
+          "totalGap": {
+            "type": "number"
+          },
+          "frozenBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "frozenAt": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BomSnapshotLine"
+            }
+          }
+        }
+      },
+      "BomSnapshotLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentLineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "depth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "path": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "componentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceVersionNo": {
+            "type": "string"
+          },
+          "sourceBomCode": {
+            "type": "string"
+          },
+          "unitQuantity": {
+            "type": "number"
+          },
+          "scrapRate": {
+            "type": "number"
+          },
+          "requiredQuantity": {
+            "type": "number"
+          },
+          "available": {
+            "type": "number"
+          },
+          "inTransit": {
+            "type": "number"
+          },
+          "gap": {
+            "type": "number"
+          },
+          "surplus": {
+            "type": "number"
+          },
+          "isSubAssembly": {
+            "type": "boolean"
+          },
+          "subBomId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "subBomCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "subVersionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "subVersionNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "ambiguousSubBom": {
+            "type": "boolean"
+          },
+          "expanded": {
+            "type": "boolean"
+          },
+          "covered": {
+            "type": "boolean"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "role": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
           }
         }
       },
@@ -2485,6 +2860,40 @@
             }
           },
           "boundaryNotes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BomBinding": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "orderStatus": {
+            "type": "string"
+          },
+          "snapshot": {
+            "$ref": "#/components/schemas/BomSnapshot"
+          },
+          "effectiveVersionNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "drifted": {
+            "type": "boolean"
+          },
+          "effectiveVersionMissing": {
+            "type": "boolean"
+          },
+          "notes": {
             "type": "array",
             "items": {
               "type": "string"
