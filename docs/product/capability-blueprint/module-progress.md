@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 117 |
+| 已交付 | 118 |
 | 进行中 | 0 |
-| **未开发** | **348** |
-| 完成率 | 25.2% |
+| **未开发** | **347** |
+| 完成率 | 25.4% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -23,7 +23,7 @@
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 78 | 0 | 2 | 80 |
 | **D3** | 24 | 0 | 16 | 40 |
-| **D4** | 7 | 0 | 53 | 60 |
+| **D4** | 8 | 0 | 52 | 60 |
 | **D5** | 1 | 0 | 51 | 52 |
 | **D6** | 1 | 0 | 77 | 78 |
 | **D7** | 6 | 0 | 149 | 155 |
@@ -42,7 +42,7 @@
 | 08 | 仓储作业系统 | D3 / D4 | 8 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 1 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 6 | 27 |
-| 11 | 售后与退货系统 | D4 / D7 | 0 | 22 |
+| 11 | 售后与退货系统 | D4 / D7 | 1 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
 | 13 | 利润与经营分析系统 | D7 | 0 | 23 |
 | 14 | 广告与增长系统 | D7 | 0 | 22 |
@@ -377,7 +377,7 @@
 | 11.4.1.1 | 纠纷列表 | — | D7 | 未开发 | — |
 | 11.4.1.2 | 证据与申诉 | — | D4 | 未开发 | — |
 | 11.4.2.1 | 工单管理 | — | D7 | 未开发 | — |
-| 11.4.2.2 | 知识库与话术 | — | D4 | 未开发 | — |
+| 11.4.2.2 | 知识库与话术 | — | D4 | 已交付 | 迁移 V100__customer_service_knowledge_base.sql：kb_rule_version（平台规则版本台账）/ kb_entry（话术条目）/ kb_entry_translation（多语言译文，真实表行不是 json 挂一列）/ kb_entry_rule（话术↔规则版本挂钩）/ kb_review_task（政策改版自动生成的待复核任务）/ kb_usage（append-only 引用与命中明细），六张表全部 tenant_id uuid NOT NULL + ENABLE/FORCE ROW LEVEL SECURITY；端点 25 个 /catalog/kb（overview、options、entries 读写与 enabled 启停、translations 多语言、translation-coverage、rule-versions 规则版本台账、entries/{id}/rule-bindings 政策挂钩、review-tasks 待复核、usages 引用、hit-rates 命中率统计），租户只取 AccessService.Access 已认证成员关系不读 X-Tenant-Id；页面 apps/web/src/app/aftersales/knowledge/page.tsx + knowledge-workspace.tsx（概览/话术/译文/规则版本/待复核/命中率六个工作区）；测试 KnowledgeBaseIntegrationTest 33 条（含租户隔离三断言：两租户互不可见、伪造 X-Tenant-Id 无效且行确实落在自称租户名下、连接池归还后 5 轮交替不串租户）、KnowledgeBaseRulesTest 35 条、knowledge-model.test.ts 44 条、api-proxy catalog route.test.ts 38 条 |
 | 11.5.1.1 | 退货分析 | — | D7 | 未开发 | — |
 | 11.5.2.1 | 质量分析 | — | D7 | 未开发 | — |
 | 12.1.1.1 | 应收单管理 | — | D6 | 未开发 | — |

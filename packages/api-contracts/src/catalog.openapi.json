@@ -5173,6 +5173,192 @@
         }
       }
     },
+    "/catalog/description-templates/templates/{id}": {
+      "get": {
+        "tags": [
+          "description-template-controller"
+        ],
+        "operationId": "template_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescriptionTemplateRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "description-template-controller"
+        ],
+        "operationId": "updateTemplate_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescriptionTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescriptionTemplateSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "description-template-controller"
+        ],
+        "operationId": "deleteTemplate_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/description-templates/templates/{id}/enabled": {
+      "put": {
+        "tags": [
+          "description-template-controller"
+        ],
+        "operationId": "setEnabled_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "enabled",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescriptionTemplateSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/components/{id}": {
       "get": {
         "tags": [
@@ -13553,6 +13739,194 @@
         }
       }
     },
+    "/catalog/description-templates/templates": {
+      "get": {
+        "tags": [
+          "description-template-controller"
+        ],
+        "operationId": "templates_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DescriptionTemplateRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "description-template-controller"
+        ],
+        "operationId": "createTemplate_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescriptionTemplateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescriptionTemplateSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/description-templates/renders": {
+      "get": {
+        "tags": [
+          "description-template-controller"
+        ],
+        "operationId": "listRenders_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescriptionRenderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "description-template-controller"
+        ],
+        "operationId": "render_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescriptionRenderInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescriptionRenderProduct"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/completeness/precheck/listing": {
       "post": {
         "tags": [
@@ -20566,6 +20940,151 @@
         }
       }
     },
+    "/catalog/description-templates/templates/{id}/sections": {
+      "get": {
+        "tags": [
+          "description-template-controller"
+        ],
+        "operationId": "sections_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DescriptionSectionRow"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/description-templates/renders/{renderId}": {
+      "get": {
+        "tags": [
+          "description-template-controller"
+        ],
+        "operationId": "renderDetail_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "renderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescriptionRenderProduct"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/description-templates/overview": {
+      "get": {
+        "tags": [
+          "description-template-controller"
+        ],
+        "operationId": "overview_17",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescriptionTemplateOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/description-templates/options": {
+      "get": {
+        "tags": [
+          "description-template-controller"
+        ],
+        "operationId": "options_6",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescriptionTemplateOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/components": {
       "get": {
         "tags": [
@@ -20656,7 +21175,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "overview_17",
+        "operationId": "overview_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -20867,7 +21386,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "overview_18",
+        "operationId": "overview_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -20898,7 +21417,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "options_6",
+        "operationId": "options_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -21124,7 +21643,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "overview_19",
+        "operationId": "overview_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -21198,7 +21717,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "overview_20",
+        "operationId": "overview_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -21277,7 +21796,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "overview_21",
+        "operationId": "overview_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -21348,7 +21867,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "overview_22",
+        "operationId": "overview_23",
         "parameters": [
           {
             "name": "Authorization",
@@ -21487,7 +22006,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "overview_23",
+        "operationId": "overview_24",
         "parameters": [
           {
             "name": "Authorization",
@@ -21758,7 +22277,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_24",
+        "operationId": "overview_25",
         "parameters": [
           {
             "name": "Authorization",
@@ -22430,525 +22949,6 @@
                   "additionalProperties": {
                     "type": "boolean"
                   }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/description-templates/templates/{id}": {
-      "get": {
-        "tags": [
-          "description-template-controller"
-        ],
-        "operationId": "template_3",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DescriptionTemplateRow"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "description-template-controller"
-        ],
-        "operationId": "updateTemplate_3",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DescriptionTemplateInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DescriptionTemplateSaved"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "description-template-controller"
-        ],
-        "operationId": "deleteTemplate_3",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "version",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "boolean"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/description-templates/templates/{id}/enabled": {
-      "put": {
-        "tags": [
-          "description-template-controller"
-        ],
-        "operationId": "setEnabled_2",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "enabled",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DescriptionTemplateSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/description-templates/templates": {
-      "get": {
-        "tags": [
-          "description-template-controller"
-        ],
-        "operationId": "templates_3",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DescriptionTemplateRow"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "description-template-controller"
-        ],
-        "operationId": "createTemplate_3",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DescriptionTemplateInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DescriptionTemplateSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/description-templates/renders": {
-      "get": {
-        "tags": [
-          "description-template-controller"
-        ],
-        "operationId": "listRenders_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "skuId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DescriptionRenderPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "description-template-controller"
-        ],
-        "operationId": "render_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DescriptionRenderInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DescriptionRenderProduct"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/description-templates/templates/{id}/sections": {
-      "get": {
-        "tags": [
-          "description-template-controller"
-        ],
-        "operationId": "sections_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DescriptionSectionRow"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/description-templates/renders/{renderId}": {
-      "get": {
-        "tags": [
-          "description-template-controller"
-        ],
-        "operationId": "renderDetail_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "renderId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DescriptionRenderProduct"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/description-templates/overview": {
-      "get": {
-        "tags": [
-          "description-template-controller"
-        ],
-        "operationId": "overview_16",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DescriptionTemplateOverview"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/catalog/description-templates/options": {
-      "get": {
-        "tags": [
-          "description-template-controller"
-        ],
-        "operationId": "options_5",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DescriptionTemplateOptions"
                 }
               }
             }
@@ -26833,6 +26833,157 @@
           },
           "updatedAt": {
             "type": "string"
+          }
+        }
+      },
+      "DescriptionImageSlotInput": {
+        "required": [
+          "bindSource"
+        ],
+        "type": "object",
+        "properties": {
+          "bindSource": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "caption": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "slotNo": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "nullable": true
+      },
+      "DescriptionSectionInput": {
+        "required": [
+          "body",
+          "sectionType"
+        ],
+        "type": "object",
+        "properties": {
+          "sectionType": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "body": {
+            "maxLength": 20000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "variables": {
+            "maxItems": 16,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ContentTemplateVariableInput"
+            }
+          },
+          "imageSlots": {
+            "maxItems": 8,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DescriptionImageSlotInput"
+            }
+          },
+          "showHeading": {
+            "type": "boolean"
+          },
+          "contentTemplateId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "DescriptionTemplateInput": {
+        "required": [
+          "code",
+          "name",
+          "sourceLocale"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceLocale": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sections": {
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DescriptionSectionInput"
+            }
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DescriptionTemplateSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sectionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imageSlotCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "renderCount": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -31444,9 +31595,9 @@
         "type": "object",
         "properties": {
           "minSimilarity": {
-            "maximum": 1,
+            "maximum": 1.0,
             "exclusiveMaximum": false,
-            "minimum": 0,
+            "minimum": 0.0,
             "exclusiveMinimum": false,
             "type": "number"
           },
@@ -31908,6 +32059,244 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "DescriptionRenderInput": {
+        "required": [
+          "locale",
+          "skuId",
+          "templateId"
+        ],
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locale": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "images": {
+            "maxItems": 16,
+            "minItems": 0,
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/DescriptionRenderInputImage"
+            }
+          }
+        }
+      },
+      "DescriptionRenderInputImage": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "slotNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "url": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "alt": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "widthPx": {
+            "type": "number",
+            "nullable": true
+          },
+          "heightPx": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "DescriptionRenderImageRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "slotNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imageSlotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "src": {
+            "type": "string"
+          },
+          "alt": {
+            "type": "string"
+          },
+          "widthPx": {
+            "type": "number"
+          },
+          "heightPx": {
+            "type": "number"
+          }
+        }
+      },
+      "DescriptionRenderIssueRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "variableName": {
+            "type": "string"
+          },
+          "issueKind": {
+            "type": "string"
+          },
+          "issueKindLabel": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "DescriptionRenderProduct": {
+        "type": "object",
+        "properties": {
+          "renderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "templateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "html": {
+            "type": "string"
+          },
+          "imageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "issueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DescriptionRenderSectionRow"
+            }
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DescriptionRenderIssueRow"
+            }
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "DescriptionRenderSectionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sectionType": {
+            "type": "string"
+          },
+          "sectionTypeLabel": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "heading": {
+            "type": "string"
+          },
+          "html": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "imageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DescriptionRenderImageRow"
+            }
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DescriptionRenderIssueRow"
+            }
           }
         }
       },
@@ -40279,6 +40668,353 @@
           }
         }
       },
+      "DescriptionSectionSummary": {
+        "type": "object",
+        "properties": {
+          "sectionType": {
+            "type": "string"
+          },
+          "sectionTypeLabel": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contentTemplateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "variableCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imageSlotCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "locales": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DescriptionTemplateRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceLocale": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DescriptionSectionSummary"
+            }
+          },
+          "localeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "renderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "DescriptionImageSlotRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slotNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bindSource": {
+            "type": "string"
+          },
+          "bindSourceLabel": {
+            "type": "string"
+          },
+          "caption": {
+            "type": "string"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "bound": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DescriptionSectionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "templateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sectionType": {
+            "type": "string"
+          },
+          "sectionTypeLabel": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contentTemplateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "body": {
+            "type": "string"
+          },
+          "showHeading": {
+            "type": "boolean"
+          },
+          "variables": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentTemplateVariable"
+            }
+          },
+          "translations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentTranslation"
+            }
+          },
+          "imageSlots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DescriptionImageSlotRow"
+            }
+          }
+        }
+      },
+      "DescriptionRenderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DescriptionRenderRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DescriptionRenderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "templateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "templateCode": {
+            "type": "string"
+          },
+          "templateName": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "sectionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "incompleteCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "imageCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "issueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "DescriptionTemplateOverview": {
+        "type": "object",
+        "properties": {
+          "templateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabledTemplateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sectionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "imageSlotCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "missingSectionTypeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "renderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "succeededRenderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partialRenderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "failedRenderCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "issueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DescriptionTemplateOptions": {
+        "type": "object",
+        "properties": {
+          "sectionTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "imageBindSources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "renderStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "issueKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "variableSources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Option"
+            }
+          },
+          "defaultPhrasesBySectionType": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
       "BundleComponentPage": {
         "type": "object",
         "properties": {
@@ -42450,742 +43186,6 @@
         "properties": {
           "deleted": {
             "type": "boolean"
-          }
-        }
-      },
-      "DescriptionImageSlotInput": {
-        "required": [
-          "bindSource"
-        ],
-        "type": "object",
-        "properties": {
-          "bindSource": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string"
-          },
-          "caption": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "assetId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "required": {
-            "type": "boolean"
-          },
-          "slotNo": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "nullable": true
-      },
-      "DescriptionSectionInput": {
-        "required": [
-          "body",
-          "sectionType"
-        ],
-        "type": "object",
-        "properties": {
-          "sectionType": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string"
-          },
-          "body": {
-            "maxLength": 20000,
-            "minLength": 0,
-            "type": "string"
-          },
-          "variables": {
-            "maxItems": 16,
-            "minItems": 0,
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "$ref": "#/components/schemas/ContentTemplateVariableInput"
-            }
-          },
-          "imageSlots": {
-            "maxItems": 8,
-            "minItems": 0,
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "$ref": "#/components/schemas/DescriptionImageSlotInput"
-            }
-          },
-          "showHeading": {
-            "type": "boolean"
-          },
-          "contentTemplateId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          }
-        },
-        "nullable": true
-      },
-      "DescriptionTemplateInput": {
-        "required": [
-          "code",
-          "name",
-          "sourceLocale"
-        ],
-        "type": "object",
-        "properties": {
-          "code": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string"
-          },
-          "name": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string"
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          },
-          "sourceLocale": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string"
-          },
-          "sections": {
-            "maxItems": 5,
-            "minItems": 0,
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "$ref": "#/components/schemas/DescriptionSectionInput"
-            }
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "DescriptionTemplateSaved": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "sectionCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "imageSlotCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "renderCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "DescriptionRenderInput": {
-        "required": [
-          "locale",
-          "skuId",
-          "templateId"
-        ],
-        "type": "object",
-        "properties": {
-          "templateId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "locale": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string"
-          },
-          "images": {
-            "maxItems": 16,
-            "minItems": 0,
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "$ref": "#/components/schemas/DescriptionRenderInputImage"
-            }
-          }
-        }
-      },
-      "DescriptionRenderInputImage": {
-        "required": [
-          "url"
-        ],
-        "type": "object",
-        "properties": {
-          "slotNo": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "url": {
-            "maxLength": 1000,
-            "minLength": 0,
-            "type": "string"
-          },
-          "alt": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "assetId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "widthPx": {
-            "type": "number",
-            "nullable": true
-          },
-          "heightPx": {
-            "type": "number",
-            "nullable": true
-          }
-        },
-        "nullable": true
-      },
-      "DescriptionRenderImageRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "position": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "slotNo": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "imageSlotId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "assetId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "src": {
-            "type": "string"
-          },
-          "alt": {
-            "type": "string"
-          },
-          "widthPx": {
-            "type": "number"
-          },
-          "heightPx": {
-            "type": "number"
-          }
-        }
-      },
-      "DescriptionRenderIssueRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "variableName": {
-            "type": "string"
-          },
-          "issueKind": {
-            "type": "string"
-          },
-          "issueKindLabel": {
-            "type": "string"
-          },
-          "detail": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string"
-          }
-        }
-      },
-      "DescriptionRenderProduct": {
-        "type": "object",
-        "properties": {
-          "renderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "templateId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "templateCode": {
-            "type": "string"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "locale": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "html": {
-            "type": "string"
-          },
-          "imageCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "issueCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "sections": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DescriptionRenderSectionRow"
-            }
-          },
-          "issues": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DescriptionRenderIssueRow"
-            }
-          },
-          "note": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string"
-          }
-        }
-      },
-      "DescriptionRenderSectionRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "sectionType": {
-            "type": "string"
-          },
-          "sectionTypeLabel": {
-            "type": "string"
-          },
-          "sortOrder": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "heading": {
-            "type": "string"
-          },
-          "html": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "imageCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "images": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DescriptionRenderImageRow"
-            }
-          },
-          "issues": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DescriptionRenderIssueRow"
-            }
-          }
-        }
-      },
-      "DescriptionSectionSummary": {
-        "type": "object",
-        "properties": {
-          "sectionType": {
-            "type": "string"
-          },
-          "sectionTypeLabel": {
-            "type": "string"
-          },
-          "sortOrder": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "contentTemplateId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "variableCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "imageSlotCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "locales": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "DescriptionTemplateRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          },
-          "sourceLocale": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "sections": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DescriptionSectionSummary"
-            }
-          },
-          "localeCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "renderCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "createdAt": {
-            "type": "string"
-          },
-          "updatedAt": {
-            "type": "string"
-          }
-        }
-      },
-      "DescriptionImageSlotRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "sectionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "slotNo": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "bindSource": {
-            "type": "string"
-          },
-          "bindSourceLabel": {
-            "type": "string"
-          },
-          "caption": {
-            "type": "string"
-          },
-          "assetId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "required": {
-            "type": "boolean"
-          },
-          "bound": {
-            "type": "boolean"
-          }
-        }
-      },
-      "DescriptionSectionRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "templateId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "sectionType": {
-            "type": "string"
-          },
-          "sectionTypeLabel": {
-            "type": "string"
-          },
-          "sortOrder": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "contentTemplateId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "body": {
-            "type": "string"
-          },
-          "showHeading": {
-            "type": "boolean"
-          },
-          "variables": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ContentTemplateVariable"
-            }
-          },
-          "translations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ContentTranslation"
-            }
-          },
-          "imageSlots": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DescriptionImageSlotRow"
-            }
-          }
-        }
-      },
-      "DescriptionRenderPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DescriptionRenderRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DescriptionRenderRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "templateId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "templateCode": {
-            "type": "string"
-          },
-          "templateName": {
-            "type": "string"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "locale": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string"
-          },
-          "sectionCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "completeCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "incompleteCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "imageCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "issueCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "note": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string"
-          }
-        }
-      },
-      "DescriptionTemplateOverview": {
-        "type": "object",
-        "properties": {
-          "templateCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "enabledTemplateCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "sectionCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "imageSlotCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "missingSectionTypeCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "renderCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "succeededRenderCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "partialRenderCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "failedRenderCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "issueCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DescriptionTemplateOptions": {
-        "type": "object",
-        "properties": {
-          "sectionTypes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Option"
-            }
-          },
-          "imageBindSources": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Option"
-            }
-          },
-          "renderStatuses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Option"
-            }
-          },
-          "issueKinds": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Option"
-            }
-          },
-          "variableSources": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Option"
-            }
-          },
-          "defaultPhrasesBySectionType": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "note": {
-            "type": "string"
           }
         }
       }
