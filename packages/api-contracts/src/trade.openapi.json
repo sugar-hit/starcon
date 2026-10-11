@@ -1717,12 +1717,130 @@
         }
       }
     },
+    "/trade/sales-orders/detail/{id}": {
+      "get": {
+        "tags": [
+          "sales-order-overview-controller"
+        ],
+        "operationId": "detail_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOrderOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/sales-orders/detail/fulfillment-reference": {
+      "get": {
+        "tags": [
+          "sales-order-overview-controller"
+        ],
+        "operationId": "fulfillmentReference",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderNo",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderSource",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOrderOverviewFulfillmentReference"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/sales-orders/detail/capabilities": {
+      "get": {
+        "tags": [
+          "sales-order-overview-controller"
+        ],
+        "operationId": "capabilities_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOrderOverviewCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/sales-orders/capabilities": {
       "get": {
         "tags": [
           "manual-order-controller"
         ],
-        "operationId": "capabilities_1",
+        "operationId": "capabilities_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -1836,7 +1954,7 @@
         "tags": [
           "processing-order-controller"
         ],
-        "operationId": "capabilities_2",
+        "operationId": "capabilities_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -1991,7 +2109,7 @@
         "tags": [
           "fulfillment-routing-controller"
         ],
-        "operationId": "capabilities_3",
+        "operationId": "capabilities_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -4270,6 +4388,620 @@
           },
           "ownerModule": {
             "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderOverview": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/SalesOrderOverviewHeader"
+          },
+          "buyer": {
+            "$ref": "#/components/schemas/SalesOrderOverviewParty"
+          },
+          "addresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderOverviewAddress"
+            }
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderOverviewLine"
+            }
+          },
+          "attributesByLineId": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/SalesOrderOverviewLineAttribute"
+              }
+            }
+          },
+          "charges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderOverviewCharge"
+            }
+          },
+          "chargeTotals": {
+            "$ref": "#/components/schemas/SalesOrderOverviewTotals"
+          },
+          "chargeAllocations": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderOverviewCharge"
+            }
+          },
+          "lineComponents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderOverviewLineComponent"
+            }
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderOverviewStatusEvent"
+            }
+          },
+          "payments": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderOverviewPayment"
+            }
+          },
+          "refunds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderOverviewRefund"
+            }
+          },
+          "fulfillmentBatches": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "object",
+              "nullable": true
+            }
+          },
+          "packages": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "object",
+              "nullable": true
+            }
+          },
+          "logisticsTrace": {
+            "type": "object",
+            "nullable": true
+          },
+          "aftersalesRefs": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "object",
+              "nullable": true
+            }
+          },
+          "platformRawPayload": {
+            "type": "string",
+            "nullable": true
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderOverviewAction"
+            }
+          },
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderOverviewAction": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderOverviewAddress": {
+        "type": "object",
+        "properties": {
+          "addressRole": {
+            "type": "string"
+          },
+          "recipientName": {
+            "type": "string"
+          },
+          "recipientPhone": {
+            "type": "string"
+          },
+          "recipientEmail": {
+            "type": "string"
+          },
+          "companyName": {
+            "type": "string"
+          },
+          "countryCode": {
+            "type": "string"
+          },
+          "province": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "district": {
+            "type": "string"
+          },
+          "postcode": {
+            "type": "string"
+          },
+          "addressLine1": {
+            "type": "string"
+          },
+          "addressLine2": {
+            "type": "string"
+          },
+          "taxId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderOverviewCharge": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "chargeType": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "chargeKind": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "nullable": true
+      },
+      "SalesOrderOverviewHeader": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "externalOrderNo": {
+            "type": "string"
+          },
+          "orderSource": {
+            "type": "string"
+          },
+          "manualKind": {
+            "type": "string"
+          },
+          "documentStatus": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "subtotalAmount": {
+            "type": "number"
+          },
+          "discountAmount": {
+            "type": "number"
+          },
+          "taxAmount": {
+            "type": "number"
+          },
+          "shippingAmount": {
+            "type": "number"
+          },
+          "otherAmount": {
+            "type": "number"
+          },
+          "grandTotalAmount": {
+            "type": "number"
+          },
+          "paymentMethod": {
+            "type": "string"
+          },
+          "paymentTermsDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SalesOrderOverviewLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "specSnapshot": {
+            "type": "string"
+          },
+          "skuMappingVersion": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "discountAmount": {
+            "type": "number"
+          },
+          "taxAmount": {
+            "type": "number"
+          },
+          "lineAmount": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderOverviewLineAttribute": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "attributeName": {
+            "type": "string"
+          },
+          "attributeValue": {
+            "type": "string"
+          },
+          "attributeUnit": {
+            "type": "string"
+          },
+          "sourceVersion": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderOverviewLineComponent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "componentSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "componentSkuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        },
+        "nullable": true
+      },
+      "SalesOrderOverviewParty": {
+        "type": "object",
+        "properties": {
+          "customerPartyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerCode": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerType": {
+            "type": "string"
+          },
+          "customerDefaultCurrency": {
+            "type": "string"
+          }
+        },
+        "nullable": true
+      },
+      "SalesOrderOverviewPayment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "method": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "nullable": true
+      },
+      "SalesOrderOverviewRefund": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paymentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "refundedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "nullable": true
+      },
+      "SalesOrderOverviewStatusEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SalesOrderOverviewTotals": {
+        "type": "object",
+        "properties": {
+          "subtotalAmount": {
+            "type": "number"
+          },
+          "discountAmount": {
+            "type": "number"
+          },
+          "taxAmount": {
+            "type": "number"
+          },
+          "shippingAmount": {
+            "type": "number"
+          },
+          "otherAmount": {
+            "type": "number"
+          },
+          "grandTotalAmount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "chargeRowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allocationNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderOverviewFulfillmentReference": {
+        "type": "object",
+        "properties": {
+          "salesOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "externalOrderNo": {
+            "type": "string"
+          },
+          "orderSource": {
+            "type": "string"
+          },
+          "documentStatus": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "grandTotalAmount": {
+            "type": "number"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "buyer": {
+            "$ref": "#/components/schemas/SalesOrderOverviewParty"
+          },
+          "shipTo": {
+            "$ref": "#/components/schemas/SalesOrderOverviewAddress"
+          },
+          "billTo": {
+            "$ref": "#/components/schemas/SalesOrderOverviewAddress"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderOverviewLine"
+            }
+          },
+          "consumptionNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderOverviewCapabilities": {
+        "type": "object",
+        "properties": {
+          "availableSections": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unavailableSections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderOverviewSection"
+            }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderOverviewAction"
+            }
+          },
+          "fulfillmentReferenceApi": {
+            "type": "string"
+          },
+          "tenantIsolationNote": {
+            "type": "string"
+          },
+          "writeNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderOverviewSection": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
           },
           "reason": {
             "type": "string"
