@@ -2,12 +2,34 @@
 
 **优先级：P1。这是仓库级地雷，不是单个模块的问题。**
 
+## ✅ 已解决：建议方向 1 已落地（2026-10-11）
+
+`tools/codegen/catalog-contracts.py` 现在在**写出任何文件之前**先扫跨服务重名，
+分级判定，不再静默：
+
+- **结构完全相同** → 只打印 `note`（没有东西被吃掉，属于潜在风险）
+- **结构不同** → 打印是哪两个服务、**谁会凭空多出字段 / 谁独有字段会消失**，**非零退出且一个文件都不写**
+- 确实要接受某条有损重名 → 写进 `tools/codegen/contract-collision-allowlist.json`（进 code review 的 diff）
+- allowlist 里已经不再重名的条目 → 每次跑都提示 `WARN` 可删，防止清单腐烂
+
+护栏测试：`tools/codegen/test_catalog_contracts.py`（11 条，`pnpm test:codegen`），已挂进 CI `test` job。
+该测试**已对照旧脚本标定过**：同一组 fixture 在旧脚本上是 exit 0 + 照写不误 + 静默顶掉，
+所以断言 exit 1 + 不落盘是一条真护栏，不是自证的假绿。
+
+同时把当前唯一那条有损重名也拆了：trade 的 `ProcessingModels.DownstreamGap` →
+`ProcessingDownstreamGap`（warehouse 的同名类型由此恢复成它本来的 5 字段形状）。
+
+**仍未做**：下面的建议方向 2（按服务分文件消除平铺）与方向 3（新模块一律带服务前缀）照旧有效。
+方向 3 单独用不够——它已经被证伪两次；方向 2 是根治，但会牵动所有 import，留给独立车道。
+
+---
+
 ## 已发生两次（2026-10-10 / 2026-10-11），命名纪律已被证明守不住
 
-| # | 撞名 | 撞掉了谁 |
-| --- | --- | --- |
-| 1 | `KnowledgeEntry` / `KnowledgeEntryDetail` / `KnowledgeVersion` / `KnowledgeReference` / `KnowledgeScope` / `KnowledgeCapabilities`（6 个） | `11.4.2.2` 售后知识库，30+ TS 错误 |
-| 2 | `DownstreamGap`（1 个） | warehouse / purchase 的下游缺口类型，3 处 typecheck 报「属性不存在」 |
+| #   | 撞名                                                                                                                                       | 撞掉了谁                                                             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| 1   | `KnowledgeEntry` / `KnowledgeEntryDetail` / `KnowledgeVersion` / `KnowledgeReference` / `KnowledgeScope` / `KnowledgeCapabilities`（6 个） | `11.4.2.2` 售后知识库，30+ TS 错误                                   |
+| 2   | `DownstreamGap`（1 个）                                                                                                                    | warehouse / purchase 的下游缺口类型，3 处 typecheck 报「属性不存在」 |
 
 **第 2 次尤其说明问题**：那一条在派工前已被明确警告（「先扫一遍已存在的类型名」），
 worker 也确实先扫了（确认 `SalesOrder*` 全空闲），**但漏掉了 `DownstreamGap`**——
