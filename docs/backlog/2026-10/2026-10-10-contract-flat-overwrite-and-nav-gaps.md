@@ -2,6 +2,19 @@
 
 **优先级：P1。这是仓库级地雷，不是单个模块的问题。**
 
+## 已发生两次（2026-10-10 / 2026-10-11），命名纪律已被证明守不住
+
+| # | 撞名 | 撞掉了谁 |
+| --- | --- | --- |
+| 1 | `KnowledgeEntry` / `KnowledgeEntryDetail` / `KnowledgeVersion` / `KnowledgeReference` / `KnowledgeScope` / `KnowledgeCapabilities`（6 个） | `11.4.2.2` 售后知识库，30+ TS 错误 |
+| 2 | `DownstreamGap`（1 个） | warehouse / purchase 的下游缺口类型，3 处 typecheck 报「属性不存在」 |
+
+**第 2 次尤其说明问题**：那一条在派工前已被明确警告（「先扫一遍已存在的类型名」），
+worker 也确实先扫了（确认 `SalesOrder*` 全空闲），**但漏掉了 `DownstreamGap`**——
+因为它不是 `SalesOrder*` 家族的，扫描的思路是「按我要用的前缀扫」而不是「逐个比对我要定的每个名字」。
+
+⇒ **纪律性做法（扫描 + 谨慎命名）已被证伪两次，不能作为防线。必须靠工具拦。**
+
 ## 现象
 
 开发 `15.4.2.1`（CRM 知识库）时，它的传输模型与两天前刚交付的 `11.4.2.2`（售后知识库与话术）
