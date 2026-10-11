@@ -936,7 +936,7 @@ class ManualOrderIntegrationTest {
         .as("来源是一个字段：能力声明里 MANUAL 与平台来源并列")
         .contains(ManualOrderModels.SalesOrderSource.MANUAL, ManualOrderModels.SalesOrderSource.AMAZON);
     assertThat(caps.downstreamGaps())
-        .extracting(ManualOrderModels.DownstreamGap::moduleId)
+        .extracting(ManualOrderModels.SalesOrderDownstreamGap::moduleId)
         .contains("9.2.1.1", "9.1.2.1");
   }
 

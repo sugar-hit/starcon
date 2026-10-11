@@ -12,10 +12,10 @@
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 123 |
+| 已交付 | 124 |
 | 进行中 | 0 |
-| **未开发** | **342** |
-| 完成率 | 26.5% |
+| **未开发** | **341** |
+| 完成率 | 26.7% |
 
 ## 分阶段进度（交付顺序看这里）
 
@@ -23,7 +23,7 @@
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
 | **D3** | 24 | 0 | 16 | 40 |
-| **D4** | 8 | 0 | 52 | 60 |
+| **D4** | 9 | 0 | 51 | 60 |
 | **D5** | 1 | 0 | 51 | 52 |
 | **D6** | 3 | 0 | 75 | 78 |
 | **D7** | 7 | 0 | 148 | 155 |
@@ -40,7 +40,7 @@
 | 06 | 采购与供应系统 | D6 | 2 | 26 |
 | 07 | 库存核算系统 | D3 | 20 | 31 |
 | 08 | 仓储作业系统 | D3 / D4 | 8 | 22 |
-| 09 | 订单履约系统 | D4 / D5 | 1 | 27 |
+| 09 | 订单履约系统 | D4 / D5 | 2 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 6 | 27 |
 | 11 | 售后与退货系统 | D4 / D7 | 1 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
@@ -308,7 +308,7 @@
 | 9.1.1.2 | 订单详情 | — | D4 | 未开发 | — |
 | 9.1.1.3 | 订单变更与取消 | — | D4 | 未开发 | — |
 | 9.1.2.1 | 平台订单同步 | — | D5 | 未开发 | — |
-| 9.1.2.2 | 手工订单 | — | D4 | 未开发 | — |
+| 9.1.2.2 | 手工订单 | — | D4 | 已交付 | 迁移 trade `V99__trade_manual_sales_order.sql`（七张新表，全部 tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT trade_app/starcon_app：sales_order 通用销售订单头 · sales_order_line 订单行（含 SKU 快照列）· sales_order_party_snapshot 客户快照 · order_address_snapshot 地址快照 · order_charge 费用 · order_line_attribute_snapshot 行属性快照 · sales_order_status_history 状态事件流；**只新建表，不 ALTER 任何既有表**，跨车道 DDL 回归面 = 0，不碰 V1 的 trade_tenancy_probe 与 V92/V97/V98 的既有表）。**「来源是一个字段不是一张表」是验收项不是描述**：只有一张 sales_order，**没有** manual_sales_order / platform_sales_order 之类的专用表；order_source 一列的 CHECK 词表**连同 MANUAL 一起预先钉住** MANUAL/PLATFORM/AMAZON/SHOPIFY/EBAY/TIKTOK_SHOP/ALIBABA_1688，9.1.2.1 平台订单同步（D5）落地时直接写同一张表，**不需要 ALTER 改 CHECK 也不需要另建一套流程** —— 蓝图「手工单与平台单共用同一条履约链路，只有来源标记不同」的落法；服务层 `create` 只写 order_source='MANUAL' 且**不接受请求体传值**（应用开了 fail-on-unknown-properties，带 orderSource 直接 400 而不是被忽略）。**外部订单号按来源范围唯一**（实体目录明文）：部分唯一索引 `(tenant_id, order_source, external_order_no) WHERE external_order_no <> ''` —— 带 order_source 这一维是必须的（Amazon 的 123 与 Shopify 的 123 是两张毫不相干的单）；写成**部分索引而不是 UNIQUE 约束**同样是必须的，external_order_no 是 NOT NULL DEFAULT '' 而 PostgreSQL 的普通唯一约束把 '' 视为相等，一个租户完全可以有任意多张没填客户参考号的单，普通 UNIQUE 会让第二张撞上第一张（集成测试「未填外部订单号不算重复」当场抓出这一条）。**快照纪律是硬要求 3 与 4 的执行点**：订单行带 sku_code/sku_name/spec_snapshot/sku_mapping_version 快照列与逐属性快照表（append-only，REVOKE 与触发器两层），地址是独立快照行且**不建指向 3.6.3.1 活地址的外键**也不回查，商品参数事后被改、买家事后改地址，历史订单一个字节都不变；提交后行/地址/费用/客户快照由触发器冻结，让「改数据」在数据层根本做不到，而不是靠界面不提供编辑入口。**延迟约束触发器 DEFERRABLE INITIALLY DEFERRED 在提交时回表核对**四道闸：行 ≥ 1、有收货地址快照、有客户快照、六项汇总（商品小计/折扣/税/运费/其他/总额）与明细逐项相等；DEFERRABLE 正是「先插头 → 写行/地址/费用 → 提交」这条写入顺序能成立的原因（当场算会把「还没写完」误判成「不完整」），submit 因此是**独立事务**。**单价由表单录入**：05 价目（D6）未交付，服务层**不引用**任何价目服务、**不内置**任何默认单价，界面上也不内置 —— 集成测试用同一 SKU 两个不同单价各建一单，两单金额必须不同。状态机只到 DRAFT→SUBMITTED（9.2 审单未交付，审单结论由它按「加值迁移」扩展，本表不需要为它 ALTER）；**本模块刻意没有取消**：草稿的处置方式是「不提交」，取消/作废属于 9.2 的驳回动作。**端点前缀是 `/trade/sales-orders` 而不是 `/trade/orders`** —— 后者被 `TradeTenancyIntegrationTest` 断言 2 显式预留给另一条车道，占了它会让一条**已通过的测试**变红，而那个测试文件属于别的模块不在本车道范围（proxy 侧也有一条用例反向钉住这个 404）。端点 6 个：GET /capabilities、GET+POST /、GET /{id}、PUT /{id}（草稿整体替换）、POST /{id}/submit；权限 trade.orders.read/create/update，租户只来自已认证成员关系，伪造 X-Tenant-Id 无效。前端页面 /orders（apps/web/src/app/orders/page.tsx + components/orders/manual-order-workspace.tsx + manual-order-model.ts，加载/空/错误三态齐全，详情页逐行显示 SKU/规格/映射版本与属性快照来源版本，「来源」是固定徽章而不是下拉）；api-proxy 白名单**求并**追加 `sales-orders` 一支（外层 trade/ 段不变，内层 alternation 2→3 条，逐分支核对旧的两条逐字未丢），并写真 proxy 双向断言 7 例（源码反向抽取真实调用点逐条放行 + 反向形状断言 404 + 真跑 proxy 断言转发到 8085 + 正向钉住 9.3.2.2 与 6.4.1.1 既有分支不被误伤）。测试 ManualOrderIntegrationTest 32 例（实跑 Testcontainers PostgreSQL 16，连接池压到 1，覆盖蓝图五条硬要求与多租户三断言）+ 前端 manual-order-model.test.ts 22 例；**trade 全套 117 例全绿**，跨车道零回归。契约由 codegen 重生成（catalog.ts **纯新增 19 条 SalesOrder\***，逐名 diff 确认零删除）。**顺带修掉一个契约平铺地雷**：本模块的下游缺口记录原本叫 `DownstreamGap`，而全仓契约被 codegen 合并进**一个扁平文件**、同名 key 后者覆盖前者且不报冲突 —— 它静默覆盖了 warehouse/purchase 已交付模块正在使用的同名类型（形状为 moduleId/moduleName/service/available/ownerModule/effect），表现为 processing-order-workspace 三处 typecheck 报「属性不存在」；改名 `SalesOrderDownstreamGap` 后旧形状原样还原。**另修掉六个真缺陷**（该迁移此前从未被执行过一次）：①客户快照表建在订单头之前却对 sales_order 有外键，Flyway 直接失败；②索引建在 sales_order 上但 customer_party_id 在客户快照表上；③guard_sales_order_totals 把 4 个值 SELECT INTO 3 个变量（PL/pgSQL 编译期不报错、提交时运行期才炸）且 v_discount/v_tax 被赋值两次、grand_total_amount 根本没被核对；④头部缺 other_amount 列，PACKAGING/OTHER 类费用无处安放；⑤注释引用了一个并不存在的 line_amount_matches CHECK，补上真 CHECK（行小计 = 单价 × 数量，DB 侧独立复算）；⑥order_charge 注释引用了一个并不存在的「7.5 延迟约束触发器」与分摊明细列。**下游缺口**：9.2.1.1 待审队列 / 9.2.1.2 审单规则 / 9.3.1.1 履约请求 / 9.1.2.1 平台订单同步均未交付，capabilities 显式 available=false 并写明归属模块与影响 |
 | 9.2.1.1 | 待审队列 | /orders/review | D4 | 未开发 | — |
 | 9.2.1.2 | 审单规则 | /orders/review | D4 | 未开发 | — |
 | 9.2.1.3 | 异常拦截 | /orders/review | D4 | 未开发 | — |

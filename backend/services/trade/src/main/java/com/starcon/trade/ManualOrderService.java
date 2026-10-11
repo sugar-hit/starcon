@@ -102,7 +102,7 @@ public class ManualOrderService {
             + "9.4 发货回传、13 销量只认 sales_order 一张表，不需要知道这单是怎么来的 —— "
             + "这是蓝图「避免两套流程」的实现形式。",
         List.of(
-            new DownstreamGap(
+            new SalesOrderDownstreamGap(
                 "9.2.1.1",
                 "待审队列",
                 "trade",
@@ -110,7 +110,7 @@ public class ManualOrderService {
                 "9.2 审单与异常",
                 "审单未交付：手工订单只能提交到 SUBMITTED（待审），"
                     + "队列展示、批量通过/驳回与规则命中都还没有出口。"),
-            new DownstreamGap(
+            new SalesOrderDownstreamGap(
                 "9.2.1.2",
                 "审单规则",
                 "trade",
@@ -118,7 +118,7 @@ public class ManualOrderService {
                 "9.2 审单与异常",
                 "审单规则未交付：当前没有任何自动放行/转人工的判定，"
                     + "SUBMITTED 的订单一律等人工处理。"),
-            new DownstreamGap(
+            new SalesOrderDownstreamGap(
                 "9.1.2.1",
                 "平台订单同步",
                 "trade",
@@ -127,7 +127,7 @@ public class ManualOrderService {
                 "同组兄弟模块未交付：order_source 为平台来源的订单当前没有任何写入入口。"
                     + "本模块已把 sales_order 的形状做成通用表（来源是字段，CHECK 值域已含全部平台来源），"
                     + "平台单落地时直接写同一张表，不需要改表结构。"),
-            new DownstreamGap(
+            new SalesOrderDownstreamGap(
                 "9.3.1.1",
                 "履约请求",
                 "trade",

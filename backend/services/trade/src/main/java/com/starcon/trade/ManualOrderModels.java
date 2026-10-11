@@ -479,8 +479,16 @@ public final class ManualOrderModels {
       List<SalesOrderChargeRow> charges,
       List<SalesOrderEventRow> events) {}
 
-  /** 下游缺口的显式声明（照 9.3.2.2 / 6.4.1.1 既有约定）。 */
-  public record DownstreamGap(
+  /**
+   * 下游缺口的显式声明（照 9.3.2.2 / 6.4.1.1 既有约定）。
+   *
+   * <p><b>刻意带 {@code SalesOrder} 前缀，不叫 {@code DownstreamGap}。</b>
+   * 全仓契约被 codegen 合并进<b>一个扁平文件</b>，同名 key 后者覆盖前者且不报冲突 ——
+   * 叫 {@code DownstreamGap} 会静默覆盖 warehouse / purchase 已交付模块正在使用的同名类型
+   * （它们的形状是 moduleId / moduleName / service / available / ownerModule / effect），
+   * 表现为别处的 typecheck 报「属性不存在」。本车道踩过一次，改名前三个已交付页面直接编译不过。
+   */
+  public record SalesOrderDownstreamGap(
       String moduleId, String name, String service, boolean available, String blueprint, String reason) {}
 
   /**
@@ -499,5 +507,5 @@ public final class ManualOrderModels {
       String priceSourceNote,
       boolean downstreamReviewAvailable,
       String sharedFulfillmentNote,
-      List<DownstreamGap> downstreamGaps) {}
+      List<SalesOrderDownstreamGap> downstreamGaps) {}
 }
