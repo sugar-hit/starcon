@@ -1504,12 +1504,225 @@
         }
       }
     },
+    "/trade/sales-orders/list": {
+      "get": {
+        "tags": [
+          "sales-order-list-controller"
+        ],
+        "operationId": "list_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customerPartyId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "buyerKeyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "orderedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "minAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxAmount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOrderListPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/sales-orders/list/filters": {
+      "get": {
+        "tags": [
+          "sales-order-list-controller"
+        ],
+        "operationId": "filters",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOrderListFilterOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/sales-orders/list/capabilities": {
+      "get": {
+        "tags": [
+          "sales-order-list-controller"
+        ],
+        "operationId": "capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesOrderListCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/sales-orders/capabilities": {
       "get": {
         "tags": [
           "manual-order-controller"
         ],
-        "operationId": "capabilities",
+        "operationId": "capabilities_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -1623,7 +1836,7 @@
         "tags": [
           "processing-order-controller"
         ],
-        "operationId": "capabilities_1",
+        "operationId": "capabilities_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -1778,7 +1991,7 @@
         "tags": [
           "fulfillment-routing-controller"
         ],
-        "operationId": "capabilities_2",
+        "operationId": "capabilities_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -3786,6 +3999,280 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "SalesOrderListCurrencyAmount": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "orderCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SalesOrderListPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderListRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/SalesOrderListSummary"
+          },
+          "dataScope": {
+            "type": "string"
+          },
+          "dataScopeNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderListRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "externalOrderNo": {
+            "type": "string"
+          },
+          "orderSource": {
+            "type": "string"
+          },
+          "manualKind": {
+            "type": "string"
+          },
+          "documentStatus": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "grandTotalAmount": {
+            "type": "number"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "customerPartyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "buyerName": {
+            "type": "string"
+          },
+          "skuCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "platformStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "fulfillmentStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "shippingWarehouse": {
+            "type": "string",
+            "nullable": true
+          },
+          "aftersalesStatus": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SalesOrderListSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "submittedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "amountsByCurrency": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderListCurrencyAmount"
+            }
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "pendingCountOwner": {
+            "type": "string"
+          },
+          "pendingCountNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderListFilterOptions": {
+        "type": "object",
+        "properties": {
+          "orderSources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "documentStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "currencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderListSortOption"
+            }
+          }
+        }
+      },
+      "SalesOrderListSortOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderListBulkOperation": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderListCapabilities": {
+        "type": "object",
+        "properties": {
+          "availableDimensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unavailableDimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderListDimension"
+            }
+          },
+          "bulkOperations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderListBulkOperation"
+            }
+          },
+          "availableSorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesOrderListSortOption"
+            }
+          },
+          "filterableNote": {
+            "type": "string"
+          },
+          "exportNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SalesOrderListDimension": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
           }
         }
       },
