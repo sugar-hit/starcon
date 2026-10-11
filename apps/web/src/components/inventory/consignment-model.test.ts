@@ -14,7 +14,7 @@ import {
   unsettleable,
   zeroRemainingLines,
 } from './consignment-model';
-import type { ConsignmentLine, ConsignmentStockView } from '../../../../../packages/api-contracts/src/catalog';
+import type { ConsignmentLine, ConsignmentStockView } from '../../../../../packages/api-contracts/src/index';
 
 /**
  * 7.7.1.2 前端纯函数单测。

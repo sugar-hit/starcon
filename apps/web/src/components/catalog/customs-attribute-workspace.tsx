@@ -25,7 +25,7 @@ import {
   TriangleAlert,
   X,
 } from 'lucide-react';
-import type { CustomsProfile, DeclarationReady } from '../../../../../packages/api-contracts/src/catalog';
+import type { CustomsProfile, DeclarationReady } from '../../../../../packages/api-contracts/src/index';
 import {
   blockerLines,
   canEdit,

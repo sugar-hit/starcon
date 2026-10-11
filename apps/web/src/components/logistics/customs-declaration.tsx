@@ -19,7 +19,7 @@ import type {
   CustomsCapabilities,
   CustomsDeclarationRow,
   CustomsDocumentRow,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   actionLabel,
   amendCustomsDeclaration,

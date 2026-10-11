@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { CategoryNode, CategoryTree } from '../../../../../packages/api-contracts/src/catalog';
+import type { CategoryNode, CategoryTree } from '../../../../../packages/api-contracts/src/index';
 import {
   buildTree,
   codeProblem,

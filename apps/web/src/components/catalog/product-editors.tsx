@@ -10,7 +10,7 @@ import type {
   Sku,
   SkuInput,
   ValueInput,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { Editor, Field, control, modes, statuses, types } from './fields';
 
 function Submit({ busy, error, close }: { busy: boolean; error: string; close: () => void }) {

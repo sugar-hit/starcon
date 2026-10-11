@@ -7,7 +7,7 @@ import type {
   Product,
   ProductRecord,
   RecordInput,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from './api';
 import { canAccessRecord } from '../iam/administration-model';
 import { control, Editor, Field, statuses } from './fields';

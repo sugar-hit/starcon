@@ -18,7 +18,7 @@ import type {
   CustomsSubmitRequest,
   CustomsUpdateRequest,
   CustomsWithdrawReviewRequest,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from '../inventory/api';
 import { fetchFirstMileDetail, fetchFirstMileShipments } from './first-mile-shipment-model';
 

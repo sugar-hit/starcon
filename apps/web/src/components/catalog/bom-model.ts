@@ -18,7 +18,7 @@ import type {
   BomExplosionRun,
   BomExplosionRunPage,
   WarehouseRef,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { ApiError, api } from './api';
 
 /** BOM 列表筛选条件。字段与后端 `BomQuery` 逐字对应。 */

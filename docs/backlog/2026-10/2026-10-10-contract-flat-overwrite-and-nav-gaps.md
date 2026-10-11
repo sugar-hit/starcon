@@ -2,7 +2,9 @@
 
 **优先级：P1。这是仓库级地雷，不是单个模块的问题。**
 
-## ✅ 已解决：建议方向 1 已落地（2026-10-11）
+## ✅ 建议方向 1 与 2 均已落地（2026-10-11）
+
+### 方向 1：codegen 加碰撞检测（响亮失败）
 
 `tools/codegen/catalog-contracts.py` 现在在**写出任何文件之前**先扫跨服务重名，
 分级判定，不再静默：
@@ -12,15 +14,40 @@
 - 确实要接受某条有损重名 → 写进 `tools/codegen/contract-collision-allowlist.json`（进 code review 的 diff）
 - allowlist 里已经不再重名的条目 → 每次跑都提示 `WARN` 可删，防止清单腐烂
 
-护栏测试：`tools/codegen/test_catalog_contracts.py`（11 条，`pnpm test:codegen`），已挂进 CI `test` job。
-该测试**已对照旧脚本标定过**：同一组 fixture 在旧脚本上是 exit 0 + 照写不误 + 静默顶掉，
-所以断言 exit 1 + 不落盘是一条真护栏，不是自证的假绿。
-
-同时把当前唯一那条有损重名也拆了：trade 的 `ProcessingModels.DownstreamGap` →
+同时把当时唯一那条有损重名也拆了：trade 的 `ProcessingModels.DownstreamGap` →
 `ProcessingDownstreamGap`（warehouse 的同名类型由此恢复成它本来的 5 字段形状）。
 
-**仍未做**：下面的建议方向 2（按服务分文件消除平铺）与方向 3（新模块一律带服务前缀）照旧有效。
-方向 3 单独用不够——它已经被证伪两次；方向 2 是根治，但会牵动所有 import，留给独立车道。
+### 方向 2：按服务分文件（结构性根治）
+
+```
+packages/api-contracts/src/
+  contracts/<service>.ts   ← 各服务只出自己的类型，同名不再互相覆盖
+  index.ts                 ← 汇总入口，显式绑定每一条重名
+```
+
+同名现在有两道网，且第二道**不依赖任何纪律**：
+
+- 结构不同 → 方向 1 的闸门拦下；
+- 结构完全相同 → 两份都活在自己的文件里，桶文件里 `export *` 撞名就是
+  **TS2308 编译错误**（实测过，见会话文档）。忘了写消解行，编译会红而不是静默覆盖。
+
+allowlist 的语义随之升级：放行时必须写 `winner`，指明桶文件绑定**哪一份** ——
+否则放行后桶文件直接编译不过。
+
+消费面 233 个文件的 import 从 `packages/api-contracts/src/catalog` 改为 `.../src/index`（242 处，纯路径替换）。
+
+### 护栏
+
+`tools/codegen/test_catalog_contracts.py`（14 条，`pnpm test:codegen`），已挂进 CI `test` job。
+两条主线都**先标定再采信**：
+
+- 方向 1 的断言对照旧脚本跑过：同一组 fixture 在旧脚本上是 exit 0 + 照写不误 + 静默顶掉；
+- 方向 2 的断言对照真实生成物跑过：注入同名后 `tsc` 报 `TS2308` + `TS2353`，抽掉后退出码 0。
+
+### 仍未做
+
+建议方向 3（新模块一律带服务前缀）照旧有效，但**单独用不够**——它已经被证伪两次。
+闸门是纪律的替代品，不是补充。
 
 ---
 

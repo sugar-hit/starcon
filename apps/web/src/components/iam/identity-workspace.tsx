@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Avatar, Button } from '@starcon/ui';
-import type { Access } from '../../../../../packages/api-contracts/src/catalog';
+import type { Access } from '../../../../../packages/api-contracts/src/index';
 import { useIdentity } from './identity-shell';
 import { AdministrationPanel } from './administration-panel';
 import { MemberOnboardingWorkspace } from './member-onboarding-workspace';

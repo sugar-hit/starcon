@@ -31,7 +31,7 @@ import type {
   SyncFailureSummary,
   SyncFailureView,
   SyncRunView,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api, ApiError } from '@/lib/api';
 import { EnumMappingPanel } from './enum-mapping-panel';
 import { OAuthWizard } from './oauth-wizard';

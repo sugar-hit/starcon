@@ -24,7 +24,7 @@ import type {
   DelayThresholdRow,
   TrackingRow,
   TransitTrackCapabilities,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   acknowledgeDelayAlert,
   closeDelayAlert,

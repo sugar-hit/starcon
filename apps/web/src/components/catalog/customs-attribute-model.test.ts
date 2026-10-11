@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type {
   CustomsProfile,
   DeclarationElement,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { ApiError } from './api';
 import {
   blockerLines,

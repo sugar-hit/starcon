@@ -6,7 +6,7 @@ import type {
   LeaderGrantInput,
   LeaderProxyInput,
   MemberView,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 // 相对路径而不是 `@/lib/api`：根 vitest 配置没有 `@/*` 别名（那只在 Next 构建里解析），
 // 用别名会让这个模型的单测在 vite 下加载失败。与 administration-model 保持同一套约定。
 import { api } from '../../lib/api';

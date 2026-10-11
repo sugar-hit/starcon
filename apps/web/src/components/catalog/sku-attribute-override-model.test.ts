@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { SkuOverrideAttribute } from '../../../../../packages/api-contracts/src/catalog';
+import type { SkuOverrideAttribute } from '../../../../../packages/api-contracts/src/index';
 import {
   actionable,
   clearOverride,

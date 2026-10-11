@@ -17,7 +17,7 @@ import type {
   ImportValidationExportRow,
   ImportValidationIssuePage,
   ImportValidationSummary,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { control } from '../common/fields';
 import { useIdentity } from '../iam/identity-shell';
 import { fetchJobs, statusLabel } from './import-model';

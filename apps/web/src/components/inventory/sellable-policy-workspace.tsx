@@ -13,7 +13,7 @@ import type {
   SellableQuantityResult,
   SkuRef,
   WarehouseRef,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { fetchSkus } from './inventory-model';
 import {
   allocationText,

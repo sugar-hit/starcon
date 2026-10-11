@@ -12,7 +12,7 @@ import {
   Tags,
   TriangleAlert,
 } from 'lucide-react';
-import type { AttributeOptionOverviewRow } from '../../../../../packages/api-contracts/src/catalog';
+import type { AttributeOptionOverviewRow } from '../../../../../packages/api-contracts/src/index';
 import {
   ENABLED_FILTERS,
   OPTION_SORTS,

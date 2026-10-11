@@ -6,7 +6,7 @@ import { AlertTriangle, Building2, Check, RefreshCw } from 'lucide-react';
 import type {
   TenantContextView,
   TenantSummaryView,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api, blockWorkspaceRequests } from '@/lib/api';
 import { Field, control } from '../common/fields';
 import { announceIdentityChange, useIdentity } from './identity-shell';

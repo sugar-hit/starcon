@@ -1,4 +1,4 @@
-import type { LedgerBookItem } from '../../../../../packages/api-contracts/src/catalog';
+import type { LedgerBookItem } from '../../../../../packages/api-contracts/src/index';
 
 /**
  * 17.6.1.1 账簿与本位币的展示与入参口径。

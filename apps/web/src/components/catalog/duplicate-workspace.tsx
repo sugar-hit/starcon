@@ -8,7 +8,7 @@ import type {
   DuplicateCandidatePage,
   DuplicateOverview,
   DuplicateScanRow,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   canSubmitDecision,
   DECISION_FILTERS,

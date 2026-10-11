@@ -9,7 +9,7 @@ import type {
   WarehouseCreated,
   WarehouseFacilityPage,
   WorkVolumeCapability,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { useIdentity } from '../iam/identity-shell';
 import {
   ALL,

@@ -18,8 +18,8 @@ import {
 import type {
   LotDistribution,
   LotMovements,
-} from '../../../../../packages/api-contracts/src/catalog';
-import type { LotArchivePage } from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
+import type { LotArchivePage } from '../../../../../packages/api-contracts/src/index';
 import {
   createLot,
   expiryText,

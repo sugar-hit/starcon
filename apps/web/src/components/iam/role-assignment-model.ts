@@ -1,7 +1,7 @@
 import type {
   RoleAssignmentMergedPermission,
   RoleAssignmentScopeView,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 
 /**
  * 17.3.2.1 角色分配的前端模型。

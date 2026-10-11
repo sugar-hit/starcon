@@ -4,7 +4,7 @@ import type {
   DuplicateCandidateRow,
   DuplicateDecisionRow,
   DuplicateScanRow,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { ApiError } from './api';
 import {
   canSubmitDecision,

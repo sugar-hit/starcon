@@ -12,7 +12,7 @@ import type {
   ApprovalValidationView,
   MemberView,
   RoleView,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { ApiError, api } from '@/lib/api';
 import { Field, Editor, control } from '../common/fields';
 import { useIdentity } from './identity-shell';

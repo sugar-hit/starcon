@@ -4,7 +4,7 @@ import type {
   WarehouseDetail,
   WarehouseUpdated,
   WarehouseUpdateInput,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from './api';
 import { errorText, kindLabel, momentText, qty, statusLabel } from './warehouse-facility-model';
 

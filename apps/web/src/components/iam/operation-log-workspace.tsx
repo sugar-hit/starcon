@@ -7,7 +7,7 @@ import type {
   OperationLogDetail,
   OperationLogTrace,
   OperationLogView,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { useIdentity } from './identity-shell';
 import {
   emptyFilters,

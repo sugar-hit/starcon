@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { PartyRole, PartyRow } from '../../../../../packages/api-contracts/src/catalog';
+import type { PartyRole, PartyRow } from '../../../../../packages/api-contracts/src/index';
 import {
   PARTY_ROLES,
   PARTY_STATUSES,

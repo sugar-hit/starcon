@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { WarehouseDetail } from '../../../../../packages/api-contracts/src/catalog';
+import type { WarehouseDetail } from '../../../../../packages/api-contracts/src/index';
 import {
   addressText,
   draftOf,

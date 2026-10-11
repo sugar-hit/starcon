@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge, Button, EmptyState, SectionCard, StatCard } from '@starcon/ui';
 import { RefreshCw, TriangleAlert, ClipboardList, CheckCircle2 } from 'lucide-react';
-import type { CompletenessGap, CompletenessRow, CompletenessScorecard } from '../../../../../packages/api-contracts/src/catalog';
+import type { CompletenessGap, CompletenessRow, CompletenessScorecard } from '../../../../../packages/api-contracts/src/index';
 import { Field, control } from '../common/fields';
 import {
   certificationCompletenessLabel,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { BoundAxis, CombinationConflict, ExistingCombination } from '../../../../../packages/api-contracts/src/catalog';
+import type { BoundAxis, CombinationConflict, ExistingCombination } from '../../../../../packages/api-contracts/src/index';
 import {
   combinationSourceText,
   combinationText,

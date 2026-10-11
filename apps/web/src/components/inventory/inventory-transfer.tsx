@@ -18,7 +18,7 @@ import {
 import type {
   TransferOrderDetail,
   TransferOrderSaved,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   closeTransfer,
   confirmTransfer,

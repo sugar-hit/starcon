@@ -20,7 +20,7 @@ import type {
   SkuFieldInfo,
   SkuListCapabilities,
   SkuListRow,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   emptySkuFilters,
   fetchSkuCapabilities,

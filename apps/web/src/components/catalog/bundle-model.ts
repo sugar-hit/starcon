@@ -13,7 +13,7 @@ import type {
   BundleVersionPage,
   BundleVersionRow,
   BundleVersionSummary,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { ApiError, api } from './api';
 
 /** 套装列表筛选条件。字段与后端 `BundleQuery` 逐字对应。 */

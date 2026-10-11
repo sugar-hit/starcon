@@ -27,7 +27,7 @@ import type {
   StocktakeSheetPage,
   StocktakeTask,
   WarehouseRef,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { fetchLocations, fetchWarehouses } from './inventory-model';
 import {
   assignStocktakeTask,

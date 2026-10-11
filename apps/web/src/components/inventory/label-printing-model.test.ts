@@ -15,7 +15,7 @@ import {
   warningText,
   weightText,
 } from './label-printing-model';
-import type { LabelPrintExecution } from '../../../../../packages/api-contracts/src/catalog';
+import type { LabelPrintExecution } from '../../../../../packages/api-contracts/src/index';
 
 /**
  * 8.3.4.2 面单与标签打印前端模型测试。

@@ -6,7 +6,7 @@ import type {
   SkuMergeReport,
   SkuMergeRow,
   SkuMergeTrace,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from './api';
 
 /**

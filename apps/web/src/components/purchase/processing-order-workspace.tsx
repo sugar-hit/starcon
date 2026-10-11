@@ -23,7 +23,7 @@ import type {
   ProcessingOrderDetail,
   ProcessingOrderSaved,
   RequirementPreview,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   advanceStatus,
   createOrder,

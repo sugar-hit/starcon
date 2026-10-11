@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { BomBinding, BomSnapshotLine } from '../../../../../packages/api-contracts/src/catalog';
+import type { BomBinding, BomSnapshotLine } from '../../../../../packages/api-contracts/src/index';
 import {
   depthIndent,
   driftHeadline,

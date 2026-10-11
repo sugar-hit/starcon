@@ -27,7 +27,7 @@ import type {
   SalesOrderLineInput,
   SalesOrderPage,
   SalesOrderRow,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   addressRoleLabel,
   canSubmit,

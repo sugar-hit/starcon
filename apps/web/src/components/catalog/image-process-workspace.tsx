@@ -21,7 +21,7 @@ import type {
   MediaProcessOverview,
   MediaProcessRecipeInput,
   MediaProcessRecipeRow,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { Field, control } from '../common/fields';
 import {
   CROP_MODES,

@@ -3,7 +3,7 @@ import type {
   BomFreezeInput,
   BomFreezeResult,
   BomSnapshotLine,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from '../../lib/api';
 
 /**

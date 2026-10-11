@@ -15,7 +15,7 @@ import type {
   SalesOrderListCapabilities,
   SalesOrderListDimension,
   SalesOrderListPage,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   bulkOperationDisabled,
   documentStatusLabels,

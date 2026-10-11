@@ -9,7 +9,7 @@ import type {
   LedgerBookGroups,
   LedgerBookItem,
   LegalEntityView,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api, ApiError } from '@/lib/api';
 import { useIdentity } from './identity-shell';
 import {

@@ -13,7 +13,7 @@ import type {
   QualityStatusRef,
   SkuRef,
   WarehouseRef,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   actionNote,
   bucketPlacement,

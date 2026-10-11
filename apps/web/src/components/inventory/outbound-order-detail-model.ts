@@ -5,7 +5,7 @@ import type {
   OutboundOrderDetailCapabilities,
   OutboundQuantityAvailability,
   OutboundUnavailableLink,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { ApiError, api } from './api';
 
 /**

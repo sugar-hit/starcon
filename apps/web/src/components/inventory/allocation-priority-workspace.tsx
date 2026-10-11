@@ -12,7 +12,7 @@ import type {
   PriorityCapabilities,
   ResolutionPage,
   SkuRef,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { fetchSkus } from './inventory-model';
 import { fetchPolicies, fetchPolicy } from './allocation-policy-model';
 import {

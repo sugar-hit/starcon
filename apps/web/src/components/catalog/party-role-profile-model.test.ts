@@ -4,7 +4,7 @@ import type {
   PartyCustomerProfile,
   PartyRoleProfileRow,
   PartySupplierProfile,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   customerFormProblem,
   carrierFormProblem,

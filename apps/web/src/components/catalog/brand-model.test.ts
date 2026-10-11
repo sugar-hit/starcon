@@ -5,7 +5,7 @@ import type {
   BrandDetail,
   BrandPublishEligibility,
   BrandRow,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   BLOCK_ACTIONS,
   BLOCK_LABELS,

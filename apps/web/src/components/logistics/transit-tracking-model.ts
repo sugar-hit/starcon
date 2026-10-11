@@ -13,7 +13,7 @@ import type {
   TransitTrackCapabilities,
   TransitTrackDetail,
   TransitTrackPage,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from '../inventory/api';
 
 /**

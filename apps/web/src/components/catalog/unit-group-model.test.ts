@@ -4,7 +4,7 @@ import type {
   UnitGroupDetail,
   UnitGroupMemberInput,
   UnitOfMeasure,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   DENY_ACTIONS,
   DENY_LABELS,

@@ -16,7 +16,7 @@ import type {
   SkuRef,
   LocationRef,
   LotRef,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from './api';
 
 // 枚举码值：springdoc 不为 List<Enum> 单独出 schema，契约里是内联字符串联合。

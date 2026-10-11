@@ -8,7 +8,7 @@ import type {
   DepartmentView,
   ChildInput,
   ChildUpdate,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from '../../lib/api';
 
 export type AdministrationKind = 'roles' | 'members' | 'departments' | 'children';

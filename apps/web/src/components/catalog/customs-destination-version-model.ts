@@ -7,7 +7,7 @@ import type {
   DestinationVersionSaved,
   EffectiveDestinationVersion,
   ResolvedDeclaration,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { ApiError, api } from './api';
 
 /**

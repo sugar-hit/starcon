@@ -4,7 +4,7 @@ import type {
   ProcessingComponentLine,
   ProcessingOrderDetail,
   ProcessingOrderSaved,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   factoryKindLabels,
   fmt,

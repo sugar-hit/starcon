@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { MediaDetail, MediaRow } from '../../../../../packages/api-contracts/src/catalog';
+import type { MediaDetail, MediaRow } from '../../../../../packages/api-contracts/src/index';
 import {
   INTEGRITY_LABELS,
   byteSizeText,

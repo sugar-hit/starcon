@@ -31,7 +31,7 @@ import {
   Upload,
   UserRound,
 } from 'lucide-react';
-import type { Access, LoginResult } from '../../../../../packages/api-contracts/src/catalog';
+import type { Access, LoginResult } from '../../../../../packages/api-contracts/src/index';
 import { api, ApiError, blockWorkspaceRequests } from '@/lib/api';
 import { loginDestination } from '@/lib/identity-navigation';
 import { Field, control } from '../common/fields';

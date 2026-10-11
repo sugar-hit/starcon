@@ -22,7 +22,7 @@ import type {
   TitleRecord,
   TitleTemplateInput,
   TitleTemplateRow,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { Editor, Field, control } from '../common/fields';
 import { emptySkuFilters, fetchSkuPage } from './sku-list-model';
 import {

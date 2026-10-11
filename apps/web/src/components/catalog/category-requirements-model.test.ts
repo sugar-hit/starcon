@@ -4,7 +4,7 @@ import type {
   CategoryAttributeRequirementInput,
   CategoryNode,
   CategoryTree,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   conditionText,
   conditionValueTexts,

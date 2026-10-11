@@ -40,7 +40,7 @@ import type {
   BucketRow,
   OverviewGroup,
   OverviewRow,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { ApiError } from './api';
 
 function bucketRow(partial: Partial<BucketRow>): BucketRow {

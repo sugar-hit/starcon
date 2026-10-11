@@ -18,7 +18,7 @@ import {
 import type {
   FirstMileCapabilities,
   FirstMileRow,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   allowedRiskBearers,
   cancelFirstMileShipment,

@@ -7,7 +7,7 @@ import type {
   OnboardingResult,
   OnboardingView,
   RoleView,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from '@/lib/api';
 import { Field, Editor, control } from '../common/fields';
 import {
@@ -246,7 +246,7 @@ function OnboardingForm({
   departments: DepartmentView[];
   busy: boolean;
   save: (
-    input: import('../../../../../packages/api-contracts/src/catalog').OnboardingInput,
+    input: import('../../../../../packages/api-contracts/src/index').OnboardingInput,
   ) => Promise<void>;
 }) {
   const [username, setUsername] = useState('');

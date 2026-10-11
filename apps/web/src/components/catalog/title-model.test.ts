@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { TitleGeneration, TitleTemplateInput } from '../../../../../packages/api-contracts/src/catalog';
+import type { TitleGeneration, TitleTemplateInput } from '../../../../../packages/api-contracts/src/index';
 import {
   GENERATION_STATUSES,
   KEYWORD_TYPES,

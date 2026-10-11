@@ -10,7 +10,7 @@ import type {
   UnitGroupPage,
   UnitGroupSaved,
   UnitOfMeasure,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { ApiError, api } from './api';
 
 /**

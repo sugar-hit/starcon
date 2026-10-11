@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { AttributeOptionOverviewRow } from '../../../../../packages/api-contracts/src/catalog';
+import type { AttributeOptionOverviewRow } from '../../../../../packages/api-contracts/src/index';
 import {
   attributeLabel,
   emptyHint,

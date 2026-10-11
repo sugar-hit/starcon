@@ -14,7 +14,7 @@ import type {
   StockOwnershipResolved,
   StockOwnerInput,
   StockOwnerPage,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   allowedRefTypes,
   createOwner,

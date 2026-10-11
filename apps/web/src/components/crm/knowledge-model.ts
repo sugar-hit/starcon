@@ -11,7 +11,7 @@ import type {
   CrmPublishVersionInput,
   CrmRecordReferenceInput,
   CrmReviewDueReport,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from '../../lib/api';
 
 /**

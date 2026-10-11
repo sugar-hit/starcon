@@ -22,7 +22,7 @@ import type {
   OutboundOrderSummary,
   OutboundPickRequestResult,
   OutboundPrintResult,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   cancelOutboundOrders,
   canCancel,

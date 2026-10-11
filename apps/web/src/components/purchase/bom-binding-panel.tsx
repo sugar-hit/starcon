@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Lock, RefreshCw, Snowflake, TriangleAlert } from 'lucide-react';
 import { Badge, Button, Input, SectionCard } from '@starcon/ui';
-import type { BomBinding } from '../../../../../packages/api-contracts/src/catalog';
+import type { BomBinding } from '../../../../../packages/api-contracts/src/index';
 import {
   depthIndent,
   driftHeadline,

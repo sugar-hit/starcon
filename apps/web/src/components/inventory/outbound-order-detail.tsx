@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { AlertTriangle, ArrowLeft, Clock, Package, RefreshCw } from 'lucide-react';
 import { Badge, Button, EmptyState, Notice, PageHeader, SectionCard } from '@starcon/ui';
-import type { OutboundOrderDetail } from '../../../../../packages/api-contracts/src/catalog';
+import type { OutboundOrderDetail } from '../../../../../packages/api-contracts/src/index';
 import {
   actionButtonText,
   carrierWarning,

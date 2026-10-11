@@ -21,7 +21,7 @@ import type {
   UnitOverview,
   UnitPanel,
   UnitSnapshot,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   addConversion,
   convert,

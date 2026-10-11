@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { AuditDetail } from '../../../../../packages/api-contracts/src/catalog';
+import type { AuditDetail } from '../../../../../packages/api-contracts/src/index';
 import {
   actionLabel,
   auditExportUrl,

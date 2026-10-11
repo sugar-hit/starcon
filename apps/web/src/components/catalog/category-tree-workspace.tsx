@@ -22,7 +22,7 @@ import type {
   CategoryNode,
   CategoryOverview,
   CategoryTree,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { Field, control } from '../common/fields';
 import {
   PLATFORMS,

@@ -15,7 +15,7 @@ import type {
   SalesOrderOverview,
   SalesOrderOverviewCapabilities,
   SalesOrderOverviewLineAttribute,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   UNAVAILABLE_SECTION_ORDER,
   actionDisabled,

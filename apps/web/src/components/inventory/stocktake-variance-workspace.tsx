@@ -21,7 +21,7 @@ import type {
   StocktakeVarianceCapabilities,
   StocktakeVarianceLinePage,
   StocktakeVarianceReport,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { fetchStocktakes } from './stocktake-model';
 import {
   adjustmentStatusLabels,

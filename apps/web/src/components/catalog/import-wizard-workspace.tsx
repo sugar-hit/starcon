@@ -28,7 +28,7 @@ import type {
   ImportRowErrorPage,
   ImportTemplateDetail,
   ImportTemplateRow,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { Editor, Field, control } from '../common/fields';
 import { useIdentity } from '../iam/identity-shell';
 import {

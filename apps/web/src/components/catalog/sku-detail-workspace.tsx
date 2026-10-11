@@ -17,7 +17,7 @@ import {
 import type {
   SkuDetail,
   SkuEffectiveAttribute,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   attributeSources,
   decimal,

@@ -8,7 +8,7 @@ import type {
   ImportValidationIssuePage,
   ImportValidationReportRow,
   ImportValidationSummary,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from './api';
 
 /**
