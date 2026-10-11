@@ -388,16 +388,23 @@ public final class ProcessingModels {
       boolean bomVersionBindingAvailable,
       boolean warehouseStockMovementOwnedByWarehouse,
       String upstreamNote,
-      List<DownstreamGap> downstreamGaps,
+      List<ProcessingDownstreamGap> downstreamGaps,
       String note) {
 
     /**
      * 一个未交付下游。
      *
+     * <p><b>刻意带 {@code Processing} 前缀，不叫 {@code DownstreamGap}。</b>
+     * 全仓契约被 codegen 合并进<b>一个扁平文件</b>，同名 key 后者覆盖前者且不报冲突；
+     * {@code ProcessingModels.DownstreamGap} 与 warehouse
+     * {@code ProcessingOrderModels.DownstreamGap} 撞过名，trade 排在 warehouse 之后，
+     * 于是 warehouse 的那份被静默顶掉。现在 tools/codegen/catalog-contracts.py 会在写出文件前
+     * 拦下这类字段级覆盖，但撞名本身仍要靠改名根治。
+     *
      * @param available 该下游是否已交付
      * @param ownerModule 归属模块（页面据此写清「为什么这个按钮不能按」）
      */
-    public record DownstreamGap(
+    public record ProcessingDownstreamGap(
         String moduleId,
         String moduleName,
         String service,

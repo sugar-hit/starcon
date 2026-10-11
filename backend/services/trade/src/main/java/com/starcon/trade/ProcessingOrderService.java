@@ -89,7 +89,7 @@ public class ProcessingOrderService {
             + "本服务原样冻结不重算、不取整。库存属 warehouse：组件出库与成品入库在 warehouse 的"
             + "一个本地事务里完成，本服务不建跨库外键、不跨库读写。",
         List.of(
-            new ProcessingCapabilities.DownstreamGap(
+            new ProcessingCapabilities.ProcessingDownstreamGap(
                 "8.4.1.1",
                 "组装单",
                 "warehouse",
@@ -97,7 +97,7 @@ public class ProcessingOrderService {
                 "8 仓储作业 · 8.4 组装与加工",
                 "仓库现场作业单据未交付：加工单当前只登记入库需求通知与实收数量，"
                     + "仓库内部的拣货/复核/上架现场流程尚未建模。"),
-            new ProcessingCapabilities.DownstreamGap(
+            new ProcessingCapabilities.ProcessingDownstreamGap(
                 "6.4.1.2",
                 "BOM 关联",
                 "trade",
@@ -106,7 +106,7 @@ public class ProcessingOrderService {
                 "同组兄弟模块未交付：冻结展开结果的独立入口尚未开发。"
                     + "本模块已在下达时把当版 BOM 的组件与用量冻结进组件领用记录，"
                     + "效果上覆盖了「已下达的加工单不受后来 BOM 改动影响」这条硬要求。"),
-            new ProcessingCapabilities.DownstreamGap(
+            new ProcessingCapabilities.ProcessingDownstreamGap(
                 "6.4.2.1",
                 "质检单",
                 "trade",
@@ -114,7 +114,7 @@ public class ProcessingOrderService {
                 "6.4.2 质检",
                 "来料/成品质检未交付：完工报数量时不能做抽样判定与扣量，"
                     + "不合格量的处置（6.4.2.2）也无下游出口。"),
-            new ProcessingCapabilities.DownstreamGap(
+            new ProcessingCapabilities.ProcessingDownstreamGap(
                 "6.5.1.1",
                 "采购对账",
                 "trade",

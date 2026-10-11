@@ -5386,29 +5386,6 @@
           }
         }
       },
-      "DownstreamGap": {
-        "type": "object",
-        "properties": {
-          "moduleId": {
-            "type": "string"
-          },
-          "moduleName": {
-            "type": "string"
-          },
-          "service": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "effect": {
-            "type": "string"
-          }
-        }
-      },
       "ProcessingCapabilities": {
         "type": "object",
         "properties": {
@@ -5466,10 +5443,33 @@
           "downstreamGaps": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/DownstreamGap"
+              "$ref": "#/components/schemas/ProcessingDownstreamGap"
             }
           },
           "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ProcessingDownstreamGap": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "effect": {
             "type": "string"
           }
         }
