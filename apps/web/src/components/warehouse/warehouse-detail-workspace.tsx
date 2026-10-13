@@ -10,6 +10,7 @@ import {
   MapPin,
   MapPinned,
   RefreshCw,
+  Settings2,
   Users,
 } from 'lucide-react';
 import { Button, EmptyState, FormField, Input, Notice, PageHeader, SectionCard, StatCard } from '@starcon/ui';
@@ -167,6 +168,18 @@ export function WarehouseDetailWorkspace({ warehouseId }: { warehouseId: string 
               <Button onClick={() => (showEdit ? setShowEdit(false) : startEdit())}>
                 维护基础信息与地址
               </Button>
+            )}
+            {/* 8.1.1.3 仓库配置已交付：行为参数（拣货策略、复核比例、班次）挂在
+                档案之下而不是本页的表单里 —— 改作业参数与改地址是两种风险面，
+                所以是两个页面、两组权限码（update vs config）。 */}
+            {detail && (
+              <Link
+                href={`/warehouse/facilities/${warehouseId}/config`}
+                className="inline-flex items-center rounded-md border border-border px-3 py-1.5 text-copy-13 hover:bg-muted"
+              >
+                <Settings2 className="mr-1.5 h-4 w-4" />
+                仓库配置
+              </Link>
             )}
           </>
         }
