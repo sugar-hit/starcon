@@ -11722,12 +11722,261 @@
         }
       }
     },
+    "/warehouse/disassembly-orders": {
+      "get": {
+        "tags": [
+          "disassembly-order-controller"
+        ],
+        "operationId": "page_9",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productSkuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sourceSystem",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "referenceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CREATED_AT"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisassemblyOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "disassembly-order-controller"
+        ],
+        "operationId": "create_16",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisassemblyOrderCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisassemblyOrderCreated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/disassembly-orders/{id}/execute": {
+      "post": {
+        "tags": [
+          "disassembly-order-controller"
+        ],
+        "operationId": "execute",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisassemblyOrderExecuteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisassemblyOrderExecuted"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/disassembly-orders/{id}/cancel": {
+      "post": {
+        "tags": [
+          "disassembly-order-controller"
+        ],
+        "operationId": "cancel_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisassemblyOrderCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisassemblyOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/customs-declarations": {
       "get": {
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "page_9",
+        "operationId": "page_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -11844,7 +12093,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "create_16",
+        "operationId": "create_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -12376,7 +12625,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "cancel_5",
+        "operationId": "cancel_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -12476,7 +12725,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "page_10",
+        "operationId": "page_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -12585,7 +12834,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "create_17",
+        "operationId": "create_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -12675,7 +12924,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "cancel_6",
+        "operationId": "cancel_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -16682,7 +16931,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "page_11",
+        "operationId": "page_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -19706,6 +19955,77 @@
         }
       }
     },
+    "/warehouse/disassembly-orders/{id}": {
+      "get": {
+        "tags": [
+          "disassembly-order-controller"
+        ],
+        "operationId": "detail_14",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisassemblyOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/disassembly-orders/capabilities": {
+      "get": {
+        "tags": [
+          "disassembly-order-controller"
+        ],
+        "operationId": "capabilities_20",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisassemblyCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/customs-declarations/{declarationId}/events": {
       "get": {
         "tags": [
@@ -19754,7 +20074,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "capabilities_20",
+        "operationId": "capabilities_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -19785,7 +20105,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "detail_14",
+        "operationId": "detail_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -19825,7 +20145,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "capabilities_21",
+        "operationId": "capabilities_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -29459,6 +29779,448 @@
           },
           "sourceReference": {
             "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyComponentInput": {
+        "required": [
+          "destinationLocationId",
+          "destinationQualityStatusId",
+          "expectedQuantity",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomComponentId": {
+            "type": "string",
+            "description": "catalog 3.5.2 bom_component 的逻辑 ID，仅作追溯",
+            "format": "uuid",
+            "nullable": true
+          },
+          "expectedQuantity": {
+            "type": "number",
+            "description": "按「单位用量 × 拆解数量 × 回收率/100」冻结的应回量（6 位小数 HALF_UP）。本服务原样落库，不重算、不取整"
+          },
+          "unitQuantity": {
+            "maximum": 1000000000000,
+            "exclusiveMaximum": true,
+            "type": "number",
+            "description": "单位用量快照（每 1 个成品能拆出多少），可空：只作追溯展示，不参与任何判定",
+            "nullable": true
+          },
+          "recoveryRate": {
+            "maximum": 100,
+            "exclusiveMaximum": false,
+            "type": "number",
+            "description": "回收率快照（百分数，95 = 95%）。退件拆解与样品回收的实际损耗，默认 100（无损）",
+            "nullable": true
+          },
+          "destinationQualityStatusId": {
+            "type": "string",
+            "description": "组件入库去向的质量状态。**必填、没有默认值** —— 蓝图点名「拆解结果的组件质量状态由接收方决定，不能默认全部回可售」。取值落在 inventory_quality_status.role：SELLABLE(可用) / PENDING_INSPECTION(待检) / DEFECTIVE(残次)",
+            "format": "uuid"
+          },
+          "destinationLocationId": {
+            "type": "string",
+            "description": "组件入库库位（逐行：良品区 / 待检区 / 残次区可以分开）",
+            "format": "uuid"
+          },
+          "destinationLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "role": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DisassemblyOrderCreateInput": {
+        "required": [
+          "bomCode",
+          "bomId",
+          "bomVersionId",
+          "bomVersionNo",
+          "components",
+          "disassemblyQuantity",
+          "legalEntityId",
+          "outboundLocationId",
+          "productSkuId",
+          "sourceSystem",
+          "warehouseId"
+        ],
+        "type": "object",
+        "properties": {
+          "productSkuId": {
+            "type": "string",
+            "description": "被拆的成品 SKU（必须是本服务 sku_ref 里登记过的真实 SKU）",
+            "format": "uuid"
+          },
+          "bomId": {
+            "type": "string",
+            "description": "catalog 3.5.2 的 BOM 逻辑 ID（引用键，无外键）",
+            "format": "uuid"
+          },
+          "bomCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "bomVersionId": {
+            "type": "string",
+            "description": "catalog 3.5.2 的 BOM 版本逻辑 ID（引用键，无外键）",
+            "format": "uuid"
+          },
+          "bomVersionNo": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string",
+            "description": "上游来源：ASSEMBLY_ORDER = 来自 8.4.1.1 组装单；AFTERSALES_RETURN = 来自 11 售后退件；DIRECT = 仓库现场直接发起（样品回收等）"
+          },
+          "referenceId": {
+            "type": "string",
+            "description": "上游单据引用键；sourceSystem=DIRECT 时必须为空",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "disassemblyQuantity": {
+            "type": "number",
+            "description": "拆解数量（成品出库量）。必须能被库存刻度 4 位小数精确表示"
+          },
+          "outboundLocationId": {
+            "type": "string",
+            "description": "成品出库库位；必填（库存的最小事实单位含库位）",
+            "format": "uuid"
+          },
+          "outboundQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "outboundLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "components": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyComponentInput"
+            }
+          }
+        }
+      },
+      "DisassemblyOrderCreated": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "productSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "disassemblyQuantity": {
+            "type": "number"
+          },
+          "expectedComponentQuantity": {
+            "type": "number"
+          },
+          "componentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyOrderExecuteInput": {
+        "type": "object",
+        "properties": {
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DisassemblyComponentRecovered": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "expectedQuantity": {
+            "type": "number"
+          },
+          "recoveredQuantity": {
+            "type": "number"
+          },
+          "destinationQualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationQualityCode": {
+            "type": "string"
+          },
+          "destinationQualityRole": {
+            "type": "string"
+          },
+          "destinationLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "DisassemblyOrderEntry": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "onHandDelta": {
+            "type": "number"
+          },
+          "reservedDelta": {
+            "type": "number"
+          },
+          "direction": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyOrderExecuted": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "productSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "disassemblyQuantity": {
+            "type": "number"
+          },
+          "outboundProductQuantity": {
+            "type": "number"
+          },
+          "expectedComponentQuantity": {
+            "type": "number"
+          },
+          "recoveredComponentQuantity": {
+            "type": "number"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyComponentRecovered"
+            }
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyOrderEntry"
+            }
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyOrderCancelInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "description": "取消理由（必填：取消一张拆解单必须能解释为什么）"
+          }
+        }
+      },
+      "DisassemblyOrderRow": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "productSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "productSkuCode": {
+            "type": "string"
+          },
+          "bomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomCode": {
+            "type": "string"
+          },
+          "bomVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomVersionNo": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "disassemblyQuantity": {
+            "type": "number"
+          },
+          "expectedComponentQuantity": {
+            "type": "number"
+          },
+          "recoveredComponentQuantity": {
+            "type": "number"
+          },
+          "outboundProductQuantity": {
+            "type": "number"
+          },
+          "componentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "executedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
           },
           "notes": {
             "type": "string"
@@ -43856,6 +44618,249 @@
             "type": "string"
           },
           "label": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyDestinationStat": {
+        "type": "object",
+        "properties": {
+          "qualityStatusId": {
+            "type": "string"
+          },
+          "qualityCode": {
+            "type": "string"
+          },
+          "qualityRole": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expectedQuantity": {
+            "type": "number"
+          },
+          "recoveredQuantity": {
+            "type": "number"
+          }
+        }
+      },
+      "DisassemblyOrderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyOrderRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalDisassemblyQuantity": {
+            "type": "number"
+          },
+          "totalExpectedComponentQuantity": {
+            "type": "number"
+          },
+          "totalRecoveredComponentQuantity": {
+            "type": "number"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "destinations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyDestinationStat"
+            }
+          },
+          "sort": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyComponentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "bomComponentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "unitQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "recoveryRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "expectedQuantity": {
+            "type": "number"
+          },
+          "recoveredQuantity": {
+            "type": "number"
+          },
+          "destinationQualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationQualityCode": {
+            "type": "string"
+          },
+          "destinationQualityRole": {
+            "type": "string"
+          },
+          "destinationLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "role": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyOrderDetail": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/DisassemblyOrderRow"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyComponentRow"
+            }
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyOrderEntry"
+            }
+          }
+        }
+      },
+      "DisassemblyCapabilities": {
+        "type": "object",
+        "properties": {
+          "refType": {
+            "type": "string"
+          },
+          "atomicProductAndComponentMovements": {
+            "type": "boolean"
+          },
+          "supportsDirectInitiation": {
+            "type": "boolean"
+          },
+          "bomBoundary": {
+            "type": "string"
+          },
+          "upstreamBoundary": {
+            "type": "string"
+          },
+          "qualityDestinationRule": {
+            "type": "string"
+          },
+          "upstreamModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyUpstreamModule"
+            }
+          },
+          "downstreamModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyDownstreamModule"
+            }
+          },
+          "invariant": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyDownstreamModule": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "effect": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyUpstreamModule": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "usage": {
             "type": "string"
           }
         }
