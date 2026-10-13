@@ -894,3 +894,75 @@ it('8.1.2.1 多一层后缀仍是 404 且不发出请求', async () => {
   }
   expect(fetcher).not.toHaveBeenCalled();
 });
+
+/**
+ * 8.5.2.1 库位利用率：location-utilization 的三个形状放行 + 反向拒绝。
+ *
+ * <p>本车道只**追加**这一组断言，不改动 8.1.2.1 的任何一条 —— 白名单是累积型共享文件，
+ * 每条车道各加各的分支，谁也不重排别人的那段。
+ *
+ * <p>白名单分支的排序说明：{@code location-utilization} 放在 {@code location-trees} 之后，
+ * 但**两者的先后其实不影响判定** —— 它们在第 9 个字符就分叉（{@code t} vs {@code u}），
+ * 正则分支在这里不存在前缀歧义。真正有排序讲究的是同一分支内「字面量子路径 vs 通配段」：
+ * {@code \/capabilities} 必须排在 {@code \/[0-9a-f-]+} 之前，否则 {@code capabilities}
+ * 会先被当成一个 uuid 形状的 id 匹配掉再失败。
+ */
+it('8.5.2.1 库位利用率的三个形状被放行并转发到 warehouse 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'warehouse/location-utilization/capabilities',
+    `warehouse/location-utilization/${id}`,
+    `warehouse/location-utilization/${id}/locations/${id}`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+});
+
+it('8.5.2.1 未登记的库位利用率形状是 404 且不发出请求', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    // 本模块是**只读分析**，没有任何写端点：放行一个写形状会让「这里能不能改库位」看起来是能。
+    `warehouse/location-utilization/${id}/locations`,
+    `warehouse/location-utilization/${id}/locations/${id}/allocate`,
+    // 报表按仓库聚合，不按单个库位聚合
+    `warehouse/location-utilization/${id}/locations/${id}/report`,
+    // 热力图是报表响应里的 heatmap 字段，不是独立端点
+    `warehouse/location-utilization/${id}/heatmap`,
+    // capabilities 是单段字面量，多一段就不是它
+    'warehouse/location-utilization/capabilities/extra',
+    // 裸根路径本身没有对应端点（后端只有 /capabilities 与 /{warehouseId}）
+    'warehouse/location-utilization',
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it('8.5.2.1 追加分支后 8.1.2.1 的四个库位树形状仍被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // 两条分支在同一条正则里相邻，最怕的是新加的 location-utilization 抢走
+  // location-trees 的匹配（或反过来）。逐条正向断言把这一点钉死。
+  for (const path of [
+    'warehouse/location-trees/capabilities',
+    `warehouse/location-trees/${id}`,
+    `warehouse/location-trees/${id}/locations`,
+    `warehouse/location-trees/${id}/locations/${id}`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+  }
+});
