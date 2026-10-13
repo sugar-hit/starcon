@@ -3851,6 +3851,131 @@
         }
       }
     },
+    "/warehouse/location-allocations": {
+      "post": {
+        "tags": [
+          "location-allocation-controller"
+        ],
+        "operationId": "confirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocationAllocationConfirmInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationAllocationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/location-allocations/{allocationId}/release": {
+      "post": {
+        "tags": [
+          "location-allocation-controller"
+        ],
+        "operationId": "release",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "allocationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationAllocationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/location-allocations/recommend": {
+      "post": {
+        "tags": [
+          "location-allocation-controller"
+        ],
+        "operationId": "recommend",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocationAllocationRecommendInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LocationAllocationLinePlan"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/labor/work-tasks": {
       "get": {
         "tags": [
@@ -4431,7 +4556,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "confirm",
+        "operationId": "confirm_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -7956,7 +8081,7 @@
         "tags": [
           "inventory-expiry-controller"
         ],
-        "operationId": "recommend",
+        "operationId": "recommend_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -10875,7 +11000,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "confirm_1",
+        "operationId": "confirm_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -13655,6 +13780,170 @@
         }
       }
     },
+    "/warehouse/location-allocations/list": {
+      "get": {
+        "tags": [
+          "location-allocation-controller"
+        ],
+        "operationId": "list_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "qualityRole",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationAllocationPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/location-allocations/capabilities": {
+      "get": {
+        "tags": [
+          "location-allocation-controller"
+        ],
+        "operationId": "capabilities_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationAllocationCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/location-allocations/by-receipt/{receiptId}": {
+      "get": {
+        "tags": [
+          "location-allocation-controller"
+        ],
+        "operationId": "byReceipt",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "receiptId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LocationAllocationDecision"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/legal-entities": {
       "get": {
         "tags": [
@@ -13973,7 +14262,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "capabilities_4",
+        "operationId": "capabilities_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -14473,7 +14762,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -15206,7 +15495,7 @@
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -15610,7 +15899,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -15895,7 +16184,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -16112,7 +16401,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -16143,7 +16432,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -17958,7 +18247,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -17989,7 +18278,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_12",
+        "operationId": "capabilities_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -18313,7 +18602,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_13",
+        "operationId": "capabilities_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -18489,7 +18778,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_14",
+        "operationId": "capabilities_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -18915,7 +19204,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_15",
+        "operationId": "capabilities_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -18986,7 +19275,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_16",
+        "operationId": "capabilities_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -19146,7 +19435,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "capabilities_17",
+        "operationId": "capabilities_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -19503,7 +19792,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_18",
+        "operationId": "capabilities_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -19680,7 +19969,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "capabilities_19",
+        "operationId": "capabilities_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -19754,7 +20043,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "capabilities_20",
+        "operationId": "capabilities_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -19825,7 +20114,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "capabilities_21",
+        "operationId": "capabilities_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -19844,6 +20133,56 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/AssemblyCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/location-allocations/{allocationId}": {
+      "delete": {
+        "tags": [
+          "location-allocation-controller"
+        ],
+        "operationId": "cancel_7",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "allocationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocationAllocationCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationAllocationSaved"
                 }
               }
             }
@@ -22718,6 +23057,342 @@
           "weightLimit": {
             "type": "number",
             "nullable": true
+          }
+        }
+      },
+      "LocationAllocationConfirmInput": {
+        "type": "object",
+        "properties": {
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allocateQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "requiredCapacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "requiredWeight": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "LocationAllocationSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "requiredRule": {
+            "type": "string",
+            "enum": [
+              "SELLABLE",
+              "PENDING_INSPECTION",
+              "DEFECTIVE"
+            ]
+          },
+          "ruleSummary": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "releasedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationAllocationRecommendInput": {
+        "type": "object",
+        "properties": {
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "requiredCapacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "requiredWeight": {
+            "type": "number",
+            "nullable": true
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "LocationAllocationCandidate": {
+        "type": "object",
+        "properties": {
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "STORAGE",
+              "RECEIVING",
+              "SHIPPING",
+              "QUARANTINE",
+              "DEFECTIVE",
+              "FROZEN"
+            ]
+          },
+          "typeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "depth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distance": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "capacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "weightLimit": {
+            "type": "number",
+            "nullable": true
+          },
+          "occupiedCapacity": {
+            "type": "number"
+          },
+          "remainingCapacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "capacityEvaluated": {
+            "type": "boolean"
+          },
+          "requiredCapacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "weightEvaluated": {
+            "type": "boolean"
+          },
+          "requiredWeight": {
+            "type": "number",
+            "nullable": true
+          },
+          "occupiedWeight": {
+            "type": "number",
+            "nullable": true
+          },
+          "remainingWeight": {
+            "type": "number",
+            "nullable": true
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "onHandSkuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "affinitySkus": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationAllocationReason"
+            }
+          }
+        }
+      },
+      "LocationAllocationLinePlan": {
+        "type": "object",
+        "properties": {
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuUnitNote": {
+            "type": "string"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityRole": {
+            "type": "string"
+          },
+          "qualityLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "requiredRule": {
+            "type": "string",
+            "enum": [
+              "SELLABLE",
+              "PENDING_INSPECTION",
+              "DEFECTIVE"
+            ]
+          },
+          "requiredType": {
+            "type": "string",
+            "enum": [
+              "STORAGE",
+              "RECEIVING",
+              "SHIPPING",
+              "QUARANTINE",
+              "DEFECTIVE",
+              "FROZEN"
+            ]
+          },
+          "requiredTypeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "outstandingQuantity": {
+            "type": "number"
+          },
+          "allocateQuantity": {
+            "type": "number"
+          },
+          "sourceLocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "sourceLocationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceLocationType": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceDepth": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "requiredCapacity": {
+            "type": "number"
+          },
+          "requiredWeight": {
+            "type": "number"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rejectedLocationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationAllocationCandidate"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationAllocationReason": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "TYPE_RULE",
+              "CATEGORY_CLUSTER",
+              "SHORTEST_PATH",
+              "CAPACITY_FIT",
+              "WEIGHT_FIT",
+              "EMPTY_LOCATION",
+              "CAPACITY_UNKNOWN",
+              "WEIGHT_UNKNOWN",
+              "ALREADY_COMMITTED"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -32386,6 +33061,288 @@
             }
           },
           "maxDepth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationAllocationDecision": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityRole": {
+            "type": "string"
+          },
+          "qualityLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "requiredRule": {
+            "type": "string",
+            "enum": [
+              "SELLABLE",
+              "PENDING_INSPECTION",
+              "DEFECTIVE"
+            ]
+          },
+          "requiredType": {
+            "type": "string",
+            "enum": [
+              "STORAGE",
+              "RECEIVING",
+              "SHIPPING",
+              "QUARANTINE",
+              "DEFECTIVE",
+              "FROZEN"
+            ]
+          },
+          "requiredTypeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseName": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceLocationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "allocateQuantity": {
+            "type": "number"
+          },
+          "requiredCapacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "requiredWeight": {
+            "type": "number",
+            "nullable": true
+          },
+          "sourceDistance": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "affinitySkus": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "ruleSummary": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "releasedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LocationAllocationPage": {
+        "type": "object",
+        "properties": {
+          "totals": {
+            "$ref": "#/components/schemas/LocationAllocationTotals"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationAllocationDecision"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationAllocationTotals": {
+        "type": "object",
+        "properties": {
+          "decisionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "plannedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "releasedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "defectiveCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingInspectionCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "allocateQuantity": {
+            "type": "number"
+          },
+          "coverageLineCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LocationAllocationCapabilities": {
+        "type": "object",
+        "properties": {
+          "hardPlacementRuleEnforced": {
+            "type": "boolean"
+          },
+          "occupancyLive": {
+            "type": "boolean"
+          },
+          "pathDistanceAvailable": {
+            "type": "boolean"
+          },
+          "routingGraphAvailable": {
+            "type": "boolean"
+          },
+          "routingGraphOwnerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryAffinityAvailable": {
+            "type": "boolean"
+          },
+          "catalogCategoryAvailable": {
+            "type": "boolean"
+          },
+          "catalogCategoryOwnerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "capacityTracked": {
+            "type": "boolean"
+          },
+          "stockVolumeAvailable": {
+            "type": "boolean"
+          },
+          "putAwayTaskAvailable": {
+            "type": "boolean"
+          },
+          "putAwayTaskOwnerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SELLABLE",
+                "PENDING_INSPECTION",
+                "DEFECTIVE"
+              ]
+            }
+          },
+          "targetTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "STORAGE",
+                "RECEIVING",
+                "SHIPPING",
+                "QUARANTINE",
+                "DEFECTIVE",
+                "FROZEN"
+              ]
+            }
+          },
+          "maxCandidates": {
             "type": "integer",
             "format": "int32"
           },
@@ -44739,6 +45696,15 @@
           },
           "usage": {
             "type": "string"
+          }
+        }
+      },
+      "LocationAllocationCancelInput": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "nullable": true
           }
         }
       }

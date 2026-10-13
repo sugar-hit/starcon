@@ -560,6 +560,19 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['筛选仓库', '核对货权与库存', '新增仓库'],
   },
   {
+    // 8.1.2.2 库位自动分配：按规则为入库商品推荐库位（残次品入残次库位是硬规则）。
+    // 与 8.1.2.1 库位树同属「仓库与库位」这个 L3 下的两个子功能，所以共用 domain
+    // 'warehouse'，由导航的 children 从 IMPLEMENTED_TASK_PAGES 派生 —— 同样只登记
+    // 任务页、不改共享的 nav-config.ts。
+    href: '/warehouse/location-allocations',
+    implemented: true,
+    domain: 'warehouse',
+    label: '库位自动分配',
+    description: '为入库商品推荐库位：同品类聚类、最短上架路径、容量与承重匹配，并给出推荐理由。',
+    fields: ['收货单', 'SKU', '质量状态', '目标库位', '容量承重', '推荐理由', '状态'],
+    workflow: ['选收货单', '看候选与理由', '指派库位'],
+  },
+  {
     href: '/warehouse/inbound',
     implemented: false,
     domain: 'warehouse',
