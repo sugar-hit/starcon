@@ -624,3 +624,73 @@ it('8.2.1.1 收货单与 8.2.1.2 收货差异的全部调用形状都被放行',
     ).toBe(200);
   }
 });
+
+/**
+ * 8.1.2.1 库位树：location-trees 的四个形状放行 + 反向拒绝。
+ *
+ * <p>两层断言都用**真实代理 handler** 跑真实 HTTP 状态码，不是断言字符串出现在文件里：
+ * 白名单只按路径形状放行，落不在分支里的路径一律被拦成 404，页面只进错误态，
+ * 看起来像「后端没实现」—— 而这类漏登记 `pnpm test` 直连服务层天然测不出来。
+ */
+it('8.1.2.1 库位树的四个形状被放行并转发到 warehouse 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const paths = [
+    'warehouse/location-trees/capabilities',
+    `warehouse/location-trees/${id}`,
+    `warehouse/location-trees/${id}/locations`,
+    `warehouse/location-trees/${id}/locations/${id}`,
+  ];
+  for (const path of paths) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 写动作走同一批路径：白名单只看路径形状不看方法，所以要显式跑一遍证明真被转发。
+  expect(
+    (await POST(request(`warehouse/location-trees/${id}/locations`, 'POST'), {
+      params: { path: ['warehouse', 'location-trees', id, 'locations'] },
+    })).status,
+  ).toBe(200);
+  expect(
+    (await PUT(request(`warehouse/location-trees/${id}/locations/${id}`, 'PUT'), {
+      params: { path: ['warehouse', 'location-trees', id, 'locations', id] },
+    })).status,
+  ).toBe(200);
+  expect(
+    (await DELETE(request(`warehouse/location-trees/${id}/locations/${id}`, 'DELETE'), {
+      params: { path: ['warehouse', 'location-trees', id, 'locations', id] },
+    })).status,
+  ).toBe(200);
+});
+
+it('8.1.2.1 多一层后缀仍是 404 且不发出请求', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // 「多一层后缀」这一组是本用例的重点：白名单是锚定正则，多一层就掉出分支。
+  // 放行了 /{id}/locations/{id} 却顺手放行了 /{id}/locations/{id}/stock 之类的形状，
+  // 会让一个「还不存在的动作」看起来像已交付。
+  for (const path of [
+    `warehouse/location-trees/${id}/locations/${id}/stock`,
+    `warehouse/location-trees/${id}/locations/${id}/allocate`,
+    `warehouse/location-trees/${id}/locations/${id}/allocate/recommend`,
+    // auto-allocation 属 8.1.2.2，未交付，不能提前放行
+    `warehouse/location-trees/${id}/allocate`,
+    `warehouse/location-trees/${id}/allocation-rules`,
+    // capabilities 是单段字面量，多一段就不是它
+    'warehouse/location-trees/capabilities/extra',
+    // 单段根路径本身没有对应端点（后端只有 /capabilities 与 /{warehouseId}）
+    'warehouse/location-trees',
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});

@@ -349,6 +349,105 @@
         }
       }
     },
+    "/warehouse/location-trees/{warehouseId}/locations/{id}": {
+      "put": {
+        "tags": [
+          "warehouse-location-tree-controller"
+        ],
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocationUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "warehouse-location-tree-controller"
+        ],
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/warehouse/inventory/transfers/{orderId}": {
       "get": {
         "tags": [
@@ -392,7 +491,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "update_1",
+        "operationId": "update_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -480,7 +579,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "update_2",
+        "operationId": "update_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -528,7 +627,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "delete",
+        "operationId": "delete_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -906,7 +1005,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "update_3",
+        "operationId": "update_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -994,7 +1093,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "update_4",
+        "operationId": "update_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -1082,7 +1181,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "update_5",
+        "operationId": "update_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -1170,7 +1269,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "update_6",
+        "operationId": "update_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -1258,7 +1357,7 @@
         "tags": [
           "warehouse-detail-controller"
         ],
-        "operationId": "update_7",
+        "operationId": "update_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -1346,7 +1445,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "update_8",
+        "operationId": "update_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -1484,7 +1583,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "update_9",
+        "operationId": "update_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -3518,6 +3617,56 @@
         }
       }
     },
+    "/warehouse/location-trees/{warehouseId}/locations": {
+      "post": {
+        "tags": [
+          "warehouse-location-tree-controller"
+        ],
+        "operationId": "create_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocationCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/labor/work-tasks": {
       "get": {
         "tags": [
@@ -3614,7 +3763,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "create_2",
+        "operationId": "create_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -3957,7 +4106,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "create_3",
+        "operationId": "create_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -6708,7 +6857,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "create_4",
+        "operationId": "create_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -7064,7 +7213,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "create_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -7608,7 +7757,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "create_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -8022,7 +8171,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "create_7",
+        "operationId": "create_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -8835,7 +8984,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "create_8",
+        "operationId": "create_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -9109,7 +9258,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "create_9",
+        "operationId": "create_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -9539,7 +9688,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "create_10",
+        "operationId": "create_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -10274,7 +10423,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "create_11",
+        "operationId": "create_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -10563,7 +10712,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "create_12",
+        "operationId": "create_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -10729,7 +10878,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "create_13",
+        "operationId": "create_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -11284,7 +11433,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "create_14",
+        "operationId": "create_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -12775,6 +12924,77 @@
         }
       }
     },
+    "/warehouse/location-trees/{warehouseId}": {
+      "get": {
+        "tags": [
+          "warehouse-location-tree-controller"
+        ],
+        "operationId": "tree",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationTree"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/location-trees/capabilities": {
+      "get": {
+        "tags": [
+          "warehouse-location-tree-controller"
+        ],
+        "operationId": "capabilities_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationTreeCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/legal-entities": {
       "get": {
         "tags": [
@@ -13093,7 +13313,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "capabilities_3",
+        "operationId": "capabilities_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -13593,7 +13813,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "capabilities_4",
+        "operationId": "capabilities_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -14665,7 +14885,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -14950,7 +15170,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -15167,7 +15387,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -15198,7 +15418,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -17013,7 +17233,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -17044,7 +17264,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -17368,7 +17588,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -17544,7 +17764,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_12",
+        "operationId": "capabilities_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -17970,7 +18190,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_13",
+        "operationId": "capabilities_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -18041,7 +18261,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_14",
+        "operationId": "capabilities_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -18201,7 +18421,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "capabilities_15",
+        "operationId": "capabilities_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -18398,7 +18618,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_16",
+        "operationId": "capabilities_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -18575,7 +18795,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "capabilities_17",
+        "operationId": "capabilities_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -18649,7 +18869,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "capabilities_18",
+        "operationId": "capabilities_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -19015,6 +19235,66 @@
             "format": "int64"
           },
           "message": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationUpdateInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "pickable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "capacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "weightLimit": {
+            "type": "number",
+            "nullable": true
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "parentProvided": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "LocationSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "note": {
             "type": "string"
           }
         }
@@ -21207,6 +21487,39 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "LocationCreateInput": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "pickable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "capacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "weightLimit": {
+            "type": "number",
+            "nullable": true
           }
         }
       },
@@ -30087,6 +30400,253 @@
             "type": "boolean"
           },
           "status": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "STORAGE",
+              "RECEIVING",
+              "SHIPPING",
+              "QUARANTINE",
+              "DEFECTIVE",
+              "FROZEN"
+            ]
+          },
+          "typeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "pickable": {
+            "type": "boolean"
+          },
+          "pickableByNature": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "depth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "capacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "weightLimit": {
+            "type": "number",
+            "nullable": true
+          },
+          "occupied": {
+            "$ref": "#/components/schemas/Occupancy"
+          },
+          "subtreeOccupancy": {
+            "$ref": "#/components/schemas/Occupancy"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LocationTree": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationNode"
+            }
+          },
+          "rootCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/TreeTotals"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "Occupancy": {
+        "type": "object",
+        "properties": {
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bucketRows": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "capacityUtilization": {
+            "type": "number",
+            "nullable": true
+          },
+          "capacityExceeded": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TreeTotals": {
+        "type": "object",
+        "properties": {
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rootCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "leafCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "capacityMeasuredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuCountDistinct": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "typeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TypeBreakdown"
+            }
+          }
+        }
+      },
+      "TypeBreakdown": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "STORAGE",
+              "RECEIVING",
+              "SHIPPING",
+              "QUARANTINE",
+              "DEFECTIVE",
+              "FROZEN"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LocationTreeCapabilities": {
+        "type": "object",
+        "properties": {
+          "hierarchyMaintained": {
+            "type": "boolean"
+          },
+          "capacityTracked": {
+            "type": "boolean"
+          },
+          "weightTracked": {
+            "type": "boolean"
+          },
+          "occupancyLive": {
+            "type": "boolean"
+          },
+          "autoAllocationAvailable": {
+            "type": "boolean"
+          },
+          "autoAllocationOwnerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "pickPathOwnerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "STORAGE",
+                "RECEIVING",
+                "SHIPPING",
+                "QUARANTINE",
+                "DEFECTIVE",
+                "FROZEN"
+              ]
+            }
+          },
+          "maxDepth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
             "type": "string"
           }
         }
