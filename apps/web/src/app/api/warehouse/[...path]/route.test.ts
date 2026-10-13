@@ -793,18 +793,84 @@ it('7.2.1.1 预占需求的三个调用形状都被放行并转发到 warehouse 
   ).toBe(200);
 });
 
+/**
+ * 7.2.1.2 预占分配明细：五个读取形状 + 两个写入形状全部放行。
+ *
+ * <p>路径不是照着正则抄的 —— 组件改了这里就会红。白名单只在浏览器端生效，
+ * `pnpm test` 直连服务层测不出漏登记，而漏一条的现场表现是该页面在浏览器里静默 404，
+ * 且 typecheck / lint / vitest 全绿。
+ *
+ * <p>同时钉住**反向**：释放（7.2.1.3）仍未交付，`{id}/release` 必须仍然 404 且不发请求。
+ */
+it('7.2.1.2 预占分配明细的读取与写入形状都被放行并转发到 warehouse 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const RESERVATION = 'warehouse/inventory/reservations';
+  const id = '11111111-1111-1111-1111-111111111111';
+  const allocationId = '22222222-2222-2222-2222-222222222222';
+
+  const reads = [
+    // 分配明细行 + 预占抬头 + 汇总
+    `${RESERVATION}/${id}/allocations`,
+    // 状态迁移时间线
+    `${RESERVATION}/${id}/timeline`,
+    // 下拉项（状态词表 / bucket 候选 / 登记目标）
+    `${RESERVATION}/${id}/allocation-options`,
+    // 能力声明（释放与过期报 7.2.1.3 未接入）
+    `${RESERVATION}/${id}/capabilities`,
+  ];
+  for (const path of reads) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行`).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+
+  // 登记分配走 POST 同一路径：白名单只看形状不看方法，
+  // 这里显式跑一次证明写动作也真被转发（而不是只放行了读）。
+  expect(
+    (
+      await POST(request(`${RESERVATION}/${id}/allocations`, 'POST'), {
+        params: { path: `${RESERVATION}/${id}/allocations`.split('/') },
+      })
+    ).status,
+  ).toBe(200);
+
+  // 两个状态迁移动作：白名单里 commit / consume 必须在 allocations 之下再挂一段 id，
+  // 只放行 allocations 会让两个按钮在浏览器里 404。
+  for (const action of ['commit', 'consume']) {
+    const path = `${RESERVATION}/${id}/allocations/${allocationId}/${action}`;
+    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行`).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.anything(),
+    );
+  }
+
+  // 关键：未交付的释放形状**仍然** 404，且连请求都不发出去。
+  // 放行一个后端不存在的端点，比 404 更糟 —— 界面会以为「点进去有东西」。
+  const release = `${RESERVATION}/${id}/release`;
+  expect((await GET(request(release), { params: { path: release.split('/') } })).status).toBe(404);
+});
+
 it('7.2.1.1 刻意不放行未交付的子路径（多一层后缀仍 404 且不发请求）', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
   const RESERVATION = 'warehouse/inventory/reservations';
   const id = '11111111-1111-1111-1111-111111111111';
-  // 后端 ReservationController 只有上面那四个形状。7.2.1.2 分配明细与
-  // 7.2.1.3 释放与过期**都未交付**，放行它们等于让界面以为「点进去有东西」——
-  // 放行不该存在的路径比 404 更糟。
+  // 后端 ReservationController 只有上面那四个集合级形状；7.2.1.3 释放与过期**未交付**，
+  // 放行它们等于让界面以为「点进去有东西」—— 放行不该存在的路径比 404 更糟。
+  // 7.2.1.2 已交付，它交付的子路径由本文件下方 7.2.1.2 的放行用例钉住。
   for (const path of [
     // **多一层后缀**：这是最容易在补白名单时被顺手放行的形状。
-    // 分配明细（7.2.1.2）与释放（7.2.1.3）都在这一层之下。
-    `${RESERVATION}/${id}/allocations`,
+    // 释放（7.2.1.3）就在这一层之下。
+    // 注：`${RESERVATION}/${id}/allocations` 已由 7.2.1.2 交付并移出本清单 ——
+    // 它现在由同文件 7.2.1.2 的放行用例钉住；`${id}/entries` 仍不是任何模块的对外形状。
     `${RESERVATION}/${id}/release`,
     `${RESERVATION}/${id}/entries`,
     `${RESERVATION}/summary`,

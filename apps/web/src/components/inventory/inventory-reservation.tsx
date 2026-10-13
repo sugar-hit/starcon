@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { RefreshCw } from 'lucide-react';
 import { Badge, Button, EmptyState, PageHeader, SectionCard, StatCard } from '@starcon/ui';
 import type {
@@ -43,9 +44,12 @@ import { useIdentity } from '../iam/identity-shell';
  *       0 的含义是「超时 0 秒」—— 写死成 0 会让每一条正常的预占都显示「超时 0 秒」。
  *   <li><b>合计卡固定五行，0 也显示</b>。少一行的状态分布会让人以为「这个状态不存在」，
  *       而它只是当前没有。且合计不随筛选变化，旁边写明。
- *   <li><b>已分配量为 0 时标注「分配明细未交付」</b>，而不是显示一个看起来正常的 0。
+ *   <li><b>已分配量是回写的真值</b>（7.2.1.2 交付后由分配行汇总），0 表示
+ *       「确实还没圈到任何 bucket」，不再是「查不到」。
  *   <li><b>没有「释放」按钮</b>。释放与过期属 7.2.1.3，未交付；
  *       放一个点下去必然 404 的按钮比不放更糟。页面按 capabilities 如实说明去向。
+ *   <li><b>预占单号可点进 7.2.1.2 分配明细</b>：明细里能看到这笔货圈到了哪些
+ *       仓 / 货位 / 批次，只记总量答不出批次追溯与成本分摊。
  * </ul>
  */
 export function InventoryReservationWorkspace() {
@@ -270,8 +274,16 @@ export function InventoryReservationWorkspace() {
         </div>
       </SectionCard>
 
-      {/* 未交付能力如实说明，不放点下去必然 404 的按钮 */}
-      {allocation && !allocation.available ? (
+      {/* 7.2.1.2 交付后：明细入口真的点得进去。仍按 capabilities 兜底，
+          万一端点尚未部署也不至于渲染出一个 404 的死链。 */}
+      {allocation && allocation.available ? (
+        <SectionCard title="分配明细">
+          <p className="text-muted-foreground text-sm">
+            点预占单号进明细：看这笔预占实际圈到了哪些（仓 / 货位 / 批次），以及每条分配的迁移时间线。
+            「已分配量」由分配行回写 —— 已分配但未出库的部分不计入剩余量，那部分货还在仓里占着可用量。
+          </p>
+        </SectionCard>
+      ) : allocation && !allocation.available ? (
         <SectionCard title="分配明细尚未交付">
           <p className="text-muted-foreground text-sm">
             「已分配量」恒为 0 是因为 {allocation.ownerModule} 预占分配明细未交付（{allocation.note}
@@ -313,7 +325,11 @@ export function InventoryReservationWorkspace() {
                   {page.rows.map((row) => (
                     <tr key={row.id} className="border-border/50 border-b">
                       <td className="p-2">
-                        <div>{row.reservationNo}</div>
+                        {/* 预占单号进 7.2.1.2 分配明细：明细里能看到这笔货圈到了哪些
+                            仓 / 货位 / 批次，只记总量答不出批次追溯与成本分摊 */}
+                        <Link href={`/inventory/reservation/${row.id}`}>
+                          <span className="text-primary hover:underline">{row.reservationNo}</span>
+                        </Link>
                         {row.referenceCode ? (
                           <div className="text-muted-foreground text-xs">{row.referenceCode}</div>
                         ) : null}

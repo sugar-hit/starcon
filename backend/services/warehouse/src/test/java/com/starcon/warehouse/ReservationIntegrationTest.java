@@ -752,11 +752,13 @@ class ReservationIntegrationTest {
         .collect(java.util.stream.Collectors.toMap(ReservationCapability::dimension, c -> c));
     assertThat(byDimension.get("DEMAND_LIST").available()).isTrue();
     assertThat(byDimension.get("DEMAND_CREATE").available()).isTrue();
-    // 7.2.1.2 / 7.2.1.3 未交付：必须报 false 并说清归哪个模块，
-    // 而不是显示一个永远为 0 的「已分配量」让人以为分配已经跑通。
-    assertThat(byDimension.get("ALLOCATION_DETAIL").available()).isFalse();
+    // 7.2.1.2 分配明细已交付（按本测试原注释的约定由那条车道翻旗）：必须报 true 并指明入口，
+    // 否则列表上的「进明细」入口仍然是关的，用户点不到已经交付的功能。
+    assertThat(byDimension.get("ALLOCATION_DETAIL").available()).isTrue();
     assertThat(byDimension.get("ALLOCATION_DETAIL").ownerModule()).isEqualTo("7.2.1.2");
-    assertThat(byDimension.get("ALLOCATION_DETAIL").note()).contains("尚未交付");
+    assertThat(byDimension.get("ALLOCATION_DETAIL").note()).contains("reservation_allocation");
+    // 7.2.1.3 释放与过期仍未交付：必须报 false 并说清归哪个模块，
+    // 而不是显示一个点下去 404 的释放按钮。
     assertThat(byDimension.get("RELEASE").available()).isFalse();
     assertThat(byDimension.get("RELEASE").ownerModule()).isEqualTo("7.2.1.3");
   }
@@ -780,8 +782,10 @@ class ReservationIntegrationTest {
   }
 
   @Test
-  void 列表如实报分配明细尚未交付() {
-    assertThat(list().detailUnavailable()).isTrue();
+  void 分配明细已交付后列表不再标记明细入口不可用() {
+    // 7.2.1.2 交付后由那条车道按本测试原注释的约定翻旗：明细入口真的点得进去，
+    // 继续报 true 会让「进明细」按钮永远关着。
+    assertThat(list().detailUnavailable()).isFalse();
     assertThat(list().note()).contains("warehouse");
     assertThat(list().note()).contains("剩余量");
   }
