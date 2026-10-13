@@ -11911,6 +11911,255 @@
         }
       }
     },
+    "/warehouse/assembly-orders": {
+      "get": {
+        "tags": [
+          "assembly-order-controller"
+        ],
+        "operationId": "page_10",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productSkuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sourceSystem",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "referenceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CREATED_AT"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssemblyOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "assembly-order-controller"
+        ],
+        "operationId": "create_15",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssemblyOrderCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssemblyOrderCreated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/assembly-orders/{id}/issue": {
+      "post": {
+        "tags": [
+          "assembly-order-controller"
+        ],
+        "operationId": "issue_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssemblyOrderIssueInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssemblyOrderIssued"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/assembly-orders/{id}/cancel": {
+      "post": {
+        "tags": [
+          "assembly-order-controller"
+        ],
+        "operationId": "cancel_6",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssemblyOrderCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssemblyOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/warehouses": {
       "get": {
         "tags": [
@@ -15737,7 +15986,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "page_10",
+        "operationId": "page_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -18668,6 +18917,77 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/CustomsCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/assembly-orders/{id}": {
+      "get": {
+        "tags": [
+          "assembly-order-controller"
+        ],
+        "operationId": "detail_14",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssemblyOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/assembly-orders/capabilities": {
+      "get": {
+        "tags": [
+          "assembly-order-controller"
+        ],
+        "operationId": "capabilities_19",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssemblyCapabilities"
                 }
               }
             }
@@ -28033,6 +28353,436 @@
             "type": "string"
           },
           "resultReference": {
+            "type": "string"
+          }
+        }
+      },
+      "AssemblyComponentInput": {
+        "required": [
+          "requiredQuantity",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomComponentId": {
+            "type": "string",
+            "description": "catalog 3.5.2 bom_component 的逻辑 ID，仅作追溯",
+            "format": "uuid",
+            "nullable": true
+          },
+          "requiredQuantity": {
+            "type": "number",
+            "description": "按 BOM 规则 R7 冻结的应领量（单位用量 × 组装数量 × (1 + 损耗率/100)，6 位小数 HALF_UP）。本服务原样落库，不重算、不取整"
+          },
+          "unitQuantity": {
+            "maximum": 1000000000000,
+            "exclusiveMaximum": true,
+            "type": "number",
+            "description": "单位用量快照（每 1 个成品要多少），可空：只作追溯展示，不参与任何判定",
+            "nullable": true
+          },
+          "scrapRate": {
+            "maximum": 100,
+            "exclusiveMaximum": false,
+            "type": "number",
+            "description": "损耗率快照（百分数，5 = 5%），可空",
+            "nullable": true
+          },
+          "role": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AssemblyOrderCreateInput": {
+        "required": [
+          "assemblyQuantity",
+          "bomCode",
+          "bomId",
+          "bomVersionId",
+          "bomVersionNo",
+          "components",
+          "inboundLocationId",
+          "legalEntityId",
+          "outboundLocationId",
+          "productSkuId",
+          "sourceSystem",
+          "warehouseId"
+        ],
+        "type": "object",
+        "properties": {
+          "productSkuId": {
+            "type": "string",
+            "description": "成品 SKU（必须是 catalog 真实 SKU；虚拟套装没有 SKU 行，填不出来）",
+            "format": "uuid"
+          },
+          "bomId": {
+            "type": "string",
+            "description": "catalog 3.5.2 的 BOM 逻辑 ID（引用键，无外键）",
+            "format": "uuid"
+          },
+          "bomCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "bomVersionId": {
+            "type": "string",
+            "description": "catalog 3.5.2 的 BOM 版本逻辑 ID（引用键，无外键）",
+            "format": "uuid"
+          },
+          "bomVersionNo": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string",
+            "description": "上游来源：TRADE_PROCESSING_ORDER = 来自 6.4.1.1 加工单；DIRECT = 仓库现场直接发起"
+          },
+          "referenceId": {
+            "type": "string",
+            "description": "上游单据引用键；sourceSystem=DIRECT 时必须为空",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assemblyQuantity": {
+            "type": "number",
+            "description": "组装数量（成品入库量）。必须能被库存刻度 4 位小数精确表示"
+          },
+          "outboundLocationId": {
+            "type": "string",
+            "description": "组件出库库位；必填（库存的最小事实单位含库位）",
+            "format": "uuid"
+          },
+          "outboundQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "inboundLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inboundQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "outboundLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "inboundLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "components": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssemblyComponentInput"
+            }
+          }
+        }
+      },
+      "AssemblyOrderCreated": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "productSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assemblyQuantity": {
+            "type": "number"
+          },
+          "requiredComponentQuantity": {
+            "type": "number"
+          },
+          "componentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AssemblyOrderIssueInput": {
+        "type": "object",
+        "properties": {
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AssemblyComponentIssued": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "requiredQuantity": {
+            "type": "number"
+          },
+          "issuedQuantity": {
+            "type": "number"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "AssemblyOrderEntry": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "onHandDelta": {
+            "type": "number"
+          },
+          "reservedDelta": {
+            "type": "number"
+          },
+          "direction": {
+            "type": "string"
+          }
+        }
+      },
+      "AssemblyOrderIssued": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "productSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assemblyQuantity": {
+            "type": "number"
+          },
+          "requiredComponentQuantity": {
+            "type": "number"
+          },
+          "issuedComponentQuantity": {
+            "type": "number"
+          },
+          "inboundProductQuantity": {
+            "type": "number"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssemblyComponentIssued"
+            }
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssemblyOrderEntry"
+            }
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AssemblyOrderCancelInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "description": "取消理由（必填：取消一张组装单必须能解释为什么）"
+          }
+        }
+      },
+      "AssemblyOrderRow": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "productSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "productSkuCode": {
+            "type": "string"
+          },
+          "bomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomCode": {
+            "type": "string"
+          },
+          "bomVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomVersionNo": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assemblyQuantity": {
+            "type": "number"
+          },
+          "requiredComponentQuantity": {
+            "type": "number"
+          },
+          "issuedComponentQuantity": {
+            "type": "number"
+          },
+          "inboundProductQuantity": {
+            "type": "number"
+          },
+          "componentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "issuedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notes": {
             "type": "string"
           }
         }
@@ -41815,6 +42565,207 @@
             "type": "string"
           },
           "label": {
+            "type": "string"
+          }
+        }
+      },
+      "AssemblyOrderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssemblyOrderRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalAssemblyQuantity": {
+            "type": "number"
+          },
+          "totalRequiredComponentQuantity": {
+            "type": "number"
+          },
+          "totalIssuedComponentQuantity": {
+            "type": "number"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sort": {
+            "type": "string"
+          }
+        }
+      },
+      "AssemblyComponentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "bomComponentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "unitQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "scrapRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "requiredQuantity": {
+            "type": "number"
+          },
+          "issuedQuantity": {
+            "type": "number"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "role": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AssemblyOrderDetail": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/AssemblyOrderRow"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssemblyComponentRow"
+            }
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssemblyOrderEntry"
+            }
+          }
+        }
+      },
+      "AssemblyCapabilities": {
+        "type": "object",
+        "properties": {
+          "refType": {
+            "type": "string"
+          },
+          "atomicComponentAndProductMovements": {
+            "type": "boolean"
+          },
+          "supportsDirectInitiation": {
+            "type": "boolean"
+          },
+          "bomBoundary": {
+            "type": "string"
+          },
+          "virtualKitBoundary": {
+            "type": "string"
+          },
+          "upstreamModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpstreamModule"
+            }
+          },
+          "downstreamModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DownstreamModule"
+            }
+          },
+          "invariant": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DownstreamModule": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "effect": {
+            "type": "string"
+          }
+        }
+      },
+      "UpstreamModule": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "usage": {
             "type": "string"
           }
         }
