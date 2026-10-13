@@ -497,9 +497,12 @@ it('7.8.1.1 分配策略与序列号历史的调用形状都被放行', async ()
 it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
-  // 预占（7.2.1）与调整单（7.4.1.1）尚未交付，不应被代理放行。
+  // 调整单（7.4.1.1）尚未交付，不应被代理放行。
   // transfer 曾在这份拒绝清单里，那是 7.5.1.1 交付前的状态；它已并入且前端在调
   // /transfers 这组路径，不放行等于调拨页面在浏览器里 404，故已移出。
+  // reservations 曾在这份拒绝清单里，那是 7.2.1 未交付时的状态；7.2.1.1 已交付、
+  // 前端预占页面就在调这个路径，不放行等于该页面在浏览器里静默 404，故已移出
+  // （放行覆盖由本文件 7.2.1.1 的放行用例钉住，未交付的子路径仍由同组拒绝用例钉住）。
   // 7.1.1.2 明细页的行内操作入口指向这些路由，入口契约就位但目标模块还没到 ——
   // 目标模块交付后再加，否则就是一个点下去 404 的死链。
   //
@@ -507,7 +510,6 @@ it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
   // 7.1.2.1 已交付并入后它的前端页面就在调这个路径，不放行等于页面在浏览器里 404，
   // 所以已移出拒绝清单（放行覆盖由上面「已放行」用例钉住）。
   for (const path of [
-    'warehouse/inventory/reservations',
     'warehouse/inventory/adjustments',
     'warehouse/internal/access',
   ]) {
@@ -623,4 +625,66 @@ it('8.2.1.1 收货单与 8.2.1.2 收货差异的全部调用形状都被放行',
       (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
     ).toBe(200);
   }
+});
+
+/**
+ * 7.2.1.1 预占需求列表：从 `components/inventory/inventory-reservation-model.ts`
+ * **反向抽取**真实调用点。
+ *
+ * <p>路径不是照着正则抄的 —— 组件改了这里就会红。白名单只在浏览器端生效，
+ * `pnpm test` 直连服务层测不出漏登记，而漏一条的现场表现是该页面在浏览器里静默 404，
+ * 且 typecheck / lint / vitest 全绿。
+ */
+it('7.2.1.1 预占需求的三个调用形状都被放行并转发到 warehouse 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const RESERVATION = 'warehouse/inventory/reservations';
+  // 三个形状逐条钉住：列表读 / 下拉项读 / 能力声明读。
+  for (const path of [RESERVATION, `${RESERVATION}/options`, `${RESERVATION}/capabilities`]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行`).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 登记预占走 POST 同一路径：白名单只看形状不看方法，
+  // 这里显式跑一次证明写动作也真被转发（而不是只放行了读）。
+  expect(
+    (await POST(request(RESERVATION, 'POST'), { params: { path: RESERVATION.split('/') } })).status,
+  ).toBe(200);
+});
+
+it('7.2.1.1 刻意不放行未交付的子路径（多一层后缀仍 404 且不发请求）', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const RESERVATION = 'warehouse/inventory/reservations';
+  const id = '11111111-1111-1111-1111-111111111111';
+  // 后端 ReservationController 只有上面那四个形状。7.2.1.2 分配明细与
+  // 7.2.1.3 释放与过期**都未交付**，放行它们等于让界面以为「点进去有东西」——
+  // 放行不该存在的路径比 404 更糟。
+  for (const path of [
+    // **多一层后缀**：这是最容易在补白名单时被顺手放行的形状。
+    // 分配明细（7.2.1.2）与释放（7.2.1.3）都在这一层之下。
+    `${RESERVATION}/${id}/allocations`,
+    `${RESERVATION}/${id}/release`,
+    `${RESERVATION}/${id}/entries`,
+    `${RESERVATION}/summary`,
+    // options / capabilities 是字面量子路径，不能再往下挂一段。
+    `${RESERVATION}/options/${id}`,
+    `${RESERVATION}/capabilities/${id}`,
+    // 词表外与单复数形状：后端路由是 reservations（复数），单数不存在。
+    'warehouse/inventory/reservation',
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 不应被放行`,
+    ).toBe(404);
+  }
+  // 关键：未登记的形状**连请求都不该发出去**。
+  // 只断言 404 的话，一个「先转发再由后端报错」的实现也能过，
+  // 而那意味着未交付的端点每次点击都会打到真实服务。
+  expect(fetcher).not.toHaveBeenCalled();
 });
