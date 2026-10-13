@@ -1303,6 +1303,190 @@
         }
       }
     },
+    "/warehouse/facilities/{id}/config": {
+      "get": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shiftId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigOverview"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "update_8",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseConfigInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseConfigSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/facilities/{id}/config/shifts/{shiftId}": {
+      "put": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "updateShift",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "shiftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShiftUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShiftSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/duty-taxes/{estimateId}": {
       "get": {
         "tags": [
@@ -1346,7 +1530,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "update_8",
+        "operationId": "update_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -1484,7 +1668,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "update_9",
+        "operationId": "update_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -10599,6 +10783,56 @@
         }
       }
     },
+    "/warehouse/facilities/{id}/config/shifts": {
+      "post": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "createShift",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShiftInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShiftSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/duty-taxes": {
       "get": {
         "tags": [
@@ -14981,7 +15215,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "overview",
+        "operationId": "overview_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -18362,12 +18596,172 @@
         }
       }
     },
+    "/warehouse/facilities/{id}/config/options": {
+      "get": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/facilities/{id}/config/impacts": {
+      "get": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "impacts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConfigImpact"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/facilities/{id}/config/changes": {
+      "get": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "changes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shiftId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/facilities/options": {
       "get": {
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "options",
+        "operationId": "options_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -20068,6 +20462,248 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "WarehouseConfigInput": {
+        "required": [
+          "allowSplitShipment",
+          "defaultReviewRatio",
+          "lotTrackingEnabled",
+          "pickingStrategy",
+          "serialTrackingEnabled"
+        ],
+        "type": "object",
+        "properties": {
+          "lotTrackingEnabled": {
+            "type": "boolean"
+          },
+          "serialTrackingEnabled": {
+            "type": "boolean"
+          },
+          "pickingStrategy": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "defaultReviewRatio": {
+            "type": "number"
+          },
+          "allowSplitShipment": {
+            "type": "boolean"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ConfigChange": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "shiftId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shiftCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "fieldName": {
+            "type": "string"
+          },
+          "oldValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "newValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "changedByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WarehouseConfig": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotTrackingEnabled": {
+            "type": "boolean"
+          },
+          "serialTrackingEnabled": {
+            "type": "boolean"
+          },
+          "pickingStrategy": {
+            "type": "string",
+            "enum": [
+              "ORDER",
+              "WAVE",
+              "LOCATION"
+            ]
+          },
+          "defaultReviewRatio": {
+            "type": "number"
+          },
+          "allowSplitShipment": {
+            "type": "boolean"
+          },
+          "unconfigured": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "updatedByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "WarehouseConfigSaved": {
+        "type": "object",
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/WarehouseConfig"
+          },
+          "changeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigChange"
+            }
+          }
+        }
+      },
+      "ShiftUpdateInput": {
+        "required": [
+          "enabled",
+          "endLocal",
+          "name",
+          "startLocal"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "startLocal": {
+            "type": "string"
+          },
+          "endLocal": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ShiftRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startLocal": {
+            "type": "string"
+          },
+          "endLocal": {
+            "type": "string"
+          },
+          "crossesMidnight": {
+            "type": "boolean"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShiftSaved": {
+        "type": "object",
+        "properties": {
+          "shift": {
+            "$ref": "#/components/schemas/ShiftRow"
+          },
+          "changeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigChange"
+            }
           }
         }
       },
@@ -27649,6 +28285,43 @@
               "THIRD_PARTY",
               "BONDED"
             ]
+          }
+        }
+      },
+      "ShiftInput": {
+        "required": [
+          "code",
+          "endLocal",
+          "name",
+          "startLocal"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "startLocal": {
+            "type": "string"
+          },
+          "endLocal": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -40181,6 +40854,168 @@
           }
         }
       },
+      "ChangePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigChange"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ConfigImpact": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ConfigOverview": {
+        "type": "object",
+        "properties": {
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "warehouseStatus": {
+            "type": "string"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "config": {
+            "$ref": "#/components/schemas/WarehouseConfig"
+          },
+          "shifts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShiftRow"
+            }
+          },
+          "changes": {
+            "$ref": "#/components/schemas/ChangePage"
+          },
+          "impacts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigImpact"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ConfigOptions": {
+        "type": "object",
+        "properties": {
+          "strategies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickingStrategyOption"
+            }
+          },
+          "shifts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShiftOption"
+            }
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScopeOption"
+            }
+          },
+          "reviewRatioNote": {
+            "type": "string"
+          },
+          "splitShipmentNote": {
+            "type": "string"
+          },
+          "shiftNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PickingStrategyOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ScopeOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "ShiftOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
       "CountryOption": {
         "type": "object",
         "properties": {
@@ -41117,17 +41952,6 @@
         }
       },
       "DutyTaxStatusOption": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          }
-        }
-      },
-      "ScopeOption": {
         "type": "object",
         "properties": {
           "value": {

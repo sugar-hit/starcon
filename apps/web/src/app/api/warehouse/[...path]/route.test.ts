@@ -421,10 +421,13 @@ it('8.1.1.2 刻意不放行未交付的子路径', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
   const id = '11111111-1111-1111-1111-111111111111';
-  // 行为参数属 8.1.1.3、库位树属 8.1.2.1，两者都未交付。
-  // 放行这些形状会让界面以为「配置已经能改」已经可用 —— 放行不该存在的路径比 404 更糟。
+  // 库位树属 8.1.2.1，尚未交付。放行这个形状会让界面以为库位容量已经能维护 ——
+  // 放行不该存在的路径比 404 更糟。
+  //
+  // {uuid}/config 原本也在这张拒绝清单里（8.1.1.2 交付时写的是「行为参数属 8.1.1.3、
+  // 尚未交付」）。8.1.1.3 交付后它进了放行清单，由下面那组用例钉住 ——
+  // 那就是 8.1.1.2 文件头点名要本条车道兑现的交接。
   for (const path of [
-    `warehouse/facilities/${id}/config`,
     `warehouse/facilities/${id}/locations/capacity`,
     'warehouse/facilities/wrong-segment',
   ]) {
@@ -434,6 +437,139 @@ it('8.1.1.2 刻意不放行未交付的子路径', async () => {
     ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
+});
+
+/**
+ * 8.1.1.3 仓库配置：六个真实调用形状逐条钉住。
+ *
+ * <p>白名单是**按路径**登记的，不区分方法 —— 同一个 pattern 覆盖 GET/PUT/POST/DELETE，
+ * 方法原样透传给后端。所以这里显式跑 GET、PUT、POST 三种方法，
+ * 证明写形状也真的被转发（而不是只放行了读）。
+ *
+ * <p>路径是从 `components/warehouse/warehouse-config-model.ts` **反向抽取**的真实调用点，
+ * 不是照着正则抄的 —— 少放行一个，前端就只在浏览器里静默 404
+ * （typecheck / lint / vitest 全绿都发现不了）。
+ */
+it('8.1.1.3 仓库配置的调用形状都被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const shiftId = '22222222-2222-2222-2222-222222222222';
+  for (const path of [
+    `warehouse/facilities/${id}/config`,
+    `warehouse/facilities/${id}/config/options`,
+    `warehouse/facilities/${id}/config/impacts`,
+    `warehouse/facilities/${id}/config/changes`,
+    `warehouse/facilities/${id}/config/shifts`,
+    `warehouse/facilities/${id}/config/shifts/${shiftId}`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行`).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 改作业参数走 PUT /{id}/config（整份替换，不是逐字段补丁）
+  expect(
+    (
+      await PUT(request(`warehouse/facilities/${id}/config`, 'PUT'), {
+        params: { path: ['warehouse', 'facilities', id, 'config'] },
+      })
+    ).status,
+  ).toBe(200);
+  // 新建班次走 POST /{id}/config/shifts
+  expect(
+    (
+      await POST(request(`warehouse/facilities/${id}/config/shifts`, 'POST'), {
+        params: { path: ['warehouse', 'facilities', id, 'config', 'shifts'] },
+      })
+    ).status,
+  ).toBe(200);
+  // 改班次 / 停用走 PUT /{id}/config/shifts/{shiftId} —— 两段 uuid 必须真的匹配上，
+  // 否则单段 config 分支会把半截吃掉、把 shiftId 留在匹配之外。
+  expect(
+    (
+      await PUT(request(`warehouse/facilities/${id}/config/shifts/${shiftId}`, 'PUT'), {
+        params: { path: ['warehouse', 'facilities', id, 'config', 'shifts', shiftId] },
+      })
+    ).status,
+  ).toBe(200);
+});
+
+it('8.1.1.3 仓库配置：不越界到后端不存在的子路径', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const shiftId = '22222222-2222-2222-2222-222222222222';
+  // 后端 WarehouseConfigController 只有上面那六个形状。多一段 / 少一个动作后缀、
+  // 以及看起来合理的推导路径（config/history、config/schedules、config/roster…）
+  // 在后端都不存在，放行它们会让界面以为已交付 —— 放行不该存在的路径比 404 更糟。
+  //
+  // 特别说 roster：8.1.1.2 的证据栏点名「人员花名册与排班无表」，而 8.1.1.3 只建了
+  // **班次**（工作时段）。花名册的真相来源在 identity（成员关系），
+  // 在本服务再建一份就是造第二个真相来源，所以这条形状刻意不放行。
+  for (const path of [
+    `warehouse/facilities/${id}/config/history`,
+    `warehouse/facilities/${id}/config/roster`,
+    `warehouse/facilities/${id}/config/schedules`,
+    `warehouse/facilities/${id}/config/picking-strategy`,
+    `warehouse/facilities/${id}/config/review-ratio`,
+    `warehouse/facilities/${id}/config/shifts/${shiftId}/retire`,
+    `warehouse/facilities/${id}/config/shifts/${shiftId}/disable`,
+    // options / impacts / changes 是字面量子路径，不能再往下挂一段
+    `warehouse/facilities/${id}/config/options/${shiftId}`,
+    `warehouse/facilities/${id}/config/impacts/${shiftId}`,
+    `warehouse/facilities/${id}/config/changes/${shiftId}`,
+    // config 本身也不能再往下多挂一段
+    `warehouse/facilities/${id}/config/${shiftId}/shifts`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 不应被放行`,
+    ).toBe(404);
+  }
+  // DELETE 落到已登记的形状上由后端裁决：代理只看路径不看方法，
+  // 后端没有 DELETE 端点会返回 405 —— 「配置不可删」的两道真实防线在服务端与 V104。
+  const notAllowed = await DELETE(
+    request(`warehouse/facilities/${id}/config`, 'DELETE'),
+    { params: { path: ['warehouse', 'facilities', id, 'config'] } },
+  );
+  expect(notAllowed.status).not.toBe(404);
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
+
+it('8.1.1.3 仓库配置放行后，8.1.1.1 与 8.1.1.2 的形状一条都没被挤掉', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // 白名单是求并，不是二选一。三条车道各自往同一行正则上追加，
+  // 少一条别人的形状就等于那个页面在浏览器里静默 404。
+  for (const path of [
+    'warehouse/facilities',
+    'warehouse/facilities/options',
+    'warehouse/facilities/capabilities',
+    `warehouse/facilities/${id}`,
+    `warehouse/facilities/${id}/locations`,
+    `warehouse/facilities/${id}/entrypoints`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 被仓库配置车道的改动挤掉了`,
+    ).toBe(200);
+  }
+  expect(
+    (await POST(request('warehouse/facilities', 'POST'), {
+      params: { path: ['warehouse', 'facilities'] },
+    })).status,
+  ).toBe(200);
+  expect(
+    (await PUT(request(`warehouse/facilities/${id}`, 'PUT'), {
+      params: { path: ['warehouse', 'facilities', id] },
+    })).status,
+  ).toBe(200);
 });
 
 /**
