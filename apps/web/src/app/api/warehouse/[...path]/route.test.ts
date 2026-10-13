@@ -881,13 +881,85 @@ it('8.1.2.1 多一层后缀仍是 404 且不发出请求', async () => {
     `warehouse/location-trees/${id}/locations/${id}/stock`,
     `warehouse/location-trees/${id}/locations/${id}/allocate`,
     `warehouse/location-trees/${id}/locations/${id}/allocate/recommend`,
-    // auto-allocation 属 8.1.2.2，未交付，不能提前放行
+    // 自动分配已由 8.1.2.2 交付，但**命名空间不同**（/warehouse/location-allocations），
+    // 所以 location-trees/{id}/allocate 仍然 404 —— 交付了不等于换个前缀也能穿透白名单。
     `warehouse/location-trees/${id}/allocate`,
     `warehouse/location-trees/${id}/allocation-rules`,
     // capabilities 是单段字面量，多一段就不是它
     'warehouse/location-trees/capabilities/extra',
     // 单段根路径本身没有对应端点（后端只有 /capabilities 与 /{warehouseId}）
     'warehouse/location-trees',
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+/**
+ * 8.1.2.2 库位自动分配：location-allocations 的七个形状放行 + 反向拒绝。
+ *
+ * <p>同样跑**真实代理 handler** 与真实 HTTP 状态码，不断言字符串出现在文件里。
+ */
+it('8.1.2.2 库位自动分配的七个形状被放行并转发到 warehouse 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const paths = [
+    'warehouse/location-allocations/capabilities',
+    'warehouse/location-allocations/recommend',
+    'warehouse/location-allocations/list',
+    `warehouse/location-allocations/by-receipt/${id}`,
+    `warehouse/location-allocations/${id}`,
+    `warehouse/location-allocations/${id}/release`,
+    // 裸 POST 是本模块的写入形状（选定一个库位），末位可选量必须带
+    'warehouse/location-allocations',
+  ];
+  for (const path of paths) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 写动作：选定（裸 POST）、释放（POST {id}/release）、撤销（DELETE {id}）
+  expect(
+    (await POST(request('warehouse/location-allocations', 'POST'), {
+      params: { path: ['warehouse', 'location-allocations'] },
+    })).status,
+  ).toBe(200);
+  expect(
+    (await POST(request(`warehouse/location-allocations/${id}/release`, 'POST'), {
+      params: { path: ['warehouse', 'location-allocations', id, 'release'] },
+    })).status,
+  ).toBe(200);
+  expect(
+    (await DELETE(request(`warehouse/location-allocations/${id}`, 'DELETE'), {
+      params: { path: ['warehouse', 'location-allocations', id] },
+    })).status,
+  ).toBe(200);
+});
+
+it('8.1.2.2 多一层后缀仍是 404 且不发出请求', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    // 字面量子路径多一段：capabilities / recommend / list / by-receipt 都不是它们的父级
+    'warehouse/location-allocations/capabilities/extra',
+    'warehouse/location-allocations/recommend/extra',
+    'warehouse/location-allocations/list/extra',
+    // by-receipt 后面的 uuid 层写死，多一层仍 404
+    `warehouse/location-allocations/by-receipt/${id}/extra`,
+    // {id} 只有 release 这一个动作段，放行别的动作等于让「还不存在的动作」看起来已交付
+    `warehouse/location-allocations/${id}/stock`,
+    `warehouse/location-allocations/${id}/execute`,
+    `warehouse/location-allocations/${id}/release/extra`,
+    // 与 8.1.2.1 的命名空间刻意分开：库位树上没有 allocate 端点
+    `warehouse/location-trees/${id}/allocate`,
   ]) {
     const response = await GET(request(path), { params: { path: path.split('/') } });
     expect(response.status).toBe(404);
