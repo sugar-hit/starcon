@@ -625,9 +625,9 @@ public class WarehouseConfigService {
             .map(s -> new ShiftOption(s.id(), s.code(), s.name(), s.enabled()))
             .toList(),
         List.of(
-            new ScopeOption("CONFIG", "作业参数"),
-            new ScopeOption("SHIFT", "班次字段"),
-            new ScopeOption("SHIFT_SCHEDULE", "班次启用状态")),
+            new WarehouseConfigScopeOption("CONFIG", "作业参数"),
+            new WarehouseConfigScopeOption("SHIFT", "班次字段"),
+            new WarehouseConfigScopeOption("SHIFT_SCHEDULE", "班次启用状态")),
         "默认复核比例是 0~1 的比例值：0 = 不复核，1 = 全量复核。"
             + "它是**默认**——单次作业可以覆盖它，但「这个仓默认复核几成」是仓自己的属性。",
         "拆零发货默认关闭。拆零会破掉「一单一包裹」这个下游默认假设"

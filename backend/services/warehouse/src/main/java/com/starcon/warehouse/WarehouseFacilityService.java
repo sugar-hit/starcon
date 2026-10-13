@@ -508,9 +508,9 @@ public class WarehouseFacilityService {
         countries,
         entities,
         List.of(
-            new StatusOption("ACTIVE", "启用中"),
-            new StatusOption("INACTIVE", "已停用"),
-            new StatusOption("ARCHIVED", "已归档")),
+            new WarehouseFacilityStatusOption("ACTIVE", "启用中"),
+            new WarehouseFacilityStatusOption("INACTIVE", "已停用"),
+            new WarehouseFacilityStatusOption("ARCHIVED", "已归档")),
         "时区填 IANA ID（如 Asia/Shanghai / America/Los_Angeles），由服务端按它算当地时间",
         "国家地区是 ISO-3166-1 alpha-2 两位码；下拉只列本租户真实在用的国家，"
             + "系统不内置国别表以免与法务口径漂移");

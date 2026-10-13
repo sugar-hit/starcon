@@ -311,7 +311,7 @@ public final class WarehouseConfigModels {
   public record ConfigOptions(
       List<PickingStrategyOption> strategies,
       List<ShiftOption> shifts,
-      List<ScopeOption> scopes,
+      List<WarehouseConfigScopeOption> scopes,
       String reviewRatioNote,
       String splitShipmentNote,
       String shiftNote) {}
@@ -319,6 +319,12 @@ public final class WarehouseConfigModels {
   /** 班次下拉项（用于变更历史的筛选）。 */
   public record ShiftOption(UUID id, String code, String name, boolean enabled) {}
 
-  /** 留痕范围下拉项。 */
-  public record ScopeOption(String code, String label) {}
+  /**
+   * 留痕范围下拉项。
+   *
+   * <p>名字带模块前缀不是啰嗦：springdoc 用 record 的**简单类名**做 {@code components.schemas} 的键，
+   * 同一个服务里两个同名 record 会**后者覆盖前者**。本仓库已经因为 {@code ScopeOption}（税则）与
+   * {@code StatusOption}（预占/仓库设施）各出现过一次，已改名的这批前缀就是为了不再撞。
+   */
+  public record WarehouseConfigScopeOption(String code, String label) {}
 }

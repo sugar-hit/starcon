@@ -684,7 +684,7 @@ class WarehouseConfigIntegrationTest {
     assertThat(options.strategies()).extracting(PickingStrategyOption::code)
         .containsExactly("ORDER", "WAVE", "LOCATION");
     assertThat(options.strategies()).allSatisfy(s -> assertThat(s.note()).isNotBlank());
-    assertThat(options.scopes()).extracting(ScopeOption::code)
+    assertThat(options.scopes()).extracting(WarehouseConfigScopeOption::code)
         .containsExactly("CONFIG", "SHIFT", "SHIFT_SCHEDULE");
     asA("config", () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
     assertThat(asA("read", () -> service.options(whOf(a))).shifts()).hasSize(1);

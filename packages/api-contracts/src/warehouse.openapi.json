@@ -349,6 +349,105 @@
         }
       }
     },
+    "/warehouse/location-trees/{warehouseId}/locations/{id}": {
+      "put": {
+        "tags": [
+          "warehouse-location-tree-controller"
+        ],
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocationUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationSaved"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "warehouse-location-tree-controller"
+        ],
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/warehouse/inventory/transfers/{orderId}": {
       "get": {
         "tags": [
@@ -1303,6 +1402,190 @@
         }
       }
     },
+    "/warehouse/facilities/{id}/config": {
+      "get": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "overview",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shiftId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigOverview"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "update_9",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarehouseConfigInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/WarehouseConfigSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/facilities/{id}/config/shifts/{shiftId}": {
+      "put": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "updateShift",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "shiftId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShiftUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShiftSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/duty-taxes/{estimateId}": {
       "get": {
         "tags": [
@@ -1346,7 +1629,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "update_9",
+        "operationId": "update_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -1484,7 +1767,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "update_10",
+        "operationId": "update_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -3518,6 +3801,56 @@
         }
       }
     },
+    "/warehouse/location-trees/{warehouseId}/locations": {
+      "post": {
+        "tags": [
+          "warehouse-location-tree-controller"
+        ],
+        "operationId": "create_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocationCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/labor/work-tasks": {
       "get": {
         "tags": [
@@ -5469,7 +5802,7 @@
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "create_4",
+        "operationId": "create_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -6778,7 +7111,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "list",
+        "operationId": "list_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -6885,7 +7218,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "create_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -7241,7 +7574,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "create_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -7785,7 +8118,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "create_7",
+        "operationId": "create_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -8126,7 +8459,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "list_1",
+        "operationId": "list_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -8199,7 +8532,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "create_8",
+        "operationId": "create_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -8928,7 +9261,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "list_2",
+        "operationId": "list_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -9012,7 +9345,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "create_9",
+        "operationId": "create_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -9286,7 +9619,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "create_10",
+        "operationId": "create_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -9716,7 +10049,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "create_11",
+        "operationId": "create_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -10451,7 +10784,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "create_12",
+        "operationId": "create_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -10642,7 +10975,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "list_3",
+        "operationId": "list_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -10740,7 +11073,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "create_13",
+        "operationId": "create_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -10769,6 +11102,56 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/WarehouseCreated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/facilities/{id}/config/shifts": {
+      "post": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "createShift",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShiftInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShiftSaved"
                 }
               }
             }
@@ -10906,7 +11289,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "create_14",
+        "operationId": "create_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -11461,7 +11844,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "create_15",
+        "operationId": "create_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -12081,6 +12464,255 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/CustomsSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/assembly-orders": {
+      "get": {
+        "tags": [
+          "assembly-order-controller"
+        ],
+        "operationId": "page_10",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productSkuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sourceSystem",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "referenceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CREATED_AT"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssemblyOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "assembly-order-controller"
+        ],
+        "operationId": "create_17",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssemblyOrderCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssemblyOrderCreated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/assembly-orders/{id}/issue": {
+      "post": {
+        "tags": [
+          "assembly-order-controller"
+        ],
+        "operationId": "issue_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssemblyOrderIssueInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssemblyOrderIssued"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/assembly-orders/{id}/cancel": {
+      "post": {
+        "tags": [
+          "assembly-order-controller"
+        ],
+        "operationId": "cancel_6",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssemblyOrderCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssemblyOrderRow"
                 }
               }
             }
@@ -12945,6 +13577,77 @@
                   "items": {
                     "$ref": "#/components/schemas/LocationRef"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/location-trees/{warehouseId}": {
+      "get": {
+        "tags": [
+          "warehouse-location-tree-controller"
+        ],
+        "operationId": "tree",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationTree"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/location-trees/capabilities": {
+      "get": {
+        "tags": [
+          "warehouse-location-tree-controller"
+        ],
+        "operationId": "capabilities_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationTreeCapabilities"
                 }
               }
             }
@@ -14503,7 +15206,7 @@
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -14907,7 +15610,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -15192,7 +15895,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -15409,7 +16112,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -15440,7 +16143,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -17255,7 +17958,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -17286,7 +17989,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -17610,7 +18313,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_12",
+        "operationId": "capabilities_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -17786,7 +18489,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_13",
+        "operationId": "capabilities_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -18212,7 +18915,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_14",
+        "operationId": "capabilities_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -18283,7 +18986,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_15",
+        "operationId": "capabilities_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -18443,7 +19146,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "capabilities_16",
+        "operationId": "capabilities_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -18604,12 +19307,172 @@
         }
       }
     },
+    "/warehouse/facilities/{id}/config/options": {
+      "get": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "options_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/facilities/{id}/config/impacts": {
+      "get": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "impacts",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConfigImpact"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/facilities/{id}/config/changes": {
+      "get": {
+        "tags": [
+          "warehouse-config-controller"
+        ],
+        "operationId": "changes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shiftId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/facilities/options": {
       "get": {
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "options_1",
+        "operationId": "options_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -18640,7 +19503,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_17",
+        "operationId": "capabilities_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -18817,7 +19680,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "capabilities_18",
+        "operationId": "capabilities_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -18891,7 +19754,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "capabilities_19",
+        "operationId": "capabilities_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -18910,869 +19773,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/CustomsCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/facilities/{id}/config": {
-      "get": {
-        "tags": [
-          "warehouse-config-controller"
-        ],
-        "operationId": "overview",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "scope",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "shiftId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConfigOverview"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "warehouse-config-controller"
-        ],
-        "operationId": "update_8",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/WarehouseConfigInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/WarehouseConfigSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/facilities/{id}/config/shifts/{shiftId}": {
-      "put": {
-        "tags": [
-          "warehouse-config-controller"
-        ],
-        "operationId": "updateShift",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "shiftId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ShiftUpdateInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ShiftSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/facilities/{id}/config/shifts": {
-      "post": {
-        "tags": [
-          "warehouse-config-controller"
-        ],
-        "operationId": "createShift",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ShiftInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ShiftSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/facilities/{id}/config/options": {
-      "get": {
-        "tags": [
-          "warehouse-config-controller"
-        ],
-        "operationId": "options",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConfigOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/facilities/{id}/config/impacts": {
-      "get": {
-        "tags": [
-          "warehouse-config-controller"
-        ],
-        "operationId": "impacts",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ConfigImpact"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/facilities/{id}/config/changes": {
-      "get": {
-        "tags": [
-          "warehouse-config-controller"
-        ],
-        "operationId": "changes",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "scope",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "shiftId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChangePage"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/location-trees/{warehouseId}/locations/{id}": {
-      "put": {
-        "tags": [
-          "warehouse-location-tree-controller"
-        ],
-        "operationId": "update_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LocationUpdateInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LocationSaved"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "warehouse-location-tree-controller"
-        ],
-        "operationId": "delete",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/warehouse/location-trees/{warehouseId}/locations": {
-      "post": {
-        "tags": [
-          "warehouse-location-tree-controller"
-        ],
-        "operationId": "create_2",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LocationCreateInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LocationSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/location-trees/{warehouseId}": {
-      "get": {
-        "tags": [
-          "warehouse-location-tree-controller"
-        ],
-        "operationId": "tree",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LocationTree"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/location-trees/capabilities": {
-      "get": {
-        "tags": [
-          "warehouse-location-tree-controller"
-        ],
-        "operationId": "capabilities_3",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LocationTreeCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/assembly-orders": {
-      "get": {
-        "tags": [
-          "assembly-order-controller"
-        ],
-        "operationId": "page_10",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "productSkuId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "sourceSystem",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "referenceId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "CREATED_AT"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AssemblyOrderPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "assembly-order-controller"
-        ],
-        "operationId": "create_15",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AssemblyOrderCreateInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AssemblyOrderCreated"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/assembly-orders/{id}/issue": {
-      "post": {
-        "tags": [
-          "assembly-order-controller"
-        ],
-        "operationId": "issue_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AssemblyOrderIssueInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AssemblyOrderIssued"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/assembly-orders/{id}/cancel": {
-      "post": {
-        "tags": [
-          "assembly-order-controller"
-        ],
-        "operationId": "cancel_6",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AssemblyOrderCancelInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/AssemblyOrderRow"
                 }
               }
             }
@@ -19825,7 +19825,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "capabilities_19",
+        "operationId": "capabilities_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -20191,6 +20191,66 @@
             "format": "int64"
           },
           "message": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationUpdateInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "pickable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "capacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "weightLimit": {
+            "type": "number",
+            "nullable": true
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "parentProvided": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "LocationSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "note": {
             "type": "string"
           }
         }
@@ -21244,6 +21304,248 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "WarehouseConfigInput": {
+        "required": [
+          "allowSplitShipment",
+          "defaultReviewRatio",
+          "lotTrackingEnabled",
+          "pickingStrategy",
+          "serialTrackingEnabled"
+        ],
+        "type": "object",
+        "properties": {
+          "lotTrackingEnabled": {
+            "type": "boolean"
+          },
+          "serialTrackingEnabled": {
+            "type": "boolean"
+          },
+          "pickingStrategy": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "defaultReviewRatio": {
+            "type": "number"
+          },
+          "allowSplitShipment": {
+            "type": "boolean"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ConfigChange": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "shiftId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "shiftCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "fieldName": {
+            "type": "string"
+          },
+          "oldValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "newValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "changedByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WarehouseConfig": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotTrackingEnabled": {
+            "type": "boolean"
+          },
+          "serialTrackingEnabled": {
+            "type": "boolean"
+          },
+          "pickingStrategy": {
+            "type": "string",
+            "enum": [
+              "ORDER",
+              "WAVE",
+              "LOCATION"
+            ]
+          },
+          "defaultReviewRatio": {
+            "type": "number"
+          },
+          "allowSplitShipment": {
+            "type": "boolean"
+          },
+          "unconfigured": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "updatedByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "WarehouseConfigSaved": {
+        "type": "object",
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/WarehouseConfig"
+          },
+          "changeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigChange"
+            }
+          }
+        }
+      },
+      "ShiftUpdateInput": {
+        "required": [
+          "enabled",
+          "endLocal",
+          "name",
+          "startLocal"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "startLocal": {
+            "type": "string"
+          },
+          "endLocal": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ShiftRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startLocal": {
+            "type": "string"
+          },
+          "endLocal": {
+            "type": "string"
+          },
+          "crossesMidnight": {
+            "type": "boolean"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ShiftSaved": {
+        "type": "object",
+        "properties": {
+          "shift": {
+            "$ref": "#/components/schemas/ShiftRow"
+          },
+          "changeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigChange"
+            }
           }
         }
       },
@@ -22383,6 +22685,39 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "LocationCreateInput": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "pickable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "capacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "weightLimit": {
+            "type": "number",
+            "nullable": true
           }
         }
       },
@@ -28906,6 +29241,43 @@
           }
         }
       },
+      "ShiftInput": {
+        "required": [
+          "code",
+          "endLocal",
+          "name",
+          "startLocal"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "startLocal": {
+            "type": "string"
+          },
+          "endLocal": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "DutyEstimateCreateRequest": {
         "type": "object",
         "properties": {
@@ -29287,6 +29659,436 @@
             "type": "string"
           },
           "resultReference": {
+            "type": "string"
+          }
+        }
+      },
+      "AssemblyComponentInput": {
+        "required": [
+          "requiredQuantity",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomComponentId": {
+            "type": "string",
+            "description": "catalog 3.5.2 bom_component 的逻辑 ID，仅作追溯",
+            "format": "uuid",
+            "nullable": true
+          },
+          "requiredQuantity": {
+            "type": "number",
+            "description": "按 BOM 规则 R7 冻结的应领量（单位用量 × 组装数量 × (1 + 损耗率/100)，6 位小数 HALF_UP）。本服务原样落库，不重算、不取整"
+          },
+          "unitQuantity": {
+            "maximum": 1000000000000,
+            "exclusiveMaximum": true,
+            "type": "number",
+            "description": "单位用量快照（每 1 个成品要多少），可空：只作追溯展示，不参与任何判定",
+            "nullable": true
+          },
+          "scrapRate": {
+            "maximum": 100,
+            "exclusiveMaximum": false,
+            "type": "number",
+            "description": "损耗率快照（百分数，5 = 5%），可空",
+            "nullable": true
+          },
+          "role": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AssemblyOrderCreateInput": {
+        "required": [
+          "assemblyQuantity",
+          "bomCode",
+          "bomId",
+          "bomVersionId",
+          "bomVersionNo",
+          "components",
+          "inboundLocationId",
+          "legalEntityId",
+          "outboundLocationId",
+          "productSkuId",
+          "sourceSystem",
+          "warehouseId"
+        ],
+        "type": "object",
+        "properties": {
+          "productSkuId": {
+            "type": "string",
+            "description": "成品 SKU（必须是 catalog 真实 SKU；虚拟套装没有 SKU 行，填不出来）",
+            "format": "uuid"
+          },
+          "bomId": {
+            "type": "string",
+            "description": "catalog 3.5.2 的 BOM 逻辑 ID（引用键，无外键）",
+            "format": "uuid"
+          },
+          "bomCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "bomVersionId": {
+            "type": "string",
+            "description": "catalog 3.5.2 的 BOM 版本逻辑 ID（引用键，无外键）",
+            "format": "uuid"
+          },
+          "bomVersionNo": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string",
+            "description": "上游来源：TRADE_PROCESSING_ORDER = 来自 6.4.1.1 加工单；DIRECT = 仓库现场直接发起"
+          },
+          "referenceId": {
+            "type": "string",
+            "description": "上游单据引用键；sourceSystem=DIRECT 时必须为空",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assemblyQuantity": {
+            "type": "number",
+            "description": "组装数量（成品入库量）。必须能被库存刻度 4 位小数精确表示"
+          },
+          "outboundLocationId": {
+            "type": "string",
+            "description": "组件出库库位；必填（库存的最小事实单位含库位）",
+            "format": "uuid"
+          },
+          "outboundQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "inboundLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inboundQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "outboundLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "inboundLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "components": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssemblyComponentInput"
+            }
+          }
+        }
+      },
+      "AssemblyOrderCreated": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "productSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assemblyQuantity": {
+            "type": "number"
+          },
+          "requiredComponentQuantity": {
+            "type": "number"
+          },
+          "componentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AssemblyOrderIssueInput": {
+        "type": "object",
+        "properties": {
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "AssemblyComponentIssued": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "requiredQuantity": {
+            "type": "number"
+          },
+          "issuedQuantity": {
+            "type": "number"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "AssemblyOrderEntry": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "onHandDelta": {
+            "type": "number"
+          },
+          "reservedDelta": {
+            "type": "number"
+          },
+          "direction": {
+            "type": "string"
+          }
+        }
+      },
+      "AssemblyOrderIssued": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "productSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assemblyQuantity": {
+            "type": "number"
+          },
+          "requiredComponentQuantity": {
+            "type": "number"
+          },
+          "issuedComponentQuantity": {
+            "type": "number"
+          },
+          "inboundProductQuantity": {
+            "type": "number"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssemblyComponentIssued"
+            }
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssemblyOrderEntry"
+            }
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "AssemblyOrderCancelInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "description": "取消理由（必填：取消一张组装单必须能解释为什么）"
+          }
+        }
+      },
+      "AssemblyOrderRow": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "productSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "productSkuCode": {
+            "type": "string"
+          },
+          "bomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomCode": {
+            "type": "string"
+          },
+          "bomVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomVersionNo": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assemblyQuantity": {
+            "type": "number"
+          },
+          "requiredComponentQuantity": {
+            "type": "number"
+          },
+          "issuedComponentQuantity": {
+            "type": "number"
+          },
+          "inboundProductQuantity": {
+            "type": "number"
+          },
+          "componentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "issuedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notes": {
             "type": "string"
           }
         }
@@ -31341,6 +32143,253 @@
             "type": "boolean"
           },
           "status": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "STORAGE",
+              "RECEIVING",
+              "SHIPPING",
+              "QUARANTINE",
+              "DEFECTIVE",
+              "FROZEN"
+            ]
+          },
+          "typeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "pickable": {
+            "type": "boolean"
+          },
+          "pickableByNature": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "depth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "capacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "weightLimit": {
+            "type": "number",
+            "nullable": true
+          },
+          "occupied": {
+            "$ref": "#/components/schemas/Occupancy"
+          },
+          "subtreeOccupancy": {
+            "$ref": "#/components/schemas/Occupancy"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LocationTree": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationNode"
+            }
+          },
+          "rootCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/TreeTotals"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "Occupancy": {
+        "type": "object",
+        "properties": {
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bucketRows": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "capacityUtilization": {
+            "type": "number",
+            "nullable": true
+          },
+          "capacityExceeded": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TreeTotals": {
+        "type": "object",
+        "properties": {
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rootCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "leafCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "capacityMeasuredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuCountDistinct": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "typeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TypeBreakdown"
+            }
+          }
+        }
+      },
+      "TypeBreakdown": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "STORAGE",
+              "RECEIVING",
+              "SHIPPING",
+              "QUARANTINE",
+              "DEFECTIVE",
+              "FROZEN"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LocationTreeCapabilities": {
+        "type": "object",
+        "properties": {
+          "hierarchyMaintained": {
+            "type": "boolean"
+          },
+          "capacityTracked": {
+            "type": "boolean"
+          },
+          "weightTracked": {
+            "type": "boolean"
+          },
+          "occupancyLive": {
+            "type": "boolean"
+          },
+          "autoAllocationAvailable": {
+            "type": "boolean"
+          },
+          "autoAllocationOwnerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "pickPathOwnerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "STORAGE",
+                "RECEIVING",
+                "SHIPPING",
+                "QUARANTINE",
+                "DEFECTIVE",
+                "FROZEN"
+              ]
+            }
+          },
+          "maxDepth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
             "type": "string"
           }
         }
@@ -41692,6 +42741,168 @@
           }
         }
       },
+      "ChangePage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigChange"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ConfigImpact": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ConfigOverview": {
+        "type": "object",
+        "properties": {
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "warehouseStatus": {
+            "type": "string"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "config": {
+            "$ref": "#/components/schemas/WarehouseConfig"
+          },
+          "shifts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShiftRow"
+            }
+          },
+          "changes": {
+            "$ref": "#/components/schemas/ChangePage"
+          },
+          "impacts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigImpact"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ConfigOptions": {
+        "type": "object",
+        "properties": {
+          "strategies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickingStrategyOption"
+            }
+          },
+          "shifts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShiftOption"
+            }
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WarehouseConfigScopeOption"
+            }
+          },
+          "reviewRatioNote": {
+            "type": "string"
+          },
+          "splitShipmentNote": {
+            "type": "string"
+          },
+          "shiftNote": {
+            "type": "string"
+          }
+        }
+      },
+      "PickingStrategyOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ShiftOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "WarehouseConfigScopeOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
       "CountryOption": {
         "type": "object",
         "properties": {
@@ -41724,7 +42935,7 @@
           "statuses": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/StatusOption"
+              "$ref": "#/components/schemas/WarehouseFacilityStatusOption"
             }
           },
           "timezoneNote": {
@@ -41763,6 +42974,17 @@
             "type": "string"
           },
           "status": {
+            "type": "string"
+          }
+        }
+      },
+      "WarehouseFacilityStatusOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
             "type": "string"
           }
         }
@@ -42630,7 +43852,7 @@
       "ScopeOption": {
         "type": "object",
         "properties": {
-          "code": {
+          "value": {
             "type": "string"
           },
           "label": {
@@ -43315,1206 +44537,6 @@
             "type": "string"
           },
           "label": {
-            "type": "string"
-          }
-        }
-      },
-      "WarehouseConfigInput": {
-        "required": [
-          "allowSplitShipment",
-          "defaultReviewRatio",
-          "lotTrackingEnabled",
-          "pickingStrategy",
-          "serialTrackingEnabled"
-        ],
-        "type": "object",
-        "properties": {
-          "lotTrackingEnabled": {
-            "type": "boolean"
-          },
-          "serialTrackingEnabled": {
-            "type": "boolean"
-          },
-          "pickingStrategy": {
-            "maxLength": 16,
-            "minLength": 0,
-            "type": "string"
-          },
-          "defaultReviewRatio": {
-            "type": "number"
-          },
-          "allowSplitShipment": {
-            "type": "boolean"
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ConfigChange": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "scope": {
-            "type": "string"
-          },
-          "shiftId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "shiftCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "fieldName": {
-            "type": "string"
-          },
-          "oldValue": {
-            "type": "string",
-            "nullable": true
-          },
-          "newValue": {
-            "type": "string",
-            "nullable": true
-          },
-          "note": {
-            "type": "string"
-          },
-          "changedByMembershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "changedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "WarehouseConfig": {
-        "type": "object",
-        "properties": {
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "lotTrackingEnabled": {
-            "type": "boolean"
-          },
-          "serialTrackingEnabled": {
-            "type": "boolean"
-          },
-          "pickingStrategy": {
-            "type": "string",
-            "enum": [
-              "ORDER",
-              "WAVE",
-              "LOCATION"
-            ]
-          },
-          "defaultReviewRatio": {
-            "type": "number"
-          },
-          "allowSplitShipment": {
-            "type": "boolean"
-          },
-          "unconfigured": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          },
-          "updatedByMembershipId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "WarehouseConfigSaved": {
-        "type": "object",
-        "properties": {
-          "config": {
-            "$ref": "#/components/schemas/WarehouseConfig"
-          },
-          "changeCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "changes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ConfigChange"
-            }
-          }
-        }
-      },
-      "ShiftUpdateInput": {
-        "required": [
-          "enabled",
-          "endLocal",
-          "name",
-          "startLocal"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string"
-          },
-          "startLocal": {
-            "type": "string"
-          },
-          "endLocal": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ShiftRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "startLocal": {
-            "type": "string"
-          },
-          "endLocal": {
-            "type": "string"
-          },
-          "crossesMidnight": {
-            "type": "boolean"
-          },
-          "durationMinutes": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "note": {
-            "type": "string"
-          },
-          "createdByMembershipId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ShiftSaved": {
-        "type": "object",
-        "properties": {
-          "shift": {
-            "$ref": "#/components/schemas/ShiftRow"
-          },
-          "changeCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "changes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ConfigChange"
-            }
-          }
-        }
-      },
-      "ShiftInput": {
-        "required": [
-          "code",
-          "endLocal",
-          "name",
-          "startLocal"
-        ],
-        "type": "object",
-        "properties": {
-          "code": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string"
-          },
-          "name": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string"
-          },
-          "startLocal": {
-            "type": "string"
-          },
-          "endLocal": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "note": {
-            "maxLength": 500,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ChangePage": {
-        "type": "object",
-        "properties": {
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ConfigChange"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "ConfigImpact": {
-        "type": "object",
-        "properties": {
-          "item": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ConfigOverview": {
-        "type": "object",
-        "properties": {
-          "warehouseCode": {
-            "type": "string"
-          },
-          "warehouseName": {
-            "type": "string"
-          },
-          "timezone": {
-            "type": "string"
-          },
-          "warehouseStatus": {
-            "type": "string"
-          },
-          "archived": {
-            "type": "boolean"
-          },
-          "editable": {
-            "type": "boolean"
-          },
-          "config": {
-            "$ref": "#/components/schemas/WarehouseConfig"
-          },
-          "shifts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ShiftRow"
-            }
-          },
-          "changes": {
-            "$ref": "#/components/schemas/ChangePage"
-          },
-          "impacts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ConfigImpact"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ConfigOptions": {
-        "type": "object",
-        "properties": {
-          "strategies": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PickingStrategyOption"
-            }
-          },
-          "shifts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ShiftOption"
-            }
-          },
-          "scopes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ScopeOption"
-            }
-          },
-          "reviewRatioNote": {
-            "type": "string"
-          },
-          "splitShipmentNote": {
-            "type": "string"
-          },
-          "shiftNote": {
-            "type": "string"
-          }
-        }
-      },
-      "PickingStrategyOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ShiftOption": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          }
-        }
-      },
-      "LocationUpdateInput": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "type": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "nullable": true
-          },
-          "pickable": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "capacity": {
-            "type": "number",
-            "nullable": true
-          },
-          "weightLimit": {
-            "type": "number",
-            "nullable": true
-          },
-          "parentId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "parentProvided": {
-            "type": "boolean",
-            "nullable": true
-          }
-        }
-      },
-      "LocationSaved": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "parentId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "action": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "LocationCreateInput": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "nullable": true
-          },
-          "name": {
-            "type": "string"
-          },
-          "parentId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "type": {
-            "type": "string",
-            "nullable": true
-          },
-          "pickable": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "capacity": {
-            "type": "number",
-            "nullable": true
-          },
-          "weightLimit": {
-            "type": "number",
-            "nullable": true
-          }
-        }
-      },
-      "LocationNode": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "parentId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "STORAGE",
-              "RECEIVING",
-              "SHIPPING",
-              "QUARANTINE",
-              "DEFECTIVE",
-              "FROZEN"
-            ]
-          },
-          "typeLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "pickable": {
-            "type": "boolean"
-          },
-          "pickableByNature": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "depth": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "capacity": {
-            "type": "number",
-            "nullable": true
-          },
-          "weightLimit": {
-            "type": "number",
-            "nullable": true
-          },
-          "occupied": {
-            "$ref": "#/components/schemas/Occupancy"
-          },
-          "subtreeOccupancy": {
-            "$ref": "#/components/schemas/Occupancy"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "LocationTree": {
-        "type": "object",
-        "properties": {
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "levels": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LocationNode"
-            }
-          },
-          "rootCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totals": {
-            "$ref": "#/components/schemas/TreeTotals"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "Occupancy": {
-        "type": "object",
-        "properties": {
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "bucketRows": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "capacityUtilization": {
-            "type": "number",
-            "nullable": true
-          },
-          "capacityExceeded": {
-            "type": "boolean"
-          }
-        }
-      },
-      "TreeTotals": {
-        "type": "object",
-        "properties": {
-          "locationCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "rootCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "leafCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pickableCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "capacityMeasuredCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "skuCountDistinct": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "typeCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "byType": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TypeBreakdown"
-            }
-          }
-        }
-      },
-      "TypeBreakdown": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "STORAGE",
-              "RECEIVING",
-              "SHIPPING",
-              "QUARANTINE",
-              "DEFECTIVE",
-              "FROZEN"
-            ]
-          },
-          "label": {
-            "type": "string",
-            "nullable": true
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "LocationTreeCapabilities": {
-        "type": "object",
-        "properties": {
-          "hierarchyMaintained": {
-            "type": "boolean"
-          },
-          "capacityTracked": {
-            "type": "boolean"
-          },
-          "weightTracked": {
-            "type": "boolean"
-          },
-          "occupancyLive": {
-            "type": "boolean"
-          },
-          "autoAllocationAvailable": {
-            "type": "boolean"
-          },
-          "autoAllocationOwnerModule": {
-            "type": "string",
-            "nullable": true
-          },
-          "pickPathOwnerModule": {
-            "type": "string",
-            "nullable": true
-          },
-          "types": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "STORAGE",
-                "RECEIVING",
-                "SHIPPING",
-                "QUARANTINE",
-                "DEFECTIVE",
-                "FROZEN"
-              ]
-            }
-          },
-          "maxDepth": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "AssemblyComponentInput": {
-        "required": [
-          "requiredQuantity",
-          "skuId"
-        ],
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "bomComponentId": {
-            "type": "string",
-            "description": "catalog 3.5.2 bom_component 的逻辑 ID，仅作追溯",
-            "format": "uuid",
-            "nullable": true
-          },
-          "requiredQuantity": {
-            "type": "number",
-            "description": "按 BOM 规则 R7 冻结的应领量（单位用量 × 组装数量 × (1 + 损耗率/100)，6 位小数 HALF_UP）。本服务原样落库，不重算、不取整"
-          },
-          "unitQuantity": {
-            "maximum": 1000000000000,
-            "exclusiveMaximum": true,
-            "type": "number",
-            "description": "单位用量快照（每 1 个成品要多少），可空：只作追溯展示，不参与任何判定",
-            "nullable": true
-          },
-          "scrapRate": {
-            "maximum": 100,
-            "exclusiveMaximum": false,
-            "type": "number",
-            "description": "损耗率快照（百分数，5 = 5%），可空",
-            "nullable": true
-          },
-          "role": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "note": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "AssemblyOrderCreateInput": {
-        "required": [
-          "assemblyQuantity",
-          "bomCode",
-          "bomId",
-          "bomVersionId",
-          "bomVersionNo",
-          "components",
-          "inboundLocationId",
-          "legalEntityId",
-          "outboundLocationId",
-          "productSkuId",
-          "sourceSystem",
-          "warehouseId"
-        ],
-        "type": "object",
-        "properties": {
-          "productSkuId": {
-            "type": "string",
-            "description": "成品 SKU（必须是 catalog 真实 SKU；虚拟套装没有 SKU 行，填不出来）",
-            "format": "uuid"
-          },
-          "bomId": {
-            "type": "string",
-            "description": "catalog 3.5.2 的 BOM 逻辑 ID（引用键，无外键）",
-            "format": "uuid"
-          },
-          "bomCode": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string"
-          },
-          "bomVersionId": {
-            "type": "string",
-            "description": "catalog 3.5.2 的 BOM 版本逻辑 ID（引用键，无外键）",
-            "format": "uuid"
-          },
-          "bomVersionNo": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string"
-          },
-          "sourceSystem": {
-            "type": "string",
-            "description": "上游来源：TRADE_PROCESSING_ORDER = 来自 6.4.1.1 加工单；DIRECT = 仓库现场直接发起"
-          },
-          "referenceId": {
-            "type": "string",
-            "description": "上游单据引用键；sourceSystem=DIRECT 时必须为空",
-            "format": "uuid",
-            "nullable": true
-          },
-          "referenceNo": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "assemblyQuantity": {
-            "type": "number",
-            "description": "组装数量（成品入库量）。必须能被库存刻度 4 位小数精确表示"
-          },
-          "outboundLocationId": {
-            "type": "string",
-            "description": "组件出库库位；必填（库存的最小事实单位含库位）",
-            "format": "uuid"
-          },
-          "outboundQualityStatusId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "inboundLocationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "inboundQualityStatusId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "outboundLotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "inboundLotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "notes": {
-            "maxLength": 2000,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "components": {
-            "maxItems": 50,
-            "minItems": 0,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AssemblyComponentInput"
-            }
-          }
-        }
-      },
-      "AssemblyOrderCreated": {
-        "type": "object",
-        "properties": {
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderCode": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "productSkuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "assemblyQuantity": {
-            "type": "number"
-          },
-          "requiredComponentQuantity": {
-            "type": "number"
-          },
-          "componentCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "createdAt": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "AssemblyOrderIssueInput": {
-        "type": "object",
-        "properties": {
-          "notes": {
-            "maxLength": 2000,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "AssemblyComponentIssued": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "requiredQuantity": {
-            "type": "number"
-          },
-          "issuedQuantity": {
-            "type": "number"
-          },
-          "balanceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "locationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "lotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          }
-        }
-      },
-      "AssemblyOrderEntry": {
-        "type": "object",
-        "properties": {
-          "entryId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "balanceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "onHandDelta": {
-            "type": "number"
-          },
-          "reservedDelta": {
-            "type": "number"
-          },
-          "direction": {
-            "type": "string"
-          }
-        }
-      },
-      "AssemblyOrderIssued": {
-        "type": "object",
-        "properties": {
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderCode": {
-            "type": "string"
-          },
-          "inventoryTransactionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "occurredAt": {
-            "type": "string"
-          },
-          "productSkuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "assemblyQuantity": {
-            "type": "number"
-          },
-          "requiredComponentQuantity": {
-            "type": "number"
-          },
-          "issuedComponentQuantity": {
-            "type": "number"
-          },
-          "inboundProductQuantity": {
-            "type": "number"
-          },
-          "components": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AssemblyComponentIssued"
-            }
-          },
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AssemblyOrderEntry"
-            }
-          },
-          "entryCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "AssemblyOrderCancelInput": {
-        "required": [
-          "reason"
-        ],
-        "type": "object",
-        "properties": {
-          "reason": {
-            "maxLength": 200,
-            "minLength": 1,
-            "type": "string",
-            "description": "取消理由（必填：取消一张组装单必须能解释为什么）"
-          }
-        }
-      },
-      "AssemblyOrderRow": {
-        "type": "object",
-        "properties": {
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderCode": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "productSkuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "productSkuCode": {
-            "type": "string"
-          },
-          "bomId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "bomCode": {
-            "type": "string"
-          },
-          "bomVersionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "bomVersionNo": {
-            "type": "string"
-          },
-          "sourceSystem": {
-            "type": "string"
-          },
-          "referenceId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "referenceNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "assemblyQuantity": {
-            "type": "number"
-          },
-          "requiredComponentQuantity": {
-            "type": "number"
-          },
-          "issuedComponentQuantity": {
-            "type": "number"
-          },
-          "inboundProductQuantity": {
-            "type": "number"
-          },
-          "componentCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "inventoryTransactionId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "issuedAt": {
-            "type": "string",
-            "nullable": true
-          },
-          "cancelledAt": {
-            "type": "string",
-            "nullable": true
-          },
-          "cancelReason": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string"
-          },
-          "createdBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "notes": {
             "type": "string"
           }
         }
