@@ -89,11 +89,12 @@ it('跨法人调拨不因本模块而放行未交付模块或不存在的子路�
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
   const id = '11111111-1111-1111-1111-111111111111';
-  // 7.2.1 预占与 7.4.1.1 调整单尚未交付，不能被本模块顺手放行；
+  // 7.2.1 预占已交付（2026-10-13，inventory_reservation 落 warehouse），
+  // 「尚未交付因而必须 404」那条断言已随之失效，与 route.test.ts 同步移除。
+  // 剩下的 7.4.1.1 调整单仍未交付，不能被本模块顺手放行；
   // 不存在的子路径同样必须 404 —— 放行一个没有端点的形状，
   // 会让界面以为那个能力已经交付，而它点下去只拿到 404。
   for (const path of [
-    'warehouse/inventory/reservations',
     'warehouse/inventory/adjustments',
     `warehouse/inventory/cross-entity-transfers/${id}/not-a-real-action`,
     'warehouse/inventory/cross-entity-transfers/settlement',
