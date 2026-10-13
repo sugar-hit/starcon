@@ -5328,6 +5328,183 @@
         }
       }
     },
+    "/warehouse/inventory/reservations": {
+      "get": {
+        "tags": [
+          "reservation-controller"
+        ],
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "sourceType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sourceSystem",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requestedFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "requestedTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "overdueOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "legalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "reservation-controller"
+        ],
+        "operationId": "create_4",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationCreated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/reconciliation": {
       "get": {
         "tags": [
@@ -6601,7 +6778,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "list",
+        "operationId": "list_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -6708,7 +6885,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "create_4",
+        "operationId": "create_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -7064,7 +7241,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "create_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -7608,7 +7785,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "create_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -7949,7 +8126,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "list_1",
+        "operationId": "list_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -8022,7 +8199,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "create_7",
+        "operationId": "create_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -8751,7 +8928,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "list_2",
+        "operationId": "list_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -8835,7 +9012,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "create_8",
+        "operationId": "create_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -9109,7 +9286,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "create_9",
+        "operationId": "create_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -9539,7 +9716,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "create_10",
+        "operationId": "create_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -10274,7 +10451,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "create_11",
+        "operationId": "create_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -10465,7 +10642,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "list_3",
+        "operationId": "list_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -10563,7 +10740,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "create_12",
+        "operationId": "create_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -10729,7 +10906,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "create_13",
+        "operationId": "create_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -11284,7 +11461,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "create_14",
+        "operationId": "create_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -14290,6 +14467,71 @@
         }
       }
     },
+    "/warehouse/inventory/reservations/options": {
+      "get": {
+        "tags": [
+          "reservation-controller"
+        ],
+        "operationId": "options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/capabilities": {
+      "get": {
+        "tags": [
+          "reservation-controller"
+        ],
+        "operationId": "capabilities_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReservationCapability"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/reconciliation/{runId}": {
       "get": {
         "tags": [
@@ -14665,7 +14907,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -14950,7 +15192,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -15167,7 +15409,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -15198,7 +15440,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -17013,7 +17255,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -17044,7 +17286,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -17368,7 +17610,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -17544,7 +17786,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_12",
+        "operationId": "capabilities_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -17970,7 +18212,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_13",
+        "operationId": "capabilities_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -18041,7 +18283,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_14",
+        "operationId": "capabilities_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -18201,7 +18443,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "capabilities_15",
+        "operationId": "capabilities_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -18367,7 +18609,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "options",
+        "operationId": "options_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -18398,7 +18640,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_16",
+        "operationId": "capabilities_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -18575,7 +18817,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "capabilities_17",
+        "operationId": "capabilities_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -18649,7 +18891,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "capabilities_18",
+        "operationId": "capabilities_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -23052,6 +23294,84 @@
           },
           "platformListing": {
             "type": "number"
+          }
+        }
+      },
+      "ReservationCreateInput": {
+        "required": [
+          "legalEntityId",
+          "requestedQuantity",
+          "skuId",
+          "sourceSystem",
+          "sourceType"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceSystem": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceType": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "heldAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationCreated": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
           }
         }
       },
@@ -32121,6 +32441,263 @@
           }
         }
       },
+      "ReservationPage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/ReservationSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "detailUnavailable": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationNo": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "sourceSystemLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "consumedQuantity": {
+            "type": "number"
+          },
+          "remainingQuantity": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "overdueSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "heldAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "committedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "settledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "counts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "consumedQuantity": {
+            "type": "number"
+          },
+          "remainingQuantity": {
+            "type": "number"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueQuantity": {
+            "type": "number"
+          }
+        }
+      },
+      "ReservationOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatusOption"
+            }
+          },
+          "sourceSystems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceOption"
+            }
+          },
+          "sourceTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceOption"
+            }
+          },
+          "sortOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatusOption"
+            }
+          },
+          "timezoneNote": {
+            "type": "string"
+          },
+          "ownerNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SourceOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "StatusOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ReservationCapability": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
       "ReconciliationRunPage": {
         "type": "object",
         "properties": {
@@ -40252,17 +40829,6 @@
             "type": "string"
           },
           "status": {
-            "type": "string"
-          }
-        }
-      },
-      "StatusOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
             "type": "string"
           }
         }

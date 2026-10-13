@@ -631,6 +631,17 @@ export const TASK_PAGES: TaskPage[] = [
     fields: ['SKU', '仓库', '库龄区间', '安全库存', '预警类型', '负责人'],
     workflow: ['识别风险', '制定处置', '跟进结果'],
   },
+  {
+    // 7.2.1.1 预占需求列表。与 ledger / aging 同属库存卷，按 href 排序插在 ledger 之后。
+    // 本条是**追加**：该文件是多车道共用的注册表，并入时按 href 求并。
+    href: '/inventory/reservation',
+    implemented: true,
+    domain: 'inventory',
+    label: '预占需求',
+    description: '查看订单履约、加工领料与其他占用的预占需求及剩余量、超时时长。',
+    fields: ['预占单号', '需求来源', 'SKU', '需求量', '剩余量', '状态', '超时时长'],
+    workflow: ['筛选需求', '核对剩余量', '跟进超时'],
+  },
 ];
 export function findTaskPage(href: string) {
   return TASK_PAGES.find((page) => page.href === href);
