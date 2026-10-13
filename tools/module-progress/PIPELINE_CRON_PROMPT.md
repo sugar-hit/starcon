@@ -1,480 +1,316 @@
-# starcon 并行车道开发流水线
+# starcon 并行车道流水线 · cron 任务书（2026-10-13 组批模式）
 
-项目：`/Users/tommy/Project/starcon`（Java Spring Boot 微服务 + Next.js 双栈，遵守仓库根 `AGENTS.md`）。
+> **本文件是 cron 任务的 prompt 来源。协议只存这一份，且在版本控制里。**
+> 改策略改文件，不要改 cron prompt 字段。
+>
+> 落库的完整协议在 `tools/module-progress/PIPELINE.md`，**两者不一致时以 PIPELINE.md 为准**，
+> 并在汇报里点名不一致的地方。
 
-你每次运行是一个**全新的独立会话**，不继承上次上下文。所有判断必须从仓库现状重新取证，不能凭记忆。
+你每次运行是**全新的独立会话**，不继承任何上下文。
+**所有判断必须从仓库现状重新取证，不能凭记忆。**
 
-## ⛔ 停机协议（最高优先级，先看这条）
+---
 
-**本流水线硬停机时刻：2026-10-18 18:00（Asia/Shanghai，周日）。**
-（`tools/module-progress/PIPELINE.md` 是同一事实的落库版本；两者不一致时以 PIPELINE.md 为准，并在汇报里点名。
+## 0. 项目与职责
 
-### 停机时刻与节奏的变更史（**最新一条在最上面**）
+项目：`/Users/tommy/Project/starcon`（Java Spring Boot 微服务 + Next.js 双栈，遵守根 `AGENTS.md`）。
 
-| 时间 | 停机时刻 | 节奏 | 触发原因 |
-| --- | --- | --- | --- |
-| **2026-10-08 22:25** | **2026-10-18 18:00** | **`0 * * * *` + `--lanes 1`，配额 2** | **用户反馈「电脑温度太高了」+「结束时间延长到下周日」** |
-| 2026-10-08 21:35 | 2026-10-11 18:00 | `*/30` + `--lanes 3`，配额 4 | 用户要求 24 小时连续跑到周日 |
-| 2026-10-08 21:30 | 2026-10-11 18:00 | `0 * * * *` + `--lanes 4` | 用户要求延到周日 |
+你是**调度者**，绝不自己写业务代码 —— 代码由你派发的 `worker` 子任务完成。
 
-**这次把「噪音」升级成了「温度」硬约束。** `--lanes 3` 的稳态并发正好等于
-2026-10-07 22:56 记录的「风扇很响」量级（6 个 Testcontainers PG 容器、load 11+），
-用户这次报的是**温度**，所以并发必须降到 1 车道，而不是在 3 附近微调。
-降载换来的是停机时刻往后延 7 天（10-11 → 10-18），两者是配套决定，不要只改其一。）
-
-每次运行**第一步先看完整时间**：`date '+%Y-%m-%d %H:%M'`
-
-⚠️ **必须比对完整日期，不能只比 `HH:MM`。** 停机日当天 09:00 看到的 `09:00 < 18:00` 是对的，
-但 10-19 的 09:00 也长这样 —— 只比时分会导致停机后继续无限派发。
-
-- **当前时间 < 2026-10-18 18:00** → 照常执行下面第 1–5 步，车道继续跑。
-- **当前时间 >= 2026-10-18 18:00** → 进入**收尾模式**，**绝对不要派发任何新车道**，依次做完：
-
-1. `node tools/module-progress/lane.mjs merge-ready`（把赶在停机前落地的车道并进集成头）
-2. `node tools/module-progress/sync.mjs`
-3. `node tools/module-progress/lane.mjs gc`
-4. 出**最终收尾报告**（格式见下）
-5. **关闭本定时任务**（`fcf14c15-6744-4ec2-b733-fc31d5babf44`），然后结束本次运行
-
-**最终收尾报告**必须包含：总数 / 已交付 / 进行中 / 未开发 / 完成率、本轮周期累计交付数与平均吞吐、
-分阶段进度表（D1–D2 / D3 / D4 / D5 / D6 / D7）、仍在 in-flight 的车道（模块 ID + 名称 + 心跳年龄，
-必须点名，这些模块未完成）、**离 465 还差几个**（不要许诺补齐）、未解决阻塞项与下一步建议、集成头 commit hash。
-
-**关闭定时任务的精确做法**：
-```
-mcp_invoke(tool_name="cron_update", arguments={
-  "cron_id":"fcf14c15-6744-4ec2-b733-fc31d5babf44",
-  "enabled":false,
-  "schedule":"0 * * * *"
-})
-```
-⚠️ **改 cron 时必须显式带上 `schedule`**，只传 `{cron_id, enabled}` 会把调度静默重置成 `0 * * * *`。
-改完必须**逐字核对返回体里的 `schedule` 和 `nextRun`**，`nextRun` 更直接。
-另有一个 B 组任务 `f029d0bf-f94a-4aa4-8633-6dd220fe2ce7`（`0 */2`）保持 `enabled: false` 即可，不必再动。
-
-**若 `enabled:false` 报错或没生效，在报告里写明失败原因，不要假装关掉了。**
-
-**如果本次运行已经是收尾之后**（任务没关成功又被触发）：不要再做任何改动，只需确认该任务是
-`enabled: false`，然后直接结束。
-
-## 你的职责
+每次运行的职责：
 
 1. 汇报 465 个 L4 模块的交付进度
-2. 回收已经落地的车道，并把它们并入集成头
-3. 排出若干条**互不依赖**的车道并派发开发子任务（并行）
-4. 汇报本次动作与结果
+2. 回收已落地的车道，并入集成头
+3. 每轮派发**一组（4 条）**互不依赖的车道并行开发
+4. **对整组做一次批量验证**，绿了才 push
+5. **为每轮交付写详细功能说明**，随 commit 推送到远端
 
-绝不自己动手写业务代码 —— 你是调度者，代码由你派发的子任务完成。
+---
 
-## 你的并发配额
+## 1. 🧩 组批模式：开发与验证分离（核心，先读这段）
 
-**你是唯一的调度任务，每小时一次（`0 * * * *`），每次 `plan --lanes 1`。全局配额 2 条车道。**
+**每 5 小时开发一组功能，每组只验证一次。** 这是本流水线当前的核心模式。
 
-⚠️ **配额从 4 降到 2 是 2026-10-08 22:25 的决定，理由是用户报「电脑温度太高」，不是调优偏好。**
-配额 4 只是个上界，真正决定并发的是 `--lanes`；两者必须同时降，否则会漂回去。
+### 为什么（实测数据，不是推测）
 
-### ⚠️ 车道寿命实测是 30 分钟，不是 40（2026-10-08 21:35 实测，55 个样本）
+一条车道的全量验证规模：**后端 2829 例 + 前端 2163 例 + Next production build**。
+后端共 151 个测试类，分布 catalog 78 / warehouse 37 / identity 18 / **trade 8** / channel 5 / crm 3。
 
-`.dev-agent/lanes.json` 的 `createdAt → landedAt/mergedAt`：中位数 **30 分钟**、均值 33、区间 **1–82**。
-最慢 5 条：`10.4.1.2` 82、`7.6.1.1` 78、`3.9.2.1` 61、`10.5.2.1` 50、`10.4.1.1` 49。
+**一条只改了 trade（占 5.3%）的车道，要重跑 100% 的测试** —— 95% 的机器时间在重新验证
+它没碰过的代码。4 条车道各跑一遍 = 4 套全量 = 巨量重复，且这就是「电脑太热」的来源。
 
-**此前文档里的「约 40 分钟」是估计值，实测偏乐观。** 所有吞吐估算用 30 分钟重算。
+**更关键**：`lane.mjs` 从不执行任何测试，`land` 只校验「工作区干净 + 有新提交」。
+所以**合并后的集成头状态从来没人验证过** —— 「A 弄坏了 B」只能等以后某条新车道偶然踩到才暴露。
+仓库有真实事故记录：某车道把某列改成 NOT NULL 且无 DEFAULT 兜底，破坏了早先合入车道的 INSERT，
+各自单跑都绿。组批模式**补上了这层今天不存在的安全网**。
 
-稳态并发 ≈ `--lanes × 车道寿命 / tick 间隔`；吞吐 ≈ `--lanes / tick 间隔 × 60`。
+### 三层验证
 
-| tick | `--lanes` | 稳态并发 | 吞吐 | PG 容器 | 状态 |
-| --- | --- | --- | --- | --- | --- |
-| **60 分钟** | **1** | **0.5** | **1 个/小时** | **1–2** | ← **当前（2026-10-08 22:25 起）** |
-| 30 分钟 | 2 | 2.0 | 4 个/小时 | 4 | 没白跑，但也没收益 |
-| 30 分钟 | 3 | 3.0 | 6 个/小时 | **6** | 已停用：用户报温度过高 |
-| 60 分钟 | 4 | 2.0 | 4 个/小时 | 4 | 已停用：配额 4 撞 PG 降噪闸 |
-| 60 分钟 | 2 | 1.0 | 2 个/小时 | 2–4 | 备用档，用户嫌热时不要往上调 |
-
-**2026-10-08 22:25 为什么降到 `0 * * * *` + `--lanes 1` + 配额 2：**
-用户反馈「电脑温度太高了」。`--lanes 3` 的稳态并发 3 条 ≈ 6 个 Testcontainers PG 容器，
-正是 2026-10-07 22:56 记录的「风扇很响」量级。用户这次报的是温度，所以要压到 1 车道。
-**停机时刻同时从 10-11 延到 10-18，补偿降载损失的产能 —— 这是配套决定。**
-
-⚠️ **不要因为「闲着」就把 `--lanes` 调回 2 或 3。** 空转轮次是正确结果，不是浪费产能。
-用户在场时会自己调，不要自作主张提速。
-
-### 本轮交付预期（2026-10-08 22:25 基线）
-
-| 项 | 值 |
-| --- | --- |
-| 模块总数 | 465 |
-| 起点已交付 | 116（24.9%） |
-| 起点未开发 | **349** |
-| 停机前小时 tick 数 | 约 235（10-08 23:00 起，至 10-18 17:00 止） |
-| 理论上限 | `235 × 1` ≈ **235 个模块** |
-| 受剩余量约束 | 最多 235 个 → **理论终点 351 / 465 ≈ 76%** |
-
-⚠️ **降载后这套流水线跑不完 465 个模块，这是用户知情下选的取舍，不要粉饰。**
-
-上一版（`*/30` + `--lanes 3`）理论上限 408 个、诚实区间 90%–100%，那是建立在
-6 个 PG 容器、用户报温度过高之前的节奏上。**降载后吞吐从 6 个/小时掉到 1 个/小时，
-折掉 60%，而停机只延后了 7 天（约 336 小时 → 235 小时），延长的时长不足以补回差额。**
-
-诚实预期（四个折损因素叠乘）：
-
-| 折损 | 系数 | 说明 |
+| 层 | 谁跑 | 跑什么 |
 | --- | --- | --- |
-| 名义吞吐 | 1.0 | `1 lane × 1 tick/小时` |
-| `BLOCKED` / 并入冲突重试 | ×0.96 | 55 样本里 2 条 abandoned，3.6% |
-| 不可调度模块 | ×0.97 | 上游永不交付（如 `3.7.1.1` 被 `product_compliance` 表结构阻塞） |
-| 长尾车道占位 | ×0.90 | 区间上界 82 分钟 = 中位数 30 的 2.7 倍，跨 tick 占位 |
-| 调度摩擦（回收等待、服务闸） | ×0.95 | 实测经验值 |
+| **L0 编译闸** | worker，在自己 worktree | `pnpm typecheck` + 后端 `compile` |
+| **L1 模块闸** | worker，在自己 worktree | **只跑自己那一个服务**的后端测试 + 自己模块的前端测试 |
+| **L2 批次闸** | **你，在集成头上** | **全量**：mvnw verify + typecheck/lint/test + Next build + sync --check |
 
-**综合系数 ≈ 0.80 → 235 × 0.80 ≈ 188 个 → 终点约 116 + 188 = 304 / 465 ≈ 65%。**
-区间 **60% – 76%**（上限是无任何折损的 76%，下限叠加更多折损）。
+L0/L1 归因精确；L2 抓跨车道互相破坏。
 
-**汇报一律按 `sync.mjs` 的实际数字说话，不要承诺「全部完成」，
-也不要拿上一版的 90%–100% 当参照 —— 那个区间已经作废。**
-若某轮实际吞吐稳定高于 1.3 个/小时，在汇报里指出并给出样本数，让用户自己决定要不要提速。
+### 数字对比
 
-### 🔥 机器温度：硬约束，优先级高于吞吐（2026-10-08 22:25 用户反馈「电脑温度太高了」）
+| 指标 | 旧模式（10-08） | 组批模式（现在） |
+| --- | --- | --- |
+| 每轮车道数 | 1 | **4** |
+| 每轮全量验证次数 | 1 | **1**（不变） |
+| 单轮功能产出 | 1 个 | **最多 4 个** |
+| 发热峰值 | 1 次全量 | **1 次全量（不变）** |
 
-实测关系（10 核机器）：
-
-| running 车道 | 同时存活的 PG 容器 | load 1min 峰值 | 体验 |
-| ------------ | ------------------ | -------------- | ---- |
-| 0–1 条 | 0–2 个 | 空载基线 4–7 | ✅ 当前档位 |
-| 2 条 | 约 4 个 | 8–12 | 可接受（备用档） |
-| 3 条 | **6 个** | 11+ | 风扇很响 → **已导致温度过高** |
-| 5 条 | 4–6 个 | **14.8** | 很响 |
-
-**温度是硬约束，和吞吐冲突时永远让位给温度。** 不要为了「闲着」把并发调上去。
-
-每条车道并发 `verify` 时约起 2 个 Testcontainers PG 容器，**PG 容器数比 load 更能提前反映热度**。
-**派发前除了数 running，一定要数容器：**
-
-```bash
-docker ps --filter "ancestor=postgres:16-alpine" --format '{{.Names}}\t{{.Status}}'
-```
-
-看到 **4 个** `postgres:16-alpine`（**不含常驻的 `starcon-mig-v2`**）→ 视为已到温度上限，**本轮零派发**。
-
-⚠️ **PG 闸从 6 降到 4 是 2026-10-08 22:25 的调整。** 配额降到 2 之后，6 个容器已经不可能出现，
-闸在 6 就是死代码；按新档位（1–2 车道 ≈ 2–4 容器）设 4，它才真正绑得住并发。
-`starcon-mig-v2` 是常驻的本地迁移库（Up 36 小时），**永远不计入**，否则流水线会全程空转。
-
-### 🌡️ 温度闸：内核上报的节流信号（比 load 更直接）
-
-```bash
-pmset -g therm
-```
-
-**这台机器上可用**（2026-10-08 22:21 实测输出 `No thermal warning level has been recorded`，
-即当时温度正常；AC 供电、电池 80%）。它由内核记录真实热压力，不是估算值：
-
-- 输出里出现 `CPU_Speed_Limit` / `CPU_Processor_Speed_Limit` / `CPU_Shutdown_SpeedLimit`
-  且值 **< 100** ⇒ 系统**已经在因过热降频** → **命中 STOP，本轮零派发**。
-- 输出仍是 `Note: No thermal warning level has been recorded` ⇒ 温度正常，可继续判其它闸。
-- 命令不存在或报 unknown oid ⇒ **跳过温度闸**，不要因此判STOP（不同机型 oid 不同）。
-
-⚠️ **温度闸报降频时，除了零派发，还要在汇报里点名**「内核已记录热降频，暂停派发」。
-持续多轮降频说明这台机器扛不住当前档位，应建议用户继续减负或干脆停机，不要硬撑。
-
-### load 阈值不能低于 10
-
-空载基线是 **4–7**（来源是 Docker VM 常驻 + WeChat ~45% + IDE，与本流水线无关）。
-2026-10-07 21:39–21:42 在 `lanesRunning: 0` 时 load 1min 只从 8.12 衰减到 7.04，降不下去。
-
-**阈值低于空载基线不是保护 CPU，是把流水线整个停掉。** 一度设成 6 就是这么把自己锁死的。
+**总测试量不变，产出翻 4 倍，温度不变。** 这是能安全把 lanes 提到 4 的全部原因。
 
 ---
 
-## 🚦 第 0 步：容量闸（**先于一切动作，只读，不取闸**）
+## 2. ⛔ 停机协议
 
-事故复盘：两个 tick 各自无条件 `plan --lanes 4`，而 `lane.mjs plan` **没有全局容量闸** ——
-它只排除「已被 running/ready 车道占用的模块」，从不看「当前已有多少条 running 车道」。
-结果每轮稳加 4 条，车道寿命 > tick 间隔，**并发无上界增长直到压垮机器**。
+**停机条件：全部 465 个模块状态为 `已交付`。不再有日期停机。**
 
-### 0.1 先只读取数（**这五条都要跑**）
+（原来定的 2026-10-18 18:00 已作废 —— 按当时节奏跑不完剩余模块，
+日期停机会把流水线砍在一半，与「尽快完成」冲突。）
 
-```bash
-cd /Users/tommy/Project/starcon
-node tools/module-progress/lane.mjs status | head -30    # 数 state==='running' 的条目数
-uptime                                                   # 看 1min / 5min / 15min 趋势
-sysctl -n hw.ncpu                                         # 核数，决策按它折算
-docker ps --filter "ancestor=postgres:16-alpine" --format '{{.Names}}\t{{.Status}}'
-pmset -g therm                                            # 内核热压力，降频即 STOP
-```
-
-数 PG 容器时**排除 `starcon-mig-v2`**（常驻迁移库，不是 Testcontainers）。
-
-### 0.2 判定为 STOP（零派发），命中任意一条即可
-
-- **`status` 里 running 条数 >= 2**（设计配额，**主闸**；2026-10-08 22:25 由 4 降到 2）
-- **load 1min 值 > 核数**（10 核机即 load 1min > 10，**辅助闸**）
-- **Testcontainers PG 容器数 >= 4**（**降噪/降温闸**，注意排除常驻的 `starcon-mig-v2`；
-  2026-10-08 22:25 由 6 降到 4）
-- **`pmset -g therm` 报出 `CPU_Speed_Limit` 等降频项且值 < 100**（**温度闸**，2026-10-08 22:25 新增）
-- **`plan` 返回的 `newlyPlanned` 为空数组** —— 本轮一条新车道都没排出来，**此时一条都不派**
-
-**闸的优先级：温度闸 > 配额闸 > PG 闸 > load 闸。**
-温度是用户 2026-10-08 明确提出的硬约束，与吞吐冲突时让位给温度。
-
-命中 STOP → **不要 `gate acquire`、不要 `plan`、不要派发任何 task**。只跑 `sync.mjs` 刷新台账 + 汇报，
-然后结束本轮。「车道全忙，本轮未派发」是完全正常且正确的结果，不是失败。
-
-### 0.3 顺序：先 `gate status`，**不要直接 `gate acquire`**
-
-```bash
-node tools/module-progress/lane.mjs gate status     # 只读，先看闸状态 + ageSeconds
-```
-
-**只有本轮确实打算派发（0.2 四条都没命中）时才去 acquire。**
-理由：acquire 成功就等于把自己绑进一次「派发或 release」的决策。
-
-### 0.4 「闸被占」与「超配额」是相关事件
-
-退出码 3 = 另一个 tick 正在派发。**不要顺势认为「我这边没事」** —— 持有闸的那个 tick
-往往就是刚刚把车道数推过配额的那次派发。撞闸后仍然要跑 0.1 数 running：
-若 running >= 2 → 撞闸恰好是**别停手的信号** → 零派发 + 只汇报。
-
-**闸被占时仍然可以做（纯只读）**：`sync.mjs`、`lane.mjs status`、台账完整性 grep、进程/写入取证。
-**不要做**：`merge-ready`、`gc`、`plan`、`heartbeat`（会覆盖 worker 自己那条有信息量的 note）。
-
-### 0.5 load 必须看趋势，1min 会骗人
-
-**实测 2026-10-07 22:29:50 → 22:30:20，90 秒内 load 1min 从 6.31 冲到 14.83。** 单点采样完全不可信。
-
-- `1min > 5min > 15min` ⇒ 正在爬升，**本轮按 STOP 处理**
-- `1min < 5min` ⇒ 尖峰已过
-
-**别用 load 判断机器是否空闲，要用 `docker ps` 数 PG 容器。**
-
-### 0.6 判活看文件写入，不看心跳
-
-worker 大部分时间在跑 `mvnw verify` / Testcontainers 冷启动（**几分钟不写文件**），心跳照样新鲜。
-
-```bash
-for d in .worktrees/*/; do
-  find "$d" -newermt '-8 minutes' -type f \
-    -not -path '*/.git/*' -not -path '*/node_modules/*' \
-    -not -path '*/target/*' -not -path '*/.next/*' 2>/dev/null | head -5
-done
-```
-
-重载车道会出现**上千个文件写入**（构建/测试产物），轻载车道只有个位数。
-
-### 0.7 降温与压回
-
-**不要杀车道**（会丢工作量，且不是调度器该干的事）。只**停止继续加**，并在汇报里点名触发了哪条闸。
-
-**已经是最省档位（`0 * * * *` + `--lanes 1` + 配额 2）还命中温度闸时，不要再自行降 —— 报给用户。**
-调度器已经降到头，能做的只有两件事：① 汇报里点名温度闸触发；② 区分是不是非流水线负载：
-
-```bash
-ps -Ao pcpu,comm -r | head -8
-```
-
-若高占用是 WeChat ~45% / WindowServer ~22% / Docker VM 常驻而**不是** `java` / `node`，
-**那是机器本来就这样，再降 `--lanes` 是白降** —— 直接告诉用户去关别的应用。
-
----
-
-## 第 1 步：同步台账
+每次运行**第一步先跑台账**：
 
 ```bash
 cd /Users/tommy/Project/starcon && node tools/module-progress/sync.mjs
 ```
 
-**以它的输出为准汇报数字，不要自己数。** 状态只有三个值：`已交付` / `进行中` / `未开发`。
+- **未开发 > 0** → 照常执行第 1–6 步
+- **未开发 == 0** → 收尾模式，**绝不派发新车道**：
+  1. `lane.mjs merge-ready`
+  2. `sync.mjs`
+  3. `lane.mjs gc`
+  4. 出最终收尾报告（总数/已交付/完成率、分阶段进度表、分系统进度表、集成头 hash、push 的 commit 列表）
+  5. **关闭本定时任务**（`fcf14c15-6744-4ec2-b733-fc31d5babf44`）：
+     ```bash
+     # mcp_invoke(tool_name="cron_update", arguments={
+     #   "cron_id":"fcf14c15-6744-4ec2-b733-fc31d5babf44",
+     #   "enabled":false,
+     #   "schedule":"0 */5 * * *"   # 必须显式带 schedule
+     # })
+     # ⚠️ boolean 经 mcp_invoke 可能被序列化成 string，报 "/enabled: Expected boolean"。
+     #   这是调用链类型退化，改参数组合永远无效 —— 照常做其他步骤，报告里写明失败原因。
+     # ⚠️ 只传 {cron_id, enabled} 会把 schedule 静默重置成 0 * * * *。
+     #   改完必须逐字核对返回体的 schedule 和 nextRun。
+     ```
+  6. 报告里明确写「定时任务已关闭」。**关不掉就写明失败原因，不要假装关掉了。**
 
-## 第 2 步：取调度闸（**仅在第 0 步判定为 GO 且 0.3 的 `gate status` 显示空闲时才做**）
+另一个 B 组任务 `f029d0bf-f94a-4aa4-8633-6dd220fe2ce7`（`0 */2`）保持 `enabled: false`，不必再动。
+
+### 🛑 长期停滞保护
+
+连续 **3 轮**「派发了车道但一条都没交付」→ 本轮零派发，出停滞报告点名原因
+（上游依赖未交付 / 反复 BLOCKED / L2 长期红 / 机器闸长期命中）。
+**不要**靠加并发硬推。
+
+---
+
+## 3. 🚨 容量闸（先于一切动作，只读）
+
+### 3.1 四条只读命令（都要跑）
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs gate acquire
+cd /Users/tommy/Project/starcon
+node tools/module-progress/lane.mjs status | head -30
+uptime
+sysctl -n hw.ncpu
+docker ps --filter "ancestor=postgres:16-alpine" --format '{{.Names}}\t{{.Status}}'
+pmset -g therm
 ```
 
-**收尾时必须 `lane.mjs gate release`**，否则下一个 tick 会一直撞闸。
+### 3.2 判定 STOP（命中任一条即零派发）
 
-## 第 3 步：回收已落地的车道
+- **温度闸（最高优先级）**：`pmset -g therm` 报 `CPU_Speed_Limit` / `CPU_Processor_Speed_Limit` /
+  `CPU_Shutdown_SpeedLimit` 且值 **< 100** ⇒ 系统已因过热降频 ⇒ **STOP，零派发**。
+  报 unknown oid ⇒ **跳过温度闸**，不要因此判 STOP。
+  （2026-10-08 22:21 实测输出 `Note: No thermal warning level has been recorded` = 正常。）
+- `status` 里 running 条数 **>= 4**
+- load 1min **> 核数**（10 核机即 > 10）
+- Testcontainers PG 容器数 **>= 6**（排除常驻的 `starcon-mig-v2`，它 Up 数天不是 Testcontainers）
+- `plan` 返回的 `newlyPlanned` 为空数组
+
+**闸的优先级：温度闸 > 配额闸 > PG 闸 > load 闸。**
+
+命中 STOP → **不取闸、不 plan、不派发**。只跑 `sync.mjs` 刷新台账 + 汇报，然后结束。
+「车道全忙，本轮未派发」是完全正常且正确的结果。
+
+⚠️ **load 阈值不能低于 10**：空载基线就有 3–7（Docker VM + 常驻应用），
+低于基线不是保护 CPU，是把流水线整个锁死（曾设成 6，自锁过）。
+
+⚠️ **load 要看趋势**：实测 22:29:50 → 22:30:20（90 秒）load 1min 从 6.31 冲到 14.83。
+`1min > 5min > 15min` ⇒ 正在爬升 ⇒ 按 STOP 处理。
+
+⚠️ **别用 load 判断空闲，用 `docker ps` 数 PG 容器**。
+
+### 3.3 取闸顺序
+
+先 `gate status`（只读），确认要派发且闸空闲，再 `gate acquire`。
+撞闸（退出码 3）后仍要数 running：撞闸往往正是「别停手」的信号。
+闸被占时仍可做纯只读：`sync.mjs`、`lane.mjs status`、台账完整性 grep。
+
+---
+
+## 4. 六个步骤
+
+### 第 1 步：同步台账
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs merge-ready
+cd /Users/tommy/Project/starcon && node tools/module-progress/sync.mjs
+```
+**以它的输出为准汇报数字，不要自己数。**
+
+### 第 2 步：取调度闸
+
+```bash
+node tools/module-progress/lane.mjs gate acquire
+```
+（仅在判定 GO 且 `gate status` 显示空闲时）
+
+### 第 3 步：回收已落地的车道
+
+```bash
+node tools/module-progress/lane.mjs merge-ready
+node tools/module-progress/sync.mjs
+node tools/module-progress/lane.mjs gc
 ```
 
-把所有 `ready` 车道并入集成头 `integration/module-dev`，成功后跑 `sync.mjs` 刷新台账，再 `lane.mjs gc`。
+退出码 2 = 有车道并入冲突，脚本已标 `conflict`。**不要自己强行解冲突**，写进汇报，下轮处理。
 
-退出码 2 = 有车道并入冲突，脚本已标成 `conflict` 并列出冲突文件 —— **不要自己强行解冲突**，
-写进汇报，下一轮处理。
+若主工作区已有未解决冲突（`UU`）：不要 `git merge --abort`（可能丢别人成果），
+在汇报里点名冲突文件。
 
-**主工作区必须干净**：`merge-ready` 在脏工作区上会直接 `exit(1)`，**并入通道会被彻底堵死**。
-若发现残留未跟踪文件，确认无用后用 `git stash push -u -m "<说明>"` 存起来（不要直接删），
-并把原因写进汇报。
-
-并入后顺手核对台账完整性：
+并入后核对台账完整性：
 ```bash
 grep -cE '^\| [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ ' docs/product/capability-blueprint/module-progress.md  # 须恒为 465
 grep -oE '^\| [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ ' docs/product/capability-blueprint/module-progress.md | sort | uniq -d   # 须为空
 ```
 
-## 第 4 步：排车道并派发（**仅当第 0 步判定 GO**）
+### 第 4 步：排车道并派发
 
 ```bash
-cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs plan --lanes 1
+node tools/module-progress/lane.mjs plan --lanes 4
 ```
 
-它会读台账 + 蓝图「关系」字段 → 挑出**上游已交付且 L3 锚点互不相同**的模块 →
-按**依赖深度降序**（关键路径优先）→ 预分配 Flyway 版本号 → 建分支 → 建 worktree → 装依赖。
+它会读台账 + 蓝图「关系」字段，挑出**上游已交付且 L3 锚点互不相同**的模块，
+按**依赖深度降序**排，预分配 Flyway 版本号，建分支 + worktree + 装依赖。
 
-**`--lanes 1` 是 2026-10-08 22:25 因用户报「电脑温度太高」定的档位，不要自行调回 2 或 3。**
-`--lanes 3` / `--lanes 4` 都于 2026-10-08 21:35 干跑验证过可排满（11.4.2.2 / 4.2.2.2 / 6.4.1.1 /
-15.4.2.1，分落 D4–D7，L3 锚点互不重复，`serviceBlocked` 为空）—— **能力上没问题，
-纯粹是并发度量的取舍：能排出来 ≠ 该排。**
-若某轮 `newlyPlanned` 为空，先看 `serviceBlocked` 区分「服务缺口」还是「上游未就绪」，
-照实汇报，不要自己改锚点绕开。
+- **不要再自己挑模块、排顺序、定基线** —— 编排逻辑在脚本里。
+- **不要用 `plan` 试探**（它有副作用，会凭空造车道）。想判断该不该派发，先用 3.1 的只读命令。
+- 想看原因不留副作用用 `plan --lanes 4 --dry-run`。
+- **若 `newlyPlanned` 为空数组 → 按 3.2 判 STOP，一条都不派。**
+- 输出里 `serviceBlocked` 非空 = 服务缺口堵死（模块该落的微服务还没并入集成头）。
 
-**注意 `plan` 有副作用**：跑它会真的创建分支 + worktree。**不要用 `plan` 去「试探」有没有新车道** ——
-想判断该不该派发，先用 0.1 的四条只读命令。
+**派发前冲突预检**：检查每条 `toDispatch` 的 worktree 是否已存在且含未跟踪文件、
+迁移版本号是否已被占用。**发现已被占 = 立刻停止派这条，零改动退出**，不要开双 writer。
 
-**微服务闸**：模块该落的微服务必须已在集成头里。`newlyPlanned` 为空时先看 `serviceBlocked`：
-空数组 + 非空 `serviceBlocked` = 服务缺口堵死；空数组 + 空 `serviceBlocked` = 真的上游未就绪。
+派发时每条车道一个 `task`（`agent_name: worker`，`run_in_background: true`），
+任务书用 `PIPELINE.md` 的「子任务模板」章节。
 
-### 冲突预检（派发前必做）
+### 第 5 步：批量验证 + 写详细说明 + push
 
-派发前对每条 `toDispatch` 车道检查：worktree 目录是否已存在且含未跟踪文件、迁移版本号是否已被别的车道占用。
-**发现已被占 = 立刻停止派这条，零改动退出**，不要开双 writer。
+#### 5.1 静态预检（先于 L2，几秒）
 
-### 子任务模板
-
+对本批新迁移跑「已知互相破坏形状」检查：
+```bash
+grep -rn 'ADD COLUMN' backend/services/*/src/main/resources/db/migration/ | grep -v 'DEFAULT'
+grep -rn 'SET NOT NULL' backend/services/*/src/main/resources/db/migration/
+grep -rn 'ADD CONSTRAINT.*CHECK' backend/services/*/src/main/resources/db/migration/
 ```
-在 <WORKTREE> 这条车道上实现能力蓝图模块 <模块ID>「<模块名>」（阶段 <阶段>，L3 锚点 <L3>）。
+命中①无 DEFAULT，或②SET NOT NULL 且目标表无 BEFORE INSERT 触发器兜底 ⇒ **必然违约，当场点名修掉**。
 
-## 你已经在一个独立的 worktree 里了
-分支 <BRANCH> 已创建，依赖已装好，基线是集成头 integration/module-dev。
-**不要 checkout 别的分支，不要切回主工作区，所有命令都在 <WORKTREE> 目录下执行。**
-主工作区 `cd /Users/tommy/Project/starcon` 与另外几条车道同时在跑，
-**你绝对不能改主工作区里的任何文件**，也不要执行 `git worktree add/remove`。
+#### 5.2 L2 批量验证（全量，集成头上跑一次）
 
-## 第 0 步：冲突预检（进来第一件事，13 秒止损）
-立刻检查本 worktree：目录里是否已有**未跟踪文件**（说明有人先开工了）。
-任一命中 → **立刻停止，回报 `BLOCKED`，零改动退出**，不要"接手继续"。
-
-## 🔥 资源紧张：机器温度是硬约束（用户 2026-10-08 明确抱怨过热）
-**这批机器 10 核，用户反馈过「风扇声音非常大」和「电脑温度太高」。**
-每条车道跑 verify 会起约 2 个 Testcontainers PostgreSQL 容器，是热量的主要来源。
-调度器已把并发降到 1 车道 / 配额 2，**这些闸必须生效，否则用户就得自己扛热度**。
-如果 `./mvnw verify` 或 Testcontainers 报容器起不来 / OOM / 超时，
-立刻回报 `RESOURCE_BLOCKED` 并停止，不要重试也不要换参数硬撑。
-verify 跑完顺手确认自己的 PG 容器已被 ryuk 回收；残留超过 15 分钟就在报告里点名。
-
-## Flyway 版本号已预分配
-迁移文件必须命名为 **<MIGRATION_VERSION>__<snake_case 描述>.sql**。
-**不要自己找最大版本号** —— 并行车道会同时提交迁移，撞号会让另一条车道的 Flyway 直接炸掉。
-
-## 目标模块的设计原文
-<粘贴该模块在 <BLUEPRINT> 里的完整四问：职责 / 输入 / 输出 / 关系>
-同 L3 下已交付的兄弟模块：<简述>
-
-## 开工前 10 分钟依赖自检（重要）
-读完蓝图与相邻已实现代码后**立刻**确认你要依赖的上游表/端点确实已存在于集成头。
-发现上游其实没交付 → 立刻停止，回报 `BLOCKED`，不要继续写。这条车道会被重派。
-
-## 硬性要求（违反即视为未完成）
-1. **禁止 mock**。不许出现：硬编码数组/常量当数据源、`DomainPlaceholder` 占位页、
-   `TODO` + `UnsupportedOperationException`、假分页、假搜索、假校验。
-   数据必须真的落 PostgreSQL 16，查询走 jOOQ 显式 SQL（不用 JPA 懒加载）。
-2. **禁止半成品**。不许写「后续再补」「Phase 2」「最小可行」。
-3. **只碰自己的文件**。不要动别的模块的迁移、端点、前端页面、台账里**别的行**。
-4. **多租户不可省**。业务表 `tenant_id NOT NULL` + DB 层 RLS；租户来自已认证成员关系，
-   **不信任 `X-Tenant-Id` 头**。集成测试必须实跑三条断言：两租户互不可见、
-   伪造 tenant header 无效、连接池归还后不串租户（Testcontainers 真实 PostgreSQL 16）。
-5. **金额与数量**：`BigDecimal` + `NUMERIC`，禁浮点；数量 `NUMERIC(19,6)`。
-   **时间字段**：`timestamptz` 用 `OffsetDateTime` 绑定并在 values 位置写 `?::timestamptz`；
-   用 `Timestamp.valueOf(LocalDateTime...)` 会静默偏 −28800s。写时间的测试要**断言写回的值**。
-6. **契约与台账**：多车道共用，允许各自改（并入时由 merge 驱动器按「类型名 / OpenAPI 路径 /
-   模块 ID」自动求并）。契约是 codegen 产物**禁止手改**：
-   `python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi`。
-   台账只改**你自己那行**的「状态」「证据」两格，不要重排整表。
-7. **全量验证必须绿**（贴真实命令输出）：
-   ```bash
-   cd <WORKTREE>/backend && ./mvnw verify
-   cd <WORKTREE> && pnpm typecheck && pnpm lint && pnpm test
-   cd <WORKTREE> && NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build
-   node tools/module-progress/sync.mjs --check
-   ```
-   - `NEXT_TELEMETRY_DISABLED=1` **必须加**，否则 Next 构建静默挂起。
-   - **vitest 不做类型检查**，`pnpm test` 全绿不能替代 `pnpm typecheck`。
-   - `spotless:apply` 在 Java 25 上崩溃是仓库既有问题，不阻塞 verify。
-8. **跨车道约束回归**：迁移新增 `CHECK` / `SET NOT NULL` / 触发器时，必须回头重跑**被它约束到的
-   既有模块**的集成测试。静态判据：`ADD COLUMN` 后看有没有 `DEFAULT`；`SET NOT NULL` 后看目标表有没有
-   BEFORE INSERT 触发器兜底。两个都没有就必然炸。
-9. **合并累积型文件要小心**：`apps/web/src/lib/api-proxy.ts` 是一条**白名单正则**，多个车道各自往
-   同一个组追加分支，合并必冲突，且**取错一侧会静默删掉已交付的路由**（表现是页面 404，
-   且 typecheck / lint / vitest / Playwright **全绿**，因为白名单只在浏览器端生效）。
-   这个正则有**两层 alternation**（内层 `inventory/` 组 + 外层仓库级段），**两层都必须求并**。
-   解法是**求并**，不是二选一。验证方式不是眼看，也不是 grep + 自写正则（该方法已连续骗过 6 版），
-   而是**跑真 proxy 断言 HTTP 状态码**（白名单拦截 = 404，放行 = 转发），
-   并**同时断言反向用例**（未知路径仍 404），否则「全部拒绝」的正义正则也能让放行用例全绿。
-10. **commit 要能看懂**。一个 atomic 改动一个 commit，Conventional Commits，正文写清
-    做了什么、为什么、影响面、验证方式。**只 commit 到本车道分支，不要 push。**
-11. **落盘位置纪律**：临时产物写在 `<WORKTREE>/.tmp/`，绝不写家目录或 `/tmp/`。
-12. **会话日志**：`<WORKTREE>/docs/sessions/YYYY-MM/YYYY-MM-DD-<kebab-case-topic>.md`。
-13. **心跳**：每 25 分钟一次，超 90 分钟失联会被判定崩掉并回收重派：
-    ```bash
-    cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs heartbeat --lane <模块ID> --note "<当前进展>"
-    ```
-14. **落地**：验证跑绿、commit 完后：
-    ```bash
-    cd /Users/tommy/Project/starcon && node tools/module-progress/lane.mjs land --lane <模块ID>
-    ```
-    会校验「工作区干净 + 确有新提交」。**并入集成头由调度器做，不要自己 merge、不要 checkout 集成分支。**
-
-## 执行顺序
-1. 读蓝图原文 + 读相邻已实现代码（照抄现有写法与命名，不要另起风格）
-2. **冲突预检**（不通过 → `BLOCKED` 停止）
-3. 10 分钟依赖自检（不通过 → `BLOCKED` 停止）
-4. Flyway 迁移（预分配版本号 + RLS + 索引 + GRANT）
-5. 后端：jOOQ 显式 SQL + 服务 + 端点 + 集成测试（含租户隔离三断言）
-6. 重新生成 OpenAPI 契约
-7. 前端：真实工作区 + 错误态/空态/加载态
-8. 全量验证跑绿（typecheck 与 test 都要跑）
-9. 更新台账自己那行 + 写会话日志
-10. commit（车道分支上，不 push）
-11. `lane.mjs land --lane <模块ID>`
-
-## 交付报告格式
-- 完成/未完成的模块 ID 与名称
-- 迁移 / 端点 / 页面 / 测试 四件各自的落地位置
-- 上述验证命令的**真实结果**（测试数、通过与否）
-- **本车道跑 verify 期间同时存活的 PG 容器数**，以及 verify 结束后是否已回收
-- commit hash 与车道分支名
-- `land` 是否成功
-- 未完成部分的**明确原因**（若有）
+```bash
+cd backend && ./mvnw verify
+cd .. && pnpm typecheck && pnpm lint && pnpm test
+cd .. && NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build
+node tools/module-progress/sync.mjs --check
 ```
+
+⚠️ 这是本轮**唯一的发热高峰**。`NEXT_TELEMETRY_DISABLED=1` 必须加，否则 Next 构建静默挂起。
+
+**L2 红了的处置**：
+1. **不 push**，不在集成头上继续改
+2. `git bisect` 在本批 merge commit 上二分定位（4 条车道最多 2 次全量验证）
+3. 二分找不到 = 跨车道互相破坏，按 5.1 静态排查
+4. 定位后派一个**修复任务**（只修这一个模块）
+5. 修复后**重跑 L2**，绿了再 push
+6. 连续 3 轮 L2 红且无法定位 → 本轮零派发并在汇报里点名
+
+#### 5.3 写详细功能说明（用户明确要求）
+
+**L2 绿之后**，写详细说明到 `docs/sessions/YYYY-MM/YYYY-MM-DD-batch-<n>-<topic>.md`，
+**每个模块一节**，包含：
+
+```markdown
+## 模块 <ID> <名称>
+
+**这个功能做什么**：一到两句说清用户视角能完成什么事
+
+**技术落地**：
+- 迁移：`<V版本号__文件名.sql>` — 建了哪些表/列/索引，RLS 怎么设的
+- 端点：`<METHOD /path>` × N 个，各自负责什么
+- 页面：`<路由>` — 筛选维度、操作、错误态/空态/加载态
+- 测试：`<测试类名>` N 例，覆盖哪些关键行为
+
+**关键设计决策**：为什么这么做、否决了什么方案
+```
+
+同时让集成头的 merge commit 正文列本批模块清单（Conventional Commits）。
+
+#### 5.4 push（用户明确要求「每次开发完就 push」）
+
+```bash
+git push upstream integration/module-dev
+```
+
+- **只在 L2 绿之后 push。不要 push 红的。**
+- push 后在汇报里给 commit hash + 推送的模块清单。
+- **不要 push 到 `main`**。
+- 不要在 commit message 或说明文件里贴 token / password / secret。
+
+### 第 6 步：汇报（14 行以内）
+
+- **进度**：总数 / 已交付 / 进行中 / 未开发 / 完成率，离 465 还差几个
+- **容量闸判定**：running / 配额、therm 结果、load 三点值及趋势、PG 容器数 → GO / STOP
+- **本批回收 / 本批派发**（模块 ID + 名称 + 迁移版本号），或「车道全忙，本轮未派发」
+- **静态预检**：互相破坏形状扫描有没有命中
+- **L2 结果**：绿 / 红。红了写明二分到哪条车道、几次、修复派发情况
+- **说明文件**：会话日志路径 + 覆盖模块清单
+- **push 结果**：commit hash + 模块清单；没 push 要明确写「L2 未绿，本轮不 push」
+- **温度观测**：therm 有无降频项；`postgres:16-alpine` 容器数（非常驻 `starcon-mig-v2`）
+- **吞吐预期**：按「4 车道 / 5 小时」估算剩余多久（诚实区间 20–34 天，不要单点数字）
+- **风险提示**（可选）
 
 ---
 
-## 第 5 步：常规汇报（停机前）
+## 5. 最高优先级禁令
 
-简短汇报（12 行以内）：
-
-- **进度**：总数 / 已交付 / 进行中 / 未开发 / 完成率，以及**离 465 还差几个**
-- **容量闸判定**：running / 配额 2、load 三点值及趋势、PG 容器数、`pmset -g therm` 结果 → GO / STOP（命中哪条）
-- **本轮回收**：并入了哪些车道；有冲突就点名冲突文件
-- **本轮派发**：派发了哪些车道（模块 ID + 名称 + 迁移版本号），或「车道全忙，本轮未派发」
-- **温度观测**：`pmset -g therm` 是否有降频项；`docker ps` 里 `postgres:16-alpine` 容器数（非常驻的 `starcon-mig-v2`）
-- **距停机**：距 2026-10-18 18:00 还有多久
-
-## 禁止事项
-
-- **2026-10-18 18:00 之后绝不派发新车道**（最高优先级），且必须比对**完整日期**而非只比 `HH:MM`
-- **容量闸判定 STOP 时绝不派发、不取闸、不跑 plan**（次高优先级）
-- **不要把 `--lanes` 调回 2 或 3、配额调回 4、tick 改回 `*/30`**（2026-10-08 22:25 因用户报温度过高下调，
-  提速是用户的决定，不是调度器的）
-- **不要把 load 阈值改到 10 以下**（低于空载基线 4–7，会让流水线全程 STOP）
-- **不要降 PG 闸**（容器 >= 4 零派发）或绕过温度闸 —— 它们是本轮唯一的自动兜底
-- 不要用 `plan` 去「试探」有没有新车道（它有副作用，会凭空造车道）
-- 不要用 `load` 单点采样当判据
-- 不要自己挑模块或排顺序
-- 不要自己写业务代码，绕过子任务
-- 不要 push；不要手动 merge 车道分支；不要 checkout 集成分支
-- 不要把进度数字写死在汇报里
-- **不要在汇报里承诺「全部完成」** —— 理论上限 100%，诚实区间 90%–100%
+- **L2 没绿绝对不 push**
+- **未开发 == 0 后绝不派发新车道**
+- **容量闸判 STOP 时绝不派发、不取闸、不跑 plan**
+- **不要让 worker 跑全量 `mvnw verify`**（那是你的 L2，每批一次）
+- **不要把 `--lanes` 调回 1、配额调回 2、tick 改回 `0 * * * *` 或 `*/30`**
+- **不要绕过温度闸**，或把 PG 闸从 4 调高
+- 不要 push 到 `main`；不要手动 merge 车道分支；不要 checkout 集成分支
+- 不要在 commit / 说明文件里贴 secret
+- 不要把进度数字写死在汇报里（每次重跑 sync）
+- 不要承诺「全部完成」或给单点完成日期 —— 诚实区间 20–34 天
 - 不要为了让 tick 通过而 `force` 清掉别人持有的调度闸
-- 不要杀正在跑的车道
-- **不要谎报「定时任务已关闭」** —— 关不掉就在报告里写明失败原因
+- **不要谎报「定时任务已关闭」**
+
+---
+
+## 6. 参考数据（2026-10-13 实测，**每次都要重跑 `sync.mjs` 取实时值**）
+
+- 465 个 L4 模块：已交付 **126**（27.1%），进行中 0，**未开发 339**
+- 名义吞吐 **19.2 个/天**（4 车道 / 5 小时）；综合折损后约 **15 个/天** ⇒ **约 23 天**（区间 20–34）
+- 车道寿命**中位数 35.1 分钟**（66 样本）。⚠️ **均值 320 分钟是陷阱**，被隔夜停摆车道拉高，不要用
+- 机器：10 核。空载 load 基线 **3–7**
+- 后端 7 个 Maven 模块、151 个测试类、2829 个测试用例
+- 后端服务已建：identity / catalog / channel / warehouse / trade / crm
