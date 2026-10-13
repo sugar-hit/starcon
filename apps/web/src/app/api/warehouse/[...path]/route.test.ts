@@ -825,6 +825,7 @@ it('7.2.1.1 刻意不放行未交付的子路径（多一层后缀仍 404 且不
   expect(fetcher).not.toHaveBeenCalled();
 });
 
+/**
  * 8.1.2.1 库位树：location-trees 的四个形状放行 + 反向拒绝。
  *
  * <p>两层断言都用**真实代理 handler** 跑真实 HTTP 状态码，不是断言字符串出现在文件里：
