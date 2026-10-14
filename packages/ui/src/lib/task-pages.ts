@@ -236,6 +236,20 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['同步订单', '审核', '交付履约'],
   },
   {
+    // 9.7.1.1 批发订单与账期。与 /orders 同属订单域，domain 取域级 'orders'，
+    // 导航条目由 SYSTEMS 的 children 从 IMPLEMENTED_TASK_PAGES 派生（见 nav-config），
+    // 所以这里**只**登记任务页，不需要改共享的导航常量文件。
+    // 刻意不是 /orders 的第三个 tab：那边是零售订单列表与手工录入（只读投影 / 零售录入），
+    // 本页是 B2B 录入 + 发货确认应收，账期应收按到期日排序（资金计划 12.1.2.2 取数顺序）。
+    href: '/orders/b2b',
+    implemented: true,
+    domain: 'orders',
+    label: '批发订单',
+    description: '按客户分级价与阶梯价录单，管理起订量、账期结算与开票对账需求。',
+    fields: ['订单号', '客户分级', '收款方式', '订单总额', '已确认应收', '账期到期日', '开票需求'],
+    workflow: ['试算阶梯价与起订量', '发货确认账期应收', '按账期开票对账'],
+  },
+  {
     href: '/orders/review',
     implemented: false,
     domain: 'orders',
