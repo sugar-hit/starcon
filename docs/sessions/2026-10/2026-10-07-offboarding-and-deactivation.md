@@ -13,12 +13,12 @@
 
 四块职责**各自都有真实读出口**，不是一个「离职」按钮配四段文案：
 
-| 职责 | 真实读出口 |
-| --- | --- |
-| 停用成员 | `membership.status=INACTIVE` + 案卷 `memberName/status/effectiveAt` |
-| 转移在职单据与审批责任 | `offboarding_responsibility_item` 的 PENDING→TRANSFERRED 明细 |
-| 回收待办与任务 | `offboarding_reclaim_item` 的 RECLAIMED / REASSIGNED 明细 |
-| 保留历史操作记录 | 案卷行 + audit 留痕 + 物理删除被 DB 拒绝 |
+| 职责                   | 真实读出口                                                          |
+| ---------------------- | ------------------------------------------------------------------- |
+| 停用成员               | `membership.status=INACTIVE` + 案卷 `memberName/status/effectiveAt` |
+| 转移在职单据与审批责任 | `offboarding_responsibility_item` 的 PENDING→TRANSFERRED 明细       |
+| 回收待办与任务         | `offboarding_reclaim_item` 的 RECLAIMED / REASSIGNED 明细           |
+| 保留历史操作记录       | 案卷行 + audit 留痕 + 物理删除被 DB 拒绝                            |
 
 ## 关键 trade-off
 
@@ -82,17 +82,17 @@ identity 无权假装没发生，这些行正是「当时转过什么」的证�
 
 ## 文件清单
 
-| 类别 | 路径 |
-| --- | --- |
-| 迁移 | `backend/services/identity/src/main/resources/db/migration/V46__member_offboarding.sql` |
-| 后端 | `backend/services/identity/src/main/java/com/starcon/identity/OffboardingController.java` |
-| 后端测试 | `backend/services/identity/src/test/java/com/starcon/identity/OffboardingIntegrationTest.java` |
-| 契约 | `packages/api-contracts/src/identity.openapi.json`、`packages/api-contracts/src/catalog.ts` |
-| 白名单 | `apps/web/src/lib/api-proxy.ts` |
-| 白名单测试 | `apps/web/src/app/api/iam/[...path]/route.test.ts` |
-| 前端 | `apps/web/src/components/iam/offboarding-workspace.tsx`、`offboarding-model.ts`、`offboarding-model.test.ts`、`apps/web/src/app/org/offboarding/page.tsx` |
-| 导航 | `apps/web/src/components/iam/identity-workspace.tsx`（租户概览入口） |
-| 台账 | `docs/product/capability-blueprint/module-progress.md`（仅 17.2.2.3 行） |
+| 类别       | 路径                                                                                                                                                      |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 迁移       | `backend/services/identity/src/main/resources/db/migration/V46__member_offboarding.sql`                                                                   |
+| 后端       | `backend/services/identity/src/main/java/com/starcon/identity/OffboardingController.java`                                                                 |
+| 后端测试   | `backend/services/identity/src/test/java/com/starcon/identity/OffboardingIntegrationTest.java`                                                            |
+| 契约       | `packages/api-contracts/src/identity.openapi.json`、`packages/api-contracts/src/catalog.ts`                                                               |
+| 白名单     | `apps/web/src/lib/api-proxy.ts`                                                                                                                           |
+| 白名单测试 | `apps/web/src/app/api/iam/[...path]/route.test.ts`                                                                                                        |
+| 前端       | `apps/web/src/components/iam/offboarding-workspace.tsx`、`offboarding-model.ts`、`offboarding-model.test.ts`、`apps/web/src/app/org/offboarding/page.tsx` |
+| 导航       | `apps/web/src/components/iam/identity-workspace.tsx`（租户概览入口）                                                                                      |
+| 台账       | `docs/product/capability-blueprint/module-progress.md`（仅 17.2.2.3 行）                                                                                  |
 
 ## 验证
 

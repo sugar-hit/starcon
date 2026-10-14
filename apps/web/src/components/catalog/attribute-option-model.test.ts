@@ -64,7 +64,13 @@ describe('3.2.1.2 属性选项管理 · 空态区分', () => {
 describe('3.2.1.2 属性选项管理 · 分组与批量重排', () => {
   const color = [row({ value: '红', position: 0 }), row({ value: '蓝', position: 1 })];
   const size = [
-    row({ attributeId: 'attr-2', attributeCode: 'SIZE', attributeName: '尺码', value: 'S', position: 0 }),
+    row({
+      attributeId: 'attr-2',
+      attributeCode: 'SIZE',
+      attributeName: '尺码',
+      value: 'S',
+      position: 0,
+    }),
   ];
 
   it('相邻同属性合并成一组，且不重排服务端顺序', () => {

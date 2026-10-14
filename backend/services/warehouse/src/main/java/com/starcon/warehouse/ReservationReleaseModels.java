@@ -10,19 +10,17 @@ import java.util.UUID;
 /**
  * 7.2.1.3 释放与过期的传输模型。
  *
- * <p>蓝图：「处理预占的释放（订单取消、支付超时、拆单减少）与过期回收，提供手动释放入口与批量过期清理，
- * 释放时同步恢复可用量。」输入「释放请求（业务事件或人工）；过期时间规则；批量清理任务」，
+ * <p>蓝图：「处理预占的释放（订单取消、支付超时、拆单减少）与过期回收，提供手动释放入口与批量过期清理， 释放时同步恢复可用量。」输入「释放请求（业务事件或人工）；过期时间规则；批量清理任务」，
  * 输出「预占终态记录 + 余额恢复分录」。
  *
- * <p><b>命名纪律</b>：本类每一个 record / enum 都以 {@code ReservationRelease} 起头。
- * springdoc 用 record 的**简单类名**做 {@code components.schemas} 的键，同名而不同形状的 record
- * 会让先注册的那份被<em>静默覆盖</em> —— 别人的字段形状被改掉，而后端测试全绿、只有前端 typecheck 会红。
- * 已被占用的通用名（{@code StatusOption} / {@code SourceOption} / {@code Row} / {@code Page} /
- * {@code Summary} / {@code Occupancy} / {@code LocationRow} / {@code LocationTotals} / {@code Turnover} …）
- * 本类一个都不复用。
+ * <p><b>命名纪律</b>：本类每一个 record / enum 都以 {@code ReservationRelease} 起头。 springdoc 用 record
+ * 的**简单类名**做 {@code components.schemas} 的键，同名而不同形状的 record 会让先注册的那份被<em>静默覆盖</em> ——
+ * 别人的字段形状被改掉，而后端测试全绿、只有前端 typecheck 会红。 已被占用的通用名（{@code StatusOption} / {@code SourceOption} /
+ * {@code Row} / {@code Page} / {@code Summary} / {@code Occupancy} / {@code LocationRow} / {@code
+ * LocationTotals} / {@code Turnover} …） 本类一个都不复用。
  *
- * <p>表与服务归属：{@code reservation_release_record} 与 {@code reservation_expiry_run} 落 warehouse
- * （V112 文件头第零节），不跨服务读写 trade 的表。可用量口径由 7.1.1.3 裁决，本模块**不重复实现**。
+ * <p>表与服务归属：{@code reservation_release_record} 与 {@code reservation_expiry_run} 落 warehouse （V112
+ * 文件头第零节），不跨服务读写 trade 的表。可用量口径由 7.1.1.3 裁决，本模块**不重复实现**。
  */
 public final class ReservationReleaseModels {
 
@@ -33,8 +31,7 @@ public final class ReservationReleaseModels {
   /**
    * 释放方式（受控词表，与 V112 的 CHECK 逐字一致）。
    *
-   * <p>刻意分成 RELEASE 与 EXPIRE 而不是只留一个「结束」标志：事后要能回答「这笔是被取消了，
-   * 还是等太久了」。这两个数在运营上要分开看 —— 前者是业务动作，后者是流程失败。
+   * <p>刻意分成 RELEASE 与 EXPIRE 而不是只留一个「结束」标志：事后要能回答「这笔是被取消了， 还是等太久了」。这两个数在运营上要分开看 —— 前者是业务动作，后者是流程失败。
    */
   public enum ReservationReleaseMode {
     /** 显式释放：订单取消 / 支付超时 / 拆单减少 / 人工。 */
@@ -56,8 +53,8 @@ public final class ReservationReleaseModels {
   /**
    * 释放来源（受控词表，与 V112 的 CHECK 逐字一致）。
    *
-   * <p>蓝图点名三类：订单取消、支付超时、拆单减少。三者都是**业务事件**（上游 trade 回传），
-   * 补上 {@link #MANUAL} 人工入口与 {@link #EXPIRY_SWEEP} 本模块自己的批量回收。
+   * <p>蓝图点名三类：订单取消、支付超时、拆单减少。三者都是**业务事件**（上游 trade 回传）， 补上 {@link #MANUAL} 人工入口与 {@link
+   * #EXPIRY_SWEEP} 本模块自己的批量回收。
    */
   public enum ReservationReleaseTriggerSource {
     /** 09 订单取消事件回传。 */
@@ -97,8 +94,7 @@ public final class ReservationReleaseModels {
    * @param sort 排序键（白名单）：EXPIRES_AT / OVERDUE / RESTORABLE / RESERVATION_NO
    * @param page 页码，从 0 开始
    * @param size 每页行数，服务端有上限
-   * @param evaluatedAt 规则判定时刻；null = 服务端当前时刻。显式传入可做「按某时刻预演」，
-   *     调度器重跑同一批作业时也必须用同一个时刻，否则候选集不可复现
+   * @param evaluatedAt 规则判定时刻；null = 服务端当前时刻。显式传入可做「按某时刻预演」， 调度器重跑同一批作业时也必须用同一个时刻，否则候选集不可复现
    */
   public record ReservationReleaseQuery(
       @Schema(nullable = true) String sourceType,
@@ -111,8 +107,7 @@ public final class ReservationReleaseModels {
   /**
    * 一条分配的可释放明细（拆单减少时按这一行选量）。
    *
-   * @param remainingQuantity 该分配现在还占着多少（= 分配量 − 已消耗 − 已释放，DB 生成列）。
-   *     这就是「还回去就等于释放多少」的上限
+   * @param remainingQuantity 该分配现在还占着多少（= 分配量 − 已消耗 − 已释放，DB 生成列）。 这就是「还回去就等于释放多少」的上限
    */
   public record ReservationReleaseAllocationLine(
       UUID allocationId,
@@ -133,10 +128,9 @@ public final class ReservationReleaseModels {
   /**
    * 一条过期候选行。
    *
-   * @param restorableQuantity 这笔预占全部释放时可还回可用池的量（各分配剩余量之和）。
-   *     与「需求量 − 已消耗」**不是同一个数**：没圈到 bucket 的部分从没占过可用量
-   * @param overdueSeconds 已超时多久（秒）。**恒从 expires_at 算**，不给「没超时」的 0 ——
-   *     0 会把「刚刚到期 0 秒」与「不参与超时」混成同一个数
+   * @param restorableQuantity 这笔预占全部释放时可还回可用池的量（各分配剩余量之和）。 与「需求量 − 已消耗」**不是同一个数**：没圈到 bucket
+   *     的部分从没占过可用量
+   * @param overdueSeconds 已超时多久（秒）。**恒从 expires_at 算**，不给「没超时」的 0 —— 0 会把「刚刚到期 0 秒」与「不参与超时」混成同一个数
    * @param allocations 该预占下仍在占额的分配明细（供按分配选量）
    */
   public record ReservationReleaseCandidateRow(
@@ -174,10 +168,8 @@ public final class ReservationReleaseModels {
    * @param overdueCount 已过 expires_at 且仍在 HELD 的条数（真正会被清理的那些）
    * @param overdueRestorableQuantity 上述候选可还回的量合计
    * @param unmanagedHeldCount 仍在 HELD 但**没有** expires_at 的条数 ——
-   *     它们永远不会自动过期。单独报出来，是因为「登记预占时忘了传过期时刻」这件事
-   *     只能靠这个数被发现，而它在列表页上看起来和正常的预占一模一样
-   * @param committedCount 已承诺（COMMITTED）且**永不自动过期**的条数 ——
-   *     蓝图 7.2.1.3 的红线就在这里，把它显示出来是为了让这条规则可见而不是靠文档
+   *     它们永远不会自动过期。单独报出来，是因为「登记预占时忘了传过期时刻」这件事 只能靠这个数被发现，而它在列表页上看起来和正常的预占一模一样
+   * @param committedCount 已承诺（COMMITTED）且**永不自动过期**的条数 —— 蓝图 7.2.1.3 的红线就在这里，把它显示出来是为了让这条规则可见而不是靠文档
    * @param mixedCommitmentSkippedCount 已超时、但因名下仍有 COMMITTED 分配而**不会被自动回收**的条数。
    *     它们在列表上与普通候选长得一模一样，不报出来的话运营永远发现不了「这批货为什么一直占着」
    * @param terminalReleasedCount / terminalExpiredCount 已被释放 / 已过期的终态条数
@@ -197,8 +189,7 @@ public final class ReservationReleaseModels {
   /**
    * 过期候选页。
    *
-   * @param evaluatedAt 本次判定时刻（**逐字返回**：判定时刻是这份清单的一部分，
-   *     页面上必须显示「按这个时刻算的」，否则用户会把列表当成实时状态）
+   * @param evaluatedAt 本次判定时刻（**逐字返回**：判定时刻是这份清单的一部分， 页面上必须显示「按这个时刻算的」，否则用户会把列表当成实时状态）
    * @param ruleNote 规则说明：判据、COMMITTED 不参与、dry_run 语义
    */
   public record ReservationReleaseCandidatePage(
@@ -225,45 +216,34 @@ public final class ReservationReleaseModels {
    *
    * <ul>
    *   <li>{@code allocations} 为空 + {@code quantity} 为空 → 释放全部仍在占额的分配
-   *   <li>{@code allocations} 为空 + {@code quantity} 有值 → 按圈定时间先后（FIFO）释放到该量为止，
-   *       对应蓝图的「拆单减少」
+   *   <li>{@code allocations} 为空 + {@code quantity} 有值 → 按圈定时间先后（FIFO）释放到该量为止， 对应蓝图的「拆单减少」
    *   <li>{@code allocations} 非空 → 只作用于列出的分配，逐条按各自的 {@code quantity}（空 = 全量）
    * </ul>
    *
-   * @param triggerSource 释放来源（受控词表）。**不接受 EXPIRY_SWEEP** —— 那是批量清理的来源，
-   *     人工把它写进凭据会让「等太久」与「被取消」这两个数分不开
+   * @param triggerSource 释放来源（受控词表）。**不接受 EXPIRY_SWEEP** —— 那是批量清理的来源， 人工把它写进凭据会让「等太久」与「被取消」这两个数分不开
    * @param occurredAt 释放发生时刻；不传则取服务端当前时刻。跨服务回传**必须显式传**：
    *     订单取消发生在上游，用服务端当前时间会把「什么时候取消的」换成「本服务什么时候知道的」
    * @param idempotencyKey 幂等键（≤64）。同键同参 → 回放既有凭据；同键不同参 → 409。
    *     上游事件重投（at-least-once）必须带键，否则重放会与第一次的意图混淆
-   * @param finalizeReservation 部分释放时是否同时终结整笔预占；不传 = false。
-   *     仍有未终结分配时强制为 false —— 预占还占着额就不能说它结束了
+   * @param finalizeReservation 部分释放时是否同时终结整笔预占；不传 = false。 仍有未终结分配时强制为 false —— 预占还占着额就不能说它结束了
    */
   public record ReservationReleaseInput(
-      @Schema(nullable = true) List<@jakarta.validation.Valid ReservationReleaseAllocationInput>
-          allocations,
+      @Schema(nullable = true)
+          List<@jakarta.validation.Valid ReservationReleaseAllocationInput> allocations,
       @Schema(nullable = true) BigDecimal quantity,
-      @Schema(nullable = true)
-          @jakarta.validation.constraints.Size(max = 24)
-          String triggerSource,
-      @Schema(nullable = true)
-          @jakarta.validation.constraints.Size(max = 200)
-          String reason,
+      @Schema(nullable = true) @jakarta.validation.constraints.Size(max = 24) String triggerSource,
+      @Schema(nullable = true) @jakarta.validation.constraints.Size(max = 200) String reason,
       @Schema(nullable = true) OffsetDateTime occurredAt,
-      @Schema(nullable = true)
-          @jakarta.validation.constraints.Size(max = 64)
-          String idempotencyKey,
+      @Schema(nullable = true) @jakarta.validation.constraints.Size(max = 64) String idempotencyKey,
       @Schema(nullable = true) Boolean finalizeReservation) {}
 
   /**
    * 手动释放结果。
    *
    * @param restoredQuantity 真正还回可用池的量（各分配本次释放量之和）
-   * @param releasedDemandQuantity 预占口径的已释放量。整笔终结时 = 需求量 − 已消费量，
-   *     所以它通常**大于等于** restoredQuantity：没圈到 bucket 的部分同样是不再需要的需求，
-   *     但它从没占过可用量。两个数分开报，是因为合并会让可用量的恢复量凭空多出来
-   * @param replayed true = 这次调用命中了幂等键或预占已是同种终态，**没有产生新的释放**。
-   *     重放不是错误：上游事件至少投递一次，第二次到达必须成功而不是把货再还一次
+   * @param releasedDemandQuantity 预占口径的已释放量。整笔终结时 = 需求量 − 已消费量， 所以它通常**大于等于** restoredQuantity：没圈到
+   *     bucket 的部分同样是不再需要的需求， 但它从没占过可用量。两个数分开报，是因为合并会让可用量的恢复量凭空多出来
+   * @param replayed true = 这次调用命中了幂等键或预占已是同种终态，**没有产生新的释放**。 重放不是错误：上游事件至少投递一次，第二次到达必须成功而不是把货再还一次
    * @param entryId append-only 流水中对应那一条的 id；部分释放时为最后写入的那一条
    */
   public record ReservationReleaseOutcome(
@@ -291,19 +271,15 @@ public final class ReservationReleaseModels {
    * 批量过期清理入参。
    *
    * @param dryRun 只判定不落库。干跑**只写一条运行凭据**，不碰预占 / 分配 / 流水
-   * @param evaluatedAt 规则判定时刻；不传则取服务端当前时刻。
-   *     调度器重跑同一批作业必须用同一个时刻（配幂等键），否则「同一批」两次算出来不一样
+   * @param evaluatedAt 规则判定时刻；不传则取服务端当前时刻。 调度器重跑同一批作业必须用同一个时刻（配幂等键），否则「同一批」两次算出来不一样
    * @param limitCount 单批上限，服务端还有一层硬上限（1000，与 V112 的 CHECK 同口径）
    */
   public record ReservationReleaseRunRequest(
       @Schema(nullable = true) Boolean dryRun,
       @Schema(nullable = true) OffsetDateTime evaluatedAt,
       @Schema(nullable = true) Integer limitCount,
-      @Schema(nullable = true)
-          @jakarta.validation.constraints.Size(max = 200)
-          String reason,
-      @Schema(nullable = true)
-          @jakarta.validation.constraints.Size(max = 64)
+      @Schema(nullable = true) @jakarta.validation.constraints.Size(max = 200) String reason,
+      @Schema(nullable = true) @jakarta.validation.constraints.Size(max = 64)
           String idempotencyKey) {}
 
   /** 运行凭据行（列表与详情共用同一形状，避免两页显示不同的数）。 */
@@ -369,8 +345,7 @@ public final class ReservationReleaseModels {
   /**
    * 补写 / 调整过期时刻。
    *
-   * <p>7.2.1.1 的登记入参注释逐字写着「不传则该预占不参与超时筛选（可稍后由 7.2.1.3 补）」——
-   * 补的就是这个时刻。传空值表示「取消过期时刻」，该预占从此不参与批量清理。
+   * <p>7.2.1.1 的登记入参注释逐字写着「不传则该预占不参与超时筛选（可稍后由 7.2.1.3 补）」—— 补的就是这个时刻。传空值表示「取消过期时刻」，该预占从此不参与批量清理。
    *
    * @param expiresAt 新的过期时刻；不传表示不改
    * @param clear 传 true 表示清空过期时刻（该预占不再参与自动回收）
@@ -378,15 +353,12 @@ public final class ReservationReleaseModels {
   public record ReservationReleaseExpiryInput(
       @Schema(nullable = true) OffsetDateTime expiresAt,
       @Schema(nullable = true) Boolean clear,
-      @Schema(nullable = true)
-          @jakarta.validation.constraints.Size(max = 200)
-          String reason) {}
+      @Schema(nullable = true) @jakarta.validation.constraints.Size(max = 200) String reason) {}
 
   /**
    * 补写结果。
    *
-   * @param expiresAt 写回库里的真实值（逐字可比，不是「没抛异常」）。
-   *     清空时为 null —— 「取消过期时刻」与「设了一个未来时刻」是两件事
+   * @param expiresAt 写回库里的真实值（逐字可比，不是「没抛异常」）。 清空时为 null —— 「取消过期时刻」与「设了一个未来时刻」是两件事
    * @param overdueSeconds 按新时刻算出的超时秒数；未过期或已清空时为 null
    */
   public record ReservationReleaseExpiryOutcome(

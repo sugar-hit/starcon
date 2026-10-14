@@ -9,11 +9,13 @@
 变更历史追加不可改）。
 
 **数据分层**：`dict_catalog`（平台出厂字典目录，**不带** `tenant_id`，只授予 SELECT）
-+ `dict_item`（租户私有字典项）+ `dict_item_usage`（引用台账）+ `dict_history`（变更历史）。
-沿用 V48 业务参数「码表 + 租户档」的分层：目录不出租户、项才出租户，
-这样租户往目录里加自己的条目就是「租户级自定义扩展」。
+
+- `dict_item`（租户私有字典项）+ `dict_item_usage`（引用台账）+ `dict_history`（变更历史）。
+  沿用 V48 业务参数「码表 + 租户档」的分层：目录不出租户、项才出租户，
+  这样租户往目录里加自己的条目就是「租户级自定义扩展」。
 
 **「被引用后只能停用不能删除」四道防线**（沿用 17.2.2.3 离职模块先例）：
+
 1. 控制器**没有 DELETE 端点**（连 `delete` 权限码都不创建）；
 2. 迁移只授予 `SELECT/INSERT/UPDATE`，不授予 `DELETE`；
 3. `dict_item_usage.item_id` 外键 `ON DELETE RESTRICT`；
@@ -46,18 +48,18 @@
 
 ## 文件清单
 
-| 类型 | 路径 |
-| --- | --- |
-| 迁移 | `backend/services/identity/src/main/resources/db/migration/V53__data_dictionary.sql` |
-| 端点 | `backend/services/identity/src/main/java/com/starcon/identity/DictionaryController.java` |
+| 类型     | 路径                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------ |
+| 迁移     | `backend/services/identity/src/main/resources/db/migration/V53__data_dictionary.sql`                   |
+| 端点     | `backend/services/identity/src/main/java/com/starcon/identity/DictionaryController.java`               |
 | 集成测试 | `backend/services/identity/src/test/java/com/starcon/identity/DictionaryIntegrationTest.java`（15 项） |
-| 契约 | `packages/api-contracts/src/{catalog.ts,identity.openapi.json}`（codegen 生成，7 个 `Dict*` DTO） |
-| 页面 | `apps/web/src/app/org/dictionary/page.tsx` |
-| 工作区 | `apps/web/src/components/iam/dictionary-workspace.tsx` |
-| 前端模型 | `apps/web/src/components/iam/dictionary-model.ts` |
-| 前端测试 | `apps/web/src/components/iam/dictionary-model.test.ts`（24 项） |
-| 导航 | `apps/web/src/components/iam/identity-workspace.tsx`（+1 目的地 +1 可见性判定） |
-| 台账 | `docs/product/capability-blueprint/module-progress.md`（仅 17.5.2.1 那一行 + sync 派生计数） |
+| 契约     | `packages/api-contracts/src/{catalog.ts,identity.openapi.json}`（codegen 生成，7 个 `Dict*` DTO）      |
+| 页面     | `apps/web/src/app/org/dictionary/page.tsx`                                                             |
+| 工作区   | `apps/web/src/components/iam/dictionary-workspace.tsx`                                                 |
+| 前端模型 | `apps/web/src/components/iam/dictionary-model.ts`                                                      |
+| 前端测试 | `apps/web/src/components/iam/dictionary-model.test.ts`（24 项）                                        |
+| 导航     | `apps/web/src/components/iam/identity-workspace.tsx`（+1 目的地 +1 可见性判定）                        |
+| 台账     | `docs/product/capability-blueprint/module-progress.md`（仅 17.5.2.1 那一行 + sync 派生计数）           |
 
 ## 端点清单
 

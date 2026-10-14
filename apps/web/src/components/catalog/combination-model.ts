@@ -55,14 +55,16 @@ export function fetchDrafts(spuId: string) {
 }
 
 export function fetchDraft(spuId: string, draftId: string) {
-  return api<SkuMatrixDraft>(
-    `catalog/variant-combination/spus/${spuId}/drafts/${draftId}`,
-  );
+  return api<SkuMatrixDraft>(`catalog/variant-combination/spus/${spuId}/drafts/${draftId}`);
 }
 
 /** 预校验：不写库，返回结构化冲突清单。 */
 export function checkCombinations(spuId: string, input: CombinationCheckInput) {
-  return api<CombinationCheckResult>(`catalog/variant-combination/spus/${spuId}/check`, 'POST', input);
+  return api<CombinationCheckResult>(
+    `catalog/variant-combination/spus/${spuId}/check`,
+    'POST',
+    input,
+  );
 }
 
 /** 生成待建 SKU 草稿。校验不通过时后端回 409，冲突清单在 body.conflicts 里。 */
@@ -228,10 +230,12 @@ export function localConflictReasons(
     }
     for (const axis of axes)
       if (!present.has(axis.code)) reasons.push(`${label}：缺少规格轴「${axis.name}」的取值`);
-    const local = signature(values.map((value) => ({
-      axisCode: bound.get(value.specAxisId)?.code ?? '',
-      optionValue: value.value.trim(),
-    })));
+    const local = signature(
+      values.map((value) => ({
+        axisCode: bound.get(value.specAxisId)?.code ?? '',
+        optionValue: value.value.trim(),
+      })),
+    );
     if (local && seen.has(local)) reasons.push(`${label}：与本次提交里的其它组合重复`);
     if (local) seen.add(local);
   });

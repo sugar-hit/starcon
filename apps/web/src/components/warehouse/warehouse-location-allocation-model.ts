@@ -122,7 +122,9 @@ export function fetchAllocationList(params: {
   return api<LocationAllocationPage>(`${base}/list${suffix ? `?${suffix}` : ''}`);
 }
 
-export function fetchAllocationsByReceipt(receiptId: string): Promise<LocationAllocationDecision[]> {
+export function fetchAllocationsByReceipt(
+  receiptId: string,
+): Promise<LocationAllocationDecision[]> {
   return api<LocationAllocationDecision[]>(`${base}/by-receipt/${receiptId}`);
 }
 
@@ -255,7 +257,11 @@ export interface CapabilityGap {
 export function capabilityGaps(caps: LocationAllocationCapabilities): CapabilityGap[] {
   const out: CapabilityGap[] = [];
   if (caps.routingGraphAvailable === false) {
-    out.push({ flag: 'routingGraphAvailable', label: '巷道路径图', owner: caps.routingGraphOwnerModule });
+    out.push({
+      flag: 'routingGraphAvailable',
+      label: '巷道路径图',
+      owner: caps.routingGraphOwnerModule,
+    });
   }
   if (caps.catalogCategoryAvailable === false) {
     out.push({
@@ -268,7 +274,11 @@ export function capabilityGaps(caps: LocationAllocationCapabilities): Capability
     out.push({ flag: 'stockVolumeAvailable', label: '既有库存的体积口径', owner: null });
   }
   if (caps.putAwayTaskAvailable === false) {
-    out.push({ flag: 'putAwayTaskAvailable', label: '上架任务', owner: caps.putAwayTaskOwnerModule });
+    out.push({
+      flag: 'putAwayTaskAvailable',
+      label: '上架任务',
+      owner: caps.putAwayTaskOwnerModule,
+    });
   }
   return out;
 }

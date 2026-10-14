@@ -2,16 +2,13 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  ArrowLeft,
-  CalendarClock,
-  Check,
-  CircleAlert,
-  RefreshCw,
-  Settings2,
-} from 'lucide-react';
+import { ArrowLeft, CalendarClock, Check, CircleAlert, RefreshCw, Settings2 } from 'lucide-react';
 import { Button, EmptyState, FormField, Input, Notice, PageHeader, SectionCard } from '@starcon/ui';
-import type { ConfigImpact, ConfigOptions, ConfigOverview } from '../../../../../packages/api-contracts/src/index';
+import type {
+  ConfigImpact,
+  ConfigOptions,
+  ConfigOverview,
+} from '../../../../../packages/api-contracts/src/index';
 import { useIdentity } from '../iam/identity-shell';
 import {
   ALL,
@@ -226,13 +223,16 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
       )}
 
       {loading && !overview && (
-        <p className="py-8 text-center text-copy-13 text-muted-foreground">加载中…</p>
+        <p className="text-copy-13 text-muted-foreground py-8 text-center">加载中…</p>
       )}
 
       {overview && (
         <>
-          <p className="mt-2 text-copy-12 text-muted-foreground">
-            <Link href={`/warehouse/facilities/${warehouseId}`} className="inline-flex items-center hover:underline">
+          <p className="text-copy-12 text-muted-foreground mt-2">
+            <Link
+              href={`/warehouse/facilities/${warehouseId}`}
+              className="inline-flex items-center hover:underline"
+            >
               <ArrowLeft className="mr-1 h-3.5 w-3.5" />
               返回仓库详情
             </Link>
@@ -274,7 +274,11 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
               <Info
                 label="拆零发货"
                 value={overview.config.allowSplitShipment ? '允许' : '不允许'}
-                hint={overview.config.allowSplitShipment ? options?.splitShipmentNote : '拆零会破掉「一单一包裹」这个下游默认假设'}
+                hint={
+                  overview.config.allowSplitShipment
+                    ? options?.splitShipmentNote
+                    : '拆零会破掉「一单一包裹」这个下游默认假设'
+                }
               />
               <Info
                 label="最后修改"
@@ -283,7 +287,7 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
               />
             </div>
             {overview.config.note && (
-              <p className="mt-3 border-t pt-3 text-copy-12 text-muted-foreground">
+              <p className="text-copy-12 text-muted-foreground mt-3 border-t pt-3">
                 备注：{overview.config.note}
               </p>
             )}
@@ -305,7 +309,7 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
                   <FormField id="cfg-strategy" label="拣货策略" required>
                     <select
                       id="cfg-strategy"
-                      className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+                      className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
                       value={draft.pickingStrategy}
                       onChange={(e) => setDraft({ ...draft, pickingStrategy: e.target.value })}
                     >
@@ -334,11 +338,14 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
                     onChange={(v) => setDraft({ ...draft, allowSplitShipment: v })}
                   />
                   <FormField id="cfg-note" label="备注">
-                    <Input value={draft.note} onChange={(e) => setDraft({ ...draft, note: e.target.value })} />
+                    <Input
+                      value={draft.note}
+                      onChange={(e) => setDraft({ ...draft, note: e.target.value })}
+                    />
                   </FormField>
                 </div>
                 {draftError && (
-                  <p role="alert" className="mt-2 text-copy-12 text-destructive">
+                  <p role="alert" className="text-copy-12 text-destructive mt-2">
                     {draftError}
                   </p>
                 )}
@@ -356,7 +363,7 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
 
           {/* 班次 */}
           <SectionCard className="mt-4" title={`工作时段与班次（${shifts.length}）`}>
-            <p className="mb-3 text-copy-12 text-muted-foreground">{options?.shiftNote}</p>
+            <p className="text-copy-12 text-muted-foreground mb-3">{options?.shiftNote}</p>
             {shifts.length === 0 ? (
               <EmptyState
                 title="还没有排班"
@@ -374,7 +381,7 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
                       <div className="text-copy-13">
                         {shift.name}（{shift.code}）
                         {!shift.enabled && (
-                          <span className="ml-2 text-copy-12 text-muted-foreground">已停用</span>
+                          <span className="text-copy-12 text-muted-foreground ml-2">已停用</span>
                         )}
                       </div>
                       <div className="text-copy-12 text-muted-foreground">
@@ -401,20 +408,24 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
 
             {shiftDraft && (
               <div className="mt-4 border-t pt-4">
-                <p className="text-copy-13">
-                  {shiftEditingId ? '编辑班次' : '新建班次'}
-                </p>
+                <p className="text-copy-13">{shiftEditingId ? '编辑班次' : '新建班次'}</p>
                 <div className="mt-2 grid gap-3 sm:grid-cols-2">
                   <FormField
                     id="shift-code"
                     label="班次编码"
                     required
-                    hint={shiftEditingId ? '编码不可改：它是留痕里的引用键' : '同一仓内唯一，留痕按它回溯'}
+                    hint={
+                      shiftEditingId
+                        ? '编码不可改：它是留痕里的引用键'
+                        : '同一仓内唯一，留痕按它回溯'
+                    }
                   >
                     <Input
                       value={shiftDraft.code}
                       disabled={shiftEditingId !== null}
-                      onChange={(e) => setShiftDraft({ ...shiftDraft, code: e.target.value.toUpperCase() })}
+                      onChange={(e) =>
+                        setShiftDraft({ ...shiftDraft, code: e.target.value.toUpperCase() })
+                      }
                     />
                   </FormField>
                   <FormField id="shift-name" label="班次名称" required>
@@ -429,7 +440,12 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
                       onChange={(e) => setShiftDraft({ ...shiftDraft, startLocal: e.target.value })}
                     />
                   </FormField>
-                  <FormField id="shift-end" label="下班时刻" required hint="当地 HH:mm；早于上班表示跨夜班">
+                  <FormField
+                    id="shift-end"
+                    label="下班时刻"
+                    required
+                    hint="当地 HH:mm；早于上班表示跨夜班"
+                  >
                     <Input
                       value={shiftDraft.endLocal}
                       onChange={(e) => setShiftDraft({ ...shiftDraft, endLocal: e.target.value })}
@@ -449,7 +465,7 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
                   </FormField>
                 </div>
                 {draftError && (
-                  <p role="alert" className="mt-2 text-copy-12 text-destructive">
+                  <p role="alert" className="text-copy-12 text-destructive mt-2">
                     {draftError}
                   </p>
                 )}
@@ -489,7 +505,7 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
 
           {/* 下游影响 */}
           <SectionCard className="mt-4" title="这些参数现在会影响什么">
-            <p className="mb-3 text-copy-12 text-muted-foreground">
+            <p className="text-copy-12 text-muted-foreground mb-3">
               配置已经落库并留痕，但「落库」不等于「下游已经在按它跑」。逐条说清哪些现在真的会生效。
             </p>
             <ImpactList title="现在已生效" items={availableImpacts} tone="ok" />
@@ -497,11 +513,8 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
           </SectionCard>
 
           {/* 变更留痕 */}
-          <SectionCard
-            className="mt-4"
-            title={`变更留痕（${changes?.total ?? 0}）`}
-          >
-            <p className="mb-3 text-copy-12 text-muted-foreground">
+          <SectionCard className="mt-4" title={`变更留痕（${changes?.total ?? 0}）`}>
+            <p className="text-copy-12 text-muted-foreground mb-3">
               蓝图要求「修改需记录变更」，所以每一次保存都会逐字段写入一条留痕：
               谁、什么时候、把哪个字段从什么改成了什么。这些记录只能追加 ——
               连超级用户都改不掉或删不掉某一条。
@@ -510,7 +523,7 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
               <FormField id="change-scope" label="留痕范围">
                 <select
                   id="change-scope"
-                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+                  className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
                   value={scope}
                   onChange={(e) => {
                     setScope(e.target.value);
@@ -528,7 +541,7 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
               <FormField id="change-shift" label="班次">
                 <select
                   id="change-shift"
-                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+                  className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
                   value={shiftFilter}
                   onChange={(e) => {
                     setShiftFilter(e.target.value);
@@ -551,8 +564,8 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
                 description="修改作业参数或班次之后，每变一个字段就会在这里留下一条记录。"
               />
             ) : (
-              <table className="mt-3 w-full text-copy-12">
-                <thead className="text-left text-muted-foreground">
+              <table className="text-copy-12 mt-3 w-full">
+                <thead className="text-muted-foreground text-left">
                   <tr>
                     <th className="py-2 pr-3 font-normal">时刻</th>
                     <th className="py-2 pr-3 font-normal">范围</th>
@@ -566,11 +579,11 @@ export function WarehouseConfigWorkspace({ warehouseId }: { warehouseId: string 
                     const line = changeText(change, isBoolField, isRatioField);
                     return (
                       <tr key={change.id} className="border-t">
-                        <td className="py-2 pr-3 text-muted-foreground">
+                        <td className="text-muted-foreground py-2 pr-3">
                           {momentOf(change.changedAt)}
                         </td>
                         <td className="py-2 pr-3">{scopeLabel(change.scope)}</td>
-                        <td className="py-2 pr-3 text-muted-foreground">
+                        <td className="text-muted-foreground py-2 pr-3">
                           {change.shiftCode ?? '—'}
                         </td>
                         <td className="py-2 pr-3">{line.field}</td>
@@ -634,13 +647,13 @@ function ImpactList({
               {tone === 'ok' ? (
                 <Check className="h-3.5 w-3.5 text-emerald-600" />
               ) : (
-                <CircleAlert className="h-3.5 w-3.5 text-muted-foreground" />
+                <CircleAlert className="text-muted-foreground h-3.5 w-3.5" />
               )}
             </span>
             <div>
               <div className="text-copy-13">
                 {item.label}
-                <span className="ml-2 text-copy-12 text-muted-foreground">
+                <span className="text-copy-12 text-muted-foreground ml-2">
                   {tone === 'ok' ? item.ownerModule : `属 ${item.ownerModule}`}
                 </span>
               </div>
@@ -685,11 +698,11 @@ function CheckField({
   onChange: (value: boolean) => void;
 }) {
   return (
-    <label htmlFor={id} className="flex items-center gap-2 text-copy-13">
+    <label htmlFor={id} className="text-copy-13 flex items-center gap-2">
       <input
         id={id}
         type="checkbox"
-        className="h-4 w-4 rounded border-input"
+        className="border-input h-4 w-4 rounded"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
       />

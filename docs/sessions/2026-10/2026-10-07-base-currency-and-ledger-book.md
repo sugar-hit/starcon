@@ -47,17 +47,21 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/identity/src/main/resources/db/migration/V43__accounting_book.sql`
 
 **后端**
+
 - `backend/services/identity/src/main/java/com/starcon/identity/AccountingBookController.java`（新）
 - `backend/services/identity/src/test/java/com/starcon/identity/AccountingBookIntegrationTest.java`（新，13 例）
 
 **契约（codegen 产物，未手改）**
+
 - `packages/api-contracts/src/identity.openapi.json`（+3 路径 / +2 schema / 0 删除 / 0 operationId 位移）
 - `packages/api-contracts/src/catalog.ts`（+`AccountingBookView` / +`AccountingBookInput`）
 
 **前端**
+
 - `apps/web/src/components/iam/accounting-book-workspace.tsx`（新）
 - `apps/web/src/components/iam/accounting-book-model.ts` + `.test.ts`（新，7 例）
 - `apps/web/src/app/org/accounting-books/page.tsx`（新）
@@ -65,6 +69,7 @@
 - `packages/ui/src/lib/task-pages.ts`（页面目录 + 账户菜单顺序）
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md`（17.1.2.2 一行 + 四处派生汇总）
 
 ## 未采纳的做法

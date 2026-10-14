@@ -24,14 +24,12 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.5.1.2 在途库存：四类在途同一口径、**在途漏算不得发生**（与四个既有模块同一条 sum）、
- * 逾期预警真算、分批到货与短少如实记录、时刻带时区偏移写回、乐观锁冲突，以及租户隔离三断言。
+ * 7.5.1.2 在途库存：四类在途同一口径、**在途漏算不得发生**（与四个既有模块同一条 sum）、 逾期预警真算、分批到货与短少如实记录、时刻带时区偏移写回、乐观锁冲突，以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link InventoryTransferIntegrationTest} 完全一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
+ * <p>夹具写法与 {@link InventoryTransferIntegrationTest} 完全一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -166,22 +164,42 @@ class InventoryInTransitIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 4),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-SZ", "深圳仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 5),
+                tenant,
+                "WH-SZ",
+                "深圳仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 6),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             return null;
           });
     }
@@ -194,7 +212,10 @@ class InventoryInTransitIntegrationTest {
           sql.execute(
               "insert into inventory_lot(id,tenant_id,sku_id,lot_code,status)"
                   + " values(?,?,?,?,'ACTIVE')",
-              lotA, a, skuA, "LOT-1");
+              lotA,
+              a,
+              skuA,
+              "LOT-1");
           return null;
         });
   }
@@ -203,7 +224,11 @@ class InventoryInTransitIntegrationTest {
     sql.execute(
         "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
             + " values(?,?,?,?,?,'STORAGE',true)",
-        id, a, warehouse, code, "库位 " + code);
+        id,
+        a,
+        warehouse,
+        code,
+        "库位 " + code);
   }
 
   AccessService.Access actorFor(UUID tenant) {
@@ -228,12 +253,25 @@ class InventoryInTransitIntegrationTest {
           sql.execute(
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-              balanceId, a, sku, warehouse, leA, qSellable, new BigDecimal(onHand));
+              balanceId,
+              a,
+              sku,
+              warehouse,
+              leA,
+              qSellable,
+              new BigDecimal(onHand));
           sql.execute(
               "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
                   + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
                   + "last_movement_at) values(?,?,?,?,?,?,null,?,?,?,0,now())",
-              UUID.randomUUID(), a, leA, sku, warehouse, location, qSellable, balanceId,
+              UUID.randomUUID(),
+              a,
+              leA,
+              sku,
+              warehouse,
+              location,
+              qSellable,
+              balanceId,
               new BigDecimal(onHand));
           return null;
         });
@@ -242,8 +280,7 @@ class InventoryInTransitIntegrationTest {
   /**
    * 与 7.1.1.1 / 7.2.2.1 / 7.1.3.1 / 7.5.1.1 **完全相同**的那条在途口径。
    *
-   * <p>本模块新增的头程/采购/FBA 在途若能被这条老口径读到，就证明它们真的进了同一张事实表，
-   * 而不是另建了一套 —— 「在途漏算导致重复补货」的根因就是有两套账。
+   * <p>本模块新增的头程/采购/FBA 在途若能被这条老口径读到，就证明它们真的进了同一张事实表， 而不是另建了一套 —— 「在途漏算导致重复补货」的根因就是有两套账。
    */
   BigDecimal sharedInTransit() {
     return asA(
@@ -260,7 +297,8 @@ class InventoryInTransitIntegrationTest {
             sql.fetchOne(
                     "select coalesce(sum(on_hand),0) from inventory_balance"
                         + " where sku_id=? and warehouse_id=?",
-                    sku, warehouse)
+                    sku,
+                    warehouse)
                 .get(0, BigDecimal.class));
   }
 
@@ -285,12 +323,15 @@ class InventoryInTransitIntegrationTest {
   /**
    * 头程在途登记请求（默认值覆盖大多数用例）。
    *
-   * <p>ETA 早于「此刻」时自动把发出时刻推到 ETA 之前：ETA 不能早于发出时刻（那说明录反了），
-   * 但一条 10 天前发出、2 天前该到的批次正是逾期预警要有数据可算的那种货。
+   * <p>ETA 早于「此刻」时自动把发出时刻推到 ETA 之前：ETA 不能早于发出时刻（那说明录反了）， 但一条 10 天前发出、2 天前该到的批次正是逾期预警要有数据可算的那种货。
    */
   InTransitRegisterRequest firstMile(String qty, OffsetDateTime eta) {
     OffsetDateTime shippedAt =
-        eta != null && eta.isBefore(OffsetDateTime.now()) ? eta.minusDays(5) : null;
+        eta != null
+                && eta.isBefore(
+                    OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS))
+            ? eta.minusDays(5)
+            : null;
     return new InTransitRegisterRequest(
         "FIRST_MILE",
         skuA,
@@ -320,19 +361,27 @@ class InventoryInTransitIntegrationTest {
 
   InTransitRow legOf(UUID id) {
     return asA(
-        () -> service.page(new InTransitQuery(null, null, null, null, null, null, null, null, 0, 50))
-            .rows()
-            .stream()
-            .filter(r -> r.id().equals(id))
-            .findFirst()
-            .orElse(null));
+        () ->
+            service
+                .page(new InTransitQuery(null, null, null, null, null, null, null, null, 0, 50))
+                .rows()
+                .stream()
+                .filter(r -> r.id().equals(id))
+                .findFirst()
+                .orElse(null));
   }
 
   // ================================================================ 登记
 
   @Test
   void 登记头程在途_不动在手且进入四个既有模块同一条在途口径() {
-    var saved = register(firstMile("500", OffsetDateTime.now().plusDays(20)));
+    var saved =
+        register(
+            firstMile(
+                "500",
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .plusDays(20)));
 
     assertThat(saved.transitKind()).isEqualTo("FIRST_MILE");
     assertThat(saved.status()).isEqualTo("IN_TRANSIT");
@@ -374,7 +423,7 @@ class InventoryInTransitIntegrationTest {
                 null,
                 new BigDecimal("30"),
                 null,
-                OffsetDateTime.now().plusDays(10),
+                OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(10),
                 "FBA",
                 "FBA-SHP-9001",
                 "亚马逊物流",
@@ -392,8 +441,22 @@ class InventoryInTransitIntegrationTest {
   void 登记_调拨类型被拒_否则在途被记两次() {
     var request =
         new InTransitRegisterRequest(
-            "TRANSFER", skuA, qSellable, leA, whSh, "", whSz, "", null, new BigDecimal("1"),
-            null, null, "", "", "", "");
+            "TRANSFER",
+            skuA,
+            qSellable,
+            leA,
+            whSh,
+            "",
+            whSz,
+            "",
+            null,
+            new BigDecimal("1"),
+            null,
+            null,
+            "",
+            "",
+            "",
+            "");
     assertThatThrownBy(() -> register(request))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("7.5.1.1");
@@ -402,8 +465,18 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 登记_同一来源单据重复投递被拒_不双记在途() {
-    register(firstMile("500", OffsetDateTime.now().plusDays(20)));
-    assertThatThrownBy(() -> register(firstMile("500", OffsetDateTime.now().plusDays(20))))
+    register(
+        firstMile(
+            "500",
+            OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(20)));
+    assertThatThrownBy(
+            () ->
+                register(
+                    firstMile(
+                        "500",
+                        OffsetDateTime.now()
+                            .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                            .plusDays(20))))
         .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
     // 关键：不能变成 1000
     assertThat(sharedInTransit()).isEqualByComparingTo("500");
@@ -416,78 +489,203 @@ class InventoryInTransitIntegrationTest {
             () ->
                 register(
                     new InTransitRegisterRequest(
-                        "FIRST_MILE", skuA, qSellable, leA, null, "某工厂", whSz, "", null,
-                        new BigDecimal("1"), null, null, "", "", "", "")))
+                        "FIRST_MILE",
+                        skuA,
+                        qSellable,
+                        leA,
+                        null,
+                        "某工厂",
+                        whSz,
+                        "",
+                        null,
+                        new BigDecimal("1"),
+                        null,
+                        null,
+                        "",
+                        "",
+                        "",
+                        "")))
         .hasMessageContaining("来源系统必填");
     // 数量非正 / 超过 4 位小数
-    assertThatThrownBy(() -> register(firstMile("0", null)))
-        .hasMessageContaining("在途数量必须大于 0");
-    assertThatThrownBy(() -> register(firstMile("1.00001", null)))
-        .hasMessageContaining("最多 4 位小数");
+    assertThatThrownBy(() -> register(firstMile("0", null))).hasMessageContaining("在途数量必须大于 0");
+    assertThatThrownBy(() -> register(firstMile("1.00001", null))).hasMessageContaining("最多 4 位小数");
     // 起止站都为空 → DB 的 ck_transfer_endpoint 挡住
     assertThatThrownBy(
             () ->
                 register(
                     new InTransitRegisterRequest(
-                        "FIRST_MILE", skuA, qSellable, leA, null, "", null, "", null,
-                        new BigDecimal("1"), null, null, "P", "R-1", "", "")))
+                        "FIRST_MILE",
+                        skuA,
+                        qSellable,
+                        leA,
+                        null,
+                        "",
+                        null,
+                        "",
+                        null,
+                        new BigDecimal("1"),
+                        null,
+                        null,
+                        "P",
+                        "R-1",
+                        "",
+                        "")))
         .isInstanceOf(Exception.class);
     // 非本租户仓的一端没有可读名
     assertThatThrownBy(
             () ->
                 register(
                     new InTransitRegisterRequest(
-                        "FIRST_MILE", skuA, qSellable, leA, null, "", whSz, "", null,
-                        new BigDecimal("1"), null, null, "P", "R-2", "", "")))
+                        "FIRST_MILE",
+                        skuA,
+                        qSellable,
+                        leA,
+                        null,
+                        "",
+                        whSz,
+                        "",
+                        null,
+                        new BigDecimal("1"),
+                        null,
+                        null,
+                        "P",
+                        "R-2",
+                        "",
+                        "")))
         .hasMessageContaining("可读名称");
     // FBA 发货没有我方发货仓 → 无法扣减在手
     assertThatThrownBy(
             () ->
                 register(
                     new InTransitRegisterRequest(
-                        "FBA_OUTBOUND", skuA, qSellable, leA, null, "某仓", null, "FBA 仓",
-                        null, new BigDecimal("1"), null, null, "FBA", "R-3", "", "")))
+                        "FBA_OUTBOUND",
+                        skuA,
+                        qSellable,
+                        leA,
+                        null,
+                        "某仓",
+                        null,
+                        "FBA 仓",
+                        null,
+                        new BigDecimal("1"),
+                        null,
+                        null,
+                        "FBA",
+                        "R-3",
+                        "",
+                        "")))
         .hasMessageContaining("发货仓");
     // 头程/采购没有我方收货仓 → 到货没有入库落点
     assertThatThrownBy(
             () ->
                 register(
                     new InTransitRegisterRequest(
-                        "FIRST_MILE", skuA, qSellable, leA, null, "某工厂", null, "某平台仓",
-                        null, new BigDecimal("1"), null, null, "P", "R-4", "", "")))
+                        "FIRST_MILE",
+                        skuA,
+                        qSellable,
+                        leA,
+                        null,
+                        "某工厂",
+                        null,
+                        "某平台仓",
+                        null,
+                        new BigDecimal("1"),
+                        null,
+                        null,
+                        "P",
+                        "R-4",
+                        "",
+                        "")))
         .hasMessageContaining("收货仓");
     // 同仓进出没有在途意义
     assertThatThrownBy(
             () ->
                 register(
                     new InTransitRegisterRequest(
-                        "FIRST_MILE", skuA, qSellable, leA, whSz, "", whSz, "", null,
-                        new BigDecimal("1"), null, null, "P", "R-5", "", "")))
+                        "FIRST_MILE",
+                        skuA,
+                        qSellable,
+                        leA,
+                        whSz,
+                        "",
+                        whSz,
+                        "",
+                        null,
+                        new BigDecimal("1"),
+                        null,
+                        null,
+                        "P",
+                        "R-5",
+                        "",
+                        "")))
         .hasMessageContaining("同一个仓");
     // 批次不属于该 SKU
     assertThatThrownBy(
             () ->
                 register(
                     new InTransitRegisterRequest(
-                        "FIRST_MILE", skuA, qSellable, leA, null, "工厂", whSz, "",
-                        UUID.randomUUID(), new BigDecimal("1"), null, null, "P", "R-6", "", "")))
+                        "FIRST_MILE",
+                        skuA,
+                        qSellable,
+                        leA,
+                        null,
+                        "工厂",
+                        whSz,
+                        "",
+                        UUID.randomUUID(),
+                        new BigDecimal("1"),
+                        null,
+                        null,
+                        "P",
+                        "R-6",
+                        "",
+                        "")))
         .hasMessageContaining("批次不存在");
     // SKU 未在本租户登记
     assertThatThrownBy(
             () ->
                 register(
                     new InTransitRegisterRequest(
-                        "FIRST_MILE", idFor(b, 2), qSellable, leA, null, "工厂", whSz, "", null,
-                        new BigDecimal("1"), null, null, "P", "R-7", "", "")))
+                        "FIRST_MILE",
+                        idFor(b, 2),
+                        qSellable,
+                        leA,
+                        null,
+                        "工厂",
+                        whSz,
+                        "",
+                        null,
+                        new BigDecimal("1"),
+                        null,
+                        null,
+                        "P",
+                        "R-7",
+                        "",
+                        "")))
         .hasMessageContaining("SKU 未在本租户登记");
     // ETA 早于发出
     assertThatThrownBy(
             () ->
                 register(
                     new InTransitRegisterRequest(
-                        "FIRST_MILE", skuA, qSellable, leA, null, "工厂", whSz, "", null,
-                        new BigDecimal("1"), OffsetDateTime.now(),
-                        OffsetDateTime.now().minusYears(1), "P", "R-8", "", "")))
+                        "FIRST_MILE",
+                        skuA,
+                        qSellable,
+                        leA,
+                        null,
+                        "工厂",
+                        whSz,
+                        "",
+                        null,
+                        new BigDecimal("1"),
+                        OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS),
+                        OffsetDateTime.now()
+                            .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                            .minusYears(1),
+                        "P",
+                        "R-8",
+                        "",
+                        "")))
         .hasMessageContaining("预计到达时间不能早于发出时间");
     // 未知在途类型 / 未知排序键
     assertThatThrownBy(
@@ -512,7 +710,15 @@ class InventoryInTransitIntegrationTest {
                     () ->
                         service.page(
                             new InTransitQuery(
-                                null, null, null, null, List.of("VERY_LATE"), null, null, null, 0,
+                                null,
+                                null,
+                                null,
+                                null,
+                                List.of("VERY_LATE"),
+                                null,
+                                null,
+                                null,
+                                0,
                                 50))))
         .hasMessageContaining("未知的逾期档位");
   }
@@ -533,7 +739,7 @@ class InventoryInTransitIntegrationTest {
                 lotA,
                 new BigDecimal("120"),
                 null,
-                OffsetDateTime.now().plusDays(35),
+                OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(35),
                 "PURCHASING",
                 "PO-2026-88",
                 "顺丰国际",
@@ -552,7 +758,13 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 到货_分批入库并结案_事件逐笔留痕() {
-    var leg = register(firstMile("500", OffsetDateTime.now().plusDays(20)));
+    var leg =
+        register(
+            firstMile(
+                "500",
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .plusDays(20)));
 
     var first =
         asA(
@@ -639,8 +851,7 @@ class InventoryInTransitIntegrationTest {
         () ->
             service.arrive(
                 leg.id(),
-                new InTransitArriveRequest(
-                    0L, null, locSz1, null, "", new BigDecimal("500"))));
+                new InTransitArriveRequest(0L, null, locSz1, null, "", new BigDecimal("500"))));
     assertThatThrownBy(
             () ->
                 asA(
@@ -651,8 +862,7 @@ class InventoryInTransitIntegrationTest {
                                 0L, null, locSz1, null, "", new BigDecimal("1")))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
   }
 
   @Test
@@ -661,9 +871,22 @@ class InventoryInTransitIntegrationTest {
     var leg =
         register(
             new InTransitRegisterRequest(
-                "FBA_OUTBOUND", skuA, qSellable, leA, whSh, "", null, "Amazon FBA ONT8", null,
-                new BigDecimal("30"), null, OffsetDateTime.now().plusDays(10), "FBA", "FBA-SHP-1",
-                "亚马逊物流", "AMZ-1"));
+                "FBA_OUTBOUND",
+                skuA,
+                qSellable,
+                leA,
+                whSh,
+                "",
+                null,
+                "Amazon FBA ONT8",
+                null,
+                new BigDecimal("30"),
+                null,
+                OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(10),
+                "FBA",
+                "FBA-SHP-1",
+                "亚马逊物流",
+                "AMZ-1"));
 
     // 平台侧没有本地库位，所以这次到货不给库位、也不入库
     var saved =
@@ -682,8 +905,8 @@ class InventoryInTransitIntegrationTest {
   /**
    * 时刻带时区偏移写回 —— 必须断言**写回来的值**，否则静默偏 −28800s 没人发现。
    *
-   * <p>用 {@code Timestamp.valueOf(LocalDateTime…)} 绑定的典型症状就是这个：写进去的
-   * 瞬间被当成 UTC 解释，读回来差 8 小时，ETA 算出来全错。
+   * <p>用 {@code Timestamp.valueOf(LocalDateTime…)} 绑定的典型症状就是这个：写进去的 瞬间被当成 UTC 解释，读回来差 8 小时，ETA
+   * 算出来全错。
    */
   @Test
   void 预计到达与发出时刻_带时区偏移准确写回() {
@@ -692,8 +915,22 @@ class InventoryInTransitIntegrationTest {
     var leg =
         register(
             new InTransitRegisterRequest(
-                "FIRST_MILE", skuA, qSellable, leA, null, "工厂", whSz, "", null,
-                new BigDecimal("10"), shippedAt, eta, "FIRST_MILE", "TZ-1", "", ""));
+                "FIRST_MILE",
+                skuA,
+                qSellable,
+                leA,
+                null,
+                "工厂",
+                whSz,
+                "",
+                null,
+                new BigDecimal("10"),
+                shippedAt,
+                eta,
+                "FIRST_MILE",
+                "TZ-1",
+                "",
+                ""));
 
     var stored =
         asA(
@@ -707,7 +944,8 @@ class InventoryInTransitIntegrationTest {
     assertThat(backShip.toInstant()).isEqualTo(shippedAt.toInstant());
     assertThat(backEta.toInstant()).isEqualTo(eta.toInstant());
     // 墙钟时刻也要对（+08:00 偏移被保留，不是换成 UTC 墙钟）
-    assertThat(backEta.getHour()).isEqualTo(17);
+    assertThat(backEta.withOffsetSameInstant(java.time.ZoneOffset.ofHours(8)).getHour())
+        .isEqualTo(17);
     assertThat(backEta.getMinute()).isEqualTo(45);
 
     // 服务层回读同样带着偏移，不是被吞掉
@@ -717,12 +955,12 @@ class InventoryInTransitIntegrationTest {
     // 库里按 UTC 记的墙钟时间也对得上
     var utcText =
         asA(
-                () ->
-                    sql.fetchOne(
-                            "select to_char(expected_arrive_at at time zone 'UTC',"
-                                + "'YYYY-MM-DD HH24:MI:SS') as t from inventory_transfer where id=?",
-                            leg.id())
-                        .get("t", String.class));
+            () ->
+                sql.fetchOne(
+                        "select to_char(expected_arrive_at at time zone 'UTC',"
+                            + "'YYYY-MM-DD HH24:MI:SS') as t from inventory_transfer where id=?",
+                        leg.id())
+                    .get("t", String.class));
     assertThat(utcText).isEqualTo("2026-10-20 09:45:00");
   }
 
@@ -730,14 +968,21 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 差异登记_原因必填且短少后未达量归零() {
-    var leg = register(firstMile("500", OffsetDateTime.now().minusDays(9)));
+    var leg =
+        register(
+            firstMile(
+                "500",
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .minusDays(9)));
     assertThatThrownBy(
             () ->
                 asA(
                     () ->
                         service.discrepancy(
                             leg.id(),
-                            new InTransitDiscrepancyRequest(0L, null, new BigDecimal("30"), "", ""))))
+                            new InTransitDiscrepancyRequest(
+                                0L, null, new BigDecimal("30"), "", ""))))
         .hasMessageContaining("差异原因必填");
     assertThatThrownBy(
             () ->
@@ -807,8 +1052,7 @@ class InventoryInTransitIntegrationTest {
                                 7L, null, locSz1, null, "", new BigDecimal("1")))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
     // 缺版本也不放行（不做「读到什么就写什么」）
     assertThatThrownBy(
             () ->
@@ -828,20 +1072,64 @@ class InventoryInTransitIntegrationTest {
     var fresh =
         register(
             new InTransitRegisterRequest(
-                "FIRST_MILE", skuA, qSellable, leA, null, "工厂A", whSz, "", null,
-                new BigDecimal("10"), null, OffsetDateTime.now().plusDays(3), "P", "OK-1", "", ""));
+                "FIRST_MILE",
+                skuA,
+                qSellable,
+                leA,
+                null,
+                "工厂A",
+                whSz,
+                "",
+                null,
+                new BigDecimal("10"),
+                null,
+                OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(3),
+                "P",
+                "OK-1",
+                "",
+                ""));
     var mild =
         register(
             new InTransitRegisterRequest(
-                "FIRST_MILE", skuA, qSellable, leA, null, "工厂B", whSz, "", null,
-                new BigDecimal("20"), OffsetDateTime.now().minusDays(6),
-                OffsetDateTime.now().minusHours(6), "P", "MILD-1", "", ""));
+                "FIRST_MILE",
+                skuA,
+                qSellable,
+                leA,
+                null,
+                "工厂B",
+                whSz,
+                "",
+                null,
+                new BigDecimal("20"),
+                OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).minusDays(6),
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .minusHours(6),
+                "P",
+                "MILD-1",
+                "",
+                ""));
     var critical =
         register(
             new InTransitRegisterRequest(
-                "FIRST_MILE", skuA, qSellable, leA, null, "工厂C", whSz, "", null,
-                new BigDecimal("30"), OffsetDateTime.now().minusDays(14),
-                OffsetDateTime.now().minusDays(9), "P", "CRIT-1", "", ""));
+                "FIRST_MILE",
+                skuA,
+                qSellable,
+                leA,
+                null,
+                "工厂C",
+                whSz,
+                "",
+                null,
+                new BigDecimal("30"),
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .minusDays(14),
+                OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).minusDays(9),
+                "P",
+                "CRIT-1",
+                "",
+                ""));
     // 历史行：有在途但没有登记 ETA —— 算不出逾期，必须如实显示而不是算成准点
     asA(
         () -> {
@@ -849,7 +1137,14 @@ class InventoryInTransitIntegrationTest {
               "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,"
                   + "from_warehouse_id,to_warehouse_id,quality_status_id,quantity,status,shipped_at)"
                   + " values(?,?,?,?,?,?,?,?, 'IN_TRANSIT',now())",
-              UUID.randomUUID(), a, skuA, leA, whSh, whSz, qSellable, new BigDecimal("40"));
+              UUID.randomUUID(),
+              a,
+              skuA,
+              leA,
+              whSh,
+              whSz,
+              qSellable,
+              new BigDecimal("40"));
           return null;
         });
 
@@ -861,7 +1156,8 @@ class InventoryInTransitIntegrationTest {
     assertThat(legOf(critical.id()).overdueHours()).isGreaterThanOrEqualTo(8L * 24);
 
     var alerts = asA(() -> service.alerts());
-    assertThat(alerts.rows()).extracting(InTransitRow::id)
+    assertThat(alerts.rows())
+        .extracting(InTransitRow::id)
         .containsExactlyInAnyOrder(mild.id(), critical.id());
     assertThat(alerts.totalOverdueLegs()).isEqualTo(2);
     assertThat(alerts.overdueQuantity()).isEqualByComparingTo("50");
@@ -879,7 +1175,8 @@ class InventoryInTransitIntegrationTest {
             () ->
                 service.page(
                     new InTransitQuery(null, null, null, null, null, true, null, null, 0, 50)));
-    assertThat(only.rows()).extracting(InTransitRow::id)
+    assertThat(only.rows())
+        .extracting(InTransitRow::id)
         .containsExactlyInAnyOrder(mild.id(), critical.id());
 
     // 按档位筛选
@@ -896,7 +1193,8 @@ class InventoryInTransitIntegrationTest {
         () -> {
           sql.execute(
               "update inventory_transfer set expected_arrive_at=cast(? as timestamptz) where id=?",
-              OffsetDateTime.now().plusDays(2), critical.id());
+              OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(2),
+              critical.id());
           return null;
         });
     assertThat(legOf(critical.id()).overdueLevel()).isEqualTo("ON_TIME");
@@ -905,7 +1203,7 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 逾期档位与阈值_分档边界由同一套规则给出() {
-    var now = OffsetDateTime.now();
+    var now = OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS);
     assertThat(InTransitOverdueLevel.of(new BigDecimal("1"), null, now))
         .isEqualTo(InTransitOverdueLevel.NO_ETA);
     assertThat(InTransitOverdueLevel.of(new BigDecimal("1"), now.plusDays(1), now))
@@ -919,20 +1217,15 @@ class InventoryInTransitIntegrationTest {
     assertThat(InTransitOverdueLevel.of(new BigDecimal("1"), now.minusDays(30), now))
         .isEqualTo(InTransitOverdueLevel.CRITICAL);
     // 已了结的腿不报逾期（货都到了还进待办清单）
-    assertThat(
-            InTransitOverdueLevel.of(
-                BigDecimal.ZERO, now.minusDays(30), now))
+    assertThat(InTransitOverdueLevel.of(BigDecimal.ZERO, now.minusDays(30), now))
         .isEqualTo(InTransitOverdueLevel.ON_TIME);
   }
 
-  /**
-   * 调拨在途的 ETA 从调拨单派生 —— 7.5.1.1 的既有单据立刻可算逾期，
-   * 且**不需要**改它的一行代码。
-   */
+  /** 调拨在途的 ETA 从调拨单派生 —— 7.5.1.1 的既有单据立刻可算逾期， 且**不需要**改它的一行代码。 */
   @Test
   void 调拨在途_清单可见且ETA从调拨单派生() {
     seedBalance(skuA, whSh, locSh1, "100");
-    var past = OffsetDateTime.now().minusDays(2);
+    var past = OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).minusDays(2);
     var order =
         asA(
             () ->
@@ -953,20 +1246,15 @@ class InventoryInTransitIntegrationTest {
         () ->
             transfers.confirm(
                 order.id(), new InventoryTransferModels.TransferOrderActionRequest(0L, null)));
-    var lineId =
-        asA(
-                () ->
-                    transfers
-                        .detail(order.id())
-                        .lines()
-                        .get(0)
-                        .id());
+    var lineId = asA(() -> transfers.detail(order.id()).lines().get(0).id());
     asA(
         () ->
             transfers.ship(
                 order.id(),
                 new InventoryTransferModels.TransferShipRequest(
-                    1L, null, "",
+                    1L,
+                    null,
+                    "",
                     List.of(
                         new InventoryTransferModels.TransferShipLineRequest(
                             lineId, new BigDecimal("60"))))));
@@ -996,13 +1284,20 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 补货净额_按目的仓与SKU聚合_平台仓方向不计入() {
-    register(firstMile("500", OffsetDateTime.now().plusDays(20)));
+    register(
+        firstMile(
+            "500",
+            OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(20)));
     // 第二个 SKU 的头程，也去深圳仓
     var skuB = idFor(a, 11);
     asA(
         () -> {
-          sql.execute("insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)", skuB, a,
-              "SKU-2", "商品二");
+          sql.execute(
+              "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+              skuB,
+              a,
+              "SKU-2",
+              "商品二");
           return null;
         });
     asA(
@@ -1010,8 +1305,23 @@ class InventoryInTransitIntegrationTest {
             service.register(
                 a,
                 new InTransitRegisterRequest(
-                    "PURCHASE", skuB, qSellable, leA, null, "1688 工厂", whSz, "", null,
-                    new BigDecimal("300"), null, OffsetDateTime.now().plusDays(40), "P", "PO-2", "",
+                    "PURCHASE",
+                    skuB,
+                    qSellable,
+                    leA,
+                    null,
+                    "1688 工厂",
+                    whSz,
+                    "",
+                    null,
+                    new BigDecimal("300"),
+                    null,
+                    OffsetDateTime.now()
+                        .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                        .plusDays(40),
+                    "P",
+                    "PO-2",
+                    "",
                     "")));
     // 发往平台仓的 FBA 在途：不属于任何本租户仓的入库缺口
     seedBalance(skuA, whSh, locSh1, "100");
@@ -1020,14 +1330,30 @@ class InventoryInTransitIntegrationTest {
             service.register(
                 a,
                 new InTransitRegisterRequest(
-                    "FBA_OUTBOUND", skuA, qSellable, leA, whSh, "", null, "Amazon FBA", null,
-                    new BigDecimal("30"), null, OffsetDateTime.now().plusDays(10), "FBA", "FBA-9", "",
+                    "FBA_OUTBOUND",
+                    skuA,
+                    qSellable,
+                    leA,
+                    whSh,
+                    "",
+                    null,
+                    "Amazon FBA",
+                    null,
+                    new BigDecimal("30"),
+                    null,
+                    OffsetDateTime.now()
+                        .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                        .plusDays(10),
+                    "FBA",
+                    "FBA-9",
+                    "",
                     "")));
 
     var netting = asA(() -> service.netting(null, null, "QUANTITY", 0, 50));
     assertThat(netting.total()).isEqualTo(2);
     assertThat(netting.totalOutstandingQuantity()).isEqualByComparingTo("800");
-    assertThat(netting.rows()).extracting(InTransitNettingRow::skuCode)
+    assertThat(netting.rows())
+        .extracting(InTransitNettingRow::skuCode)
         .containsExactly("SKU-1", "SKU-2");
     var first = netting.rows().get(0);
     assertThat(first.toWarehouseCode()).isEqualTo("WH-SZ");
@@ -1047,24 +1373,58 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 清单_筛选搜索排序分页与汇总不受分页影响() {
-    register(firstMile("500", OffsetDateTime.now().plusDays(20)));
+    register(
+        firstMile(
+            "500",
+            OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(20)));
     asA(
         () ->
             service.register(
                 a,
                 new InTransitRegisterRequest(
-                    "PURCHASE", skuA, qSellable, leA, null, "1688 工厂", whSz, "", null,
-                    new BigDecimal("300"), OffsetDateTime.now().minusDays(13),
-                    OffsetDateTime.now().minusDays(8), "P", "PO-77",
-                    "顺丰国际", "SF-77")));
+                    "PURCHASE",
+                    skuA,
+                    qSellable,
+                    leA,
+                    null,
+                    "1688 工厂",
+                    whSz,
+                    "",
+                    null,
+                    new BigDecimal("300"),
+                    OffsetDateTime.now()
+                        .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                        .minusDays(13),
+                    OffsetDateTime.now()
+                        .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                        .minusDays(8),
+                    "P",
+                    "PO-77",
+                    "顺丰国际",
+                    "SF-77")));
     seedBalance(skuA, whSh, locSh1, "100");
     asA(
         () ->
             service.register(
                 a,
                 new InTransitRegisterRequest(
-                    "FBA_OUTBOUND", skuA, qSellable, leA, whSh, "", null, "Amazon FBA", null,
-                    new BigDecimal("30"), null, OffsetDateTime.now().plusDays(5), "FBA", "FBA-5", "",
+                    "FBA_OUTBOUND",
+                    skuA,
+                    qSellable,
+                    leA,
+                    whSh,
+                    "",
+                    null,
+                    "Amazon FBA",
+                    null,
+                    new BigDecimal("30"),
+                    null,
+                    OffsetDateTime.now()
+                        .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                        .plusDays(5),
+                    "FBA",
+                    "FBA-5",
+                    "",
                     "")));
 
     var all = asA(() -> service.page(query()));
@@ -1082,7 +1442,8 @@ class InventoryInTransitIntegrationTest {
     assertThat(all.summary().earliestExpectedArriveAt()).isNotNull();
     // 下拉词表四类全列（含 0 条的调拨在途）
     assertThat(all.kindOptions()).hasSize(4);
-    assertThat(all.kindOptions()).extracting(InTransitOption::value)
+    assertThat(all.kindOptions())
+        .extracting(InTransitOption::value)
         .containsExactly("TRANSFER", "FIRST_MILE", "PURCHASE", "FBA_OUTBOUND");
     assertThat(all.warehouseOptions()).hasSize(2);
 
@@ -1104,79 +1465,67 @@ class InventoryInTransitIntegrationTest {
 
     // 类型筛选 / 仓筛选 / SKU 筛选 / 关键词搜索
     assertThat(
-            asA(
-                    () ->
-                        service.page(
-                            new InTransitQuery(
-                                "FBA_OUTBOUND", null, null, null, null, null, null, null, 0, 50)))
+            asA(() ->
+                    service.page(
+                        new InTransitQuery(
+                            "FBA_OUTBOUND", null, null, null, null, null, null, null, 0, 50)))
                 .total())
         .isEqualTo(1);
     assertThat(
-            asA(
-                    () ->
-                        service.page(
-                            new InTransitQuery(
-                                null, null, whSz, null, null, null, null, null, 0, 50)))
+            asA(() ->
+                    service.page(
+                        new InTransitQuery(null, null, whSz, null, null, null, null, null, 0, 50)))
                 .total())
         .isEqualTo(2);
     assertThat(
-            asA(
-                    () ->
-                        service.page(
-                            new InTransitQuery(
-                                null, whSh, null, null, null, null, null, null, 0, 50)))
+            asA(() ->
+                    service.page(
+                        new InTransitQuery(null, whSh, null, null, null, null, null, null, 0, 50)))
                 .total())
         .isEqualTo(1);
     assertThat(
-            asA(
-                    () ->
-                        service.page(
-                            new InTransitQuery(
-                                null, null, null, skuA, null, null, null, null, 0, 50)))
+            asA(() ->
+                    service.page(
+                        new InTransitQuery(null, null, null, skuA, null, null, null, null, 0, 50)))
                 .total())
         .isEqualTo(3);
     assertThat(
-            asA(
-                    () ->
-                        service.page(
-                            new InTransitQuery(
-                                null, null, null, null, null, null, "SF-77", null, 0, 50)))
+            asA(() ->
+                    service.page(
+                        new InTransitQuery(
+                            null, null, null, null, null, null, "SF-77", null, 0, 50)))
                 .total())
         .isEqualTo(1);
     assertThat(
-            asA(
-                    () ->
-                        service.page(
-                            new InTransitQuery(
-                                null, null, null, null, null, null, "1688 工厂", null, 0, 50)))
+            asA(() ->
+                    service.page(
+                        new InTransitQuery(
+                            null, null, null, null, null, null, "1688 工厂", null, 0, 50)))
                 .total())
         .isEqualTo(1);
     assertThat(
-            asA(
-                    () ->
-                        service.page(
-                            new InTransitQuery(
-                                null, null, null, null, null, null, "不存在的东西", null, 0, 50)))
+            asA(() ->
+                    service.page(
+                        new InTransitQuery(
+                            null, null, null, null, null, null, "不存在的东西", null, 0, 50)))
                 .total())
         .isZero();
 
     // 排序：按未达量 / 按 SKU / 按逾期优先
     assertThat(
-            asA(
-                    () ->
-                        service.page(
-                            new InTransitQuery(
-                                null, null, null, null, null, null, null, "QUANTITY", 0, 50)))
+            asA(() ->
+                    service.page(
+                        new InTransitQuery(
+                            null, null, null, null, null, null, null, "QUANTITY", 0, 50)))
                 .rows()
                 .get(0)
                 .outstandingQuantity())
         .isEqualByComparingTo("500");
     assertThat(
-            asA(
-                    () ->
-                        service.page(
-                            new InTransitQuery(
-                                null, null, null, null, null, null, null, "OVERDUE", 0, 50)))
+            asA(() ->
+                    service.page(
+                        new InTransitQuery(
+                            null, null, null, null, null, null, null, "OVERDUE", 0, 50)))
                 .rows()
                 .get(0)
                 .overdueLevel())
@@ -1188,8 +1537,7 @@ class InventoryInTransitIntegrationTest {
     assertThatThrownBy(() -> asA(() -> service.detail(UUID.randomUUID())))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
   }
 
   // ================================================================ HTTP 层
@@ -1203,35 +1551,41 @@ class InventoryInTransitIntegrationTest {
     http.perform(get("/warehouse/inventory/in-transit/netting"))
         .andExpect(status().isUnauthorized());
     // 只读角色不能登记
-    http.perform(post("/warehouse/inventory/in-transit")
-            .header("Authorization", "Bearer read-only")
-            .contentType("application/json")
-            .content("{\"transitKind\":\"FIRST_MILE\"}"))
+    http.perform(
+            post("/warehouse/inventory/in-transit")
+                .header("Authorization", "Bearer read-only")
+                .contentType("application/json")
+                .content("{\"transitKind\":\"FIRST_MILE\"}"))
         .andExpect(status().isForbidden());
 
-    register(firstMile("500", OffsetDateTime.now().minusDays(2)));
-    http.perform(get("/warehouse/inventory/in-transit")
-            .header("Authorization", "Bearer tenant-a"))
+    register(
+        firstMile(
+            "500",
+            OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).minusDays(2)));
+    http.perform(get("/warehouse/inventory/in-transit").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.summary.outstandingQuantity").value(500.0))
         .andExpect(jsonPath("$.rows[0].transitKind").value("FIRST_MILE"))
         .andExpect(jsonPath("$.rows[0].overdueLevel").value("OVERDUE"))
         .andExpect(jsonPath("$.kindOptions.length()").value(4));
-    http.perform(get("/warehouse/inventory/in-transit/alerts")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/in-transit/alerts")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.totalOverdueLegs").value(1));
-    http.perform(get("/warehouse/inventory/in-transit/netting")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/in-transit/netting")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.rows[0].outstandingQuantity").value(500.0));
     // 空请求体也要报可读错误，不能 NPE
-    http.perform(post("/warehouse/inventory/in-transit")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{}"))
+    http.perform(
+            post("/warehouse/inventory/in-transit")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{}"))
         .andExpect(status().isBadRequest());
   }
 
@@ -1239,7 +1593,13 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 断言一_两租户互不可见() {
-    var leg = register(firstMile("500", OffsetDateTime.now().minusDays(2)));
+    var leg =
+        register(
+            firstMile(
+                "500",
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .minusDays(2)));
 
     // B 有自己的在途夹具
     access.run(
@@ -1250,8 +1610,14 @@ class InventoryInTransitIntegrationTest {
               "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,"
                   + "from_warehouse_id,to_warehouse_id,quality_status_id,quantity,status,shipped_at)"
                   + " values(?,?,?,?,?,?,?,?, 'IN_TRANSIT',now())",
-              UUID.randomUUID(), b, idFor(b, 2), idFor(b, 1), idFor(b, 4), idFor(b, 5),
-              idFor(b, 6), new BigDecimal("7"));
+              UUID.randomUUID(),
+              b,
+              idFor(b, 2),
+              idFor(b, 1),
+              idFor(b, 4),
+              idFor(b, 5),
+              idFor(b, 6),
+              new BigDecimal("7"));
           return null;
         });
 
@@ -1270,8 +1636,7 @@ class InventoryInTransitIntegrationTest {
     assertThatThrownBy(() -> asB(() -> service.detail(leg.id())))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     // 拿 A 的腿 id 给 B 登记到货 → 建不出痕迹
     assertThatThrownBy(
             () ->
@@ -1296,37 +1661,50 @@ class InventoryInTransitIntegrationTest {
 
   @Test
   void 断言二_伪造租户头无效() throws Exception {
-    register(firstMile("500", OffsetDateTime.now().minusDays(2)));
+    register(
+        firstMile(
+            "500",
+            OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).minusDays(2)));
 
     // 身份是 B 但伪造 X-Tenant-Id 指向 A → 只能看到 B 自己的（这里是空）
-    http.perform(get("/warehouse/inventory/in-transit")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/in-transit")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(0))
         .andExpect(jsonPath("$.summary.outstandingQuantity").value(0.0));
     // 反向：身份是 A 伪造 B 的头也拿不到 B 的数据
-    http.perform(get("/warehouse/inventory/in-transit")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/inventory/in-transit")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1));
     // 预警与补货净额同样不受伪造头影响
-    http.perform(get("/warehouse/inventory/in-transit/alerts")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/in-transit/alerts")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.totalOverdueLegs").value(0));
-    http.perform(get("/warehouse/inventory/in-transit/netting")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/in-transit/netting")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(0));
   }
 
   @Test
   void 断言三_连接池归还后不串租户() {
-    var leg = register(firstMile("500", OffsetDateTime.now().minusDays(2)));
+    var leg =
+        register(
+            firstMile(
+                "500",
+                OffsetDateTime.now()
+                    .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+                    .minusDays(2)));
     access.run(
         actorB,
         "warehouse.inventory.read",
@@ -1335,8 +1713,14 @@ class InventoryInTransitIntegrationTest {
               "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,"
                   + "from_warehouse_id,to_warehouse_id,quality_status_id,quantity,status,shipped_at)"
                   + " values(?,?,?,?,?,?,?,?, 'IN_TRANSIT',now())",
-              UUID.randomUUID(), b, idFor(b, 2), idFor(b, 1), idFor(b, 4), idFor(b, 5),
-              idFor(b, 6), new BigDecimal("7"));
+              UUID.randomUUID(),
+              b,
+              idFor(b, 2),
+              idFor(b, 1),
+              idFor(b, 4),
+              idFor(b, 5),
+              idFor(b, 6),
+              new BigDecimal("7"));
           return null;
         });
 
@@ -1352,11 +1736,11 @@ class InventoryInTransitIntegrationTest {
       assertThat(asA(() -> sharedInTransitRaw())).isEqualByComparingTo("500");
       assertThat(
               asB(
-                      () ->
-                          sql.fetchOne(
-                                  "select coalesce(sum(quantity),0) from inventory_transfer"
-                                      + " where status='IN_TRANSIT'")
-                              .get(0, BigDecimal.class)))
+                  () ->
+                      sql.fetchOne(
+                              "select coalesce(sum(quantity),0) from inventory_transfer"
+                                  + " where status='IN_TRANSIT'")
+                          .get(0, BigDecimal.class)))
           .isEqualByComparingTo("7");
       assertThat(asA(() -> service.alerts()).totalOverdueLegs()).isEqualTo(1);
       assertThat(asB(() -> service.alerts()).totalOverdueLegs()).isZero();
@@ -1401,11 +1785,15 @@ class InventoryInTransitIntegrationTest {
   /** 在途事实仍然只有一张表：外部腿与调拨腿落在同一张 inventory_transfer 上。 */
   @Test
   void 在途只有一个事实表_外部腿与调拨腿同表() {
-    register(firstMile("500", OffsetDateTime.now().plusDays(5)));
+    register(
+        firstMile(
+            "500",
+            OffsetDateTime.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS).plusDays(5)));
     var kinds =
         asA(
             () ->
-                sql.fetch(
+                sql
+                    .fetch(
                         "select distinct transit_kind from inventory_transfer order by transit_kind")
                     .stream()
                     .map(r -> r.get(0, String.class))
@@ -1416,9 +1804,9 @@ class InventoryInTransitIntegrationTest {
         asA(
             () ->
                 sql.fetch(
-                        "select table_name from information_schema.tables"
-                            + " where table_schema='public' and table_name like '%transit%'"
-                            + " or (table_schema='public' and table_name='inventory_transfer')"));
+                    "select table_name from information_schema.tables"
+                        + " where table_schema='public' and table_name like '%transit%'"
+                        + " or (table_schema='public' and table_name='inventory_transfer')"));
     assertThat(tables.stream().map(r -> r.get(0, String.class)).toList())
         .containsExactlyInAnyOrder("inventory_transfer", "in_transit_event");
   }

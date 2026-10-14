@@ -27,12 +27,12 @@
 
 蓝图最强调的一条。单一实现不够，所以叠了四层：
 
-| 层 | 机制 | 防的是 |
-|---|---|---|
-| 结构 | `b2b_receivable.shipment_id` NOT NULL 外键 | 应收挂不到发货单就写不出来 —— 不是没写的代码路径，是走不通的路径 |
-| 数值 | `receivable_amount ≤ total_amount` CHECK + 触发器按 `SUM(应收)` 复算 | 头尾两个数各算各的 |
-| 算术 | 服务层只在 `ship()` 一个方法里产生应收 | 以后有人「顺手」在下单里加一行 |
-| 口径 | 账期起算点 = 发货确认时刻，到期日由触发器 `make_interval` 独立复算 | −28800s 那类静默时间偏移 |
+| 层   | 机制                                                                 | 防的是                                                           |
+| ---- | -------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 结构 | `b2b_receivable.shipment_id` NOT NULL 外键                           | 应收挂不到发货单就写不出来 —— 不是没写的代码路径，是走不通的路径 |
+| 数值 | `receivable_amount ≤ total_amount` CHECK + 触发器按 `SUM(应收)` 复算 | 头尾两个数各算各的                                               |
+| 算术 | 服务层只在 `ship()` 一个方法里产生应收                               | 以后有人「顺手」在下单里加一行                                   |
+| 口径 | 账期起算点 = 发货确认时刻，到期日由触发器 `make_interval` 独立复算   | −28800s 那类静默时间偏移                                         |
 
 收款方式三分支各写明理由：`ORDER_SETTLEMENT` 不产生应收（款项已收讫，收进来的是**预收**不是应收，
 返回值里明确说明原因而不是给个 null 让人猜）、`ON_RECEIPT` 到期日 = 发货确认时刻、
@@ -64,15 +64,15 @@
 
 ## 关键 trade-off
 
-| 决定 | 放弃了什么 | 为什么值得 |
-|---|---|---|
-| B2B 独立表族 | 与零售共用一张订单表带来的「下游只认一张表」 | 跨车道 DDL 回归面归零；账期语义在零售侧无对应物 |
-| 起订量放价目表**表头**（不是每档） | 「MOQ 与某一档绑定」的直觉写法 | 同一 SKU 的三档可能写着三个不同 MOQ，而无法表达「哪个是对的」 |
-| 阶梯投影**整体替换**（先删后插） | 逐档追加的实现简单性 | 删档是调价最常见的动作，追加语义表达不了它 |
-| 不给 `b2b_price_tier` 收回 DELETE | 「投影不可删」的整齐 | 整体替换走不通会变成一个完全没有信息量的 409 |
-| 阶梯 / 客户投影在本服务内落库 | 「纯消费事件」的干净 | 05 价目未交付；不落库就没有任何可试算的数据 |
-| 应收列表独立端点 | 与订单列表合并成一张表 | 应收按**到期日**排（资金计划取数顺序），与订单的创建时间维度不是一回事 |
-| 前端 `/orders/b2b` 而非 `/orders` 第三个 tab | 「订单中心一处看全」 | `/orders` 是别的模块的页面；且账期应收的排序维度不同 |
+| 决定                                         | 放弃了什么                                   | 为什么值得                                                             |
+| -------------------------------------------- | -------------------------------------------- | ---------------------------------------------------------------------- |
+| B2B 独立表族                                 | 与零售共用一张订单表带来的「下游只认一张表」 | 跨车道 DDL 回归面归零；账期语义在零售侧无对应物                        |
+| 起订量放价目表**表头**（不是每档）           | 「MOQ 与某一档绑定」的直觉写法               | 同一 SKU 的三档可能写着三个不同 MOQ，而无法表达「哪个是对的」          |
+| 阶梯投影**整体替换**（先删后插）             | 逐档追加的实现简单性                         | 删档是调价最常见的动作，追加语义表达不了它                             |
+| 不给 `b2b_price_tier` 收回 DELETE            | 「投影不可删」的整齐                         | 整体替换走不通会变成一个完全没有信息量的 409                           |
+| 阶梯 / 客户投影在本服务内落库                | 「纯消费事件」的干净                         | 05 价目未交付；不落库就没有任何可试算的数据                            |
+| 应收列表独立端点                             | 与订单列表合并成一张表                       | 应收按**到期日**排（资金计划取数顺序），与订单的创建时间维度不是一回事 |
+| 前端 `/orders/b2b` 而非 `/orders` 第三个 tab | 「订单中心一处看全」                         | `/orders` 是别的模块的页面；且账期应收的排序维度不同                   |
 
 ## 过程中改掉的六个真缺陷
 
@@ -96,6 +96,7 @@
 ## 文件清单
 
 **后端（新增）**
+
 - `backend/services/trade/src/main/resources/db/migration/V120__trade_b2b_order_terms.sql`
 - `backend/services/trade/src/main/java/com/starcon/trade/B2BOrderModels.java`
 - `backend/services/trade/src/main/java/com/starcon/trade/B2BOrderService.java`
@@ -103,12 +104,14 @@
 - `backend/services/trade/src/test/java/com/starcon/trade/B2BOrderIntegrationTest.java`
 
 **前端（新增）**
+
 - `apps/web/src/app/orders/b2b/page.tsx`
 - `apps/web/src/components/orders/b2b-order-workspace.tsx`
 - `apps/web/src/components/orders/b2b-order-model.ts` + `.test.ts`
 - `apps/web/src/app/api/trade/b2b-order-allowlist.test.ts`
 
 **共用文件（外科式最小改动）**
+
 - `apps/web/src/lib/api-proxy.ts` — trade alternation **追加** `b2b-orders` 一支
 - `packages/ui/src/lib/nav-config.ts` — 运营区追加「批发订单」一条
 - `packages/api-contracts/src/contracts/trade.ts` / `trade.openapi.json` — codegen 纯新增 31 条 `B2B*`
@@ -116,12 +119,12 @@
 
 ## 验证
 
-| 闸 | 命令 | 结果 |
-|---|---|---|
-| L0 后端编译 | `cd backend && ./mvnw -q compile` | 通过（无输出） |
-| L0 类型 | `pnpm typecheck` | 3 个包全绿 |
-| L1 后端 | `cd backend && ./mvnw -pl services/trade -am test` | **227 例全绿**，BUILD SUCCESS |
-| L1 前端 | `pnpm vitest run <4 个改动文件 + 3 个他车道 trade allowlist + nav>` | **58 例全绿** |
+| 闸          | 命令                                                                | 结果                          |
+| ----------- | ------------------------------------------------------------------- | ----------------------------- |
+| L0 后端编译 | `cd backend && ./mvnw -q compile`                                   | 通过（无输出）                |
+| L0 类型     | `pnpm typecheck`                                                    | 3 个包全绿                    |
+| L1 后端     | `cd backend && ./mvnw -pl services/trade -am test`                  | **227 例全绿**，BUILD SUCCESS |
+| L1 前端     | `pnpm vitest run <4 个改动文件 + 3 个他车道 trade allowlist + nav>` | **58 例全绿**                 |
 
 trade 全套含本模块 32 例 + 既有 195 例，**跨车道零回归**（手动订单 32 / 加工单 27 /
 履约路由 32 / 仓配 40 / 订单列表 22 / 订单详情 16 / BOM 21 / 租户 4 / 契约导出 1）。

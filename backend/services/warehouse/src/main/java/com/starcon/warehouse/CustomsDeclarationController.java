@@ -19,23 +19,18 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 10.5.1.1 报关单管理。
  *
- * <p>命名空间 {@code /warehouse/customs-declarations}：与 10.4.1.1 头程发运单
- * （{@code /warehouse/first-mile-shipments}）同一 {@code /warehouse} 前缀，浏览器只经
- * /api/warehouse 代理访问。本模块的货物来源在 warehouse 服务内，明细行对
- * {@code first_mile_shipment_line} 建了复合外键，所以放进 {@code /inventory/} 会让
- * 「8.2 现场作业」与「10 物流报关」两套语义混在一个前缀里。
+ * <p>命名空间 {@code /warehouse/customs-declarations}：与 10.4.1.1 头程发运单 （{@code
+ * /warehouse/first-mile-shipments}）同一 {@code /warehouse} 前缀，浏览器只经 /api/warehouse 代理访问。本模块的货物来源在
+ * warehouse 服务内，明细行对 {@code first_mile_shipment_line} 建了复合外键，所以放进 {@code /inventory/} 会让 「8.2
+ * 现场作业」与「10 物流报关」两套语义混在一个前缀里。
  *
- * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}，
- * 全部写动作（建单 / 改单 / 复核 / 生成单据 / 提交报关行 / 登记海关结果 / 改单 / 取消）
- * 挂 {@code warehouse.inventory.update} —— 提交报关行那一刻申报资料就出去了，
- * 权限等级与调拨发货同档。
+ * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}， 全部写动作（建单 / 改单 / 复核 / 生成单据 /
+ * 提交报关行 / 登记海关结果 / 改单 / 取消） 挂 {@code warehouse.inventory.update} —— 提交报关行那一刻申报资料就出去了， 权限等级与调拨发货同档。
  *
- * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
- * 客户端伪造的 {@code X-Tenant-Id} 进不来也改不动它。
+ * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code app.current_tenant}，由
+ * RLS 在数据库层强制隔离。 客户端伪造的 {@code X-Tenant-Id} 进不来也改不动它。
  *
- * <p>动作端点是 **POST**：复核、提交、登记结果都是「发生一次业务事件」，
- * 用 PUT 会被 HTTP 语义读成「把单据设置成某个状态」，而实际发生的是申报资料对外递交。
+ * <p>动作端点是 **POST**：复核、提交、登记结果都是「发生一次业务事件」， 用 PUT 会被 HTTP 语义读成「把单据设置成某个状态」，而实际发生的是申报资料对外递交。
  */
 @RestController
 @RequestMapping("/warehouse/customs-declarations")
@@ -44,7 +39,8 @@ public class CustomsDeclarationController {
   private final AccessService access;
   private final CustomsDeclarationService declarations;
 
-  public CustomsDeclarationController(AccessService access, CustomsDeclarationService declarations) {
+  public CustomsDeclarationController(
+      AccessService access, CustomsDeclarationService declarations) {
     this.access = access;
     this.declarations = declarations;
   }
@@ -56,11 +52,9 @@ public class CustomsDeclarationController {
   }
 
   /**
-   * 报关能力：贸易方式、运输方式、状态机、单据类型、申报要素状态、
-   * **未交付依赖逐条声明**与四条必须讲清的口径。
+   * 报关能力：贸易方式、运输方式、状态机、单据类型、申报要素状态、 **未交付依赖逐条声明**与四条必须讲清的口径。
    *
-   * <p>前端据此渲染各下拉与提示 —— 3.7.1.1 HS 编码字典与外部报关行接口**显式报不可用
-   * 并给出归属模块**，而不是给一个点下去没反应的选项。
+   * <p>前端据此渲染各下拉与提示 —— 3.7.1.1 HS 编码字典与外部报关行接口**显式报不可用 并给出归属模块**，而不是给一个点下去没反应的选项。
    */
   @GetMapping("/capabilities")
   public CustomsCapabilities capabilities(
@@ -101,8 +95,7 @@ public class CustomsDeclarationController {
   }
 
   /**
-   * 报关单详情：头 + 明细 + 三单据（含被改版取代的历史版本）+ 提交回执 + 海关结果回执
-   * + 事件时间线 + 当前状态的合法下一步。
+   * 报关单详情：头 + 明细 + 三单据（含被改版取代的历史版本）+ 提交回执 + 海关结果回执 + 事件时间线 + 当前状态的合法下一步。
    *
    * <p>跨租户在 RLS 下查不到 → 404（403 会泄露「这张单存在」）。
    */
@@ -196,8 +189,7 @@ public class CustomsDeclarationController {
   /**
    * 人工复核通过：待复核 → 已复核。这是提交报关行的**唯一前置状态**。
    *
-   * <p>蓝图原文——报关数据错误导致的扣货与罚款由卖家承担，所以这一闸不能省，
-   * 而且 DB 层会逐行检查申报资料齐备性，缺哪几项一次全报出来。
+   * <p>蓝图原文——报关数据错误导致的扣货与罚款由卖家承担，所以这一闸不能省， 而且 DB 层会逐行检查申报资料齐备性，缺哪几项一次全报出来。
    */
   @PostMapping("/{declarationId}/review")
   public CustomsSaved review(
@@ -207,7 +199,9 @@ public class CustomsDeclarationController {
     return call(
         auth,
         "inventory.update",
-        a -> declarations.review(declarationId, request == null ? new CustomsReviewRequest("") : request));
+        a ->
+            declarations.review(
+                declarationId, request == null ? new CustomsReviewRequest("") : request));
   }
 
   /** 复核退回：待复核 → 复核退回。必须给原因。改完必须重新走复核才能再次提交。 */
@@ -247,7 +241,10 @@ public class CustomsDeclarationController {
     return call(
         auth,
         "inventory.update",
-        a -> declarations.generateDocument(declarationId, request == null ? new CustomsGenerateDocumentRequest("", "") : request));
+        a ->
+            declarations.generateDocument(
+                declarationId,
+                request == null ? new CustomsGenerateDocumentRequest("", "") : request));
   }
 
   /** 定稿单据：报关单 / 装箱单 / 商业发票三份都定稿后才允许提交报关行。 */
@@ -276,8 +273,7 @@ public class CustomsDeclarationController {
   /**
    * 提交报关行：已复核 → 已提交。
    *
-   * <p>必须先完成人工复核、三单据齐备且最新版本都已定稿 —— 三道闸里最硬的一道（人工复核）
-   * 由 DB 触发器钉死，绕过服务层直接改状态同样被挡。
+   * <p>必须先完成人工复核、三单据齐备且最新版本都已定稿 —— 三道闸里最硬的一道（人工复核） 由 DB 触发器钉死，绕过服务层直接改状态同样被挡。
    */
   @PostMapping("/{declarationId}/submit")
   public CustomsSaved submit(
@@ -299,7 +295,10 @@ public class CustomsDeclarationController {
     return call(
         auth,
         "inventory.update",
-        a -> declarations.recordResult(declarationId, request == null ? new CustomsResultRequest("", "", "", null, "", "") : request));
+        a ->
+            declarations.recordResult(
+                declarationId,
+                request == null ? new CustomsResultRequest("", "", "", null, "", "") : request));
   }
 
   /** 改单：已提交 / 已改单 / 已放行 → 已改单。必须给原因。 */
@@ -311,7 +310,9 @@ public class CustomsDeclarationController {
     return call(
         auth,
         "inventory.update",
-        a -> declarations.amend(declarationId, request == null ? new CustomsAmendRequest("", "") : request));
+        a ->
+            declarations.amend(
+                declarationId, request == null ? new CustomsAmendRequest("", "") : request));
   }
 
   /** 取消：必须给原因。报关资料已生成过，取消后无法追责。 */
@@ -323,7 +324,9 @@ public class CustomsDeclarationController {
     return call(
         auth,
         "inventory.update",
-        a -> declarations.cancel(declarationId, request == null ? new CustomsCancelRequest("") : request));
+        a ->
+            declarations.cancel(
+                declarationId, request == null ? new CustomsCancelRequest("") : request));
   }
 
   // 空请求体落到这里：{@code @Valid} 对 null 不生效，必须由服务层报出可读错误
@@ -334,33 +337,70 @@ public class CustomsDeclarationController {
   private static CustomsCreateRequest emptyCreate() {
     return new CustomsCreateRequest(
         // sourceShipmentId, legalEntityId, tradeMode,
-        null, null, null,
+        null,
+        null,
+        null,
         // exporterName, exporterCountryCode, consigneeName, consigneeCountryCode,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // iorName, iorCountryCode, brokerName, brokerCode, brokerContact,
-        null, null, null, null, null,
+        null,
+        null,
+        null,
+        null,
+        null,
         // destinationCountryCode, destinationCustomsDistrict, departurePort, destinationPort,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // transportMode, billOfLadingNo, declarationCurrency, baseCurrency,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // exchangeRate, exchangeRateScale, exchangeRateDate, notes, lines
-        null, null, null, null, List.of());
+        null,
+        null,
+        null,
+        null,
+        List.of());
   }
 
   private static CustomsUpdateRequest emptyUpdate() {
     return new CustomsUpdateRequest(
         // expectedVersion, tradeMode, exporterName, exporterCountryCode,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // consigneeName, consigneeCountryCode, iorName, iorCountryCode,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // brokerName, brokerCode, brokerContact, destinationCountryCode,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // destinationCustomsDistrict, departurePort, destinationPort, transportMode,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // billOfLadingNo, declarationCurrency, baseCurrency, exchangeRate,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // exchangeRateScale, exchangeRateDate, notes, lines
-        null, null, null, List.of());
+        null,
+        null,
+        null,
+        List.of());
   }
 
   private static CustomsSubmitRequest emptySubmit() {

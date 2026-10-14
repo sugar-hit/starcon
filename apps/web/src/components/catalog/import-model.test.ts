@@ -186,7 +186,12 @@ describe('3.8.1.1 导入向导 · 模型', () => {
     });
 
     it('预校验按已判定行数推进', () => {
-      const running = job({ status: 'PREVALIDATING', rowCount: 40, validCount: 10, invalidCount: 2 });
+      const running = job({
+        status: 'PREVALIDATING',
+        rowCount: 40,
+        validCount: 10,
+        invalidCount: 2,
+      });
       expect(progressText(running)).toBe('正在校验，已完成 12 / 40 行');
       expect(progressPercent(running)).toBe(30);
     });
@@ -205,7 +210,9 @@ describe('3.8.1.1 导入向导 · 模型', () => {
     });
 
     it('百分比被夹在 0..100（计数与分母不一致时不许画出溢出条）', () => {
-      expect(progressPercent(job({ status: 'RUNNING', validCount: 1, appliedCount: 99 }))).toBe(100);
+      expect(progressPercent(job({ status: 'RUNNING', validCount: 1, appliedCount: 99 }))).toBe(
+        100,
+      );
       expect(progressPercent(job({ status: 'PREVALIDATING', rowCount: 10 }))).toBe(0);
     });
   });
@@ -254,17 +261,16 @@ describe('3.8.1.1 导入向导 · 模型', () => {
       // 也不该被悄悄吞掉：它出现在 ignoredHeaders 里，页面上会写明「这一列不会被导入」。
       expect(unmappedRequiredKeys(template(), mapping)).toEqual([]);
       expect(mappingProblem(template(), mapping)).toBeNull();
-      expect(ignoredHeaders(template(), ['商品编码', '商品名称', '品牌', '内部备注'], mapping)).toEqual([
-        '品牌',
-        '内部备注',
-      ]);
+      expect(
+        ignoredHeaders(template(), ['商品编码', '商品名称', '品牌', '内部备注'], mapping),
+      ).toEqual(['品牌', '内部备注']);
     });
 
     it('没有对应模板字段的列同样被列为忽略', () => {
       const mapping = { spu_code: '商品编码', spu_name: '商品名称', brand: '品牌' };
-      expect(ignoredHeaders(template(), ['商品编码', '商品名称', '品牌', '内部备注'], mapping)).toEqual([
-        '内部备注',
-      ]);
+      expect(
+        ignoredHeaders(template(), ['商品编码', '商品名称', '品牌', '内部备注'], mapping),
+      ).toEqual(['内部备注']);
     });
   });
 
@@ -326,13 +332,15 @@ describe('3.8.1.1 导入向导 · 模型', () => {
       expect(input.code).toBe('SPU-STD');
       expect(input.name).toBe('商品导入');
       expect(input.columns).toEqual([]);
-      expect(templateProblem({
-        code: 'SPU-STD',
-        name: '商品导入',
-        targetEntity: 'SPU',
-        note: '',
-        enabled: true,
-      })).toBeNull();
+      expect(
+        templateProblem({
+          code: 'SPU-STD',
+          name: '商品导入',
+          targetEntity: 'SPU',
+          note: '',
+          enabled: true,
+        }),
+      ).toBeNull();
     });
 
     it('超长编码被拦下（与后端 @Size(max=64) 一致）', () => {

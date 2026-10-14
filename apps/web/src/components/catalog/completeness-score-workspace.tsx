@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge, Button, EmptyState, SectionCard, StatCard } from '@starcon/ui';
 import { RefreshCw, TriangleAlert, ClipboardList, CheckCircle2 } from 'lucide-react';
-import type { CompletenessGap, CompletenessRow, CompletenessScorecard } from '../../../../../packages/api-contracts/src/index';
+import type {
+  CompletenessGap,
+  CompletenessRow,
+  CompletenessScorecard,
+} from '../../../../../packages/api-contracts/src/index';
 import { Field, control } from '../common/fields';
 import {
   certificationCompletenessLabel,
@@ -53,7 +57,9 @@ export function CompletenessScoreWorkspace({ writable }: { writable: boolean }) 
   const [notice, setNotice] = useState<string | null>(null);
   const [card, setCard] = useState<CompletenessScorecard | null>(null);
   const [gaps, setGaps] = useState<CompletenessGap[]>([]);
-  const [gapSummary, setGapSummary] = useState<Awaited<ReturnType<typeof fetchGapSummary>> | null>(null);
+  const [gapSummary, setGapSummary] = useState<Awaited<ReturnType<typeof fetchGapSummary>> | null>(
+    null,
+  );
   const [tab, setTab] = useState<'scores' | 'gaps'>('scores');
 
   const load = useCallback(async () => {
@@ -63,7 +69,11 @@ export function CompletenessScoreWorkspace({ writable }: { writable: boolean }) 
       const [ov, page, gapPage, summary] = await Promise.all([
         fetchOverview(),
         fetchScores(query),
-        fetchGaps({ ...(query.ownerType ? { ownerType: query.ownerType } : {}), ...(query.keyword ? { keyword: query.keyword } : {}), size: 20 }),
+        fetchGaps({
+          ...(query.ownerType ? { ownerType: query.ownerType } : {}),
+          ...(query.keyword ? { keyword: query.keyword } : {}),
+          size: 20,
+        }),
         fetchGapSummary(query.ownerType ?? undefined),
       ]);
       setOverview(ov);
@@ -104,7 +114,11 @@ export function CompletenessScoreWorkspace({ writable }: { writable: boolean }) 
     const ownerIds = rows.map((row) => row.ownerId);
     if (ownerIds.length === 0 || !query.ownerType) return;
     try {
-      const result = await evaluate(query.ownerType, ownerIds, `台账第 ${(query.page ?? 0) + 1} 页`);
+      const result = await evaluate(
+        query.ownerType,
+        ownerIds,
+        `台账第 ${(query.page ?? 0) + 1} 页`,
+      );
       setNotice(
         `已评估 ${result.succeeded} 条` +
           (result.failed ? `，${result.failed} 条失败（不存在或跨租户）` : '') +
@@ -127,7 +141,11 @@ export function CompletenessScoreWorkspace({ writable }: { writable: boolean }) 
             刷新
           </Button>
           {writable && (
-            <Button size="sm" disabled={loading || rows.length === 0} onClick={() => void evaluatePage()}>
+            <Button
+              size="sm"
+              disabled={loading || rows.length === 0}
+              onClick={() => void evaluatePage()}
+            >
               <ClipboardList className="h-4 w-4" />
               评估本页并存快照
             </Button>
@@ -176,7 +194,7 @@ export function CompletenessScoreWorkspace({ writable }: { writable: boolean }) 
         {error && (
           <div
             role="alert"
-            className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm"
+            className="border-destructive/40 bg-destructive/10 flex items-start gap-2 rounded-md border p-3 text-sm"
           >
             <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{error}</span>
@@ -184,17 +202,25 @@ export function CompletenessScoreWorkspace({ writable }: { writable: boolean }) 
         )}
 
         {notice && (
-          <div className="flex items-start gap-2 rounded-md border border-border bg-muted/40 p-3 text-sm">
+          <div className="border-border bg-muted/40 flex items-start gap-2 rounded-md border p-3 text-sm">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{notice}</span>
           </div>
         )}
 
         <div className="flex gap-2 text-sm">
-          <Button size="sm" variant={tab === 'scores' ? 'default' : 'ghost'} onClick={() => setTab('scores')}>
+          <Button
+            size="sm"
+            variant={tab === 'scores' ? 'default' : 'ghost'}
+            onClick={() => setTab('scores')}
+          >
             评分台账
           </Button>
-          <Button size="sm" variant={tab === 'gaps' ? 'default' : 'ghost'} onClick={() => setTab('gaps')}>
+          <Button
+            size="sm"
+            variant={tab === 'gaps' ? 'default' : 'ghost'}
+            onClick={() => setTab('gaps')}
+          >
             补全清单
           </Button>
         </div>
@@ -267,14 +293,19 @@ export function CompletenessScoreWorkspace({ writable }: { writable: boolean }) 
                     </thead>
                     <tbody>
                       {rows.map((row) => (
-                        <tr key={`${row.ownerType}-${row.ownerId}`} className="border-t border-border">
+                        <tr
+                          key={`${row.ownerType}-${row.ownerId}`}
+                          className="border-border border-t"
+                        >
                           <td className="py-2 pr-3 font-mono text-xs">{row.ownerCode}</td>
                           <td className="py-2 pr-3">{row.ownerName}</td>
                           <td className="py-2 pr-3 tabular-nums">
                             {scoreText(row.score, row.scorePercent)}
                           </td>
                           <td className="py-2 pr-3">
-                            <Badge tone={badgeTone(gradeTone(row.grade))}>{gradeLabel(row.grade)}</Badge>
+                            <Badge tone={badgeTone(gradeTone(row.grade))}>
+                              {gradeLabel(row.grade)}
+                            </Badge>
                           </td>
                           <td className="py-2 pr-3 tabular-nums">{row.missingCount}</td>
                           <td className="py-2 pr-3">
@@ -360,7 +391,10 @@ export function CompletenessScoreWorkspace({ writable }: { writable: boolean }) 
                   </thead>
                   <tbody>
                     {gaps.map((gap) => (
-                      <tr key={`${gap.dimension}-${gap.code}`} className="border-t border-border align-top">
+                      <tr
+                        key={`${gap.dimension}-${gap.code}`}
+                        className="border-border border-t align-top"
+                      >
                         <td className="py-2 pr-3">
                           <div className="font-medium">{gap.detail}</div>
                           <div className="text-muted-foreground font-mono text-xs">{gap.code}</div>
@@ -381,7 +415,7 @@ export function CompletenessScoreWorkspace({ writable }: { writable: boolean }) 
         )}
 
         {card && (
-          <section className="space-y-3 rounded-md border border-border p-4">
+          <section className="border-border space-y-3 rounded-md border p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h3 className="text-base font-semibold">
@@ -405,7 +439,7 @@ export function CompletenessScoreWorkspace({ writable }: { writable: boolean }) 
 
             {/* 两个就绪结论必须各自带阻塞原因，不能只给一个布尔。 */}
             <div className="grid gap-2 sm:grid-cols-2">
-              <div className="rounded-md border border-border p-3 text-sm">
+              <div className="border-border rounded-md border p-3 text-sm">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">刊登就绪</span>
                   <Badge tone={card.listingReady ? 'success' : 'danger'}>
@@ -418,7 +452,7 @@ export function CompletenessScoreWorkspace({ writable }: { writable: boolean }) 
                   </p>
                 )}
               </div>
-              <div className="rounded-md border border-border p-3 text-sm">
+              <div className="border-border rounded-md border p-3 text-sm">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">清关就绪</span>
                   <Badge tone={card.customsReady ? 'success' : 'danger'}>
@@ -435,14 +469,20 @@ export function CompletenessScoreWorkspace({ writable }: { writable: boolean }) 
 
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {card.dimensions.map((dimension) => (
-                <div key={dimension.dimension} className="rounded-md border border-border p-3 text-sm">
+                <div
+                  key={dimension.dimension}
+                  className="border-border rounded-md border p-3 text-sm"
+                >
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{dimension.dimensionLabel}</span>
                     <span className="tabular-nums">{ratioText(dimension.ratio)}</span>
                   </div>
                   <p className="text-muted-foreground mt-1 text-xs">
-                    权重 {dimension.weight} · {dimensionProgress(dimension.satisfied, dimension.total)} 项已满足
-                    {dimension.blockedFor.length ? ` · 卡住${dimension.blockedFor.join('/')}链` : ''}
+                    权重 {dimension.weight} ·{' '}
+                    {dimensionProgress(dimension.satisfied, dimension.total)} 项已满足
+                    {dimension.blockedFor.length
+                      ? ` · 卡住${dimension.blockedFor.join('/')}链`
+                      : ''}
                   </p>
                 </div>
               ))}
@@ -463,8 +503,11 @@ export function CompletenessScoreWorkspace({ writable }: { writable: boolean }) 
                   </thead>
                   <tbody>
                     {card.missing.map((check, index) => (
-                      <tr key={`${check.code}-${check.subjectLabel}-${index}`} className="border-t border-border align-top">
-                        <td className="font-mono py-2 pr-3 text-xs">{check.code}</td>
+                      <tr
+                        key={`${check.code}-${check.subjectLabel}-${index}`}
+                        className="border-border border-t align-top"
+                      >
+                        <td className="py-2 pr-3 font-mono text-xs">{check.code}</td>
                         <td className="py-2 pr-3">{check.subjectLabel}</td>
                         <td className="py-2 pr-3">{check.detail}</td>
                         <td className="py-2">{check.remedy}</td>

@@ -16,7 +16,7 @@
         "tags": [
           "zombie-candidate-controller"
         ],
-        "operationId": "saveRule",
+        "operationId": "put_catalog_zombie_candidates_rules_entityType",
         "parameters": [
           {
             "name": "Authorization",
@@ -65,7 +65,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "version",
+        "operationId": "get_catalog_versions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -103,7 +103,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "updateVersion",
+        "operationId": "put_catalog_versions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -151,7 +151,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "deleteVersion",
+        "operationId": "delete_catalog_versions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -203,7 +203,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "components",
+        "operationId": "get_catalog_versions_id_components",
         "parameters": [
           {
             "name": "Authorization",
@@ -244,7 +244,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "replaceComponents",
+        "operationId": "put_catalog_versions_id_components",
         "parameters": [
           {
             "name": "Authorization",
@@ -292,7 +292,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "addComponent",
+        "operationId": "post_catalog_versions_id_components",
         "parameters": [
           {
             "name": "Authorization",
@@ -342,7 +342,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "closeVersion",
+        "operationId": "put_catalog_versions_id_close",
         "parameters": [
           {
             "name": "Authorization",
@@ -390,7 +390,7 @@
         "tags": [
           "unit-group-controller"
         ],
-        "operationId": "detail",
+        "operationId": "get_catalog_unit_groups_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -436,7 +436,7 @@
         "tags": [
           "unit-group-controller"
         ],
-        "operationId": "update",
+        "operationId": "put_catalog_unit_groups_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -484,7 +484,7 @@
         "tags": [
           "unit-group-controller"
         ],
-        "operationId": "delete",
+        "operationId": "delete_catalog_unit_groups_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -536,7 +536,7 @@
         "tags": [
           "unit-group-controller"
         ],
-        "operationId": "setEnabled",
+        "operationId": "put_catalog_unit_groups_id_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -596,7 +596,7 @@
         "tags": [
           "unit-conversion-controller"
         ],
-        "operationId": "updateUnit",
+        "operationId": "put_catalog_unit_conversion_units_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -644,7 +644,7 @@
         "tags": [
           "unit-conversion-controller"
         ],
-        "operationId": "deleteUnit",
+        "operationId": "delete_catalog_unit_conversion_units_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -696,7 +696,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "locale",
+        "operationId": "get_catalog_translations_locales_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -734,7 +734,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "updateLocale",
+        "operationId": "put_catalog_translations_locales_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -782,7 +782,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "deleteLocale",
+        "operationId": "delete_catalog_translations_locales_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -834,7 +834,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "setLocaleEnabled",
+        "operationId": "put_catalog_translations_locales_id_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -882,7 +882,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "entry",
+        "operationId": "get_catalog_translations_entries_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -920,7 +920,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "updateEntry",
+        "operationId": "put_catalog_translations_entries_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -968,7 +968,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "deleteEntry",
+        "operationId": "delete_catalog_translations_entries_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1020,7 +1020,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "setEntryStatus",
+        "operationId": "put_catalog_translations_entries_id_status",
         "parameters": [
           {
             "name": "Authorization",
@@ -1070,7 +1070,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "template",
+        "operationId": "get_catalog_titles_templates_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1108,7 +1108,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "updateTemplate",
+        "operationId": "put_catalog_titles_templates_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1156,7 +1156,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "deleteTemplate",
+        "operationId": "delete_catalog_titles_templates_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1208,7 +1208,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "setTemplateEnabled",
+        "operationId": "put_catalog_titles_templates_id_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -1256,7 +1256,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "updateKeyword",
+        "operationId": "put_catalog_titles_keywords_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1304,7 +1304,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "deleteKeyword",
+        "operationId": "delete_catalog_titles_keywords_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1356,7 +1356,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "setKeywordEnabled",
+        "operationId": "put_catalog_titles_keywords_id_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -1404,7 +1404,7 @@
         "tags": [
           "supplier-quote-controller"
         ],
-        "operationId": "detail_1",
+        "operationId": "get_catalog_supplier_quotes_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1442,7 +1442,7 @@
         "tags": [
           "supplier-quote-controller"
         ],
-        "operationId": "update_1",
+        "operationId": "put_catalog_supplier_quotes_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1490,7 +1490,7 @@
         "tags": [
           "supplier-quote-controller"
         ],
-        "operationId": "delete_1",
+        "operationId": "delete_catalog_supplier_quotes_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1542,7 +1542,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "updateAxis",
+        "operationId": "put_catalog_spec_axis_axes_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1590,7 +1590,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "deleteAxis",
+        "operationId": "delete_catalog_spec_axis_axes_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1642,7 +1642,7 @@
         "tags": [
           "sku-detail-controller"
         ],
-        "operationId": "detail_2",
+        "operationId": "get_catalog_skus_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1680,7 +1680,7 @@
         "tags": [
           "sku-detail-controller"
         ],
-        "operationId": "update_2",
+        "operationId": "put_catalog_skus_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1730,7 +1730,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "setCode",
+        "operationId": "put_catalog_sku_code_skus_id_code",
         "parameters": [
           {
             "name": "Authorization",
@@ -1780,7 +1780,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "updateRule",
+        "operationId": "put_catalog_sku_code_rules_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1830,7 +1830,7 @@
         "tags": [
           "sku-attribute-override-controller"
         ],
-        "operationId": "set",
+        "operationId": "put_catalog_sku_attribute_override_skus_skuId_attribute_overrides_attributeId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1887,7 +1887,7 @@
         "tags": [
           "sku-attribute-override-controller"
         ],
-        "operationId": "remove",
+        "operationId": "delete_catalog_sku_attribute_override_skus_skuId_attribute_overrides_attributeId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1936,7 +1936,7 @@
         "tags": [
           "sku-attribute-override-controller"
         ],
-        "operationId": "clear",
+        "operationId": "put_catalog_sku_attribute_override_skus_skuId_attribute_overrides_attributeId_clear",
         "parameters": [
           {
             "name": "Authorization",
@@ -1985,7 +1985,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "recordUpdate",
+        "operationId": "put_catalog_records_kind_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -2042,7 +2042,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "recordDelete",
+        "operationId": "delete_catalog_records_kind_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -2092,7 +2092,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "detail_3",
+        "operationId": "get_catalog_products_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -2130,7 +2130,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "update_3",
+        "operationId": "put_catalog_products_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -2179,7 +2179,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "delete_2",
+        "operationId": "delete_catalog_products_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -2221,7 +2221,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "skuUpdate",
+        "operationId": "put_catalog_products_id_skus_sid",
         "parameters": [
           {
             "name": "Authorization",
@@ -2279,7 +2279,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "skuDelete",
+        "operationId": "delete_catalog_products_id_skus_sid",
         "parameters": [
           {
             "name": "Authorization",
@@ -2330,7 +2330,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "attributeUpdate",
+        "operationId": "put_catalog_products_id_attributes_aid",
         "parameters": [
           {
             "name": "Authorization",
@@ -2380,7 +2380,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "attributeDelete",
+        "operationId": "delete_catalog_products_id_attributes_aid",
         "parameters": [
           {
             "name": "Authorization",
@@ -2431,7 +2431,7 @@
         "tags": [
           "physical-safety-controller"
         ],
-        "operationId": "profile",
+        "operationId": "get_catalog_physical_safety_skus_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -2477,7 +2477,7 @@
         "tags": [
           "physical-safety-controller"
         ],
-        "operationId": "save",
+        "operationId": "put_catalog_physical_safety_skus_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -2527,7 +2527,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "detail_4",
+        "operationId": "get_catalog_parties_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -2565,7 +2565,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "update_4",
+        "operationId": "put_catalog_parties_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -2613,7 +2613,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "delete_3",
+        "operationId": "delete_catalog_parties_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -2665,7 +2665,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "supplier",
+        "operationId": "get_catalog_parties_id_supplier_profile",
         "parameters": [
           {
             "name": "Authorization",
@@ -2703,7 +2703,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "saveSupplier",
+        "operationId": "put_catalog_parties_id_supplier_profile",
         "parameters": [
           {
             "name": "Authorization",
@@ -2753,7 +2753,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "setStatus",
+        "operationId": "put_catalog_parties_id_status",
         "parameters": [
           {
             "name": "Authorization",
@@ -2803,7 +2803,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "updateRole",
+        "operationId": "put_catalog_parties_id_roles_roleId",
         "parameters": [
           {
             "name": "Authorization",
@@ -2860,7 +2860,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "removeRole",
+        "operationId": "delete_catalog_parties_id_roles_roleId",
         "parameters": [
           {
             "name": "Authorization",
@@ -2918,7 +2918,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "customer",
+        "operationId": "get_catalog_parties_id_customer_profile",
         "parameters": [
           {
             "name": "Authorization",
@@ -2956,7 +2956,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "saveCustomer",
+        "operationId": "put_catalog_parties_id_customer_profile",
         "parameters": [
           {
             "name": "Authorization",
@@ -3006,7 +3006,7 @@
         "tags": [
           "party-contact-controller"
         ],
-        "operationId": "detail_5",
+        "operationId": "get_catalog_parties_id_contacts_contactId",
         "parameters": [
           {
             "name": "Authorization",
@@ -3053,7 +3053,7 @@
         "tags": [
           "party-contact-controller"
         ],
-        "operationId": "update_5",
+        "operationId": "put_catalog_parties_id_contacts_contactId",
         "parameters": [
           {
             "name": "Authorization",
@@ -3110,7 +3110,7 @@
         "tags": [
           "party-contact-controller"
         ],
-        "operationId": "delete_4",
+        "operationId": "delete_catalog_parties_id_contacts_contactId",
         "parameters": [
           {
             "name": "Authorization",
@@ -3171,7 +3171,7 @@
         "tags": [
           "party-contact-controller"
         ],
-        "operationId": "setPrimary",
+        "operationId": "put_catalog_parties_id_contacts_contactId_primary",
         "parameters": [
           {
             "name": "Authorization",
@@ -3230,7 +3230,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "carrier",
+        "operationId": "get_catalog_parties_id_carrier_profile",
         "parameters": [
           {
             "name": "Authorization",
@@ -3268,7 +3268,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "saveCarrier",
+        "operationId": "put_catalog_parties_id_carrier_profile",
         "parameters": [
           {
             "name": "Authorization",
@@ -3318,7 +3318,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "detail_6",
+        "operationId": "get_catalog_parties_id_addresses_addressId",
         "parameters": [
           {
             "name": "Authorization",
@@ -3365,7 +3365,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "update_6",
+        "operationId": "put_catalog_parties_id_addresses_addressId",
         "parameters": [
           {
             "name": "Authorization",
@@ -3422,7 +3422,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "delete_5",
+        "operationId": "delete_catalog_parties_id_addresses_addressId",
         "parameters": [
           {
             "name": "Authorization",
@@ -3483,7 +3483,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "saveUsages",
+        "operationId": "put_catalog_parties_id_addresses_addressId_usages",
         "parameters": [
           {
             "name": "Authorization",
@@ -3542,7 +3542,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "setDefault",
+        "operationId": "put_catalog_parties_id_addresses_addressId_default",
         "parameters": [
           {
             "name": "Authorization",
@@ -3601,7 +3601,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "detail_7",
+        "operationId": "get_catalog_media_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -3639,7 +3639,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "update_7",
+        "operationId": "put_catalog_media_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -3687,7 +3687,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "delete_6",
+        "operationId": "delete_catalog_media_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -3739,7 +3739,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "setEnabled_1",
+        "operationId": "put_catalog_media_id_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -3790,7 +3790,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "updateTag",
+        "operationId": "put_catalog_media_tags_tagId",
         "parameters": [
           {
             "name": "Authorization",
@@ -3838,7 +3838,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "deleteTag",
+        "operationId": "delete_catalog_media_tags_tagId",
         "parameters": [
           {
             "name": "Authorization",
@@ -3890,7 +3890,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "setTagEnabled",
+        "operationId": "put_catalog_media_tags_tagId_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -3941,7 +3941,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "recipe",
+        "operationId": "get_catalog_media_processing_recipes_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -3979,7 +3979,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "updateRecipe",
+        "operationId": "put_catalog_media_processing_recipes_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4027,7 +4027,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "deleteRecipe",
+        "operationId": "delete_catalog_media_processing_recipes_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4079,7 +4079,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "setRecipeEnabled",
+        "operationId": "put_catalog_media_processing_recipes_id_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -4127,7 +4127,7 @@
         "tags": [
           "lifecycle-controller"
         ],
-        "operationId": "ruleUpdate",
+        "operationId": "put_catalog_lifecycle_rules_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4176,7 +4176,7 @@
         "tags": [
           "lifecycle-controller"
         ],
-        "operationId": "ruleDelete",
+        "operationId": "delete_catalog_lifecycle_rules_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4218,7 +4218,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "updateRuleVersion",
+        "operationId": "put_catalog_kb_rule_versions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4274,7 +4274,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "deleteRuleVersion",
+        "operationId": "delete_catalog_kb_rule_versions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4314,7 +4314,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "updateReviewTask",
+        "operationId": "put_catalog_kb_review_tasks_taskId",
         "parameters": [
           {
             "name": "Authorization",
@@ -4364,7 +4364,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "entry_1",
+        "operationId": "get_catalog_kb_entries_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4402,7 +4402,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "updateEntry_1",
+        "operationId": "put_catalog_kb_entries_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4450,7 +4450,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "deleteEntry_1",
+        "operationId": "delete_catalog_kb_entries_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4499,7 +4499,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "setEntryEnabled",
+        "operationId": "put_catalog_kb_entries_id_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -4547,7 +4547,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "updateTranslation",
+        "operationId": "put_catalog_kb_entries_entryId_translations_translationId",
         "parameters": [
           {
             "name": "Authorization",
@@ -4606,7 +4606,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "template_1",
+        "operationId": "get_catalog_import_templates_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4644,7 +4644,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "updateTemplate_1",
+        "operationId": "put_catalog_import_templates_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4692,7 +4692,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "deleteTemplate_1",
+        "operationId": "delete_catalog_import_templates_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4735,7 +4735,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "mapping",
+        "operationId": "put_catalog_import_jobs_id_mapping",
         "parameters": [
           {
             "name": "Authorization",
@@ -4785,7 +4785,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "updateTranslation_1",
+        "operationId": "put_catalog_descriptions_templates_templateId_translations_translationId",
         "parameters": [
           {
             "name": "Authorization",
@@ -4844,7 +4844,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "template_2",
+        "operationId": "get_catalog_descriptions_templates_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4882,7 +4882,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "updateTemplate_2",
+        "operationId": "put_catalog_descriptions_templates_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4930,7 +4930,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "deleteTemplate_2",
+        "operationId": "delete_catalog_descriptions_templates_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -4982,7 +4982,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "setTemplateEnabled_1",
+        "operationId": "put_catalog_descriptions_templates_id_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -5030,7 +5030,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "updatePhrase",
+        "operationId": "put_catalog_descriptions_phrases_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -5078,7 +5078,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "deletePhrase",
+        "operationId": "delete_catalog_descriptions_phrases_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -5130,7 +5130,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "setPhraseEnabled",
+        "operationId": "put_catalog_descriptions_phrases_id_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -5178,7 +5178,7 @@
         "tags": [
           "description-template-controller"
         ],
-        "operationId": "template_3",
+        "operationId": "get_catalog_description_templates_templates_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -5216,7 +5216,7 @@
         "tags": [
           "description-template-controller"
         ],
-        "operationId": "updateTemplate_3",
+        "operationId": "put_catalog_description_templates_templates_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -5264,7 +5264,7 @@
         "tags": [
           "description-template-controller"
         ],
-        "operationId": "deleteTemplate_3",
+        "operationId": "delete_catalog_description_templates_templates_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -5316,7 +5316,7 @@
         "tags": [
           "description-template-controller"
         ],
-        "operationId": "setEnabled_2",
+        "operationId": "put_catalog_description_templates_templates_id_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -5364,7 +5364,7 @@
         "tags": [
           "customs-destination-version-controller"
         ],
-        "operationId": "profile_1",
+        "operationId": "get_catalog_customs_destination_versions_skus_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -5410,7 +5410,7 @@
         "tags": [
           "customs-destination-version-controller"
         ],
-        "operationId": "save_1",
+        "operationId": "put_catalog_customs_destination_versions_skus_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -5460,7 +5460,7 @@
         "tags": [
           "customs-attribute-controller"
         ],
-        "operationId": "profile_2",
+        "operationId": "get_catalog_customs_attributes_skus_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -5498,7 +5498,7 @@
         "tags": [
           "customs-attribute-controller"
         ],
-        "operationId": "save_2",
+        "operationId": "put_catalog_customs_attributes_skus_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -5548,7 +5548,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "component",
+        "operationId": "get_catalog_components_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -5586,7 +5586,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "editComponent",
+        "operationId": "put_catalog_components_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -5634,7 +5634,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "deleteComponent",
+        "operationId": "delete_catalog_components_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -5686,7 +5686,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "customs",
+        "operationId": "get_catalog_completeness_customs_skus_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -5724,7 +5724,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "saveCustoms",
+        "operationId": "put_catalog_completeness_customs_skus_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -5772,7 +5772,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "deleteCustoms",
+        "operationId": "delete_catalog_completeness_customs_skus_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -5824,7 +5824,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "updateCertification",
+        "operationId": "put_catalog_completeness_certifications_skus_skuId_certId",
         "parameters": [
           {
             "name": "Authorization",
@@ -5881,7 +5881,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "deleteCertification",
+        "operationId": "delete_catalog_completeness_certifications_skus_skuId_certId",
         "parameters": [
           {
             "name": "Authorization",
@@ -5942,7 +5942,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "updateTree",
+        "operationId": "put_catalog_categories_trees_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -5990,7 +5990,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "deleteTree",
+        "operationId": "delete_catalog_categories_trees_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -6042,7 +6042,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "spuCategories",
+        "operationId": "get_catalog_categories_spus_spuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -6080,7 +6080,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "saveSpuCategories",
+        "operationId": "put_catalog_categories_spus_spuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -6130,7 +6130,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "updateNode",
+        "operationId": "put_catalog_categories_nodes_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -6178,7 +6178,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "deleteNode",
+        "operationId": "delete_catalog_categories_nodes_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -6230,7 +6230,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "moveNode",
+        "operationId": "put_catalog_categories_nodes_id_move",
         "parameters": [
           {
             "name": "Authorization",
@@ -6280,7 +6280,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "setEnabled_3",
+        "operationId": "put_catalog_categories_nodes_id_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -6331,7 +6331,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "setEnabled_4",
+        "operationId": "put_catalog_categories_attribute_requirements_categoryId_attributeId_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -6391,7 +6391,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "bundle",
+        "operationId": "get_catalog_bundles_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -6429,7 +6429,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "updateBundle",
+        "operationId": "put_catalog_bundles_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -6477,7 +6477,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "deleteBundle",
+        "operationId": "delete_catalog_bundles_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -6529,7 +6529,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "setBundleStatus",
+        "operationId": "put_catalog_bundles_id_status",
         "parameters": [
           {
             "name": "Authorization",
@@ -6577,7 +6577,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "updateLink",
+        "operationId": "put_catalog_bundle_skus_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -6625,7 +6625,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "deleteLink",
+        "operationId": "delete_catalog_bundle_skus_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -6677,7 +6677,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "detail_8",
+        "operationId": "get_catalog_brands_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -6715,7 +6715,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "update_8",
+        "operationId": "put_catalog_brands_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -6763,7 +6763,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "delete_7",
+        "operationId": "delete_catalog_brands_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -6815,7 +6815,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "setEnabled_5",
+        "operationId": "put_catalog_brands_id_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -6866,7 +6866,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "updateAuthorization",
+        "operationId": "put_catalog_brands_id_authorizations_authorizationId",
         "parameters": [
           {
             "name": "Authorization",
@@ -6925,7 +6925,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "revokeAuthorization",
+        "operationId": "put_catalog_brands_id_authorizations_authorizationId_enabled",
         "parameters": [
           {
             "name": "Authorization",
@@ -6982,7 +6982,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "bom",
+        "operationId": "get_catalog_boms_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -7020,7 +7020,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "updateBom",
+        "operationId": "put_catalog_boms_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -7068,7 +7068,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "deleteBom",
+        "operationId": "delete_catalog_boms_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -7120,7 +7120,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "setBomStatus",
+        "operationId": "put_catalog_boms_id_status",
         "parameters": [
           {
             "name": "Authorization",
@@ -7168,7 +7168,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "version_1",
+        "operationId": "get_catalog_bom_versions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -7206,7 +7206,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "updateVersion_1",
+        "operationId": "put_catalog_bom_versions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -7254,7 +7254,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "deleteVersion_1",
+        "operationId": "delete_catalog_bom_versions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -7306,7 +7306,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "components_1",
+        "operationId": "get_catalog_bom_versions_id_components",
         "parameters": [
           {
             "name": "Authorization",
@@ -7347,7 +7347,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "replaceComponents_1",
+        "operationId": "put_catalog_bom_versions_id_components",
         "parameters": [
           {
             "name": "Authorization",
@@ -7397,7 +7397,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "closeVersion_1",
+        "operationId": "put_catalog_bom_versions_id_close",
         "parameters": [
           {
             "name": "Authorization",
@@ -7445,7 +7445,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "update_9",
+        "operationId": "put_catalog_attributes_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -7493,7 +7493,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "delete_8",
+        "operationId": "delete_catalog_attributes_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -7545,7 +7545,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "options",
+        "operationId": "get_catalog_attributes_id_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -7586,7 +7586,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "updateOption",
+        "operationId": "put_catalog_attributes_id_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -7642,7 +7642,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "addOption",
+        "operationId": "post_catalog_attributes_id_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -7690,7 +7690,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "deleteOption",
+        "operationId": "delete_catalog_attributes_id_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -7741,7 +7741,7 @@
         "tags": [
           "attribute-option-controller"
         ],
-        "operationId": "reorder",
+        "operationId": "put_catalog_attributes_options_order",
         "parameters": [
           {
             "name": "Authorization",
@@ -7782,7 +7782,7 @@
         "tags": [
           "attribute-option-controller"
         ],
-        "operationId": "toggle",
+        "operationId": "put_catalog_attributes_options_lifecycle",
         "parameters": [
           {
             "name": "Authorization",
@@ -7840,7 +7840,7 @@
         "tags": [
           "zombie-candidate-controller"
         ],
-        "operationId": "pushStats",
+        "operationId": "post_catalog_zombie_candidates_reference_stats",
         "parameters": [
           {
             "name": "Authorization",
@@ -7889,7 +7889,7 @@
         "tags": [
           "zombie-candidate-controller"
         ],
-        "operationId": "deactivate",
+        "operationId": "post_catalog_zombie_candidates_deactivate",
         "parameters": [
           {
             "name": "Authorization",
@@ -7938,7 +7938,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "publishVersion",
+        "operationId": "post_catalog_versions_id_publish",
         "parameters": [
           {
             "name": "Authorization",
@@ -7978,7 +7978,7 @@
         "tags": [
           "variant-combination-controller"
         ],
-        "operationId": "listDrafts",
+        "operationId": "get_catalog_variant_combination_spus_id_drafts",
         "parameters": [
           {
             "name": "Authorization",
@@ -8019,7 +8019,7 @@
         "tags": [
           "variant-combination-controller"
         ],
-        "operationId": "generateDraft",
+        "operationId": "post_catalog_variant_combination_spus_id_drafts",
         "parameters": [
           {
             "name": "Authorization",
@@ -8069,7 +8069,7 @@
         "tags": [
           "variant-combination-controller"
         ],
-        "operationId": "check",
+        "operationId": "post_catalog_variant_combination_spus_id_check",
         "parameters": [
           {
             "name": "Authorization",
@@ -8119,7 +8119,7 @@
         "tags": [
           "unit-group-controller"
         ],
-        "operationId": "list",
+        "operationId": "get_catalog_unit_groups",
         "parameters": [
           {
             "name": "Authorization",
@@ -8192,7 +8192,7 @@
         "tags": [
           "unit-group-controller"
         ],
-        "operationId": "create",
+        "operationId": "post_catalog_unit_groups",
         "parameters": [
           {
             "name": "Authorization",
@@ -8233,7 +8233,7 @@
         "tags": [
           "unit-group-controller"
         ],
-        "operationId": "addConversion",
+        "operationId": "post_catalog_unit_groups_id_conversions",
         "parameters": [
           {
             "name": "Authorization",
@@ -8283,7 +8283,7 @@
         "tags": [
           "unit-group-controller"
         ],
-        "operationId": "convert",
+        "operationId": "post_catalog_unit_groups_convert",
         "parameters": [
           {
             "name": "Authorization",
@@ -8324,7 +8324,7 @@
         "tags": [
           "unit-conversion-controller"
         ],
-        "operationId": "units",
+        "operationId": "get_catalog_unit_conversion_units",
         "parameters": [
           {
             "name": "Authorization",
@@ -8356,7 +8356,7 @@
         "tags": [
           "unit-conversion-controller"
         ],
-        "operationId": "createUnit",
+        "operationId": "post_catalog_unit_conversion_units",
         "parameters": [
           {
             "name": "Authorization",
@@ -8397,7 +8397,7 @@
         "tags": [
           "unit-conversion-controller"
         ],
-        "operationId": "snapshot",
+        "operationId": "get_catalog_unit_conversion_snapshots",
         "parameters": [
           {
             "name": "Authorization",
@@ -8442,7 +8442,7 @@
         "tags": [
           "unit-conversion-controller"
         ],
-        "operationId": "freeze",
+        "operationId": "post_catalog_unit_conversion_snapshots",
         "parameters": [
           {
             "name": "Authorization",
@@ -8483,7 +8483,7 @@
         "tags": [
           "unit-conversion-controller"
         ],
-        "operationId": "addConversion_1",
+        "operationId": "post_catalog_unit_conversion_skus_id_conversions",
         "parameters": [
           {
             "name": "Authorization",
@@ -8533,7 +8533,7 @@
         "tags": [
           "unit-conversion-controller"
         ],
-        "operationId": "convert_1",
+        "operationId": "post_catalog_unit_conversion_convert",
         "parameters": [
           {
             "name": "Authorization",
@@ -8574,7 +8574,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "suggestions",
+        "operationId": "get_catalog_translations_suggestions",
         "parameters": [
           {
             "name": "Authorization",
@@ -8679,7 +8679,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "submitSuggestions",
+        "operationId": "post_catalog_translations_suggestions",
         "parameters": [
           {
             "name": "Authorization",
@@ -8720,7 +8720,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "rejectSuggestion",
+        "operationId": "post_catalog_translations_suggestions_id_reject",
         "parameters": [
           {
             "name": "Authorization",
@@ -8770,7 +8770,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "adoptSuggestion",
+        "operationId": "post_catalog_translations_suggestions_id_adopt",
         "parameters": [
           {
             "name": "Authorization",
@@ -8810,7 +8810,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "createSpuEntry",
+        "operationId": "post_catalog_translations_spus_spuId_entries",
         "parameters": [
           {
             "name": "Authorization",
@@ -8860,7 +8860,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "createSkuEntry",
+        "operationId": "post_catalog_translations_skus_skuId_entries",
         "parameters": [
           {
             "name": "Authorization",
@@ -8910,7 +8910,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "locales",
+        "operationId": "get_catalog_translations_locales",
         "parameters": [
           {
             "name": "Authorization",
@@ -8983,7 +8983,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "createLocale",
+        "operationId": "post_catalog_translations_locales",
         "parameters": [
           {
             "name": "Authorization",
@@ -9024,7 +9024,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "syncFromSites",
+        "operationId": "post_catalog_translations_locales_sync",
         "parameters": [
           {
             "name": "Authorization",
@@ -9055,7 +9055,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "batches",
+        "operationId": "get_catalog_translations_batches",
         "parameters": [
           {
             "name": "Authorization",
@@ -9128,7 +9128,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "runBatch",
+        "operationId": "post_catalog_translations_batches",
         "parameters": [
           {
             "name": "Authorization",
@@ -9169,7 +9169,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "templates",
+        "operationId": "get_catalog_titles_templates",
         "parameters": [
           {
             "name": "Authorization",
@@ -9201,7 +9201,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "createTemplate",
+        "operationId": "post_catalog_titles_templates",
         "parameters": [
           {
             "name": "Authorization",
@@ -9242,7 +9242,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "select",
+        "operationId": "post_catalog_titles_records_id_select",
         "parameters": [
           {
             "name": "Authorization",
@@ -9282,7 +9282,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "reject",
+        "operationId": "post_catalog_titles_records_id_reject",
         "parameters": [
           {
             "name": "Authorization",
@@ -9322,7 +9322,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "deselect",
+        "operationId": "post_catalog_titles_records_id_deselect",
         "parameters": [
           {
             "name": "Authorization",
@@ -9362,7 +9362,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "keywords",
+        "operationId": "get_catalog_titles_keywords",
         "parameters": [
           {
             "name": "Authorization",
@@ -9427,7 +9427,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "createKeyword",
+        "operationId": "post_catalog_titles_keywords",
         "parameters": [
           {
             "name": "Authorization",
@@ -9468,7 +9468,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "generations",
+        "operationId": "get_catalog_titles_generations",
         "parameters": [
           {
             "name": "Authorization",
@@ -9533,7 +9533,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "generate",
+        "operationId": "post_catalog_titles_generations",
         "parameters": [
           {
             "name": "Authorization",
@@ -9574,7 +9574,7 @@
         "tags": [
           "supplier-quote-controller"
         ],
-        "operationId": "list_1",
+        "operationId": "get_catalog_supplier_quotes",
         "parameters": [
           {
             "name": "Authorization",
@@ -9698,7 +9698,7 @@
         "tags": [
           "supplier-quote-controller"
         ],
-        "operationId": "create_1",
+        "operationId": "post_catalog_supplier_quotes",
         "parameters": [
           {
             "name": "Authorization",
@@ -9739,7 +9739,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "bindAxis",
+        "operationId": "post_catalog_spec_axis_spus_id_axes",
         "parameters": [
           {
             "name": "Authorization",
@@ -9789,7 +9789,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "categoryRules",
+        "operationId": "get_catalog_spec_axis_category_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -9829,7 +9829,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "saveCategoryRule",
+        "operationId": "post_catalog_spec_axis_category_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -9877,7 +9877,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "deleteCategoryRule",
+        "operationId": "delete_catalog_spec_axis_category_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -9928,7 +9928,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "axes",
+        "operationId": "get_catalog_spec_axis_axes",
         "parameters": [
           {
             "name": "Authorization",
@@ -9960,7 +9960,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "createAxis",
+        "operationId": "post_catalog_spec_axis_axes",
         "parameters": [
           {
             "name": "Authorization",
@@ -10001,7 +10001,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "options_1",
+        "operationId": "get_catalog_spec_axis_axes_id_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -10042,7 +10042,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "addOption_1",
+        "operationId": "post_catalog_spec_axis_axes_id_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -10090,7 +10090,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "deleteOption_1",
+        "operationId": "delete_catalog_spec_axis_axes_id_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -10141,7 +10141,7 @@
         "tags": [
           "sku-list-controller"
         ],
-        "operationId": "batch",
+        "operationId": "post_catalog_skus_batch",
         "parameters": [
           {
             "name": "Authorization",
@@ -10182,7 +10182,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "addIdentifier",
+        "operationId": "post_catalog_sku_code_skus_id_identifiers",
         "parameters": [
           {
             "name": "Authorization",
@@ -10232,7 +10232,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "rules",
+        "operationId": "get_catalog_sku_code_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -10264,7 +10264,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "createRule",
+        "operationId": "post_catalog_sku_code_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -10305,7 +10305,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "importIdentifiers",
+        "operationId": "post_catalog_sku_code_identifiers_import",
         "parameters": [
           {
             "name": "Authorization",
@@ -10346,7 +10346,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "batch_1",
+        "operationId": "post_catalog_sku_code_batch",
         "parameters": [
           {
             "name": "Authorization",
@@ -10387,7 +10387,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "records",
+        "operationId": "get_catalog_records_kind",
         "parameters": [
           {
             "name": "Authorization",
@@ -10427,7 +10427,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "recordCreate",
+        "operationId": "post_catalog_records_kind",
         "parameters": [
           {
             "name": "Authorization",
@@ -10477,7 +10477,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "list_2",
+        "operationId": "get_catalog_products",
         "parameters": [
           {
             "name": "Authorization",
@@ -10518,7 +10518,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "create_2",
+        "operationId": "post_catalog_products",
         "parameters": [
           {
             "name": "Authorization",
@@ -10560,7 +10560,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "skuCreate",
+        "operationId": "post_catalog_products_id_skus",
         "parameters": [
           {
             "name": "Authorization",
@@ -10611,7 +10611,7 @@
         "tags": [
           "lifecycle-controller"
         ],
-        "operationId": "view",
+        "operationId": "get_catalog_products_id_lifecycle",
         "parameters": [
           {
             "name": "Authorization",
@@ -10649,7 +10649,7 @@
         "tags": [
           "lifecycle-controller"
         ],
-        "operationId": "transition",
+        "operationId": "post_catalog_products_id_lifecycle",
         "parameters": [
           {
             "name": "Authorization",
@@ -10699,7 +10699,7 @@
         "tags": [
           "catalog-controller"
         ],
-        "operationId": "attributeCreate",
+        "operationId": "post_catalog_products_id_attributes",
         "parameters": [
           {
             "name": "Authorization",
@@ -10742,7 +10742,7 @@
         "tags": [
           "physical-safety-controller"
         ],
-        "operationId": "verdict",
+        "operationId": "post_catalog_physical_safety_skus_skuId_channel_verdict",
         "parameters": [
           {
             "name": "Authorization",
@@ -10792,7 +10792,7 @@
         "tags": [
           "physical-safety-controller"
         ],
-        "operationId": "cartonCalc",
+        "operationId": "post_catalog_physical_safety_carton_calc",
         "parameters": [
           {
             "name": "Authorization",
@@ -10833,7 +10833,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "list_3",
+        "operationId": "get_catalog_parties",
         "parameters": [
           {
             "name": "Authorization",
@@ -10938,7 +10938,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "create_3",
+        "operationId": "post_catalog_parties",
         "parameters": [
           {
             "name": "Authorization",
@@ -10979,7 +10979,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "roles",
+        "operationId": "get_catalog_parties_id_roles",
         "parameters": [
           {
             "name": "Authorization",
@@ -11020,7 +11020,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "createRole",
+        "operationId": "post_catalog_parties_id_roles",
         "parameters": [
           {
             "name": "Authorization",
@@ -11070,7 +11070,7 @@
         "tags": [
           "party-contact-controller"
         ],
-        "operationId": "list_4",
+        "operationId": "get_catalog_parties_id_contacts",
         "parameters": [
           {
             "name": "Authorization",
@@ -11127,7 +11127,7 @@
         "tags": [
           "party-contact-controller"
         ],
-        "operationId": "create_4",
+        "operationId": "post_catalog_parties_id_contacts",
         "parameters": [
           {
             "name": "Authorization",
@@ -11177,7 +11177,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "list_5",
+        "operationId": "get_catalog_parties_id_addresses",
         "parameters": [
           {
             "name": "Authorization",
@@ -11267,7 +11267,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "post_catalog_parties_id_addresses",
         "parameters": [
           {
             "name": "Authorization",
@@ -11317,7 +11317,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "list_6",
+        "operationId": "get_catalog_media",
         "parameters": [
           {
             "name": "Authorization",
@@ -11422,7 +11422,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "upload",
+        "operationId": "post_catalog_media",
         "parameters": [
           {
             "name": "Authorization",
@@ -11475,7 +11475,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "versions",
+        "operationId": "get_catalog_media_id_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -11516,7 +11516,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "addVersion",
+        "operationId": "post_catalog_media_id_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -11578,7 +11578,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "verify",
+        "operationId": "post_catalog_media_id_verify",
         "parameters": [
           {
             "name": "Authorization",
@@ -11618,7 +11618,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "references",
+        "operationId": "get_catalog_media_id_references",
         "parameters": [
           {
             "name": "Authorization",
@@ -11659,7 +11659,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "addReference",
+        "operationId": "post_catalog_media_id_references",
         "parameters": [
           {
             "name": "Authorization",
@@ -11709,7 +11709,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "verifySweep",
+        "operationId": "post_catalog_media_verify_sweep",
         "parameters": [
           {
             "name": "Authorization",
@@ -11740,7 +11740,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "tags",
+        "operationId": "get_catalog_media_tags",
         "parameters": [
           {
             "name": "Authorization",
@@ -11772,7 +11772,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "createTag",
+        "operationId": "post_catalog_media_tags",
         "parameters": [
           {
             "name": "Authorization",
@@ -11813,7 +11813,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "recipes",
+        "operationId": "get_catalog_media_processing_recipes",
         "parameters": [
           {
             "name": "Authorization",
@@ -11845,7 +11845,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "createRecipe",
+        "operationId": "post_catalog_media_processing_recipes",
         "parameters": [
           {
             "name": "Authorization",
@@ -11886,7 +11886,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "jobs",
+        "operationId": "get_catalog_media_processing_jobs",
         "parameters": [
           {
             "name": "Authorization",
@@ -11951,7 +11951,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "submit",
+        "operationId": "post_catalog_media_processing_jobs",
         "parameters": [
           {
             "name": "Authorization",
@@ -11992,7 +11992,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "cancel",
+        "operationId": "post_catalog_media_processing_jobs_jobId_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -12032,7 +12032,7 @@
         "tags": [
           "lifecycle-controller"
         ],
-        "operationId": "rules_1",
+        "operationId": "get_catalog_lifecycle_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -12064,7 +12064,7 @@
         "tags": [
           "lifecycle-controller"
         ],
-        "operationId": "ruleCreate",
+        "operationId": "post_catalog_lifecycle_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -12106,7 +12106,7 @@
         "tags": [
           "lifecycle-controller"
         ],
-        "operationId": "run",
+        "operationId": "post_catalog_lifecycle_rules_id_run",
         "parameters": [
           {
             "name": "Authorization",
@@ -12156,7 +12156,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "ruleVersions",
+        "operationId": "get_catalog_kb_rule_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -12229,7 +12229,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "createRuleVersion",
+        "operationId": "post_catalog_kb_rule_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -12270,7 +12270,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "entries",
+        "operationId": "get_catalog_kb_entries",
         "parameters": [
           {
             "name": "Authorization",
@@ -12351,7 +12351,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "createEntry",
+        "operationId": "post_catalog_kb_entries",
         "parameters": [
           {
             "name": "Authorization",
@@ -12392,7 +12392,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "entryUsages",
+        "operationId": "get_catalog_kb_entries_id_usages",
         "parameters": [
           {
             "name": "Authorization",
@@ -12453,7 +12453,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "recordUsage",
+        "operationId": "post_catalog_kb_entries_id_usages",
         "parameters": [
           {
             "name": "Authorization",
@@ -12503,7 +12503,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "createTranslation",
+        "operationId": "post_catalog_kb_entries_entryId_translations",
         "parameters": [
           {
             "name": "Authorization",
@@ -12553,7 +12553,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "bindEntry",
+        "operationId": "post_catalog_kb_entries_entryId_rule_bindings",
         "parameters": [
           {
             "name": "Authorization",
@@ -12603,7 +12603,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "templates_1",
+        "operationId": "get_catalog_import_templates",
         "parameters": [
           {
             "name": "Authorization",
@@ -12668,7 +12668,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "createTemplate_1",
+        "operationId": "post_catalog_import_templates",
         "parameters": [
           {
             "name": "Authorization",
@@ -12709,7 +12709,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "list_7",
+        "operationId": "get_catalog_import_jobs",
         "parameters": [
           {
             "name": "Authorization",
@@ -12774,7 +12774,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "upload_1",
+        "operationId": "post_catalog_import_jobs",
         "parameters": [
           {
             "name": "Authorization",
@@ -12848,7 +12848,7 @@
         "tags": [
           "import-validation-controller"
         ],
-        "operationId": "report",
+        "operationId": "get_catalog_import_jobs_id_report",
         "parameters": [
           {
             "name": "Authorization",
@@ -12886,7 +12886,7 @@
         "tags": [
           "import-validation-controller"
         ],
-        "operationId": "regenerate",
+        "operationId": "post_catalog_import_jobs_id_report",
         "parameters": [
           {
             "name": "Authorization",
@@ -12926,7 +12926,7 @@
         "tags": [
           "import-validation-controller"
         ],
-        "operationId": "exports",
+        "operationId": "get_catalog_import_jobs_id_report_exports",
         "parameters": [
           {
             "name": "Authorization",
@@ -12964,7 +12964,7 @@
         "tags": [
           "import-validation-controller"
         ],
-        "operationId": "createExport",
+        "operationId": "post_catalog_import_jobs_id_report_exports",
         "parameters": [
           {
             "name": "Authorization",
@@ -13014,7 +13014,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "prevalidate",
+        "operationId": "post_catalog_import_jobs_id_prevalidate",
         "parameters": [
           {
             "name": "Authorization",
@@ -13054,7 +13054,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "execute",
+        "operationId": "post_catalog_import_jobs_id_execute",
         "parameters": [
           {
             "name": "Authorization",
@@ -13094,7 +13094,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "cancel_1",
+        "operationId": "post_catalog_import_jobs_id_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -13134,7 +13134,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "mappings",
+        "operationId": "get_catalog_import_field_mappings",
         "parameters": [
           {
             "name": "Authorization",
@@ -13172,7 +13172,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "saveMapping",
+        "operationId": "post_catalog_import_field_mappings",
         "parameters": [
           {
             "name": "Authorization",
@@ -13213,7 +13213,7 @@
         "tags": [
           "export-controller"
         ],
-        "operationId": "jobs_1",
+        "operationId": "get_catalog_export_jobs",
         "parameters": [
           {
             "name": "Authorization",
@@ -13278,7 +13278,7 @@
         "tags": [
           "export-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "post_catalog_export_jobs",
         "parameters": [
           {
             "name": "Authorization",
@@ -13319,7 +13319,7 @@
         "tags": [
           "export-controller"
         ],
-        "operationId": "cancel_2",
+        "operationId": "post_catalog_export_jobs_id_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -13359,7 +13359,7 @@
         "tags": [
           "duplicate-detection-controller"
         ],
-        "operationId": "scans",
+        "operationId": "get_catalog_duplicate_scans",
         "parameters": [
           {
             "name": "Authorization",
@@ -13408,7 +13408,7 @@
         "tags": [
           "duplicate-detection-controller"
         ],
-        "operationId": "scan",
+        "operationId": "post_catalog_duplicate_scans",
         "parameters": [
           {
             "name": "Authorization",
@@ -13448,7 +13448,7 @@
         "tags": [
           "sku-merge-controller"
         ],
-        "operationId": "merge",
+        "operationId": "post_catalog_duplicate_candidates_id_merge",
         "parameters": [
           {
             "name": "Authorization",
@@ -13497,7 +13497,7 @@
         "tags": [
           "duplicate-detection-controller"
         ],
-        "operationId": "decision",
+        "operationId": "get_catalog_duplicate_candidates_id_decision",
         "parameters": [
           {
             "name": "Authorization",
@@ -13535,7 +13535,7 @@
         "tags": [
           "duplicate-detection-controller"
         ],
-        "operationId": "decide",
+        "operationId": "post_catalog_duplicate_candidates_id_decision",
         "parameters": [
           {
             "name": "Authorization",
@@ -13585,7 +13585,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "templates_2",
+        "operationId": "get_catalog_descriptions_templates",
         "parameters": [
           {
             "name": "Authorization",
@@ -13617,7 +13617,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "createTemplate_2",
+        "operationId": "post_catalog_descriptions_templates",
         "parameters": [
           {
             "name": "Authorization",
@@ -13658,7 +13658,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "createTranslation_1",
+        "operationId": "post_catalog_descriptions_templates_templateId_translations",
         "parameters": [
           {
             "name": "Authorization",
@@ -13708,7 +13708,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "listRenders",
+        "operationId": "get_catalog_descriptions_renders",
         "parameters": [
           {
             "name": "Authorization",
@@ -13773,7 +13773,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "render",
+        "operationId": "post_catalog_descriptions_renders",
         "parameters": [
           {
             "name": "Authorization",
@@ -13814,7 +13814,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "phrases",
+        "operationId": "get_catalog_descriptions_phrases",
         "parameters": [
           {
             "name": "Authorization",
@@ -13887,7 +13887,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "createPhrase",
+        "operationId": "post_catalog_descriptions_phrases",
         "parameters": [
           {
             "name": "Authorization",
@@ -13928,7 +13928,7 @@
         "tags": [
           "description-template-controller"
         ],
-        "operationId": "templates_3",
+        "operationId": "get_catalog_description_templates_templates",
         "parameters": [
           {
             "name": "Authorization",
@@ -13960,7 +13960,7 @@
         "tags": [
           "description-template-controller"
         ],
-        "operationId": "createTemplate_3",
+        "operationId": "post_catalog_description_templates_templates",
         "parameters": [
           {
             "name": "Authorization",
@@ -14001,7 +14001,7 @@
         "tags": [
           "description-template-controller"
         ],
-        "operationId": "listRenders_1",
+        "operationId": "get_catalog_description_templates_renders",
         "parameters": [
           {
             "name": "Authorization",
@@ -14075,7 +14075,7 @@
         "tags": [
           "description-template-controller"
         ],
-        "operationId": "render_1",
+        "operationId": "post_catalog_description_templates_renders",
         "parameters": [
           {
             "name": "Authorization",
@@ -14116,7 +14116,7 @@
         "tags": [
           "customs-destination-version-controller"
         ],
-        "operationId": "publish",
+        "operationId": "post_catalog_customs_destination_versions_versionId_publish",
         "parameters": [
           {
             "name": "Authorization",
@@ -14166,7 +14166,7 @@
         "tags": [
           "customs-attribute-controller"
         ],
-        "operationId": "submit_1",
+        "operationId": "post_catalog_customs_attributes_skus_skuId_submit",
         "parameters": [
           {
             "name": "Authorization",
@@ -14216,7 +14216,7 @@
         "tags": [
           "customs-attribute-controller"
         ],
-        "operationId": "review",
+        "operationId": "post_catalog_customs_attributes_skus_skuId_review",
         "parameters": [
           {
             "name": "Authorization",
@@ -14266,7 +14266,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "listingPrecheck",
+        "operationId": "post_catalog_completeness_precheck_listing",
         "parameters": [
           {
             "name": "Authorization",
@@ -14313,7 +14313,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "customsPrecheck",
+        "operationId": "post_catalog_completeness_precheck_customs",
         "parameters": [
           {
             "name": "Authorization",
@@ -14360,7 +14360,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "evaluations",
+        "operationId": "get_catalog_completeness_evaluations",
         "parameters": [
           {
             "name": "Authorization",
@@ -14426,7 +14426,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "evaluate",
+        "operationId": "post_catalog_completeness_evaluations",
         "parameters": [
           {
             "name": "Authorization",
@@ -14467,7 +14467,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "certifications",
+        "operationId": "get_catalog_completeness_certifications_skus_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -14505,7 +14505,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "createCertification",
+        "operationId": "post_catalog_completeness_certifications_skus_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -14555,7 +14555,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "trees",
+        "operationId": "get_catalog_categories_trees",
         "parameters": [
           {
             "name": "Authorization",
@@ -14587,7 +14587,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "createTree",
+        "operationId": "post_catalog_categories_trees",
         "parameters": [
           {
             "name": "Authorization",
@@ -14628,7 +14628,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "nodes",
+        "operationId": "get_catalog_categories_trees_treeId_nodes",
         "parameters": [
           {
             "name": "Authorization",
@@ -14678,7 +14678,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "createNode",
+        "operationId": "post_catalog_categories_trees_treeId_nodes",
         "parameters": [
           {
             "name": "Authorization",
@@ -14728,7 +14728,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "requirements",
+        "operationId": "get_catalog_categories_attribute_requirements_categoryId",
         "parameters": [
           {
             "name": "Authorization",
@@ -14766,7 +14766,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "save_3",
+        "operationId": "post_catalog_categories_attribute_requirements_categoryId",
         "parameters": [
           {
             "name": "Authorization",
@@ -14816,7 +14816,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "validate",
+        "operationId": "post_catalog_categories_attribute_requirements_categoryId_validate",
         "parameters": [
           {
             "name": "Authorization",
@@ -14866,7 +14866,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "entryFormSchema",
+        "operationId": "post_catalog_categories_attribute_requirements_categoryId_entry_form_schema",
         "parameters": [
           {
             "name": "Authorization",
@@ -14926,7 +14926,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "bundles",
+        "operationId": "get_catalog_bundles",
         "parameters": [
           {
             "name": "Authorization",
@@ -14991,7 +14991,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "saveBundle",
+        "operationId": "post_catalog_bundles",
         "parameters": [
           {
             "name": "Authorization",
@@ -15032,7 +15032,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "versionsOf",
+        "operationId": "get_catalog_bundles_id_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -15073,7 +15073,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "createVersion",
+        "operationId": "post_catalog_bundles_id_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -15123,7 +15123,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "links",
+        "operationId": "get_catalog_bundle_skus",
         "parameters": [
           {
             "name": "Authorization",
@@ -15180,7 +15180,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "createLink",
+        "operationId": "post_catalog_bundle_skus",
         "parameters": [
           {
             "name": "Authorization",
@@ -15221,7 +15221,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "list_8",
+        "operationId": "get_catalog_brands",
         "parameters": [
           {
             "name": "Authorization",
@@ -15311,7 +15311,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "create_7",
+        "operationId": "post_catalog_brands",
         "parameters": [
           {
             "name": "Authorization",
@@ -15352,7 +15352,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "authorizations",
+        "operationId": "get_catalog_brands_id_authorizations",
         "parameters": [
           {
             "name": "Authorization",
@@ -15393,7 +15393,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "createAuthorization",
+        "operationId": "post_catalog_brands_id_authorizations",
         "parameters": [
           {
             "name": "Authorization",
@@ -15443,7 +15443,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "eligibilityBatch",
+        "operationId": "post_catalog_brands_listing_eligibility",
         "parameters": [
           {
             "name": "Authorization",
@@ -15487,7 +15487,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "boms",
+        "operationId": "get_catalog_boms",
         "parameters": [
           {
             "name": "Authorization",
@@ -15552,7 +15552,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "saveBom",
+        "operationId": "post_catalog_boms",
         "parameters": [
           {
             "name": "Authorization",
@@ -15593,7 +15593,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "versionsOf_1",
+        "operationId": "get_catalog_boms_id_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -15634,7 +15634,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "createVersion_1",
+        "operationId": "post_catalog_boms_id_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -15684,7 +15684,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "publishVersion_1",
+        "operationId": "post_catalog_bom_versions_id_publish",
         "parameters": [
           {
             "name": "Authorization",
@@ -15724,7 +15724,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "copyVersion",
+        "operationId": "post_catalog_bom_versions_id_copy",
         "parameters": [
           {
             "name": "Authorization",
@@ -15780,7 +15780,7 @@
         "tags": [
           "bom-explosion-controller"
         ],
-        "operationId": "runs",
+        "operationId": "get_catalog_bom_explosions",
         "parameters": [
           {
             "name": "Authorization",
@@ -15847,7 +15847,7 @@
         "tags": [
           "bom-explosion-controller"
         ],
-        "operationId": "explode",
+        "operationId": "post_catalog_bom_explosions",
         "parameters": [
           {
             "name": "Authorization",
@@ -15888,7 +15888,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "list_9",
+        "operationId": "get_catalog_attributes",
         "parameters": [
           {
             "name": "Authorization",
@@ -15985,7 +15985,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "create_8",
+        "operationId": "post_catalog_attributes",
         "parameters": [
           {
             "name": "Authorization",
@@ -16026,7 +16026,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "saveCategoryRule_1",
+        "operationId": "post_catalog_attributes_id_category_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -16074,7 +16074,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "deleteCategoryRule_1",
+        "operationId": "delete_catalog_attributes_id_category_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -16125,7 +16125,7 @@
         "tags": [
           "zombie-candidate-controller"
         ],
-        "operationId": "list_10",
+        "operationId": "get_catalog_zombie_candidates",
         "parameters": [
           {
             "name": "Authorization",
@@ -16198,7 +16198,7 @@
         "tags": [
           "zombie-candidate-controller"
         ],
-        "operationId": "rules_2",
+        "operationId": "get_catalog_zombie_candidates_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -16232,7 +16232,7 @@
         "tags": [
           "zombie-candidate-controller"
         ],
-        "operationId": "records_1",
+        "operationId": "get_catalog_zombie_candidates_records",
         "parameters": [
           {
             "name": "Authorization",
@@ -16307,7 +16307,7 @@
         "tags": [
           "zombie-candidate-controller"
         ],
-        "operationId": "overview",
+        "operationId": "get_catalog_zombie_candidates_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -16338,7 +16338,7 @@
         "tags": [
           "zombie-candidate-controller"
         ],
-        "operationId": "options_2",
+        "operationId": "get_catalog_zombie_candidates_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -16369,7 +16369,7 @@
         "tags": [
           "zombie-candidate-controller"
         ],
-        "operationId": "evidence",
+        "operationId": "get_catalog_zombie_candidates_evidence",
         "parameters": [
           {
             "name": "Authorization",
@@ -16417,7 +16417,7 @@
         "tags": [
           "zombie-candidate-controller"
         ],
-        "operationId": "deactivationTargets",
+        "operationId": "get_catalog_zombie_candidates_deactivation_targets",
         "parameters": [
           {
             "name": "Authorization",
@@ -16451,7 +16451,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "versions_1",
+        "operationId": "get_catalog_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -16527,7 +16527,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "check_1",
+        "operationId": "get_catalog_versions_id_component_check",
         "parameters": [
           {
             "name": "Authorization",
@@ -16567,7 +16567,7 @@
         "tags": [
           "variant-combination-controller"
         ],
-        "operationId": "panel",
+        "operationId": "get_catalog_variant_combination_spus_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -16607,7 +16607,7 @@
         "tags": [
           "variant-combination-controller"
         ],
-        "operationId": "draft",
+        "operationId": "get_catalog_variant_combination_spus_id_drafts_draftId",
         "parameters": [
           {
             "name": "Authorization",
@@ -16654,7 +16654,7 @@
         "tags": [
           "variant-combination-controller"
         ],
-        "operationId": "discardDraft",
+        "operationId": "delete_catalog_variant_combination_spus_id_drafts_draftId",
         "parameters": [
           {
             "name": "Authorization",
@@ -16706,7 +16706,7 @@
         "tags": [
           "variant-combination-controller"
         ],
-        "operationId": "combinations",
+        "operationId": "get_catalog_variant_combination_spus_id_combinations",
         "parameters": [
           {
             "name": "Authorization",
@@ -16749,7 +16749,7 @@
         "tags": [
           "variant-combination-controller"
         ],
-        "operationId": "overview_1",
+        "operationId": "get_catalog_variant_combination_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -16780,7 +16780,7 @@
         "tags": [
           "unit-group-controller"
         ],
-        "operationId": "overview_2",
+        "operationId": "get_catalog_unit_groups_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -16811,7 +16811,7 @@
         "tags": [
           "unit-conversion-controller"
         ],
-        "operationId": "panel_1",
+        "operationId": "get_catalog_unit_conversion_skus_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -16851,7 +16851,7 @@
         "tags": [
           "unit-conversion-controller"
         ],
-        "operationId": "overview_3",
+        "operationId": "get_catalog_unit_conversion_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -16882,7 +16882,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "suggestion",
+        "operationId": "get_catalog_translations_suggestions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -16920,7 +16920,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "deleteSuggestion",
+        "operationId": "delete_catalog_translations_suggestions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -16972,7 +16972,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "spuWorkspace",
+        "operationId": "get_catalog_translations_spus_spuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -17012,7 +17012,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "skuWorkspace",
+        "operationId": "get_catalog_translations_skus_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -17052,7 +17052,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "overview_4",
+        "operationId": "get_catalog_translations_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -17083,7 +17083,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "requirements_1",
+        "operationId": "get_catalog_translations_locales_requirements",
         "parameters": [
           {
             "name": "Authorization",
@@ -17114,7 +17114,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "entries_1",
+        "operationId": "get_catalog_translations_entries",
         "parameters": [
           {
             "name": "Authorization",
@@ -17213,7 +17213,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "exportEntries",
+        "operationId": "get_catalog_translations_entries_export",
         "parameters": [
           {
             "name": "Authorization",
@@ -17292,7 +17292,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "coverage",
+        "operationId": "get_catalog_translations_coverage",
         "parameters": [
           {
             "name": "Authorization",
@@ -17351,7 +17351,7 @@
         "tags": [
           "translation-controller"
         ],
-        "operationId": "batchDetail",
+        "operationId": "get_catalog_translations_batches_batchId",
         "parameters": [
           {
             "name": "Authorization",
@@ -17391,7 +17391,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "records_2",
+        "operationId": "get_catalog_titles_records",
         "parameters": [
           {
             "name": "Authorization",
@@ -17484,7 +17484,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "export",
+        "operationId": "get_catalog_titles_records_export",
         "parameters": [
           {
             "name": "Authorization",
@@ -17540,7 +17540,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "overview_5",
+        "operationId": "get_catalog_titles_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -17571,7 +17571,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "generation",
+        "operationId": "get_catalog_titles_generations_generationId",
         "parameters": [
           {
             "name": "Authorization",
@@ -17611,7 +17611,7 @@
         "tags": [
           "title-controller"
         ],
-        "operationId": "generationSkus",
+        "operationId": "get_catalog_titles_generations_generationId_skus",
         "parameters": [
           {
             "name": "Authorization",
@@ -17654,7 +17654,7 @@
         "tags": [
           "supplier-quote-controller"
         ],
-        "operationId": "tiers",
+        "operationId": "get_catalog_supplier_quotes_id_tiers",
         "parameters": [
           {
             "name": "Authorization",
@@ -17697,7 +17697,7 @@
         "tags": [
           "supplier-quote-controller"
         ],
-        "operationId": "overview_6",
+        "operationId": "get_catalog_supplier_quotes_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -17728,7 +17728,7 @@
         "tags": [
           "supplier-quote-controller"
         ],
-        "operationId": "options_3",
+        "operationId": "get_catalog_supplier_quotes_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -17759,7 +17759,7 @@
         "tags": [
           "supplier-quote-controller"
         ],
-        "operationId": "effective",
+        "operationId": "get_catalog_supplier_quotes_effective",
         "parameters": [
           {
             "name": "Authorization",
@@ -17825,7 +17825,7 @@
         "tags": [
           "supplier-quote-controller"
         ],
-        "operationId": "resolve",
+        "operationId": "get_catalog_supplier_quotes_effective_resolve",
         "parameters": [
           {
             "name": "Authorization",
@@ -17891,7 +17891,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "panel_2",
+        "operationId": "get_catalog_spec_axis_spus_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -17931,7 +17931,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "overview_7",
+        "operationId": "get_catalog_spec_axis_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -17962,7 +17962,7 @@
         "tags": [
           "sku-list-controller"
         ],
-        "operationId": "list_11",
+        "operationId": "get_catalog_skus",
         "parameters": [
           {
             "name": "Authorization",
@@ -18139,7 +18139,7 @@
         "tags": [
           "sku-list-controller"
         ],
-        "operationId": "export_1",
+        "operationId": "get_catalog_skus_export",
         "parameters": [
           {
             "name": "Authorization",
@@ -18239,7 +18239,7 @@
         "tags": [
           "sku-list-controller"
         ],
-        "operationId": "capabilities",
+        "operationId": "get_catalog_skus_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -18270,7 +18270,7 @@
         "tags": [
           "sku-merge-controller"
         ],
-        "operationId": "merges",
+        "operationId": "get_catalog_sku_merges",
         "parameters": [
           {
             "name": "Authorization",
@@ -18321,7 +18321,7 @@
         "tags": [
           "sku-merge-controller"
         ],
-        "operationId": "merge_1",
+        "operationId": "get_catalog_sku_merges_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -18361,7 +18361,7 @@
         "tags": [
           "sku-merge-controller"
         ],
-        "operationId": "overview_8",
+        "operationId": "get_catalog_sku_merges_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -18392,7 +18392,7 @@
         "tags": [
           "sku-merge-controller"
         ],
-        "operationId": "bySku",
+        "operationId": "get_catalog_sku_merges_by_sku_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -18432,7 +18432,7 @@
         "tags": [
           "sku-merge-controller"
         ],
-        "operationId": "byCandidate",
+        "operationId": "get_catalog_sku_merges_by_candidate_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -18472,7 +18472,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "panel_3",
+        "operationId": "get_catalog_sku_code_skus_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -18512,7 +18512,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "overview_9",
+        "operationId": "get_catalog_sku_code_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -18543,7 +18543,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "batch_2",
+        "operationId": "get_catalog_sku_code_batches_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -18583,7 +18583,7 @@
         "tags": [
           "sku-attribute-override-controller"
         ],
-        "operationId": "read",
+        "operationId": "get_catalog_sku_attribute_override_skus_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -18623,7 +18623,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "list_12",
+        "operationId": "get_catalog_role_profiles",
         "parameters": [
           {
             "name": "Authorization",
@@ -18738,7 +18738,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "overview_10",
+        "operationId": "get_catalog_role_profiles_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -18769,7 +18769,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "options_4",
+        "operationId": "get_catalog_role_profiles_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -18808,7 +18808,7 @@
         "tags": [
           "physical-safety-controller"
         ],
-        "operationId": "profiles",
+        "operationId": "get_catalog_physical_safety_profiles",
         "parameters": [
           {
             "name": "Authorization",
@@ -18923,7 +18923,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "aggregate",
+        "operationId": "get_catalog_parties_id_role_profiles",
         "parameters": [
           {
             "name": "Authorization",
@@ -18963,7 +18963,7 @@
         "tags": [
           "party-contact-controller"
         ],
-        "operationId": "primary",
+        "operationId": "get_catalog_parties_id_contacts_default",
         "parameters": [
           {
             "name": "Authorization",
@@ -19003,7 +19003,7 @@
         "tags": [
           "party-contact-controller"
         ],
-        "operationId": "candidates",
+        "operationId": "get_catalog_parties_id_contacts_candidates",
         "parameters": [
           {
             "name": "Authorization",
@@ -19063,7 +19063,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "versions_2",
+        "operationId": "get_catalog_parties_id_addresses_addressId_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -19115,7 +19115,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "version_2",
+        "operationId": "get_catalog_parties_id_addresses_addressId_versions_versionNo",
         "parameters": [
           {
             "name": "Authorization",
@@ -19173,7 +19173,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "defaultAddress",
+        "operationId": "get_catalog_parties_id_addresses_defaults",
         "parameters": [
           {
             "name": "Authorization",
@@ -19221,7 +19221,7 @@
         "tags": [
           "party-address-controller"
         ],
-        "operationId": "candidates_1",
+        "operationId": "get_catalog_parties_id_addresses_candidates",
         "parameters": [
           {
             "name": "Authorization",
@@ -19289,7 +19289,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "overview_11",
+        "operationId": "get_catalog_parties_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -19320,7 +19320,7 @@
         "tags": [
           "party-controller"
         ],
-        "operationId": "candidates_2",
+        "operationId": "get_catalog_parties_candidates",
         "parameters": [
           {
             "name": "Authorization",
@@ -19379,7 +19379,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "integrityChecks",
+        "operationId": "get_catalog_media_id_integrity_checks",
         "parameters": [
           {
             "name": "Authorization",
@@ -19422,7 +19422,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "referencesOf",
+        "operationId": "get_catalog_media_references",
         "parameters": [
           {
             "name": "Authorization",
@@ -19482,7 +19482,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "overview_12",
+        "operationId": "get_catalog_media_processing_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -19513,7 +19513,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "job",
+        "operationId": "get_catalog_media_processing_jobs_jobId",
         "parameters": [
           {
             "name": "Authorization",
@@ -19553,7 +19553,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "items",
+        "operationId": "get_catalog_media_processing_jobs_jobId_items",
         "parameters": [
           {
             "name": "Authorization",
@@ -19596,7 +19596,7 @@
         "tags": [
           "image-process-controller"
         ],
-        "operationId": "history",
+        "operationId": "get_catalog_media_processing_assets_assetId_history",
         "parameters": [
           {
             "name": "Authorization",
@@ -19639,7 +19639,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "overview_13",
+        "operationId": "get_catalog_media_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -19670,7 +19670,7 @@
         "tags": [
           "lifecycle-controller"
         ],
-        "operationId": "preview",
+        "operationId": "get_catalog_lifecycle_rules_id_preview",
         "parameters": [
           {
             "name": "Authorization",
@@ -19728,7 +19728,7 @@
         "tags": [
           "lifecycle-controller"
         ],
-        "operationId": "metrics",
+        "operationId": "get_catalog_lifecycle_metrics",
         "parameters": [
           {
             "name": "Authorization",
@@ -19762,7 +19762,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "usages",
+        "operationId": "get_catalog_kb_usages",
         "parameters": [
           {
             "name": "Authorization",
@@ -19838,7 +19838,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "reviewTasks",
+        "operationId": "get_catalog_kb_review_tasks",
         "parameters": [
           {
             "name": "Authorization",
@@ -19913,7 +19913,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "overview_14",
+        "operationId": "get_catalog_kb_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -19944,7 +19944,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "options_5",
+        "operationId": "get_catalog_kb_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -19975,7 +19975,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "hitRates",
+        "operationId": "get_catalog_kb_hit_rates",
         "parameters": [
           {
             "name": "Authorization",
@@ -20027,7 +20027,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "translations",
+        "operationId": "get_catalog_kb_entries_id_translations",
         "parameters": [
           {
             "name": "Authorization",
@@ -20070,7 +20070,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "translationCoverage",
+        "operationId": "get_catalog_kb_entries_id_translation_coverage",
         "parameters": [
           {
             "name": "Authorization",
@@ -20121,7 +20121,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "bindings",
+        "operationId": "get_catalog_kb_entries_id_rule_bindings",
         "parameters": [
           {
             "name": "Authorization",
@@ -20164,7 +20164,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "templateFile",
+        "operationId": "get_catalog_import_templates_id_file",
         "parameters": [
           {
             "name": "Authorization",
@@ -20205,7 +20205,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "job_1",
+        "operationId": "get_catalog_import_jobs_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -20245,7 +20245,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "rows",
+        "operationId": "get_catalog_import_jobs_id_rows",
         "parameters": [
           {
             "name": "Authorization",
@@ -20313,7 +20313,7 @@
         "tags": [
           "import-validation-controller"
         ],
-        "operationId": "issues",
+        "operationId": "get_catalog_import_jobs_id_report_issues",
         "parameters": [
           {
             "name": "Authorization",
@@ -20398,7 +20398,7 @@
         "tags": [
           "import-validation-controller"
         ],
-        "operationId": "exportFile",
+        "operationId": "get_catalog_import_jobs_id_report_exports_exportId_file",
         "parameters": [
           {
             "name": "Authorization",
@@ -20448,7 +20448,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "errors",
+        "operationId": "get_catalog_import_jobs_id_errors",
         "parameters": [
           {
             "name": "Authorization",
@@ -20516,7 +20516,7 @@
         "tags": [
           "export-controller"
         ],
-        "operationId": "sources",
+        "operationId": "get_catalog_export_sources",
         "parameters": [
           {
             "name": "Authorization",
@@ -20547,7 +20547,7 @@
         "tags": [
           "export-controller"
         ],
-        "operationId": "job_2",
+        "operationId": "get_catalog_export_jobs_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -20587,7 +20587,7 @@
         "tags": [
           "export-controller"
         ],
-        "operationId": "file",
+        "operationId": "get_catalog_export_jobs_id_file",
         "parameters": [
           {
             "name": "Authorization",
@@ -20628,7 +20628,7 @@
         "tags": [
           "duplicate-detection-controller"
         ],
-        "operationId": "scan_1",
+        "operationId": "get_catalog_duplicate_scans_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -20668,7 +20668,7 @@
         "tags": [
           "duplicate-detection-controller"
         ],
-        "operationId": "candidates_3",
+        "operationId": "get_catalog_duplicate_scans_id_candidates",
         "parameters": [
           {
             "name": "Authorization",
@@ -20752,7 +20752,7 @@
         "tags": [
           "duplicate-detection-controller"
         ],
-        "operationId": "overview_15",
+        "operationId": "get_catalog_duplicate_scans_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -20783,7 +20783,7 @@
         "tags": [
           "duplicate-detection-controller"
         ],
-        "operationId": "candidate",
+        "operationId": "get_catalog_duplicate_candidates_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -20823,7 +20823,7 @@
         "tags": [
           "sku-merge-controller"
         ],
-        "operationId": "preview_1",
+        "operationId": "get_catalog_duplicate_candidates_id_merge_preview",
         "parameters": [
           {
             "name": "Authorization",
@@ -20863,7 +20863,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "translations_1",
+        "operationId": "get_catalog_descriptions_templates_id_translations",
         "parameters": [
           {
             "name": "Authorization",
@@ -20906,7 +20906,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "translationCoverage_1",
+        "operationId": "get_catalog_descriptions_templates_id_translation_coverage",
         "parameters": [
           {
             "name": "Authorization",
@@ -20957,7 +20957,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "sections",
+        "operationId": "get_catalog_descriptions_sections",
         "parameters": [
           {
             "name": "Authorization",
@@ -21058,7 +21058,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "exportSections",
+        "operationId": "get_catalog_descriptions_sections_export",
         "parameters": [
           {
             "name": "Authorization",
@@ -21122,7 +21122,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "renderDetail",
+        "operationId": "get_catalog_descriptions_renders_renderId",
         "parameters": [
           {
             "name": "Authorization",
@@ -21162,7 +21162,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "renderSkus",
+        "operationId": "get_catalog_descriptions_renders_renderId_skus",
         "parameters": [
           {
             "name": "Authorization",
@@ -21205,7 +21205,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "missingVariables",
+        "operationId": "get_catalog_descriptions_renders_renderId_missing_variables",
         "parameters": [
           {
             "name": "Authorization",
@@ -21248,7 +21248,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "overview_16",
+        "operationId": "get_catalog_descriptions_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -21279,7 +21279,7 @@
         "tags": [
           "description-template-controller"
         ],
-        "operationId": "sections_1",
+        "operationId": "get_catalog_description_templates_templates_id_sections",
         "parameters": [
           {
             "name": "Authorization",
@@ -21322,7 +21322,7 @@
         "tags": [
           "description-template-controller"
         ],
-        "operationId": "renderDetail_1",
+        "operationId": "get_catalog_description_templates_renders_renderId",
         "parameters": [
           {
             "name": "Authorization",
@@ -21362,7 +21362,7 @@
         "tags": [
           "description-template-controller"
         ],
-        "operationId": "overview_17",
+        "operationId": "get_catalog_description_templates_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -21393,7 +21393,7 @@
         "tags": [
           "description-template-controller"
         ],
-        "operationId": "options_6",
+        "operationId": "get_catalog_description_templates_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -21424,7 +21424,7 @@
         "tags": [
           "customs-destination-version-controller"
         ],
-        "operationId": "requirements_2",
+        "operationId": "get_catalog_customs_destination_versions_requirements",
         "parameters": [
           {
             "name": "Authorization",
@@ -21480,7 +21480,7 @@
         "tags": [
           "customs-destination-version-controller"
         ],
-        "operationId": "effective_1",
+        "operationId": "get_catalog_customs_destination_versions_effective",
         "parameters": [
           {
             "name": "Authorization",
@@ -21536,7 +21536,7 @@
         "tags": [
           "customs-declaration-resolve-controller"
         ],
-        "operationId": "resolve_1",
+        "operationId": "get_catalog_customs_declaration_resolve",
         "parameters": [
           {
             "name": "Authorization",
@@ -21592,7 +21592,7 @@
         "tags": [
           "customs-attribute-controller"
         ],
-        "operationId": "profiles_1",
+        "operationId": "get_catalog_customs_attributes_profiles",
         "parameters": [
           {
             "name": "Authorization",
@@ -21691,7 +21691,7 @@
         "tags": [
           "customs-attribute-controller"
         ],
-        "operationId": "declarationReady",
+        "operationId": "get_catalog_customs_attributes_declaration_ready",
         "parameters": [
           {
             "name": "Authorization",
@@ -21731,7 +21731,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "components_2",
+        "operationId": "get_catalog_components",
         "parameters": [
           {
             "name": "Authorization",
@@ -21816,7 +21816,7 @@
         "tags": [
           "bundle-component-controller"
         ],
-        "operationId": "overview_18",
+        "operationId": "get_catalog_components_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -21847,7 +21847,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "list_13",
+        "operationId": "get_catalog_completeness",
         "parameters": [
           {
             "name": "Authorization",
@@ -21979,7 +21979,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "card",
+        "operationId": "get_catalog_completeness_ownerType_ownerId",
         "parameters": [
           {
             "name": "Authorization",
@@ -22027,7 +22027,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "overview_19",
+        "operationId": "get_catalog_completeness_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -22058,7 +22058,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "options_7",
+        "operationId": "get_catalog_completeness_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -22089,7 +22089,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "gaps",
+        "operationId": "get_catalog_completeness_gaps",
         "parameters": [
           {
             "name": "Authorization",
@@ -22205,7 +22205,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "gapSummary",
+        "operationId": "get_catalog_completeness_gaps_summary",
         "parameters": [
           {
             "name": "Authorization",
@@ -22244,7 +22244,7 @@
         "tags": [
           "completeness-score-controller"
         ],
-        "operationId": "evaluation",
+        "operationId": "get_catalog_completeness_evaluations_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -22284,7 +22284,7 @@
         "tags": [
           "category-tree-controller"
         ],
-        "operationId": "overview_20",
+        "operationId": "get_catalog_categories_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -22315,7 +22315,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "effective_2",
+        "operationId": "get_catalog_categories_attribute_requirements_categoryId_effective",
         "parameters": [
           {
             "name": "Authorization",
@@ -22358,7 +22358,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "overview_21",
+        "operationId": "get_catalog_categories_attribute_requirements_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -22389,7 +22389,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "effectiveVersion",
+        "operationId": "get_catalog_bundles_id_effective",
         "parameters": [
           {
             "name": "Authorization",
@@ -22437,7 +22437,7 @@
         "tags": [
           "bundle-version-controller"
         ],
-        "operationId": "overview_22",
+        "operationId": "get_catalog_bundles_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -22468,7 +22468,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "eligibility",
+        "operationId": "get_catalog_brands_id_listing_eligibility",
         "parameters": [
           {
             "name": "Authorization",
@@ -22508,7 +22508,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "overview_23",
+        "operationId": "get_catalog_brands_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -22539,7 +22539,7 @@
         "tags": [
           "brand-controller"
         ],
-        "operationId": "candidates_4",
+        "operationId": "get_catalog_brands_candidates",
         "parameters": [
           {
             "name": "Authorization",
@@ -22599,7 +22599,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "effectiveVersion_1",
+        "operationId": "get_catalog_boms_id_effective",
         "parameters": [
           {
             "name": "Authorization",
@@ -22647,7 +22647,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "overview_24",
+        "operationId": "get_catalog_boms_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -22678,7 +22678,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "versions_3",
+        "operationId": "get_catalog_bom_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -22754,7 +22754,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "requirement",
+        "operationId": "get_catalog_bom_versions_id_requirement",
         "parameters": [
           {
             "name": "Authorization",
@@ -22802,7 +22802,7 @@
         "tags": [
           "bom-explosion-controller"
         ],
-        "operationId": "run_1",
+        "operationId": "get_catalog_bom_explosions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -22842,7 +22842,7 @@
         "tags": [
           "bom-version-controller"
         ],
-        "operationId": "usage",
+        "operationId": "get_catalog_bom_components_usage",
         "parameters": [
           {
             "name": "Authorization",
@@ -22918,7 +22918,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "overview_25",
+        "operationId": "get_catalog_attributes_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -22949,7 +22949,7 @@
         "tags": [
           "attribute-option-controller"
         ],
-        "operationId": "list_14",
+        "operationId": "get_catalog_attributes_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -23041,7 +23041,7 @@
         "tags": [
           "attribute-dictionary-controller"
         ],
-        "operationId": "categoryRules_1",
+        "operationId": "get_catalog_attributes_category_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -23092,7 +23092,7 @@
         "tags": [
           "unit-group-controller"
         ],
-        "operationId": "deleteConversion",
+        "operationId": "delete_catalog_unit_groups_id_conversions_conversionId",
         "parameters": [
           {
             "name": "Authorization",
@@ -23144,7 +23144,7 @@
         "tags": [
           "spec-axis-controller"
         ],
-        "operationId": "unbindAxis",
+        "operationId": "delete_catalog_spec_axis_spus_id_axes_axisId",
         "parameters": [
           {
             "name": "Authorization",
@@ -23196,7 +23196,7 @@
         "tags": [
           "sku-code-controller"
         ],
-        "operationId": "deleteIdentifier",
+        "operationId": "delete_catalog_sku_code_skus_id_identifiers_identifierId",
         "parameters": [
           {
             "name": "Authorization",
@@ -23248,7 +23248,7 @@
         "tags": [
           "party-role-profile-controller"
         ],
-        "operationId": "delete_9",
+        "operationId": "delete_catalog_parties_id_roleType_profile",
         "parameters": [
           {
             "name": "Authorization",
@@ -23308,7 +23308,7 @@
         "tags": [
           "media-controller"
         ],
-        "operationId": "removeReference",
+        "operationId": "delete_catalog_media_id_references_referenceId",
         "parameters": [
           {
             "name": "Authorization",
@@ -23357,7 +23357,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "deleteTranslation",
+        "operationId": "delete_catalog_kb_translations_translationId",
         "parameters": [
           {
             "name": "Authorization",
@@ -23406,7 +23406,7 @@
         "tags": [
           "knowledge-base-controller"
         ],
-        "operationId": "unbindEntry",
+        "operationId": "delete_catalog_kb_entries_entryId_rule_bindings_bindingId",
         "parameters": [
           {
             "name": "Authorization",
@@ -23455,7 +23455,7 @@
         "tags": [
           "import-wizard-controller"
         ],
-        "operationId": "deleteMapping",
+        "operationId": "delete_catalog_import_field_mappings_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -23498,7 +23498,7 @@
         "tags": [
           "description-controller"
         ],
-        "operationId": "deleteTranslation_1",
+        "operationId": "delete_catalog_descriptions_translations_translationId",
         "parameters": [
           {
             "name": "Authorization",
@@ -23550,7 +23550,7 @@
         "tags": [
           "category-attribute-requirement-controller"
         ],
-        "operationId": "delete_10",
+        "operationId": "delete_catalog_categories_attribute_requirements_categoryId_attributeId",
         "parameters": [
           {
             "name": "Authorization",

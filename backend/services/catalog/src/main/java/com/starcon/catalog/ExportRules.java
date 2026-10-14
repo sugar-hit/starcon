@@ -13,9 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.8.2.1 导出的**纯校验规则**：字段选择、排序还原、筛选条件归属、PII 授权。
  *
- * <p>刻意做成不碰数据库的静态方法：这些是「请求对不对」的问题，
- * 放一条从 HTTP 到落库的链路上测很难把它们单独测干净。这里全部是纯函数，
- * 由 {@link ExportJobService} 在开事务之前调用 —— 校验失败不该先占着一个事务。
+ * <p>刻意做成不碰数据库的静态方法：这些是「请求对不对」的问题， 放一条从 HTTP 到落库的链路上测很难把它们单独测干净。这里全部是纯函数， 由 {@link
+ * ExportJobService} 在开事务之前调用 —— 校验失败不该先占着一个事务。
  */
 final class ExportRules {
   private ExportRules() {}
@@ -23,8 +22,7 @@ final class ExportRules {
   /**
    * 解析字段清单：命中白名单、保留**数据源定义的列顺序**、去重。
    *
-   * <p>保留列顺序而不是用户提交顺序：导出文件的列序要稳定可预期，
-   * 而「按你勾选的顺序」会让同一个模板两次导出得到不同列序的行，
+   * <p>保留列顺序而不是用户提交顺序：导出文件的列序要稳定可预期， 而「按你勾选的顺序」会让同一个模板两次导出得到不同列序的行，
    * 下游拿它做自动比对时会直接错位。用户能选择**选哪些**，不能选择**按什么顺序**。
    *
    * <p>返回的顺序即 {@code export_job.selected_fields} 与 CSV 表头的顺序。
@@ -85,8 +83,7 @@ final class ExportRules {
   /**
    * 校验筛选条件全部属于本数据源，且没有落在「上游投影未接入」的那几个上。
    *
-   * <p>两条错误分开报：不属于本数据源（填错了地方）与属于但当前无法求值
-   * （依赖 07 库存 / 05 定价 / 04 刊登）。后者必须点名归属服务，
+   * <p>两条错误分开报：不属于本数据源（填错了地方）与属于但当前无法求值 （依赖 07 库存 / 05 定价 / 04 刊登）。后者必须点名归属服务，
    * 否则用户只会觉得「导出功能坏了」，而他填的条件其实是对的。
    */
   static void requireSupportedFilters(ExportDataSource source, ExportFilterInput spec) {
@@ -126,20 +123,16 @@ final class ExportRules {
     if (!unavailable.isEmpty())
       throw new ResponseStatusException(
           HttpStatus.UNPROCESSABLE_ENTITY,
-          "以下筛选条件依赖尚未接入的上游投影，无法求值："
-              + String.join("；", reasons)
-              + "。请先接入对应服务，或改用其他条件。");
+          "以下筛选条件依赖尚未接入的上游投影，无法求值：" + String.join("；", reasons) + "。请先接入对应服务，或改用其他条件。");
   }
 
   /**
    * PII 授权校验：本次导出含敏感字段时，理由必须非空。
    *
-   * <p>返回本次导出涉及的**敏感字段键**（空列表 = 不含 PII）。
-   * 落库的是键（EMAIL / PHONE / MOBILE）而不是中文标签：键是稳定标识，
+   * <p>返回本次导出涉及的**敏感字段键**（空列表 = 不含 PII）。 落库的是键（EMAIL / PHONE / MOBILE）而不是中文标签：键是稳定标识，
    * 标签随时可能改写，而审计要回答的是「导走了哪些字段」，那需要一份不随文案漂移的清单。
    *
-   * <p>字段清单由**服务端按字段定义**推导，不采信客户端的「是否含 PII」——
-   * 否则这个开关就只是个装饰：只要客户端说「不含 PII」，一次含邮箱的导出就能无声通过。
+   * <p>字段清单由**服务端按字段定义**推导，不采信客户端的「是否含 PII」—— 否则这个开关就只是个装饰：只要客户端说「不含 PII」，一次含邮箱的导出就能无声通过。
    */
   static List<String> requirePiiAuthorization(
       List<ExportColumn> columns, String purpose, String sourceLabel) {

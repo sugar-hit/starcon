@@ -15,20 +15,17 @@ import org.jooq.DSLContext;
 /**
  * 17.5.3.2 操作日志写入侧。
  *
- * <p>所有运行事件都经这一个入口落表，所以「事件类型、级别、请求 ID、脱敏、堆栈截断」的口径只有一处，
- * 不会因为某个调用点自己拼参数而漏字段。
+ * <p>所有运行事件都经这一个入口落表，所以「事件类型、级别、请求 ID、脱敏、堆栈截断」的口径只有一处， 不会因为某个调用点自己拼参数而漏字段。
  *
- * <p><b>与 {@link AuditLog} 的边界</b>：审计是合规证据（脱敏、不可篡改、长期留存），
- * 这里是排障证据（含技术细节、可清理）。两者字段几乎没有交集，也不共用表——
+ * <p><b>与 {@link AuditLog} 的边界</b>：审计是合规证据（脱敏、不可篡改、长期留存）， 这里是排障证据（含技术细节、可清理）。两者字段几乎没有交集，也不共用表——
  * 蓝图明确要求二者不可互相替代。
  *
  * <p><b>但「含技术细节」不等于「可以无节制写入」</b>：这里仍然做三件事——
+ *
  * <ol>
  *   <li>技术细节走 {@link AuditRedactor} 同一套脱敏口径，密码与令牌不会进库；
- *   <li>错误堆栈截断到 {@value #MAX_STACK} 字符并追加可见的截断标记，
- *       库层还有 CHECK 兜底，不会无界写入；
- *   <li>只记 API 调用<b>摘要</b>（方法、路径、状态码、耗时），<b>不记请求体</b>——
- *       请求体里就是业务数据与凭证，属于审计域的内容，不属于排障域。
+ *   <li>错误堆栈截断到 {@value #MAX_STACK} 字符并追加可见的截断标记， 库层还有 CHECK 兜底，不会无界写入；
+ *   <li>只记 API 调用<b>摘要</b>（方法、路径、状态码、耗时），<b>不记请求体</b>—— 请求体里就是业务数据与凭证，属于审计域的内容，不属于排障域。
  * </ol>
  *
  * <p>时间绑定见 {@link AuditLog#utc}：{@code OffsetDateTime} 是唯一不会静默偏 -28800 秒的姿势。
@@ -38,7 +35,9 @@ final class OperationLog {
 
   /** 堆栈截断上限。超过部分丢弃并留下标记，让读的人知道「这里被截过」而不是以为堆栈到此为止。 */
   static final int MAX_STACK = 8000;
+
   static final String TRUNCATED = "…[已截断]";
+
   /** 默认留存天数：蓝图说排障日志「可短期留存」，这个值就是「短期」的具体口径。 */
   static final int RETENTION_DAYS = 90;
 
@@ -81,7 +80,8 @@ final class OperationLog {
     text.append(error.getClass().getName());
     if (error.getMessage() != null) text.append(": ").append(error.getMessage());
     var cause = error.getCause();
-    if (cause != null && cause != error) text.append(" | caused by ").append(cause.getClass().getName());
+    if (cause != null && cause != error)
+      text.append(" | caused by ").append(cause.getClass().getName());
     for (var frame : error.getStackTrace()) text.append("\n\tat ").append(frame);
     return stack(text.toString());
   }
@@ -111,8 +111,8 @@ final class OperationLog {
   /**
    * 记录一条操作日志。
    *
-   * <p>调用方必须已经处于租户事务内（{@link com.starcon.tenancy.TenantTransactions}），
-   * 否则 RLS 的 WITH CHECK 会拒写——这是刻意的：操作日志同样不允许跨租户写入。
+   * <p>调用方必须已经处于租户事务内（{@link com.starcon.tenancy.TenantTransactions}）， 否则 RLS 的 WITH CHECK
+   * 会拒写——这是刻意的：操作日志同样不允许跨租户写入。
    */
   void record(Entry entry) {
     var detail = AuditRedactor.redactAll(entry.detail() == null ? Map.of() : entry.detail());
@@ -157,8 +157,7 @@ final class OperationLog {
   /**
    * 登录事件。
    *
-   * <p>登录必须能独立于会话存在：失败的登录没有已认证成员，所以 actor 允许为 null，
-   * 记的是「谁尝试用哪个账号进来」而不是「谁成功了」。
+   * <p>登录必须能独立于会话存在：失败的登录没有已认证成员，所以 actor 允许为 null， 记的是「谁尝试用哪个账号进来」而不是「谁成功了」。
    */
   void login(
       UUID tenantId,
@@ -173,17 +172,33 @@ final class OperationLog {
     if (detail != null) merged.putAll(detail);
     record(
         new Entry(
-            tenantId, "LOGIN", success ? "INFO" : "ERROR", requestId, null, null, actorName,
-            success ? "登录成功" : "登录失败", null, null, null, null, null, null, null, null, null,
-            merged, null));
+            tenantId,
+            "LOGIN",
+            success ? "INFO" : "ERROR",
+            requestId,
+            null,
+            null,
+            actorName,
+            success ? "登录成功" : "登录失败",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            merged,
+            null));
   }
 
   /** 登出。会话已撤销，所以只记「发生过登出」，不再附带令牌细节。 */
   void logout(UUID tenantId, String requestId, UUID actorId, String actorName) {
     record(
         new Entry(
-            tenantId, "LOGOUT", "INFO", requestId, null, actorId, actorName, "退出登录",
-            null, null, null, null, null, null, null, null, null, Map.of(), null));
+            tenantId, "LOGOUT", "INFO", requestId, null, actorId, actorName, "退出登录", null, null,
+            null, null, null, null, null, null, null, Map.of(), null));
   }
 
   /** API 调用摘要。只记方法/路径/状态码/耗时，**不记请求体与查询串**。 */
@@ -200,9 +215,25 @@ final class OperationLog {
       boolean failed) {
     record(
         new Entry(
-            tenantId, "API_CALL", levelFor(status), requestId, traceId, actorId, actorName,
+            tenantId,
+            "API_CALL",
+            levelFor(status),
+            requestId,
+            traceId,
+            actorId,
+            actorName,
             method + " " + path + " → " + status,
-            method, path, status, durationMs, null, null, null, null, null, Map.of(), null));
+            method,
+            path,
+            status,
+            durationMs,
+            null,
+            null,
+            null,
+            null,
+            null,
+            Map.of(),
+            null));
   }
 
   /** 任务执行。影响行数等结果放进 detail，便于回答「跑了没有、跑了多少」。 */
@@ -216,12 +247,25 @@ final class OperationLog {
       Throwable error) {
     record(
         new Entry(
-            tenantId, "TASK_RUN", "SUCCEEDED".equals(taskStatus) ? "INFO" : "ERROR",
-            requestId, null, null, null, "任务 " + taskName + " " + taskStatus,
-            null, null, null, durationMs, taskName, taskStatus,
+            tenantId,
+            "TASK_RUN",
+            "SUCCEEDED".equals(taskStatus) ? "INFO" : "ERROR",
+            requestId,
+            null,
+            null,
+            null,
+            "任务 " + taskName + " " + taskStatus,
+            null,
+            null,
+            null,
+            durationMs,
+            taskName,
+            taskStatus,
             error == null ? null : error.getClass().getName(),
             error == null ? null : error.getMessage(),
-            render(error), detail, null));
+            render(error),
+            detail,
+            null));
   }
 
   /** 错误堆栈。这是排障最常用的一条：错误摘要 + 截断后的堆栈。 */
@@ -236,11 +280,25 @@ final class OperationLog {
       Map<String, Object> detail) {
     record(
         new Entry(
-            tenantId, "ERROR", "ERROR", requestId, traceId, actorId, actorName, summary,
-            null, null, null, null, null, null,
+            tenantId,
+            "ERROR",
+            "ERROR",
+            requestId,
+            traceId,
+            actorId,
+            actorName,
+            summary,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
             error == null ? null : error.getClass().getName(),
             error == null ? null : error.getMessage(),
-            render(error), detail, null));
+            render(error),
+            detail,
+            null));
   }
 
   /** 状态码映射：4xx 是调用方的问题（WARNING），5xx 是服务端的问题（ERROR）。 */

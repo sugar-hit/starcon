@@ -15,9 +15,8 @@ import org.junit.jupiter.api.Test;
 /**
  * 4.2.2.2 描述模板渲染引擎的纯函数断言。
  *
- * <p>与集成测试分工：这里不碰数据库，钉的是「拼装规则」本身
- * （五段顺序、&lt;img&gt; 位置可解析、白名单标签转义、占位符绝不残留）；
- * 「这些真的落进了 PostgreSQL」由 {@code DescriptionTemplateIntegrationTest} 负责。
+ * <p>与集成测试分工：这里不碰数据库，钉的是「拼装规则」本身 （五段顺序、&lt;img&gt; 位置可解析、白名单标签转义、占位符绝不残留）； 「这些真的落进了 PostgreSQL」由
+ * {@code DescriptionTemplateIntegrationTest} 负责。
  */
 class DescriptionTemplateRendererTest {
   static final UUID TEMPLATE = UUID.randomUUID();
@@ -26,7 +25,13 @@ class DescriptionTemplateRendererTest {
 
   static DescriptionRenderer.SkuFacts sku() {
     return new DescriptionRenderer.SkuFacts(
-        UUID.randomUUID(), "SKU-1", "桌面款", "星云桌面音箱", "星云", "音频", "黑色 / 2.0声道",
+        UUID.randomUUID(),
+        "SKU-1",
+        "桌面款",
+        "星云桌面音箱",
+        "星云",
+        "音频",
+        "黑色 / 2.0声道",
         List.of("SKU-1", "SKU-2"));
   }
 
@@ -52,12 +57,15 @@ class DescriptionTemplateRendererTest {
         DescriptionTemplateRenderer.render(
             TEMPLATE, "DTPL", "zh-CN", specs, sku(), pools(), Map.of());
 
-    assertThat(doc.sections()).extracting(SectionRendered::sectionType).containsExactly("INTRO", "SPEC");
+    assertThat(doc.sections())
+        .extracting(SectionRendered::sectionType)
+        .containsExactly("INTRO", "SPEC");
     // 输出顺序跟着 sort_order 走，而不是跟着调用方给的顺序或枚举顺序。
     assertThat(doc.html().indexOf("data-section-type=\"INTRO\""))
         .isLessThan(doc.html().indexOf("data-section-type=\"SPEC\""));
     assertThat(doc.html()).contains("<h3>产品介绍</h3>").contains("<h3>规格参数</h3>");
-    assertThat(doc.html()).startsWith("<div class=\"description-template\" data-template-code=\"DTPL\"");
+    assertThat(doc.html())
+        .startsWith("<div class=\"description-template\" data-template-code=\"DTPL\"");
     assertThat(doc.complete()).isTrue();
   }
 
@@ -95,7 +103,8 @@ class DescriptionTemplateRendererTest {
         new DescriptionRenderer.SkuFacts(
             UUID.randomUUID(), "SKU-1", "桌面款", "星云桌面音箱", "", "音频", "黑色", List.of());
     var doc =
-        DescriptionTemplateRenderer.render(TEMPLATE, "DTPL", "zh-CN", specs, facts, pools(), Map.of());
+        DescriptionTemplateRenderer.render(
+            TEMPLATE, "DTPL", "zh-CN", specs, facts, pools(), Map.of());
 
     assertThat(doc.html()).doesNotContain("{").doesNotContain("}");
     assertThat(doc.html()).doesNotContain("brand");
@@ -115,7 +124,8 @@ class DescriptionTemplateRendererTest {
     var emptyPools =
         new DescriptionRenderer.PhrasePools(List.of(), List.of(), List.of(), List.of());
     var doc =
-        DescriptionTemplateRenderer.render(TEMPLATE, "DTPL", "zh-CN", specs, sku(), emptyPools, Map.of());
+        DescriptionTemplateRenderer.render(
+            TEMPLATE, "DTPL", "zh-CN", specs, sku(), emptyPools, Map.of());
     assertThat(doc.html()).doesNotContain("{");
     assertThat(doc.sections().get(0).issues().get(0).issueKind()).isEqualTo("EMPTY_PHRASE_POOL");
   }
@@ -127,7 +137,8 @@ class DescriptionTemplateRendererTest {
             new SectionSpec(
                 INTRO, "INTRO", 0, true, "en-US", "星云的音频产品", false, List.of(), List.of()));
     var doc =
-        DescriptionTemplateRenderer.render(TEMPLATE, "DTPL", "en-US", specs, sku(), pools(), Map.of());
+        DescriptionTemplateRenderer.render(
+            TEMPLATE, "DTPL", "en-US", specs, sku(), pools(), Map.of());
     assertThat(doc.html()).doesNotContain("星云");
     assertThat(doc.sections().get(0).issues().get(0).issueKind()).isEqualTo("TRANSLATION_MISSING");
     assertThat(doc.complete()).isFalse();
@@ -144,8 +155,16 @@ class DescriptionTemplateRendererTest {
             new SectionSpec(
                 INTRO, "INTRO", 0, true, "zh-CN", "产品介绍正文", true, List.of(), List.of(slotA, slotB)),
             new SectionSpec(
-                SPEC, "SPEC", 1, true, "zh-CN", "规格正文", true, List.of(),
-                List.of(new ImageSlotSpec(UUID.randomUUID(), 0, "RENDER_INPUT", "参数图", null, false))));
+                SPEC,
+                "SPEC",
+                1,
+                true,
+                "zh-CN",
+                "规格正文",
+                true,
+                List.of(),
+                List.of(
+                    new ImageSlotSpec(UUID.randomUUID(), 0, "RENDER_INPUT", "参数图", null, false))));
     Map<String, ResolvedImage> resolved = new LinkedHashMap<>();
     resolved.put(
         DescriptionTemplateRenderer.key(slotA, INTRO),
@@ -160,12 +179,17 @@ class DescriptionTemplateRendererTest {
             new ImageSlotSpec(null, 0, "RENDER_INPUT", "参数图", null, false), SPEC),
         specImage);
 
-    var doc = DescriptionTemplateRenderer.render(TEMPLATE, "DTPL", "zh-CN", specs, sku(), pools(), resolved);
+    var doc =
+        DescriptionTemplateRenderer.render(
+            TEMPLATE, "DTPL", "zh-CN", specs, sku(), pools(), resolved);
 
     // data-position 是全文档连续序号，跨段落不回零。
-    assertThat(doc.html()).contains("data-position=\"0\" data-section-type=\"INTRO\" data-slot-no=\"0\"");
-    assertThat(doc.html()).contains("data-position=\"1\" data-section-type=\"INTRO\" data-slot-no=\"1\"");
-    assertThat(doc.html()).contains("data-position=\"2\" data-section-type=\"SPEC\" data-slot-no=\"0\"");
+    assertThat(doc.html())
+        .contains("data-position=\"0\" data-section-type=\"INTRO\" data-slot-no=\"0\"");
+    assertThat(doc.html())
+        .contains("data-position=\"1\" data-section-type=\"INTRO\" data-slot-no=\"1\"");
+    assertThat(doc.html())
+        .contains("data-position=\"2\" data-section-type=\"SPEC\" data-slot-no=\"0\"");
     assertThat(doc.html()).contains("src=\"https://cdn/a.png\"").contains("alt=\"主图\"");
     assertThat(doc.sections()).flatExtracting(s -> s.images()).hasSize(3);
   }
@@ -177,7 +201,9 @@ class DescriptionTemplateRendererTest {
         List.of(
             new SectionSpec(
                 INTRO, "INTRO", 0, true, "zh-CN", "产品介绍正文", true, List.of(), List.of(slot)));
-    var doc = DescriptionTemplateRenderer.render(TEMPLATE, "DTPL", "zh-CN", specs, sku(), pools(), Map.of());
+    var doc =
+        DescriptionTemplateRenderer.render(
+            TEMPLATE, "DTPL", "zh-CN", specs, sku(), pools(), Map.of());
     assertThat(doc.html()).doesNotContain("<img");
     assertThat(doc.complete()).isFalse();
     var issue = doc.sections().get(0).issues().get(0);
@@ -193,7 +219,9 @@ class DescriptionTemplateRendererTest {
         List.of(
             new SectionSpec(
                 INTRO, "INTRO", 0, true, "zh-CN", "产品介绍正文", true, List.of(), List.of(slot)));
-    var doc = DescriptionTemplateRenderer.render(TEMPLATE, "DTPL", "zh-CN", specs, sku(), pools(), Map.of());
+    var doc =
+        DescriptionTemplateRenderer.render(
+            TEMPLATE, "DTPL", "zh-CN", specs, sku(), pools(), Map.of());
     assertThat(doc.complete()).isTrue();
     assertThat(doc.sections().get(0).issues()).isEmpty();
   }
@@ -210,7 +238,9 @@ class DescriptionTemplateRendererTest {
                 0,
                 "重要：<b>加粗</b>与 <script>alert(1)</script> 与 <img src=x onerror=y>",
                 List.of()));
-    var doc = DescriptionTemplateRenderer.render(TEMPLATE, "DTPL", "zh-CN", specs, sku(), pools(), Map.of());
+    var doc =
+        DescriptionTemplateRenderer.render(
+            TEMPLATE, "DTPL", "zh-CN", specs, sku(), pools(), Map.of());
     assertThat(doc.html()).contains("<b>加粗</b>");
     assertThat(doc.html()).doesNotContain("<script>");
     assertThat(doc.html()).doesNotContain("onerror=y>");
@@ -220,13 +250,20 @@ class DescriptionTemplateRendererTest {
   @Test
   void variableValuesAreEscapedSoDataCannotBecomeMarkup() {
     var specs =
-        List.of(
-            section(INTRO, "INTRO", 0, "品牌：{brand}。", List.of(var("brand", "SPU_BRAND"))));
+        List.of(section(INTRO, "INTRO", 0, "品牌：{brand}。", List.of(var("brand", "SPU_BRAND"))));
     var facts =
         new DescriptionRenderer.SkuFacts(
-            UUID.randomUUID(), "SKU-1", "桌面款", "星云", "<img src=x onerror=alert(1)>", "音频",
-            "黑色", List.of());
-    var doc = DescriptionTemplateRenderer.render(TEMPLATE, "DTPL", "zh-CN", specs, facts, pools(), Map.of());
+            UUID.randomUUID(),
+            "SKU-1",
+            "桌面款",
+            "星云",
+            "<img src=x onerror=alert(1)>",
+            "音频",
+            "黑色",
+            List.of());
+    var doc =
+        DescriptionTemplateRenderer.render(
+            TEMPLATE, "DTPL", "zh-CN", specs, facts, pools(), Map.of());
     // 品牌名里的标签被转义成文本，而不是变成一个真标签。
     assertThat(doc.html()).doesNotContain("<img src=x");
     assertThat(doc.html()).contains("&lt;img src=x onerror=alert(1)&gt;");
@@ -243,9 +280,16 @@ class DescriptionTemplateRendererTest {
         Map.of(
             DescriptionTemplateRenderer.key(slot, INTRO),
             new ResolvedImage(
-                slot.imageSlotId(), 0, null, "https://cdn/a.png", "a",
-                new java.math.BigDecimal("640"), new java.math.BigDecimal("480.0")));
-    var doc = DescriptionTemplateRenderer.render(TEMPLATE, "DTPL", "zh-CN", specs, sku(), pools(), resolved);
+                slot.imageSlotId(),
+                0,
+                null,
+                "https://cdn/a.png",
+                "a",
+                new java.math.BigDecimal("640"),
+                new java.math.BigDecimal("480.0")));
+    var doc =
+        DescriptionTemplateRenderer.render(
+            TEMPLATE, "DTPL", "zh-CN", specs, sku(), pools(), resolved);
     assertThat(doc.html()).contains("width=\"640\"").contains("height=\"480\"");
     assertThat(doc.html()).doesNotContain("E+");
   }

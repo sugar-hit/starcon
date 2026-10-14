@@ -16,15 +16,15 @@
 3. **`detailUnavailable` 交接**。8.1.1.1 把它写死 `true` 让前端禁用详情入口；本模块交付时翻成
    `false` 并在列表行加详情链接。不翻的话控制塔只能靠手敲 URL 到达 —— 这是它自己文件头设计的开关。
 4. **「未交付」与「有但是 0」严格区分**。没有数据表的维度一律 `available=false` + `ownerModule`
-   + `note` + `href=null`，而不是给 0 或空数组。
+   - `note` + `href=null`，而不是给 0 或空数组。
 
 ## 上游依赖实查（与调度简报有出入，按实查为准）
 
-| 简报说法 | 实查结论 | 影响 |
-| --- | --- | --- |
-| 「8.1.2.1 库位表不存在，库位结构要报未接入」 | **不成立**：`warehouse_location` 由 V2 建立，带 `type`/`status`/`pickable` | 库位结构给**真实数据**（数量、类型分布、可拣数、按类型的在手量 + 库位清单真分页）。`available=false` 的只剩**层级**（无 `parent_id`、无容量承重列，归 8.1.2.1）与自动分配（8.1.2.2） |
-| 收货未交付、上架未交付 | 收货**已交付**（8.2.1.1，V70 `goods_receipt`）；未交付的是 8.2.2.1 上架任务（无表） | 收货作业是真数（单数 + 累计实收量分列） |
-| 作业人员与设备：表不存在 | **部分成立**：`warehouse_work_task`（V74 / 8.5.1.1）带 `warehouse_id` + `operator_user_id` | 拆成三个子维度分别表态：任务/派工**真数**；花名册排班未接入（8.1.1.3）；设备未接入 —— `print_device`（V73）**没有 `warehouse_id`**，设备是租户级的，按仓统计在数据层就无从谈起 |
+| 简报说法                                     | 实查结论                                                                                   | 影响                                                                                                                                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 「8.1.2.1 库位表不存在，库位结构要报未接入」 | **不成立**：`warehouse_location` 由 V2 建立，带 `type`/`status`/`pickable`                 | 库位结构给**真实数据**（数量、类型分布、可拣数、按类型的在手量 + 库位清单真分页）。`available=false` 的只剩**层级**（无 `parent_id`、无容量承重列，归 8.1.2.1）与自动分配（8.1.2.2） |
+| 收货未交付、上架未交付                       | 收货**已交付**（8.2.1.1，V70 `goods_receipt`）；未交付的是 8.2.2.1 上架任务（无表）        | 收货作业是真数（单数 + 累计实收量分列）                                                                                                                                              |
+| 作业人员与设备：表不存在                     | **部分成立**：`warehouse_work_task`（V74 / 8.5.1.1）带 `warehouse_id` + `operator_user_id` | 拆成三个子维度分别表态：任务/派工**真数**；花名册排班未接入（8.1.1.3）；设备未接入 —— `print_device`（V73）**没有 `warehouse_id`**，设备是租户级的，按仓统计在数据层就无从谈起       |
 
 ## 关键 trade-off
 
@@ -50,18 +50,22 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V77__warehouse_detail_address.sql`（地址五列；不建表）
 - `backend/services/identity/src/main/resources/db/migration/V77__warehouse_facilities_update_permission.sql`
 
 **后端**（`backend/services/warehouse/src/main/java/com/starcon/warehouse/`）
+
 - `WarehouseDetailModels.java`、`WarehouseDetailService.java`、`WarehouseDetailController.java`
 - 交接改动：`WarehouseFacilityService.java`（`detailUnavailable` 一个字面量）
 
 **测试**
+
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/WarehouseDetailIntegrationTest.java`（31 例）
 - 交接改动：`WarehouseFacilityIntegrationTest.java`（该字面量的断言 true→false）
 
 **前端**
+
 - `apps/web/src/app/warehouse/facilities/[id]/page.tsx`
 - `apps/web/src/components/warehouse/warehouse-detail-model.ts` / `-model.test.ts` / `warehouse-detail-workspace.tsx`
 - 交接改动：`warehouse-facility-workspace.tsx`（列表行加详情链接 + 表头）
@@ -69,6 +73,7 @@
 - `apps/web/src/app/api/warehouse/[...path]/route.test.ts`（反向拒绝清单更新）
 
 **契约（codegen 产物，未手改）**
+
 - `packages/api-contracts/src/{catalog,warehouse}.ts`、`*.openapi.json`
 
 **台账**：`docs/product/capability-blueprint/module-progress.md` 第 286 行（只有 8.1.1.2 自己那行）

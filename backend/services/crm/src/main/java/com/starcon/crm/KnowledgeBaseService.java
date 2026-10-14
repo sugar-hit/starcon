@@ -29,27 +29,23 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * 15.4.2.1 客服知识库：按店铺 / 类目 / 语言组织的客服标准答法，支持版本与生效日期，
- * 记录每一次引用，并支持「平台政策改版后定位待复核条目」。
+ * 15.4.2.1 客服知识库：按店铺 / 类目 / 语言组织的客服标准答法，支持版本与生效日期， 记录每一次引用，并支持「平台政策改版后定位待复核条目」。
  *
  * <p>蓝图 15 卷 15.4.2.1 原话：
  *
  * <blockquote>
- * 职责：维护客服知识库：常见问题标准答法、平台政策说明、产品使用指导、退换货规则，
- * 按店铺/类目/语言组织，支持版本与生效日期。
- * 输入：知识条目编辑；版本管理。输出：知识库内容 + 引用记录。
- * 关系：上游 = 3.4.2.2 文案资产；下游 = 15.1.1.2 发送、15.5.1 自动回复。
- * <b>知识条目必须标注适用平台与生效时间</b>，平台政策变更时才能快速定位过期内容。
+ *
+ * 职责：维护客服知识库：常见问题标准答法、平台政策说明、产品使用指导、退换货规则， 按店铺/类目/语言组织，支持版本与生效日期。 输入：知识条目编辑；版本管理。输出：知识库内容 + 引用记录。
+ * 关系：上游 = 3.4.2.2 文案资产；下游 = 15.1.1.2 发送、15.5.1 自动回复。 <b>知识条目必须标注适用平台与生效时间</b>，平台政策变更时才能快速定位过期内容。
+ *
  * </blockquote>
  *
- * <p><b>与 11.4.2.2「知识库与话术」（catalog V100，已交付）不是同一个模块</b>：
- * 那边按平台规则版本组织，本模块按店铺 / 类目 / 语言组织。理由与逐条差异见 V99 文件头第零节。
+ * <p><b>与 11.4.2.2「知识库与话术」（catalog V100，已交付）不是同一个模块</b>： 那边按平台规则版本组织，本模块按店铺 / 类目 / 语言组织。理由与逐条差异见
+ * V99 文件头第零节。
  *
- * <p><b>生效区间沿用 catalog V23 / V25 / V95 的 R1–R5，不另立一套</b>：
- * 半开区间 {@code [from, to)}、重叠一律拒绝不做自动裁决、只有已发布版本参与判定、
- * 当前生效版本确定性查询、已发布版本只能向前关闭。本服务**不重算**这些规则 ——
- * 区间重叠由 V99 的 guard_crm_knowledge_version_interval 触发器在数据库层挡住，
- * 服务层只负责把可读的原因带给用户。
+ * <p><b>生效区间沿用 catalog V23 / V25 / V95 的 R1–R5，不另立一套</b>： 半开区间 {@code [from,
+ * to)}、重叠一律拒绝不做自动裁决、只有已发布版本参与判定、 当前生效版本确定性查询、已发布版本只能向前关闭。本服务**不重算**这些规则 —— 区间重叠由 V99 的
+ * guard_crm_knowledge_version_interval 触发器在数据库层挡住， 服务层只负责把可读的原因带给用户。
  */
 @Service
 public class KnowledgeBaseService {
@@ -64,8 +60,7 @@ public class KnowledgeBaseService {
   /**
    * review-due 的判定口径，写进响应里让页面能自证它按什么查的。
    *
-   * <p>不用「最后更新时间」这种更宽松的判据：改备注 / 改标题都会刷新 updated_at，
-   * 与答法正文是否按新政策重写毫无关系；用它会让只改过备注的条目冒充「已按新政策复核过」。
+   * <p>不用「最后更新时间」这种更宽松的判据：改备注 / 改标题都会刷新 updated_at， 与答法正文是否按新政策重写毫无关系；用它会让只改过备注的条目冒充「已按新政策复核过」。
    */
   private static final String REVIEW_CRITERION =
       "当前生效的那一版写于改版之前（effective_from < policyChangedAt），"
@@ -81,8 +76,7 @@ public class KnowledgeBaseService {
   // ================================================================ 能力声明
 
   public CrmKnowledgeCapabilities capabilities() {
-    return new CrmKnowledgeCapabilities(
-        true, true, true, true, TOPIC_TYPES, CONSUMERS);
+    return new CrmKnowledgeCapabilities(true, true, true, true, TOPIC_TYPES, CONSUMERS);
   }
 
   // ================================================================ 组织范围（三个维度的真实数据源）
@@ -90,11 +84,10 @@ public class KnowledgeBaseService {
   /**
    * 列出本租户真实存在过的「店铺 × 类目 × 语言」格子。
    *
-   * <p>页面上三个下拉框的数据源必须是**这条查询**，不是前端写死的常量 ——
-   * 否则「按店铺/类目/语言组织」就退化成一个摆设（V99 第二节）。
+   * <p>页面上三个下拉框的数据源必须是**这条查询**，不是前端写死的常量 —— 否则「按店铺/类目/语言组织」就退化成一个摆设（V99 第二节）。
    *
-   * <p>{@code entryCount} 只统计 ACTIVE 档案：归档的知识不该继续出现在新建下拉框里，
-   * 否则运营会建出一个与已归档知识同名的格子（UNIQUE 会拒绝，报错原因还很难看懂）。
+   * <p>{@code entryCount} 只统计 ACTIVE 档案：归档的知识不该继续出现在新建下拉框里， 否则运营会建出一个与已归档知识同名的格子（UNIQUE
+   * 会拒绝，报错原因还很难看懂）。
    */
   public List<CrmKnowledgeScope> scopes() {
     return sql.fetch(
@@ -122,16 +115,19 @@ public class KnowledgeBaseService {
   /**
    * 按格子取条目，并带上「此刻生效的那一版」（规则 R4）。
    *
-   * <p>这就是蓝图那句话「这家店这个类目中文版当前有效的条目有哪些」的落点。
-   * {@code at} 省略时取此刻；传了就按那一刻判定 —— 下游 15.1.1.2 回溯历史消息时要用它。
+   * <p>这就是蓝图那句话「这家店这个类目中文版当前有效的条目有哪些」的落点。 {@code at} 省略时取此刻；传了就按那一刻判定 —— 下游 15.1.1.2 回溯历史消息时要用它。
    *
-   * <p>生效版本用 LATERAL 取：规则 R2 保证同一档案下已发布版本区间不重叠，
-   * 所以这个子查询**至多命中一行**；仍然写 LIMIT 1 并按 effective_from 倒序，
+   * <p>生效版本用 LATERAL 取：规则 R2 保证同一档案下已发布版本区间不重叠， 所以这个子查询**至多命中一行**；仍然写 LIMIT 1 并按 effective_from 倒序，
    * 是为了让「万一重叠了」（例如有人手工改过库）时的行为是确定的 newest-wins 而不是报错。
    */
   public List<CrmKnowledgeEntry> list(
-      UUID shopId, UUID categoryId, String locale, String platformCode, String topicType,
-      String at, boolean includeArchived) {
+      UUID shopId,
+      UUID categoryId,
+      String locale,
+      String platformCode,
+      String topicType,
+      String at,
+      boolean includeArchived) {
     OffsetDateTime moment = at == null || at.isBlank() ? now() : parseMoment(at, "查询时刻");
     var rows =
         sql.fetch(
@@ -168,8 +164,15 @@ public class KnowledgeBaseService {
                 + (topicType == null || topicType.isBlank() ? "" : " and e.topic_type = ?")
                 + (includeArchived ? "" : " and e.status = 'ACTIVE'")
                 + " order by e.updated_at desc, e.id",
-            bindings(moment, moment, currentTenant(), shopId, categoryId,
-                blankToNull(locale), blankToNull(platformCode), blankToNull(topicType)));
+            bindings(
+                moment,
+                moment,
+                currentTenant(),
+                shopId,
+                categoryId,
+                blankToNull(locale),
+                blankToNull(platformCode),
+                blankToNull(topicType)));
     return rows.map(KnowledgeBaseService::entry);
   }
 
@@ -238,17 +241,17 @@ public class KnowledgeBaseService {
   /**
    * 新建一个草稿版本。
    *
-   * <p>草稿的区间可以随便设（规则 R3：只有已发布版本参与重叠判定），
-   * 但**空区间与倒挂区间**在这里就被拒掉：CHECK 也会挡，但 CHECK 只会说 constraint failed，
-   * 这里给出人话。
+   * <p>草稿的区间可以随便设（规则 R3：只有已发布版本参与重叠判定）， 但**空区间与倒挂区间**在这里就被拒掉：CHECK 也会挡，但 CHECK 只会说 constraint
+   * failed， 这里给出人话。
    */
   @Transactional
   public CrmKnowledgeVersion createVersion(UUID entryId, CrmCreateVersionInput input) {
     requireEntry(entryId);
     OffsetDateTime from = parseMoment(input.effectiveFrom(), "生效起点");
-    OffsetDateTime to = input.effectiveTo() == null || input.effectiveTo().isBlank()
-        ? null
-        : parseMoment(input.effectiveTo(), "生效终点");
+    OffsetDateTime to =
+        input.effectiveTo() == null || input.effectiveTo().isBlank()
+            ? null
+            : parseMoment(input.effectiveTo(), "生效终点");
     if (to != null && !to.isAfter(from)) {
       throw bad(
           "生效区间是空的：终点「"
@@ -280,8 +283,11 @@ public class KnowledgeBaseService {
     } catch (org.jooq.exception.DataAccessException e) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "同一条知识下已经有版本号 " + input.versionNo() + " 了。两行时「v"
-              + input.versionNo() + " 是哪一个」无法回答，而生效区间判定会两边都算数。请换一个版本号。");
+          "同一条知识下已经有版本号 "
+              + input.versionNo()
+              + " 了。两行时「v"
+              + input.versionNo()
+              + " 是哪一个」无法回答，而生效区间判定会两边都算数。请换一个版本号。");
     }
     return requireVersion(id);
   }
@@ -289,9 +295,8 @@ public class KnowledgeBaseService {
   /**
    * 发布一个草稿版本（不可逆）。
    *
-   * <p>发布那一刻才检查区间重叠（规则 R3 → R2）：数据库层的
-   * guard_crm_knowledge_version_interval 会拒绝并点名与哪一版撞了，
-   * 这里把它翻译成 409 + 可读原因。
+   * <p>发布那一刻才检查区间重叠（规则 R3 → R2）：数据库层的 guard_crm_knowledge_version_interval 会拒绝并点名与哪一版撞了， 这里把它翻译成
+   * 409 + 可读原因。
    */
   @Transactional
   public CrmKnowledgeVersion publish(UUID versionId, CrmPublishVersionInput input, UUID actorId) {
@@ -337,8 +342,7 @@ public class KnowledgeBaseService {
   public CrmKnowledgeVersion close(UUID versionId, CrmCloseVersionInput input) {
     CrmKnowledgeVersion version = requireVersion(versionId);
     if (!"PUBLISHED".equals(version.status())) {
-      throw bad(
-          "版本 " + version.versionNo() + " 还是草稿，不需要关闭生效区间 —— 草稿还没生效。请先发布。");
+      throw bad("版本 " + version.versionNo() + " 还是草稿，不需要关闭生效区间 —— 草稿还没生效。请先发布。");
     }
     OffsetDateTime to = parseMoment(input.effectiveTo(), "生效终点");
     if (!to.isAfter(now())) {
@@ -352,12 +356,14 @@ public class KnowledgeBaseService {
       sql.execute(
           "update crm_knowledge_version set effective_to=?::timestamptz, updated_at=?::timestamptz"
               + " where tenant_id=? and id=?",
-          to, now(), currentTenant(), versionId);
+          to,
+          now(),
+          currentTenant(),
+          versionId);
     } catch (org.jooq.exception.DataAccessException e) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "无法关闭：已发布的版本只能向前关闭到一个仍在未来的时刻，"
-              + "不能重开（改回一直有效）也不能往后延 —— 那两种都会与接替它的版本重叠。");
+          "无法关闭：已发布的版本只能向前关闭到一个仍在未来的时刻，" + "不能重开（改回一直有效）也不能往后延 —— 那两种都会与接替它的版本重叠。");
     }
     return requireVersion(versionId);
   }
@@ -367,8 +373,8 @@ public class KnowledgeBaseService {
   /**
    * 记录一次引用。
    *
-   * <p>{@code referencedBy} 取服务端已认证的 actor，不接受客户端传值；{@code referencedAt}
-   * 取服务端 now() —— 引用记录的时间必须是系统事实，不能由调用方编造。
+   * <p>{@code referencedBy} 取服务端已认证的 actor，不接受客户端传值；{@code referencedAt} 取服务端 now() ——
+   * 引用记录的时间必须是系统事实，不能由调用方编造。
    *
    * <p>引用是**只追加**的（V99 第五节）：本模块刻意不提供修改 / 删除入口。
    */
@@ -378,11 +384,7 @@ public class KnowledgeBaseService {
     CrmKnowledgeVersion version = requireVersion(versionId);
     String consumer = oneOf(CONSUMERS, input.consumer(), "引用来源");
     if (!"PUBLISHED".equals(version.status())) {
-      throw bad(
-          "版本 "
-              + version.versionNo()
-              + " 还是草稿，草稿没有生效过，引用它等于在引用一段从未给过买家的内容。"
-              + "请先发布这一版。");
+      throw bad("版本 " + version.versionNo() + " 还是草稿，草稿没有生效过，引用它等于在引用一段从未给过买家的内容。" + "请先发布这一版。");
     }
     // 生效起点直接从库里读成 OffsetDateTime 再比 —— 不要拿传输层的字符串去比时间，
     // 那等于把「时刻」退化成「长得像时刻的字符串」。
@@ -435,16 +437,14 @@ public class KnowledgeBaseService {
   /**
    * 「某平台改版后哪些条目需要复核」—— 蓝图粗体句的正面回答。
    *
-   * <p>判据：给定平台 P 与该平台新政策的生效时刻 T，返回
-   * 「<b>当前生效</b>的那一版写于 T <b>之前</b>、且至今仍是<b>开放区间</b>（没有接替版本）」的条目。
+   * <p>判据：给定平台 P 与该平台新政策的生效时刻 T，返回 「<b>当前生效</b>的那一版写于 T <b>之前</b>、且至今仍是<b>开放区间</b>（没有接替版本）」的条目。
    * 换句话说：**内容还停留在改版前的政策口径下、而且从来没人改过**。
    *
-   * <p>为什么「开放区间」是必要条件：如果某一版已经被接替（effective_to 非空），
-   * 那么它已经退出历史舞台，此刻生效的是接替它的那一版 —— 那**不是**过期内容，
+   * <p>为什么「开放区间」是必要条件：如果某一版已经被接替（effective_to 非空）， 那么它已经退出历史舞台，此刻生效的是接替它的那一版 —— 那**不是**过期内容，
    * 把它们列出来只会让运营去复核一批早已不再生效的答案。
    *
-   * <p>这依赖 (platform_code) × (effective_from, effective_to) 的倒排形状，
-   * V99 第五节为它建了 {@code crm_knowledge_version_open_ended} 部分索引。
+   * <p>这依赖 (platform_code) × (effective_from, effective_to) 的倒排形状， V99 第五节为它建了 {@code
+   * crm_knowledge_version_open_ended} 部分索引。
    */
   public CrmReviewDueReport reviewDue(String platformCode, String policyChangedAt) {
     String platform = platformCode == null ? null : platformCode.trim();
@@ -531,35 +531,46 @@ public class KnowledgeBaseService {
                 + "     join crm_knowledge_version rv on rv.tenant_id = r.tenant_id and rv.id = r.version_id"
                 + "    where rv.tenant_id = e.tenant_id and rv.entry_id = e.id) rc on true"
                 + " where e.tenant_id = ? and e.id = ?",
-            now(), now(), currentTenant(), entryId);
+            now(),
+            now(),
+            currentTenant(),
+            entryId);
     if (row == null) throw notFound("知识条目不存在");
     return entry(row);
   }
 
   private CrmKnowledgeVersion requireVersion(UUID versionId) {
-    var row = sql.fetchOne(versionColumns() + " where tenant_id = ? and id = ?",
-        currentTenant(), versionId);
+    var row =
+        sql.fetchOne(
+            versionColumns() + " where tenant_id = ? and id = ?", currentTenant(), versionId);
     if (row == null) throw notFound("知识版本不存在");
     return version(row);
   }
 
   private List<CrmKnowledgeVersion> versionRows(UUID entryId) {
-    return sql.fetch(versionColumns() + " where tenant_id = ? and entry_id = ? order by version_no desc",
-            currentTenant(), entryId)
+    return sql.fetch(
+            versionColumns() + " where tenant_id = ? and entry_id = ? order by version_no desc",
+            currentTenant(),
+            entryId)
         .map(KnowledgeBaseService::version);
   }
 
   private CrmKnowledgeReference referenceById(UUID id) {
-    var row = sql.fetchOne(referenceColumns() + " where r.tenant_id = ? and r.id = ?",
-        currentTenant(), id);
+    var row =
+        sql.fetchOne(
+            referenceColumns() + " where r.tenant_id = ? and r.id = ?", currentTenant(), id);
     if (row == null) throw notFound("引用记录不存在");
     return reference(row);
   }
 
   private List<CrmKnowledgeReference> referenceRows(String extraCondition, UUID argument) {
-    return sql.fetch(referenceColumns() + " where r.tenant_id = ?" + extraCondition
-            + " order by r.referenced_at desc, r.id",
-            currentTenant(), argument)
+    return sql.fetch(
+            referenceColumns()
+                + " where r.tenant_id = ?"
+                + extraCondition
+                + " order by r.referenced_at desc, r.id",
+            currentTenant(),
+            argument)
         .map(KnowledgeBaseService::reference);
   }
 
@@ -593,9 +604,7 @@ public class KnowledgeBaseService {
         r.get("platform_code", String.class),
         r.get("topic_type", String.class),
         r.get("status", String.class),
-        r.get("version_id", UUID.class) == null
-            ? null
-            : versionOf(r, "version_"),
+        r.get("version_id", UUID.class) == null ? null : versionOf(r, "version_"),
         r.get("version_count", Integer.class),
         r.get("reference_count", Long.class),
         r.get("note", String.class),
@@ -606,10 +615,9 @@ public class KnowledgeBaseService {
   /**
    * 从条目查询的行里取生效版本。
    *
-   * <p>列名必须与 list()/requireEntry() 里那两段 SELECT <b>逐字对齐</b>：
-   * 只有会与档案列撞名的才加了 {@code version_} 前缀（id / status / note / created_at /
-   * updated_at），其余（version_no、question、answer、effective_*、published_*）保持原名，
-   * 因为档案侧没有同名列，不需要前缀。
+   * <p>列名必须与 list()/requireEntry() 里那两段 SELECT <b>逐字对齐</b>： 只有会与档案列撞名的才加了 {@code version_} 前缀（id /
+   * status / note / created_at /
+   * updated_at），其余（version_no、question、answer、effective_*、published_*）保持原名， 因为档案侧没有同名列，不需要前缀。
    */
   private static CrmKnowledgeVersion versionOf(Record r, String prefix) {
     return new CrmKnowledgeVersion(
@@ -663,8 +671,14 @@ public class KnowledgeBaseService {
 
   /** 拼 list() 的绑定值：跳过 null，让可选过滤条件自然消失。 */
   private static Object[] bindings(
-      OffsetDateTime moment, OffsetDateTime momentAgain, UUID tenant, UUID shopId,
-      UUID categoryId, String locale, String platformCode, String topicType) {
+      OffsetDateTime moment,
+      OffsetDateTime momentAgain,
+      UUID tenant,
+      UUID shopId,
+      UUID categoryId,
+      String locale,
+      String platformCode,
+      String topicType) {
     var values = new java.util.ArrayList<Object>();
     values.add(moment);
     values.add(momentAgain);
@@ -689,9 +703,8 @@ public class KnowledgeBaseService {
   /**
    * 解析带时区偏移量的时刻。
    *
-   * <p>刻意用 {@code OffsetDateTime.parse}：用 {@code Timestamp.valueOf(LocalDateTime)}
-   * 会在东八区**静默偏 −28800 秒**，写进去的生效起点与运营填的差 8 小时，
-   * 而页面看上去一切正常。缺偏移量时 parse 会抛 DateTimeParseException → 400。
+   * <p>刻意用 {@code OffsetDateTime.parse}：用 {@code Timestamp.valueOf(LocalDateTime)} 会在东八区**静默偏
+   * −28800 秒**，写进去的生效起点与运营填的差 8 小时， 而页面看上去一切正常。缺偏移量时 parse 会抛 DateTimeParseException → 400。
    */
   private static OffsetDateTime parseMoment(String value, String label) {
     String text = nz(value).trim();
@@ -700,7 +713,8 @@ public class KnowledgeBaseService {
       return OffsetDateTime.parse(text);
     } catch (java.time.format.DateTimeParseException e) {
       throw bad(
-          label + "「"
+          label
+              + "「"
               + text
               + "」格式不对：请带时区偏移量，例如 2026-10-10T08:00:00+08:00。"
               + "缺偏移量的时间会在东八区静默偏 8 小时，页面却看不出异常。");

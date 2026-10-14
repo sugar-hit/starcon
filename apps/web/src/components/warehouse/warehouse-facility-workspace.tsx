@@ -3,7 +3,16 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Boxes, Filter, Plus, RefreshCw, Warehouse } from 'lucide-react';
-import { Button, EmptyState, FormField, Input, Notice, PageHeader, SectionCard, StatCard } from '@starcon/ui';
+import {
+  Button,
+  EmptyState,
+  FormField,
+  Input,
+  Notice,
+  PageHeader,
+  SectionCard,
+  StatCard,
+} from '@starcon/ui';
 import type {
   FacilityOptions,
   WarehouseCreated,
@@ -93,7 +102,16 @@ export function WarehouseFacilityWorkspace() {
   const [draftError, setDraftError] = useState('');
 
   const params: FacilityParams = useMemo(
-    () => ({ kind, legalEntityId, countryCode, status, keyword, sort, page: pageNo, size: PAGE_SIZE }),
+    () => ({
+      kind,
+      legalEntityId,
+      countryCode,
+      status,
+      keyword,
+      sort,
+      page: pageNo,
+      size: PAGE_SIZE,
+    }),
     [kind, legalEntityId, countryCode, status, keyword, sort, pageNo],
   );
 
@@ -171,7 +189,7 @@ export function WarehouseFacilityWorkspace() {
               刷新
             </Button>
             {writable && (
-              <Button onClick={() => (setShowCreate((v) => !v))}>
+              <Button onClick={() => setShowCreate((v) => !v)}>
                 <Plus className="mr-2 h-4 w-4" />
                 新增仓库
               </Button>
@@ -230,9 +248,9 @@ export function WarehouseFacilityWorkspace() {
       {unavailable.length > 0 && (
         <SectionCard className="mt-4">
           <div className="flex items-start gap-2">
-            <Filter className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+            <Filter className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
             <div className="text-copy-12 text-muted-foreground">
-              <p className="text-copy-13 font-medium text-foreground">以下作业维度尚未交付</p>
+              <p className="text-copy-13 text-foreground font-medium">以下作业维度尚未交付</p>
               <ul className="mt-1 list-disc pl-4">
                 {unavailable.map((c) => (
                   <li key={c.dimension}>
@@ -251,7 +269,7 @@ export function WarehouseFacilityWorkspace() {
           <FormField id="facility-kind" label="类型">
             <select
               id="facility-kind"
-              className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
               value={kind}
               onChange={(e) => {
                 setKind(e.target.value);
@@ -269,7 +287,7 @@ export function WarehouseFacilityWorkspace() {
           <FormField id="facility-legal-entity" label="所属法人">
             <select
               id="facility-legal-entity"
-              className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
               value={legalEntityId}
               onChange={(e) => {
                 setLegalEntityId(e.target.value);
@@ -288,7 +306,7 @@ export function WarehouseFacilityWorkspace() {
           <FormField id="facility-country" label="国家地区">
             <select
               id="facility-country"
-              className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
               value={countryCode}
               onChange={(e) => {
                 setCountryCode(e.target.value);
@@ -306,7 +324,7 @@ export function WarehouseFacilityWorkspace() {
           <FormField id="facility-status" label="启用状态">
             <select
               id="facility-status"
-              className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
               value={status}
               onChange={(e) => {
                 setStatus(e.target.value);
@@ -324,7 +342,7 @@ export function WarehouseFacilityWorkspace() {
           <FormField id="facility-sort" label="排序">
             <select
               id="facility-sort"
-              className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
               value={sort}
               onChange={(e) => setSort(e.target.value)}
             >
@@ -359,8 +377,8 @@ export function WarehouseFacilityWorkspace() {
       {showCreate && writable && (
         <SectionCard className="mt-4" title="新增仓库">
           <Notice tone="info" title="仓库绑定法人是财务前提">
-            不同法人的库存货权与收入归属不同，所以所属法人必填。时区要填 IANA ID
-            （如 Asia/Shanghai），偏移量不表达夏令时规则。
+            不同法人的库存货权与收入归属不同，所以所属法人必填。时区要填 IANA ID （如
+            Asia/Shanghai），偏移量不表达夏令时规则。
           </Notice>
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <FormField id="create-code" label="仓库编码" required>
@@ -371,12 +389,15 @@ export function WarehouseFacilityWorkspace() {
               />
             </FormField>
             <FormField id="create-name" label="仓库名称" required>
-              <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+              <Input
+                value={draft.name}
+                onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+              />
             </FormField>
             <FormField id="create-kind" label="仓库类型" required>
               <select
                 id="create-kind"
-                className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+                className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
                 value={draft.kind}
                 onChange={(e) => setDraft({ ...draft, kind: e.target.value as WarehouseKind })}
               >
@@ -415,7 +436,7 @@ export function WarehouseFacilityWorkspace() {
             <FormField id="create-legal-entity" label="所属法人" required hint="货权与收入归属">
               <select
                 id="create-legal-entity"
-                className="h-9 w-full rounded-md border border-input bg-background px-3 text-copy-13"
+                className="border-input bg-background text-copy-13 h-9 w-full rounded-md border px-3"
                 value={draft.defaultLegalEntityId}
                 onChange={(e) => setDraft({ ...draft, defaultLegalEntityId: e.target.value })}
               >
@@ -430,7 +451,7 @@ export function WarehouseFacilityWorkspace() {
               </select>
             </FormField>
           </div>
-          <label className="mt-3 flex items-center gap-2 text-copy-13">
+          <label className="text-copy-13 mt-3 flex items-center gap-2">
             <input
               type="checkbox"
               checked={draft.isDefault}
@@ -439,7 +460,7 @@ export function WarehouseFacilityWorkspace() {
             设为默认发货仓（每个租户至多一个启用中的默认仓）
           </label>
           {draftError && (
-            <p role="alert" className="mt-2 text-copy-12 text-destructive">
+            <p role="alert" className="text-copy-12 text-destructive mt-2">
               {draftError}
             </p>
           )}
@@ -447,7 +468,7 @@ export function WarehouseFacilityWorkspace() {
             <Button onClick={() => void submit()} disabled={saving}>
               {saving ? '保存中…' : '保存'}
             </Button>
-            <Button variant="secondary" onClick={() => (setShowCreate(false))}>
+            <Button variant="secondary" onClick={() => setShowCreate(false)}>
               取消
             </Button>
           </div>
@@ -457,7 +478,7 @@ export function WarehouseFacilityWorkspace() {
       {/* 列表 */}
       <SectionCard className="mt-4" title={`仓库（${page?.total ?? 0}）`}>
         {loading ? (
-          <p className="py-8 text-center text-copy-13 text-muted-foreground">加载中…</p>
+          <p className="text-copy-13 text-muted-foreground py-8 text-center">加载中…</p>
         ) : rows.length === 0 ? (
           <EmptyState
             icon={<Warehouse />}
@@ -474,8 +495,8 @@ export function WarehouseFacilityWorkspace() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-copy-13">
-              <thead className="text-left text-muted-foreground">
+            <table className="text-copy-13 w-full">
+              <thead className="text-muted-foreground text-left">
                 <tr className="border-b">
                   <th className="py-2 pr-3">仓库</th>
                   <th className="py-2 pr-3">详情</th>
@@ -525,7 +546,7 @@ export function WarehouseFacilityWorkspace() {
                         )}
                       </td>
                       <td className="py-2 pr-3">{row.countryCode}</td>
-                      <td className="py-2 pr-3 text-muted-foreground">{localTimeText(row)}</td>
+                      <td className="text-muted-foreground py-2 pr-3">{localTimeText(row)}</td>
                       <td className="py-2 pr-3">{statusLabel(row.status)}</td>
                       <td className="py-2 pr-3">
                         <div>{stock.onHand}</div>
@@ -534,8 +555,8 @@ export function WarehouseFacilityWorkspace() {
                       <td className="py-2 pr-3">
                         <div>{workText(row)}</div>
                         <div className="text-copy-12 text-muted-foreground">
-                          未结 {qty(row.work.openWorkOrderCount)} · 库位 {qty(row.locationCount)} · SKU{' '}
-                          {qty(row.skuCount)}
+                          未结 {qty(row.work.openWorkOrderCount)} · 库位 {qty(row.locationCount)} ·
+                          SKU {qty(row.skuCount)}
                         </div>
                       </td>
                     </tr>
@@ -547,7 +568,7 @@ export function WarehouseFacilityWorkspace() {
         )}
 
         {page && page.total > 0 && (
-          <div className="mt-3 flex items-center justify-between text-copy-12 text-muted-foreground">
+          <div className="text-copy-12 text-muted-foreground mt-3 flex items-center justify-between">
             <span>
               第 {page.page + 1} / {totalPages} 页 · 每页 {page.size} 条 · {page.note}
             </span>
@@ -571,7 +592,7 @@ export function WarehouseFacilityWorkspace() {
         )}
 
         {page?.detailUnavailable && (
-          <p className="mt-3 text-copy-12 text-muted-foreground">
+          <p className="text-copy-12 text-muted-foreground mt-3">
             仓库详情（8.1.1.2）尚未交付，进详情入口暂不可用。
           </p>
         )}

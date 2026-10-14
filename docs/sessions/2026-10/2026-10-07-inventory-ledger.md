@@ -67,6 +67,7 @@ RLS 下查不到就是查不到；403 会泄露"这笔业务存在"。
 ## 文件清单
 
 新增：
+
 - `backend/services/warehouse/src/main/resources/db/migration/V51__warehouse_inventory_ledger.sql`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryLedgerModels.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryLedgerService.java`
@@ -75,6 +76,7 @@ RLS 下查不到就是查不到；403 会泄露"这笔业务存在"。
 - `apps/web/src/app/inventory/ledger/page.tsx`
 
 修改：
+
 - `InventoryController.java`（3 个只读端点 + 时间解析 + 数据范围推导）
 - `InventoryBucketService.java`（7.1.1.2 的「查看流水」入口翻成 available=true）
 - `InventoryBucketIntegrationTest.java`（对应断言：只有 7.1.2.1 这条变可用）

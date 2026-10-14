@@ -274,15 +274,12 @@ export function imageUrlProblem(url: string): string | null {
   const value = url.trim();
   if (!value) return '图片地址不能为空';
   if (value.length > 1000) return '图片地址最多 1000 个字符';
-  if (!/^https?:\/\/[^\s"'<>]+$/i.test(value))
-    return '图片地址必须以 http:// 或 https:// 开头';
+  if (!/^https?:\/\/[^\s"'<>]+$/i.test(value)) return '图片地址必须以 http:// 或 https:// 开头';
   return null;
 }
 
 /** 插图位编号必须从 0 连续：data-slot-no 是渲染出来给平台定位用的。 */
-export function imageSlotNumberingProblem(
-  slots: ({ slotNo: number } | null)[],
-): string | null {
+export function imageSlotNumberingProblem(slots: ({ slotNo: number } | null)[]): string | null {
   for (let i = 0; i < slots.length; i++) {
     if (slots[i]?.slotNo !== i)
       return `图片插入位的编号必须从 0 连续递增（当前第 ${i + 1} 个是 ${slots[i]?.slotNo ?? '空'}）`;
@@ -330,16 +327,15 @@ export function variableBindingProblem(
 }
 
 /** 未配齐五类的段落类型（列表页要显示，这是「模板还不完整」的唯一信号）。 */
-export function missingSectionTypes(row: {
-  sections: { sectionType: string }[];
-}): string[] {
+export function missingSectionTypes(row: { sections: { sectionType: string }[] }): string[] {
   const present = new Set((row.sections ?? []).map((item) => item.sectionType));
   return SECTION_TYPES.filter((item) => !present.has(item.value)).map((item) => item.label);
 }
 
 export function templateSummary(row: DescriptionTemplateRow): string {
   const parts = (row.sections ?? []).map(
-    (item) => `${sectionTypeLabel(item.sectionType)}(${item.variableCount}变量/${item.imageSlotCount}图)`,
+    (item) =>
+      `${sectionTypeLabel(item.sectionType)}(${item.variableCount}变量/${item.imageSlotCount}图)`,
   );
   return parts.length ? parts.join(' · ') : '还没有段落';
 }
@@ -479,7 +475,9 @@ export function fetchDescriptionTemplate(id: string) {
 }
 
 export function fetchDescriptionSections(templateId: string) {
-  return api<DescriptionSectionRow[]>(`catalog/description-templates/templates/${templateId}/sections`);
+  return api<DescriptionSectionRow[]>(
+    `catalog/description-templates/templates/${templateId}/sections`,
+  );
 }
 
 export function saveDescriptionTemplate(id: string | null, input: DescriptionTemplateInput) {

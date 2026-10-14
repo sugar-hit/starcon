@@ -31,18 +31,13 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.7.2.1 VMI 供应商管理库存：协议 → 水位监控 → 补货信号 → 售出事实 → 结算对账单，
- * <b>以及「可售 ≠ 自有」这条口径</b>，外加租户隔离三断言。
+ * 7.7.2.1 VMI 供应商管理库存：协议 → 水位监控 → 补货信号 → 售出事实 → 结算对账单， <b>以及「可售 ≠ 自有」这条口径</b>，外加租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p><b>本测试的核心是 {@link #数据库层挡住把VMI货算成自有资产()} 与
- * {@link #水位监控把可售与自有分成两个数()} 两条。</b>
- * 蓝图把它写成加粗约束：「可售量要计入可售额，货值不能计入自有资产，两者必须分开统计」。
- * 光断言「接口返回的 ownedAssetValue 是 null」证明不了这条红线 —— 那只是服务层自觉，
- * 任何一次绕过服务层的写入都能把它变成真的。所以必须**真的**去数据库里硬写不该存在的行，
- * 验证 V115 的闸门会当场拒绝。
+ * <p><b>本测试的核心是 {@link #数据库层挡住把VMI货算成自有资产()} 与 {@link #水位监控把可售与自有分成两个数()} 两条。</b>
+ * 蓝图把它写成加粗约束：「可售量要计入可售额，货值不能计入自有资产，两者必须分开统计」。 光断言「接口返回的 ownedAssetValue 是 null」证明不了这条红线 ——
+ * 那只是服务层自觉， 任何一次绕过服务层的写入都能把它变成真的。所以必须**真的**去数据库里硬写不该存在的行， 验证 V115 的闸门会当场拒绝。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -54,7 +49,10 @@ class VmiIntegrationTest {
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
   static final List<String> allPermissions =
       Stream.of("inventory")
-          .flatMap(p -> Stream.of("read", "create", "update", "delete").map(op -> "warehouse." + p + "." + op))
+          .flatMap(
+              p ->
+                  Stream.of("read", "create", "update", "delete")
+                      .map(op -> "warehouse." + p + "." + op))
           .toList();
 
   static final UUID supplier = UUID.randomUUID();
@@ -63,10 +61,7 @@ class VmiIntegrationTest {
     return UUID.nameUUIDFromBytes(("starcon-warehouse-vmi-" + tenant + "-" + ordinal).getBytes());
   }
 
-  /**
-   * 货主档案按租户各建一份：{@code stock_owner.id} 是**全局**主键（不是 (tenant_id,id) 复合），
-   * 同一个 UUID 插两个租户会撞主键。
-   */
+  /** 货主档案按租户各建一份：{@code stock_owner.id} 是**全局**主键（不是 (tenant_id,id) 复合）， 同一个 UUID 插两个租户会撞主键。 */
   static UUID selfOwnerOf(UUID tenant) {
     return idFor(tenant, 9);
   }
@@ -78,8 +73,13 @@ class VmiIntegrationTest {
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -89,7 +89,8 @@ class VmiIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -104,7 +105,8 @@ class VmiIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -167,39 +169,75 @@ class VmiIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 3), tenant, "SKU-2", "商品二");
+                idFor(tenant, 3),
+                tenant,
+                "SKU-2",
+                "商品二");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-ONE", "一仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 4),
+                tenant,
+                "WH-ONE",
+                "一仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,pickable)"
                     + " values(?,?,?,?,?,'STORAGE','ACTIVE',true)",
-                idFor(tenant, 6), tenant, idFor(tenant, 4), "LOC-1", "库位一");
+                idFor(tenant, 6),
+                tenant,
+                idFor(tenant, 4),
+                "LOC-1",
+                "库位一");
             // SELLABLE 质量状态：VMI 的可售量只认这一类（与 7.1.1.3 同口径）。
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 7), tenant, "GOOD", "良品", "SELLABLE");
+                idFor(tenant, 7),
+                tenant,
+                "GOOD",
+                "良品",
+                "SELLABLE");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 8), tenant, "PENDING", "待检", "PENDING_INSPECTION");
+                idFor(tenant, 8),
+                tenant,
+                "PENDING",
+                "待检",
+                "PENDING_INSPECTION");
             // 货主档案（7.7.1.1 V67）：SELF 计入自有资产，SUPPLIER_CONSIGNMENT 不计入。
             sql.execute(
                 "insert into stock_owner(id,tenant_id,code,name,owner_kind,owner_ref_type,"
                     + "owner_ref_id,owner_ref_label,created_by_membership_id) "
                     + "values(?,?,?,?,'SELF','LEGAL_ENTITY',?,?,?)",
-                selfOwnerOf(tenant), tenant, "OWNER-SELF", "我方自有", idFor(tenant, 1), "主体一",
+                selfOwnerOf(tenant),
+                tenant,
+                "OWNER-SELF",
+                "我方自有",
+                idFor(tenant, 1),
+                "主体一",
                 UUID.randomUUID());
             sql.execute(
                 "insert into stock_owner(id,tenant_id,code,name,owner_kind,owner_ref_type,"
                     + "owner_ref_id,owner_ref_label,created_by_membership_id) "
                     + "values(?,?,?,?,'SUPPLIER_CONSIGNMENT','SUPPLIER',?,?,?)",
-                vmiOwnerOf(tenant), tenant, "OWNER-VMI", "供应商一（VMI）", supplier, "供应商一",
+                vmiOwnerOf(tenant),
+                tenant,
+                "OWNER-VMI",
+                "供应商一（VMI）",
+                supplier,
+                "供应商一",
                 UUID.randomUUID());
             return null;
           });
@@ -222,25 +260,50 @@ class VmiIntegrationTest {
   }
 
   UUID activeAgreement(
-      String cycle, String mode, String target, String safety, String multiple, String price,
+      String cycle,
+      String mode,
+      String target,
+      String safety,
+      String multiple,
+      String price,
       String supplied) {
     var input =
         new VmiAgreementInput(
-            supplier, "SUP-1", "供应商一", idFor(a, 1), "CNY", cycle, mode, target,
-            LocalDate.now().minusDays(3), null, "VMI 协议",
+            supplier,
+            "SUP-1",
+            "供应商一",
+            idFor(a, 1),
+            "CNY",
+            cycle,
+            mode,
+            target,
+            LocalDate.now().minusDays(3),
+            null,
+            "VMI 协议",
             List.of(
                 new VmiLineInput(
-                    idFor(a, 2), idFor(a, 4), vmiOwnerOf(a), new BigDecimal(safety),
-                    new BigDecimal(multiple), new BigDecimal(price), new BigDecimal(supplied),
+                    idFor(a, 2),
+                    idFor(a, 4),
+                    vmiOwnerOf(a),
+                    new BigDecimal(safety),
+                    new BigDecimal(multiple),
+                    new BigDecimal(price),
+                    new BigDecimal(supplied),
                     new BigDecimal(supplied))));
     var id =
-        access.run(actorA, "warehouse.inventory.update", () -> service.createAgreement(input, user))
-            .agreement().id();
-    return access.run(actorA, "warehouse.inventory.update", () -> service.activate(id, null, user)).id();
+        access
+            .run(actorA, "warehouse.inventory.update", () -> service.createAgreement(input, user))
+            .agreement()
+            .id();
+    return access
+        .run(actorA, "warehouse.inventory.update", () -> service.activate(id, null, user))
+        .id();
   }
 
   UUID lineOf(UUID agreementId, UUID skuId) {
-    return access.run(actorA, "warehouse.inventory.read", () -> service.agreement(agreementId)).lines()
+    return access
+        .run(actorA, "warehouse.inventory.read", () -> service.agreement(agreementId))
+        .lines()
         .stream()
         .filter(l -> l.skuId().equals(skuId))
         .findFirst()
@@ -251,13 +314,11 @@ class VmiIntegrationTest {
   /**
    * 往账本里放一批货（balance + bucket 同事务，守恒触发器才成立）。
    *
-   * <p><b>balance 上没有货主维度</b> —— 7.7.1.1（V67）刻意没往 {@code inventory_balance} 的键里
-   * 加 stock_owner，所以同一 SKU×仓×法人×质量 只有一行余额，货主差异落在 bucket 上。
-   * 这正是「货权是 bucket（最小事实单位）的维度、balance 是它的汇总」，
-   * 也是 VMI 货与自有货能在同一个 SKU×仓 里并存而不互相覆盖的原因。
+   * <p><b>balance 上没有货主维度</b> —— 7.7.1.1（V67）刻意没往 {@code inventory_balance} 的键里 加 stock_owner，所以同一
+   * SKU×仓×法人×质量 只有一行余额，货主差异落在 bucket 上。 这正是「货权是 bucket（最小事实单位）的维度、balance 是它的汇总」， 也是 VMI 货与自有货能在同一个
+   * SKU×仓 里并存而不互相覆盖的原因。
    *
-   * @param ownerId 货主：VMI 供应商货主 → 被 VMI 水位监控算成 VMI 可售量；
-   *                  SELF 货主 → 落进 {@code selfOwnedSplit} 对照口径
+   * @param ownerId 货主：VMI 供应商货主 → 被 VMI 水位监控算成 VMI 可售量； SELF 货主 → 落进 {@code selfOwnedSplit} 对照口径
    */
   void putOnHand(UUID tenant, UUID skuId, UUID ownerId, String onHand) {
     access.run(
@@ -268,27 +329,46 @@ class VmiIntegrationTest {
               sql.fetchOne(
                   "select id from inventory_balance where tenant_id=? and sku_id=? and warehouse_id=?"
                       + " and legal_entity_id=? and quality_status_id=?",
-                  tenant, skuId, idFor(tenant, 4), idFor(tenant, 1), idFor(tenant, 7));
+                  tenant,
+                  skuId,
+                  idFor(tenant, 4),
+                  idFor(tenant, 1),
+                  idFor(tenant, 7));
           UUID balance;
           if (existing == null) {
             balance = UUID.randomUUID();
             sql.execute(
                 "insert into inventory_balance(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
                     + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-                balance, tenant, idFor(tenant, 1), skuId, idFor(tenant, 4), idFor(tenant, 7),
+                balance,
+                tenant,
+                idFor(tenant, 1),
+                skuId,
+                idFor(tenant, 4),
+                idFor(tenant, 7),
                 new BigDecimal(onHand));
           } else {
             balance = existing.get("id", UUID.class);
             sql.execute(
                 "update inventory_balance set on_hand = on_hand + ? where tenant_id=? and id=?",
-                new BigDecimal(onHand), tenant, balance);
+                new BigDecimal(onHand),
+                tenant,
+                balance);
           }
           sql.execute(
               "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,location_id,"
                   + "lot_id,quality_status_id,balance_id,on_hand,reserved,stock_owner_id)"
                   + " values(?,?,?,?,?,?,null,?,?,?,0,?)",
-              UUID.randomUUID(), tenant, idFor(tenant, 1), skuId, idFor(tenant, 4), idFor(tenant, 6),
-              idFor(tenant, 7), balance, new BigDecimal(onHand), ownerId);
+              UUID.randomUUID(),
+              tenant,
+              idFor(tenant, 1),
+              skuId,
+              idFor(tenant, 4),
+              idFor(tenant, 6),
+              idFor(tenant, 7),
+              balance,
+              new BigDecimal(onHand),
+              ownerId);
           return null;
         });
   }
@@ -299,7 +379,8 @@ class VmiIntegrationTest {
         "warehouse.inventory.update",
         () ->
             service.recordSale(
-                agreementId, lineId,
+                agreementId,
+                lineId,
                 new VmiSaleInput(new BigDecimal(qty), ref, null, null, at, null),
                 user));
   }
@@ -309,14 +390,16 @@ class VmiIntegrationTest {
   /**
    * 绕过服务层直接写数据库 —— 这才是验证「红线真的在数据库里」的正确姿势。
    *
-   * <p>必须在租户事务里做：RLS 开着 FORCE，事务外裸写连行都看不见（UPDATE 静默影响 0 行），
-   * 那会让「数据库挡住了我」变成一句自欺欺人的话。
+   * <p>必须在租户事务里做：RLS 开着 FORCE，事务外裸写连行都看不见（UPDATE 静默影响 0 行）， 那会让「数据库挡住了我」变成一句自欺欺人的话。
    */
   void rawAsA(Runnable write) {
-    access.run(actorA, "warehouse.inventory.update", () -> {
-      write.run();
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.update",
+        () -> {
+          write.run();
+          return null;
+        });
   }
 
   /** 断言「被**数据库**拒绝」，而不是被应用层挡住。 */
@@ -332,8 +415,7 @@ class VmiIntegrationTest {
               }
               // 逐条打印异常链上的**消息**（不只 toString()）：jOOQ/Spring 包装后的
               // toString() 里没有 PostgreSQL 的原始原因，只看它会得到一个指不到问题的报错。
-              fail("期望被数据库拒绝（错误消息含 '" + expectedFragment + "'），实际异常链消息："
-                  + messages);
+              fail("期望被数据库拒绝（错误消息含 '" + expectedFragment + "'），实际异常链消息：" + messages);
             });
   }
 
@@ -364,14 +446,32 @@ class VmiIntegrationTest {
   void 数据库层挡住把VMI货算成自有资产() {
     var input =
         new VmiAgreementInput(
-            supplier, "SUP-1", "供应商一", idFor(a, 1), "CNY", "MONTHLY", "SYSTEM_SIGNAL",
-            "SUPPLIER", LocalDate.now(), null, null,
-            List.of(new VmiLineInput(
-                idFor(a, 2), idFor(a, 4), vmiOwnerOf(a), new BigDecimal("20"), BigDecimal.ONE,
-                new BigDecimal("12.5"), new BigDecimal("100"), new BigDecimal("100"))));
+            supplier,
+            "SUP-1",
+            "供应商一",
+            idFor(a, 1),
+            "CNY",
+            "MONTHLY",
+            "SYSTEM_SIGNAL",
+            "SUPPLIER",
+            LocalDate.now(),
+            null,
+            null,
+            List.of(
+                new VmiLineInput(
+                    idFor(a, 2),
+                    idFor(a, 4),
+                    vmiOwnerOf(a),
+                    new BigDecimal("20"),
+                    BigDecimal.ONE,
+                    new BigDecimal("12.5"),
+                    new BigDecimal("100"),
+                    new BigDecimal("100"))));
     var id =
-        access.run(actorA, "warehouse.inventory.update", () -> service.createAgreement(input, user))
-            .agreement().id();
+        access
+            .run(actorA, "warehouse.inventory.update", () -> service.createAgreement(input, user))
+            .agreement()
+            .id();
 
     // ① 直接写 counts_as_owned_asset=true —— CHECK 钉死 false。
     assertDbRejects(
@@ -381,8 +481,16 @@ class VmiIntegrationTest {
                 "insert into vmi_agreement_line(id,tenant_id,agreement_id,sku_id,warehouse_id,"
                     + "stock_owner_id,safety_level,replenishment_multiple,settlement_price,"
                     + "counts_as_owned_asset,supplied_quantity) values(?,?,?,?,?,?,?,?,?,true,?)",
-                UUID.randomUUID(), a, id, idFor(a, 3), idFor(a, 4), vmiOwnerOf(a),
-                new BigDecimal("5"), BigDecimal.ONE, new BigDecimal("1"), new BigDecimal("1")));
+                UUID.randomUUID(),
+                a,
+                id,
+                idFor(a, 3),
+                idFor(a, 4),
+                vmiOwnerOf(a),
+                new BigDecimal("5"),
+                BigDecimal.ONE,
+                new BigDecimal("1"),
+                new BigDecimal("1")));
 
     // ② 引用「计入自有资产」的货主（SELF）—— 这是最关键的一条：
     //    光在自己表里写 false 不够，真要把 VMI 货算成资产必须去动 7.7.1.1 的货主档案，
@@ -394,20 +502,35 @@ class VmiIntegrationTest {
                 "insert into vmi_agreement_line(id,tenant_id,agreement_id,sku_id,warehouse_id,"
                     + "stock_owner_id,safety_level,replenishment_multiple,settlement_price,"
                     + "supplied_quantity) values(?,?,?,?,?,?,?,?,?,?)",
-                UUID.randomUUID(), a, id, idFor(a, 3), idFor(a, 4), selfOwnerOf(a),
-                new BigDecimal("5"), BigDecimal.ONE, new BigDecimal("1"), new BigDecimal("1")));
+                UUID.randomUUID(),
+                a,
+                id,
+                idFor(a, 3),
+                idFor(a, 4),
+                selfOwnerOf(a),
+                new BigDecimal("5"),
+                BigDecimal.ONE,
+                new BigDecimal("1"),
+                new BigDecimal("1")));
 
     // ③ 服务层把货主换成 SELF 同样被数据库挡住（错误信息讲清为什么）。
     assertThatThrownBy(
             () ->
                 access.run(
-                    actorA, "warehouse.inventory.update",
+                    actorA,
+                    "warehouse.inventory.update",
                     () ->
                         service.addLine(
                             id,
                             new VmiAddLineInput(
-                                idFor(a, 3), idFor(a, 4), selfOwnerOf(a), new BigDecimal("5"), BigDecimal.ONE,
-                                new BigDecimal("1"), new BigDecimal("1"), new BigDecimal("1")),
+                                idFor(a, 3),
+                                idFor(a, 4),
+                                selfOwnerOf(a),
+                                new BigDecimal("5"),
+                                BigDecimal.ONE,
+                                new BigDecimal("1"),
+                                new BigDecimal("1"),
+                                new BigDecimal("1")),
                             user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("自有资产");
@@ -416,8 +539,12 @@ class VmiIntegrationTest {
     //    否则「建协议时合规、改完货主档案就变资产」这条路是通的。
     assertDbRejects(
         "计入自有资产",
-        () -> sql.execute("update stock_owner set owner_kind='SELF', owner_ref_type='INTERNAL',"
-            + " owner_ref_id=null, owner_ref_label='' where tenant_id=? and id=?", a, vmiOwnerOf(a)));
+        () ->
+            sql.execute(
+                "update stock_owner set owner_kind='SELF', owner_ref_type='INTERNAL',"
+                    + " owner_ref_id=null, owner_ref_label='' where tenant_id=? and id=?",
+                a,
+                vmiOwnerOf(a)));
   }
 
   @Test
@@ -450,13 +577,19 @@ class VmiIntegrationTest {
 
     var snap =
         access.run(
-            actorA, "warehouse.inventory.update",
+            actorA,
+            "warehouse.inventory.update",
             () ->
                 service.recordSnapshot(
                     agreement,
                     new VmiSnapshotInput(
-                        line, "TENANT_MAINTAINED", null, now(), new BigDecimal("45"),
-                        new BigDecimal("12"), "供应商仓实测"),
+                        line,
+                        "TENANT_MAINTAINED",
+                        null,
+                        now(),
+                        new BigDecimal("45"),
+                        new BigDecimal("12"),
+                        "供应商仓实测"),
                     user));
     assertThat(snap.stockSource()).isEqualTo("TENANT_MAINTAINED");
 
@@ -473,13 +606,19 @@ class VmiIntegrationTest {
     assertThatThrownBy(
             () ->
                 access.run(
-                    actorA, "warehouse.inventory.update",
+                    actorA,
+                    "warehouse.inventory.update",
                     () ->
                         service.recordSnapshot(
                             agreement,
                             new VmiSnapshotInput(
-                                line, "WAREHOUSE_BUCKET", null, now(), new BigDecimal("1"),
-                                null, null),
+                                line,
+                                "WAREHOUSE_BUCKET",
+                                null,
+                                now(),
+                                new BigDecimal("1"),
+                                null,
+                                null),
                             user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不接受手工登记");
@@ -506,7 +645,8 @@ class VmiIntegrationTest {
     putOnHand(a, idFor(a, 2), vmiOwnerOf(a), "8");
     var result =
         access.run(
-            actorA, "warehouse.inventory.update",
+            actorA,
+            "warehouse.inventory.update",
             () -> service.generateSignals(agreement, new VmiSignalInput(null, "补货"), user));
     assertThat(result.createdCount()).isEqualTo(1);
     var signal = result.signals().get(0);
@@ -523,7 +663,8 @@ class VmiIntegrationTest {
     UUID agreement = activeAgreement("MONTHLY", "SYSTEM_SIGNAL", "SUPPLIER");
     var result =
         access.run(
-            actorA, "warehouse.inventory.update",
+            actorA,
+            "warehouse.inventory.update",
             () -> service.generateSignals(agreement, new VmiSignalInput(null, null), user));
     assertThat(result.createdCount()).isEqualTo(1);
     assertThat(result.signals().get(0).triggerReason()).isEqualTo("STOCKOUT");
@@ -533,11 +674,13 @@ class VmiIntegrationTest {
   void 已有未了结信号时不重复出单并说明原因() {
     UUID agreement = activeAgreement("MONTHLY", "SYSTEM_SIGNAL", "SUPPLIER");
     access.run(
-        actorA, "warehouse.inventory.update",
+        actorA,
+        "warehouse.inventory.update",
         () -> service.generateSignals(agreement, new VmiSignalInput(null, null), user));
     var again =
         access.run(
-            actorA, "warehouse.inventory.update",
+            actorA,
+            "warehouse.inventory.update",
             () -> service.generateSignals(agreement, new VmiSignalInput(null, null), user));
     assertThat(again.createdCount()).isZero();
     assertThat(again.skippedOpenCount()).isEqualTo(1);
@@ -558,7 +701,8 @@ class VmiIntegrationTest {
 
     var result =
         access.run(
-            actorA, "warehouse.inventory.update",
+            actorA,
+            "warehouse.inventory.update",
             () -> service.generateSignals(agreement, new VmiSignalInput(null, null), user));
     assertThat(result.createdCount()).isZero();
     assertThat(result.skippedHealthyCount()).isEqualTo(1);
@@ -570,7 +714,8 @@ class VmiIntegrationTest {
     UUID agreement = activeAgreement("MONTHLY", "VENDOR_OWN", "SUPPLIER");
     var result =
         access.run(
-            actorA, "warehouse.inventory.update",
+            actorA,
+            "warehouse.inventory.update",
             () -> service.generateSignals(agreement, new VmiSignalInput(null, null), user));
     assertThat(result.createdCount()).isZero();
     assertThat(result.skippedVendorOwnCount()).isEqualTo(1);
@@ -581,15 +726,23 @@ class VmiIntegrationTest {
   void 信号走完受理下发到货后供货累加() {
     UUID agreement = activeAgreement("MONTHLY", "SYSTEM_SIGNAL", "SUPPLIER");
     var created =
-        access.run(
-                actorA, "warehouse.inventory.update",
+        access
+            .run(
+                actorA,
+                "warehouse.inventory.update",
                 () -> service.generateSignals(agreement, new VmiSignalInput(null, null), user))
-            .signals().get(0);
+            .signals()
+            .get(0);
 
-    access.run(actorA, "warehouse.inventory.update", () -> service.acknowledgeSignal(created.id(), null, user));
+    access.run(
+        actorA,
+        "warehouse.inventory.update",
+        () -> service.acknowledgeSignal(created.id(), null, user));
     var dispatched =
         access.run(
-            actorA, "warehouse.inventory.update", () -> service.dispatchSignal(created.id(), null, user));
+            actorA,
+            "warehouse.inventory.update",
+            () -> service.dispatchSignal(created.id(), null, user));
     assertThat(dispatched.status()).isEqualTo("DISPATCHED");
     // 下游 6 采购 / 供应商尚未交付：只写交接定位键，不代它们建单。
     assertThat(dispatched.referenceId()).isNotBlank();
@@ -609,7 +762,8 @@ class VmiIntegrationTest {
     // 到货 50 后供货累加到 150，可以继续卖完剩下 50。
     var fulfilled =
         access.run(
-            actorA, "warehouse.inventory.update",
+            actorA,
+            "warehouse.inventory.update",
             () ->
                 service.fulfilSignal(
                     created.id(), new VmiSignalFulfilInput(new BigDecimal("50"), "到货"), user));
@@ -637,14 +791,32 @@ class VmiIntegrationTest {
   void 草稿协议不能记销售() {
     var input =
         new VmiAgreementInput(
-            supplier, "SUP-1", "供应商一", idFor(a, 1), "CNY", "MONTHLY", "SYSTEM_SIGNAL",
-            "SUPPLIER", LocalDate.now(), null, null,
-            List.of(new VmiLineInput(
-                idFor(a, 2), idFor(a, 4), vmiOwnerOf(a), new BigDecimal("20"), BigDecimal.ONE,
-                new BigDecimal("12.5"), new BigDecimal("100"), new BigDecimal("100"))));
+            supplier,
+            "SUP-1",
+            "供应商一",
+            idFor(a, 1),
+            "CNY",
+            "MONTHLY",
+            "SYSTEM_SIGNAL",
+            "SUPPLIER",
+            LocalDate.now(),
+            null,
+            null,
+            List.of(
+                new VmiLineInput(
+                    idFor(a, 2),
+                    idFor(a, 4),
+                    vmiOwnerOf(a),
+                    new BigDecimal("20"),
+                    BigDecimal.ONE,
+                    new BigDecimal("12.5"),
+                    new BigDecimal("100"),
+                    new BigDecimal("100"))));
     var id =
-        access.run(actorA, "warehouse.inventory.update", () -> service.createAgreement(input, user))
-            .agreement().id();
+        access
+            .run(actorA, "warehouse.inventory.update", () -> service.createAgreement(input, user))
+            .agreement()
+            .id();
     var line = lineOf(id, idFor(a, 2));
     assertThatThrownBy(() -> sale(id, line, "1", "SO-1", now()))
         .isInstanceOf(ResponseStatusException.class)
@@ -666,7 +838,10 @@ class VmiIntegrationTest {
   @Test
   void 关闭协议后明细被数据库冻结() {
     UUID agreement = activeAgreement("MONTHLY", "SYSTEM_SIGNAL", "SUPPLIER");
-    var id = access.run(actorA, "warehouse.inventory.update", () -> service.close(agreement, null, user)).id();
+    var id =
+        access
+            .run(actorA, "warehouse.inventory.update", () -> service.close(agreement, null, user))
+            .id();
     var line = lineOf(id, idFor(a, 2));
     // 冻结是数据库闸门（vmi_line_frozen 触发器），所以断言落在 DB 的拒绝上。
     assertDbRejects(
@@ -674,7 +849,9 @@ class VmiIntegrationTest {
         () ->
             sql.execute(
                 "update vmi_agreement_line set on_hand_quantity = ? where tenant_id = ? and id = ?",
-                new BigDecimal("1"), a, line));
+                new BigDecimal("1"),
+                a,
+                line));
   }
 
   // ================================================================ 结算对账单
@@ -687,7 +864,8 @@ class VmiIntegrationTest {
 
     var detail =
         access.run(
-            actorA, "warehouse.inventory.update",
+            actorA,
+            "warehouse.inventory.update",
             () ->
                 service.createSettlement(
                     agreement,
@@ -710,13 +888,15 @@ class VmiIntegrationTest {
   void 单据级应付HALF_UP到分而明细保留四位() {
     // 结算价 0.3333 × 数量 3 = 0.9999，到分是 1.00；
     // 这条断言的意义是「表头可付、明细精确」两套 scale 各自成立，不会互相污染。
-    UUID agreement = activeAgreement("MONTHLY", "SYSTEM_SIGNAL", "SUPPLIER", "20", "2", "0.3333", "100");
+    UUID agreement =
+        activeAgreement("MONTHLY", "SYSTEM_SIGNAL", "SUPPLIER", "20", "2", "0.3333", "100");
     UUID line = lineOf(agreement, idFor(a, 2));
     sale(agreement, line, "3", "SO-R", now());
 
     var detail =
         access.run(
-            actorA, "warehouse.inventory.update",
+            actorA,
+            "warehouse.inventory.update",
             () ->
                 service.createSettlement(
                     agreement,
@@ -737,7 +917,8 @@ class VmiIntegrationTest {
     assertThatThrownBy(
             () ->
                 access.run(
-                    actorA, "warehouse.inventory.update",
+                    actorA,
+                    "warehouse.inventory.update",
                     () ->
                         service.createSettlement(
                             agreement,
@@ -746,8 +927,14 @@ class VmiIntegrationTest {
                             user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("没有已售出但尚未对账");
-    assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.settlements(null, null, 0, 20))
-        .total()).isZero();
+    assertThat(
+            access
+                .run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> service.settlements(null, null, 0, 20))
+                .total())
+        .isZero();
   }
 
   @Test
@@ -756,14 +943,17 @@ class VmiIntegrationTest {
     UUID line = lineOf(agreement, idFor(a, 2));
     sale(agreement, line, "10", "SO-1", now());
     var window =
-        new VmiSettlementInput(
-            LocalDate.now().minusDays(5), LocalDate.now().plusDays(1), null);
-    access.run(actorA, "warehouse.inventory.update", () -> service.createSettlement(agreement, window, user));
+        new VmiSettlementInput(LocalDate.now().minusDays(5), LocalDate.now().plusDays(1), null);
+    access.run(
+        actorA,
+        "warehouse.inventory.update",
+        () -> service.createSettlement(agreement, window, user));
     // 区间重叠再来一次 → 已进过对账单的售出事实不会被收第二次。
     assertThatThrownBy(
             () ->
                 access.run(
-                    actorA, "warehouse.inventory.update",
+                    actorA,
+                    "warehouse.inventory.update",
                     () ->
                         service.createSettlement(
                             agreement,
@@ -774,14 +964,26 @@ class VmiIntegrationTest {
         .hasMessageContaining("没有已售出但尚未对账");
     // 数据库层也不让同一条 sale 进两张单：建第二张单，硬把同一条售出事实塞进去。
     var settlementId =
-        access.run(actorA, "warehouse.inventory.read", () -> service.settlements(agreement, null, 0, 20))
-            .settlements().get(0).id();
+        access
+            .run(
+                actorA,
+                "warehouse.inventory.read",
+                () -> service.settlements(agreement, null, 0, 20))
+            .settlements()
+            .get(0)
+            .id();
     var lineId =
-        access.run(actorA, "warehouse.inventory.read", () -> service.sales(agreement, null, 0, 20))
-            .sales().get(0).agreementLineId();
+        access
+            .run(actorA, "warehouse.inventory.read", () -> service.sales(agreement, null, 0, 20))
+            .sales()
+            .get(0)
+            .agreementLineId();
     var saleId =
-        access.run(actorA, "warehouse.inventory.read", () -> service.sales(agreement, null, 0, 20))
-            .sales().get(0).id();
+        access
+            .run(actorA, "warehouse.inventory.read", () -> service.sales(agreement, null, 0, 20))
+            .sales()
+            .get(0)
+            .id();
     // 第二张单必须在**租户事务里**建：FORCE RLS 开着，事务外裸查连行都看不见。
     var secondSettlement = new UUID[1];
     rawAsA(
@@ -790,8 +992,13 @@ class VmiIntegrationTest {
               "insert into vmi_settlement(id,tenant_id,settlement_code,agreement_id,period_start,"
                   + "period_end,currency,status,created_by_user_id) "
                   + "values(?,?,?,?,?::date,?::date,'CNY','OPEN',?)",
-              UUID.randomUUID(), a, "VST-SECOND", agreement,
-              LocalDate.now().minusDays(90), LocalDate.now().minusDays(80), user);
+              UUID.randomUUID(),
+              a,
+              "VST-SECOND",
+              agreement,
+              LocalDate.now().minusDays(90),
+              LocalDate.now().minusDays(80),
+              user);
           secondSettlement[0] =
               sql.fetchOne(
                       "select id from vmi_settlement where tenant_id=? and settlement_code='VST-SECOND'",
@@ -804,8 +1011,13 @@ class VmiIntegrationTest {
             sql.execute(
                 "insert into vmi_settlement_line(id,tenant_id,settlement_id,agreement_line_id,"
                     + "sale_id,quantity,unit_price) values(?,?,?,?,?,?,?)",
-                UUID.randomUUID(), a, secondSettlement[0], lineId, saleId,
-                new BigDecimal("10"), new BigDecimal("12.5000")));
+                UUID.randomUUID(),
+                a,
+                secondSettlement[0],
+                lineId,
+                saleId,
+                new BigDecimal("10"),
+                new BigDecimal("12.5000")));
     assertThat(settlementId).isNotNull();
     assertThat(saleId).isNotNull();
   }
@@ -816,8 +1028,10 @@ class VmiIntegrationTest {
     UUID line = lineOf(agreement, idFor(a, 2));
     sale(agreement, line, "10", "SO-1", now());
     var settlement =
-        access.run(
-                actorA, "warehouse.inventory.update",
+        access
+            .run(
+                actorA,
+                "warehouse.inventory.update",
                 () ->
                     service.createSettlement(
                         agreement,
@@ -827,7 +1041,8 @@ class VmiIntegrationTest {
             .settlement();
     var confirmed =
         access.run(
-            actorA, "warehouse.inventory.update",
+            actorA,
+            "warehouse.inventory.update",
             () -> service.confirmSettlement(settlement.id(), null, user));
     assertThat(confirmed.status()).isEqualTo("CONFIRMED");
     assertThat(confirmed.referenceId()).isNotBlank();
@@ -841,7 +1056,9 @@ class VmiIntegrationTest {
         () ->
             sql.execute(
                 "update vmi_settlement_line set quantity=? where tenant_id=? and id=?",
-                new BigDecimal("999"), a, target.id()));
+                new BigDecimal("999"),
+                a,
+                target.id()));
   }
 
   @Test
@@ -854,7 +1071,8 @@ class VmiIntegrationTest {
     UUID monthly = activeAgreement("MONTHLY", "SYSTEM_SIGNAL", "SUPPLIER");
     var m = access.run(actorA, "warehouse.inventory.read", () -> service.settlementWindow(monthly));
     assertThat(m.periodStart().getDayOfMonth()).isEqualTo(1);
-    assertThat(m.periodEnd()).isEqualTo(m.periodStart().withDayOfMonth(m.periodStart().lengthOfMonth()));
+    assertThat(m.periodEnd())
+        .isEqualTo(m.periodStart().withDayOfMonth(m.periodStart().lengthOfMonth()));
   }
 
   @Test
@@ -866,13 +1084,17 @@ class VmiIntegrationTest {
     var written = sale(agreement, line, "1", "SO-TZ", at);
     // 断言写回的值，而不是断言「没报错」。
     var readBack =
-        access.run(actorA, "warehouse.inventory.read", () -> service.sales(agreement, null, 0, 10))
-            .sales().stream()
+        access
+            .run(actorA, "warehouse.inventory.read", () -> service.sales(agreement, null, 0, 10))
+            .sales()
+            .stream()
             .filter(s -> s.id().equals(written.id()))
             .findFirst()
             .orElseThrow();
     assertThat(readBack.occurredAt().toInstant()).isEqualTo(at.toInstant());
-    assertThat(readBack.occurredAt().getHour()).isEqualTo(15);
+    assertThat(
+            readBack.occurredAt().withOffsetSameInstant(java.time.ZoneOffset.ofHours(8)).getHour())
+        .isEqualTo(15);
   }
 
   @Test
@@ -881,16 +1103,24 @@ class VmiIntegrationTest {
     var at = OffsetDateTime.of(2026, 10, 7, 15, 30, 0, 0, ZoneOffset.ofHours(8));
     var written =
         access.run(
-            actorA, "warehouse.inventory.update",
+            actorA,
+            "warehouse.inventory.update",
             () ->
                 service.recordSnapshot(
                     agreement,
                     new VmiSnapshotInput(
-                        lineOf(agreement, idFor(a, 2)), "VENDOR_FEED", "SUPPLIER-PORTAL", at,
-                        new BigDecimal("77"), null, null),
+                        lineOf(agreement, idFor(a, 2)),
+                        "VENDOR_FEED",
+                        "SUPPLIER-PORTAL",
+                        at,
+                        new BigDecimal("77"),
+                        null,
+                        null),
                     user));
     assertThat(written.observedAt().toInstant()).isEqualTo(at.toInstant());
-    assertThat(written.observedAt().getHour()).isEqualTo(15);
+    assertThat(
+            written.observedAt().withOffsetSameInstant(java.time.ZoneOffset.ofHours(8)).getHour())
+        .isEqualTo(15);
   }
 
   // ================================================================ 租户隔离三断言
@@ -902,58 +1132,115 @@ class VmiIntegrationTest {
     sale(agreement, line, "10", "SO-1", now());
 
     // B 看不到 A 的任何东西：连详情都是 404（比返回空集更强 —— 不泄露存在性）。
-    assertThatThrownBy(() -> access.run(actorB, "warehouse.inventory.read", () -> service.agreement(agreement)))
-        .isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");
-    assertThatThrownBy(() -> access.run(actorB, "warehouse.inventory.read", () -> service.waterLevelMonitor(agreement)))
-        .isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");
-    assertThatThrownBy(() -> access.run(actorB, "warehouse.inventory.read", () -> service.sales(agreement, null, 0, 10)))
-        .isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");
-    assertThatThrownBy(() -> access.run(actorB, "warehouse.inventory.read", () -> service.auditTrail(agreement, null)))
-        .isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");
-    assertThat(access.run(actorB, "warehouse.inventory.read", () -> service.agreements(null, null, null, 0, 20))
-        .total()).isZero();
+    assertThatThrownBy(
+            () ->
+                access.run(actorB, "warehouse.inventory.read", () -> service.agreement(agreement)))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("404");
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorB, "warehouse.inventory.read", () -> service.waterLevelMonitor(agreement)))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("404");
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorB,
+                    "warehouse.inventory.read",
+                    () -> service.sales(agreement, null, 0, 10)))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("404");
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorB, "warehouse.inventory.read", () -> service.auditTrail(agreement, null)))
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("404");
+    assertThat(
+            access
+                .run(
+                    actorB,
+                    "warehouse.inventory.read",
+                    () -> service.agreements(null, null, null, 0, 20))
+                .total())
+        .isZero();
     // B 不能往 A 的协议行上写销售。
     assertThatThrownBy(() -> saleFor(actorB, agreement, line, "1", "SO-X"))
-        .isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("404");
     // B 不能出补货信号，也不能给 A 的单据出对账单。
     assertThatThrownBy(
             () ->
                 access.run(
-                    actorB, "warehouse.inventory.update",
+                    actorB,
+                    "warehouse.inventory.update",
                     () -> service.generateSignals(agreement, new VmiSignalInput(null, null), user)))
-        .isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("404");
     assertThatThrownBy(
             () ->
                 access.run(
-                    actorB, "warehouse.inventory.update",
+                    actorB,
+                    "warehouse.inventory.update",
                     () ->
                         service.createSettlement(
                             agreement,
                             new VmiSettlementInput(
                                 LocalDate.now().minusDays(2), LocalDate.now().plusDays(1), null),
                             user)))
-        .isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");
+        .isInstanceOf(ResponseStatusException.class)
+        .hasMessageContaining("404");
     // B 自己的协议与 A 的互不可见。
     var bInput =
         new VmiAgreementInput(
-            supplier, "SUP-B", "B 的供应商", idFor(b, 1), "CNY", "MONTHLY", "SYSTEM_SIGNAL",
-            "SUPPLIER", LocalDate.now(), null, null,
-            List.of(new VmiLineInput(
-                idFor(b, 2), idFor(b, 4), vmiOwnerOf(b), new BigDecimal("5"), BigDecimal.ONE,
-                new BigDecimal("2"), new BigDecimal("5"), new BigDecimal("5"))));
+            supplier,
+            "SUP-B",
+            "B 的供应商",
+            idFor(b, 1),
+            "CNY",
+            "MONTHLY",
+            "SYSTEM_SIGNAL",
+            "SUPPLIER",
+            LocalDate.now(),
+            null,
+            null,
+            List.of(
+                new VmiLineInput(
+                    idFor(b, 2),
+                    idFor(b, 4),
+                    vmiOwnerOf(b),
+                    new BigDecimal("5"),
+                    BigDecimal.ONE,
+                    new BigDecimal("2"),
+                    new BigDecimal("5"),
+                    new BigDecimal("5"))));
     var bAgreement =
-        access.run(actorB, "warehouse.inventory.update", () -> service.createAgreement(bInput, user))
-            .agreement().id();
-    assertThat(access.run(actorB, "warehouse.inventory.read", () -> service.agreements(null, null, null, 0, 20))
-        .agreements().stream().map(VmiAgreement::id)).containsExactly(bAgreement);
+        access
+            .run(actorB, "warehouse.inventory.update", () -> service.createAgreement(bInput, user))
+            .agreement()
+            .id();
+    assertThat(
+            access
+                .run(
+                    actorB,
+                    "warehouse.inventory.read",
+                    () -> service.agreements(null, null, null, 0, 20))
+                .agreements()
+                .stream()
+                .map(VmiAgreement::id))
+        .containsExactly(bAgreement);
   }
 
-  VmiSale saleFor(AccessService.Access actor, UUID agreementId, UUID lineId, String qty, String ref) {
+  VmiSale saleFor(
+      AccessService.Access actor, UUID agreementId, UUID lineId, String qty, String ref) {
     return access.run(
-        actor, "warehouse.inventory.update",
+        actor,
+        "warehouse.inventory.update",
         () ->
             service.recordSale(
-                agreementId, lineId,
+                agreementId,
+                lineId,
                 new VmiSaleInput(new BigDecimal(qty), ref, null, null, now(), null),
                 user));
   }
@@ -965,28 +1252,39 @@ class VmiIntegrationTest {
     sale(agreement, line, "10", "SO-1", now());
 
     // 身份是 B，伪造 X-Tenant-Id 指向 A：B 看到的仍然是 B 的（空）。
-    http.perform(get("/warehouse/inventory/vmi/agreements")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/vmi/agreements")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(0));
-    http.perform(get("/warehouse/inventory/vmi/agreements/{id}", agreement)
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/vmi/agreements/{id}", agreement)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
-    http.perform(get("/warehouse/inventory/vmi/agreements/{id}/water-levels", agreement)
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/vmi/agreements/{id}/water-levels", agreement)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
     // 伪造头也不能让 B 给 A 的单出补货信号（出信号 = 让供应商备货）。
-    http.perform(post("/warehouse/inventory/vmi/agreements/{id}/replenishment-signals", agreement)
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString())
-            .contentType("application/json").content("{}"))
+    http.perform(
+            post("/warehouse/inventory/vmi/agreements/{id}/replenishment-signals", agreement)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString())
+                .contentType("application/json")
+                .content("{}"))
         .andExpect(status().isNotFound());
     // A 的数据未被这串伪造请求改动。
-    assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.signals(agreement, null, null, 0, 20))
-        .total()).isZero();
+    assertThat(
+            access
+                .run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> service.signals(agreement, null, null, 0, 20))
+                .total())
+        .isZero();
   }
 
   @Test
@@ -995,30 +1293,65 @@ class VmiIntegrationTest {
     sale(agreement, lineOf(agreement, idFor(a, 2)), "10", "SO-1", now());
     var bInput =
         new VmiAgreementInput(
-            supplier, "SUP-B", "B 的供应商", idFor(b, 1), "CNY", "MONTHLY", "SYSTEM_SIGNAL",
-            "SUPPLIER", LocalDate.now(), null, null,
-            List.of(new VmiLineInput(
-                idFor(b, 2), idFor(b, 4), vmiOwnerOf(b), new BigDecimal("5"), BigDecimal.ONE,
-                new BigDecimal("2"), new BigDecimal("5"), new BigDecimal("5"))));
+            supplier,
+            "SUP-B",
+            "B 的供应商",
+            idFor(b, 1),
+            "CNY",
+            "MONTHLY",
+            "SYSTEM_SIGNAL",
+            "SUPPLIER",
+            LocalDate.now(),
+            null,
+            null,
+            List.of(
+                new VmiLineInput(
+                    idFor(b, 2),
+                    idFor(b, 4),
+                    vmiOwnerOf(b),
+                    new BigDecimal("5"),
+                    BigDecimal.ONE,
+                    new BigDecimal("2"),
+                    new BigDecimal("5"),
+                    new BigDecimal("5"))));
     access.run(actorB, "warehouse.inventory.update", () -> service.createAgreement(bInput, user));
 
     // 交替复用同一条物理连接（池容量=1）：A → B → A → B
     for (int i = 0; i < 3; i++) {
       var a1 = access.run(actorA, "warehouse.inventory.read", () -> service.agreement(agreement));
       assertThat(a1.lines().get(0).soldQuantity()).isEqualByComparingTo("10.000000");
-      var b1 = access.run(actorB, "warehouse.inventory.read", () -> service.agreements(null, null, null, 0, 20));
+      var b1 =
+          access.run(
+              actorB,
+              "warehouse.inventory.read",
+              () -> service.agreements(null, null, null, 0, 20));
       assertThat(b1.total()).isEqualTo(1);
-      var a2 = access.run(actorA, "warehouse.inventory.read", () -> service.agreements(null, null, null, 0, 20));
+      var a2 =
+          access.run(
+              actorA,
+              "warehouse.inventory.read",
+              () -> service.agreements(null, null, null, 0, 20));
       assertThat(a2.total()).isEqualTo(1);
     }
     // 八张表逐张确认 FORCE RLS
-    for (var table : List.of(
-        "vmi_agreement", "vmi_agreement_line", "vmi_stock_snapshot", "vmi_sale",
-        "vmi_replenishment_signal", "vmi_settlement", "vmi_settlement_line", "vmi_audit")) {
-      assertThat(sql.fetchOne("select relforcerowsecurity from pg_class where relname = ?", table)
-          .get("relforcerowsecurity", Boolean.class)).isTrue();
-      assertThat(sql.fetchOne("select relrowsecurity from pg_class where relname = ?", table)
-          .get("relrowsecurity", Boolean.class)).isTrue();
+    for (var table :
+        List.of(
+            "vmi_agreement",
+            "vmi_agreement_line",
+            "vmi_stock_snapshot",
+            "vmi_sale",
+            "vmi_replenishment_signal",
+            "vmi_settlement",
+            "vmi_settlement_line",
+            "vmi_audit")) {
+      assertThat(
+              sql.fetchOne("select relforcerowsecurity from pg_class where relname = ?", table)
+                  .get("relforcerowsecurity", Boolean.class))
+          .isTrue();
+      assertThat(
+              sql.fetchOne("select relrowsecurity from pg_class where relname = ?", table)
+                  .get("relrowsecurity", Boolean.class))
+          .isTrue();
     }
   }
 
@@ -1030,10 +1363,11 @@ class VmiIntegrationTest {
     actors.put("Bearer vmi-read-only", readOnly);
     var cap = access.run(readOnly, "warehouse.inventory.read", () -> service.capabilities());
     assertThat(cap.settlementCycles()).hasSize(4);
-    http.perform(post("/warehouse/inventory/vmi/agreements")
-            .header("Authorization", "Bearer vmi-read-only")
-            .contentType("application/json")
-            .content("{}"))
+    http.perform(
+            post("/warehouse/inventory/vmi/agreements")
+                .header("Authorization", "Bearer vmi-read-only")
+                .contentType("application/json")
+                .content("{}"))
         .andExpect(status().isForbidden());
   }
 }

@@ -18,23 +18,20 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 7.2.1.3 释放与过期。
  *
- * <p>蓝图：「处理预占的释放（订单取消、支付超时、拆单减少）与过期回收，提供手动释放入口与
- * 批量过期清理，释放时同步恢复可用量。」
+ * <p>蓝图：「处理预占的释放（订单取消、支付超时、拆单减少）与过期回收，提供手动释放入口与 批量过期清理，释放时同步恢复可用量。」
  *
  * <p><b>命名空间沿用预占链路的前缀</b>（{@code /warehouse/inventory/reservations}）而不是另起一个
- * 顶层名：释放的对象就是预占，挂在它下面才看得见「释放的是哪一笔」。与 7.2.1.1 的集合级形状、
- * 7.2.1.2 的明细级形状同前缀、不同层级，三条车道各加各的。
+ * 顶层名：释放的对象就是预占，挂在它下面才看得见「释放的是哪一笔」。与 7.2.1.1 的集合级形状、 7.2.1.2 的明细级形状同前缀、不同层级，三条车道各加各的。
  *
- * <p><b>集合级与预占级的形状必须分开且都在白名单里</b>：{@code /release-candidates}、
- * {@code /expire-overdue}、{@code /expiry-runs} 是集合级，{@code /{id}/release}、
- * {@code /{id}/expiry} 是预占级。api-proxy 的正则里，字面量子路径必须排在 {@code [0-9a-f-]+}
- * 之前 —— alternation 首个命中即返回，排错会让 {@code /release} 被当成「id=release」凭空放行。
+ * <p><b>集合级与预占级的形状必须分开且都在白名单里</b>：{@code /release-candidates}、 {@code /expire-overdue}、{@code
+ * /expiry-runs} 是集合级，{@code /{id}/release}、 {@code /{id}/expiry} 是预占级。api-proxy 的正则里，字面量子路径必须排在
+ * {@code [0-9a-f-]+} 之前 —— alternation 首个命中即返回，排错会让 {@code /release} 被当成「id=release」凭空放行。
  *
- * <p>权限码是 {@code warehouse.inventory.read} / {@code warehouse.inventory.update}，
- * 与预占链路其余端点同一组 —— 释放是改库存的动作，风险面与分配一致。
+ * <p>权限码是 {@code warehouse.inventory.read} / {@code warehouse.inventory.update}， 与预占链路其余端点同一组 ——
+ * 释放是改库存的动作，风险面与分配一致。
  *
- * <p>租户**绝不**来自任何客户端头：先向 identity 确认身份与权限（{@link AccessService#require}），
- * 再在一个事务里绑定 RLS 租户上下文后执行。伪造的 {@code X-Tenant-Id} 头进不到这个上下文里。
+ * <p>租户**绝不**来自任何客户端头：先向 identity 确认身份与权限（{@link AccessService#require}）， 再在一个事务里绑定 RLS
+ * 租户上下文后执行。伪造的 {@code X-Tenant-Id} 头进不到这个上下文里。
  */
 @RestController
 @RequestMapping("/warehouse/inventory/reservations")
@@ -57,8 +54,7 @@ public class ReservationReleaseController {
   /**
    * 过期候选清单（批量清理的对象）。
    *
-   * <p>{@code evaluatedAt} 让页面能「按某个时刻预演」；不传则用服务端当前时刻，
-   * 并把判定时刻**逐字返回**给前端显示。
+   * <p>{@code evaluatedAt} 让页面能「按某个时刻预演」；不传则用服务端当前时刻， 并把判定时刻**逐字返回**给前端显示。
    */
   @GetMapping("/release-candidates")
   public ReservationReleaseCandidatePage candidates(
@@ -104,9 +100,7 @@ public class ReservationReleaseController {
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "20") int size) {
     return call(
-        auth,
-        "inventory.read",
-        a -> releases.records(a.tenantId(), reservationId, page, size));
+        auth, "inventory.read", a -> releases.records(a.tenantId(), reservationId, page, size));
   }
 
   /** 下拉项：释放方式、释放来源、排序键，外加过期规则说明。 */
@@ -119,9 +113,8 @@ public class ReservationReleaseController {
   /**
    * 链路各环节的接入情况。
    *
-   * <p>复用 7.2.1.1 的 {@code ReservationCapability}：同一条预占链路的能力声明只能有一种表示。
-   * 「可用量恢复口径」如实报 {@code available=false} 并写明归 7.1.1.3 —— 本模块把货退出占额集合，
-   * 口径由 7.1.1.3 裁决。
+   * <p>复用 7.2.1.1 的 {@code ReservationCapability}：同一条预占链路的能力声明只能有一种表示。 「可用量恢复口径」如实报 {@code
+   * available=false} 并写明归 7.1.1.3 —— 本模块把货退出占额集合， 口径由 7.1.1.3 裁决。
    */
   @GetMapping("/release-capabilities")
   public List<ReservationModels.ReservationCapability> releaseCapabilities(
@@ -132,8 +125,8 @@ public class ReservationReleaseController {
   /**
    * 批量过期清理（显式端点，**无常驻定时器**）。
    *
-   * <p>{@code dryRun=true} 只写一条运行凭据，不碰预占 / 分配 / 流水；这是给运营的「先看看会动多少」。
-   * {@code idempotencyKey} 让调度器重投时回放既有凭据而不是再扫一遍。
+   * <p>{@code dryRun=true} 只写一条运行凭据，不碰预占 / 分配 / 流水；这是给运营的「先看看会动多少」。 {@code idempotencyKey}
+   * 让调度器重投时回放既有凭据而不是再扫一遍。
    *
    * <p>一批一个事务：候选判定、逐条终结、流水与凭据写入、运行凭据落库全在其中。
    */
@@ -142,20 +135,17 @@ public class ReservationReleaseController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @RequestBody(required = false) ReservationReleaseRunRequest request) {
     return call(
-        auth,
-        "inventory.update",
-        a -> releases.expireRun(a.tenantId(), a.userId(), request));
+        auth, "inventory.update", a -> releases.expireRun(a.tenantId(), a.userId(), request));
   }
 
   /**
    * 手动释放：订单取消 / 支付超时 / 拆单减少 / 人工。
    *
-   * <p>三种粒度：不传参数 = 整笔释放（订单取消）；只传 {@code quantity} = FIFO 释放到该量为止
-   * （拆单减少）；传 {@code allocations} = 按分配逐条调整。
+   * <p>三种粒度：不传参数 = 整笔释放（订单取消）；只传 {@code quantity} = FIFO 释放到该量为止 （拆单减少）；传 {@code allocations} =
+   * 按分配逐条调整。
    *
-   * <p>幂等：带 {@code idempotencyKey} 时同键同参回放既有凭据（200 + {@code replayed=true}），
-   * 同键不同参 409；不带键时预占已是 RELEASED 同样回放 —— 上游事件是至少投递一次，
-   * 第二次到达必须成功而不是把货再还一次。
+   * <p>幂等：带 {@code idempotencyKey} 时同键同参回放既有凭据（200 + {@code replayed=true}）， 同键不同参 409；不带键时预占已是
+   * RELEASED 同样回放 —— 上游事件是至少投递一次， 第二次到达必须成功而不是把货再还一次。
    */
   @PostMapping("/{reservationId}/release")
   public ReservationReleaseOutcome release(
@@ -163,21 +153,24 @@ public class ReservationReleaseController {
       @PathVariable UUID reservationId,
       @Valid @RequestBody(required = false) ReservationReleaseInput input) {
     return call(
-        auth, "inventory.update", a -> releases.release(a.tenantId(), reservationId, a.userId(), input));
+        auth,
+        "inventory.update",
+        a -> releases.release(a.tenantId(), reservationId, a.userId(), input));
   }
 
   /**
    * 补写 / 调整 / 清空过期时刻。
    *
-   * <p>7.2.1.1 登记预占时没传 {@code expiresAt} 的那些，就靠这个端点补上；传 {@code clear=true}
-   * 表示取消过期时刻。只对 HELD 开放：已承诺的预占永不自动过期，留着过期时刻只会误导。
+   * <p>7.2.1.1 登记预占时没传 {@code expiresAt} 的那些，就靠这个端点补上；传 {@code clear=true} 表示取消过期时刻。只对 HELD
+   * 开放：已承诺的预占永不自动过期，留着过期时刻只会误导。
    */
   @PostMapping("/{reservationId}/expiry")
   public ReservationReleaseExpiryOutcome expiry(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID reservationId,
       @RequestBody(required = false) ReservationReleaseExpiryInput input) {
-    return call(auth, "inventory.update", a -> releases.setExpiry(a.tenantId(), reservationId, input));
+    return call(
+        auth, "inventory.update", a -> releases.setExpiry(a.tenantId(), reservationId, input));
   }
 
   /**
@@ -190,7 +183,8 @@ public class ReservationReleaseController {
     try {
       return java.time.OffsetDateTime.parse(raw.trim());
     } catch (RuntimeException e) {
-      throw new IllegalArgumentException("evaluatedAt 不是合法的带时区时刻（形如 2026-10-14T10:00:00+08:00）：" + raw);
+      throw new IllegalArgumentException(
+          "evaluatedAt 不是合法的带时区时刻（形如 2026-10-14T10:00:00+08:00）：" + raw);
     }
   }
 }

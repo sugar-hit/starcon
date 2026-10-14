@@ -20,11 +20,11 @@
 
 任务书要求先 grep 确认 `stock_bucket` 上有没有能当 FIFO 依据的时间列。结论是**有**：
 
-| 列 | 语义 | 用作 FIFO 依据？ |
-| --- | --- | --- |
-| `inventory_lot.received_on` | 收货业务日期 | ✅ 主依据 |
-| `stock_bucket.created_at` | 该库位 bucket 的建行时间 | ✅ `received_on` 缺失时兜底 |
-| `stock_bucket.last_movement_at` | **最近一次变动的业务时间** | ❌ **刻意不用** |
+| 列                              | 语义                       | 用作 FIFO 依据？            |
+| ------------------------------- | -------------------------- | --------------------------- |
+| `inventory_lot.received_on`     | 收货业务日期               | ✅ 主依据                   |
+| `stock_bucket.created_at`       | 该库位 bucket 的建行时间   | ✅ `received_on` 缺失时兜底 |
+| `stock_bucket.last_movement_at` | **最近一次变动的业务时间** | ❌ **刻意不用**             |
 
 `last_movement_at` 每动一次就前移，拿它排序等于按「最近被碰过的先后」出库，
 那不是先进先出。这一点写进了 SQL 注释与集成测试断言（缺收货日期时确实退回 `created_at`，
@@ -37,11 +37,11 @@ FIFO 排序：`coalesce(l.received_on, b.created_at::date) asc nulls last, b.cre
 如果按随机数据造夹具，两种策略有可能碰巧排出同一个顺序，断言就变成了同义反复。
 所以夹具刻意让「失效日期先后」与「收货日期先后」完全相反：
 
-| 批次 | 失效 | 收货 | FEFO 位次 | FIFO 位次 |
-| --- | --- | --- | --- | --- |
-| LOT-A | +3 天 | −5 天 | 1 | 3 |
-| LOT-B | +20 天 | −30 天 | 3 | 1 |
-| LOT-C | +10 天 | −15 天 | 2 | 2 |
+| 批次  | 失效   | 收货   | FEFO 位次 | FIFO 位次 |
+| ----- | ------ | ------ | --------- | --------- |
+| LOT-A | +3 天  | −5 天  | 1         | 3         |
+| LOT-B | +20 天 | −30 天 | 3         | 1         |
+| LOT-C | +10 天 | −15 天 | 2         | 2         |
 
 于是 `containsExactly(A, C)` 与 `containsExactly(B, C)` 两条断言才真的钉住了「两种排序」。
 
@@ -121,19 +121,19 @@ FIFO 排序：`coalesce(l.received_on, b.created_at::date) asc nulls last, b.cre
 
 ## 文件清单
 
-| 文件 | 说明 |
-| --- | --- |
-| `backend/services/warehouse/src/main/resources/db/migration/V60__warehouse_inventory_expiry_policy.sql` | 策略表 + RLS + GRANT + 两个触发器 + 索引 |
-| `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryExpiryModels.java` | 传输模型（全部 `Expiry*` / `Fefo*` 前缀防契约重名覆盖） |
-| `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryExpiryService.java` | jOOQ 显式 SQL：分配推荐 / 预警清单 / 策略 CRUD |
-| `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryExpiryController.java` | 7 个端点，租户来自已认证成员关系 |
-| `backend/services/warehouse/src/test/java/com/starcon/warehouse/InventoryExpiryIntegrationTest.java` | 24 例，Testcontainers PG16，池压到 1 |
-| `apps/web/src/components/inventory/inventory-expiry-model.ts` | 前端模型与纯函数 |
-| `apps/web/src/components/inventory/inventory-expiry-model.test.ts` | 14 例 |
-| `apps/web/src/components/inventory/inventory-expiry.tsx` | 工作区（预警清单 / 分配试算 / 策略） |
-| `apps/web/src/app/inventory/expiry/page.tsx` | 页面 `/inventory/expiry` |
-| `apps/web/src/lib/api-proxy.ts` | 白名单放行 `inventory/expiry` 的七个形状 |
-| `apps/web/src/app/api/warehouse/[...path]/route.test.ts` | 白名单覆盖 |
+| 文件                                                                                                    | 说明                                                    |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `backend/services/warehouse/src/main/resources/db/migration/V60__warehouse_inventory_expiry_policy.sql` | 策略表 + RLS + GRANT + 两个触发器 + 索引                |
+| `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryExpiryModels.java`             | 传输模型（全部 `Expiry*` / `Fefo*` 前缀防契约重名覆盖） |
+| `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryExpiryService.java`            | jOOQ 显式 SQL：分配推荐 / 预警清单 / 策略 CRUD          |
+| `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryExpiryController.java`         | 7 个端点，租户来自已认证成员关系                        |
+| `backend/services/warehouse/src/test/java/com/starcon/warehouse/InventoryExpiryIntegrationTest.java`    | 24 例，Testcontainers PG16，池压到 1                    |
+| `apps/web/src/components/inventory/inventory-expiry-model.ts`                                           | 前端模型与纯函数                                        |
+| `apps/web/src/components/inventory/inventory-expiry-model.test.ts`                                      | 14 例                                                   |
+| `apps/web/src/components/inventory/inventory-expiry.tsx`                                                | 工作区（预警清单 / 分配试算 / 策略）                    |
+| `apps/web/src/app/inventory/expiry/page.tsx`                                                            | 页面 `/inventory/expiry`                                |
+| `apps/web/src/lib/api-proxy.ts`                                                                         | 白名单放行 `inventory/expiry` 的七个形状                |
+| `apps/web/src/app/api/warehouse/[...path]/route.test.ts`                                                | 白名单覆盖                                              |
 
 ## 验证
 

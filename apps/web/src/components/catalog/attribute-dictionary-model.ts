@@ -98,7 +98,9 @@ export function fetchCategoryRules(category: string | null, attributeId: string 
   if (category?.trim()) params.set('category', category.trim());
   if (attributeId) params.set('attributeId', attributeId);
   const suffix = params.toString();
-  return api<CategoryAttributeRule[]>(`catalog/attributes/category-rules${suffix ? `?${suffix}` : ''}`);
+  return api<CategoryAttributeRule[]>(
+    `catalog/attributes/category-rules${suffix ? `?${suffix}` : ''}`,
+  );
 }
 
 export function saveCategoryRule(id: string, input: CategoryAttributeRuleInput) {
@@ -166,8 +168,7 @@ export function normalizeCode(value: string) {
 export function codeProblem(value: string): string | null {
   const code = value.trim();
   if (code === '') return '属性编码不能为空';
-  if (!CODE_PATTERN.test(code))
-    return '属性编码请使用英文字母、数字、下划线或短横线，长度 1~64 位';
+  if (!CODE_PATTERN.test(code)) return '属性编码请使用英文字母、数字、下划线或短横线，长度 1~64 位';
   return null;
 }
 
@@ -370,7 +371,14 @@ export type RuleDraft = {
 };
 
 export function emptyRuleDraft(category = ''): RuleDraft {
-  return { category, required: false, minValue: '', maxValue: '', position: '0', allowedOptions: [] };
+  return {
+    category,
+    required: false,
+    minValue: '',
+    maxValue: '',
+    position: '0',
+    allowedOptions: [],
+  };
 }
 
 export function validateRule(

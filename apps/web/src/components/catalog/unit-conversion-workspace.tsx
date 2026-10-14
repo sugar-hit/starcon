@@ -216,9 +216,17 @@ export function UnitConversionWorkspace() {
       </header>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="单位字典" value={`${overview.enabledUnitCount} / ${overview.unitCount}`} hint="启用中 / 全部" />
+        <Stat
+          label="单位字典"
+          value={`${overview.enabledUnitCount} / ${overview.unitCount}`}
+          hint="启用中 / 全部"
+        />
         <Stat label="换算版本" value={overview.conversionCount} hint="含历史版本，全部可读" />
-        <Stat label="基础单位未登记" value={overview.unregisteredUnitCount} hint="这些 SKU 无法配置换算" />
+        <Stat
+          label="基础单位未登记"
+          value={overview.unregisteredUnitCount}
+          hint="这些 SKU 无法配置换算"
+        />
         <Stat label="单据快照" value={overview.snapshotCount} hint="已冻结，不可修改" />
       </div>
 
@@ -261,9 +269,9 @@ export function UnitConversionWorkspace() {
                     )}
                   </p>
                   <p className="text-muted-foreground mt-1 text-xs">
-                    数量精度 {unit.scale} 位小数 · 采购 {unit.allowPurchase ? '可用' : '不可用'} · 销售{' '}
-                    {unit.allowSale ? '可用' : '不可用'} · 存储 {unit.allowStorage ? '可用' : '不可用'} ·{' '}
-                    {unit.conversionCount} 条换算版本引用
+                    数量精度 {unit.scale} 位小数 · 采购 {unit.allowPurchase ? '可用' : '不可用'} ·
+                    销售 {unit.allowSale ? '可用' : '不可用'} · 存储{' '}
+                    {unit.allowStorage ? '可用' : '不可用'} · {unit.conversionCount} 条换算版本引用
                   </p>
                 </div>
                 {writable && (
@@ -351,8 +359,8 @@ export function UnitConversionWorkspace() {
               </p>
               {!panel.baseUnitRegistered && (
                 <p className="text-destructive mt-2 text-xs">
-                  该基础单位尚未登记到单位字典，量纲校验对它无法进行，因此这个 SKU 现在不能配置换算。
-                  请先在上方字典里补登记。
+                  该基础单位尚未登记到单位字典，量纲校验对它无法进行，因此这个 SKU
+                  现在不能配置换算。 请先在上方字典里补登记。
                 </p>
               )}
             </div>
@@ -523,7 +531,9 @@ export function UnitConversionWorkspace() {
             <div className="flex items-end">
               <Button
                 size="sm"
-                disabled={snapshotBusy || docRef.trim() === '' || quantityProblem(docQuantity) !== null}
+                disabled={
+                  snapshotBusy || docRef.trim() === '' || quantityProblem(docQuantity) !== null
+                }
                 onClick={() => void runFreeze()}
               >
                 <Snowflake className="h-4 w-4" />
@@ -539,11 +549,12 @@ export function UnitConversionWorkspace() {
           {snapshot && (
             <div className="mt-3">
               <p className="text-sm font-medium">
-                {snapshot.documentTypeLabel} {snapshot.documentRef} · 新冻结 {snapshot.createdCount} 行 ·
-                复用 {snapshot.reusedCount} 行
+                {snapshot.documentTypeLabel} {snapshot.documentRef} · 新冻结 {snapshot.createdCount}{' '}
+                行 · 复用 {snapshot.reusedCount} 行
               </p>
               <p className="text-muted-foreground mt-1 text-xs">
-                业务时间 {timestamp(snapshot.occurredAt)}。比例与结果都冻结在行上，之后改换算比例不影响这里。
+                业务时间 {timestamp(snapshot.occurredAt)}
+                。比例与结果都冻结在行上，之后改换算比例不影响这里。
               </p>
               <table className="mt-2 w-full text-sm">
                 <thead>
@@ -579,13 +590,13 @@ export function UnitConversionWorkspace() {
       )}
 
       {panel && panel.snapshots.length > 0 && (
-        <Card
-          title="该 SKU 的快照留痕"
-          hint="这个 SKU 参与过的最近单据及其当时冻结的比例。"
-        >
+        <Card title="该 SKU 的快照留痕" hint="这个 SKU 参与过的最近单据及其当时冻结的比例。">
           <ul className="space-y-1 text-xs">
             {panel.snapshots.map((line) => (
-              <li key={`${line.lineNo}-${line.occurredAt}-${line.unitCode}`} className="text-muted-foreground">
+              <li
+                key={`${line.lineNo}-${line.occurredAt}-${line.unitCode}`}
+                className="text-muted-foreground"
+              >
                 {timestamp(line.occurredAt)} · {line.skuCode} · {line.roleLabel} ·{' '}
                 <span className="tabular-nums">{snapshotLineText(line)}</span> ·{' '}
                 {windowText(line.effectiveFrom, line.effectiveTo)}

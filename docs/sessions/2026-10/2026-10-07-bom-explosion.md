@@ -66,22 +66,24 @@ V25 的 `bom_component` 只引用 SKU 不引用 BOM，嵌套靠「子 BOM 的成
 
 ## 关键 trade-off
 
-| 取舍 | 选择 | 代价 |
-| --- | --- | --- |
-| 循环引用 | 409 拒绝 | 遇到循环的用户暂时拿不到清单，必须先改数据。换成截断的话错的小数会变成真实采购单 |
-| 深度上限 | 截断 + 显式标注 | 清单可能不完整，页面上必须显眼，运营要能看懂「为什么不全」 |
-| 缺口下限 | 截 0，富余量另给 `surplus` | 多一列，但避免了缺口列出现负号 |
-| 歧义子 BOM | 按 `(code,id)` 确定性取第一个 + 告警 | 结果「能用」但数据有问题；另一条路是直接拒绝，那会让这类租户完全展不开 |
-| 展开权限 | `spu.read`（纯计算） | 落库的行来自只读用户。但改动 BOM/组件的入口仍是 `spu.update`，落库的也只是调用者自己这份建议快照 |
-| `WAREHOUSE_URL` 默认空 | 其余 14 个 catalog 集成测试不碰展开路径，不被一个用不上的配置项卡在启动失败上 | 真实调用时才报错并说清原因 |
-| 子 BOM 无生效版本 | 按叶子件处理 + note 说明 | 结果里有一行「子装配（未展开）」，但不下钻。另一条路是报错，那会让「只有草稿子 BOM」的租户完全展不开 |
+| 取舍                   | 选择                                                                          | 代价                                                                                                 |
+| ---------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 循环引用               | 409 拒绝                                                                      | 遇到循环的用户暂时拿不到清单，必须先改数据。换成截断的话错的小数会变成真实采购单                     |
+| 深度上限               | 截断 + 显式标注                                                               | 清单可能不完整，页面上必须显眼，运营要能看懂「为什么不全」                                           |
+| 缺口下限               | 截 0，富余量另给 `surplus`                                                    | 多一列，但避免了缺口列出现负号                                                                       |
+| 歧义子 BOM             | 按 `(code,id)` 确定性取第一个 + 告警                                          | 结果「能用」但数据有问题；另一条路是直接拒绝，那会让这类租户完全展不开                               |
+| 展开权限               | `spu.read`（纯计算）                                                          | 落库的行来自只读用户。但改动 BOM/组件的入口仍是 `spu.update`，落库的也只是调用者自己这份建议快照     |
+| `WAREHOUSE_URL` 默认空 | 其余 14 个 catalog 集成测试不碰展开路径，不被一个用不上的配置项卡在启动失败上 | 真实调用时才报错并说清原因                                                                           |
+| 子 BOM 无生效版本      | 按叶子件处理 + note 说明                                                      | 结果里有一行「子装配（未展开）」，但不下钻。另一条路是报错，那会让「只有草稿子 BOM」的租户完全展不开 |
 
 ## 文件清单
 
 ### 迁移
+
 - `backend/services/catalog/src/main/resources/db/migration/V26__bom_explosion.sql`（新）
 
 ### catalog 后端
+
 - `BomExplosionService.java`（新）：逐层推进的递归展开
 - `BomExplosionRules.java`（新）：纯规则层（R6/R7 转发 BomRules，自有 E1/E2/E4）
 - `InventoryAvailabilityPort.java`（新）：跨服务读取口 + 真实 HTTP 实现
@@ -90,11 +92,13 @@ V25 的 `bom_component` 只引用 SKU 不引用 BOM，嵌套靠「子 BOM 的成
 - `CatalogModels.java`（改）：+4 个 `BomExplosion*` 传输模型
 
 ### warehouse 后端
+
 - `InventoryAvailabilityService.java`（新）：批量可用量聚合
 - `InventoryController.java`（改）：+1 端点
 - `WarehouseModels.java`（改）：+3 个 `Availability*` 传输模型
 
 ### 前端
+
 - `bom-model.ts`（改）：展开工作区的口径固化与读模型
 - `bom-workspace.tsx`（改）：展开工作区 UI
 - `bom-model.test.ts`（改）：38 → 51 例
@@ -102,10 +106,12 @@ V25 的 `bom_component` 只引用 SKU 不引用 BOM，嵌套靠「子 BOM 的成
 - `packages/api-contracts/`（codegen 产物，只由脚本生成）
 
 ### 配置与文档
+
 - `deploy/docker/docker-compose.catalog.yml`（改）：`WAREHOUSE_URL`
 - `docs/product/capability-blueprint/module-progress.md`（改）：3.5.2.2 一行
 
 ### 测试
+
 - `BomExplosionIntegrationTest.java`（新，13 例）
 - `BomExplosionRulesTest.java`（新，11 例）
 - `InventoryAvailabilityIntegrationTest.java`（新，warehouse 8 例）

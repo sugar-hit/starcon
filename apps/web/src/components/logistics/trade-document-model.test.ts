@@ -100,7 +100,9 @@ describe('查询串：每个筛选条件都真的进 URL', () => {
   });
 
   it('状态可多选：每个值单独出一个 status 参数', () => {
-    expect(tradeQuery({ status: ['DRAFT', 'APPROVED', 'SUBMITTED'] }).match(/status=/g)).toHaveLength(3);
+    expect(
+      tradeQuery({ status: ['DRAFT', 'APPROVED', 'SUBMITTED'] }).match(/status=/g),
+    ).toHaveLength(3);
   });
 
   it('blockedOnly=false 不进查询串（不筛 ≠ 筛一个假值）', () => {
@@ -258,7 +260,11 @@ describe('真实调用点：每个端点的 URL 与方法都被断言', () => {
       content: {},
       notes: '',
     });
-    expect(calls[1]?.body).toMatchObject({ templateId: null, quantityTotal: null, packageCount: null });
+    expect(calls[1]?.body).toMatchObject({
+      templateId: null,
+      quantityTotal: null,
+      packageCount: null,
+    });
   });
 
   it('写：维护单证要求 / 认证状态 / 优惠规则 / 处理提醒', async () => {
@@ -348,7 +354,14 @@ describe('「待业务确认」不等于「校验通过」', () => {
   });
 
   it('待业务确认、不通过、未校验、空值都不算通过', () => {
-    for (const result of ['PENDING_BUSINESS_CONFIRMATION', 'FAIL', 'NOT_CHECKED', '', null, undefined]) {
+    for (const result of [
+      'PENDING_BUSINESS_CONFIRMATION',
+      'FAIL',
+      'NOT_CHECKED',
+      '',
+      null,
+      undefined,
+    ]) {
       expect(checkPassed(result)).toBe(false);
     }
   });
@@ -365,7 +378,10 @@ describe('提交前阻断清单：与后端提交闸同一组判据', () => {
   });
 
   it('没跑过校验也算阻断：没校验就提交等于没人确认齐不齐', () => {
-    const blockers = submitBlockers({ ...base, set: { latestCheckResult: 'NOT_CHECKED' } as TradeSetRow });
+    const blockers = submitBlockers({
+      ...base,
+      set: { latestCheckResult: 'NOT_CHECKED' } as TradeSetRow,
+    });
     expect(blockers).toHaveLength(1);
     expect(blockers[0]).toContain('还没跑完整性校验');
   });
@@ -453,7 +469,9 @@ describe('单证包动作入口按状态编码，不许诺做不到的事', () =
 
   it('已提交之后才出现「登记已接收 / 被退回」', () => {
     expect(tradeSetActions('DRAFT')).not.toContain('acknowledge');
-    expect(tradeSetActions('SUBMITTED')).toEqual(expect.arrayContaining(['acknowledge', 'sendBack']));
+    expect(tradeSetActions('SUBMITTED')).toEqual(
+      expect.arrayContaining(['acknowledge', 'sendBack']),
+    );
   });
 
   it('终态没有任何动作', () => {

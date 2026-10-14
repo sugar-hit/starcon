@@ -66,9 +66,11 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/catalog/src/main/resources/db/migration/V35__product_export.sql`
 
 **后端**
+
 - `ExportModels.java`（对外契约 record）
 - `ExportDataSource.java`（数据源接口 + ExportColumn / ExportSort）
 - `SqlExportDataSource.java`（count 与分批 stream 的 SQL 通用实现）
@@ -80,31 +82,34 @@
 - `ExportController.java`
 
 **测试**
+
 - `ExportIntegrationTest.java`（16 项，Testcontainers PG16 + 强制 RLS + 单连接池）
 - `export-model.test.ts`（18 项）
 
 **前端**
+
 - `apps/web/src/app/products/export/page.tsx`
 - `apps/web/src/components/catalog/export-model.ts`
 - `apps/web/src/components/catalog/export-workspace.tsx`
 - `apps/web/src/lib/api-proxy.ts`（只**追加** `export-*` 分支）
 
 **契约 / 台账 / 文档**
+
 - `packages/api-contracts/src/*`（codegen 产物，494 DTOs，只读）
 - `docs/product/capability-blueprint/module-progress.md`（只改 3.8.2.1 一行的状态与证据）
 - `docs/backlog/2026-10/2026-10-07-quote-export-data-source-extension.md`
 
 ## 验证
 
-| 命令 | 结果 |
-| --- | --- |
-| `./mvnw verify`（backend） | BUILD SUCCESS，6 模块全过；catalog 992 tests / 0 failures |
-| `-Dtest=ExportIntegrationTest` | Tests run: 16, Failures: 0, Errors: 0 |
-| `pnpm typecheck` | 3/3 成功 |
-| `pnpm lint` | 3/3 成功 |
-| `pnpm test` | 43 files / 734 tests 全过 |
-| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 成功，`/products/export` 6.58 kB |
-| `node tools/module-progress/sync.mjs --check` | ✓ 台账与蓝图一致 |
+| 命令                                                         | 结果                                                      |
+| ------------------------------------------------------------ | --------------------------------------------------------- |
+| `./mvnw verify`（backend）                                   | BUILD SUCCESS，6 模块全过；catalog 992 tests / 0 failures |
+| `-Dtest=ExportIntegrationTest`                               | Tests run: 16, Failures: 0, Errors: 0                     |
+| `pnpm typecheck`                                             | 3/3 成功                                                  |
+| `pnpm lint`                                                  | 3/3 成功                                                  |
+| `pnpm test`                                                  | 43 files / 734 tests 全过                                 |
+| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 成功，`/products/export` 6.58 kB                          |
+| `node tools/module-progress/sync.mjs --check`                | ✓ 台账与蓝图一致                                          |
 
 多租户三断言全部实跑：两租户互不可见、伪造 `X-Tenant-Id` 无效、单连接池反复交替不串租户；
 另加**数据范围断言**：SELF 范围的用户对同一 SPU 导出 0 行，

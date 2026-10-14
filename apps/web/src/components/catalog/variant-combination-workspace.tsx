@@ -3,16 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Badge, Button } from '@starcon/ui';
-import {
-  ArrowLeft,
-  Boxes,
-  GitBranch,
-  ListChecks,
-  Plus,
-  RefreshCw,
-  Trash2,
-  X,
-} from 'lucide-react';
+import { ArrowLeft, Boxes, GitBranch, ListChecks, Plus, RefreshCw, Trash2, X } from 'lucide-react';
 import type {
   BoundAxis,
   CombinationConflict,
@@ -94,7 +85,11 @@ export function VariantCombinationWorkspace() {
 
   const [mode, setMode] = useState<DraftMode>('MATRIX');
   const [selection, setSelection] = useState(emptySelectionDraft([]));
-  const [explicit, setExplicit] = useState<ExplicitDraft>({ rows: [[]], notes: '', occurredAt: '' });
+  const [explicit, setExplicit] = useState<ExplicitDraft>({
+    rows: [[]],
+    notes: '',
+    occurredAt: '',
+  });
   const [notes, setNotes] = useState('');
   const [occurredAt, setOccurredAt] = useState('');
   const [draftBusy, setDraftBusy] = useState(false);
@@ -170,7 +165,9 @@ export function VariantCombinationWorkspace() {
       mode === 'EXPLICIT'
         ? localConflictReasons(
             explicit.rows
-              .filter((row) => row.some((cell) => cell.specAxisId !== '' && cell.value.trim() !== ''))
+              .filter((row) =>
+                row.some((cell) => cell.specAxisId !== '' && cell.value.trim() !== ''),
+              )
               .map((row) =>
                 row
                   .filter((cell) => cell.specAxisId !== '' && cell.value.trim() !== '')
@@ -182,7 +179,10 @@ export function VariantCombinationWorkspace() {
     [mode, explicit, axes],
   );
 
-  const matrixRows = useMemo(() => selectionRowCount(axes, selection.picks), [axes, selection.picks]);
+  const matrixRows = useMemo(
+    () => selectionRowCount(axes, selection.picks),
+    [axes, selection.picks],
+  );
 
   /**
    * 预校验：只对显式提交的组合有意义。
@@ -304,8 +304,8 @@ export function VariantCombinationWorkspace() {
           <h2 className="text-xl font-semibold">组合唯一性校验</h2>
           <p className="text-muted-foreground mt-1 text-sm">
             保证同一 SPU 下不存在重复的规格值组合（如「红色 / 大」出现两次），并在生成 SKU
-            矩阵前拦住非法组合。校验通过后生成的是<b>待建 SKU 草稿</b>——组合先占住位，
-            真正落 SKU 由下游 SKU 列表模块执行。
+            矩阵前拦住非法组合。校验通过后生成的是<b>待建 SKU 草稿</b>——组合先占住位， 真正落 SKU
+            由下游 SKU 列表模块执行。
           </p>
         </div>
         <Button variant="ghost" size="sm" onClick={() => void load()}>
@@ -315,11 +315,7 @@ export function VariantCombinationWorkspace() {
       </header>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat
-          label="已绑定轴的 SPU"
-          value={overview.axisBoundSpuCount}
-          hint="组合唯一性的作用域"
-        />
+        <Stat label="已绑定轴的 SPU" value={overview.axisBoundSpuCount} hint="组合唯一性的作用域" />
         <Stat label="组合占用" value={overview.reservedCombinationCount} hint="草稿已占位" />
         <Stat
           label="矩阵草稿"
@@ -413,8 +409,7 @@ export function VariantCombinationWorkspace() {
                   <li key={axis.specAxisId} className="text-muted-foreground text-sm">
                     <span className="text-foreground">{axis.name}</span>（{axis.code}）·{' '}
                     {axis.options.filter((option) => option.enabled).length} 个启用取值 / 共{' '}
-                    {axis.options.length} 个
-                    {!axis.enabled && ' · 已停用'}
+                    {axis.options.length} 个{!axis.enabled && ' · 已停用'}
                   </li>
                 ))}
               </ul>
@@ -485,9 +480,7 @@ export function VariantCombinationWorkspace() {
                       <select
                         key={axis.specAxisId}
                         className="border-control-border rounded-md border px-2 py-1 text-sm"
-                        value={
-                          row.find((cell) => cell.specAxisId === axis.specAxisId)?.value ?? ''
-                        }
+                        value={row.find((cell) => cell.specAxisId === axis.specAxisId)?.value ?? ''}
                         onChange={(e) =>
                           setExplicit((current) => {
                             const rows = current.rows.map((candidate, index) =>
@@ -563,10 +556,7 @@ export function VariantCombinationWorkspace() {
                   onChange={(e) => setNotes(e.target.value)}
                 />
               </Field>
-              <Field
-                label="业务时间"
-                hint="业务时间与系统写入时间分开存；留空表示用当前时间。"
-              >
+              <Field label="业务时间" hint="业务时间与系统写入时间分开存；留空表示用当前时间。">
                 <input
                   className="border-control-border w-full rounded-md border px-3 py-2 text-sm"
                   value={occurredAt}
@@ -650,8 +640,12 @@ export function VariantCombinationWorkspace() {
                     </p>
                     <p className="mt-1 text-sm">{conflict.message}</p>
                     <p className="text-muted-foreground mt-1 text-xs">
-                      {conflictPositionText(conflict) && <>落点：{conflictPositionText(conflict)} · </>}
-                      {conflictTargetText(conflict) && <>撞的是：{conflictTargetText(conflict)} · </>}
+                      {conflictPositionText(conflict) && (
+                        <>落点：{conflictPositionText(conflict)} · </>
+                      )}
+                      {conflictTargetText(conflict) && (
+                        <>撞的是：{conflictTargetText(conflict)} · </>
+                      )}
                       {conflict.values && conflict.values.length > 0 && (
                         <>组合：{combinationText(conflict.values)}</>
                       )}
@@ -674,9 +668,15 @@ export function VariantCombinationWorkspace() {
             ) : (
               <ul className="space-y-1">
                 {combinations.map((combination) => (
-                  <li key={`${combination.source}-${combination.signature}-${combination.skuId}`} className="text-sm">
+                  <li
+                    key={`${combination.source}-${combination.signature}-${combination.skuId}`}
+                    className="text-sm"
+                  >
                     <span className="font-mono text-xs">{combination.signature}</span>
-                    <span className="text-muted-foreground"> · {combinationText(combination.values)}</span>
+                    <span className="text-muted-foreground">
+                      {' '}
+                      · {combinationText(combination.values)}
+                    </span>
                     <Badge tone={combination.source === 'RESERVED' ? 'info' : 'neutral'}>
                       {combinationSourceText(combination)}
                     </Badge>
@@ -717,7 +717,8 @@ export function VariantCombinationWorkspace() {
                         <p className="text-muted-foreground mt-0.5 text-xs">备注：{draft.notes}</p>
                       )}
                       <p className="text-muted-foreground mt-0.5 text-xs">
-                        业务时间 {timestamp(draft.occurredAt)} · 系统写入 {timestamp(draft.createdAt)}
+                        业务时间 {timestamp(draft.occurredAt)} · 系统写入{' '}
+                        {timestamp(draft.createdAt)}
                       </p>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => void openDraft(draft)}>
@@ -755,16 +756,14 @@ export function VariantCombinationWorkspace() {
                 {detail.combinations.map((combination) => (
                   <li key={combination.signature} className="text-sm">
                     <span className="font-mono text-xs">{combination.signature}</span>
-                    <span className="text-muted-foreground"> · {combinationText(combination.values)}</span>
+                    <span className="text-muted-foreground">
+                      {' '}
+                      · {combinationText(combination.values)}
+                    </span>
                   </li>
                 ))}
               </ul>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-3"
-                onClick={() => setDetail(null)}
-              >
+              <Button variant="ghost" size="sm" className="mt-3" onClick={() => setDetail(null)}>
                 <X className="h-4 w-4" />
                 收起
               </Button>

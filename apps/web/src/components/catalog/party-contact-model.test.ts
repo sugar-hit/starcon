@@ -125,10 +125,13 @@ describe('3.6.3.1 地址与联系人前端模型', () => {
       removedUsages(['SHIP_TO', 'PICKUP'], [{ usage: 'SHIP_TO', isDefault: true }, null]),
     ).toEqual(['PICKUP']);
     expect(
-      removedUsages(['SHIP_TO', 'PICKUP'], [
-        { usage: 'SHIP_TO', isDefault: true },
-        { usage: 'PICKUP', isDefault: false },
-      ]),
+      removedUsages(
+        ['SHIP_TO', 'PICKUP'],
+        [
+          { usage: 'SHIP_TO', isDefault: true },
+          { usage: 'PICKUP', isDefault: false },
+        ],
+      ),
     ).toEqual([]);
     expect(removedUsages(['PICKUP'], [])).toEqual(['PICKUP']);
   });

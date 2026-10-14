@@ -10,9 +10,7 @@ import org.junit.jupiter.api.Test;
 /**
  * 3.3.1.2 类目属性要求的纯规则单测：要求形态词表、取值约束按数据类型的分流、条件求值。
  *
- * <p>条件求值是本模块最容易出错的一处——布尔列表达不了「条件必填」，
- * 求值逻辑一旦对某个算子或某个类型判错，症状是「字段偶尔不校验」，
- * 集成测试很难穷举，所以在这里把每个分支都钉死。
+ * <p>条件求值是本模块最容易出错的一处——布尔列表达不了「条件必填」， 求值逻辑一旦对某个算子或某个类型判错，症状是「字段偶尔不校验」， 集成测试很难穷举，所以在这里把每个分支都钉死。
  */
 class CategoryAttributeRequirementRulesTest {
 
@@ -60,7 +58,10 @@ class CategoryAttributeRequirementRulesTest {
   void rangeConstraintsMustMatchTheAttributeDataType() {
     // 数值：区间合法。比较按值域而不是书写顺序：min 永远是小的那一端。
     assertThat(rangeProblem("DECIMAL", BigDecimal.ONE, BigDecimal.TEN, null, false, 0)).isNull();
-    assertThat(rangeProblem("DECIMAL", new BigDecimal("0.01"), new BigDecimal("99.99"), null, false, 0)).isNull();
+    assertThat(
+            rangeProblem(
+                "DECIMAL", new BigDecimal("0.01"), new BigDecimal("99.99"), null, false, 0))
+        .isNull();
     assertThat(rangeProblem("DECIMAL", BigDecimal.TEN, BigDecimal.ONE, null, false, 0))
         .contains("下限不能大于上限");
 
@@ -91,7 +92,8 @@ class CategoryAttributeRequirementRulesTest {
     assertThat(conditionValuesProblem("CONDITIONAL_REQUIRED", List.of())).contains("至少一个条件取值");
     assertThat(conditionValuesProblem("CONDITIONAL_REQUIRED", null)).contains("至少一个条件取值");
     assertThat(conditionValuesProblem("CONDITIONAL_REQUIRED", List.of("红色", ""))).contains("不能为空");
-    assertThat(conditionValuesProblem("CONDITIONAL_REQUIRED", List.of("红色", "红色"))).contains("不可重复");
+    assertThat(conditionValuesProblem("CONDITIONAL_REQUIRED", List.of("红色", "红色")))
+        .contains("不可重复");
     assertThat(conditionValuesProblem("CONDITIONAL_REQUIRED", List.of("红色", "蓝色"))).isNull();
 
     // 非条件必填却配了取值：那是一条永不生效的死配置。

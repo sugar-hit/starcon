@@ -90,7 +90,9 @@ it('模型源码里真实存在的每个调用点都被放行', async () => {
   const sites = realCallSites();
   expect(sites.length, '模型源码里一个调用点都没抽到 —— 断言本身失效了').toBeGreaterThan(0);
   for (const path of sites) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（白名单漏登记 = 浏览器里静默 404）`).toBe(200);
   }
   expect(sites).toEqual(
@@ -107,7 +109,7 @@ it('放行时真的转发到 8085', async () => {
   vi.stubGlobal('fetch', fetcher);
 
   const response = await GET(request('trade/sales-orders/list'), {
-    params: { path: 'trade/sales-orders/list'.split('/') },
+    params: Promise.resolve({ path: 'trade/sales-orders/list'.split('/') }),
   });
   expect(response.status).toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
@@ -138,7 +140,9 @@ it('未交付 / 本模块刻意不提供的形状仍然被拒', async () => {
     'trade/sales-order/list',
     'trade/sales-orderss/list',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不该被放行（放行比 404 更糟：界面会以为它可用）`).toBe(404);
   }
 });
@@ -166,7 +170,9 @@ it('白名单里不存在任何批量操作的写形状', async () => {
     'trade/sales-orders/list/bulk/cancel',
     'trade/sales-orders/list/bulk/dunning',
   ]) {
-    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    const response = await POST(request(path, 'POST'), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `POST ${path} 不该被放行：写形状不存在`).toBe(404);
   }
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
@@ -182,7 +188,9 @@ it('不误伤其他车道已登记的 trade 分支（取并不得取错一侧）
     `trade/fulfillment/routing/decisions/${ID}/status`,
     'trade/fulfillment/routing/switches',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `9.3.2.2 的 ${path} 被本车道误伤`).toBe(200);
   }
   // 6.4.1.1 加工单
@@ -193,7 +201,9 @@ it('不误伤其他车道已登记的 trade 分支（取并不得取错一侧）
     `trade/processing/orders/${ID}/components/issue`,
     'trade/processing/factories',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `6.4.1.1 的 ${path} 被本车道误伤`).toBe(200);
   }
   // 9.1.2.2 手工订单（本车道与之并列，不是覆盖）
@@ -203,7 +213,9 @@ it('不误伤其他车道已登记的 trade 分支（取并不得取错一侧）
     `trade/sales-orders/${ID}`,
     `trade/sales-orders/${ID}/submit`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `9.1.2.2 的 ${path} 被本车道误伤`).toBe(200);
   }
 });
@@ -214,9 +226,11 @@ it('/trade/orders 仍然 404 —— 该路径被 TradeTenancyIntegrationTest 预
   for (const method of ['GET', 'POST'] as const) {
     const response =
       method === 'GET'
-        ? await GET(request('trade/orders'), { params: { path: ['trade', 'orders'] } })
+        ? await GET(request('trade/orders'), {
+            params: Promise.resolve({ path: ['trade', 'orders'] }),
+          })
         : await POST(request('trade/orders', 'POST'), {
-            params: { path: ['trade', 'orders'] },
+            params: Promise.resolve({ path: ['trade', 'orders'] }),
           });
     expect(response.status).toBe(404);
   }

@@ -10,24 +10,19 @@ import java.util.UUID;
 /**
  * 8.3.1.1 出库单列表的传输模型。
  *
- * <p>蓝图原话：「出库作业主列表：来源（销售/采购退货/调拨/加工出库）、SKU 行数、件数、状态
- * （待拣/拣货中/待复核/待打包/待发货/已发货/取消）、发货仓、承运渠道。」输入：「筛选条件
- * （仓库、来源、状态、时间）；用户数据范围。」输出：「分页列表 + 批量操作（生成拣货任务、
- * 打印、取消）。」以及本模块被点名的那条关系：「**出库单 ≠ 销售订单**：一订单可多出库单
+ * <p>蓝图原话：「出库作业主列表：来源（销售/采购退货/调拨/加工出库）、SKU 行数、件数、状态 （待拣/拣货中/待复核/待打包/待发货/已发货/取消）、发货仓、承运渠道。」输入：「筛选条件
+ * （仓库、来源、状态、时间）；用户数据范围。」输出：「分页列表 + 批量操作（生成拣货任务、 打印、取消）。」以及本模块被点名的那条关系：「**出库单 ≠ 销售订单**：一订单可多出库单
  * （分仓/分批），出库单是履约动作的载体。」
  *
- * <p><b>出库单是履约动作的载体，不是订单的影子。</b> 这决定了两个数据形状：
- * 外部单号是 {@code String} 而不是指向订单表的外键（9 订单履约尚未交付，跨服务也不能建
+ * <p><b>出库单是履约动作的载体，不是订单的影子。</b> 这决定了两个数据形状： 外部单号是 {@code String} 而不是指向订单表的外键（9 订单履约尚未交付，跨服务也不能建
  * FK），并且刻意**不加** (tenant_id, source_external_ref) 唯一索引 —— 加了就等于把
  * 「分仓/分批拆多张出库单」在数据上禁掉了，那正是这条关系要表达的相反面。
  *
  * <p><b>七态状态机在 {@link OutboundOrderStatus} 里显式建模</b>，与 V72 的触发器白名单
  * 一一对应（两处都写，改一处必须改另一处；单测里有一条断言比对两者）。
  *
- * <p><b>「生成拣货任务」只做到交接请求为止</b>：蓝图把 8.3.2.1 拣货任务列为下游，而它
- * 拥有拣货任务表、拣货明细与异常上报。本模块不建那张表，也不假装它存在 —— 它做的是
- * 真实的三件事：校验待拣状态、落一行交接请求、把状态推到拣货中。8.3.2.1 交付后按
- * (tenant_id, order_id) 接手这张表。
+ * <p><b>「生成拣货任务」只做到交接请求为止</b>：蓝图把 8.3.2.1 拣货任务列为下游，而它 拥有拣货任务表、拣货明细与异常上报。本模块不建那张表，也不假装它存在 —— 它做的是
+ * 真实的三件事：校验待拣状态、落一行交接请求、把状态推到拣货中。8.3.2.1 交付后按 (tenant_id, order_id) 接手这张表。
  */
 public final class OutboundOrderModels {
 
@@ -41,12 +36,11 @@ public final class OutboundOrderModels {
    * <p>四类的<b>可信度不一样，所以表达方式也不一样</b>：
    *
    * <ul>
-   *   <li>{@link #SALES} 销售 —— 上游是 9 订单履约，<b>尚未交付</b>：只存外部订单号字符串，
-   *       跨服务不建 FK、不查对方的表（AGENTS.md）。
+   *   <li>{@link #SALES} 销售 —— 上游是 9 订单履约，<b>尚未交付</b>：只存外部订单号字符串， 跨服务不建 FK、不查对方的表（AGENTS.md）。
    *   <li>{@link #PURCHASE_RETURN} 采购退货 —— 上游是 6 采购，同样未交付，同样只存单号。
    *   <li>{@link #PRODUCTION} 加工出库 —— 上游是 10 加工，同样未交付，同样只存工单号。
-   *   <li>{@link #TRANSFER} 调拨 —— 上游是 7.5.1.1，<b>已交付且同在 warehouse 服务</b>：
-   *       真复合外键到 {@code transfer_order}，建单时还会校验发货仓与明细 SKU 对得上。
+   *   <li>{@link #TRANSFER} 调拨 —— 上游是 7.5.1.1，<b>已交付且同在 warehouse 服务</b>： 真复合外键到 {@code
+   *       transfer_order}，建单时还会校验发货仓与明细 SKU 对得上。
    * </ul>
    *
    * <p>前三类合起来是「外部 id 字符串」，第四类是「真关联」，两者在库上互斥（V72 的 CHECK）。
@@ -77,9 +71,8 @@ public final class OutboundOrderModels {
   /**
    * 出库单状态（七态）与显式转换矩阵。
    *
-   * <p>七个值与蓝图括号里逐字对应：待拣 / 拣货中 / 待复核 / 待打包 / 待发货 / 已发货 / 取消。
-   * 转换矩阵与 V72 的 {@code outbound_order_status_guard} 触发器白名单一一对应：
-   * 服务层用它给出可读的拒绝理由，触发器保证绕过服务层也过不去。
+   * <p>七个值与蓝图括号里逐字对应：待拣 / 拣货中 / 待复核 / 待打包 / 待发货 / 已发货 / 取消。 转换矩阵与 V72 的 {@code
+   * outbound_order_status_guard} 触发器白名单一一对应： 服务层用它给出可读的拒绝理由，触发器保证绕过服务层也过不去。
    *
    * <p><b>两条返工边不是随手加的</b>：
    *
@@ -88,11 +81,9 @@ public final class OutboundOrderModels {
    *   <li>待打包 → 待复核：打包时发现缺件，退回复核重新确认。
    * </ul>
    *
-   * <p><b>复核不通过为什么不退回「待拣」</b>：待拣的含义是「一件都没拣」，而复核不通过时
-   * 货已经离开库位、正处在返工循环里。退回待拣会让待拣同时表达「没开始」与「拣错了
-   * 重来」，作业台按状态分组时这两种单子必须分开处理。这个选择同时让「一张出库单只
-   * 生成一次拣货任务」（{@code outbound_pick_request} 上的 UNIQUE）站得住 ——
-   * 拣货任务本来就是一次性交接，不是反复重发的工单。
+   * <p><b>复核不通过为什么不退回「待拣」</b>：待拣的含义是「一件都没拣」，而复核不通过时 货已经离开库位、正处在返工循环里。退回待拣会让待拣同时表达「没开始」与「拣错了
+   * 重来」，作业台按状态分组时这两种单子必须分开处理。这个选择同时让「一张出库单只 生成一次拣货任务」（{@code outbound_pick_request} 上的 UNIQUE）站得住
+   * —— 拣货任务本来就是一次性交接，不是反复重发的工单。
    */
   public enum OutboundOrderStatus {
     PENDING_PICKING("待拣", false),
@@ -143,60 +134,31 @@ public final class OutboundOrderModels {
             PENDING_PICKING,
                 List.of(
                     new Transition(
-                        PENDING_PICKING,
-                        PICKING,
-                        false,
-                        false,
-                        "生成拣货任务，出库单交给 8.3.2.1 拣货作业"),
+                        PENDING_PICKING, PICKING, false, false, "生成拣货任务，出库单交给 8.3.2.1 拣货作业"),
                     new Transition(PENDING_PICKING, CANCELLED, true, false, "单据作废")),
             PICKING,
                 List.of(
-                    new Transition(
-                        PICKING, PENDING_RECHECK, false, false, "拣货完成，提交复核（8.3.3.1）"),
+                    new Transition(PICKING, PENDING_RECHECK, false, false, "拣货完成，提交复核（8.3.3.1）"),
                     new Transition(PICKING, CANCELLED, true, false, "拣货中发现无法发货，单据作废")),
             PENDING_RECHECK,
                 List.of(
                     new Transition(
-                        PENDING_RECHECK,
-                        PENDING_PACKING,
-                        false,
-                        false,
-                        "复核通过，提交打包（8.3.3.2）"),
-                    new Transition(
-                        PENDING_RECHECK,
-                        PICKING,
-                        true,
-                        false,
-                        "复核发现拣错或缺件，退回拣货重做"),
+                        PENDING_RECHECK, PENDING_PACKING, false, false, "复核通过，提交打包（8.3.3.2）"),
+                    new Transition(PENDING_RECHECK, PICKING, true, false, "复核发现拣错或缺件，退回拣货重做"),
                     new Transition(PENDING_RECHECK, CANCELLED, true, false, "复核不通过且无法补救，作废")),
             PENDING_PACKING,
                 List.of(
                     new Transition(
-                        PENDING_PACKING,
-                        PENDING_SHIPMENT,
-                        false,
-                        false,
-                        "打包完成，交接发货（8.3.4.1）"),
+                        PENDING_PACKING, PENDING_SHIPMENT, false, false, "打包完成，交接发货（8.3.4.1）"),
                     new Transition(
-                        PENDING_PACKING,
-                        PENDING_RECHECK,
-                        true,
-                        false,
-                        "打包时发现缺件，退回复核重新确认"),
+                        PENDING_PACKING, PENDING_RECHECK, true, false, "打包时发现缺件，退回复核重新确认"),
                     new Transition(PENDING_PACKING, CANCELLED, true, false, "打包中发现无法发货，作废")),
             PENDING_SHIPMENT,
                 List.of(
-                    new Transition(
-                        PENDING_SHIPMENT,
-                        SHIPPED,
-                        true,
-                        true,
-                        "承运商已揽收，出库单完成"),
+                    new Transition(PENDING_SHIPMENT, SHIPPED, true, true, "承运商已揽收，出库单完成"),
                     new Transition(PENDING_SHIPMENT, CANCELLED, true, false, "发货前取消")),
-            SHIPPED,
-                List.of(),
-            CANCELLED,
-                List.of());
+            SHIPPED, List.of(),
+            CANCELLED, List.of());
 
     /** 合法转换矩阵：从当前状态能去哪儿、每一步要不要理由与承运渠道，都在此显式建模。 */
     public List<Transition> transitionsFrom() {
@@ -217,8 +179,7 @@ public final class OutboundOrderModels {
   /**
    * 打印文档种类。
    *
-   * <p>刻意**只有两种**：出库单与拣货单 —— 都是 8.3.1.1 自己持有的数据。
-   * 面单、箱唛、标签打印属于 8.3.4.2（并行车道 V73），在这里放一种就是抢它的表与端点，
+   * <p>刻意**只有两种**：出库单与拣货单 —— 都是 8.3.1.1 自己持有的数据。 面单、箱唛、标签打印属于 8.3.4.2（并行车道 V73），在这里放一种就是抢它的表与端点，
    * 所以本枚举里一个都不列。
    */
   public enum OutboundPrintDocument {
@@ -247,9 +208,8 @@ public final class OutboundOrderModels {
   /**
    * 建单入参。
    *
-   * <p>{@code skuId} + {@code quantity} 成对出现（{@code lines} 的元素）：
-   * skuCode / skuName 由服务端读 {@code sku_ref} 冻结，不接受调用方自填 ——
-   * 让调用方能自填商品名，就等于允许台账上的货名与商品中心各说各话。
+   * <p>{@code skuId} + {@code quantity} 成对出现（{@code lines} 的元素）： skuCode / skuName 由服务端读 {@code
+   * sku_ref} 冻结，不接受调用方自填 —— 让调用方能自填商品名，就等于允许台账上的货名与商品中心各说各话。
    */
   public record OutboundOrderCreateInput(
       String sourceType,
@@ -263,10 +223,12 @@ public final class OutboundOrderModels {
   public record OutboundOrderLineInput(UUID skuId, BigDecimal quantity) {}
 
   /** 状态推进入参：目标状态 + 说明。 */
-  public record OutboundTransitionInput(String targetStatus, @Schema(nullable = true) String note) {}
+  public record OutboundTransitionInput(
+      String targetStatus, @Schema(nullable = true) String note) {}
 
   /** 批量生成拣货任务入参。 */
-  public record OutboundPickRequestInput(List<UUID> orderIds, @Schema(nullable = true) String note) {}
+  public record OutboundPickRequestInput(
+      List<UUID> orderIds, @Schema(nullable = true) String note) {}
 
   /** 批量取消入参：原因必填（DB 级 CHECK 也要求非空）。 */
   public record OutboundCancelInput(List<UUID> orderIds, String reason) {}
@@ -303,7 +265,8 @@ public final class OutboundOrderModels {
       /** 是否已把拣货任务交接给 8.3.2.1（部分唯一索引保证至多一次）。 */
       boolean pickRequested) {}
 
-  public record OutboundOrderPage(List<OutboundOrderSummary> items, long total, int page, int size) {}
+  public record OutboundOrderPage(
+      List<OutboundOrderSummary> items, long total, int page, int size) {}
 
   /** 打印出参：真正要印的内容（不是「已提交打印」的空壳）。 */
   public record OutboundPrintDocumentLine(

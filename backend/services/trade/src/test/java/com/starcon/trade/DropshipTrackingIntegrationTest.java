@@ -33,27 +33,21 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 9.6.1.3 代发履约跟踪与异常。
  *
- * <p>本测试是 <b>V126 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论，
- * 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不只直连数据库，
+ * <p>本测试是 <b>V126 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论， 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不只直连数据库，
  * 以便同时验证「服务层 + DB 层」两层都没有把闸门漏掉。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p><b>七组断言</b>：
+ *
  * <ol>
- *   <li><b>两段物流必须分列</b>（蓝图唯一不可让步的一条）：录供应商段不写我方段，
- *       录我方段不写供应商段，两组运单号与承运商各自独立、互不覆盖；</li>
- *   <li><b>三类异常由规则检出</b>：超时未发货 / 轨迹长时间无更新 /
- *       报发货后无运单，各自有真实判据，且未过期不误报、重复跑不刷屏；</li>
- *   <li><b>三类处置各有状态流转</b>：催单 / 改自营 / 退款，落处置 + 任务 + 事件；
- *       「改自营发货」真的把生效段切过去且供应商段**保留**为 ABANDONED；</li>
- *   <li><b>回传平台只到「待办」为止</b>：未给运单号时无任务，给了才有；
- *       下游受理前 callback_status 不得显示已回传；</li>
- *   <li><b>时间写回正确</b>：timestamptz 往返不发生 −28800s 静默偏移；</li>
- *   <li><b>DB 级闸门</b>：两段不得同时在途、异常证据不可改写、事件流 append-only；</li>
- *   <li><b>多租户三断言</b>：两租户互不可见 / 伪造 tenant header 无效 /
- *       连接池归还后不串租户。</li>
+ *   <li><b>两段物流必须分列</b>（蓝图唯一不可让步的一条）：录供应商段不写我方段， 录我方段不写供应商段，两组运单号与承运商各自独立、互不覆盖；
+ *   <li><b>三类异常由规则检出</b>：超时未发货 / 轨迹长时间无更新 / 报发货后无运单，各自有真实判据，且未过期不误报、重复跑不刷屏；
+ *   <li><b>三类处置各有状态流转</b>：催单 / 改自营 / 退款，落处置 + 任务 + 事件； 「改自营发货」真的把生效段切过去且供应商段**保留**为 ABANDONED；
+ *   <li><b>回传平台只到「待办」为止</b>：未给运单号时无任务，给了才有； 下游受理前 callback_status 不得显示已回传；
+ *   <li><b>时间写回正确</b>：timestamptz 往返不发生 −28800s 静默偏移；
+ *   <li><b>DB 级闸门</b>：两段不得同时在途、异常证据不可改写、事件流 append-only；
+ *   <li><b>多租户三断言</b>：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。
  * </ol>
  */
 @SpringBootTest
@@ -63,7 +57,8 @@ class DropshipTrackingIntegrationTest {
   static final UUID a = UUID.randomUUID(), b = UUID.randomUUID(), user = UUID.randomUUID();
   static HttpServer identity;
   static final ObjectMapper json = new ObjectMapper();
-  static final Map<String, AccessService.Access> actors = new java.util.concurrent.ConcurrentHashMap<>();
+  static final Map<String, AccessService.Access> actors =
+      new java.util.concurrent.ConcurrentHashMap<>();
   static final List<String> allPermissions =
       java.util.stream.Stream.of("fulfillment")
           .flatMap(
@@ -266,7 +261,10 @@ class DropshipTrackingIntegrationTest {
                   + " values (?,?,'DSH-ORD-1','代发单用配置','SHOP','SHOP-US-1','',"
                   + "'SUPPLIER_DIRECT','SUP-ACME','PURE_AGENCY','','ON_RECEIPT','FLAT_COST','USD',"
                   + "10.0000,25.0000,'SKIP','ALWAYS_LIST',10,'ACTIVE',?::timestamptz,?::timestamptz,'')",
-              configId, tenant, at(-1), at(-1));
+              configId,
+              tenant,
+              at(-1),
+              at(-1));
           UUID orderId = idFor(tenant, 21);
           BigDecimal lineAmount = new BigDecimal("25.0000");
           sql.execute(
@@ -274,23 +272,35 @@ class DropshipTrackingIntegrationTest {
                   + "payment_method,status,submitted_at,subtotal_amount,grand_total_amount)"
                   + " values (?,?,'SO-TRK-1','MANUAL','DROPSHIP','USD','PREPAID','SUBMITTED',"
                   + "?::timestamptz,?,?)",
-              orderId, tenant, at(-1), lineAmount, lineAmount);
+              orderId,
+              tenant,
+              at(-1),
+              lineAmount,
+              lineAmount);
           sql.execute(
               "insert into sales_order_line(id,tenant_id,order_id,line_no,sku_id,sku_code,sku_name,"
                   + "quantity,unit_price,line_amount)"
                   + " values (?,?,?,1,?,'SKU-A','测试商品',1.000000,25.0000,25.0000)",
-              idFor(tenant, 22), tenant, orderId, idFor(tenant, 23));
+              idFor(tenant, 22),
+              tenant,
+              orderId,
+              idFor(tenant, 23));
           sql.execute(
               "insert into sales_order_party_snapshot(id,tenant_id,order_id,customer_party_id,"
                   + "customer_code,customer_name,customer_type)"
                   + " values (?,?,?,?,'C-1','测试买家','INDIVIDUAL')",
-              idFor(tenant, 24), tenant, orderId, idFor(tenant, 25));
+              idFor(tenant, 24),
+              tenant,
+              orderId,
+              idFor(tenant, 25));
           sql.execute(
               "insert into order_address_snapshot(id,tenant_id,order_id,address_role,recipient_name,"
                   + "recipient_phone,country_code,province,city,address_line1)"
                   + " values (?,?,?,'SHIPPING','收件人','13800000000','US','CA','Los Angeles',"
                   + "'123 Main St')",
-              idFor(tenant, 26), tenant, orderId);
+              idFor(tenant, 26),
+              tenant,
+              orderId);
           return new Fixture(configId, orderId);
         });
   }
@@ -302,7 +312,8 @@ class DropshipTrackingIntegrationTest {
         () -> {
           var saved =
               dropshipOrders.createOrder(
-                  new DropshipOrderInput(f.salesOrderId(), f.configId(), "MANUAL", "MANUAL_ENTRY", ""),
+                  new DropshipOrderInput(
+                      f.salesOrderId(), f.configId(), "MANUAL", "MANUAL_ENTRY", ""),
                   idFor(tenant, 99));
           dropshipOrders.confirmPayment(
               saved.id(),
@@ -361,7 +372,9 @@ class DropshipTrackingIntegrationTest {
                       "select relrowsecurity as rls, relforcerowsecurity as force"
                           + " from pg_class where relname = ?",
                       table));
-      assertThat(flags.get("rls", Boolean.class)).as("%s 必须 ENABLE ROW LEVEL SECURITY", table).isTrue();
+      assertThat(flags.get("rls", Boolean.class))
+          .as("%s 必须 ENABLE ROW LEVEL SECURITY", table)
+          .isTrue();
       assertThat(flags.get("force", Boolean.class))
           .as("%s 必须 FORCE ROW LEVEL SECURITY（否则表所有者绕过策略）", table)
           .isTrue();
@@ -386,8 +399,7 @@ class DropshipTrackingIntegrationTest {
     asA(
         () -> {
           service.savePolicy(
-              new DropshipTrackingPolicyInput(2, 24, 36, 100, true, "A 租户阈值"),
-              idFor(a, 99));
+              new DropshipTrackingPolicyInput(2, 24, 36, 100, true, "A 租户阈值"), idFor(a, 99));
           return null;
         });
     var set = asA(service::policy);
@@ -395,9 +407,7 @@ class DropshipTrackingIntegrationTest {
     assertThat(set.stallThresholdHours()).isEqualTo(36);
     // B 租户仍看不到 A 的策略（视图 security_invoker + 底层表 RLS）
     var fb = seedTenant(b);
-    assertThat(asB(service::policy).stallThresholdHours())
-        .as("A 的策略不得泄漏给 B")
-        .isEqualTo(72);
+    assertThat(asB(service::policy).stallThresholdHours()).as("A 的策略不得泄漏给 B").isEqualTo(72);
   }
 
   // ==========================================================================
@@ -439,9 +449,7 @@ class DropshipTrackingIntegrationTest {
     var afterSupplier = trackingRow(a, id);
     assertThat(afterSupplier.supplierTrackingNo()).isEqualTo("SF-SUP-0001");
     assertThat(afterSupplier.supplierCarrierCode()).isEqualTo("SUP-CARRIER");
-    assertThat(afterSupplier.ownTrackingNo())
-        .as("录供应商段不得写我方运单号：两段是两组列，不是一个字段")
-        .isEmpty();
+    assertThat(afterSupplier.ownTrackingNo()).as("录供应商段不得写我方运单号：两段是两组列，不是一个字段").isEmpty();
     assertThat(afterSupplier.ownLegStatus()).isEqualTo("NOT_HANDED_OVER");
 
     asA(
@@ -449,7 +457,13 @@ class DropshipTrackingIntegrationTest {
             service.recordOwnLeg(
                 id,
                 new DropshipOwnLegInput(
-                    "HANDED_OVER", "OWN-CARRIER", "OW-SUP-0002", hoursAgo(1), hoursAgo(1), null, ""),
+                    "HANDED_OVER",
+                    "OWN-CARRIER",
+                    "OW-SUP-0002",
+                    hoursAgo(1),
+                    hoursAgo(1),
+                    null,
+                    ""),
                 idFor(a, 99)));
 
     var both = trackingRow(a, id);
@@ -493,9 +507,7 @@ class DropshipTrackingIntegrationTest {
     var ex = exceptions(a, late).get(0);
     assertThat(ex.exceptionKind()).isEqualTo("DELAYED_SHIPMENT");
     assertThat(ex.ruleCode()).isEqualTo("PAST_PROMISED_SHIP_NO_SHIPMENT");
-    assertThat(ex.ruleThresholdHours())
-        .as("阈值必须随异常一起存下来：事后改策略不能让历史异常看起来是按新规则算的")
-        .isZero();
+    assertThat(ex.ruleThresholdHours()).as("阈值必须随异常一起存下来：事后改策略不能让历史异常看起来是按新规则算的").isZero();
     assertThat(ex.ruleEvidence()).contains("未发货");
     assertThat(ex.severity())
         .as("逾期 48 小时超过 critical_delay_hours=24，必须是 CRITICAL")
@@ -516,7 +528,13 @@ class DropshipTrackingIntegrationTest {
             service.recordSupplierLeg(
                 id,
                 new DropshipSupplierLegInput(
-                    "IN_TRANSIT", "SUP-CARRIER", "SF-STALL-1", hoursAgo(120), hoursAgo(100), null, ""),
+                    "IN_TRANSIT",
+                    "SUP-CARRIER",
+                    "SF-STALL-1",
+                    hoursAgo(120),
+                    hoursAgo(100),
+                    null,
+                    ""),
                 idFor(a, 99)));
     assertThat(evaluate(a).detected()).isEqualTo(1);
     var ex = exceptions(a, id).get(0);
@@ -534,7 +552,13 @@ class DropshipTrackingIntegrationTest {
             service.recordSupplierLeg(
                 id,
                 new DropshipSupplierLegInput(
-                    "IN_TRANSIT", "SUP-CARRIER", "SF-STALL-1", hoursAgo(120), hoursAgo(1), null, ""),
+                    "IN_TRANSIT",
+                    "SUP-CARRIER",
+                    "SF-STALL-1",
+                    hoursAgo(120),
+                    hoursAgo(1),
+                    null,
+                    ""),
                 idFor(a, 99)));
     assertThat(evaluate(a).detected()).as("轨迹更新后不得重复检出同一条").isZero();
   }
@@ -548,7 +572,13 @@ class DropshipTrackingIntegrationTest {
             service.recordSupplierLeg(
                 id,
                 new DropshipSupplierLegInput(
-                    "IN_TRANSIT", "SUP-CARRIER", "SF-LOST-1", hoursAgo(200), hoursAgo(150), null, ""),
+                    "IN_TRANSIT",
+                    "SUP-CARRIER",
+                    "SF-LOST-1",
+                    hoursAgo(200),
+                    hoursAgo(150),
+                    null,
+                    ""),
                 idFor(a, 99)));
     assertThat(evaluate(a).detected()).isEqualTo(1);
     assertThat(exceptions(a, id).get(0).severity())
@@ -563,7 +593,8 @@ class DropshipTrackingIntegrationTest {
     asA(
         () ->
             service.recordSupplierLeg(
-                id, new DropshipSupplierLegInput("SHIPPED", "", "", hoursAgo(5), hoursAgo(5), null, ""),
+                id,
+                new DropshipSupplierLegInput("SHIPPED", "", "", hoursAgo(5), hoursAgo(5), null, ""),
                 idFor(a, 99)));
     var result = evaluate(a);
     assertThat(result.detected()).isEqualTo(1);
@@ -581,19 +612,17 @@ class DropshipTrackingIntegrationTest {
     asA(
         () -> {
           service.savePolicy(
-              new DropshipTrackingPolicyInput(0, 24, 72, 120, false, "线下发货店铺不要求运单号"),
-              idFor(a, 99));
+              new DropshipTrackingPolicyInput(0, 24, 72, 120, false, "线下发货店铺不要求运单号"), idFor(a, 99));
           return null;
         });
     UUID id = newTracking(a, f, at(2));
     asA(
         () ->
             service.recordSupplierLeg(
-                id, new DropshipSupplierLegInput("SHIPPED", "", "", hoursAgo(5), hoursAgo(5), null, ""),
+                id,
+                new DropshipSupplierLegInput("SHIPPED", "", "", hoursAgo(5), hoursAgo(5), null, ""),
                 idFor(a, 99)));
-    assertThat(evaluate(a).detected())
-        .as("策略关闭后跑单规则停用 —— 阈值是经营口径，不是写死的常量")
-        .isZero();
+    assertThat(evaluate(a).detected()).as("策略关闭后跑单规则停用 —— 阈值是经营口径，不是写死的常量").isZero();
 
     // 有运单号时永不判跑单
     UUID id2 = newTracking(a, seedTenant2(a), at(2));
@@ -622,7 +651,10 @@ class DropshipTrackingIntegrationTest {
                   + " values (?,?,'DSH-ORD-2','第二张配置','SHOP','SHOP-US-2','',"
                   + "'SUPPLIER_DIRECT','SUP-BETA','PURE_AGENCY','','ON_RECEIPT','FLAT_COST','USD',"
                   + "10.0000,25.0000,'SKIP','ALWAYS_LIST',11,'ACTIVE',?::timestamptz,?::timestamptz,'')",
-              configId, tenant, at(-1), at(-1));
+              configId,
+              tenant,
+              at(-1),
+              at(-1));
           UUID orderId = idFor(tenant, 32);
           BigDecimal lineAmount = new BigDecimal("25.0000");
           sql.execute(
@@ -630,23 +662,35 @@ class DropshipTrackingIntegrationTest {
                   + "payment_method,status,submitted_at,subtotal_amount,grand_total_amount)"
                   + " values (?,?,'SO-TRK-2','MANUAL','DROPSHIP','USD','PREPAID','SUBMITTED',"
                   + "?::timestamptz,?,?)",
-              orderId, tenant, at(-1), lineAmount, lineAmount);
+              orderId,
+              tenant,
+              at(-1),
+              lineAmount,
+              lineAmount);
           sql.execute(
               "insert into sales_order_line(id,tenant_id,order_id,line_no,sku_id,sku_code,sku_name,"
                   + "quantity,unit_price,line_amount)"
                   + " values (?,?,?,1,?,'SKU-B','测试商品2',1.000000,25.0000,25.0000)",
-              idFor(tenant, 33), tenant, orderId, idFor(tenant, 34));
+              idFor(tenant, 33),
+              tenant,
+              orderId,
+              idFor(tenant, 34));
           sql.execute(
               "insert into sales_order_party_snapshot(id,tenant_id,order_id,customer_party_id,"
                   + "customer_code,customer_name,customer_type)"
                   + " values (?,?,?,?,'C-2','测试买家2','INDIVIDUAL')",
-              idFor(tenant, 35), tenant, orderId, idFor(tenant, 36));
+              idFor(tenant, 35),
+              tenant,
+              orderId,
+              idFor(tenant, 36));
           sql.execute(
               "insert into order_address_snapshot(id,tenant_id,order_id,address_role,recipient_name,"
                   + "recipient_phone,country_code,province,city,address_line1)"
                   + " values (?,?,?,'SHIPPING','收件人','13800000000','US','CA','Los Angeles',"
                   + "'123 Main St')",
-              idFor(tenant, 37), tenant, orderId);
+              idFor(tenant, 37),
+              tenant,
+              orderId);
           return new Fixture(configId, orderId);
         });
   }
@@ -661,8 +705,7 @@ class DropshipTrackingIntegrationTest {
     asA(
         () -> {
           service.dismissException(
-              ex.id(), new DropshipDismissInput("供应商已口头确认今天发出，平台考核暂不追究"),
-              idFor(a, 99));
+              ex.id(), new DropshipDismissInput("供应商已口头确认今天发出，平台考核暂不追究"), idFor(a, 99));
           return null;
         });
     assertThat(exceptions(a, id).get(0).status()).isEqualTo("DISMISSED");
@@ -741,8 +784,7 @@ class DropshipTrackingIntegrationTest {
         () -> {
           service.dispose(
               exceptions(a, id).get(0).id(),
-              new DropshipDisposeInput(
-                  "SWITCH_TO_SELF", null, null, "供应商连续延迟，改由我方仓发货"),
+              new DropshipDisposeInput("SWITCH_TO_SELF", null, null, "供应商连续延迟，改由我方仓发货"),
               idFor(a, 99));
           return null;
         });
@@ -752,25 +794,23 @@ class DropshipTrackingIntegrationTest {
     assertThat(row.supplierLegStatus())
         .as("供应商段必须保留为 ABANDONED 凭据，不能删也不能留在途")
         .isEqualTo("ABANDONED");
-    assertThat(row.supplierTrackingNo())
-        .as("放弃不等于抹掉：供应商发过货这件事仍然可查")
-        .isEqualTo("SF-SW-1");
+    assertThat(row.supplierTrackingNo()).as("放弃不等于抹掉：供应商发过货这件事仍然可查").isEqualTo("SF-SW-1");
     assertThat(row.switchedToOwnAt()).isNotNull();
     assertThat(row.switchedToOwnByMembershipId()).isEqualTo(idFor(a, 99));
     assertThat(row.switchReason()).contains("我方仓");
 
     // 该跟踪上未决异常全部结案
-    assertThat(exceptions(a, id))
-        .allSatisfy(e -> assertThat(e.status()).isEqualTo("DISPOSED"));
+    assertThat(exceptions(a, id)).allSatisfy(e -> assertThat(e.status()).isEqualTo("DISPOSED"));
 
     // 切给我方仓的待办
     var taskList = tasks(a, id);
-    assertThat(taskList).anySatisfy(
-        t -> {
-          assertThat(t.taskKind()).isEqualTo("SELF_FULFILL_SWITCH");
-          assertThat(t.targetSystem()).isEqualTo("WAREHOUSE");
-          assertThat(t.taskStatus()).isEqualTo("OPEN");
-        });
+    assertThat(taskList)
+        .anySatisfy(
+            t -> {
+              assertThat(t.taskKind()).isEqualTo("SELF_FULFILL_SWITCH");
+              assertThat(t.targetSystem()).isEqualTo("WAREHOUSE");
+              assertThat(t.taskStatus()).isEqualTo("OPEN");
+            });
 
     // 切到自有段之后，供应商段的规则不再对该单生效
     assertThat(evaluate(a).detected()).as("切段后不应再检出供应商段异常").isZero();
@@ -815,9 +855,7 @@ class DropshipTrackingIntegrationTest {
     assertThat(d.actionKind()).isEqualTo("REQUEST_REFUND");
     assertThat(d.targetSystem()).isEqualTo("AFTER_SALE");
     assertThat(d.refundCurrencyCode()).as("币种统一大写").isEqualTo("USD");
-    assertThat(d.refundAmount())
-        .as("金额走 numeric(19,4)，不得被浮点截断")
-        .isEqualByComparingTo("31.5678");
+    assertThat(d.refundAmount()).as("金额走 numeric(19,4)，不得被浮点截断").isEqualByComparingTo("31.5678");
     assertThat(d.status()).isEqualTo("PENDING");
 
     // 下游未交付 → 只落待办，不假装退款已完成
@@ -861,7 +899,8 @@ class DropshipTrackingIntegrationTest {
                 asA(
                     () ->
                         service.dispose(
-                            exId, new DropshipDisposeInput("URGE_SUPPLIER", null, null, "  "),
+                            exId,
+                            new DropshipDisposeInput("URGE_SUPPLIER", null, null, "  "),
                             idFor(a, 99))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("处置必须写明依据");
@@ -874,16 +913,15 @@ class DropshipTrackingIntegrationTest {
   void 有运单号才排回传任务_下游受理前不得显示已回传() {
     var f = seedTenant(a);
     UUID id = newTracking(a, f, at(2));
-    assertThat(tasks(a, id))
-        .as("未发货时没有回传任务 —— 拿什么回传？")
-        .isEmpty();
+    assertThat(tasks(a, id)).as("未发货时没有回传任务 —— 拿什么回传？").isEmpty();
     assertThat(trackingRow(a, id).callbackStatus()).isEqualTo("NOT_REQUIRED");
 
     // 供应商报了发货但没给单号 → 不排回传任务（空转的回传毫无意义）
     asA(
         () ->
             service.recordSupplierLeg(
-                id, new DropshipSupplierLegInput("SHIPPED", "", "", hoursAgo(3), hoursAgo(3), null, ""),
+                id,
+                new DropshipSupplierLegInput("SHIPPED", "", "", hoursAgo(3), hoursAgo(3), null, ""),
                 idFor(a, 99)));
     assertThat(tasks(a, id)).isEmpty();
     assertThat(trackingRow(a, id).callbackStatus()).isEqualTo("NOT_REQUIRED");
@@ -950,8 +988,7 @@ class DropshipTrackingIntegrationTest {
     asA(
         () ->
             service.completeTask(
-                taskId, new DropshipTaskResultInput(false, "平台接口返回 403 鉴权失败"),
-                idFor(a, 99)));
+                taskId, new DropshipTaskResultInput(false, "平台接口返回 403 鉴权失败"), idFor(a, 99)));
     assertThat(trackingRow(a, id).callbackStatus()).isEqualTo("FAILED");
     assertThat(trackingRow(a, id).callbackLastError()).contains("403");
   }
@@ -992,12 +1029,11 @@ class DropshipTrackingIntegrationTest {
     evaluate(a);
     UUID exId = exceptions(a, id).get(0).id();
     UUID dId =
-        asA(
-                () ->
-                    service.dispose(
-                        exId,
-                        new DropshipDisposeInput("URGE_SUPPLIER", null, null, "催单"),
-                        idFor(a, 99)))
+        asA(() ->
+                service.dispose(
+                    exId,
+                    new DropshipDisposeInput("URGE_SUPPLIER", null, null, "催单"),
+                    idFor(a, 99)))
             .id();
     asA(
         () -> {
@@ -1014,15 +1050,18 @@ class DropshipTrackingIntegrationTest {
     asA(
         () -> {
           service.changeDispositionStatus(
-              dId, new DropshipDispositionStatusInput("COMPLETED", "供应商已确认今日发出"),
-              idFor(a, 99));
+              dId, new DropshipDispositionStatusInput("COMPLETED", "供应商已确认今日发出"), idFor(a, 99));
           return null;
         });
     var row =
         asA(
             () ->
-                service.pageTrackings(new DropshipTrackingQuery(null, null, null, null, null, null,
-                        null, null, 0, 50)).items().get(0));
+                service
+                    .pageTrackings(
+                        new DropshipTrackingQuery(
+                            null, null, null, null, null, null, null, null, 0, 50))
+                    .items()
+                    .get(0));
     assertThat(row).isNotNull();
     var d =
         asA(() -> service.trackingDetail(id)).dispositions().stream()
@@ -1092,7 +1131,11 @@ class DropshipTrackingIntegrationTest {
     evaluate(a);
     UUID exId = exceptions(a, id).get(0).id();
     assertDbRefused(
-        () -> asTableOwner(a, "delete from fulfillment_dropship_tracking_exception where id='" + exId + "'").run(),
+        () ->
+            asTableOwner(
+                    a,
+                    "delete from fulfillment_dropship_tracking_exception where id='" + exId + "'")
+                .run(),
         "不可删除");
     assertDbRefused(
         () ->
@@ -1135,10 +1178,18 @@ class DropshipTrackingIntegrationTest {
     evaluate(a);
     evaluate(b);
 
-    var inA = asA(() -> service.pageTrackings(new DropshipTrackingQuery(null, null, null, null, null,
-            null, null, null, 0, 50)));
-    var inB = asB(() -> service.pageTrackings(new DropshipTrackingQuery(null, null, null, null, null,
-            null, null, null, 0, 50)));
+    var inA =
+        asA(
+            () ->
+                service.pageTrackings(
+                    new DropshipTrackingQuery(
+                        null, null, null, null, null, null, null, null, 0, 50)));
+    var inB =
+        asB(
+            () ->
+                service.pageTrackings(
+                    new DropshipTrackingQuery(
+                        null, null, null, null, null, null, null, null, 0, 50)));
     assertThat(inA.total()).isEqualTo(1);
     assertThat(inB.total()).isEqualTo(1);
 
@@ -1151,8 +1202,12 @@ class DropshipTrackingIntegrationTest {
 
     // 异常工作台与任务队列同样隔离
     var exB =
-        asA(() -> service.pageExceptions(
-                new DropshipTrackingExceptionQuery(tb, null, null, null, null, 0, 50)).total());
+        asA(
+            () ->
+                service
+                    .pageExceptions(
+                        new DropshipTrackingExceptionQuery(tb, null, null, null, null, 0, 50))
+                    .total());
     assertThat(exB).as("对方租户的异常不可见").isZero();
   }
 
@@ -1177,10 +1232,20 @@ class DropshipTrackingIntegrationTest {
                 .content("{}"))
         .andExpect(status().isOk());
 
-    var inA = asA(() -> service.pageExceptions(
-            new DropshipTrackingExceptionQuery(null, null, null, null, null, 0, 50)).total());
-    var inB = asB(() -> service.pageExceptions(
-            new DropshipTrackingExceptionQuery(null, null, null, null, null, 0, 50)).total());
+    var inA =
+        asA(
+            () ->
+                service
+                    .pageExceptions(
+                        new DropshipTrackingExceptionQuery(null, null, null, null, null, 0, 50))
+                    .total());
+    var inB =
+        asB(
+            () ->
+                service
+                    .pageExceptions(
+                        new DropshipTrackingExceptionQuery(null, null, null, null, null, 0, 50))
+                    .total());
     assertThat(inA).as("A 的单未逾期，伪造头不得让 B 的检出写进 A").isZero();
     assertThat(inB).as("B 没有跟踪，伪造头也不得凭空造出异常").isZero();
 
@@ -1196,14 +1261,29 @@ class DropshipTrackingIntegrationTest {
     newTracking(b, fb, at(2));
     // 池大小为 1：下面每次读写都复用同一条连接。
     for (int i = 0; i < 5; i++) {
-      assertThat(asA(() -> service.pageTrackings(new DropshipTrackingQuery(null, null, null, null, null,
-                      null, null, null, 0, 50)).total()))
-          .as("第 %d 轮租户 A", i).isEqualTo(1);
-      assertThat(asB(() -> service.pageTrackings(new DropshipTrackingQuery(null, null, null, null, null,
-                      null, null, null, 0, 50)).total()))
-          .as("第 %d 轮租户 B", i).isEqualTo(1);
+      assertThat(
+              asA(
+                  () ->
+                      service
+                          .pageTrackings(
+                              new DropshipTrackingQuery(
+                                  null, null, null, null, null, null, null, null, 0, 50))
+                          .total()))
+          .as("第 %d 轮租户 A", i)
+          .isEqualTo(1);
+      assertThat(
+              asB(
+                  () ->
+                      service
+                          .pageTrackings(
+                              new DropshipTrackingQuery(
+                                  null, null, null, null, null, null, null, null, 0, 50))
+                          .total()))
+          .as("第 %d 轮租户 B", i)
+          .isEqualTo(1);
       assertThat(sql.fetch("select id from fulfillment_dropship_tracking").size())
-          .as("第 %d 轮事务外", i).isZero();
+          .as("第 %d 轮事务外", i)
+          .isZero();
       // 策略也必须跟着租户切换，而不是被上一条连接的 GUC 污染
       assertThat(asA(service::policy).delayToleranceHours()).as("第 %d 轮 A 策略", i).isZero();
       assertThat(asB(service::policy).policyRegistered()).as("第 %d 轮 B 策略", i).isFalse();
@@ -1219,27 +1299,31 @@ class DropshipTrackingIntegrationTest {
     UUID id = newTracking(a, f, at(-1));
     evaluate(a);
 
-    http.perform(get("/trade/fulfillment/dropship-tracking/capabilities")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/trade/fulfillment/dropship-tracking/capabilities")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.platformCallbackReady").value(false))
         .andExpect(jsonPath("$.refundReady").value(false))
         .andExpect(jsonPath("$.rules.length()").value(3));
 
-    http.perform(get("/trade/fulfillment/dropship-tracking/trackings")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/trade/fulfillment/dropship-tracking/trackings")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1));
 
-    http.perform(get("/trade/fulfillment/dropship-tracking/exceptions")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/trade/fulfillment/dropship-tracking/exceptions")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.items[0].exceptionKind").value("DELAYED_SHIPMENT"));
 
     // 详情必须把两段都返回出来（前端据此分开画）
-    http.perform(get("/trade/fulfillment/dropship-tracking/trackings/{id}", id)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/trade/fulfillment/dropship-tracking/trackings/{id}", id)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.tracking.supplierLegStatus").value("NOT_SHIPMENT"))
         .andExpect(jsonPath("$.tracking.ownLegStatus").value("NOT_HANDED_OVER"))
@@ -1247,8 +1331,9 @@ class DropshipTrackingIntegrationTest {
         .andExpect(jsonPath("$.exceptions.length()").value(1))
         .andExpect(jsonPath("$.tasks.length()").value(0));
 
-    http.perform(get("/trade/fulfillment/dropship-tracking/trackings/{id}", id)
-            .header("Authorization", "Bearer tenant-b"))
+    http.perform(
+            get("/trade/fulfillment/dropship-tracking/trackings/{id}", id)
+                .header("Authorization", "Bearer tenant-b"))
         .andExpect(status().isNotFound());
   }
 
@@ -1265,10 +1350,11 @@ class DropshipTrackingIntegrationTest {
                 .content("{\"actionKind\":\"URGE_SUPPLIER\",\"note\":\"催\"}"))
         .andExpect(status().isForbidden());
 
-    http.perform(post("/trade/fulfillment/dropship-tracking/exceptions/evaluate")
-            .header("Authorization", "Bearer read-only")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("{}"))
+    http.perform(
+            post("/trade/fulfillment/dropship-tracking/exceptions/evaluate")
+                .header("Authorization", "Bearer read-only")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
         .andExpect(status().isForbidden());
   }
 
@@ -1282,14 +1368,16 @@ class DropshipTrackingIntegrationTest {
             () ->
                 dropshipOrders
                     .createOrder(
-                        new DropshipOrderInput(f.salesOrderId(), f.configId(), "MANUAL", "MANUAL_ENTRY", ""),
+                        new DropshipOrderInput(
+                            f.salesOrderId(), f.configId(), "MANUAL", "MANUAL_ENTRY", ""),
                         idFor(a, 99))
                     .id());
     assertThatThrownBy(
             () ->
                 asA(
-                    () -> service.createTracking(new DropshipTrackingInput(orderId, at(2), ""),
-                        idFor(a, 99))))
+                    () ->
+                        service.createTracking(
+                            new DropshipTrackingInput(orderId, at(2), ""), idFor(a, 99))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("还没提交给供应商");
   }

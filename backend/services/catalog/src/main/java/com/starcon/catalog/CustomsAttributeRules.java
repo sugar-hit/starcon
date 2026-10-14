@@ -10,25 +10,20 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * 3.7.1.1 HS 编码与申报要素的<b>纯规则</b>：HS 编码格式校验、享惠一致性、
- * 申报要素齐备性、可报关性判定、国家码归一。
+ * 3.7.1.1 HS 编码与申报要素的<b>纯规则</b>：HS 编码格式校验、享惠一致性、 申报要素齐备性、可报关性判定、国家码归一。
  *
- * <p>抽成纯函数的理由同 {@link PhysicalSafetyRules}：这些判定决定的是
- * 「这个 SKU 能不能拿去报关」，代价出现在<b>真实的报关单与罚款</b>上，
+ * <p>抽成纯函数的理由同 {@link PhysicalSafetyRules}：这些判定决定的是 「这个 SKU 能不能拿去报关」，代价出现在<b>真实的报关单与罚款</b>上，
  * 而判定发生在录入那一刻。所以它们必须能不碰数据库逐条跑单元测试。
  *
- * <p><b>本类不落任何派生值</b>（V94 零之三）：可报关性、税率、完税价格全部现算。
- * 完税价格 = 成交价 × 汇率 × 税率，而<b>成交价是 10 报关的事实、汇率与税率是
- * 12 财务与 10.5.1.3 的事实</b>；落一列等于替三个服务选定口径。
+ * <p><b>本类不落任何派生值</b>（V94 零之三）：可报关性、税率、完税价格全部现算。 完税价格 = 成交价 × 汇率 × 税率，而<b>成交价是 10 报关的事实、汇率与税率是 12
+ * 财务与 10.5.1.3 的事实</b>；落一列等于替三个服务选定口径。
  *
  * <p><b>四条不可让步的纪律</b>：
  *
  * <ol>
  *   <li><b>HS 编码必须 6–10 位纯数字</b>（规则 A1）。蓝图点名的罚款来源。
- *   <li><b>享惠资格与协定代码双向一致</b>（规则 A2）。两个方向都拦，
- *       否则「不能享惠但填了协定」会同时告诉 10 与 16 两个矛盾的答案。
- *   <li><b>只有审核通过才可报关</b>（V94 第一节）。这不是「质量建议」而是闸门：
- *       草稿行对 10 报关<b>不可见</b>，而不是「可见但要小心」。
+ *   <li><b>享惠资格与协定代码双向一致</b>（规则 A2）。两个方向都拦， 否则「不能享惠但填了协定」会同时告诉 10 与 16 两个矛盾的答案。
+ *   <li><b>只有审核通过才可报关</b>（V94 第一节）。这不是「质量建议」而是闸门： 草稿行对 10 报关<b>不可见</b>，而不是「可见但要小心」。
  *   <li><b>要素码按 ordinal 有序，不按字母序</b>。海关按序比对，顺序是业务事实。
  * </ol>
  */
@@ -58,8 +53,7 @@ public final class CustomsAttributeRules {
   /**
    * 归一化 HS 编码：去首尾空格后必须仍是 6–10 位纯数字。
    *
-   * <p><b>只去空格，不做别的「善意修正」</b>：自动补零、把字母换成数字这类修正
-   * 会把一个明显的错码改成一个「看起来对」的错码 —— 而错码要到海关退单时才发现，
+   * <p><b>只去空格，不做别的「善意修正」</b>：自动补零、把字母换成数字这类修正 会把一个明显的错码改成一个「看起来对」的错码 —— 而错码要到海关退单时才发现，
    * 代价是罚款。所以这里要么原样通过，要么报错。
    *
    * @throws IllegalArgumentException 格式不合法时抛出可读的中文原因
@@ -82,12 +76,10 @@ public final class CustomsAttributeRules {
   /**
    * 归一化原产地国家码：<b>trim + 转大写</b>，然后校验两位大写字母。
    *
-   * <p><b>转大写是对的，国家码转小写是错的</b>：ISO 3166-1 alpha-2 定义的就是大写，
-   * 用户从任何来源粘贴都可能带来小写/前后空格，而它落库后在页面上
+   * <p><b>转大写是对的，国家码转小写是错的</b>：ISO 3166-1 alpha-2 定义的就是大写， 用户从任何来源粘贴都可能带来小写/前后空格，而它落库后在页面上
    * 「看起来完全正常」，直到报关时才发现归类到了错误的税率。
    *
-   * <p>对照 V94 第二节对 {@code char(2)} 的取舍：库层用 {@code varchar(2)} 不做填充，
-   * 归一化全部在应用层做，所以库里存的一定是干净的两位大写。
+   * <p>对照 V94 第二节对 {@code char(2)} 的取舍：库层用 {@code varchar(2)} 不做填充， 归一化全部在应用层做，所以库里存的一定是干净的两位大写。
    */
   public static String normalizeCountryCode(String countryCode, String label) {
     String trimmed = countryCode == null ? "" : countryCode.trim().toUpperCase(Locale.ROOT);
@@ -107,9 +99,8 @@ public final class CustomsAttributeRules {
   /**
    * 校验享惠资格与协定代码双向一致（规则 A2），返回归一化后的协定代码。
    *
-   * <p>两个方向都拦，与 DB 层的两条 CHECK 一一对应：
-   * 「勾了能享惠但没说是哪个协定」会让海关无法适用优惠税率，而运营以为已经享惠；
-   * 「填了协定却没勾享惠」会同时告诉 10 报关「不能享惠」和 16 合规「有协定」。
+   * <p>两个方向都拦，与 DB 层的两条 CHECK 一一对应： 「勾了能享惠但没说是哪个协定」会让海关无法适用优惠税率，而运营以为已经享惠； 「填了协定却没勾享惠」会同时告诉 10
+   * 报关「不能享惠」和 16 合规「有协定」。
    */
   public static String normalizePreference(boolean eligible, String agreement) {
     String trimmed = agreement == null ? "" : agreement.trim();
@@ -131,10 +122,8 @@ public final class CustomsAttributeRules {
   /**
    * 按 {@code ordinal} 升序排列申报要素（纪律 4：顺序是业务事实）。
    *
-   * <p><b>按位次排而不是按字母序排</b>：海关按申报要素的编号顺序逐项比对，
-   * 顺序错了会被判为填报不符。库里的 UNIQUE 约束保证位次不重复，
- * 但<b>不保证读出来是有序的</b>（没有 ORDER BY 的 SQL 返回顺序不保证），
-   * 所以这一层必须显式排。
+   * <p><b>按位次排而不是按字母序排</b>：海关按申报要素的编号顺序逐项比对， 顺序错了会被判为填报不符。库里的 UNIQUE 约束保证位次不重复，
+   * 但<b>不保证读出来是有序的</b>（没有 ORDER BY 的 SQL 返回顺序不保证）， 所以这一层必须显式排。
    */
   public static List<DeclarationElement> ordered(List<DeclarationElement> elements) {
     List<DeclarationElement> sorted = new ArrayList<>(elements);
@@ -145,20 +134,18 @@ public final class CustomsAttributeRules {
   /**
    * 把申报要素拍成 jsonb 对象形态（键 = elementCode、值 = elementValue）。
    *
-   * <p>给 10 报关直接落进 V85 的 {@code declaration_elements jsonb}，
-   * 满足它的 {@code CHECK(jsonb_typeof(... )='object')}。
+   * <p>给 10 报关直接落进 V85 的 {@code declaration_elements jsonb}， 满足它的 {@code CHECK(jsonb_typeof(...
+   * )='object')}。
    *
-   * <p><b>重复的要素码后者覆盖前者</b>：V85 刻意不写死键名，
-   * 而本表的位次唯一并不蕴含要素码唯一（不同位次可以是同一个码，比如
-   * 「品牌类型」在两个子项上各出现一次）。对象形态下这是唯一可表达的语义，
-   * 所以取<b>位次靠后的那个</b>并保持稳定顺序。
-   * 位次唯一由 DB 的 UNIQUE(tenant_id,customs_attribute_id,ordinal) 保证，
-   * 要素码重复因此是一个**真实存在**的合法输入，不是脏数据。
+   * <p><b>重复的要素码后者覆盖前者</b>：V85 刻意不写死键名， 而本表的位次唯一并不蕴含要素码唯一（不同位次可以是同一个码，比如
+   * 「品牌类型」在两个子项上各出现一次）。对象形态下这是唯一可表达的语义， 所以取<b>位次靠后的那个</b>并保持稳定顺序。 位次唯一由 DB 的
+   * UNIQUE(tenant_id,customs_attribute_id,ordinal) 保证， 要素码重复因此是一个**真实存在**的合法输入，不是脏数据。
    */
   public static Map<String, String> toByCode(List<DeclarationElement> ordered) {
     Map<String, String> byCode = new LinkedHashMap<>();
     for (DeclarationElement element : ordered)
-      byCode.put(element.elementCode(), element.elementValue() == null ? "" : element.elementValue());
+      byCode.put(
+          element.elementCode(), element.elementValue() == null ? "" : element.elementValue());
     return Map.copyOf(byCode);
   }
 
@@ -181,8 +168,9 @@ public final class CustomsAttributeRules {
   public static final String NOT_APPROVED = "NOT_APPROVED";
   public static final String SUBMITTED_AWAITING_REVIEW = "SUBMITTED_AWAITING_REVIEW";
 
-  /** 已被驳回。<b>刻意不叫 {@code REJECTED}</b>：那是审核状态常量，
-   *  同名会让「状态是 REJECTED」与「被 REJECTED 这条原因拦住」在读代码时无法区分。 */
+  /**
+   * 已被驳回。<b>刻意不叫 {@code REJECTED}</b>：那是审核状态常量， 同名会让「状态是 REJECTED」与「被 REJECTED 这条原因拦住」在读代码时无法区分。
+   */
   public static final String DECLARATION_REJECTED = "DECLARATION_REJECTED";
 
   public static final String NO_ELEMENTS = "NO_ELEMENTS";
@@ -199,14 +187,13 @@ public final class CustomsAttributeRules {
   /**
    * 判定这份报关属性能不能被 10 报关引用（纪律 3）。
    *
-   * <p><b>{@code status != APPROVED} 一律判不可报关</b>，且按当前态区分三种未就绪：
-   * 还没维护 / 已提交待审 / 被驳回。这三者给运营的下一步动作完全不同
+   * <p><b>{@code status != APPROVED} 一律判不可报关</b>，且按当前态区分三种未就绪： 还没维护 / 已提交待审 / 被驳回。这三者给运营的下一步动作完全不同
    * （去填 / 等审核 / 改后重提），所以不能塌缩成一个「未就绪」。
    *
-   * <p>元素齐备性也在这里判：它是「现算」的派生值，**不落表**
-   * （V94 零之三）—— 落一列就等于缓存了一个会被审核流程改写的状态。
+   * <p>元素齐备性也在这里判：它是「现算」的派生值，**不落表** （V94 零之三）—— 落一列就等于缓存了一个会被审核流程改写的状态。
    */
-  public static DeclarationVerdict verdict(CustomsProfile profile, List<DeclarationElement> ordered) {
+  public static DeclarationVerdict verdict(
+      CustomsProfile profile, List<DeclarationElement> ordered) {
     List<String> blockers = new ArrayList<>(2);
     if (profile.attributeId() == null) {
       blockers.add(NOT_RECORDED);
@@ -220,8 +207,8 @@ public final class CustomsAttributeRules {
           else if (!missingRequired(ordered).isEmpty()) blockers.add(REQUIRED_ELEMENTS_INCOMPLETE);
         }
         case REJECTED -> blockers.add(DECLARATION_REJECTED);
-        case DRAFT -> blockers.add(
-            profile.submittedAt() == null ? NOT_APPROVED : SUBMITTED_AWAITING_REVIEW);
+        case DRAFT ->
+            blockers.add(profile.submittedAt() == null ? NOT_APPROVED : SUBMITTED_AWAITING_REVIEW);
         default -> blockers.add(NOT_APPROVED);
       }
     }
@@ -266,8 +253,7 @@ public final class CustomsAttributeRules {
   /**
    * 协定筛选归一：<b>空串是一个有意义的筛选值</b>（筛「不适用任何协定」）。
    *
-   * <p>所以这里返回 {@code null} 表示「不筛」、返回 {@code ""} 表示「筛不适用协定」，
-   * 调用方必须区分这两种 null/空串，不能一并当成不筛。
+   * <p>所以这里返回 {@code null} 表示「不筛」、返回 {@code ""} 表示「筛不适用协定」， 调用方必须区分这两种 null/空串，不能一并当成不筛。
    */
   public static String normalizeAgreementFilter(String agreement) {
     if (agreement == null) return null;
@@ -287,8 +273,7 @@ public final class CustomsAttributeRules {
   /**
    * HS 编码筛选归一：<b>不校验格式</b>。
    *
-   * <p>与写入路径的差别是有意的：筛选一个写坏的值（比如历史脏数据或用户就是想确认
-   * 「没有 851712-ABC 这种码」）应当返回空集而不是报错 —— 报错会让页面只进错误态，
+   * <p>与写入路径的差别是有意的：筛选一个写坏的值（比如历史脏数据或用户就是想确认 「没有 851712-ABC 这种码」）应当返回空集而不是报错 —— 报错会让页面只进错误态，
    * 看不出「筛出来是 0 条」。
    */
   public static String normalizeHsCodeFilter(String hsCode) {

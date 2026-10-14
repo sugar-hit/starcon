@@ -11,6 +11,7 @@ import { PhysicalSafetyWorkspace } from '@/components/catalog/physical-safety-wo
  * 所以放在 SKU 详情下作为独立工作区，比放在一个跟 SKU 无关的合规列表页里
  * 更贴合「建档时就填」这个要求。
  */
-export default function PhysicalSafetyPage({ params }: { params: { id: string } }) {
-  return <PhysicalSafetyWorkspace skuId={params.id} />;
+export default async function PhysicalSafetyPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  return <PhysicalSafetyWorkspace skuId={resolvedParams.id} />;
 }

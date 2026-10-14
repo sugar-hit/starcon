@@ -81,30 +81,36 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/catalog/src/main/resources/db/migration/V23__bundle_version.sql`
 
 **后端**
+
 - `backend/services/catalog/src/main/java/com/starcon/catalog/BundleRules.java`（新增，纯规则层）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/BundleVersionService.java`（新增）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/BundleVersionController.java`（新增）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/CatalogModels.java`（追加 14 个 `Bundle*` DTO）
 
 **测试**
+
 - `backend/services/catalog/src/test/java/com/starcon/catalog/BundleRulesTest.java`（13 例）
 - `backend/services/catalog/src/test/java/com/starcon/catalog/BundleVersionIntegrationTest.java`（17 例，含租户隔离三断言）
 - `apps/web/src/components/catalog/bundle-model.test.ts`（19 例）
 
 **前端**
+
 - `apps/web/src/components/catalog/bundle-model.ts`（新增）
 - `apps/web/src/components/catalog/bundle-workspace.tsx`（新增）
 - `apps/web/src/app/products/bundles/page.tsx`（新增）
 - `apps/web/src/lib/api-proxy.ts`（`bundles` / `versions` 白名单放行）
 
 **契约（生成物，只读）**
+
 - `packages/api-contracts/src/catalog.ts`（+14 个 `Bundle*` DTO，纯新增）
 - `packages/api-contracts/src/catalog.openapi.json`
 
 **台账与会话**
+
 - `docs/product/capability-blueprint/module-progress.md`（3.5.1.1 → 已交付）
 - `docs/sessions/2026-10/2026-10-07-bundle-version-management.md`（本文件）
 

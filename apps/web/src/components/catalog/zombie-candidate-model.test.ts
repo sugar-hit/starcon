@@ -295,6 +295,12 @@ describe('分页计数', () => {
     };
     expect(requiredDimensionCount(base)).toBe(0);
     expect(requiredDimensionCount({ ...base, requireZeroCost: true })).toBe(1);
-    expect(requiredDimensionCount({ ...base, requireZeroOrderReference: true, requireZeroInventory: true })).toBe(2);
+    expect(
+      requiredDimensionCount({
+        ...base,
+        requireZeroOrderReference: true,
+        requireZeroInventory: true,
+      }),
+    ).toBe(2);
   });
 });

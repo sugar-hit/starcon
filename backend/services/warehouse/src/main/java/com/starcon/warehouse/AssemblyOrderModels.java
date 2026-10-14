@@ -18,25 +18,23 @@ import java.util.UUID;
  * <p>蓝图 08 卷 8.4.1.1 的输入 / 输出逐条对应到这里：
  *
  * <ul>
- *   <li>输入「成品 SKU 与 BOM 版本」→ {@link AssemblyOrderCreateInput#productSkuId()} 与
- *       {@code bomId / bomCode / bomVersionId / bomVersionNo}；<b>上游来源</b>由
- *       {@code sourceSystem + referenceId} 显式表达（加工单引用键，或仓库直接发起）。<br>
- *   <li>输入「组件领用量」→ {@link AssemblyComponentInput#requiredQuantity()}（BOM 规则 R7
- *       冻结的应领量，本服务**不重算**）。<br>
+ *   <li>输入「成品 SKU 与 BOM 版本」→ {@link AssemblyOrderCreateInput#productSkuId()} 与 {@code bomId /
+ *       bomCode / bomVersionId / bomVersionNo}；<b>上游来源</b>由 {@code sourceSystem + referenceId}
+ *       显式表达（加工单引用键，或仓库直接发起）。<br>
+ *   <li>输入「组件领用量」→ {@link AssemblyComponentInput#requiredQuantity()}（BOM 规则 R7 冻结的应领量，本服务**不重算**）。
+ *       <br>
  *   <li>输入「组装数量」→ {@link AssemblyOrderCreateInput#assemblyQuantity()}。<br>
- *   <li>输出「组装单 + 组件出库分录 + 成品入库分录」→ {@link AssemblyOrderCreated}（单据）、
- *       {@link AssemblyOrderIssued#components()}（组件出库）、{@link AssemblyOrderIssued}
- *       的 inbound 分录（成品入库），三者挂在同一个 {@code inventoryTransactionId} 下。</li>
+ *   <li>输出「组装单 + 组件出库分录 + 成品入库分录」→ {@link AssemblyOrderCreated}（单据）、 {@link
+ *       AssemblyOrderIssued#components()}（组件出库）、{@link AssemblyOrderIssued} 的 inbound
+ *       分录（成品入库），三者挂在同一个 {@code inventoryTransactionId} 下。
  * </ul>
  *
- * <p><b>数量刻度</b>：列都是 {@code NUMERIC(19,6)}（对齐 catalog 规则 R7 的 6 位小数），
- * 但**库存余额是 {@code NUMERIC(19,4)}**（V1 已定）。本模块**不允许取整换通过** ——
- * 向下取整等于凭空吞掉材料，向上取整等于凭空多领。所以凡是要真正过账的量，
- * 必须能被 4 位小数精确表示，否则服务层显式拒绝并指出是哪一行。
+ * <p><b>数量刻度</b>：列都是 {@code NUMERIC(19,6)}（对齐 catalog 规则 R7 的 6 位小数）， 但**库存余额是 {@code
+ * NUMERIC(19,4)}**（V1 已定）。本模块**不允许取整换通过** —— 向下取整等于凭空吞掉材料，向上取整等于凭空多领。所以凡是要真正过账的量， 必须能被 4
+ * 位小数精确表示，否则服务层显式拒绝并指出是哪一行。
  *
- * <p><b>虚拟套装进不来</b>：{@code productSkuId} 必须落在本服务 {@code sku_ref} 里。
- * catalog 3.5.1.1 的虚拟套装（{@code bundle}）**不占 SKU 行**（V25 原文：「bundle 没有任何
- * sku 外键 —— 虚拟组合不占 SKU 行」），所以它在数据形状上就填不出一个合法的成品 SKU。
+ * <p><b>虚拟套装进不来</b>：{@code productSkuId} 必须落在本服务 {@code sku_ref} 里。 catalog 3.5.1.1 的虚拟套装（{@code
+ * bundle}）**不占 SKU 行**（V25 原文：「bundle 没有任何 sku 外键 —— 虚拟组合不占 SKU 行」），所以它在数据形状上就填不出一个合法的成品 SKU。
  */
 public final class AssemblyOrderModels {
 
@@ -70,13 +68,10 @@ public final class AssemblyOrderModels {
           @Positive
           @Digits(integer = 13, fraction = 6)
           BigDecimal requiredQuantity,
-      @Schema(
-              nullable = true,
-              description = "单位用量快照（每 1 个成品要多少），可空：只作追溯展示，不参与任何判定")
+      @Schema(nullable = true, description = "单位用量快照（每 1 个成品要多少），可空：只作追溯展示，不参与任何判定")
           @DecimalMax(value = "1000000000000", inclusive = false)
           BigDecimal unitQuantity,
-      @Schema(nullable = true, description = "损耗率快照（百分数，5 = 5%），可空")
-          @DecimalMax(value = "100")
+      @Schema(nullable = true, description = "损耗率快照（百分数，5 = 5%），可空") @DecimalMax(value = "100")
           BigDecimal scrapRate,
       @Schema(nullable = true) @Size(max = 64) String role,
       @Schema(nullable = true) @Size(max = 200) String note) {}
@@ -84,24 +79,20 @@ public final class AssemblyOrderModels {
   /**
    * 建组装单请求。
    *
-   * <p>BOM 与加工单都在别的服务（catalog / trade），所以本请求带的是**引用键 + 冻结的组件明细**，
-   * 不是「帮我按 BOM 查一下」—— 那要求 warehouse 跨服务读 catalog 的表，AGENTS.md 明令禁止。
+   * <p>BOM 与加工单都在别的服务（catalog / trade），所以本请求带的是**引用键 + 冻结的组件明细**， 不是「帮我按 BOM 查一下」—— 那要求 warehouse
+   * 跨服务读 catalog 的表，AGENTS.md 明令禁止。
    */
   public record AssemblyOrderCreateInput(
-      @Schema(description = "成品 SKU（必须是 catalog 真实 SKU；虚拟套装没有 SKU 行，填不出来）")
-          @NotNull
+      @Schema(description = "成品 SKU（必须是 catalog 真实 SKU；虚拟套装没有 SKU 行，填不出来）") @NotNull
           UUID productSkuId,
       @Schema(description = "catalog 3.5.2 的 BOM 逻辑 ID（引用键，无外键）") @NotNull UUID bomId,
       @NotNull @Size(max = 64) String bomCode,
       @Schema(description = "catalog 3.5.2 的 BOM 版本逻辑 ID（引用键，无外键）") @NotNull UUID bomVersionId,
       @NotNull @Size(max = 32) String bomVersionNo,
-      @Schema(
-              description =
-                  "上游来源：TRADE_PROCESSING_ORDER = 来自 6.4.1.1 加工单；DIRECT = 仓库现场直接发起")
+      @Schema(description = "上游来源：TRADE_PROCESSING_ORDER = 来自 6.4.1.1 加工单；DIRECT = 仓库现场直接发起")
           @NotNull
           String sourceSystem,
-      @Schema(nullable = true, description = "上游单据引用键；sourceSystem=DIRECT 时必须为空")
-          UUID referenceId,
+      @Schema(nullable = true, description = "上游单据引用键；sourceSystem=DIRECT 时必须为空") UUID referenceId,
       @Schema(nullable = true) @Size(max = 64) String referenceNo,
       @NotNull UUID warehouseId,
       @NotNull UUID legalEntityId,
@@ -132,8 +123,7 @@ public final class AssemblyOrderModels {
       String note) {}
 
   /** 执行组装请求（组件出库 + 成品入库在**同一个本地事务**内完成）。 */
-  public record AssemblyOrderIssueInput(
-      @Schema(nullable = true) @Size(max = 2000) String notes) {}
+  public record AssemblyOrderIssueInput(@Schema(nullable = true) @Size(max = 2000) String notes) {}
 
   /** 执行结果：一次事务的结果 + 组件出库分录 + 成品入库分录。 */
   public record AssemblyOrderIssued(
@@ -163,9 +153,7 @@ public final class AssemblyOrderModels {
 
   /** 取消组装单请求（只有 DRAFT 可取消；取消不动库存）。 */
   public record AssemblyOrderCancelInput(
-      @Schema(description = "取消理由（必填：取消一张组装单必须能解释为什么）")
-          @NotNull
-          @Size(min = 1, max = 200)
+      @Schema(description = "取消理由（必填：取消一张组装单必须能解释为什么）") @NotNull @Size(min = 1, max = 200)
           String reason) {}
 
   /** 组装单列表（真分页 + 全量汇总；汇总用标量子查询，不 join 展开）。 */
@@ -212,7 +200,9 @@ public final class AssemblyOrderModels {
 
   /** 组装单详情（单据 + 组件快照明细 + 账本分录）。 */
   public record AssemblyOrderDetail(
-      AssemblyOrderRow order, List<AssemblyComponentRow> components, List<AssemblyOrderEntry> entries) {}
+      AssemblyOrderRow order,
+      List<AssemblyComponentRow> components,
+      List<AssemblyOrderEntry> entries) {}
 
   /** 组件明细一行（BOM 的跨服务冻结快照）。 */
   public record AssemblyComponentRow(

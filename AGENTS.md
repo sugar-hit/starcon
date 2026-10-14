@@ -11,7 +11,7 @@ starcon 是一个面向跨境电商（Amazon / Shopify / eBay / TikTok Shop / 16
 
 ## Setup commands
 
-- Node: `>= 20.11.0`（见 `.nvmrc`）
+- Node: `>= 22.12.0`（见 `.nvmrc`）
 - 包管理器: **pnpm** `>= 9.0.0`（`package.json#packageManager`）
 - 安装依赖: `pnpm install`
 - 启动所有 app 的 dev: `pnpm dev`（turbo 并行）
@@ -132,16 +132,16 @@ starcon 是 SaaS，**所有业务表必须带 `tenant_id` NOT NULL**，DB 层启
 
 跨会话上下文必须落 `docs/`，**不能只在 chat 里**：
 
-| 类别                            | 路径                       | 性质         | 谁写           |
-| ------------------------------- | -------------------------- | ------------ | -------------- |
-| 架构决策（不可逆）              | `docs/decisions/000N-*.md` | 永久         | 人 + AI        |
-| 系统设计（活文档）              | `docs/architecture/`       | 演进         | 人 + AI        |
-| **系统功能蓝图**（四级功能目录）| `docs/product/capability-blueprint/` | 演进 | 人 + AI |
-| 视觉规范（设计令牌 / 组件调性） | `docs/design/`             | 演进         | 前端 + AI      |
-| 产品需求                        | `docs/product/prds/`       | 演进         | 人             |
-| 跨模块 TODO                     | `docs/backlog/`            | 临时集中     | AI（自动）     |
-| 调研 / 探索                     | `docs/investment/`         | 一次性       | AI             |
-| **AI 会话日志**                 | `docs/sessions/YYYY-MM/`   | 项目级可检索 | AI（每轮结束） |
+| 类别                             | 路径                                 | 性质         | 谁写           |
+| -------------------------------- | ------------------------------------ | ------------ | -------------- |
+| 架构决策（不可逆）               | `docs/decisions/000N-*.md`           | 永久         | 人 + AI        |
+| 系统设计（活文档）               | `docs/architecture/`                 | 演进         | 人 + AI        |
+| **系统功能蓝图**（四级功能目录） | `docs/product/capability-blueprint/` | 演进         | 人 + AI        |
+| 视觉规范（设计令牌 / 组件调性）  | `docs/design/`                       | 演进         | 前端 + AI      |
+| 产品需求                         | `docs/product/prds/`                 | 演进         | 人             |
+| 跨模块 TODO                      | `docs/backlog/`                      | 临时集中     | AI（自动）     |
+| 调研 / 探索                      | `docs/investment/`                   | 一次性       | AI             |
+| **AI 会话日志**                  | `docs/sessions/YYYY-MM/`             | 项目级可检索 | AI（每轮结束） |
 
 **会话语档收录规范**（详见 `docs/sessions/README.md`）：
 

@@ -84,7 +84,9 @@ describe('进度口径：已领 / 需求（还欠）三个数自解释', () => {
 
   it('差额为 0 才算领满', () => {
     expect(isFullyIssued(component({ issuedQuantity: 5.25, outstandingQuantity: 0 }))).toBe(true);
-    expect(isFullyIssued(component({ issuedQuantity: 5.2, outstandingQuantity: 0.05 }))).toBe(false);
+    expect(isFullyIssued(component({ issuedQuantity: 5.2, outstandingQuantity: 0.05 }))).toBe(
+      false,
+    );
   });
 
   it('未领满计数只数真正还欠的那些', () => {
@@ -98,7 +100,7 @@ describe('进度口径：已领 / 需求（还欠）三个数自解释', () => {
 
   it('数量保留 6 位小数的零头（组件常是「0.5 米面料 + 2 颗螺丝」）', () => {
     expect(fmt(5.25)).toBe('5.25');
-    expect(fmt(5.250000)).toBe('5.25');
+    expect(fmt(5.25)).toBe('5.25');
     expect(fmt(0.5)).toBe('0.5');
     expect(fmt(20)).toBe('20');
     expect(fmt(null)).toBe('—');
@@ -167,9 +169,7 @@ describe('报完工 ≠ 已入库：差额必须摆在界面上', () => {
 
   it('部分入库时明确写出「还差多少」，而不是合成一个「已完成」', () => {
     const d = detail(8, 2);
-    expect(receiptGapText(d.order, d.inboundRequest)).toBe(
-      '还有 2 件未入库（待入库 10，实收 8）',
-    );
+    expect(receiptGapText(d.order, d.inboundRequest)).toBe('还有 2 件未入库（待入库 10，实收 8）');
   });
 
   it('收满后不再提示差额', () => {

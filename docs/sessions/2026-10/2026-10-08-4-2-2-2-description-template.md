@@ -25,20 +25,20 @@ V21 已经交付了 `content_template` / `content_template_variable` /
 
 **复用（不另立表）**
 
-| 复用对象 | 理由 |
-| --- | --- |
-| `content_template_variable` | 11 个绑定源枚举与取值代码都在 3.4.2.2。另建一张变量表 ⇒ `{{尺寸}}` 有两个「取自哪里」的答案 |
+| 复用对象                       | 理由                                                                                                   |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `content_template_variable`    | 11 个绑定源枚举与取值代码都在 3.4.2.2。另建一张变量表 ⇒ `{{尺寸}}` 有两个「取自哪里」的答案            |
 | `content_template_translation` | origin / status 与「译文占位符必须与源语言相等」都在 3.4.2.2。复制一份 ⇒「这段英文是谁写的」有两个答案 |
-| `content_phrase` | 使用场景段绑 `PHRASE_SCENE`、注意事项段绑 `PHRASE_CAUTION`，本来就是同一个池子 |
-| `content_template.body` | 一个段落 = 一行 `content_template`，`description_template_section` 只负责挂进五段骨架并排序 |
+| `content_phrase`               | 使用场景段绑 `PHRASE_SCENE`、注意事项段绑 `PHRASE_CAUTION`，本来就是同一个池子                         |
+| `content_template.body`        | 一个段落 = 一行 `content_template`，`description_template_section` 只负责挂进五段骨架并排序            |
 
 **另立（V21 确实解决不了）**
 
-| 新表 | 为什么 V21 里无处安放 |
-| --- | --- |
-| `description_template` / `description_template_section` | V21 是「一整段文本 + 一个 content_type」，蓝图要的是**一个模板内部五类段落**且顺序可查。糊成一个大字符串后，「规格参数段还没配英文」就答不出来 |
-| `description_image_slot` | V21 全程纯文本，没有任何图片概念 |
-| `description_render*`（4 张） | V21 的 `content_render_section` 有 `UNIQUE(tenant_id, render_id, sku_id)`：**一个批次里同一 SKU 只能落一段**，所以「一个模板 → 五段结构化 HTML」在它的渲染表里根本表达不了 |
+| 新表                                                    | 为什么 V21 里无处安放                                                                                                                                                      |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `description_template` / `description_template_section` | V21 是「一整段文本 + 一个 content_type」，蓝图要的是**一个模板内部五类段落**且顺序可查。糊成一个大字符串后，「规格参数段还没配英文」就答不出来                             |
+| `description_image_slot`                                | V21 全程纯文本，没有任何图片概念                                                                                                                                           |
+| `description_render*`（4 张）                           | V21 的 `content_render_section` 有 `UNIQUE(tenant_id, render_id, sku_id)`：**一个批次里同一 SKU 只能落一段**，所以「一个模板 → 五段结构化 HTML」在它的渲染表里根本表达不了 |
 
 **代码层落点**：`DescriptionTemplateService.saveSectionContent()` 建/改的是
 `content_template` 行，不是第二张表。测试
@@ -69,9 +69,11 @@ V21 已经交付了 `content_template` / `content_template_variable` /
 ## 文件清单
 
 **迁移**（V96，版本号由调度器预分配）
+
 - `backend/services/catalog/src/main/resources/db/migration/V96__description_template_layout.sql`
 
 **后端**
+
 - `DescriptionTemplateRules.java` — 纯规则层（词表 / 上限 / 校验 / HTML 白名单转义）
 - `DescriptionTemplateRenderer.java` — 纯函数渲染引擎（五段拼装 + `<img>` 落点）
 - `DescriptionTemplateService.java` — 模板 CRUD + 段落 + 插图位
@@ -80,14 +82,17 @@ V21 已经交付了 `content_template` / `content_template_variable` /
 - `CatalogModels.java` — 新增 17 个 record（只追加，未改动既有 record）
 
 **测试**
+
 - `DescriptionTemplateIntegrationTest.java` — 20 个用例，真实 PostgreSQL 16 + 强制 RLS
 - `DescriptionTemplateRendererTest.java` — 11 个纯函数用例
 
 **契约**
+
 - `packages/api-contracts/src/catalog.ts` / `catalog.openapi.json`（codegen 产物，只由
   `python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi` 生成）
 
 **前端**
+
 - `apps/web/src/components/catalog/description-template-model.ts`
 - `apps/web/src/components/catalog/description-template-workspace.tsx`
 - `apps/web/src/app/listings/templates/page.tsx`

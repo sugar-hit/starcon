@@ -34,10 +34,10 @@ export default function DuplicateDetectionPage() {
         <p className="text-muted-foreground text-copy-13">
           找出被拆成多条的商品：<strong>同 SPU 重复规格组合</strong>、
           <strong>同商品不同 SPU 重复建档</strong>、<strong>同条码多 SKU</strong>、
-          <strong>近似标题 + 相似图片疑似同品</strong>。
-          输出<strong>相似度、重叠维度与影响引用数</strong>供人工确认。
-          重复 SKU 会污染销量、采购、库存与利润统计 —— 同一商品被拆成两条，各算各的，
-          所以治理的价值在于<strong>报表可信</strong>。
+          <strong>近似标题 + 相似图片疑似同品</strong>。 输出
+          <strong>相似度、重叠维度与影响引用数</strong>供人工确认。 重复 SKU
+          会污染销量、采购、库存与利润统计 —— 同一商品被拆成两条，各算各的， 所以治理的价值在于
+          <strong>报表可信</strong>。
         </p>
       </header>
 

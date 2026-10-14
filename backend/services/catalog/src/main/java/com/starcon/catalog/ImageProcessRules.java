@@ -10,9 +10,8 @@ import java.util.Set;
  * <p>与 {@link MediaRules} / {@link BrandRules} / {@link UnitGroupRules} 同一形状：无状态静态方法，
  * 服务层拒绝时给出的话、前端表单校验、集成测试断言的边界都引同一份实现。
  *
- * <p><b>像素加工本身不在这里。</b>去背景 / 白底 / 水印 / 裁剪 / 格式转换 / 多比例是
- * {@link ImageProcessor} 的职责（要 ImageIO 与 Graphics2D），这里只管「参数合不合法」——
- * 两类逻辑混在一起会让「校验」这个能单测的纯函数被像素代码污染。
+ * <p><b>像素加工本身不在这里。</b>去背景 / 白底 / 水印 / 裁剪 / 格式转换 / 多比例是 {@link ImageProcessor} 的职责（要 ImageIO 与
+ * Graphics2D），这里只管「参数合不合法」—— 两类逻辑混在一起会让「校验」这个能单测的纯函数被像素代码污染。
  */
 public final class ImageProcessRules {
   private ImageProcessRules() {}
@@ -27,6 +26,7 @@ public final class ImageProcessRules {
       List.of("PENDING", "RUNNING", "SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED");
   public static final List<String> ITEM_STATUSES =
       List.of("PENDING", "RUNNING", "SUCCEEDED", "FAILED", "SKIPPED", "CANCELLED");
+
   /** 终态：任务到达这些状态后不会再被工作线程改动。 */
   public static final List<String> TERMINAL_JOB_STATUSES =
       List.of("SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED");
@@ -70,8 +70,7 @@ public final class ImageProcessRules {
   /**
    * 单次提交最多 500 个素材。
    *
-   * <p>取 500 是因为一次任务会为每个素材、每个比例档写一个新版本行：500 素材 × 3 档
-   * 就是 1500 个新对象。更大的批量应该让调用方按批次提交，而不是把一个跑几小时、
+   * <p>取 500 是因为一次任务会为每个素材、每个比例档写一个新版本行：500 素材 × 3 档 就是 1500 个新对象。更大的批量应该让调用方按批次提交，而不是把一个跑几小时、
    * 中途失败还要重跑几千次的任务塞进来。进度是可见的，所以分批不会丢信息。
    */
   public static final int MAX_ASSETS_PER_JOB = 500;
@@ -82,9 +81,8 @@ public final class ImageProcessRules {
   /**
    * 处理产物的像素面积上限 80 megapixel。
    *
-   * <p>裁剪放大到极大尺寸时，每多一像素就多一次 RGB 读写。80MP（≈10000×8000）
-   * 在内存里按 ARGB 是 320MB，一个批次并行几条就会把堆吃满。所以不是「能不能做」的问题，
-   * 而是给出上限并让服务层在**开工前**就拒绝——先分配再失败会连带整批回滚。
+   * <p>裁剪放大到极大尺寸时，每多一像素就多一次 RGB 读写。80MP（≈10000×8000） 在内存里按 ARGB 是
+   * 320MB，一个批次并行几条就会把堆吃满。所以不是「能不能做」的问题， 而是给出上限并让服务层在**开工前**就拒绝——先分配再失败会连带整批回滚。
    */
   public static final long MAX_OUTPUT_PIXELS = 80_000_000L;
 
@@ -103,8 +101,7 @@ public final class ImageProcessRules {
     String value = MediaRules.normalize(code).toUpperCase(Locale.ROOT);
     if (value.isEmpty()) return "配方编码不能为空";
     if (value.length() > 32) return "配方编码最多 32 个字符";
-    if (!value.matches("[A-Z0-9][A-Z0-9_-]{0,31}"))
-      return "配方编码请使用英文字母、数字、下划线或短横线，长度 1~32 位";
+    if (!value.matches("[A-Z0-9][A-Z0-9_-]{0,31}")) return "配方编码请使用英文字母、数字、下划线或短横线，长度 1~32 位";
     return null;
   }
 
@@ -120,15 +117,15 @@ public final class ImageProcessRules {
     String value = MediaRules.normalize(format).toLowerCase(Locale.ROOT);
     if (value.isEmpty()) return "目标格式不能为空";
     if (!TARGET_FORMATS.contains(value))
-      return "目标格式只能是 " + String.join(" / ", TARGET_FORMATS)
+      return "目标格式只能是 "
+          + String.join(" / ", TARGET_FORMATS)
           + "（服务端用 JDK ImageIO 写出，WEBP 没有内置写入器，写它只会得到空产物）";
     return null;
   }
 
   public static String cropModeProblem(String mode) {
     String value = MediaRules.normalizeUpper(mode);
-    if (!CROP_MODES.contains(value))
-      return "适配方式只能是 FIT（等比缩放补白边）或 CROP_FILL（填满后居中裁掉溢出）";
+    if (!CROP_MODES.contains(value)) return "适配方式只能是 FIT（等比缩放补白边）或 CROP_FILL（填满后居中裁掉溢出）";
     return null;
   }
 
@@ -161,8 +158,7 @@ public final class ImageProcessRules {
   /**
    * 目标尺寸校验：要么两列都空（不缩放），要么两列都有值且在上限内。
    *
-   * <p>「只给宽或只给高」被拒：那种行的含义不唯一，而它一旦落库，
-   * 后面每个产物都会按一个说不清的尺寸裁。
+   * <p>「只给宽或只给高」被拒：那种行的含义不唯一，而它一旦落库， 后面每个产物都会按一个说不清的尺寸裁。
    */
   public static String targetSizeProblem(Integer widthPx, Integer heightPx) {
     boolean noWidth = widthPx == null;
@@ -192,8 +188,7 @@ public final class ImageProcessRules {
   }
 
   public static String ratiosSizeProblem(int size) {
-    if (size > MAX_RATIOS_PER_RECIPE)
-      return "一个配方最多 " + MAX_RATIOS_PER_RECIPE + " 个比例档";
+    if (size > MAX_RATIOS_PER_RECIPE) return "一个配方最多 " + MAX_RATIOS_PER_RECIPE + " 个比例档";
     return null;
   }
 
@@ -218,8 +213,8 @@ public final class ImageProcessRules {
   /**
    * 去背景 + 输出格式的组合校验。
    *
-   * <p>与 V19 那个 CHECK 同一语义，在服务层先给可读原因（DB 抛出来只有约束名）：
-   * 只有 png 有真正的 alpha 通道，gif 只有 1 位透明，bmp / jpeg 没有 alpha。
+   * <p>与 V19 那个 CHECK 同一语义，在服务层先给可读原因（DB 抛出来只有约束名）： 只有 png 有真正的 alpha 通道，gif 只有 1 位透明，bmp / jpeg 没有
+   * alpha。
    */
   public static String backgroundFormatProblem(boolean removeBackground, String targetFormat) {
     if (!removeBackground) return null;
@@ -237,7 +232,8 @@ public final class ImageProcessRules {
     Set<String> c = Set.copyOf(CROP_MODES);
     if (c.size() != CROP_MODES.size()) throw new IllegalStateException("CROP_MODES 有重复项");
     Set<String> w = Set.copyOf(WATERMARK_POSITIONS);
-    if (w.size() != WATERMARK_POSITIONS.size()) throw new IllegalStateException("WATERMARK_POSITIONS 有重复项");
+    if (w.size() != WATERMARK_POSITIONS.size())
+      throw new IllegalStateException("WATERMARK_POSITIONS 有重复项");
     Set<String> j = Set.copyOf(JOB_STATUSES);
     if (j.size() != JOB_STATUSES.size()) throw new IllegalStateException("JOB_STATUSES 有重复项");
     Set<String> i = Set.copyOf(ITEM_STATUSES);

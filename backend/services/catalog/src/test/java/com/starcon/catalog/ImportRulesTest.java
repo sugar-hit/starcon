@@ -11,15 +11,15 @@ import org.junit.jupiter.api.Test;
 /**
  * 3.8.1.1 预校验规则的纯单元测试。
  *
- * <p>不启数据库：规则的边界（空串算不算缺、{@code 0} 算不算填、毛重小于净重拦不拦、
- * 属性行的复合自然键）必须在集成测试之外被单独钉住 ——
+ * <p>不启数据库：规则的边界（空串算不算缺、{@code 0} 算不算填、毛重小于净重拦不拦、 属性行的复合自然键）必须在集成测试之外被单独钉住 ——
  * 在集成测试里这些用例很容易被「顺手写对」从而永远测不到真正的分支。
  */
 class ImportRulesTest {
 
   private static List<ImportRules.Column> columns(ImportRules.DefaultColumn... defs) {
     List<ImportRules.Column> out = new ArrayList<>();
-    for (var d : defs) out.add(new ImportRules.Column(d.fieldKey(), d.dataType(), d.required(), d.matchKey()));
+    for (var d : defs)
+      out.add(new ImportRules.Column(d.fieldKey(), d.dataType(), d.required(), d.matchKey()));
     return out;
   }
 
@@ -34,7 +34,9 @@ class ImportRulesTest {
   }
 
   private static List<ImportRules.Column> spuColumns() {
-    return columns(ImportRules.defaultColumns(ImportRules.Entity.SPU).toArray(ImportRules.DefaultColumn[]::new));
+    return columns(
+        ImportRules.defaultColumns(ImportRules.Entity.SPU)
+            .toArray(ImportRules.DefaultColumn[]::new));
   }
 
   // ================================================================ 默认列
@@ -43,7 +45,9 @@ class ImportRulesTest {
   void 每个目标对象的默认列都恰好有一个匹配键() {
     for (var entity : ImportRules.Entity.values()) {
       long matchKeys =
-          ImportRules.defaultColumns(entity).stream().filter(ImportRules.DefaultColumn::matchKey).count();
+          ImportRules.defaultColumns(entity).stream()
+              .filter(ImportRules.DefaultColumn::matchKey)
+              .count();
       assertThat(matchKeys).as("%s 的匹配键数量", entity).isEqualTo(1);
     }
   }
@@ -62,7 +66,10 @@ class ImportRulesTest {
   void 必填列缺值报REQUIRED() {
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.SPU, ImportRules.Mode.CREATE, spuColumns(), values("spu_code", "S1"),
+            ImportRules.Entity.SPU,
+            ImportRules.Mode.CREATE,
+            spuColumns(),
+            values("spu_code", "S1"),
             ImportRules.Facts.clean());
     assertThat(codes(problems)).contains("REQUIRED");
     assertThat(ImportRules.blocking(problems)).isTrue();
@@ -73,8 +80,11 @@ class ImportRulesTest {
     // 「0 件重」和「没填」是两件事：把 0 当缺失会让运营永远导不进合法的零值数据。
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.PACKAGE, ImportRules.Mode.CREATE,
-            columns(ImportRules.defaultColumns(ImportRules.Entity.PACKAGE).toArray(ImportRules.DefaultColumn[]::new)),
+            ImportRules.Entity.PACKAGE,
+            ImportRules.Mode.CREATE,
+            columns(
+                ImportRules.defaultColumns(ImportRules.Entity.PACKAGE)
+                    .toArray(ImportRules.DefaultColumn[]::new)),
             values("sku_code", "S1", "net_weight_g", "0"),
             ImportRules.Facts.clean());
     assertThat(codes(problems)).doesNotContain("REQUIRED");
@@ -84,8 +94,11 @@ class ImportRulesTest {
   void 空白格按缺失处理而不是按类型错误() {
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.PACKAGE, ImportRules.Mode.CREATE,
-            columns(ImportRules.defaultColumns(ImportRules.Entity.PACKAGE).toArray(ImportRules.DefaultColumn[]::new)),
+            ImportRules.Entity.PACKAGE,
+            ImportRules.Mode.CREATE,
+            columns(
+                ImportRules.defaultColumns(ImportRules.Entity.PACKAGE)
+                    .toArray(ImportRules.DefaultColumn[]::new)),
             values("sku_code", "S1", "net_weight_g", "   "),
             ImportRules.Facts.clean());
     // 空值归必填/可选管，不该同时报「不是数字」——两种错误同时出现会让人以为格式坏了。
@@ -96,8 +109,11 @@ class ImportRulesTest {
   void 数字列填字母报INVALID_TYPE() {
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.PACKAGE, ImportRules.Mode.CREATE,
-            columns(ImportRules.defaultColumns(ImportRules.Entity.PACKAGE).toArray(ImportRules.DefaultColumn[]::new)),
+            ImportRules.Entity.PACKAGE,
+            ImportRules.Mode.CREATE,
+            columns(
+                ImportRules.defaultColumns(ImportRules.Entity.PACKAGE)
+                    .toArray(ImportRules.DefaultColumn[]::new)),
             values("sku_code", "S1", "net_weight_g", "abc"),
             ImportRules.Facts.clean());
     assertThat(codes(problems)).contains("INVALID_TYPE");
@@ -134,7 +150,9 @@ class ImportRulesTest {
     // 报成错误会让「导入 100 条、其中 3 条早就导过」整个批次失败。
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.SPU, ImportRules.Mode.CREATE, spuColumns(),
+            ImportRules.Entity.SPU,
+            ImportRules.Mode.CREATE,
+            spuColumns(),
             values("spu_code", "S1", "spu_name", "商品"),
             new ImportRules.Facts("S1", true, false, null, List.of()));
     assertThat(codes(problems)).contains("EXISTS_IN_CREATE_MODE");
@@ -145,7 +163,9 @@ class ImportRulesTest {
   void 更新模式遇到不存在的记录必须阻断() {
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.SPU, ImportRules.Mode.UPDATE, spuColumns(),
+            ImportRules.Entity.SPU,
+            ImportRules.Mode.UPDATE,
+            spuColumns(),
             values("spu_code", "S1", "spu_name", "商品"),
             new ImportRules.Facts("S1", false, false, null, List.of()));
     assertThat(codes(problems)).contains("NOT_FOUND_IN_UPDATE_MODE");
@@ -156,8 +176,11 @@ class ImportRulesTest {
   void 更新模式缺匹配键必须阻断() {
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.SPU, ImportRules.Mode.UPDATE, spuColumns(),
-            values("spu_code", "  ", "spu_name", "商品"), ImportRules.Facts.clean());
+            ImportRules.Entity.SPU,
+            ImportRules.Mode.UPDATE,
+            spuColumns(),
+            values("spu_code", "  ", "spu_name", "商品"),
+            ImportRules.Facts.clean());
     assertThat(codes(problems)).contains("MATCH_KEY_REQUIRED");
   }
 
@@ -166,12 +189,16 @@ class ImportRulesTest {
     var columns = spuColumns();
     var existing =
         ImportRules.validateRow(
-            ImportRules.Entity.SPU, ImportRules.Mode.MATCH_BY_CODE, columns,
+            ImportRules.Entity.SPU,
+            ImportRules.Mode.MATCH_BY_CODE,
+            columns,
             values("spu_code", "S1", "spu_name", "商品"),
             new ImportRules.Facts("S1", true, false, null, List.of()));
     var missing =
         ImportRules.validateRow(
-            ImportRules.Entity.SPU, ImportRules.Mode.MATCH_BY_CODE, columns,
+            ImportRules.Entity.SPU,
+            ImportRules.Mode.MATCH_BY_CODE,
+            columns,
             values("spu_code", "S2", "spu_name", "商品"),
             new ImportRules.Facts("S2", false, false, null, List.of()));
     assertThat(ImportRules.blocking(existing)).isFalse();
@@ -195,15 +222,19 @@ class ImportRulesTest {
 
   @Test
   void 其他对象的自然键就是匹配键本身() {
-    assertThat(ImportRules.naturalKey(ImportRules.Entity.SKU, values("sku_code", "K1"))).isEqualTo("K1");
-    assertThat(ImportRules.naturalKey(ImportRules.Entity.BARCODE, values("sku_code", "K1"))).isEqualTo("K1");
+    assertThat(ImportRules.naturalKey(ImportRules.Entity.SKU, values("sku_code", "K1")))
+        .isEqualTo("K1");
+    assertThat(ImportRules.naturalKey(ImportRules.Entity.BARCODE, values("sku_code", "K1")))
+        .isEqualTo("K1");
   }
 
   @Test
   void 文件内重复行阻断() {
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.SPU, ImportRules.Mode.CREATE, spuColumns(),
+            ImportRules.Entity.SPU,
+            ImportRules.Mode.CREATE,
+            spuColumns(),
             values("spu_code", "S1", "spu_name", "商品"),
             new ImportRules.Facts("S1", false, true, null, List.of()));
     assertThat(codes(problems)).contains("DUPLICATE_IN_FILE");
@@ -216,8 +247,11 @@ class ImportRulesTest {
   void 毛重小于净重必须阻断() {
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.PACKAGE, ImportRules.Mode.CREATE,
-            columns(ImportRules.defaultColumns(ImportRules.Entity.PACKAGE).toArray(ImportRules.DefaultColumn[]::new)),
+            ImportRules.Entity.PACKAGE,
+            ImportRules.Mode.CREATE,
+            columns(
+                ImportRules.defaultColumns(ImportRules.Entity.PACKAGE)
+                    .toArray(ImportRules.DefaultColumn[]::new)),
             values("sku_code", "K1", "net_weight_g", "300", "gross_weight_g", "200"),
             ImportRules.Facts.clean());
     assertThat(codes(problems)).contains("GROSS_LT_NET");
@@ -228,8 +262,11 @@ class ImportRulesTest {
   void 毛重等于净重放行() {
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.PACKAGE, ImportRules.Mode.CREATE,
-            columns(ImportRules.defaultColumns(ImportRules.Entity.PACKAGE).toArray(ImportRules.DefaultColumn[]::new)),
+            ImportRules.Entity.PACKAGE,
+            ImportRules.Mode.CREATE,
+            columns(
+                ImportRules.defaultColumns(ImportRules.Entity.PACKAGE)
+                    .toArray(ImportRules.DefaultColumn[]::new)),
             values("sku_code", "K1", "net_weight_g", "200", "gross_weight_g", "200"),
             ImportRules.Facts.clean());
     assertThat(codes(problems)).doesNotContain("GROSS_LT_NET");
@@ -239,8 +276,11 @@ class ImportRulesTest {
   void 负数尺寸阻断() {
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.PACKAGE, ImportRules.Mode.CREATE,
-            columns(ImportRules.defaultColumns(ImportRules.Entity.PACKAGE).toArray(ImportRules.DefaultColumn[]::new)),
+            ImportRules.Entity.PACKAGE,
+            ImportRules.Mode.CREATE,
+            columns(
+                ImportRules.defaultColumns(ImportRules.Entity.PACKAGE)
+                    .toArray(ImportRules.DefaultColumn[]::new)),
             values("sku_code", "K1", "length_mm", "-5"),
             ImportRules.Facts.clean());
     assertThat(codes(problems)).contains("NEGATIVE");
@@ -249,37 +289,53 @@ class ImportRulesTest {
   @Test
   void 条码体系必须是词表内取值() {
     var columns =
-        columns(ImportRules.defaultColumns(ImportRules.Entity.BARCODE).toArray(ImportRules.DefaultColumn[]::new));
-    assertThat(codes(ImportRules.validateRow(
-            ImportRules.Entity.BARCODE, ImportRules.Mode.CREATE, columns,
-            values("sku_code", "K1", "scheme", "EAN-13", "barcode_value", "6901"),
-            ImportRules.Facts.clean())))
+        columns(
+            ImportRules.defaultColumns(ImportRules.Entity.BARCODE)
+                .toArray(ImportRules.DefaultColumn[]::new));
+    assertThat(
+            codes(
+                ImportRules.validateRow(
+                    ImportRules.Entity.BARCODE,
+                    ImportRules.Mode.CREATE,
+                    columns,
+                    values("sku_code", "K1", "scheme", "EAN-13", "barcode_value", "6901"),
+                    ImportRules.Facts.clean())))
         .contains("INVALID_ENUM");
-    assertThat(codes(ImportRules.validateRow(
-            ImportRules.Entity.BARCODE, ImportRules.Mode.CREATE, columns,
-            values("sku_code", "K1", "scheme", "EAN_13", "barcode_value", "6901"),
-            ImportRules.Facts.clean())))
+    assertThat(
+            codes(
+                ImportRules.validateRow(
+                    ImportRules.Entity.BARCODE,
+                    ImportRules.Mode.CREATE,
+                    columns,
+                    values("sku_code", "K1", "scheme", "EAN_13", "barcode_value", "6901"),
+                    ImportRules.Facts.clean())))
         .doesNotContain("INVALID_ENUM");
   }
 
   @Test
   void 商品状态词表按生命周期五态() {
-    assertThat(codes(ImportRules.validateRow(
-            ImportRules.Entity.SPU, ImportRules.Mode.CREATE, spuColumns(),
-            values("spu_code", "S1", "spu_name", "商品", "status", "ACTIVE"),
-            ImportRules.Facts.clean())))
+    assertThat(
+            codes(
+                ImportRules.validateRow(
+                    ImportRules.Entity.SPU,
+                    ImportRules.Mode.CREATE,
+                    spuColumns(),
+                    values("spu_code", "S1", "spu_name", "商品", "status", "ACTIVE"),
+                    ImportRules.Facts.clean())))
         .as("V4 已把 ACTIVE 迁到 ON_SALE，旧值不该再被接受")
         .contains("INVALID_ENUM");
   }
 
   @Test
   void 引用不存在的问题并入该行() {
-    var reference =
-        ImportRules.Problem.error("spu_code", "REFERENCE_NOT_FOUND", "所属商品 S9 在本租户不存在");
+    var reference = ImportRules.Problem.error("spu_code", "REFERENCE_NOT_FOUND", "所属商品 S9 在本租户不存在");
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.SKU, ImportRules.Mode.CREATE,
-            columns(ImportRules.defaultColumns(ImportRules.Entity.SKU).toArray(ImportRules.DefaultColumn[]::new)),
+            ImportRules.Entity.SKU,
+            ImportRules.Mode.CREATE,
+            columns(
+                ImportRules.defaultColumns(ImportRules.Entity.SKU)
+                    .toArray(ImportRules.DefaultColumn[]::new)),
             values("sku_code", "K1", "spu_code", "S9", "sku_name", "黑"),
             new ImportRules.Facts("K1", false, false, reference, List.of()));
     assertThat(codes(problems)).contains("REFERENCE_NOT_FOUND");
@@ -289,11 +345,16 @@ class ImportRulesTest {
   @Test
   void 条码被别的SKU占用是阻断错误() {
     var extra =
-        List.of(ImportRules.Problem.error("barcode_value", "BARCODE_TAKEN", "条码 EAN_13|6901 已经挂在 SKU K2 上"));
+        List.of(
+            ImportRules.Problem.error(
+                "barcode_value", "BARCODE_TAKEN", "条码 EAN_13|6901 已经挂在 SKU K2 上"));
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.BARCODE, ImportRules.Mode.CREATE,
-            columns(ImportRules.defaultColumns(ImportRules.Entity.BARCODE).toArray(ImportRules.DefaultColumn[]::new)),
+            ImportRules.Entity.BARCODE,
+            ImportRules.Mode.CREATE,
+            columns(
+                ImportRules.defaultColumns(ImportRules.Entity.BARCODE)
+                    .toArray(ImportRules.DefaultColumn[]::new)),
             values("sku_code", "K1", "scheme", "EAN_13", "barcode_value", "6901"),
             new ImportRules.Facts("K1", false, false, null, extra));
     assertThat(codes(problems)).contains("BARCODE_TAKEN");
@@ -302,10 +363,14 @@ class ImportRulesTest {
 
   @Test
   void 编码超长必须阻断() {
-    assertThat(codes(ImportRules.validateRow(
-            ImportRules.Entity.SPU, ImportRules.Mode.CREATE, spuColumns(),
-            values("spu_code", "S".repeat(65), "spu_name", "商品"),
-            ImportRules.Facts.clean())))
+    assertThat(
+            codes(
+                ImportRules.validateRow(
+                    ImportRules.Entity.SPU,
+                    ImportRules.Mode.CREATE,
+                    spuColumns(),
+                    values("spu_code", "S".repeat(65), "spu_name", "商品"),
+                    ImportRules.Facts.clean())))
         .contains("TOO_LONG");
   }
 
@@ -315,8 +380,11 @@ class ImportRulesTest {
     // 否则一个「类型错」会变成 500 而不是一条可定位到行号的预校验错误。
     var problems =
         ImportRules.validateRow(
-            ImportRules.Entity.PACKAGE, ImportRules.Mode.CREATE,
-            columns(ImportRules.defaultColumns(ImportRules.Entity.PACKAGE).toArray(ImportRules.DefaultColumn[]::new)),
+            ImportRules.Entity.PACKAGE,
+            ImportRules.Mode.CREATE,
+            columns(
+                ImportRules.defaultColumns(ImportRules.Entity.PACKAGE)
+                    .toArray(ImportRules.DefaultColumn[]::new)),
             values("sku_code", "K1", "net_weight_g", "abc", "gross_weight_g", "xyz"),
             ImportRules.Facts.clean());
     assertThat(codes(problems)).contains("INVALID_TYPE");

@@ -13,20 +13,16 @@ import java.util.UUID;
  * 7.3.1.2 效期与先进先出的传输模型。
  *
  * <p>蓝图原文：「对有保质期的商品，按 FEFO（先到期先出）或 FIFO 分配出库批次，预警临期与过期库存」，
- * 输入「批次失效日期；出库分配策略（FEFO/FIFO/指定批次）；预警提前天数」，
- * 输出「推荐出库批次；临期/过期预警清单」。
+ * 输入「批次失效日期；出库分配策略（FEFO/FIFO/指定批次）；预警提前天数」， 输出「推荐出库批次；临期/过期预警清单」。
  *
- * <p><b>类型名前缀是刻意选的</b>：契约 codegen 一次拍平全部四个服务的 schema 到同一命名空间，
- * 重名的 DTO 会被静默覆盖且没有任何警告。本模块的每个类型都带 {@code Expiry} 或 {@code Fefo} 前缀，
- * 就是为了让「重名覆盖」这件事在物理上不可能发生。
+ * <p><b>类型名前缀是刻意选的</b>：契约 codegen 一次拍平全部四个服务的 schema 到同一命名空间， 重名的 DTO 会被静默覆盖且没有任何警告。本模块的每个类型都带
+ * {@code Expiry} 或 {@code Fefo} 前缀， 就是为了让「重名覆盖」这件事在物理上不可能发生。
  *
- * <p><b>效期日��是 {@code date} 不是 {@code timestamptz}</b>：失效日期是产线与包装上写死的事实，
- * 用 {@link LocalDate} + PG {@code date} 列承载。硬套时间戳会让「哪天到期」随服务器时区漂一天，
- * 而 FEFO 的整个排序都建立在这上面。
+ * <p><b>效期日��是 {@code date} 不是 {@code timestamptz}</b>：失效日期是产线与包装上写死的事实， 用 {@link LocalDate} + PG
+ * {@code date} 列承载。硬套时间戳会让「哪天到期」随服务器时区漂一天， 而 FEFO 的整个排序都建立在这上面。
  *
- * <p><b>临期与过期是两件事，不合并成一个状态</b>：过期是日历事实（不能再发，必须走 6.4.2 临期品处理），
- * 临期是「还剩 N 天、该开始促销了」。合成一个「效期状态」字段会让界面无法回答
- * 「哪些货现在必须拦下来」，所以这里给三个互斥档 + 一个不适用档。
+ * <p><b>临期与过期是两件事，不合并成一个状态</b>：过期是日历事实（不能再发，必须走 6.4.2 临期品处理）， 临期是「还剩 N
+ * 天、该开始促销了」。合成一个「效期状态」字段会让界面无法回答 「哪些货现在必须拦下来」，所以这里给三个互斥档 + 一个不适用档。
  */
 public final class InventoryExpiryModels {
 
@@ -45,8 +41,7 @@ public final class InventoryExpiryModels {
    *   <li>{@link #SPECIFIED_LOT} 固定从指定批次取。
    * </ul>
    *
-   * <p>刻意**没有** {@code LIFO}：库存出库里「后进的先出」只在极少数行业成立，
-   * 把它放进词表只会让「按效期出库」这个需求被误解成「可任意排序」。
+   * <p>刻意**没有** {@code LIFO}：库存出库里「后进的先出」只在极少数行业成立， 把它放进词表只会让「按效期出库」这个需求被误解成「可任意排序」。
    */
   public enum ExpiryAllocationStrategy {
     FEFO("先到期先出"),
@@ -68,8 +63,7 @@ public final class InventoryExpiryModels {
       for (var strategy : values()) {
         if (strategy.name().equalsIgnoreCase(value.trim())) return strategy;
       }
-      throw new IllegalArgumentException(
-          "未知的出库分配策略：" + value + "，可选：" + names());
+      throw new IllegalArgumentException("未知的出库分配策略：" + value + "，可选：" + names());
     }
 
     public static String names() {
@@ -80,9 +74,8 @@ public final class InventoryExpiryModels {
   /**
    * 效期档位。
    *
-   * <p>{@link #EXPIRED} 与 {@link #EXPIRING} 必须分开：前者是「不能再发」，后者是「还能发但该促销了」。
-   * 临期阈值来自每个 SKU 自己的策略（{@code lead_days}），不是全局常量 ——
-   * 食品与日化的临期窗口差一个数量级。
+   * <p>{@link #EXPIRED} 与 {@link #EXPIRING} 必须分开：前者是「不能再发」，后者是「还能发但该促销了」。 临期阈值来自每个 SKU 自己的策略（{@code
+   * lead_days}），不是全局常量 —— 食品与日化的临期窗口差一个数量级。
    */
   public enum ExpiryStatus {
     /** 失效日期早于今天。数量仍在库里，但不能再发。 */
@@ -128,13 +121,11 @@ public final class InventoryExpiryModels {
    *
    * @param skuId 策略主体：一个 SKU 至多一条策略（DB 的 UNIQUE(tenant_id,sku_id) 裁决）
    * @param strategy 出库分配策略；不传按 FEFO
-   * @param enabled 策略开关。**默认 false**：效期/FIFO 是食品化妆品类目的硬需求，
-   *     但系统不知道哪个 SKU 是效期品（品类属性在 catalog，不在本服务），
-   *     替租户默认打开等于凭空做了「这个 SKU 受效期管理」的判断。
-   *     关着时出库退回「按库位顺序取可用量」，响应里 policyEnabled=false 如实报出
+   * @param enabled 策略开关。**默认 false**：效期/FIFO 是食品化妆品类目的硬需求， 但系统不知道哪个 SKU 是效期品（品类属性在 catalog，不在本服务），
+   *     替租户默认打开等于凭空做了「这个 SKU 受效期管理」的判断。 关着时出库退回「按库位顺序取可用量」，响应里 policyEnabled=false 如实报出
    * @param leadDays 临期预警提前天数；不传按 30。上限 3650 由 DB CHECK 兜住
-   * @param specifiedLotId strategy=SPECIFIED_LOT 时**必填**，且该批次必须属于该 SKU
-   *     （DB 触发器 guard_expiry_policy_lot_sku 裁决）
+   * @param specifiedLotId strategy=SPECIFIED_LOT 时**必填**，且该批次必须属于该 SKU （DB 触发器
+   *     guard_expiry_policy_lot_sku 裁决）
    */
   public record ExpiryPolicyUpsertRequest(
       @NotNull UUID skuId,
@@ -147,9 +138,8 @@ public final class InventoryExpiryModels {
   /**
    * 单个 SKU 的**生效策略**。
    *
-   * @param configured 该 SKU 是否真的配过策略行。false 时下面几个字段是**兜底默认值**，
-   *     不是租户的选择 —— 界面上必须能区分「配成 30 天」与「没人配、用的 30 天默认值」，
-   *     否则运营会以为预警窗口是别人调过的
+   * @param configured 该 SKU 是否真的配过策略行。false 时下面几个字段是**兜底默认值**， 不是租户的选择 —— 界面上必须能区分「配成 30 天」与「没人配、用的
+   *     30 天默认值」， 否则运营会以为预警窗口是别人调过的
    * @param strategy / enabled / leadDays / specifiedLotId 实际生效值（配了就用配的，没配就用默认）
    * @param source 来源：POLICY = 来自策略行；DEFAULT = 兜底默认
    */
@@ -213,7 +203,9 @@ public final class InventoryExpiryModels {
 
   /** 策略列表页。 */
   public record ExpiryPolicyPage(
-      ExpiryPolicySummary summary, List<ExpiryPolicyRow> rows, List<ExpiryPolicyOption> strategyOptions,
+      ExpiryPolicySummary summary,
+      List<ExpiryPolicyRow> rows,
+      List<ExpiryPolicyOption> strategyOptions,
       long total,
       int page,
       int size) {}
@@ -227,11 +219,9 @@ public final class InventoryExpiryModels {
    * 出库分配推荐请求（8 拣货侧的下单依据，本模块只出推荐、不动库存）。
    *
    * @param skuId 要出库的 SKU
-   * @param warehouseId 从哪个仓出。**必填**：FEFO/FIFO 都要在仓内排序，
-   *     跨仓合并排序会排出一个物理上拣不到的顺序
+   * @param warehouseId 从哪个仓出。**必填**：FEFO/FIFO 都要在仓内排序， 跨仓合并排序会排出一个物理上拣不到的顺序
    * @param quantity 要出的数量（numeric(19,4)，禁浮点）
-   * @param strategy 本次请求显式指定的策略。不传则用该 SKU 的策略；
-   *     传了就是**覆盖**（拣货员临时指定「这单走指定批次」的真实场景）
+   * @param strategy 本次请求显式指定的策略。不传则用该 SKU 的策略； 传了就是**覆盖**（拣货员临时指定「这单走指定批次」的真实场景）
    * @param specifiedLotId strategy=SPECIFIED_LOT 时必填（请求覆盖策略里的指定批次）
    */
   public record FefoAllocationRequest(
@@ -244,8 +234,7 @@ public final class InventoryExpiryModels {
   /**
    * 一个批次的取用量（推荐结果的一行）。
    *
-   * @param quantity 从该批次取的量。**按批次精确**：stock_bucket 是批次粒度的事实层，
-   *     所以这里的数不是「这个余额行上大约有多少」而是「这批货取多少」
+   * @param quantity 从该批次取的量。**按批次精确**：stock_bucket 是批次粒度的事实层， 所以这里的数不是「这个余额行上大约有多少」而是「这批货取多少」
    */
   public record FefoAllocationLine(
       UUID lotId,
@@ -263,8 +252,8 @@ public final class InventoryExpiryModels {
   /**
    * 批次内的一个库位取用量。
    *
-   * <p>给到库位级是因为**推荐必须可执行**：8 拣货拿到的是「A-01 库位取 12、A-02 库位取 8」，
-   * 只给到批次级的话拣货还要自己决定去哪个库位，那正是 FEFO 该替人做的决定。
+   * <p>给到库位级是因为**推荐必须可执行**：8 拣货拿到的是「A-01 库位取 12、A-02 库位取 8」， 只给到批次级的话拣货还要自己决定去哪个库位，那正是 FEFO
+   * 该替人做的决定。
    */
   public record FefoAllocationBucketLine(
       UUID bucketId,
@@ -279,8 +268,7 @@ public final class InventoryExpiryModels {
   /**
    * **不可用于本次出库的量，按原因拆开报出**。
    *
-   * <p>存在的理由：分配不足时，界面必须能回答「为什么不够」。
-   * 只回一句「缺 20 件」的话，人只能回去自己翻库存 —— 而缺口往往正是过期或待检造成的。
+   * <p>存在的理由：分配不足时，界面必须能回答「为什么不够」。 只回一句「缺 20 件」的话，人只能回去自己翻库存 —— 而缺口往往正是过期或待检造成的。
    *
    * @param expiredAvailable 已过期仍占着库位的可用量（必须先走 6.4.2 临期品处理）
    * @param noExpiryAvailable 无失效日期的可用量（FEFO 下不参与排序；FIFO 下正常可用）
@@ -332,11 +320,9 @@ public final class InventoryExpiryModels {
   /**
    * 效期预警清单查询条件。
    *
-   * @param expiryStatus 只看某一档（多选）。**不传 = 只看需要处理的两档**
-   *     （EXPIRED + EXPIRING）—— 预警清单的用途是「找出待办的货」，
-   *     把 HEALTHY 也塞进来会让清单长到没法用
-   * @param leadDays 临时覆盖提前天数。不传则逐 SKU 用它自己策略里的阈值，
-   *     都没配时用默认值 30。传了就统一按这个窗口算 —— 「让我看看未来 90 天」的临时视图
+   * @param expiryStatus 只看某一档（多选）。**不传 = 只看需要处理的两档** （EXPIRED + EXPIRING）—— 预警清单的用途是「找出待办的货」， 把
+   *     HEALTHY 也塞进来会让清单长到没法用
+   * @param leadDays 临时覆盖提前天数。不传则逐 SKU 用它自己策略里的阈值， 都没配时用默认值 30。传了就统一按这个窗口算 —— 「让我看看未来 90 天」的临时视图
    * @param inStock 只看在手 > 0 的批次。不传默认 true：零库存批次发不出货，占着预警位是噪声
    * @param sort 排序键（白名单）
    */
@@ -354,14 +340,12 @@ public final class InventoryExpiryModels {
   /**
    * 效期预警清单的一行 = 一个批次。
    *
-   * <p>行上的 {@code expiryStatus} 是按**该 SKU 自己的提前天数**算出来的，
-   * 所以同一个租户里不同 SKU 的「临期」口径可以不同 —— 这是刻意的：
+   * <p>行上的 {@code expiryStatus} 是按**该 SKU 自己的提前天数**算出来的， 所以同一个租户里不同 SKU 的「临期」口径可以不同 —— 这是刻意的：
    * 日化品的临期窗口本来就比食品长。
    *
    * @param leadDays 本行实际用的提前天数（policyLeadDays 为空时是全局默认值）
    * @param leadDaysSource 阈值来源：POLICY = 该 SKU 配过；DEFAULT = 用的默认值
-   * @param daysToExpiry 距离失效日期的天数。已过期为负数；无失效日期为 null
-   *     （**必须能读出负数**：jOOQ 对纯文本语句里的 date 差值表达式拿不到列类型，
+   * @param daysToExpiry 距离失效日期的天数。已过期为负数；无失效日期为 null （**必须能读出负数**：jOOQ 对纯文本语句里的 date 差值表达式拿不到列类型，
    *     取值方式不当会让每一行都退化成 null，也就是「全都显示没有效期」）
    */
   public record ExpiryAlertRow(
@@ -390,8 +374,8 @@ public final class InventoryExpiryModels {
   /**
    * 效期预警汇总（**全量**，不受分页影响）。
    *
-   * @param expiredOnHand 已过期的在手量。与 expiringOnHand 分开报：
-   *     两者的处置路径完全不同（过期走 6.4.2 临期品处理，临期走促销/调拨），合成一个数就没法派工
+   * @param expiredOnHand 已过期的在手量。与 expiringOnHand 分开报： 两者的处置路径完全不同（过期走 6.4.2
+   *     临期品处理，临期走促销/调拨），合成一个数就没法派工
    * @param earliestExpiry 最早的失效日期（已经过期时也在内，那正是最紧急的那个）
    */
   public record ExpiryAlertSummary(
@@ -428,5 +412,6 @@ public final class InventoryExpiryModels {
   public record ExpiryWarehouseOption(UUID warehouseId, String code, String name) {}
 
   /** 批次下拉项（指定批次策略用）。按失效日期升序，先到期的排前面。 */
-  public record ExpiryLotOption(UUID lotId, String lotCode, @Schema(nullable = true) LocalDate expiresOn) {}
+  public record ExpiryLotOption(
+      UUID lotId, String lotCode, @Schema(nullable = true) LocalDate expiresOn) {}
 }

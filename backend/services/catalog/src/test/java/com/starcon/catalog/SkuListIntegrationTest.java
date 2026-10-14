@@ -7,8 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
-import java.sql.DriverManager;
 import java.nio.charset.StandardCharsets;
+import java.sql.DriverManager;
 import java.util.*;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.*;
@@ -21,10 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-/**
- * 3.1.2.1 SKU 列表：分页、多维筛选、批量操作、导出、未接入投影的处置，以及租户隔离三断言。
- * 真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
- */
+/** 3.1.2.1 SKU 列表：分页、多维筛选、批量操作、导出、未接入投影的处置，以及租户隔离三断言。 真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。 */
 @SpringBootTest
 @AutoConfigureMockMvc
 class SkuListIntegrationTest {
@@ -201,8 +198,7 @@ class SkuListIntegrationTest {
                 catalog.saveSpu(
                     actor,
                     null,
-                    new SpuInput(
-                        prefix, "SKU 列表测试商品", "描述", "品牌", category, "DRAFT", 0)));
+                    new SpuInput(prefix, "SKU 列表测试商品", "描述", "品牌", category, "DRAFT", 0)));
     // 规格轴：OPTION / SKU_ONLY / 必填单选，满足 V1 的 CHECK 约束。
     // 选项数要 ≥ 每个 SPU 的 SKU 数：variant_signature 在同一 SPU 内唯一（V1 的唯一约束），
     // 否则第二个同色 SKU 会被真实约束挡住。
@@ -283,7 +279,8 @@ class SkuListIntegrationTest {
   void paginationIsServerSideAndStable() {
     var f = fixture("PAGE", "3C 配件", 5);
     // 只按 SPU 过滤，避免同库内其他用例的行混进来。
-    var first = call(actor, "catalog.sku.read", () -> skus.page(query("spuId", f.spuId(), "size", 2)));
+    var first =
+        call(actor, "catalog.sku.read", () -> skus.page(query("spuId", f.spuId(), "size", 2)));
     assertThat(first.total()).isEqualTo(5);
     assertThat(first.items()).hasSize(2);
     assertThat(first.size()).isEqualTo(2);
@@ -299,10 +296,16 @@ class SkuListIntegrationTest {
               () -> skus.page(query("spuId", f.spuId(), "size", 2, "page", index)));
       page.items().forEach(r -> seen.add(r.id()));
     }
-    assertThat(seen).hasSize(5).doesNotHaveDuplicates().containsExactlyInAnyOrderElementsOf(f.skuIds());
+    assertThat(seen)
+        .hasSize(5)
+        .doesNotHaveDuplicates()
+        .containsExactlyInAnyOrderElementsOf(f.skuIds());
     // 超出范围返回空页而不是报错或重复最后一行。
     var beyond =
-        call(actor, "catalog.sku.read", () -> skus.page(query("spuId", f.spuId(), "size", 2, "page", 9)));
+        call(
+            actor,
+            "catalog.sku.read",
+            () -> skus.page(query("spuId", f.spuId(), "size", 2, "page", 9)));
     assertThat(beyond.items()).isEmpty();
     assertThat(beyond.total()).isEqualTo(5);
   }
@@ -310,11 +313,19 @@ class SkuListIntegrationTest {
   @Test
   void sortingIsWhitelistedAndAlwaysBreaksTiesById() {
     var f = fixture("SORT", "3C 配件", 4);
-    var asc = call(actor, "catalog.sku.read", () -> skus.page(query("spuId", f.spuId(), "sort", "code", "order", "asc")));
+    var asc =
+        call(
+            actor,
+            "catalog.sku.read",
+            () -> skus.page(query("spuId", f.spuId(), "sort", "code", "order", "asc")));
     var codes = asc.items().stream().map(SkuListRow::code).toList();
     assertThat(codes).isSorted();
     // 未登记的排序列回落到默认列，而不是拼进 SQL。
-    var bogus = call(actor, "catalog.sku.read", () -> skus.page(query("spuId", f.spuId(), "sort", "1;drop table sku")));
+    var bogus =
+        call(
+            actor,
+            "catalog.sku.read",
+            () -> skus.page(query("spuId", f.spuId(), "sort", "1;drop table sku")));
     assertThat(bogus.total()).isEqualTo(4);
   }
 
@@ -325,43 +336,73 @@ class SkuListIntegrationTest {
     var electronics = fixture("FILTER-A", "3C 配件", 3);
     var home = fixture("FILTER-B", "家居", 2);
 
-    var bySpu = call(actor, "catalog.sku.read", () -> skus.page(query("spuId", electronics.spuId())));
+    var bySpu =
+        call(actor, "catalog.sku.read", () -> skus.page(query("spuId", electronics.spuId())));
     assertThat(bySpu.items()).hasSize(3);
 
     var byCategory = call(actor, "catalog.sku.read", () -> skus.page(query("category", "家居")));
     assertThat(byCategory.items()).extracting(SkuListRow::spuId).containsOnly(home.spuId());
 
-    var byStatus = call(actor, "catalog.spu.read", () -> skus.page(query("statuses", List.of("ACTIVE"), "spuId", electronics.spuId())));
+    var byStatus =
+        call(
+            actor,
+            "catalog.spu.read",
+            () -> skus.page(query("statuses", List.of("ACTIVE"), "spuId", electronics.spuId())));
     assertThat(byStatus.items()).hasSize(3);
 
     var byKeyword =
-        call(actor, "catalog.sku.read", () -> skus.page(query("spuId", electronics.spuId(), "keyword", "FILTER-A-1")));
+        call(
+            actor,
+            "catalog.sku.read",
+            () -> skus.page(query("spuId", electronics.spuId(), "keyword", "FILTER-A-1")));
     assertThat(byKeyword.items()).hasSize(1);
 
     var byBarcode = call(actor, "catalog.sku.read", () -> skus.page(query("barcode", "BC0")));
-    assertThat(byBarcode.items()).extracting(SkuListRow::id).contains(electronics.skuIds().getFirst());
+    assertThat(byBarcode.items())
+        .extracting(SkuListRow::id)
+        .contains(electronics.skuIds().getFirst());
 
     // 规格关键字走 variant_signature（由真实规格轴拼出），不是某个冗余列。
-    var bySpec = call(actor, "catalog.sku.read", () -> skus.page(query("spuId", electronics.spuId(), "spec", "黑色")));
-    assertThat(bySpec.items()).extracting(SkuListRow::id).containsExactly(electronics.skuIds().getFirst());
+    var bySpec =
+        call(
+            actor,
+            "catalog.sku.read",
+            () -> skus.page(query("spuId", electronics.spuId(), "spec", "黑色")));
+    assertThat(bySpec.items())
+        .extracting(SkuListRow::id)
+        .containsExactly(electronics.skuIds().getFirst());
     var bySpecMiss =
-        call(actor, "catalog.sku.read", () -> skus.page(query("spuId", electronics.spuId(), "spec", "不存在色")));
+        call(
+            actor,
+            "catalog.sku.read",
+            () -> skus.page(query("spuId", electronics.spuId(), "spec", "不存在色")));
     assertThat(bySpecMiss.items()).isEmpty();
 
     // 多个条件是「与」关系。
     var combined =
-        call(actor, "catalog.sku.read", () -> skus.page(query("spuId", electronics.spuId(), "category", "家居")));
+        call(
+            actor,
+            "catalog.sku.read",
+            () -> skus.page(query("spuId", electronics.spuId(), "category", "家居")));
     assertThat(combined.items()).isEmpty();
 
     // LIKE 通配符按字面量处理，用户输入的 % 不能把条件变成全表。
-    var literal = call(actor, "catalog.sku.read", () -> skus.page(query("spuId", electronics.spuId(), "keyword", "%")));
+    var literal =
+        call(
+            actor,
+            "catalog.sku.read",
+            () -> skus.page(query("spuId", electronics.spuId(), "keyword", "%")));
     assertThat(literal.items()).isEmpty();
   }
 
   @Test
   void invalidStatusIsRejectedInsteadOfReturningEverything() {
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.read", () -> skus.page(query("statuses", List.of("ON_SALE")))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.read",
+                    () -> skus.page(query("statuses", List.of("ON_SALE")))))
         .hasMessageContaining("无效状态");
   }
 
@@ -377,18 +418,25 @@ class SkuListIntegrationTest {
       assertThat(row.projections()).allMatch(c -> !c.available());
       assertThat(row.projections()).allMatch(c -> c.value() == null);
       assertThat(row.projections()).allMatch(c -> c.note().contains("上游投影未接入"));
-      assertThat(row.projections()).extracting(SkuProjectionCell::source)
+      assertThat(row.projections())
+          .extracting(SkuProjectionCell::source)
           .contains("07 库存", "06 采购", "05 定价", "04 刊登");
     }
 
     // 能力声明逐字段说明归属服务，前端据此禁用控件。
     var capabilities = call(actor, "catalog.sku.read", () -> skus.capabilities());
     assertThat(capabilities.fields()).hasSize(SkuField.values().length);
+    assertThat(capabilities.fields()).allMatch(x -> x.note().contains("上游投影未接入"));
     assertThat(capabilities.fields())
-        .allMatch(x -> x.note().contains("上游投影未接入"));
-    assertThat(capabilities.fields()).extracting(SkuFieldInfo::code)
+        .extracting(SkuFieldInfo::code)
         .containsExactlyInAnyOrder(
-            "ON_HAND", "IN_TRANSIT", "AVAILABLE_QTY", "UNIT_COST", "PURCHASE_PRICE", "SALE_PRICE", "LISTED_PLATFORMS");
+            "ON_HAND",
+            "IN_TRANSIT",
+            "AVAILABLE_QTY",
+            "UNIT_COST",
+            "PURCHASE_PRICE",
+            "SALE_PRICE",
+            "LISTED_PLATFORMS");
   }
 
   @Test
@@ -400,7 +448,9 @@ class SkuListIntegrationTest {
                 call(
                     actor,
                     "catalog.sku.read",
-                    () -> skus.page(query("spuId", f.spuId(), "onHandMin", new java.math.BigDecimal("1")))))
+                    () ->
+                        skus.page(
+                            query("spuId", f.spuId(), "onHandMin", new java.math.BigDecimal("1")))))
         .hasMessageContaining("尚未接入的上游投影")
         .hasMessageContaining("07 库存");
     // 价格区间 → 05 未接入
@@ -409,11 +459,14 @@ class SkuListIntegrationTest {
                 call(
                     actor,
                     "catalog.sku.read",
-                    () -> skus.page(query("spuId", f.spuId(), "priceMin", new java.math.BigDecimal("10")))))
+                    () ->
+                        skus.page(
+                            query("spuId", f.spuId(), "priceMin", new java.math.BigDecimal("10")))))
         .hasMessageContaining("05 定价");
     // 是否缺货 → 07 未接入
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.read", () -> skus.page(query("outOfStock", Boolean.TRUE))))
+            () ->
+                call(actor, "catalog.sku.read", () -> skus.page(query("outOfStock", Boolean.TRUE))))
         .hasMessageContaining("尚未接入的上游投影");
     // 是否在售 / 平台 → 04 未接入
     assertThatThrownBy(
@@ -424,9 +477,16 @@ class SkuListIntegrationTest {
         .hasMessageContaining("04 刊登");
     // 关键：拒绝发生在筛选之前，没有静默退化成"返回全部 / 返回空"。
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.read", () -> skus.page(query("outOfStock", Boolean.TRUE))))
+            () ->
+                call(actor, "catalog.sku.read", () -> skus.page(query("outOfStock", Boolean.TRUE))))
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-        .satisfies(e -> assertThat(((org.springframework.web.server.ResponseStatusException) e).getStatusCode().value()).isEqualTo(422));
+        .satisfies(
+            e ->
+                assertThat(
+                        ((org.springframework.web.server.ResponseStatusException) e)
+                            .getStatusCode()
+                            .value())
+                    .isEqualTo(422));
   }
 
   // ------------------------------------------------------------ 批量操作
@@ -441,7 +501,8 @@ class SkuListIntegrationTest {
             () ->
                 skus.batch(
                     actor,
-                    new SkuBatchInput("STOP_SELLING", f.skuIds(), "INACTIVE", "供应商停供", null, false)));
+                    new SkuBatchInput(
+                        "STOP_SELLING", f.skuIds(), "INACTIVE", "供应商停供", null, false)));
     assertThat(result.appliedCount()).isEqualTo(3);
     assertThat(result.skippedCount()).isZero();
     assertThat(result.targetStatus()).isEqualTo("INACTIVE");
@@ -453,7 +514,9 @@ class SkuListIntegrationTest {
             a,
             () ->
                 sql.fetchOne(
-                    "select * from sku_status_event where tenant_id=? and sku_id=?", a, f.skuIds().getFirst()));
+                    "select * from sku_status_event where tenant_id=? and sku_id=?",
+                    a,
+                    f.skuIds().getFirst()));
     assertThat(row.get("from_status", String.class)).isEqualTo("ACTIVE");
     assertThat(row.get("to_status", String.class)).isEqualTo("INACTIVE");
     assertThat(row.get("source", String.class)).isEqualTo("BATCH");
@@ -482,7 +545,8 @@ class SkuListIntegrationTest {
                     () ->
                         skus.batch(
                             actor,
-                            new SkuBatchInput("SET_STATUS", f.skuIds(), "DRAFT", "回退", null, false))))
+                            new SkuBatchInput(
+                                "SET_STATUS", f.skuIds(), "DRAFT", "回退", null, false))))
         .hasMessageContaining("只能改为");
     // 原因不能为空。
     assertThatThrownBy(
@@ -492,7 +556,9 @@ class SkuListIntegrationTest {
                     "catalog.sku.update",
                     () ->
                         skus.batch(
-                            actor, new SkuBatchInput("SET_STATUS", f.skuIds(), "ACTIVE", "  ", null, false))))
+                            actor,
+                            new SkuBatchInput(
+                                "SET_STATUS", f.skuIds(), "ACTIVE", "  ", null, false))))
         .hasMessageContaining("必须填写原因");
     // 重复 SKU 与空选择都被拒绝。
     assertThatThrownBy(
@@ -518,7 +584,9 @@ class SkuListIntegrationTest {
                     "catalog.sku.update",
                     () ->
                         skus.batch(
-                            actor, new SkuBatchInput("SET_STATUS", List.of(), "INACTIVE", "空", null, false))))
+                            actor,
+                            new SkuBatchInput(
+                                "SET_STATUS", List.of(), "INACTIVE", "空", null, false))))
         .hasMessageContaining("请先选择");
 
     // 归档可用。
@@ -549,7 +617,14 @@ class SkuListIntegrationTest {
     assertThat(preview.appliedCount()).isEqualTo(3);
     // 预览不能动状态，也不能写这些 SKU 的状态历史。
     for (UUID id : f.skuIds()) assertThat(skuStatus(id)).isEqualTo("ACTIVE");
-    assertThat(tx(a, () -> sql.fetch("select * from sku_status_event where tenant_id=? and sku_id=?", a, f.skuIds().getFirst())))
+    assertThat(
+            tx(
+                a,
+                () ->
+                    sql.fetch(
+                        "select * from sku_status_event where tenant_id=? and sku_id=?",
+                        a,
+                        f.skuIds().getFirst())))
         .isEmpty();
     // 但预览本身留痕，便于事后核对"当时打算做什么"。
     var batchRow =
@@ -557,7 +632,9 @@ class SkuListIntegrationTest {
             a,
             () ->
                 sql.fetchOne(
-                    "select * from sku_batch_operation where tenant_id=? and id=?", a, preview.batchId()));
+                    "select * from sku_batch_operation where tenant_id=? and id=?",
+                    a,
+                    preview.batchId()));
     assertThat(batchRow).isNotNull();
     assertThat(batchRow.get("status", String.class)).isEqualTo("PREVIEW");
     assertThat(batchRow.get("occurred_at", java.time.OffsetDateTime.class)).isNotNull();
@@ -616,7 +693,10 @@ class SkuListIntegrationTest {
           .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
           .satisfies(
               e ->
-                  assertThat(((org.springframework.web.server.ResponseStatusException) e).getStatusCode().value())
+                  assertThat(
+                          ((org.springframework.web.server.ResponseStatusException) e)
+                              .getStatusCode()
+                              .value())
                       .isEqualTo(422));
     }
     // 状态没被动过。
@@ -683,7 +763,8 @@ class SkuListIntegrationTest {
   }
 
   String codeOf(UUID sku) {
-    return tx(a, () -> sql.fetchOne("select code from sku where id=?", sku).get("code", String.class));
+    return tx(
+        a, () -> sql.fetchOne("select code from sku where id=?", sku).get("code", String.class));
   }
 
   // ------------------------------------------------------------ 多租户三断言
@@ -774,7 +855,8 @@ class SkuListIntegrationTest {
                 + " and relname in ('sku','sku_status_event','sku_batch_operation','sku_batch_operation_item')"
                 + " and (not relrowsecurity or not relforcerowsecurity)");
     assertThat(weak).isEmpty();
-    var role = sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
+    var role =
+        sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
     assertThat(role.get("rolsuper", Boolean.class)).isFalse();
     assertThat(role.get("rolbypassrls", Boolean.class)).isFalse();
     // sku 表必须仍带 tenant_id NOT NULL。
@@ -818,7 +900,11 @@ class SkuListIntegrationTest {
                     .header("Authorization", "Bearer tenant-a"))
             .andExpect(status().isOk())
             .andExpect(header().string("Content-Type", "text/csv; charset=UTF-8"))
-            .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString("catalog-skus-")))
+            .andExpect(
+                header()
+                    .string(
+                        "Content-Disposition",
+                        org.hamcrest.Matchers.containsString("catalog-skus-")))
             .andReturn();
     result.getAsyncResult();
     var body = new String(result.getResponse().getContentAsByteArray(), StandardCharsets.UTF_8);

@@ -42,27 +42,22 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>蓝图对本模块点名的两条硬要求，在这里各有明确落点：
  *
  * <ul>
- *   <li><b>参数必须有默认值与生效范围</b>：默认值在 {@code business_parameter_definition}
- *       （随代码发布的出厂码表），生效范围在 {@code business_parameter_override} 的三档
- *       GLOBAL / LEGAL_ENTITY / SHOP。{@code /business-parameters/effective} 按
- *       <b>店铺 &gt; 法人 &gt; 全局 &gt; 出厂默认</b> 的优先级解析出唯一生效值，
- *       并把「这个值从哪一档来的」一并返回——只给一个值不给来源，排查时无法判断它
- *       是继承来的还是配出来的。
- *   <li><b>改参数不改历史单据已冻结的行为</b>：单据创建时调 {@code /business-parameters/freezes}
- *       把当时的生效值整份拷进冻结快照；之后怎么改 override，这张单据读到的永远是
- *       {@code freeze_value} 里那一份。一个单据只冻结一次，重复冻结返回 409 而不是覆盖，
+ *   <li><b>参数必须有默认值与生效范围</b>：默认值在 {@code business_parameter_definition} （随代码发布的出厂码表），生效范围在 {@code
+ *       business_parameter_override} 的三档 GLOBAL / LEGAL_ENTITY / SHOP。{@code
+ *       /business-parameters/effective} 按 <b>店铺 &gt; 法人 &gt; 全局 &gt; 出厂默认</b> 的优先级解析出唯一生效值，
+ *       并把「这个值从哪一档来的」一并返回——只给一个值不给来源，排查时无法判断它 是继承来的还是配出来的。
+ *   <li><b>改参数不改历史单据已冻结的行为</b>：单据创建时调 {@code /business-parameters/freezes} 把当时的生效值整份拷进冻结快照；之后怎么改
+ *       override，这张单据读到的永远是 {@code freeze_value} 里那一份。一个单据只冻结一次，重复冻结返回 409 而不是覆盖，
  *       否则「这张单据当时按什么参数建的」又会变成一个没有唯一答案的问题。
  * </ul>
  *
- * <p>店铺维度只存逻辑 ID + 写入时快照的店铺标签，不建跨库外键：{@code shop} 属于 channel
- * 服务的库，AGENTS.md 禁止跨服务数据库访问（与 channel 侧 {@code shop.legal_entity_id}
- * 存逻辑 ID 是同一套边界做法）。
+ * <p>店铺维度只存逻辑 ID + 写入时快照的店铺标签，不建跨库外键：{@code shop} 属于 channel 服务的库，AGENTS.md 禁止跨服务数据库访问（与 channel 侧
+ * {@code shop.legal_entity_id} 存逻辑 ID 是同一套边界做法）。
  *
- * <p>校验规则（枚举取值、正则、数值范围）读自码表而不是写死在 Java：新增一类参数时，
- * 口径跟着数据一起进版本库，代码不需要新增分支。
+ * <p>校验规则（枚举取值、正则、数值范围）读自码表而不是写死在 Java：新增一类参数时， 口径跟着数据一起进版本库，代码不需要新增分支。
  *
- * <p>独立成 {@code BusinessParameterController} 而不并进 {@code AdministrationController}：
- * 17.5.1.1 是独立 L4 单元，同文件各自生长会让两侧改动在合并时互相打架。
+ * <p>独立成 {@code BusinessParameterController} 而不并进 {@code AdministrationController}： 17.5.1.1 是独立 L4
+ * 单元，同文件各自生长会让两侧改动在合并时互相打架。
  */
 @RestController
 @RequestMapping("/identity")
@@ -87,8 +82,8 @@ public class BusinessParameterController {
   /**
    * 参数定义 + 出厂默认值。
    *
-   * <p>{@code allowedValueCodes} 是显式字段而不是 {@code Map}：多选参数（售后必退情形）
-   * 在契约里必须保持 {@code string[]} 类型，退化成 {@code {}} 会让前端完全无法渲染。
+   * <p>{@code allowedValueCodes} 是显式字段而不是 {@code Map}：多选参数（售后必退情形） 在契约里必须保持 {@code string[]} 类型，退化成
+   * {@code {}} 会让前端完全无法渲染。
    */
   public record BusinessParameterDefinitionView(
       String code,
@@ -106,9 +101,8 @@ public class BusinessParameterController {
   /**
    * 参数生效值。
    *
-   * <p>{@code scopeType}/{@code sourceScope} 回答「这个值配在哪一档」，
-   * {@code definitionDefault*} 是同一参数未被任何档覆盖时的出厂值，两者并列给出，
-   * 这样继承关系在接口层就是可读的，不必再发一次请求去猜。
+   * <p>{@code scopeType}/{@code sourceScope} 回答「这个值配在哪一档」， {@code definitionDefault*}
+   * 是同一参数未被任何档覆盖时的出厂值，两者并列给出， 这样继承关系在接口层就是可读的，不必再发一次请求去猜。
    */
   public record BusinessParameterEffectiveView(
       String parameterCode,
@@ -132,8 +126,8 @@ public class BusinessParameterController {
   /**
    * 生效范围覆盖值。
    *
-   * <p>{@code legalEntityCode}/{@code legalEntityName} 由联查带出，法人改名后列表仍可读；
-   * 店铺标签则是写入时快照（跨服务，拿不到 channel 的实时名）。
+   * <p>{@code legalEntityCode}/{@code legalEntityName} 由联查带出，法人改名后列表仍可读； 店铺标签则是写入时快照（跨服务，拿不到
+   * channel 的实时名）。
    */
   public record BusinessParameterOverrideView(
       UUID id,
@@ -233,13 +227,16 @@ public class BusinessParameterController {
   private static final String PARAMETER_DELETE = "identity.business_parameter.delete";
 
   /**
-   * 与 {@code AccountingBookController.call} 同口径：解析会话 → 切到该会话的租户事务 →
-   * 锁会话 → 二次校验租户未切换 → 校验权限码 → 组织变更要求 OWNER。
+   * 与 {@code AccountingBookController.call} 同口径：解析会话 → 切到该会话的租户事务 → 锁会话 → 二次校验租户未切换 → 校验权限码 →
+   * 组织变更要求 OWNER。
    *
    * <p>租户来自会话成员关系，{@code X-Tenant-Id} 头在这里从头到尾没有出现过。
    */
   private <T> T call(
-      String auth, String permission, boolean mutation, Function<IdentityController.Access, T> work) {
+      String auth,
+      String permission,
+      boolean mutation,
+      Function<IdentityController.Access, T> work) {
     var initial = identity.resolve(auth);
     return tenants.run(
         initial.tenantId(),
@@ -251,7 +248,8 @@ public class BusinessParameterController {
           require(a.tenantId().equals(initial.tenantId()), "租户已切换，请重试");
           require(
               a.grants().stream()
-                  .anyMatch(g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
+                  .anyMatch(
+                      g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
               "当前角色没有此操作权限");
           if (mutation) require(a.owner(), "业务参数变更需由当前租户所有者执行");
           return work.apply(a);
@@ -296,7 +294,8 @@ public class BusinessParameterController {
         PARAMETER_READ,
         false,
         a ->
-            sql.fetch(
+            sql
+                .fetch(
                     "select code,name,category,value_type,default_value,default_value_numeric,"
                         + " allowed_values,validation_pattern,unit,description,status"
                         + " from business_parameter_definition order by sort_order,code")
@@ -333,7 +332,8 @@ public class BusinessParameterController {
             condition.add(" and o.scope_type=?");
             condition.bind(scopeType);
           }
-          return sql.fetch(
+          return sql
+              .fetch(
                   selectOverrides()
                       + condition.sql()
                       + " order by d.sort_order,o.scope_type,e.code nulls last,o.shop_label nulls last",
@@ -347,11 +347,10 @@ public class BusinessParameterController {
   /**
    * 参数生效值：在给定（法人 / 店铺）上下文下解析出的唯一值。
    *
-   * <p>优先级 <b>店铺 &gt; 法人 &gt; 全局 &gt; 出厂默认</b>。法人或店铺不传时对应档自然不参与
-   * 匹配（比较 NULL 结果为 NULL，不进入候选集），不需要调用方先判断"要不要传"。
+   * <p>优先级 <b>店铺 &gt; 法人 &gt; 全局 &gt; 出厂默认</b>。法人或店铺不传时对应档自然不参与 匹配（比较 NULL 结果为
+   * NULL，不进入候选集），不需要调用方先判断"要不要传"。
    *
-   * <p>法定代表人存在性必须查：法人维度是 identity 自己拥有的表，
-   * 传一个本租户不存在的法人 id 会静默退回全局值，那是最难排查的一类错配。
+   * <p>法定代表人存在性必须查：法人维度是 identity 自己拥有的表， 传一个本租户不存在的法人 id 会静默退回全局值，那是最难排查的一类错配。
    */
   @GetMapping("/business-parameters/effective")
   public List<BusinessParameterEffectiveView> effective(
@@ -398,7 +397,8 @@ public class BusinessParameterController {
             condition.add(" and h.scope_type=?");
             condition.bind(scopeType);
           }
-          return sql.fetch(
+          return sql
+              .fetch(
                   "select h.id,h.parameter_code,d.name as parameter_name,h.scope_type,"
                       + " h.legal_entity_id,e.code as legal_entity_code,h.shop_id,h.shop_label,"
                       + " h.action,h.before_value,h.before_value_numeric,h.after_value,"
@@ -430,8 +430,13 @@ public class BusinessParameterController {
         true,
         a -> {
           var definition = definition(input.parameterCode());
-          Scope scope = scope(a.tenantId(), input.scopeType(), input.legalEntityId(), input.shopId(),
-              input.shopLabel());
+          Scope scope =
+              scope(
+                  a.tenantId(),
+                  input.scopeType(),
+                  input.legalEntityId(),
+                  input.shopId(),
+                  input.shopLabel());
           var value = validated(definition, input.value());
           UUID id = Ids.next();
           try {
@@ -456,7 +461,15 @@ public class BusinessParameterController {
           } catch (org.springframework.dao.DataIntegrityViolationException e) {
             throw duplicate(definition.get("code", String.class), scope);
           }
-          history(a, auth, definition.get("code", String.class), scope, "CREATED", null, value, input.note());
+          history(
+              a,
+              auth,
+              definition.get("code", String.class),
+              scope,
+              "CREATED",
+              null,
+              value,
+              input.note());
           audit.record(
               a,
               auth,
@@ -473,8 +486,7 @@ public class BusinessParameterController {
   /**
    * 更新覆盖值。
    *
-   * <p>生效范围（{@code scopeType} 与两个 id）不允许改：要改范围等于换一条记录，
-   * 否则变更历史里「从哪一档挪到哪一档」会分不清是改值还是搬家。范围不符返回 409。
+   * <p>生效范围（{@code scopeType} 与两个 id）不允许改：要改范围等于换一条记录， 否则变更历史里「从哪一档挪到哪一档」会分不清是改值还是搬家。范围不符返回 409。
    */
   @PutMapping("/business-parameters/overrides/{id}")
   public void update(
@@ -486,12 +498,14 @@ public class BusinessParameterController {
         PARAMETER_UPDATE,
         true,
         a -> {
-          var row = sql.fetchOne("select * from business_parameter_override where tenant_id=? and id=?",
-              a.tenantId(), id);
+          var row =
+              sql.fetchOne(
+                  "select * from business_parameter_override where tenant_id=? and id=?",
+                  a.tenantId(),
+                  id);
           // 404 而不是 400：跨租户拿到的 id 与真正不存在的 id 在这里不可区分，
           // 返回 403 会泄露"这个 id 存在"。
-          if (row == null)
-            throw IdentityController.error(HttpStatus.NOT_FOUND, "参数覆盖不存在或不属于当前租户");
+          if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "参数覆盖不存在或不属于当前租户");
           var definition = definition(input.parameterCode());
           check(
               definition.get("code", String.class).equals(row.get("parameter_code", String.class)),
@@ -502,8 +516,13 @@ public class BusinessParameterController {
                   row.get("legal_entity_id", UUID.class),
                   row.get("shop_id", UUID.class),
                   row.get("shop_label", String.class));
-          Scope requested = scope(a.tenantId(), input.scopeType(), input.legalEntityId(),
-              input.shopId(), input.shopLabel());
+          Scope requested =
+              scope(
+                  a.tenantId(),
+                  input.scopeType(),
+                  input.legalEntityId(),
+                  input.shopId(),
+                  input.shopLabel());
           check(
               existing.sameTarget(requested),
               "生效范围不能在此修改（当前为 " + existing.describe() + "）；如需换档请删除后新建");
@@ -521,7 +540,14 @@ public class BusinessParameterController {
               existing.shopId() == null ? null : requested.shopLabel(),
               a.tenantId(),
               id);
-          history(a, auth, definition.get("code", String.class), existing, "UPDATED", snapshotOf(row), value,
+          history(
+              a,
+              auth,
+              definition.get("code", String.class),
+              existing,
+              "UPDATED",
+              snapshotOf(row),
+              value,
               input.note());
           audit.record(
               a,
@@ -539,18 +565,21 @@ public class BusinessParameterController {
   /** 删除覆盖值 = 退回继承（该档不再覆盖，解析时落到更低一档或出厂默认）。变更历史保留 DELETE 行。 */
   @DeleteMapping("/business-parameters/overrides/{id}")
   public void delete(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     call(
         auth,
         PARAMETER_DELETE,
         true,
         a -> {
-          var row = sql.fetchOne("select * from business_parameter_override where tenant_id=? and id=?",
-              a.tenantId(), id);
+          var row =
+              sql.fetchOne(
+                  "select * from business_parameter_override where tenant_id=? and id=?",
+                  a.tenantId(),
+                  id);
           // 404 而不是 400：跨租户拿到的 id 与真正不存在的 id 在这里不可区分，
           // 返回 403 会泄露"这个 id 存在"。
-          if (row == null)
-            throw IdentityController.error(HttpStatus.NOT_FOUND, "参数覆盖不存在或不属于当前租户");
+          if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "参数覆盖不存在或不属于当前租户");
           var definition = definition(row.get("parameter_code", String.class));
           Scope scope =
               new Scope(
@@ -564,8 +593,15 @@ public class BusinessParameterController {
                   a.tenantId(),
                   id);
           check(deleted == 1, "参数覆盖不存在或不属于当前租户");
-          history(a, auth, definition.get("code", String.class), scope, "DELETED", snapshotOf(row),
-              null, "退回继承");
+          history(
+              a,
+              auth,
+              definition.get("code", String.class),
+              scope,
+              "DELETED",
+              snapshotOf(row),
+              null,
+              "退回继承");
           audit.record(
               a,
               auth,
@@ -582,12 +618,10 @@ public class BusinessParameterController {
   /**
    * 冻结一张单据的参数。
    *
-   * <p>单据创建时调一次：按当前（法人 / 店铺）上下文把解析出的生效值整份拷进快照。
-   * 之后 9 审单、11 售后、7 库存都读这份快照，而不是实时解析 —— 这就是
+   * <p>单据创建时调一次：按当前（法人 / 店铺）上下文把解析出的生效值整份拷进快照。 之后 9 审单、11 售后、7 库存都读这份快照，而不是实时解析 —— 这就是
    * 「改参数不改历史单据已冻结的行为」的物理保证。
    *
-   * <p>重复冻结返回 409：一张单据的参数只应冻结一次；覆盖会让「当时按什么参数建的」
-   * 再次失去唯一答案。
+   * <p>重复冻结返回 409：一张单据的参数只应冻结一次；覆盖会让「当时按什么参数建的」 再次失去唯一答案。
    */
   @PostMapping("/business-parameters/freezes")
   public UUID freeze(
@@ -617,7 +651,8 @@ public class BusinessParameterController {
                     + "）；单据参数只冻结一次，如需更正请由业务单据侧作废重开");
 
           // 解析与 /effective 同一段 SQL 与同一套优先级，不另写一份"冻结专用"的解析逻辑。
-          var resolved = sql.fetch(RESOLVE_SQL, a.tenantId(), input.legalEntityId(), input.shopId());
+          var resolved =
+              sql.fetch(RESOLVE_SQL, a.tenantId(), input.legalEntityId(), input.shopId());
           check(!resolved.isEmpty(), "没有任何可用的参数定义，业务参数码表异常");
 
           UUID freezeId = Ids.next();
@@ -666,8 +701,7 @@ public class BusinessParameterController {
   /**
    * 读回单据冻结的参数。
    *
-   * <p>这是「历史单据不受后续改参数影响」的读出口：参数改过之后，这里返回的仍然是
-   * 单据创建时那一份。
+   * <p>这是「历史单据不受后续改参数影响」的读出口：参数改过之后，这里返回的仍然是 单据创建时那一份。
    */
   @GetMapping("/business-parameters/freezes/{documentType}/{documentNo}")
   public BusinessParameterFreezeView frozen(
@@ -690,10 +724,10 @@ public class BusinessParameterController {
           // 查不到就是没冻结过；返回 404 而不是空快照，调用方不该把「没冻结」当成「参数为空」。
           if (head == null)
             throw IdentityController.error(
-                HttpStatus.NOT_FOUND,
-                "单据 " + documentType + " " + documentNo + " 没有冻结的参数快照");
+                HttpStatus.NOT_FOUND, "单据 " + documentType + " " + documentNo + " 没有冻结的参数快照");
           var values =
-              sql.fetch(
+              sql
+                  .fetch(
                       "select v.parameter_code,d.name as parameter_name,v.value_text,v.value_numeric,"
                           + " v.source_scope,v.source_scope_id"
                           + " from business_parameter_freeze_value v"
@@ -733,11 +767,10 @@ public class BusinessParameterController {
   /**
    * 生效值解析：唯一一个同时服务「实时生效值」与「单据冻结」的地方。
    *
-   * <p>租户 / 法人 / 店铺三个上下文绑定在 CTE 里各占一次，避免同一占位符在 lateral 子查询里
-   * 重复出现导致绑定顺序与视觉顺序不一致——那种 SQL 改一行就要重数三遍绑定。
+   * <p>租户 / 法人 / 店铺三个上下文绑定在 CTE 里各占一次，避免同一占位符在 lateral 子查询里 重复出现导致绑定顺序与视觉顺序不一致——那种 SQL 改一行就要重数三遍绑定。
    *
-   * <p>{@code left join lateral} + {@code order by … limit 1} 就是优先级本身：
-   * 店铺 &gt; 法人 &gt; 全局。上下文没传的档比较结果为 NULL，自然不进候选集。
+   * <p>{@code left join lateral} + {@code order by … limit 1} 就是优先级本身： 店铺 &gt; 法人 &gt;
+   * 全局。上下文没传的档比较结果为 NULL，自然不进候选集。
    *
    * <p>没有命中任何覆盖档时 {@code o.*} 全为 NULL，落到码表出厂默认值（{@code source_scope='DEFAULT'}）。
    */
@@ -887,12 +920,11 @@ public class BusinessParameterController {
   /**
    * 校验并规范化取值。
    *
-   * <p>规则全部读自码表：ENUM 查 allowed_values、MULTI_ENUM 逐项查且查格式、
-   * INTEGER 必须能解析成数值且匹配 validation_pattern、STRING 按 validation_pattern 匹配。
-   * 新增一类参数时只改码表，不动这段代码。
+   * <p>规则全部读自码表：ENUM 查 allowed_values、MULTI_ENUM 逐项查且查格式、 INTEGER 必须能解析成数值且匹配
+   * validation_pattern、STRING 按 validation_pattern 匹配。 新增一类参数时只改码表，不动这段代码。
    *
-   * <p>规范化结果同时给出 {@code text} 与 {@code numeric}：数值型参数文本与数值必须一致，
-   * 下游按哪一侧读都能得到同一个答案（禁浮点，一律 BigDecimal / NUMERIC(19,6)）。
+   * <p>规范化结果同时给出 {@code text} 与 {@code numeric}：数值型参数文本与数值必须一致， 下游按哪一侧读都能得到同一个答案（禁浮点，一律 BigDecimal
+   * / NUMERIC(19,6)）。
    */
   private record Value(String text, BigDecimal numeric) {}
 
@@ -933,7 +965,10 @@ public class BusinessParameterController {
         check(numeric.signum() >= 0, "参数 " + code + " 不允许为负数，当前为 " + value);
         BigDecimal normalized = numeric.stripTrailingZeros();
         // 去掉小数点后可能退化成科学计数法（1000 → 1E+3），那不是能写进 text 列的规范形式。
-        String canonical = normalized.scale() <= 0 ? normalized.toBigInteger().toString() : normalized.toPlainString();
+        String canonical =
+            normalized.scale() <= 0
+                ? normalized.toBigInteger().toString()
+                : normalized.toPlainString();
         matchPattern(code, pattern, canonical);
         return new Value(canonical, new BigDecimal(canonical));
       }
@@ -962,25 +997,21 @@ public class BusinessParameterController {
     var row = sql.fetchOne("select * from business_parameter_definition where code=?", code.trim());
     if (row == null)
       throw IdentityController.error(HttpStatus.BAD_REQUEST, "业务参数 " + code + " 不存在");
-    check(
-        row.get("status", String.class).equals("ACTIVE"),
-        "业务参数 " + code + " 已下线，不能再配置");
+    check(row.get("status", String.class).equals("ACTIVE"), "业务参数 " + code + " 已下线，不能再配置");
     return row;
   }
 
   private Record legalEntity(UUID tenantId, UUID id) {
     var row = sql.fetchOne("select * from legal_entity where tenant_id=? and id=?", tenantId, id);
-    if (row == null)
-      throw IdentityController.error(HttpStatus.NOT_FOUND, "法人不存在或不属于当前租户");
+    if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "法人不存在或不属于当前租户");
     return row;
   }
 
-  private Scope scope(UUID tenantId, String type, UUID legalEntityId, UUID shopId, String shopLabel) {
+  private Scope scope(
+      UUID tenantId, String type, UUID legalEntityId, UUID shopId, String shopLabel) {
     return switch (type) {
       case "GLOBAL" -> {
-        check(
-            legalEntityId == null && shopId == null,
-            "全租户档不能指定法人或店铺，请改用按法人或按店铺档");
+        check(legalEntityId == null && shopId == null, "全租户档不能指定法人或店铺，请改用按法人或按店铺档");
         yield new Scope("GLOBAL", null, null, null);
       }
       case "LEGAL_ENTITY" -> {
@@ -992,13 +1023,13 @@ public class BusinessParameterController {
       case "SHOP" -> {
         check(shopId != null, "按店铺档必须指定店铺");
         // 店铺在 channel 服务的库，identity 查不到它的可读名，所以标签由调用方带入并落库快照。
-        check(
-            shopLabel != null && !shopLabel.isBlank(),
-            "按店铺档必须提供店铺名称（shopLabel），它会作为历史可读标签一起冻结");
+        check(shopLabel != null && !shopLabel.isBlank(), "按店铺档必须提供店铺名称（shopLabel），它会作为历史可读标签一起冻结");
         if (legalEntityId != null) legalEntity(tenantId, legalEntityId);
         yield new Scope("SHOP", legalEntityId, shopId, shopLabel.trim());
       }
-      default -> throw IdentityController.error(HttpStatus.BAD_REQUEST, "生效范围只能是 GLOBAL、LEGAL_ENTITY 或 SHOP");
+      default ->
+          throw IdentityController.error(
+              HttpStatus.BAD_REQUEST, "生效范围只能是 GLOBAL、LEGAL_ENTITY 或 SHOP");
     };
   }
 
@@ -1013,10 +1044,7 @@ public class BusinessParameterController {
   /** 逗号分隔的取值列表；空串返回空列表而不是含一个空串的列表。 */
   private static List<String> codes(String csv) {
     if (csv == null || csv.isBlank()) return List.of();
-    return Arrays.stream(csv.split(","))
-        .map(String::trim)
-        .filter(s -> !s.isEmpty())
-        .toList();
+    return Arrays.stream(csv.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
   }
 
   private RuntimeException duplicate(String parameterCode, Scope scope) {
@@ -1027,7 +1055,8 @@ public class BusinessParameterController {
 
   /** 从库行取变更前值。文本与数值同时留：数值型参数两侧必须能互相还原出同一个数。 */
   private static Snapshot snapshotOf(Record r) {
-    return new Snapshot(r.get("value_text", String.class), r.get("value_numeric", BigDecimal.class));
+    return new Snapshot(
+        r.get("value_text", String.class), r.get("value_numeric", BigDecimal.class));
   }
 
   private String actorName(String auth) {

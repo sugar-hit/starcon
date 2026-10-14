@@ -16,13 +16,13 @@
 
 ## 关键 trade-off
 
-| 取舍 | 选择 | 理由 |
-|---|---|---|
-| 8.4.1.1 组装单同属 warehouse，要不要建外键 | **不建**，用 `reference_id` + 服务层显式 SQL 校验 | 外键只能保证「那张单存在」，表达不了「它必须已 COMPLETED」。而拆一件没组装过的成品在账上说不通 |
-| 组件去向放单头还是逐行 | **逐行必填** | 同一张单里「面料回可售、螺丝回残次」是常态；单头一个默认值会把常态压平，也等于变相允许「整单回可售」 |
-| 应回量服务端算还是调用方传 | **调用方冻结传入**，服务端不重算 | 与 6.4.1.1 trade、8.4.1.1 warehouse 同一纪律：BOM 在别的服务，跨库重算等于跨服务读表 |
-| 出库与入库的先后 | **先出成品、后入组件** | 反过来先入组件，出库失败时货已入账 —— 凭空多出一批来路不明的组件 |
-| 是否加「回收率」这一维 | **加**（8.4.1.1 没有） | 组装发料会损耗（损耗率），拆解退件会缺件/损坏（回收率）。没有它无法解释「BOM 上 10 个螺丝，拆出来只有 8 个」 |
+| 取舍                                       | 选择                                              | 理由                                                                                                         |
+| ------------------------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 8.4.1.1 组装单同属 warehouse，要不要建外键 | **不建**，用 `reference_id` + 服务层显式 SQL 校验 | 外键只能保证「那张单存在」，表达不了「它必须已 COMPLETED」。而拆一件没组装过的成品在账上说不通               |
+| 组件去向放单头还是逐行                     | **逐行必填**                                      | 同一张单里「面料回可售、螺丝回残次」是常态；单头一个默认值会把常态压平，也等于变相允许「整单回可售」         |
+| 应回量服务端算还是调用方传                 | **调用方冻结传入**，服务端不重算                  | 与 6.4.1.1 trade、8.4.1.1 warehouse 同一纪律：BOM 在别的服务，跨库重算等于跨服务读表                         |
+| 出库与入库的先后                           | **先出成品、后入组件**                            | 反过来先入组件，出库失败时货已入账 —— 凭空多出一批来路不明的组件                                             |
+| 是否加「回收率」这一维                     | **加**（8.4.1.1 没有）                            | 组装发料会损耗（损耗率），拆解退件会缺件/损坏（回收率）。没有它无法解释「BOM 上 10 个螺丝，拆出来只有 8 个」 |
 
 ## 与 8.4.1.1 的关系（已实测，非推断）
 
@@ -33,6 +33,7 @@
 ## 文件清单
 
 后端（warehouse 服务）：
+
 - `backend/services/warehouse/src/main/resources/db/migration/V108__warehouse_disassembly_order.sql`（新建）
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/DisassemblyOrderModels.java`（新建）
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/DisassemblyOrderService.java`（新建）
@@ -40,6 +41,7 @@
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/DisassemblyOrderIntegrationTest.java`（新建，27 例）
 
 前端：
+
 - `apps/web/src/app/warehouse/disassembly-orders/page.tsx`（新建）
 - `apps/web/src/components/warehouse/disassembly-order-workspace.tsx`（新建）
 - `apps/web/src/components/warehouse/disassembly-order-model.ts`（新建）
@@ -47,6 +49,7 @@
 - `apps/web/src/app/api/warehouse/disassembly-order-allowlist.test.ts`（新建，7 例）
 
 共享/累积文件（**只追加，不收窄**）：
+
 - `apps/web/src/lib/api-proxy.ts` — warehouse/ 分支 alternation 顶层追加 `disassembly-orders` 一支
 - `packages/api-contracts/**` — codegen 产物
 - `docs/product/capability-blueprint/module-progress.md` — 只改本模块那一行

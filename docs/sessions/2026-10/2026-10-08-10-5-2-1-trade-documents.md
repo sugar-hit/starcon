@@ -69,6 +69,7 @@ Java `setScale(2,HALF_UP)` 得到 `2000.01`；列是 `NUMERIC(19,4)`，读回是
 ## 涉及文件
 
 ### 后端（新增）
+
 - `backend/services/warehouse/src/main/resources/db/migration/V91__warehouse_trade_documents.sql`（9 表 + 9 个约束触发器）
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/TradeDocumentModels.java`（枚举 + ~60 个 record DTO）
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/TradeDocumentService.java`
@@ -76,6 +77,7 @@ Java `setScale(2,HALF_UP)` 得到 `2000.01`；列是 `NUMERIC(19,4)`，读回是
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/TradeDocumentIntegrationTest.java`
 
 ### 前端（新增）
+
 - `apps/web/src/components/logistics/trade-document-model.ts`
 - `apps/web/src/components/logistics/trade-document-model.test.ts`（45 例）
 - `apps/web/src/components/logistics/trade-document.tsx`
@@ -83,39 +85,42 @@ Java `setScale(2,HALF_UP)` 得到 `2000.01`；列是 `NUMERIC(19,4)`，读回是
 - `apps/web/src/app/api/warehouse/trade-document-allowlist.test.ts`（9 例）
 
 ### 前端（修改）
+
 - `apps/web/src/lib/api-proxy.ts`（在 `duty-taxes` 之后**纯插入** `trade-documents` 分支，求并，未改动任何既有分支）
 
 ### 生成物
+
 - `packages/api-contracts/src/catalog.ts`（codegen，新增 **59 个 `Trade*` DTO**，共 1272 条，**重名检查 0 冲突**）
 - `packages/api-contracts/src/warehouse.openapi.json`
 - `docs/product/capability-blueprint/module-progress.md`（第 355 行 + 4 行派生汇总计数）
 
 ### 会话文档
+
 - 本文件
 
 ## 关键 trade-off
 
-| 选择 | 放弃的 | 原因 |
-|---|---|---|
-| 「实质性改变」只做校验与留痕 | 自动判定 | 蓝图加粗句是硬边界；自动判定等于替业务做法律判断 |
-| 缺失提醒自动结清 | 历史提醒永久留档 | 否则已补齐的单证包被历史阻断永久挡住；结清走显式留痕，不静默消失 |
-| 条件描述存文本不存表达式 | 可自动判定 `CONDITIONAL` | 报关规则的执行权不能在无评审下交给运营 |
-| 认证状态登记表（非 16 合规模像表） | 单一真相源直连 | 16 合规未交付；建镜像表会成双 writer，交付后必然漂移 |
+| 选择                               | 放弃的                   | 原因                                                             |
+| ---------------------------------- | ------------------------ | ---------------------------------------------------------------- |
+| 「实质性改变」只做校验与留痕       | 自动判定                 | 蓝图加粗句是硬边界；自动判定等于替业务做法律判断                 |
+| 缺失提醒自动结清                   | 历史提醒永久留档         | 否则已补齐的单证包被历史阻断永久挡住；结清走显式留痕，不静默消失 |
+| 条件描述存文本不存表达式           | 可自动判定 `CONDITIONAL` | 报关规则的执行权不能在无评审下交给运营                           |
+| 认证状态登记表（非 16 合规模像表） | 单一真相源直连           | 16 合规未交付；建镜像表会成双 writer，交付后必然漂移             |
 
 ## 验证
 
 全部命令在 worktree `/Users/tommy/Project/starcon/.worktrees/10.5.2.1` 下执行。
 
-| 命令 | 结果 |
-|---|---|
-| `cd backend && ./mvnw verify` | **BUILD SUCCESS**（05:53），identity 46.9s / catalog 1:27 / channel 7.7s / warehouse 3:27 / trade 3.1s |
-| `TradeDocumentIntegrationTest` | **37 例全绿**（Testcontainers PG16 + fake identity + Hikari 池压到 1） |
-| `OpenApiContractTest`（warehouse） | 1 例绿 |
-| `pnpm typecheck` | 3/3 包绿 |
-| `pnpm lint` | 绿（仅他模块既有 warning） |
-| `pnpm test` | **95 文件 / 1761 例全绿** |
-| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 成功，`/logistics/trade-documents` 16.9 kB 进产物 |
-| `node tools/module-progress/sync.mjs --check` | `✓ 台账与蓝图一致` |
+| 命令                                                         | 结果                                                                                                   |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `cd backend && ./mvnw verify`                                | **BUILD SUCCESS**（05:53），identity 46.9s / catalog 1:27 / channel 7.7s / warehouse 3:27 / trade 3.1s |
+| `TradeDocumentIntegrationTest`                               | **37 例全绿**（Testcontainers PG16 + fake identity + Hikari 池压到 1）                                 |
+| `OpenApiContractTest`（warehouse）                           | 1 例绿                                                                                                 |
+| `pnpm typecheck`                                             | 3/3 包绿                                                                                               |
+| `pnpm lint`                                                  | 绿（仅他模块既有 warning）                                                                             |
+| `pnpm test`                                                  | **95 文件 / 1761 例全绿**                                                                              |
+| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 成功，`/logistics/trade-documents` 16.9 kB 进产物                                                      |
+| `node tools/module-progress/sync.mjs --check`                | `✓ 台账与蓝图一致`                                                                                     |
 
 **PG 容器**：verify 期间同时存活 **2** 个（Testcontainers 自己的 + 预先存在的 `starcon-mig-v2`）；verify 跑完后本轮的已被 ryuk 回收，`docker ps --filter "ancestor=postgres:16-alpine"` 只剩 `starcon-mig-v2`（Up 30 hours，非本车道产生）。
 

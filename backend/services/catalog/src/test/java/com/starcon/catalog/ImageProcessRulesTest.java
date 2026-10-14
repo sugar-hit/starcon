@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 /**
  * {@link ImageProcessRules} 的纯规则测试。
  *
- * <p>这些边界有三处在用：服务层拒绝时的话、前端表单校验、集成测试断言。
- * 所以在这里断言的是**可执行的中文原因**，而不是「返回了非 null」。
+ * <p>这些边界有三处在用：服务层拒绝时的话、前端表单校验、集成测试断言。 所以在这里断言的是**可执行的中文原因**，而不是「返回了非 null」。
  */
 class ImageProcessRulesTest {
 
@@ -20,8 +19,7 @@ class ImageProcessRulesTest {
     assertThat(ImageProcessRules.TARGET_FORMATS).containsExactly("png", "jpeg", "gif", "bmp");
     assertThat(ImageProcessRules.CROP_MODES).containsExactly("FIT", "CROP_FILL");
     assertThat(ImageProcessRules.WATERMARK_POSITIONS)
-        .containsExactly(
-            "TOP_LEFT", "TOP_RIGHT", "BOTTOM_LEFT", "BOTTOM_RIGHT", "CENTER", "TILED");
+        .containsExactly("TOP_LEFT", "TOP_RIGHT", "BOTTOM_LEFT", "BOTTOM_RIGHT", "CENTER", "TILED");
     assertThat(ImageProcessRules.JOB_STATUSES)
         .containsExactly("PENDING", "RUNNING", "SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED");
     assertThat(ImageProcessRules.ITEM_STATUSES)
@@ -47,9 +45,7 @@ class ImageProcessRulesTest {
     assertThat(ImageProcessRules.targetFormatProblem(" jpeg ")).isNull();
     // WEBP 必须拒，并说清为什么、改成什么。JDK 没有 WEBP 写入器，
     // 声称成功只会得到一个空产物。
-    assertThat(ImageProcessRules.targetFormatProblem("webp"))
-        .contains("png")
-        .contains("ImageIO");
+    assertThat(ImageProcessRules.targetFormatProblem("webp")).contains("png").contains("ImageIO");
     assertThat(ImageProcessRules.targetFormatProblem("")).contains("不能为空");
     assertThat(ImageProcessRules.targetFormatProblem(null)).contains("不能为空");
   }
@@ -76,8 +72,7 @@ class ImageProcessRulesTest {
     assertThat(ImageProcessRules.targetSizeProblem(null, 100)).contains("同时给宽和高");
     assertThat(ImageProcessRules.targetSizeProblem(0, 100)).contains("大于 0");
     assertThat(ImageProcessRules.targetSizeProblem(-1, 100)).contains("大于 0");
-    assertThat(ImageProcessRules.targetSizeProblem(
-            ImageProcessRules.MAX_TARGET_EDGE_PX + 1, 100))
+    assertThat(ImageProcessRules.targetSizeProblem(ImageProcessRules.MAX_TARGET_EDGE_PX + 1, 100))
         .contains(String.valueOf(ImageProcessRules.MAX_TARGET_EDGE_PX));
   }
 
@@ -130,8 +125,7 @@ class ImageProcessRulesTest {
     // 与 brand.code / media_tag.code 同一口径（V19 同样带这个 CHECK）。
     assertThat(ImageProcessRules.recipeCodeProblem("amazon-main")).isNull();
     assertThat(ImageProcessRules.recipeCodeProblem("AMZ_1")).isNull();
-    assertThat(ImageProcessRules.recipeCodeProblem(" amazon main "))
-        .contains("英文字母");
+    assertThat(ImageProcessRules.recipeCodeProblem(" amazon main ")).contains("英文字母");
     assertThat(ImageProcessRules.recipeCodeProblem("_leading")).contains("英文字母");
     assertThat(ImageProcessRules.recipeCodeProblem("")).contains("不能为空");
     assertThat(ImageProcessRules.recipeCodeProblem("x".repeat(33))).contains("32");

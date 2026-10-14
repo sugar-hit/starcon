@@ -50,14 +50,7 @@ const base = 'warehouse/packing-orders';
 export type PackingStatus = 'OPEN' | 'PACKED' | 'FAILED' | 'CANCELLED';
 export type MaterialRole = 'PACKAGING' | 'CUSHIONING';
 export type MaterialType =
-  | 'CARTON'
-  | 'ENVELOPE'
-  | 'BAG'
-  | 'BOX'
-  | 'BUBBLE'
-  | 'PAPER'
-  | 'FOAM'
-  | 'OTHER';
+  'CARTON' | 'ENVELOPE' | 'BAG' | 'BOX' | 'BUBBLE' | 'PAPER' | 'FOAM' | 'OTHER';
 export type DeclarationSource = 'CUSTOMS_DECLARATION_LINE' | 'NOT_FOUND';
 
 export interface PackingParams {

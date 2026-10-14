@@ -39,11 +39,11 @@
 三条车道都从同一个陈旧基线分叉，都**重写了同一段内联 filter**，
 每条都只带自己那一个权限码分支，看不见已并入的两条：
 
-| 车道 | 它加的 | 它漏掉的 |
-| --- | --- | --- |
-| 17.2.2.2 | onboarding | hierarchy |
-| 17.2.1.2 | department-leaders | hierarchy、onboarding |
-| 17.2.2.3 | offboarding | department-leaders、onboarding |
+| 车道     | 它加的             | 它漏掉的                       |
+| -------- | ------------------ | ------------------------------ |
+| 17.2.2.2 | onboarding         | hierarchy                      |
+| 17.2.1.2 | department-leaders | hierarchy、onboarding          |
+| 17.2.2.3 | offboarding        | department-leaders、onboarding |
 
 **最后一次取 `visible()` helper 作为唯一入口**并把 offboarding 补进去，
 现在 tenants / audit / hierarchy / department-leaders / offboarding / onboarding

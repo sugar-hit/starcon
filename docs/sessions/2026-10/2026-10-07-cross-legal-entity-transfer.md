@@ -31,15 +31,18 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V64__warehouse_cross_legal_entity_transfer.sql`
 
 **后端**
+
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/LegalEntityTransferModels.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/LegalEntityTransferService.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/LegalEntityTransferController.java`
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/LegalEntityTransferIntegrationTest.java`
 
 **前端**
+
 - `apps/web/src/app/inventory/cross-entity-transfers/page.tsx`
 - `apps/web/src/components/inventory/legal-entity-transfer.tsx`
 - `apps/web/src/components/inventory/legal-entity-transfer-model.ts`
@@ -48,15 +51,18 @@
 - `apps/web/src/lib/api-proxy.ts`（白名单，在 `inventory/(?:…)` 组**内**新增分支）
 
 **契约（codegen 产物，只读）**
+
 - `packages/api-contracts/src/catalog.ts`
 - `packages/api-contracts/src/warehouse.openapi.json`
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md`（只改 7.5.2.1 那一行）
 
 ## 跨服务交接方式（下游均未交付）
 
 **12 财务（内部结算 / 收入确认）**
+
 - 定位键：`cross_entity_settlement` 的 `source_system`（固定 `'warehouse'`）+ `reference_id`（= 跨法人调拨单 id）。
 - 唯一性：`UNIQUE(source_system, reference_id)` + `UNIQUE(tenant_id, transfer_id)`，保证一单一张凭据、重复投递不会重复计提收入。
 - 取数形状：`GET /warehouse/inventory/cross-entity-transfers/{id}/settlement`，含金额、币种、双方法人、逐行数量/单价/金额/实收/差异。**不含**科目、凭证行、税额与汇率 —— 那些属 12 自己的权威，复制一份只会造出两份对不上的账。
@@ -64,6 +70,7 @@
 - **不建跨服务外键、不查 12 的表、不用 `starcon_app` 直连本库**（迁移末尾照例 `REVOKE ALL … FROM starcon_app`）。
 
 **17 权限（双方法人授权）**
+
 - 未接入。当前可执行约束：同租户 + 租户级权限码 `warehouse.inventory.{read,update}` + DB 触发器钉死两个方向的确认人必须是两个人。
 - 缺口说清楚：能调用本端点**不等于**有权代表某个法人，两者当前没有绑定。接入 17 后会在同一处（`AccessService.require` 之后）叠加逐法人校验。
 

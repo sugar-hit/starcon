@@ -4,7 +4,6 @@ import static com.starcon.warehouse.WarehouseModels.*;
 
 import com.starcon.tenancy.Ids;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -16,12 +15,10 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 7.1.1.1 的参照数据与超储阈值。
  *
- * <p>三类东西在这里，因为它们都是"总览要筛/要判，但不属于余额本身"的租户级配置：
- * 引用登记（法人 / SKU / 仓库 / 质量状态）与阈值策略。
+ * <p>三类东西在这里，因为它们都是"总览要筛/要判，但不属于余额本身"的租户级配置： 引用登记（法人 / SKU / 仓库 / 质量状态）与阈值策略。
  *
- * <p>跨服务边界：法人与 SKU 的**主数据**分别属 identity 与 catalog，本服务只登记
- * "我这里有这批货、它算哪个法人"的引用事实（见 V1 迁移文件头）。这里**不**复制类目、
- * 品牌、店铺 —— 那三样必须走授权 API，复制成本地列会出现两份权威。
+ * <p>跨服务边界：法人与 SKU 的**主数据**分别属 identity 与 catalog，本服务只登记 "我这里有这批货、它算哪个法人"的引用事实（见 V1
+ * 迁移文件头）。这里**不**复制类目、 品牌、店铺 —— 那三样必须走授权 API，复制成本地列会出现两份权威。
  */
 @Service
 public class WarehouseReferenceService {
@@ -63,7 +60,12 @@ public class WarehouseReferenceService {
 
   public List<SkuRef> skus() {
     return sql.fetch("select id,code,name from sku_ref order by code")
-        .map(r -> new SkuRef(r.get("id", UUID.class), r.get("code", String.class), r.get("name", String.class)));
+        .map(
+            r ->
+                new SkuRef(
+                    r.get("id", UUID.class),
+                    r.get("code", String.class),
+                    r.get("name", String.class)));
   }
 
   public List<QualityStatusRef> qualityStatuses() {
@@ -88,14 +90,14 @@ public class WarehouseReferenceService {
    */
   public List<InventoryPolicy> policies(String scopeType) {
     if (scopeType == null || scopeType.isBlank()) {
-      return sql.fetch(selectPolicy() + " order by scope_type,scope_key").map(WarehouseReferenceService::policy);
+      return sql.fetch(selectPolicy() + " order by scope_type,scope_key")
+          .map(WarehouseReferenceService::policy);
     }
     String scope = scopeType.toUpperCase(Locale.ROOT);
     if (!InventoryOverviewService.POLICY_SCOPES.contains(scope)) {
       throw new IllegalArgumentException("不支持的策略范围：" + scopeType);
     }
-    return sql.fetch(
-            selectPolicy() + " where scope_type=? order by scope_key", scope)
+    return sql.fetch(selectPolicy() + " where scope_type=? order by scope_key", scope)
         .map(WarehouseReferenceService::policy);
   }
 
@@ -107,11 +109,11 @@ public class WarehouseReferenceService {
   /**
    * 保存阈值（新增或更新）。同一租户下 scope_type + scope_key 唯一，重复保存即更新。
    *
-   * <p>7.2.2 会在同一张表上扩展补货点 / 安全库存 / 提前期，届时本方法与表结构一起演进，
-   * 不需要迁移到别处 —— 这是"别把字段设计死到无法扩展"的兑现方式。
+   * <p>7.2.2 会在同一张表上扩展补货点 / 安全库存 / 提前期，届时本方法与表结构一起演进， 不需要迁移到别处 —— 这是"别把字段设计死到无法扩展"的兑现方式。
    */
   public InventoryPolicySaved savePolicy(UUID policyId, InventoryPolicyInput input) {
-    String scope = input.scopeType() == null ? "" : input.scopeType().toUpperCase(Locale.ROOT).trim();
+    String scope =
+        input.scopeType() == null ? "" : input.scopeType().toUpperCase(Locale.ROOT).trim();
     if (!InventoryOverviewService.POLICY_SCOPES.contains(scope)) {
       throw new IllegalArgumentException("不支持的策略范围：" + input.scopeType());
     }
@@ -128,8 +130,7 @@ public class WarehouseReferenceService {
     if (input.maxOnHand().compareTo(BigDecimal.ZERO) <= 0) {
       throw new IllegalArgumentException("超储上限必须大于 0");
     }
-    if (input.minOnHand() != null
-        && input.minOnHand().compareTo(input.maxOnHand()) > 0) {
+    if (input.minOnHand() != null && input.minOnHand().compareTo(input.maxOnHand()) > 0) {
       throw new IllegalArgumentException("低储下限不能高于超储上限");
     }
 
@@ -149,7 +150,9 @@ public class WarehouseReferenceService {
 
     var saved =
         sql.fetchOne(
-            "select id,version from inventory_policy where scope_type=? and scope_key=?", scope, key);
+            "select id,version from inventory_policy where scope_type=? and scope_key=?",
+            scope,
+            key);
     return new InventoryPolicySaved(saved.get("id", UUID.class), saved.get("version", Long.class));
   }
 

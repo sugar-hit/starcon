@@ -69,7 +69,7 @@ function realCallSites(): string[] {
     const cleaned = tail
       .replace(/\$\{encodeURIComponent\(setId\)\}/g, ID)
       .replace(/\$\{encodeURIComponent\(documentId\)\}/g, DOC_ID)
-      .replace(/\$\{encodeURIComponent\(id\)\}/g, ID)
+      .replace(/\$\{encodeURIComponent\(id\)\}/g, ID);
     if (cleaned.includes('${')) continue;
     found.add(`${BASE}${cleaned}`);
   }
@@ -88,7 +88,7 @@ it('源码里真实存在的每个贸易单证调用点都被放行并转发', a
 
   for (const path of sites) {
     const segments = path.split('/');
-    const response = await GET(request(path), { params: { path: segments } });
+    const response = await GET(request(path), { params: Promise.resolve({ path: segments }) });
     expect(response.status, `${path} 未被放行`).toBe(200);
     expect(fetcher).toHaveBeenCalledWith(
       expect.stringContaining(':8084/' + path),
@@ -143,7 +143,9 @@ it('建包走 POST 裸路径也被放行', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const segments = BASE.split('/');
-  const response = await POST(request(BASE, 'POST'), { params: { path: segments } });
+  const response = await POST(request(BASE, 'POST'), {
+    params: Promise.resolve({ path: segments }),
+  });
   expect(response.status, 'POST 单证包裸路径未被放行').toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8084/' + BASE),
@@ -156,7 +158,9 @@ it('改单走 PUT {id} 被放行', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const path = `${BASE}/${ID}`;
-  const response = await PUT(request(path, 'PUT'), { params: { path: path.split('/') } });
+  const response = await PUT(request(path, 'PUT'), {
+    params: Promise.resolve({ path: path.split('/') }),
+  });
   expect(response.status, 'PUT 单证包改单未被放行').toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8084/' + path),
@@ -174,7 +178,9 @@ it('四组租户可维护资源的 PUT {id} 都被放行', async () => {
     `${BASE}/certifications/${RULE_ID}`,
     `${BASE}/preference-rules/${RULE_ID}`,
   ]) {
-    const response = await PUT(request(path, 'PUT'), { params: { path: path.split('/') } });
+    const response = await PUT(request(path, 'PUT'), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行`).toBe(200);
   }
 });
@@ -191,7 +197,9 @@ it('白名单按路径登记：已登记路径的 DELETE 会被转发，防线�
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const path = `${BASE}/${ID}`;
-  const response = await DELETE(request(path, 'DELETE'), { params: { path: path.split('/') } });
+  const response = await DELETE(request(path, 'DELETE'), {
+    params: Promise.resolve({ path: path.split('/') }),
+  });
   expect(response.status).toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8084/' + path),
@@ -221,7 +229,7 @@ it('不存在的贸易单证子路径仍然被拒 —— 放行不该存在的�
     `${BASE}/certifications/sync`,
   ]) {
     const segments = path.split('/');
-    const response = await GET(request(path), { params: { path: segments } });
+    const response = await GET(request(path), { params: Promise.resolve({ path: segments }) });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
@@ -246,13 +254,12 @@ it('带查询串的集合路径（reminders / preference-confirmations）也被�
     // 查询串走 request.nextUrl.search，匹配走 params.path —— 与 route handler 同一套读法。
     // 把 `?…` 混进 params 会让正则看到 `reminders?status=…` 而 404，那是测试写错，不是白名单漏了。
     const pathname = path.split('?')[0] ?? path;
-    const response = await GET(request(path), { params: { path: pathname.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: pathname.split('/') }),
+    });
     expect(response.status, `${path} 未被放行`).toBe(200);
     // 查询串必须原样转发到上游，否则筛选条件在服务端会静默丢失
-    expect(fetcher).toHaveBeenCalledWith(
-      expect.stringContaining(path),
-      expect.anything(),
-    );
+    expect(fetcher).toHaveBeenCalledWith(expect.stringContaining(path), expect.anything());
   }
 });
 
@@ -284,7 +291,7 @@ it('兄弟模块的形状没有被贸易单证的白名单吃掉', async () => {
     `warehouse/first-mile-shipments/${ID}/transit-legs`,
   ]) {
     const segments = path.split('/');
-    const response = await GET(request(path), { params: { path: segments } });
+    const response = await GET(request(path), { params: Promise.resolve({ path: segments }) });
     expect(response.status, `${path} 未被放行（被贸易单证段吃掉了？）`).toBe(200);
   }
 
@@ -295,7 +302,7 @@ it('兄弟模块的形状没有被贸易单证的白名单吃掉', async () => {
     `warehouse/duty-taxes/${ID}/trade-documents`,
   ]) {
     const segments = path.split('/');
-    const response = await GET(request(path), { params: { path: segments } });
+    const response = await GET(request(path), { params: Promise.resolve({ path: segments }) });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
 });

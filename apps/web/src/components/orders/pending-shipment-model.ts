@@ -256,7 +256,9 @@ export function shipmentBatchStatusLabel(status: string | undefined): string {
  * <p>PARTIAL 与 SUCCEEDED **必须**不同色：这一屏是交接现场的看板，
  * 「部分成功」显示成和「全部成功」一样的绿，等于把漏发的票藏起来。
  */
-export function batchStatusSeverity(status: string | undefined): 'ok' | 'warn' | 'danger' | 'normal' {
+export function batchStatusSeverity(
+  status: string | undefined,
+): 'ok' | 'warn' | 'danger' | 'normal' {
   if (status === 'SUCCEEDED') return 'ok';
   if (status === 'PARTIAL' || status === 'RUNNING' || status === 'PENDING') return 'warn';
   if (status === 'FAILED') return 'danger';
@@ -357,9 +359,10 @@ export function carrierMissing(unit: Pick<PendingShipmentUnitRow, 'carrierCode'>
  * <p>返回原因字符串而不是布尔，是为了让禁用按钮能直接显示原因 ——
  * 只灰掉按钮不给理由，现场只能挨个点开猜。
  */
-export function taskEligibility(
-  unit: PendingShipmentUnitRow,
-): { eligible: boolean; reason: string } {
+export function taskEligibility(unit: PendingShipmentUnitRow): {
+  eligible: boolean;
+  reason: string;
+} {
   if (unit.status === 'HANDED_OVER') {
     return { eligible: false, reason: '已交接，再交接一次等于同一批货发两次' };
   }
@@ -442,7 +445,9 @@ export function nextActionText(unit: PendingShipmentUnitRow): string {
 }
 
 /** 运单号还没签发时明确写「待回执」，不显示成空白。 */
-export function waybillText(waybill: Pick<PendingShipmentWaybillRow, 'status' | 'waybillNo'>): string {
+export function waybillText(
+  waybill: Pick<PendingShipmentWaybillRow, 'status' | 'waybillNo'>,
+): string {
   if (waybill.status === 'ISSUED' && waybill.waybillNo) return waybill.waybillNo;
   if (waybill.status === 'FAILED') return '被拒（见逐条原因）';
   return '待承运商回执';

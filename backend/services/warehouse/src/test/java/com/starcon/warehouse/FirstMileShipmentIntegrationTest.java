@@ -27,16 +27,14 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 10.4.1.1 头程发运单：货权与成本节点（Incoterm × 风险承担方）入库进契约、
- * **发出不扣在手**、发货分录只经 7.5.1.2 登记、同一批货不能发两次、已发出是终态，
+ * 10.4.1.1 头程发运单：货权与成本节点（Incoterm × 风险承担方）入库进契约、 **发出不扣在手**、发货分录只经 7.5.1.2 登记、同一批货不能发两次、已发出是终态，
  * 以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link GoodsReceiptIntegrationTest} / {@link InventoryInTransitIntegrationTest}
- * 一致（同样的 Testcontainers、同样的 fake identity server、同样的按租户派生 UUID、
- * 同样的 TRUNCATE 清场），派生 id 的前缀不同，避免三条车道的夹具互相污染。
+ * <p>夹具写法与 {@link GoodsReceiptIntegrationTest} / {@link InventoryInTransitIntegrationTest} 一致（同样的
+ * Testcontainers、同样的 fake identity server、同样的按租户派生 UUID、 同样的 TRUNCATE 清场），派生 id
+ * 的前缀不同，避免三条车道的夹具互相污染。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -182,27 +180,50 @@ class FirstMileShipmentIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 3), tenant, "SKU-2", "商品二");
+                idFor(tenant, 3),
+                tenant,
+                "SKU-2",
+                "商品二");
             // 国内起运仓（CN）与海外目的仓（US）：头程的「目的仓」是本租户 warehouse
             // 表里的海外仓行，不是第三方海外仓服务商账户（10.4.2.1 未交付）。
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 4),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-LA", "洛杉矶海外仓", "US", "America/Los_Angeles");
+                idFor(tenant, 5),
+                tenant,
+                "WH-LA",
+                "洛杉矶海外仓",
+                "US",
+                "America/Los_Angeles");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 6),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             seedReceipt(tenant);
             return null;
           });
@@ -214,44 +235,82 @@ class FirstMileShipmentIntegrationTest {
     sql.execute(
         "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
             + " values(?,?,?,?,?,'STORAGE',true)",
-        idFor(tenant, 8), tenant, idFor(tenant, 4), "SH-01", "库位 SH-01");
+        idFor(tenant, 8),
+        tenant,
+        idFor(tenant, 4),
+        "SH-01",
+        "库位 SH-01");
     sql.execute(
         "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on) values(?,?,?,?,?)",
-        idFor(tenant, 10), tenant, idFor(tenant, 2), "LOT-1", LocalDate.of(2027, 3, 1));
+        idFor(tenant, 10),
+        tenant,
+        idFor(tenant, 2),
+        "LOT-1",
+        LocalDate.of(2027, 3, 1));
     // status='RECEIVED' 必须与「有实收事件」自洽（V70 的延迟约束触发器）
     sql.execute(
         "insert into goods_receipt(id,tenant_id,receipt_code,source_type,source_ref_code,"
             + "warehouse_id,legal_entity_id,status,created_by)"
             + " values(?,?,?,'TRANSFER','TO-1',?,?,'RECEIVED',?)",
-        idFor(tenant, 20), tenant, "GR-20261001-000001", idFor(tenant, 4), idFor(tenant, 1), user);
+        idFor(tenant, 20),
+        tenant,
+        "GR-20261001-000001",
+        idFor(tenant, 4),
+        idFor(tenant, 1),
+        user);
     sql.execute(
         "insert into goods_receipt_line(id,tenant_id,receipt_id,sku_id,quality_status_id,"
             + "expected_quantity) values(?,?,?,?,?,?)",
-        idFor(tenant, 21), tenant, idFor(tenant, 20), idFor(tenant, 2), idFor(tenant, 6),
+        idFor(tenant, 21),
+        tenant,
+        idFor(tenant, 20),
+        idFor(tenant, 2),
+        idFor(tenant, 6),
         new BigDecimal("100"));
     sql.execute(
         "insert into goods_receipt_event(id,tenant_id,receipt_id,received_at,location_id,"
             + "waybill_no,actor_id) values(?,?,?,?::timestamptz,?,?,?)",
-        idFor(tenant, 22), tenant, idFor(tenant, 20),
+        idFor(tenant, 22),
+        tenant,
+        idFor(tenant, 20),
         OffsetDateTime.of(2026, 10, 1, 9, 30, 0, 0, ZoneOffset.ofHours(8)),
-        idFor(tenant, 8), "WB-1", user);
+        idFor(tenant, 8),
+        "WB-1",
+        user);
     sql.execute(
         "insert into goods_receipt_event_line(id,tenant_id,event_id,line_id,received_quantity,"
             + "rejected_quantity,lot_id,expiry_date) values(?,?,?,?,?,0,?,?)",
-        idFor(tenant, 23), tenant, idFor(tenant, 22), idFor(tenant, 21), new BigDecimal("100"),
-        idFor(tenant, 10), LocalDate.of(2027, 3, 1));
+        idFor(tenant, 23),
+        tenant,
+        idFor(tenant, 22),
+        idFor(tenant, 21),
+        new BigDecimal("100"),
+        idFor(tenant, 10),
+        LocalDate.of(2027, 3, 1));
     // 在手余额：用来断言「发出**不扣在手**」
     sql.execute(
         "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
             + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-        idFor(tenant, 30), tenant, idFor(tenant, 2), idFor(tenant, 4), idFor(tenant, 1),
-        idFor(tenant, 6), new BigDecimal("40"));
+        idFor(tenant, 30),
+        tenant,
+        idFor(tenant, 2),
+        idFor(tenant, 4),
+        idFor(tenant, 1),
+        idFor(tenant, 6),
+        new BigDecimal("40"));
     sql.execute(
         "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,location_id,"
             + "lot_id,quality_status_id,balance_id,on_hand,reserved,last_movement_at)"
             + " values(?,?,?,?,?,?,null,?,?,?,0,now())",
-        idFor(tenant, 31), tenant, idFor(tenant, 1), idFor(tenant, 2), idFor(tenant, 4),
-        idFor(tenant, 8), idFor(tenant, 6), idFor(tenant, 30), new BigDecimal("40"));
+        idFor(tenant, 31),
+        tenant,
+        idFor(tenant, 1),
+        idFor(tenant, 2),
+        idFor(tenant, 4),
+        idFor(tenant, 8),
+        idFor(tenant, 6),
+        idFor(tenant, 30),
+        new BigDecimal("40"));
   }
 
   AccessService.Access actorFor(UUID tenant) {
@@ -264,8 +323,7 @@ class FirstMileShipmentIntegrationTest {
    * 建单请求的可变构造器。
    *
    * <p>{@link FirstMileCreateRequest} 有 24 个组件，直接写 record 构造器每次都要数参数 ——
-   * 数错会编译失败（还好），数「对」但顺序错会静默填错列（那才可怕）。用可变字段 + build()
-   * 把默认值集中在一处，测试里只写真正要变的那一两个字段。
+   * 数错会编译失败（还好），数「对」但顺序错会静默填错列（那才可怕）。用可变字段 + build() 把默认值集中在一处，测试里只写真正要变的那一两个字段。
    */
   private static final class Req {
     String sourceType = "GOODS_RECEIPT";
@@ -300,11 +358,30 @@ class FirstMileShipmentIntegrationTest {
 
     FirstMileCreateRequest build() {
       return new FirstMileCreateRequest(
-          sourceType, sourceRefId, sourceRefCode, legalEntityId, originWarehouseId,
-          destinationWarehouseId, destinationCountryCode, destinationName, transportMode,
-          carrierName, bookingNo, vesselOrFlightNo, incoterm, riskBearer, currency, freightCost,
-          insuranceCost, dutyEstimate, handlingCost, customsBroker, departAt, expectedArriveAt,
-          notes, lines);
+          sourceType,
+          sourceRefId,
+          sourceRefCode,
+          legalEntityId,
+          originWarehouseId,
+          destinationWarehouseId,
+          destinationCountryCode,
+          destinationName,
+          transportMode,
+          carrierName,
+          bookingNo,
+          vesselOrFlightNo,
+          incoterm,
+          riskBearer,
+          currency,
+          freightCost,
+          insuranceCost,
+          dutyEstimate,
+          handlingCost,
+          customsBroker,
+          departAt,
+          expectedArriveAt,
+          notes,
+          lines);
     }
   }
 
@@ -339,10 +416,27 @@ class FirstMileShipmentIntegrationTest {
 
     FirstMileUpdateRequest build() {
       return new FirstMileUpdateRequest(
-          expectedVersion, sourceRefCode, destinationWarehouseId, destinationCountryCode,
-          destinationName, transportMode, carrierName, bookingNo, vesselOrFlightNo, incoterm,
-          riskBearer, currency, freightCost, insuranceCost, dutyEstimate, handlingCost,
-          customsBroker, departAt, expectedArriveAt, notes, lines);
+          expectedVersion,
+          sourceRefCode,
+          destinationWarehouseId,
+          destinationCountryCode,
+          destinationName,
+          transportMode,
+          carrierName,
+          bookingNo,
+          vesselOrFlightNo,
+          incoterm,
+          riskBearer,
+          currency,
+          freightCost,
+          insuranceCost,
+          dutyEstimate,
+          handlingCost,
+          customsBroker,
+          departAt,
+          expectedArriveAt,
+          notes,
+          lines);
     }
   }
 
@@ -365,15 +459,22 @@ class FirstMileShipmentIntegrationTest {
 
   private FirstMileLineRequest lineFor(UUID tenant, String qty) {
     return line(
-        idFor(tenant, 2), idFor(tenant, 6), idFor(tenant, 23), idFor(tenant, 10), qty,
-        "棉制男士衬衫");
+        idFor(tenant, 2), idFor(tenant, 6), idFor(tenant, 23), idFor(tenant, 10), qty, "棉制男士衬衫");
   }
 
   /** 一条申报齐备的明细行（申报品名 / HS / 货值 / 毛净重 / 箱数都填好）。 */
   private FirstMileLineRequest line(
       UUID sku, UUID quality, UUID sourceLine, UUID lot, String qty, String itemName) {
     return new FirstMileLineRequest(
-        sku, quality, sourceLine, lot, new BigDecimal(qty), itemName, "6205200090", "ACME", "CN",
+        sku,
+        quality,
+        sourceLine,
+        lot,
+        new BigDecimal(qty),
+        itemName,
+        "6205200090",
+        "ACME",
+        "CN",
         new BigDecimal("12.5000"),
         new BigDecimal(qty).multiply(new BigDecimal("12.5000")),
         new BigDecimal("180.0000"),
@@ -413,7 +514,8 @@ class FirstMileShipmentIntegrationTest {
 
   FirstMileSaved dispatchShipment(UUID id, long version) {
     return asAWrite(
-        () -> service.dispatch(a, id, new FirstMileDispatchRequest(version, null, "已装船", List.of())));
+        () ->
+            service.dispatch(a, id, new FirstMileDispatchRequest(version, null, "已装船", List.of())));
   }
 
   UUID lineIdOf(UUID shipmentId) {
@@ -441,9 +543,8 @@ class FirstMileShipmentIntegrationTest {
   /**
    * 绕过服务层直接写一条在途腿回执。
    *
-   * <p>只用于 DB 触发器测试：{@code first_mile_shipment_leg_receipt} 对
-   * {@code inventory_transfer} 是**逻辑引用不建外键**（那张表的写入所有者是 7.5.1.2），
-   * 所以这里可以造一条不存在的在途腿 id —— 这正是「本模块只调 7.5.1.2 的端点、
+   * <p>只用于 DB 触发器测试：{@code first_mile_shipment_leg_receipt} 对 {@code inventory_transfer}
+   * 是**逻辑引用不建外键**（那张表的写入所有者是 7.5.1.2）， 所以这里可以造一条不存在的在途腿 id —— 这正是「本模块只调 7.5.1.2 的端点、
    * 自己只留回执」这条边界在测试里的可核对形态。
    */
   void rawLeg(UUID shipmentId, UUID lineId, String qty) {
@@ -453,15 +554,25 @@ class FirstMileShipmentIntegrationTest {
             + "expected_arrive_at,registered_at,registered_by)"
             + " values(?,?,?,?,?,'FIRST_MILE',?,?,?,?::timestamptz,?::timestamptz,"
             + "?::timestamptz,?)",
-        UUID.randomUUID(), a, shipmentId, lineId, UUID.randomUUID(),
-        "RAW-" + UUID.randomUUID(), skuA, new BigDecimal(qty), ETA.minusDays(30), ETA,
-        OffsetDateTime.now(), user);
+        UUID.randomUUID(),
+        a,
+        shipmentId,
+        lineId,
+        UUID.randomUUID(),
+        "RAW-" + UUID.randomUUID(),
+        skuA,
+        new BigDecimal(qty),
+        ETA.minusDays(30),
+        ETA,
+        OffsetDateTime.now(),
+        user);
   }
 
   BigDecimal onHand() {
     return asA(
-        () -> sql.fetchOne("select coalesce(sum(on_hand),0) from inventory_balance")
-            .get(0, BigDecimal.class));
+        () ->
+            sql.fetchOne("select coalesce(sum(on_hand),0) from inventory_balance")
+                .get(0, BigDecimal.class));
   }
 
   long transactionCount() {
@@ -471,8 +582,7 @@ class FirstMileShipmentIntegrationTest {
   long firstMileLegCount() {
     return asA(
         () ->
-            sql.fetchOne(
-                    "select count(*) from inventory_transfer where source_system='FIRST_MILE'")
+            sql.fetchOne("select count(*) from inventory_transfer where source_system='FIRST_MILE'")
                 .get(0, Long.class));
   }
 
@@ -494,8 +604,9 @@ class FirstMileShipmentIntegrationTest {
   @Test
   @DisplayName("能力端点：收货来源真通、供应商来源与五个下游显式不可用并给出归属模块")
   void 能力_未交付依赖显式声明() throws Exception {
-    http.perform(get("/warehouse/first-mile-shipments/capabilities")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/first-mile-shipments/capabilities")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.sources[?(@.value=='GOODS_RECEIPT')].available").value(true))
         .andExpect(jsonPath("$.sources[?(@.value=='GOODS_RECEIPT')].ownerModule").value("8.2.1.1"))
@@ -503,7 +614,8 @@ class FirstMileShipmentIntegrationTest {
             jsonPath("$.sources[?(@.value=='GOODS_RECEIPT')].href")
                 .value("/warehouse/goods-receipts"))
         .andExpect(jsonPath("$.sources[?(@.value=='SUPPLIER_PURCHASE')].available").value(false))
-        .andExpect(jsonPath("$.sources[?(@.value=='SUPPLIER_PURCHASE')].ownerModule").value("6.3.2.2"))
+        .andExpect(
+            jsonPath("$.sources[?(@.value=='SUPPLIER_PURCHASE')].ownerModule").value("6.3.2.2"))
         .andExpect(
             jsonPath("$.sources[?(@.value=='SUPPLIER_PURCHASE')].href").value("/purchase/orders"))
         .andExpect(jsonPath("$.sources[?(@.value=='SUPPLIER_PURCHASE')].note").isNotEmpty())
@@ -523,16 +635,20 @@ class FirstMileShipmentIntegrationTest {
   void 能力_贸易术语与状态机() {
     var caps = asA(() -> service.capabilities());
     assertThat(caps.incoterms()).hasSize(11);
-    var exw = caps.incoterms().stream().filter(i -> i.value().equals("EXW")).findFirst().orElseThrow();
+    var exw =
+        caps.incoterms().stream().filter(i -> i.value().equals("EXW")).findFirst().orElseThrow();
     assertThat(exw.allowedRiskBearers()).containsExactly("BUYER");
-    var ddp = caps.incoterms().stream().filter(i -> i.value().equals("DDP")).findFirst().orElseThrow();
+    var ddp =
+        caps.incoterms().stream().filter(i -> i.value().equals("DDP")).findFirst().orElseThrow();
     assertThat(ddp.allowedRiskBearers()).containsExactly("SELLER");
-    var fob = caps.incoterms().stream().filter(i -> i.value().equals("FOB")).findFirst().orElseThrow();
+    var fob =
+        caps.incoterms().stream().filter(i -> i.value().equals("FOB")).findFirst().orElseThrow();
     assertThat(fob.allowedRiskBearers()).hasSize(3);
     assertThat(fob.riskPoint()).isNotBlank();
     // 16 条全枚举；允许 6 条：DRAFT→DRAFT/CONFIRMED/CANCELLED + CONFIRMED→CONFIRMED/DISPATCHED/CANCELLED
     assertThat(caps.transitions()).hasSize(16);
-    assertThat(caps.transitions().stream().filter(ShipmentTransition::allowed).count()).isEqualTo(6);
+    assertThat(caps.transitions().stream().filter(ShipmentTransition::allowed).count())
+        .isEqualTo(6);
     // 自环标注为改单（前端据此决定「编辑」按钮）
     assertThat(
             caps.transitions().stream()
@@ -647,15 +763,29 @@ class FirstMileShipmentIntegrationTest {
     noBatch.lines =
         List.of(
             new FirstMileLineRequest(
-                skuA, qSellable, null, lotA1, new BigDecimal("10"), "棉制衬衫", "", "", "CN",
-                null, null, null, null, null, null));
+                skuA,
+                qSellable,
+                null,
+                lotA1,
+                new BigDecimal("10"),
+                "棉制衬衫",
+                "",
+                "",
+                "CN",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null));
     assertThatThrownBy(() -> asAWrite(() -> service.create(a, noBatch.build())))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("批次");
 
     // 计划量超实收（实收 100）
     assertThatThrownBy(
-            () -> asAWrite(() -> service.create(a, req(a).lines(List.of(lineFor(a, "101"))).build())))
+            () ->
+                asAWrite(() -> service.create(a, req(a).lines(List.of(lineFor(a, "101"))).build())))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("超过该实收批次还能发走的量");
 
@@ -686,8 +816,21 @@ class FirstMileShipmentIntegrationTest {
     noName.lines =
         List.of(
             new FirstMileLineRequest(
-                skuA, qSellable, receiptEventLineA, lotA1, new BigDecimal("10"), "  ", "", "", "CN",
-                null, null, null, null, null, null));
+                skuA,
+                qSellable,
+                receiptEventLineA,
+                lotA1,
+                new BigDecimal("10"),
+                "  ",
+                "",
+                "",
+                "CN",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null));
     assertThatThrownBy(() -> asAWrite(() -> service.create(a, noName.build())))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("申报品名");
@@ -751,8 +894,10 @@ class FirstMileShipmentIntegrationTest {
     var cny = req(a);
     cny.currency = "cny";
     asAWrite(() -> service.create(a, cny.build()));
-    assertThat(asA(() -> service.page(query(0, 50)).rows()).stream()
-            .map(FirstMileRow::currency).toList())
+    assertThat(
+            asA(() -> service.page(query(0, 50)).rows()).stream()
+                .map(FirstMileRow::currency)
+                .toList())
         .containsExactlyInAnyOrder("USD", "CNY");
   }
 
@@ -788,9 +933,21 @@ class FirstMileShipmentIntegrationTest {
     zeroValue.lines =
         List.of(
             new FirstMileLineRequest(
-                skuA, qSellable, receiptEventLineA, lotA1, new BigDecimal("10"), "棉制衬衫", "",
-                "", "CN", new BigDecimal("12.5"), BigDecimal.ZERO, new BigDecimal("10"),
-                new BigDecimal("9"), new BigDecimal("0.1"), 1));
+                skuA,
+                qSellable,
+                receiptEventLineA,
+                lotA1,
+                new BigDecimal("10"),
+                "棉制衬衫",
+                "",
+                "",
+                "CN",
+                new BigDecimal("12.5"),
+                BigDecimal.ZERO,
+                new BigDecimal("10"),
+                new BigDecimal("9"),
+                new BigDecimal("0.1"),
+                1));
     var zero = asAWrite(() -> service.create(a, zeroValue.build()));
     assertThatThrownBy(() -> confirmShipment(zero.id(), 0L))
         .isInstanceOf(IllegalArgumentException.class)
@@ -801,9 +958,21 @@ class FirstMileShipmentIntegrationTest {
     noWeight.lines =
         List.of(
             new FirstMileLineRequest(
-                skuA, qSellable, receiptEventLineA, lotA1, new BigDecimal("10"), "棉制衬衫", "",
-                "", "CN", new BigDecimal("12.5"), new BigDecimal("125"), BigDecimal.ZERO,
-                BigDecimal.ZERO, new BigDecimal("0.1"), 1));
+                skuA,
+                qSellable,
+                receiptEventLineA,
+                lotA1,
+                new BigDecimal("10"),
+                "棉制衬衫",
+                "",
+                "",
+                "CN",
+                new BigDecimal("12.5"),
+                new BigDecimal("125"),
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                new BigDecimal("0.1"),
+                1));
     var noW = asAWrite(() -> service.create(a, noWeight.build()));
     assertThatThrownBy(() -> confirmShipment(noW.id(), 0L))
         .isInstanceOf(IllegalArgumentException.class)
@@ -814,9 +983,21 @@ class FirstMileShipmentIntegrationTest {
     noCarton.lines =
         List.of(
             new FirstMileLineRequest(
-                skuA, qSellable, receiptEventLineA, lotA1, new BigDecimal("10"), "棉制衬衫", "",
-                "", "CN", new BigDecimal("12.5"), new BigDecimal("125"), new BigDecimal("10"),
-                new BigDecimal("9"), new BigDecimal("0.1"), 0));
+                skuA,
+                qSellable,
+                receiptEventLineA,
+                lotA1,
+                new BigDecimal("10"),
+                "棉制衬衫",
+                "",
+                "",
+                "CN",
+                new BigDecimal("12.5"),
+                new BigDecimal("125"),
+                new BigDecimal("10"),
+                new BigDecimal("9"),
+                new BigDecimal("0.1"),
+                0));
     var noC = asAWrite(() -> service.create(a, noCarton.build()));
     assertThatThrownBy(() -> confirmShipment(noC.id(), 0L))
         .isInstanceOf(IllegalArgumentException.class)
@@ -928,7 +1109,11 @@ class FirstMileShipmentIntegrationTest {
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已发出是终态");
     assertThatThrownBy(
-            () -> asAWrite(() -> service.update(saved.id(), upd(a).expectedVersion(dispatched.version()).build())))
+            () ->
+                asAWrite(
+                    () ->
+                        service.update(
+                            saved.id(), upd(a).expectedVersion(dispatched.version()).build())))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已发出是终态");
     assertThatThrownBy(
@@ -1048,7 +1233,8 @@ class FirstMileShipmentIntegrationTest {
                       sql.execute(
                           "update first_mile_shipment set status='DISPATCHED',"
                               + " dispatched_at=?::timestamptz where id=?",
-                          OffsetDateTime.now(), saved.id());
+                          OffsetDateTime.now(),
+                          saved.id());
                       sql.execute(
                           "update first_mile_shipment_line set shipped_quantity=100"
                               + " where shipment_id=?",
@@ -1102,7 +1288,8 @@ class FirstMileShipmentIntegrationTest {
                     () -> {
                       sql.execute(
                           "update first_mile_shipment set dispatched_at=?::timestamptz where id=?",
-                          OffsetDateTime.now(), saved.id());
+                          OffsetDateTime.now(),
+                          saved.id());
                       return null;
                     }))
         .hasMessageContaining("不自洽");
@@ -1113,7 +1300,8 @@ class FirstMileShipmentIntegrationTest {
                       sql.execute(
                           "update first_mile_shipment set status='CANCELLED',"
                               + " cancelled_at=?::timestamptz where id=?",
-                          OffsetDateTime.now(), saved.id());
+                          OffsetDateTime.now(),
+                          saved.id());
                       return null;
                     }))
         .hasMessageContaining("取消必须给原因");
@@ -1133,9 +1321,7 @@ class FirstMileShipmentIntegrationTest {
         .hasMessageContaining("取消必须给原因");
     var cancelled =
         asAWrite(
-            () ->
-                service.cancel(
-                    saved.id(), new FirstMileCancelRequest(0L, "船期取消，改下一班", "客户同意")));
+            () -> service.cancel(saved.id(), new FirstMileCancelRequest(0L, "船期取消，改下一班", "客户同意")));
     assertThat(cancelled.status()).isEqualTo("CANCELLED");
     assertThat(cancelled.cancelledAt()).isNotNull();
     assertThat(asA(() -> service.detail(saved.id())).shipment().cancelReason())
@@ -1143,7 +1329,8 @@ class FirstMileShipmentIntegrationTest {
     assertThat(
             asA(
                 () ->
-                    service.page(
+                    service
+                        .page(
                             new FirstMileQuery(
                                 null, null, null, null, null, null, true, null, null, 0, 50))
                         .total()))
@@ -1184,19 +1371,15 @@ class FirstMileShipmentIntegrationTest {
     assertThat(
             asA(
                 () ->
-                    service.sourceCandidates(receiptA, skuA, whA, "GR-20261001", 0, 50)
+                    service
+                        .sourceCandidates(receiptA, skuA, whA, "GR-20261001", 0, 50)
                         .candidateCount()))
         .isEqualTo(1L);
     assertThat(
-            asA(
-                () ->
-                    service.sourceCandidates(receiptA, skuA2, whA, null, 0, 50).candidateCount()))
+            asA(() -> service.sourceCandidates(receiptA, skuA2, whA, null, 0, 50).candidateCount()))
         .isEqualTo(0L);
     assertThat(
-            asA(
-                () ->
-                    service.sourceCandidates(null, null, null, "不存在的批次", 0, 50)
-                        .candidateCount()))
+            asA(() -> service.sourceCandidates(null, null, null, "不存在的批次", 0, 50).candidateCount()))
         .isEqualTo(0L);
 
     // 发完之后候选项消失（可发量 0 不该出现在「还能发」清单里）
@@ -1248,8 +1431,7 @@ class FirstMileShipmentIntegrationTest {
     assertThat(p1.statusOptions()).hasSize(4);
     assertThat(p1.transportModes()).hasSize(4);
     // 仓库下拉必须含**海外仓**（目的仓就取自这里）
-    assertThat(p1.warehouseOptions()).extracting(WarehouseOption::countryCode)
-        .contains("CN", "US");
+    assertThat(p1.warehouseOptions()).extracting(WarehouseOption::countryCode).contains("CN", "US");
 
     // 筛选：状态
     var onlyConfirmed =
@@ -1257,48 +1439,62 @@ class FirstMileShipmentIntegrationTest {
             () ->
                 service.page(
                     new FirstMileQuery(
-                        List.of("CONFIRMED"), null, null, null, null, null, null, null, null, 0,
+                        List.of("CONFIRMED"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        0,
                         50)));
     assertThat(onlyConfirmed.total()).isEqualTo(3L);
     // 筛选：运输方式
     assertThat(
             asA(
                 () ->
-                    service.page(
-                        new FirstMileQuery(
-                            null, "SEA", null, null, null, null, null, null, null, 0, 50))
+                    service
+                        .page(
+                            new FirstMileQuery(
+                                null, "SEA", null, null, null, null, null, null, null, 0, 50))
                         .total()))
         .isEqualTo(5L);
     assertThat(
             asA(
                 () ->
-                    service.page(
-                        new FirstMileQuery(
-                            null, "AIR", null, null, null, null, null, null, null, 0, 50))
+                    service
+                        .page(
+                            new FirstMileQuery(
+                                null, "AIR", null, null, null, null, null, null, null, 0, 50))
                         .total()))
         .isEqualTo(0L);
     // 筛选：货权节点 incoterm
     assertThat(
             asA(
                 () ->
-                    service.page(
-                        new FirstMileQuery(
-                            null, null, "FOB", null, null, null, null, null, null, 0, 50))
+                    service
+                        .page(
+                            new FirstMileQuery(
+                                null, null, "FOB", null, null, null, null, null, null, 0, 50))
                         .total()))
         .isEqualTo(5L);
     assertThat(
             asA(
                 () ->
-                    service.page(
-                        new FirstMileQuery(
-                            null, null, "CIF", null, null, null, null, null, null, 0, 50))
+                    service
+                        .page(
+                            new FirstMileQuery(
+                                null, null, "CIF", null, null, null, null, null, null, 0, 50))
                         .total()))
         .isEqualTo(0L);
     // 筛选：起止仓 + 目的地国家（大小写不敏感）
     assertThat(
             asA(
                 () ->
-                    service.page(
+                    service
+                        .page(
                             new FirstMileQuery(
                                 null, null, null, whA, whUs, "us", null, null, null, 0, 50))
                         .total()))
@@ -1306,7 +1502,8 @@ class FirstMileShipmentIntegrationTest {
     assertThat(
             asA(
                 () ->
-                    service.page(
+                    service
+                        .page(
                             new FirstMileQuery(
                                 null, null, null, whUs, whUs, null, null, null, null, 0, 50))
                         .total()))
@@ -1315,7 +1512,8 @@ class FirstMileShipmentIntegrationTest {
     assertThat(
             asA(
                 () ->
-                    service.page(
+                    service
+                        .page(
                             new FirstMileQuery(
                                 null, null, null, null, null, null, true, null, null, 0, 50))
                         .total()))
@@ -1324,19 +1522,29 @@ class FirstMileShipmentIntegrationTest {
     assertThat(
             asA(
                 () ->
-                    service.page(
+                    service
+                        .page(
                             new FirstMileQuery(
-                                null, null, null, null, null, null, null, "COSCO-1234", null, 0,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "COSCO-1234",
+                                null,
+                                0,
                                 50))
                         .total()))
         .isEqualTo(5L);
     assertThat(
             asA(
                 () ->
-                    service.page(
+                    service
+                        .page(
                             new FirstMileQuery(
-                                null, null, null, null, null, null, null, "不存在的承运商", null, 0,
-                                50))
+                                null, null, null, null, null, null, null, "不存在的承运商", null, 0, 50))
                         .total()))
         .isEqualTo(0L);
     // 排序：白名单 5 键都真的生效
@@ -1344,11 +1552,12 @@ class FirstMileShipmentIntegrationTest {
         List.of("CREATED_AT", "SHIPMENT_CODE", "EXPECTED_ARRIVE_AT", "DEPART_AT", "UPDATED_AT")) {
       assertThat(
               asA(
-                      () ->
-                          service.page(
-                                  new FirstMileQuery(
-                                      null, null, null, null, null, null, null, null, sort, 0, 50))
-                              .rows()))
+                  () ->
+                      service
+                          .page(
+                              new FirstMileQuery(
+                                  null, null, null, null, null, null, null, null, sort, 0, 50))
+                          .rows()))
           .as("排序键 %s 必须可用", sort)
           .hasSize(5);
     }
@@ -1356,29 +1565,48 @@ class FirstMileShipmentIntegrationTest {
     var injected =
         asA(
             () ->
-                service.page(
+                service
+                    .page(
                         new FirstMileQuery(
-                            null, null, null, null, null, null, null, null,
-                            "created_at; drop table first_mile_shipment", 0, 50))
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            "created_at; drop table first_mile_shipment",
+                            0,
+                            50))
                     .rows());
     assertThat(injected).hasSize(5);
     assertThat(
-            asA(
-                () ->
-                    sql.fetchOne("select count(*) from first_mile_shipment").get(0, Long.class)))
+            asA(() -> sql.fetchOne("select count(*) from first_mile_shipment").get(0, Long.class)))
         .isEqualTo(5L);
     var byEta =
         asA(
             () ->
-                service.page(
+                service
+                    .page(
                         new FirstMileQuery(
-                            null, null, null, null, null, null, null, null, "EXPECTED_ARRIVE_AT",
-                            0, 50))
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            "EXPECTED_ARRIVE_AT",
+                            0,
+                            50))
                     .rows());
     var byCode =
         asA(
             () ->
-                service.page(
+                service
+                    .page(
                         new FirstMileQuery(
                             null, null, null, null, null, null, null, null, "SHIPMENT_CODE", 0, 50))
                     .rows());
@@ -1391,7 +1619,16 @@ class FirstMileShipmentIntegrationTest {
                     () ->
                         service.page(
                             new FirstMileQuery(
-                                null, "TELEPORT", null, null, null, null, null, null, null, 0,
+                                null,
+                                "TELEPORT",
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                0,
                                 50))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("运输方式");
@@ -1412,8 +1649,9 @@ class FirstMileShipmentIntegrationTest {
                         "select expected_arrive_at from first_mile_shipment where id=?", saved.id())
                     .get(0, OffsetDateTime.class));
     assertThat(rawEta.toInstant()).isEqualTo(ETA.toInstant());
-    assertThat(rawEta.getOffset()).isEqualTo(ZoneOffset.ofHours(8));
-    assertThat(rawEta.getHour()).isEqualTo(9);
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
+    assertThat(rawEta.withOffsetSameInstant(java.time.ZoneOffset.ofHours(8)).getHour())
+        .isEqualTo(9);
     assertThat(rawEta.getMinute()).isEqualTo(45);
     // UTC 墙钟 = 01:45Z，同一瞬间
     assertThat(rawEta.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime())
@@ -1430,9 +1668,9 @@ class FirstMileShipmentIntegrationTest {
         asA(
             () ->
                 sql.fetchOne(
-                        "select shipped_at,expected_arrive_at,registered_at"
-                            + " from first_mile_shipment_leg_receipt where shipment_id=?",
-                        saved.id()));
+                    "select shipped_at,expected_arrive_at,registered_at"
+                        + " from first_mile_shipment_leg_receipt where shipment_id=?",
+                    saved.id()));
     assertThat(receipt.get("shipped_at", OffsetDateTime.class).toInstant())
         .isEqualTo(ETA.minusDays(30).toInstant());
     assertThat(receipt.get("expected_arrive_at", OffsetDateTime.class).toInstant())
@@ -1477,25 +1715,27 @@ class FirstMileShipmentIntegrationTest {
   @DisplayName("断言二：伪造 X-Tenant-Id 头无效（身份是 B 却指向 A 只能看到 B 自己的）")
   void 断言二_伪造租户头无效() throws Exception {
     createShipment("100");
-    http.perform(get("/warehouse/first-mile-shipments")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/first-mile-shipments")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(0));
     // 反向：身份是 A 伪造 B 的头也只能看到 A 自己的
-    http.perform(get("/warehouse/first-mile-shipments")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/first-mile-shipments")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1));
     // 伪造头也不能让 B 读到 A 的详情（在途腿子资源同理）
-    http.perform(get("/warehouse/first-mile-shipments/" + receiptA)
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/first-mile-shipments/" + receiptA)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
     // 伪造头也不能让 B 读到 A 的在途腿子资源
-    var mine = asA(() -> service.detail(
-        asA(() -> service.page(query(0, 50)).rows().get(0).id())));
+    var mine = asA(() -> service.detail(asA(() -> service.page(query(0, 50)).rows().get(0).id())));
     http.perform(
             get("/warehouse/first-mile-shipments/" + mine.shipment().id() + "/transit-legs")
                 .header("Authorization", "Bearer tenant-b")
@@ -1540,10 +1780,7 @@ class FirstMileShipmentIntegrationTest {
     dispatchShipment(mineA.id(), confirmShipment(mineA.id(), 0L).version());
     assertThat(firstMileLegCount()).isEqualTo(1L);
     assertThat(
-            asB(
-                () ->
-                    sql.fetchOne("select count(*) from inventory_transfer")
-                        .get(0, Long.class)))
+            asB(() -> sql.fetchOne("select count(*) from inventory_transfer").get(0, Long.class)))
         .isEqualTo(0L);
   }
 
@@ -1671,8 +1908,7 @@ class FirstMileShipmentIntegrationTest {
                    "declaredUnitValue":12.5,"declaredValue":1250,"grossWeightKg":180,
                    "netWeightKg":160,"volumeCbm":1.25,"cartonCount":12}]}
         """
-            .formatted(
-                receiptA, leA, whA, whUs, skuA, qSellable, receiptEventLineA, lotA1);
+            .formatted(receiptA, leA, whA, whUs, skuA, qSellable, receiptEventLineA, lotA1);
 
     var created =
         http.perform(
@@ -1730,8 +1966,9 @@ class FirstMileShipmentIntegrationTest {
         .andExpect(jsonPath("$.transitions").isEmpty());
 
     // 列表端点带汇总与下拉
-    http.perform(get("/warehouse/first-mile-shipments?sort=EXPECTED_ARRIVE_AT")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/first-mile-shipments?sort=EXPECTED_ARRIVE_AT")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.summary.dispatchedCount").value(1))
@@ -1764,8 +2001,15 @@ class FirstMileShipmentIntegrationTest {
                                    "grossWeightKg":18,"netWeightKg":16,"volumeCbm":0.125,
                                    "cartonCount":1}]}
                         """
-                            .formatted(receiptA, leA, whA, whUs, skuA, qSellable,
-                                receiptEventLineA, lotA1)))
+                            .formatted(
+                                receiptA,
+                                leA,
+                                whA,
+                                whUs,
+                                skuA,
+                                qSellable,
+                                receiptEventLineA,
+                                lotA1)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.incoterm").value("DDP"))
             .andReturn();

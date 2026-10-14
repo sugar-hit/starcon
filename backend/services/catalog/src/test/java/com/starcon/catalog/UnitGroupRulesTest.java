@@ -8,11 +8,9 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
 /**
- * 3.3.3.1 计量单位的纯规则单测：编码词表、名称校验、比例校验、生效区间、换算算式、
- * 量纲一致性与拒绝原因码词表。
+ * 3.3.3.1 计量单位的纯规则单测：编码词表、名称校验、比例校验、生效区间、换算算式、 量纲一致性与拒绝原因码词表。
  *
- * <p>这些规则是"能在保存前判定的"那一批，所以穷举它们比集成测试更便宜也更快。
- * 换算算式尤其要离线钉死：算错一次就是一批按错比例记完的库存账。
+ * <p>这些规则是"能在保存前判定的"那一批，所以穷举它们比集成测试更便宜也更快。 换算算式尤其要离线钉死：算错一次就是一批按错比例记完的库存账。
  */
 class UnitGroupRulesTest {
 
@@ -114,8 +112,7 @@ class UnitGroupRulesTest {
     // 量纲词表必须与 V8 的 unit_of_measure CHECK 完全一致：
     // 单位能在 SKU 侧换算，就一定要能进同量纲的单位组，反之亦然。
     assertThat(DIMENSIONS.keySet())
-        .containsExactlyInAnyOrder(
-            UnitRules.DIMENSIONS.keySet().toArray(new String[0]));
+        .containsExactlyInAnyOrder(UnitRules.DIMENSIONS.keySet().toArray(new String[0]));
   }
 
   @Test

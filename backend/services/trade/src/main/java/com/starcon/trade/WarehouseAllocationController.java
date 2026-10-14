@@ -17,18 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 9.3.2.1 分仓规则。
  *
- * <p>命名空间 {@code /trade/fulfillment/allocation}：与 9.3.2.2 的
- * {@code /trade/fulfillment/routing} **并列而不是嵌套** —— 两者是同一条履约链上
- * 相邻但不同的两环（选履约路径 vs 选发货仓），混在一个命名空间里会让
- * 「路由决策」和「分仓决策」在日志与权限上分不开。api-proxy 白名单里也是新起一组，
- * 不并进已存在的 routing 组。
+ * <p>命名空间 {@code /trade/fulfillment/allocation}：与 9.3.2.2 的 {@code /trade/fulfillment/routing}
+ * **并列而不是嵌套** —— 两者是同一条履约链上 相邻但不同的两环（选履约路径 vs 选发货仓），混在一个命名空间里会让 「路由决策」和「分仓决策」在日志与权限上分不开。api-proxy
+ * 白名单里也是新起一组， 不并进已存在的 routing 组。
  *
  * <p>权限码沿用 {@code trade.fulfillment.read} / {@code trade.fulfillment.update}：
  * 执行分配直接决定这票货从哪个仓发、收入记在哪个法人名下，不是读权限能带过去的动作。
  *
- * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
- * 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
+ * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code app.current_tenant}，由
+ * RLS 在数据库层强制隔离。 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
  */
 @RestController
 @RequestMapping("/trade/fulfillment/allocation")
@@ -37,7 +34,8 @@ public class WarehouseAllocationController {
   private final AccessService access;
   private final WarehouseAllocationService allocation;
 
-  public WarehouseAllocationController(AccessService access, WarehouseAllocationService allocation) {
+  public WarehouseAllocationController(
+      AccessService access, WarehouseAllocationService allocation) {
     this.access = access;
     this.allocation = allocation;
   }
@@ -53,9 +51,8 @@ public class WarehouseAllocationController {
   /**
    * 本模块的能力与上游可用性。
    *
-   * <p>存在的理由：把「哪些输入真有依据」显式报出来 —— 各仓可用量在 warehouse 的库、
-   * 运费试算未交付、订单与下游履约均未落地，这些都必须由接口自己说，
-   * 而不是让调用方从 404 或空数组里猜。
+   * <p>存在的理由：把「哪些输入真有依据」显式报出来 —— 各仓可用量在 warehouse 的库、 运费试算未交付、订单与下游履约均未落地，这些都必须由接口自己说， 而不是让调用方从 404
+   * 或空数组里猜。
    */
   @GetMapping("/capabilities")
   public WarehouseAllocationCapabilities capabilities(
@@ -82,14 +79,19 @@ public class WarehouseAllocationController {
         a ->
             allocation.pageRules(
                 new WarehouseAllocationRuleQuery(
-                    ruleCode, selectionPolicy, fallbackPolicy, effectiveOnly, keyword, page, size)));
+                    ruleCode,
+                    selectionPolicy,
+                    fallbackPolicy,
+                    effectiveOnly,
+                    keyword,
+                    page,
+                    size)));
   }
 
   /**
    * 维护一条分仓规则（优先级、兜底策略与五维权重）。
    *
-   * <p>五个权重合计必须为 1.0000；{@code requireLegalEntityMatch} 是货权硬闸，
-   * 开启后法人不符的仓直接不可行。
+   * <p>五个权重合计必须为 1.0000；{@code requireLegalEntityMatch} 是货权硬闸， 开启后法人不符的仓直接不可行。
    */
   @PostMapping("/rules")
   public WarehouseAllocationRuleSaved saveRule(
@@ -122,8 +124,7 @@ public class WarehouseAllocationController {
   /**
    * 维护一个发货仓的档案。
    *
-   * <p>{@code legalEntityCode} 必填：不知道货记在哪个法人名下时不允许建档 ——
-   * 按「随便选个便宜的」发货，等于替财务做了一个错误决定。
+   * <p>{@code legalEntityCode} 必填：不知道货记在哪个法人名下时不允许建档 —— 按「随便选个便宜的」发货，等于替财务做了一个错误决定。
    */
   @PostMapping("/warehouses")
   public WarehouseAllocationWarehouseSaved saveWarehouse(
@@ -158,7 +159,8 @@ public class WarehouseAllocationController {
   public WarehouseAllocationStockSaved saveStockEstimate(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @Valid @RequestBody WarehouseAllocationStockInput input) {
-    return call(auth, "fulfillment.update", a -> allocation.saveStockEstimate(input, a.membershipId()));
+    return call(
+        auth, "fulfillment.update", a -> allocation.saveStockEstimate(input, a.membershipId()));
   }
 
   /** 运费与时效估算列表。 */
@@ -178,8 +180,13 @@ public class WarehouseAllocationController {
         a ->
             allocation.pageShippingEstimates(
                 new WarehouseAllocationShippingQuery(
-                    warehouseRef, skuRef, destinationCountryCode, costSource, effectiveOnly,
-                    page, size)));
+                    warehouseRef,
+                    skuRef,
+                    destinationCountryCode,
+                    costSource,
+                    effectiveOnly,
+                    page,
+                    size)));
   }
 
   /** 维护一条运费与时效估算。 */
@@ -193,10 +200,7 @@ public class WarehouseAllocationController {
 
   // ============================================================ 试算与执行分配
 
-  /**
-   * 分仓试算（只读，**不落库**）：按当前档案、可用量、运费估算与规则算出
-   * 「应该从哪个仓发、为什么、每个仓分别如何、哪些仓被排除」。
-   */
+  /** 分仓试算（只读，**不落库**）：按当前档案、可用量、运费估算与规则算出 「应该从哪个仓发、为什么、每个仓分别如何、哪些仓被排除」。 */
   @PostMapping("/simulations")
   public WarehouseAllocationSimulation simulate(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -207,8 +211,7 @@ public class WarehouseAllocationController {
   /**
    * 执行一次分仓分配（落决策 + 逐仓候选 + 挂起或差额留痕 + 事件）。
    *
-   * <p>无法分配时返回 200 与一条 {@code SUSPENDED} 分配：挂起是业务结论不是请求失败，
-   * 调用方据此转人工而不是重试。
+   * <p>无法分配时返回 200 与一条 {@code SUSPENDED} 分配：挂起是业务结论不是请求失败， 调用方据此转人工而不是重试。
    */
   @PostMapping("/allocations")
   public WarehouseAllocationDecisionSaved allocate(
@@ -237,8 +240,16 @@ public class WarehouseAllocationController {
         a ->
             allocation.pageDecisions(
                 new WarehouseAllocationDecisionQuery(
-                    orderRef, skuRef, chosenWarehouseRef, chosenLegalEntityCode, status, reasonCode,
-                    crossLegalEntity, keyword, page, size)));
+                    orderRef,
+                    skuRef,
+                    chosenWarehouseRef,
+                    chosenLegalEntityCode,
+                    status,
+                    reasonCode,
+                    crossLegalEntity,
+                    keyword,
+                    page,
+                    size)));
   }
 
   /** 分配详情：决策 + 逐仓候选 + 挂起记录 + 事件流。跨租户在 RLS 下查不到 → 404。 */
@@ -255,7 +266,9 @@ public class WarehouseAllocationController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID allocationId,
       @Valid @RequestBody WarehouseAllocationStatusInput input) {
-    return call(auth, "fulfillment.update",
+    return call(
+        auth,
+        "fulfillment.update",
         a -> allocation.advanceStatus(allocationId, input, a.membershipId()));
   }
 
@@ -264,8 +277,7 @@ public class WarehouseAllocationController {
   /**
    * 挂起清单：这是「哪几单发不出去」与「该去补什么」的查询入口。
    *
-   * <p>每一行都带整体挂起原因与全量的逐仓排除清单 ——
-   * 事后库存会被补上、运费估算会被改，只有这份快照能回答「当时缺什么」。
+   * <p>每一行都带整体挂起原因与全量的逐仓排除清单 —— 事后库存会被补上、运费估算会被改，只有这份快照能回答「当时缺什么」。
    */
   @GetMapping("/holds")
   public WarehouseAllocationHoldPage holds(
@@ -281,6 +293,7 @@ public class WarehouseAllocationController {
         "fulfillment.read",
         a ->
             allocation.pageHolds(
-                new WarehouseAllocationHoldQuery(orderRef, decisionId, holdReason, keyword, page, size)));
+                new WarehouseAllocationHoldQuery(
+                    orderRef, decisionId, holdReason, keyword, page, size)));
   }
 }

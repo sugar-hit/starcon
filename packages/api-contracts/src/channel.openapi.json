@@ -16,7 +16,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "shop",
+        "operationId": "get_channel_shops_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -54,7 +54,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "shopUpdate",
+        "operationId": "put_channel_shops_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -95,7 +95,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "shopDelete",
+        "operationId": "delete_channel_shops_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -137,7 +137,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "credentialRotate",
+        "operationId": "put_channel_connections_id_credential",
         "parameters": [
           {
             "name": "Authorization",
@@ -180,7 +180,7 @@
         "tags": [
           "warehouse-connection-controller"
         ],
-        "operationId": "connections",
+        "operationId": "get_channel_warehouse_providers_connections",
         "parameters": [
           {
             "name": "Authorization",
@@ -212,7 +212,7 @@
         "tags": [
           "warehouse-connection-controller"
         ],
-        "operationId": "connectionCreate",
+        "operationId": "post_channel_warehouse_providers_connections",
         "parameters": [
           {
             "name": "Authorization",
@@ -254,7 +254,7 @@
         "tags": [
           "warehouse-connection-controller"
         ],
-        "operationId": "connectionSetPaused",
+        "operationId": "post_channel_warehouse_providers_connections_id_sync_paused",
         "parameters": [
           {
             "name": "Authorization",
@@ -295,7 +295,7 @@
         "tags": [
           "warehouse-connection-controller"
         ],
-        "operationId": "accountCreate",
+        "operationId": "post_channel_warehouse_providers_connections_id_accounts",
         "parameters": [
           {
             "name": "Authorization",
@@ -346,7 +346,7 @@
         "tags": [
           "warehouse-connection-controller"
         ],
-        "operationId": "syncTrigger",
+        "operationId": "post_channel_warehouse_providers_accounts_id_sync",
         "parameters": [
           {
             "name": "Authorization",
@@ -387,7 +387,7 @@
         "tags": [
           "warehouse-connection-controller"
         ],
-        "operationId": "inboundLine",
+        "operationId": "post_channel_warehouse_providers_accounts_id_inbound_stock_lines",
         "parameters": [
           {
             "name": "Authorization",
@@ -438,7 +438,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "runResolve",
+        "operationId": "post_channel_sync_runs_id_resolve",
         "parameters": [
           {
             "name": "Authorization",
@@ -479,7 +479,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "runComplete",
+        "operationId": "post_channel_sync_runs_id_complete",
         "parameters": [
           {
             "name": "Authorization",
@@ -522,7 +522,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "failureReplay",
+        "operationId": "post_channel_sync_failures_id_replay",
         "parameters": [
           {
             "name": "Authorization",
@@ -563,7 +563,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "cursors",
+        "operationId": "get_channel_sync_cursors",
         "parameters": [
           {
             "name": "Authorization",
@@ -604,7 +604,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "cursorCreate",
+        "operationId": "post_channel_sync_cursors",
         "parameters": [
           {
             "name": "Authorization",
@@ -646,7 +646,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "cursorTrigger",
+        "operationId": "post_channel_sync_cursors_id_trigger",
         "parameters": [
           {
             "name": "Authorization",
@@ -687,7 +687,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "cursorRewind",
+        "operationId": "post_channel_sync_cursors_id_rewind",
         "parameters": [
           {
             "name": "Authorization",
@@ -730,7 +730,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "cursorResume",
+        "operationId": "post_channel_sync_cursors_id_resume",
         "parameters": [
           {
             "name": "Authorization",
@@ -763,7 +763,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "cursorPause",
+        "operationId": "post_channel_sync_cursors_id_pause",
         "parameters": [
           {
             "name": "Authorization",
@@ -796,7 +796,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "shops",
+        "operationId": "get_channel_shops",
         "parameters": [
           {
             "name": "Authorization",
@@ -837,7 +837,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "shopCreate",
+        "operationId": "post_channel_shops",
         "parameters": [
           {
             "name": "Authorization",
@@ -879,7 +879,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "shopTransfer",
+        "operationId": "post_channel_shops_id_transfer",
         "parameters": [
           {
             "name": "Authorization",
@@ -922,7 +922,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "marketplaceEnable",
+        "operationId": "post_channel_shops_id_marketplaces",
         "parameters": [
           {
             "name": "Authorization",
@@ -965,7 +965,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "enumMappings",
+        "operationId": "get_channel_platforms_platformCode_enums",
         "parameters": [
           {
             "name": "Authorization",
@@ -1014,7 +1014,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "enumOverrideCreate",
+        "operationId": "post_channel_platforms_platformCode_enums",
         "parameters": [
           {
             "name": "Authorization",
@@ -1064,7 +1064,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "operations",
+        "operationId": "get_channel_platform_operations",
         "parameters": [
           {
             "name": "Authorization",
@@ -1114,7 +1114,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "operationEnqueue",
+        "operationId": "post_channel_platform_operations",
         "parameters": [
           {
             "name": "Authorization",
@@ -1156,7 +1156,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "operationVerify",
+        "operationId": "post_channel_platform_operations_id_verify",
         "parameters": [
           {
             "name": "Authorization",
@@ -1199,7 +1199,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "operationUnknown",
+        "operationId": "post_channel_platform_operations_id_unknown",
         "parameters": [
           {
             "name": "Authorization",
@@ -1242,7 +1242,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "operationSucceed",
+        "operationId": "post_channel_platform_operations_id_succeed",
         "parameters": [
           {
             "name": "Authorization",
@@ -1284,7 +1284,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "operationStart",
+        "operationId": "post_channel_platform_operations_id_start",
         "parameters": [
           {
             "name": "Authorization",
@@ -1317,7 +1317,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "operationFail",
+        "operationId": "post_channel_platform_operations_id_fail",
         "parameters": [
           {
             "name": "Authorization",
@@ -1360,7 +1360,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "oauthStart",
+        "operationId": "post_channel_oauth_sessions",
         "parameters": [
           {
             "name": "Authorization",
@@ -1401,7 +1401,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "oauthConfirm",
+        "operationId": "post_channel_oauth_sessions_id_confirm",
         "parameters": [
           {
             "name": "Authorization",
@@ -1451,7 +1451,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "oauthCancel",
+        "operationId": "post_channel_oauth_sessions_id_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -1484,7 +1484,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "connections_1",
+        "operationId": "get_channel_connections",
         "parameters": [
           {
             "name": "Authorization",
@@ -1525,7 +1525,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "connectionCreate_1",
+        "operationId": "post_channel_connections",
         "parameters": [
           {
             "name": "Authorization",
@@ -1567,7 +1567,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "connectionRevoke",
+        "operationId": "post_channel_connections_id_revoke",
         "parameters": [
           {
             "name": "Authorization",
@@ -1609,7 +1609,7 @@
         "tags": [
           "warehouse-connection-controller"
         ],
-        "operationId": "providers",
+        "operationId": "get_channel_warehouse_providers",
         "parameters": [
           {
             "name": "Authorization",
@@ -1643,7 +1643,7 @@
         "tags": [
           "warehouse-connection-controller"
         ],
-        "operationId": "syncRuns",
+        "operationId": "get_channel_warehouse_providers_sync_runs",
         "parameters": [
           {
             "name": "Authorization",
@@ -1696,7 +1696,7 @@
         "tags": [
           "warehouse-connection-controller"
         ],
-        "operationId": "connection",
+        "operationId": "get_channel_warehouse_providers_connections_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1736,7 +1736,7 @@
         "tags": [
           "warehouse-connection-controller"
         ],
-        "operationId": "accounts",
+        "operationId": "get_channel_warehouse_providers_accounts",
         "parameters": [
           {
             "name": "Authorization",
@@ -1779,7 +1779,7 @@
         "tags": [
           "warehouse-connection-controller"
         ],
-        "operationId": "account",
+        "operationId": "get_channel_warehouse_providers_accounts_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1819,7 +1819,7 @@
         "tags": [
           "warehouse-connection-controller"
         ],
-        "operationId": "observations",
+        "operationId": "get_channel_warehouse_providers_accounts_id_observations",
         "parameters": [
           {
             "name": "Authorization",
@@ -1872,7 +1872,7 @@
         "tags": [
           "warehouse-connection-controller"
         ],
-        "operationId": "latestObservations",
+        "operationId": "get_channel_warehouse_providers_accounts_id_observations_latest",
         "parameters": [
           {
             "name": "Authorization",
@@ -1915,7 +1915,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "runs",
+        "operationId": "get_channel_sync_runs",
         "parameters": [
           {
             "name": "Authorization",
@@ -1968,7 +1968,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "failures",
+        "operationId": "get_channel_sync_failures",
         "parameters": [
           {
             "name": "Authorization",
@@ -2020,7 +2020,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "failureSummary",
+        "operationId": "get_channel_sync_failures_summary",
         "parameters": [
           {
             "name": "Authorization",
@@ -2054,7 +2054,7 @@
         "tags": [
           "sync-controller"
         ],
-        "operationId": "cursor",
+        "operationId": "get_channel_sync_cursors_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -2094,7 +2094,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "platforms",
+        "operationId": "get_channel_platforms",
         "parameters": [
           {
             "name": "Authorization",
@@ -2128,7 +2128,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "oauthSession",
+        "operationId": "get_channel_oauth_sessions_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -2168,7 +2168,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "oauthShops",
+        "operationId": "get_channel_oauth_sessions_id_shops",
         "parameters": [
           {
             "name": "Authorization",
@@ -2211,7 +2211,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "oauthCallback",
+        "operationId": "get_channel_oauth_callback",
         "parameters": [
           {
             "name": "Accept",
@@ -2274,7 +2274,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "connectionHealth",
+        "operationId": "get_channel_connections_id_health",
         "parameters": [
           {
             "name": "Authorization",
@@ -2314,7 +2314,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "reminders",
+        "operationId": "get_channel_connections_reminders",
         "parameters": [
           {
             "name": "Authorization",
@@ -2358,7 +2358,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "marketplaceDisable",
+        "operationId": "delete_channel_shops_id_marketplaces_marketplaceId",
         "parameters": [
           {
             "name": "Authorization",
@@ -2400,7 +2400,7 @@
         "tags": [
           "channel-controller"
         ],
-        "operationId": "enumOverrideDelete",
+        "operationId": "delete_channel_platforms_platformCode_enums_id",
         "parameters": [
           {
             "name": "Authorization",

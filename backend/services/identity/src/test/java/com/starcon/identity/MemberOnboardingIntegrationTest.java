@@ -18,14 +18,12 @@ import org.springframework.transaction.support.TransactionTemplate;
  * <p>本模块的重点不是「能建一个成员」——那件事 17.2.2.1 已经做过了——而是两条它独有的性质：
  *
  * <ol>
- *   <li><b>凭据纪律</b>：初始凭据由服务端生成，只在创建那一次响应里返回明文。
- *       用例必须证明它真的能用（本人登录得上）、之后真的再也拿不到（列表、审计、库里都没有）。
- *   <li><b>租户隔离</b>：入职记录是本租户的业务数据，两租户互不可见、伪造 header 无效、
- *       连接池归还后不串租户三条断言在这里实跑（底座把池压到 1，每个请求必然复用同一条物理连接）。
+ *   <li><b>凭据纪律</b>：初始凭据由服务端生成，只在创建那一次响应里返回明文。 用例必须证明它真的能用（本人登录得上）、之后真的再也拿不到（列表、审计、库里都没有）。
+ *   <li><b>租户隔离</b>：入职记录是本租户的业务数据，两租户互不可见、伪造 header 无效、 连接池归还后不串租户三条断言在这里实跑（底座把池压到
+ *       1，每个请求必然复用同一条物理连接）。
  * </ol>
  *
- * <p>蓝图点名排除邮件邀请 / 接受令牌 / 自助激活，所以这里**没有**相关用例——
- * 它们属于后续独立 PRD，将来落地时必须连同令牌摘要、有效期、单次使用、防枚举与撤销规则一起做。
+ * <p>蓝图点名排除邮件邀请 / 接受令牌 / 自助激活，所以这里**没有**相关用例—— 它们属于后续独立 PRD，将来落地时必须连同令牌摘要、有效期、单次使用、防枚举与撤销规则一起做。
  */
 class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
 
@@ -89,11 +87,7 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
   /** 用指定凭据登录：入职返回的是随机初始密码，不能走底座那个固定密码的 loginUser。 */
   private String loginWith(String username, String password) throws Exception {
     return request(
-            "",
-            "POST",
-            "/auth/login",
-            Map.of("username", username, "password", password),
-            200)
+            "", "POST", "/auth/login", Map.of("username", username, "password", password), 200)
         .get("token")
         .asText();
   }
@@ -122,8 +116,7 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 新建账号：初始凭据一次性返回、真的能登录、之后再也拿不到。
    *
-   * <p>这是本模块最核心的一条：凭据必须**可用**（否则等于没发），
-   * 又必须**只出现一次**（否则它就不是初始凭据而是永久密码）。
+   * <p>这是本模块最核心的一条：凭据必须**可用**（否则等于没发）， 又必须**只出现一次**（否则它就不是初始凭据而是永久密码）。
    */
   @Test
   void createdAccountReturnsItsCredentialExactlyOnce() throws Exception {
@@ -156,8 +149,7 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     // 「声明了范围却没有任何范围对象」的残缺记录，靠 V47 的延迟约束触发器才终于被挡住。
     UUID memberId = UUID.fromString(access.get("membershipId").asText());
     var scopes =
-        tx()
-            .run(
+        tx().run(
                 UUID.fromString(accessTenant(token)),
                 () ->
                     sql.fetch(
@@ -186,8 +178,8 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     // （这正是「全局用户表不可枚举」的实现方式），所以这里刻意绕开运行时角色，
     // 用一个只有迁移/运维才拿得到的连接来验证存储形态。
     try (var connection =
-        java.sql.DriverManager.getConnection(
-            pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+            java.sql.DriverManager.getConnection(
+                pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
         var statement =
             connection.prepareStatement(
                 "select u.password_hash, (select count(*) from member_onboarding o"
@@ -206,10 +198,8 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 三种范围各自在库里留下什么形状：ALL / SELF 不带对象范围，DEPARTMENT 带且只带本人部门。
    *
-   * <p>SELF 单独点出来是因为它最容易在后来的重构里被改坏：它属于「非 ALL」，
-   * 一条「非 ALL 就必须补一条范围对象」的误解就会给 SELF 挂上对象，
-   * 而 V47 明确判定那是自相矛盾的记录（既声明仅本人、又声明限死在某个部门）。
-   * 这里是直接读库，不是看接口回显——回显只会告诉你请求被接受了。
+   * <p>SELF 单独点出来是因为它最容易在后来的重构里被改坏：它属于「非 ALL」， 一条「非 ALL 就必须补一条范围对象」的误解就会给 SELF 挂上对象， 而 V47
+   * 明确判定那是自相矛盾的记录（既声明仅本人、又声明限死在某个部门）。 这里是直接读库，不是看接口回显——回显只会告诉你请求被接受了。
    */
   @Test
   void everyScopeModeLeavesACompleteAssignmentRow() throws Exception {
@@ -219,16 +209,22 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     UUID tenant = UUID.fromString(accessTenant(token));
 
     var self = "onb-shape-self-" + tag;
-    request(token, "POST", "/identity/onboardings", onboardingInput(self, null, scope(role, "SELF")), 200);
+    request(
+        token,
+        "POST",
+        "/identity/onboardings",
+        onboardingInput(self, null, scope(role, "SELF")),
+        200);
     UUID selfMember =
         UUID.fromString(
-            findOnboarding(request(token, "GET", "/identity/onboardings", null, 200), onboardingIdOf(self, token))
+            findOnboarding(
+                    request(token, "GET", "/identity/onboardings", null, 200),
+                    onboardingIdOf(self, token))
                 .get("membershipId")
                 .asText());
     // SELF：行级范围（仅本人数据），没有对象可列，因此一条范围对象都不该有。
     assertThat(
-            tx()
-                .run(
+            tx().run(
                     tenant,
                     () ->
                         sql.fetchValue(
@@ -245,12 +241,13 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
         200);
     UUID deptMember =
         UUID.fromString(
-            findOnboarding(request(token, "GET", "/identity/onboardings", null, 200), onboardingIdOf(dept, token))
+            findOnboarding(
+                    request(token, "GET", "/identity/onboardings", null, 200),
+                    onboardingIdOf(dept, token))
                 .get("membershipId")
                 .asText());
     var deptScopes =
-        tx()
-            .run(
+        tx().run(
                 tenant,
                 () ->
                     sql.fetch(
@@ -263,8 +260,7 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     // 全库不留残缺分配：两条分配要么是 ALL/SELF（无对象），要么挂了对象，没有中间态。
     // 这条断言直接对应 V47 延迟约束触发器要挡的东西。
     assertThat(
-            tx()
-                .run(
+            tx().run(
                     tenant,
                     () ->
                         sql.fetchValue(
@@ -292,11 +288,11 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     String username = "onb-audit-" + tag;
     var created =
         request(
-                token,
-                "POST",
-                "/identity/onboardings",
-                onboardingInput(username, null, scope(role, "ALL")),
-                200);
+            token,
+            "POST",
+            "/identity/onboardings",
+            onboardingInput(username, null, scope(role, "ALL")),
+            200);
     String credential = created.get("initialCredential").asText();
     UUID onboardingId = UUID.fromString(created.get("onboardingId").asText());
 
@@ -304,8 +300,7 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     // 这条同时钉住 V50 补上的 assigned_by——该列自 V47 起 NOT NULL，
     // 而入职写入路径一度没有它，导致连全量范围的开通都撞约束（V47 之前它还不存在，所以看不出来）。
     var allAssignment =
-        tx()
-            .run(
+        tx().run(
                 UUID.fromString(accessTenant(token)),
                 () ->
                     sql.fetch(
@@ -319,8 +314,7 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(allAssignment.get(0).get("objects", Integer.class)).isZero();
 
     var audit =
-        tx()
-            .run(
+        tx().run(
                 UUID.fromString(accessTenant(token)),
                 () ->
                     sql.fetch(
@@ -333,14 +327,16 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     var changes = audit.get(0).get("changes", String.class);
     assertThat(changes).contains("accountMode").contains("CREATED").contains("ONB_" + tag);
     // 蓝图：不在页面或日志返回完整初始凭据。
-    assertThat(changes).doesNotContain(credential).doesNotContain("password").doesNotContain("$2a$");
+    assertThat(changes)
+        .doesNotContain(credential)
+        .doesNotContain("password")
+        .doesNotContain("$2a$");
   }
 
   /**
    * 关联已有全局账号：不返回凭据，也不改掉这个人原有的密码。
    *
-   * <p>LINKED 的前提是服务端根本不知道那个人的密码，所以响应里必须是 null 而不是编一个——
-   * 返回一个假的比不返回更糟：管理员会当真并转交一个登不上去的密码。
+   * <p>LINKED 的前提是服务端根本不知道那个人的密码，所以响应里必须是 null 而不是编一个—— 返回一个假的比不返回更糟：管理员会当真并转交一个登不上去的密码。
    */
   @Test
   void linkingAnExistingGlobalAccountReturnsNoCredential() throws Exception {
@@ -350,11 +346,11 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
 
     var first =
         request(
-                ownerToken,
-                "POST",
-                "/identity/onboardings",
-                onboardingInput(username, null, scope(role, "ALL")),
-                200);
+            ownerToken,
+            "POST",
+            "/identity/onboardings",
+            onboardingInput(username, null, scope(role, "ALL")),
+            200);
     assertThat(first.get("accountMode").asText()).isEqualTo("CREATED");
     String originalCredential = first.get("initialCredential").asText();
 
@@ -417,8 +413,7 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 开通时的服务端校验。
    *
-   * <p>每一条都是「看起来开通成功、实际没生效」的坑：OWNER 只能走所有者转移，
-   * 停用角色不能给，本部门范围必须先有部门，管理权限只能绑全租户范围。
+   * <p>每一条都是「看起来开通成功、实际没生效」的坑：OWNER 只能走所有者转移， 停用角色不能给，本部门范围必须先有部门，管理权限只能绑全租户范围。
    */
   @Test
   void onboardingRejectsInvalidRolesDepartmentsAndDuplicates() throws Exception {
@@ -429,19 +424,19 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     UUID ownerRole = UUID.fromString(me.get("grants").get(0).get("roleId").asText());
 
     request(
-            token,
-            "PUT",
-            "/identity/roles/" + adminRole,
-            Map.of(
-                "code",
-                "ONBA_" + tag,
-                "name",
-                "入职管理角色",
-                "status",
-                "INACTIVE",
-                "permissions",
-                List.of("identity.role.read")),
-            200);
+        token,
+        "PUT",
+        "/identity/roles/" + adminRole,
+        Map.of(
+            "code",
+            "ONBA_" + tag,
+            "name",
+            "入职管理角色",
+            "status",
+            "INACTIVE",
+            "permissions",
+            List.of("identity.role.read")),
+        200);
 
     // 不能借开通直接发 OWNER：那会让「谁能成为所有者」这件事绕开转移流程。
     // 与 17.2.2.1 的 assignments() 同口径——是权限问题，不是字段格式问题，所以是 403。
@@ -479,9 +474,7 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
         "POST",
         "/identity/onboardings",
         onboardingInput(
-            "onb-dup-" + tag,
-            null,
-            List.of(scope(role, "ALL").get(0), scope(role, "ALL").get(0))),
+            "onb-dup-" + tag, null, List.of(scope(role, "ALL").get(0), scope(role, "ALL").get(0))),
         400);
     // 角色必须属于本租户：跨租户角色在当前租户的事务里根本查不到，与「不存在」同答案。
     request(
@@ -525,11 +518,11 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     UUID role = roleId(token, tag);
     var created =
         request(
-                token,
-                "POST",
-                "/identity/onboardings",
-                onboardingInput("onb-plain-" + tag, null, scope(role, "ALL")),
-                200);
+            token,
+            "POST",
+            "/identity/onboardings",
+            onboardingInput("onb-plain-" + tag, null, scope(role, "ALL")),
+            200);
     String credential = created.get("initialCredential").asText();
     String memberToken = loginWith("onb-plain-" + tag, credential);
 
@@ -551,8 +544,7 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 租户隔离三断言：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。
    *
-   * <p>底座把 Hikari 池压到 1，所以这里 A→B→A→B 的交替请求必然复用同一条物理连接：
-   * 租户设置如果泄漏在连接上，第二个租户就会看到第一个租户的入职记录。
+   * <p>底座把 Hikari 池压到 1，所以这里 A→B→A→B 的交替请求必然复用同一条物理连接： 租户设置如果泄漏在连接上，第二个租户就会看到第一个租户的入职记录。
    */
   @Test
   void onboardingRecordsAreIsolatedBetweenTenants() throws Exception {
@@ -583,9 +575,13 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     UUID bId = UUID.fromString(bCreated.get("onboardingId").asText());
 
     // 断言一：两租户互不可见。
-    assertThat(findOnboarding(request(aToken, "GET", "/identity/onboardings", null, 200), bId.toString()))
+    assertThat(
+            findOnboarding(
+                request(aToken, "GET", "/identity/onboardings", null, 200), bId.toString()))
         .isNull();
-    assertThat(findOnboarding(request(bToken, "GET", "/identity/onboardings", null, 200), aId.toString()))
+    assertThat(
+            findOnboarding(
+                request(bToken, "GET", "/identity/onboardings", null, 200), aId.toString()))
         .isNull();
     assertThat(request(bToken, "GET", "/identity/onboardings", null, 200).toString())
         .doesNotContain(aUsername);
@@ -607,30 +603,34 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     // 注意不能断言「A 里正好一行」：底座容器由整个测试类共享，A 租户里还有其它用例建的入职记录，
     // 这里要证明的是「A 看不到 B 的那一条」，不是「A 里只有一条」。
     assertThat(
-            tx().run(aTenant, () -> sql.fetch("select id from member_onboarding")).getValues("id", UUID.class))
+            tx().run(aTenant, () -> sql.fetch("select id from member_onboarding"))
+                .getValues("id", UUID.class))
         .contains(aId)
         .doesNotContain(bId);
     assertThat(request(bToken, "GET", "/identity/onboardings", null, 200)).hasSize(1);
     assertThat(
-            tx()
-                .run(
+            tx().run(
                     aTenant,
-                    () -> sql.fetch("select id from member_onboarding").getValues("id", UUID.class)))
+                    () ->
+                        sql.fetch("select id from member_onboarding").getValues("id", UUID.class)))
         .contains(aId)
         .doesNotContain(bId);
     assertThat(request(aToken, "GET", "/identity/onboardings", null, 200).toString())
         .doesNotContain(bId.toString());
     assertThat(
-            tx()
-                .run(
+            tx().run(
                     bTenant,
-                    () -> sql.fetch("select id from member_onboarding").getValues("id", UUID.class)))
+                    () ->
+                        sql.fetch("select id from member_onboarding").getValues("id", UUID.class)))
         .containsExactly(bId);
 
     // 拿别人的入职 id 去完成，拿不到 404 而不是把它改掉。
     request(bToken, "POST", "/identity/onboardings/" + aId + "/complete", null, 404);
-    assertThat(findOnboarding(request(aToken, "GET", "/identity/onboardings", null, 200), aId.toString())
-            .get("status").asText())
+    assertThat(
+            findOnboarding(
+                    request(aToken, "GET", "/identity/onboardings", null, 200), aId.toString())
+                .get("status")
+                .asText())
         .isEqualTo("PENDING");
 
     // 没有 app.current_tenant 时整张表读不到任何行。
@@ -654,7 +654,7 @@ class MemberOnboardingIntegrationTest extends IdentityIntegrationTestBase {
     // 表结构里不存在任何能存凭据的列：只有 credential_issued 这个布尔位。
     var columns =
         sql.fetch(
-            "select column_name from information_schema.columns where table_name='member_onboarding'")
+                "select column_name from information_schema.columns where table_name='member_onboarding'")
             .getValues("column_name", String.class);
     assertThat(columns).contains("credential_issued", "credential_issued_at");
     assertThat(columns)

@@ -24,20 +24,19 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 17.1.1.3 层级授权。
  *
- * <p>ADR-0005 的核心约束在这里落地：父子租户关系只表示结构，**不自动赋权**。
- * 集团要看子公司的数据，必须由父租户所有者在这里显式开一次口；没有记录就是拒绝。
+ * <p>ADR-0005 的核心约束在这里落地：父子租户关系只表示结构，**不自动赋权**。 集团要看子公司的数据，必须由父租户所有者在这里显式开一次口；没有记录就是拒绝。
  *
  * <p>三个能力对应蓝图的三段职责：
+ *
  * <ul>
  *   <li>授权记录：{@code /hierarchy-authorizations} 的增改查（读 + 配置）；
  *   <li>访问判定：{@code POST /hierarchy-authorizations/check}，下游全系统数据过滤的唯一入口；
- *   <li>审计：每一次配置变更都经 {@link AuditLog} 落 {@code identity_audit}，
- *       并在同一事务里写 {@code identity_outbox}，下游收到的变更必然有一条对应审计行。
+ *   <li>审计：每一次配置变更都经 {@link AuditLog} 落 {@code identity_audit}， 并在同一事务里写 {@code
+ *       identity_outbox}，下游收到的变更必然有一条对应审计行。
  * </ul>
  *
- * <p>租户上下文来自 {@link IdentityController#resolve} 解析出的已认证成员关系，
- * <b>不采信 {@code X-Tenant-Id} 头</b>；判定落在数据库的 FORCE RLS 上兜底。
- * 配置授权是 Owner + ALL 专属（{@code hierarchy_owner}），与 17.1.1.2 管子租户同一道闸。
+ * <p>租户上下文来自 {@link IdentityController#resolve} 解析出的已认证成员关系， <b>不采信 {@code X-Tenant-Id}
+ * 头</b>；判定落在数据库的 FORCE RLS 上兜底。 配置授权是 Owner + ALL 专属（{@code hierarchy_owner}），与 17.1.1.2 管子租户同一道闸。
  */
 @RestController
 @RequestMapping("/identity")
@@ -62,9 +61,8 @@ public class HierarchyAuthorizationController {
   /**
    * 授权记录列表项。
    *
-   * <p>{@code effectiveStatus} 与 {@code status} 并存是刻意的：{@code status} 是这一行的持久状态，
-   * {@code effectiveStatus} 是「此刻实际有没有效」（过期、尚未生效都要在这里显形）。
-   * 只显示 status 的话，一条上个月到期但没人撤销的授权看起来仍然是 ACTIVE，
+   * <p>{@code effectiveStatus} 与 {@code status} 并存是刻意的：{@code status} 是这一行的持久状态， {@code
+   * effectiveStatus} 是「此刻实际有没有效」（过期、尚未生效都要在这里显形）。 只显示 status 的话，一条上个月到期但没人撤销的授权看起来仍然是 ACTIVE，
    * 管理员会以为权限还在。
    */
   public record HierarchyGrantView(
@@ -118,31 +116,37 @@ public class HierarchyAuthorizationController {
   @GetMapping("/hierarchy-authorizations")
   public List<HierarchyGrantView> grants(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
-    return call(auth, READ, false, a -> sql.fetch("select * from hierarchy_grants(?)", hash(auth)).stream()
-        .map(
-            r ->
-                new HierarchyGrantView(
-                    r.get("grant_id", UUID.class),
-                    r.get("child_tenant_id", UUID.class),
-                    r.get("child_code", String.class),
-                    r.get("child_name", String.class),
-                    r.get("child_status", String.class),
-                    r.get("domains", String[].class) == null
-                        ? List.of()
-                        : List.of(r.get("domains", String[].class)),
-                    r.get("access_level", String.class),
-                    r.get("valid_from", OffsetDateTime.class),
-                    r.get("valid_until", OffsetDateTime.class),
-                    r.get("status", String.class),
-                    effective(r.get("status", String.class),
-                        r.get("valid_from", OffsetDateTime.class),
-                        r.get("valid_until", OffsetDateTime.class)),
-                    r.get("note", String.class),
-                    r.get("created_by", UUID.class),
-                    r.get("created_at", OffsetDateTime.class),
-                    r.get("revoked_at", OffsetDateTime.class),
-                    r.get("revoked_by", UUID.class)))
-        .toList());
+    return call(
+        auth,
+        READ,
+        false,
+        a ->
+            sql.fetch("select * from hierarchy_grants(?)", hash(auth)).stream()
+                .map(
+                    r ->
+                        new HierarchyGrantView(
+                            r.get("grant_id", UUID.class),
+                            r.get("child_tenant_id", UUID.class),
+                            r.get("child_code", String.class),
+                            r.get("child_name", String.class),
+                            r.get("child_status", String.class),
+                            r.get("domains", String[].class) == null
+                                ? List.of()
+                                : List.of(r.get("domains", String[].class)),
+                            r.get("access_level", String.class),
+                            r.get("valid_from", OffsetDateTime.class),
+                            r.get("valid_until", OffsetDateTime.class),
+                            r.get("status", String.class),
+                            effective(
+                                r.get("status", String.class),
+                                r.get("valid_from", OffsetDateTime.class),
+                                r.get("valid_until", OffsetDateTime.class)),
+                            r.get("note", String.class),
+                            r.get("created_by", UUID.class),
+                            r.get("created_at", OffsetDateTime.class),
+                            r.get("revoked_at", OffsetDateTime.class),
+                            r.get("revoked_by", UUID.class)))
+                .toList());
   }
 
   @PostMapping("/hierarchy-authorizations")
@@ -205,8 +209,7 @@ public class HierarchyAuthorizationController {
   /**
    * 撤销授权。
    *
-   * <p>走 POST 而不是 DELETE：撤销是审计事件（要留下谁在什么时候撤的），
-   * 不是资源消失。删除之后这两列就查不到了。
+   * <p>走 POST 而不是 DELETE：撤销是审计事件（要留下谁在什么时候撤的）， 不是资源消失。删除之后这两列就查不到了。
    */
   @PostMapping("/hierarchy-authorizations/{id}/revoke")
   public void revoke(
@@ -227,12 +230,11 @@ public class HierarchyAuthorizationController {
   /**
    * 访问判定：下游全系统数据过滤的单一入口。
    *
-   * <p>刻意**不是** 403 —— 判定结果本身就是输出（蓝图「输出 = 授权记录 + 访问判定结果」），
-   * 前端要据此渲染「为什么没有权限」。真正的数据端点在拿到 allowed=false 时自行拒绝。
+   * <p>刻意**不是** 403 —— 判定结果本身就是输出（蓝图「输出 = 授权记录 + 访问判定结果」）， 前端要据此渲染「为什么没有权限」。真正的数据端点在拿到
+   * allowed=false 时自行拒绝。
    *
-   * <p>不挂页面权限码：判定要问的是「这个成员在这处授权开口上有没有资格」，
-   * 而这正是 {@code evaluate_hierarchy_access} 自己按角色算出来的；
-   * 再在外面套一层 {@code tenant.hierarchy.read} 会把「能配置授权」和「能使用授权」混成一件事。
+   * <p>不挂页面权限码：判定要问的是「这个成员在这处授权开口上有没有资格」， 而这正是 {@code evaluate_hierarchy_access} 自己按角色算出来的； 再在外面套一层
+   * {@code tenant.hierarchy.read} 会把「能配置授权」和「能使用授权」混成一件事。
    */
   @PostMapping("/hierarchy-authorizations/check")
   public AccessDecisionView check(
@@ -252,8 +254,7 @@ public class HierarchyAuthorizationController {
                   input.requireWrite());
           // 判定函数对任何会话都返回一行；这行缺失说明函数被改坏了，直接暴露而不是静默放行。
           if (row == null)
-            throw IdentityController.error(
-                HttpStatus.INTERNAL_SERVER_ERROR, "授权判定未返回结果");
+            throw IdentityController.error(HttpStatus.INTERNAL_SERVER_ERROR, "授权判定未返回结果");
           return new AccessDecisionView(
               row.get("allowed", Boolean.class),
               row.get("reason", String.class),
@@ -274,7 +275,10 @@ public class HierarchyAuthorizationController {
    * <p>{@code permission} 传 null 表示不挂页面权限码（判定路径，见 {@link #check} 的说明）。
    */
   private <T> T call(
-      String auth, String permission, boolean mutation, Function<IdentityController.Access, T> work) {
+      String auth,
+      String permission,
+      boolean mutation,
+      Function<IdentityController.Access, T> work) {
     var initial = identity.resolve(auth);
     return tenants.run(
         initial.tenantId(),
@@ -287,12 +291,10 @@ public class HierarchyAuthorizationController {
             throw IdentityController.error(HttpStatus.CONFLICT, "租户已切换，请重试");
           if (permission != null) {
             boolean allowed =
-                a.grants()
-                    .stream()
+                a.grants().stream()
                     .anyMatch(
                         g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission));
-            if (!allowed)
-              throw IdentityController.error(HttpStatus.FORBIDDEN, "当前角色没有此操作权限");
+            if (!allowed) throw IdentityController.error(HttpStatus.FORBIDDEN, "当前角色没有此操作权限");
             if (mutation && !a.owner())
               throw IdentityController.error(HttpStatus.FORBIDDEN, "授权与组织变更需由当前租户所有者执行");
           }
@@ -303,15 +305,13 @@ public class HierarchyAuthorizationController {
   /**
    * 授权范围的格式校验，与数据库函数里的同名校验互为防线。
    *
-   * <p>放在 Java 侧是为了让「域名写错」「有效期倒挂」返回 400 而不是笼统的 409：
-   * 前者告诉用户哪里填错了，后者只说「记录不可用」，用户会以为是并发冲突去刷新页面。
+   * <p>放在 Java 侧是为了让「域名写错」「有效期倒挂」返回 400 而不是笼统的 409： 前者告诉用户哪里填错了，后者只说「记录不可用」，用户会以为是并发冲突去刷新页面。
    * 数据库侧仍然保留同样的判断，因为判定函数可能被别的服务直接调用，绕过这一层。
    */
   private static void check(List<String> domains, OffsetDateTime from, OffsetDateTime until) {
     for (var d : domains)
       if (!d.matches("^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"))
-        throw IdentityController.error(
-            HttpStatus.BAD_REQUEST, "数据域格式不正确，形如 catalog.spu：" + d);
+        throw IdentityController.error(HttpStatus.BAD_REQUEST, "数据域格式不正确，形如 catalog.spu：" + d);
     if (until != null && !until.isAfter(from))
       throw IdentityController.error(HttpStatus.BAD_REQUEST, "有效期结束时间必须晚于开始时间");
   }
@@ -328,11 +328,9 @@ public class HierarchyAuthorizationController {
   /**
    * 授权快照。
    *
-   * <p>范围、级别、有效期、备注、状态、目标子租户全部进审计：事后要能解释
-   * 「当时到底把哪个子租户的哪些域、放到什么时候为止」。少一列就只剩一句「改过授权」，等于没法追责。
+   * <p>范围、级别、有效期、备注、状态、目标子租户全部进审计：事后要能解释 「当时到底把哪个子租户的哪些域、放到什么时候为止」。少一列就只剩一句「改过授权」，等于没法追责。
    *
-   * <p>刻意从库里回读而不是用入参拼：timestamptz 落库时按库时区取值，
-   * 入参拼出来的快照与真正生效的那一行可能差一个时区偏移，审计要记的是后者。
+   * <p>刻意从库里回读而不是用入参拼：timestamptz 落库时按库时区取值， 入参拼出来的快照与真正生效的那一行可能差一个时区偏移，审计要记的是后者。
    */
   private Map<String, Object> load(UUID id, String auth) {
     for (var g : grants(auth))

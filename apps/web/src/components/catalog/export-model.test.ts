@@ -130,12 +130,16 @@ describe('提交前本地校验', () => {
   });
 
   it('勾了敏感字段却没写用途时拦下，并点名是哪些字段', () => {
-    expect(requestProblem(['PARTY_CODE', 'EMAIL'], '', [contactSource], 'CONTACT')).toContain('邮箱');
+    expect(requestProblem(['PARTY_CODE', 'EMAIL'], '', [contactSource], 'CONTACT')).toContain(
+      '邮箱',
+    );
     expect(requestProblem(['EMAIL'], '   ', [contactSource], 'CONTACT')).toContain('导出用途');
   });
 
   it('写了用途就放行；不含敏感字段时不需要理由', () => {
-    expect(requestProblem(['PARTY_CODE', 'EMAIL'], '客服工单', [contactSource], 'CONTACT')).toBeNull();
+    expect(
+      requestProblem(['PARTY_CODE', 'EMAIL'], '客服工单', [contactSource], 'CONTACT'),
+    ).toBeNull();
     expect(requestProblem(['CODE'], '', [skuSource], 'SKU')).toBeNull();
   });
 
@@ -168,9 +172,7 @@ describe('审计回显', () => {
   });
 
   it('有条件时用标签而不是键名回显', () => {
-    expect(
-      conditionText([{ key: 'spuId', label: '所属 SPU', value: 'abc' }]),
-    ).toBe('所属 SPU=abc');
+    expect(conditionText([{ key: 'spuId', label: '所属 SPU', value: 'abc' }])).toBe('所属 SPU=abc');
   });
 });
 

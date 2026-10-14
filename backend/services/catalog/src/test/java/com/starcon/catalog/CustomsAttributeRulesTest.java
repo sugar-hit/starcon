@@ -9,13 +9,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.*;
 
 /**
- * 3.7.1.1 纯规则单测：HS 编码格式（规则 A1）、享惠双向一致（规则 A2）、
- * 申报要素有序性与齐备性（规则 A4）、可报关性判定、国家码归一。
+ * 3.7.1.1 纯规则单测：HS 编码格式（规则 A1）、享惠双向一致（规则 A2）、 申报要素有序性与齐备性（规则 A4）、可报关性判定、国家码归一。
  *
- * <p>这些判定决定的是「这个 SKU 能不能拿去报关」，代价出现在<b>真实的报关单与罚款</b>上
- * （蓝图：HS 编码错误直接导致申报失败与罚款；V85：扣货与罚款由卖家承担），
- * 而判定发生在录入那一刻 —— 所以必须能不碰数据库逐条穷举。
- * 集成测试（{@code CustomsAttributeIntegrationTest}）只证明这些规则真的被用上了，
+ * <p>这些判定决定的是「这个 SKU 能不能拿去报关」，代价出现在<b>真实的报关单与罚款</b>上 （蓝图：HS 编码错误直接导致申报失败与罚款；V85：扣货与罚款由卖家承担），
+ * 而判定发生在录入那一刻 —— 所以必须能不碰数据库逐条穷举。 集成测试（{@code CustomsAttributeIntegrationTest}）只证明这些规则真的被用上了，
  * 证明不了规则本身对不对。
  */
 class CustomsAttributeRulesTest {
@@ -24,13 +21,35 @@ class CustomsAttributeRulesTest {
         UUID.randomUUID(), ordinal, code, "要素" + ordinal, value, required, false);
   }
 
-  static CustomsProfile profile(String patchStatus, String submittedAt, List<DeclarationElement> elements) {
+  static CustomsProfile profile(
+      String patchStatus, String submittedAt, List<DeclarationElement> elements) {
     boolean recorded = patchStatus != null || submittedAt != null;
     return new CustomsProfile(
-        UUID.randomUUID(), "SKU-1", "测试商品", "SPU-1",
-        recorded ? UUID.randomUUID() : null, "851712", "CN", "手机", null, "PCE",
-        false, "", patchStatus, null, submittedAt, null, null, "", "", 0L,
-        elements, false, List.of(), List.of(), null);
+        UUID.randomUUID(),
+        "SKU-1",
+        "测试商品",
+        "SPU-1",
+        recorded ? UUID.randomUUID() : null,
+        "851712",
+        "CN",
+        "手机",
+        null,
+        "PCE",
+        false,
+        "",
+        patchStatus,
+        null,
+        submittedAt,
+        null,
+        null,
+        "",
+        "",
+        0L,
+        elements,
+        false,
+        List.of(),
+        List.of(),
+        null);
   }
 
   // ============================================================ 规则 A1：HS 编码格式
@@ -63,7 +82,8 @@ class CustomsAttributeRulesTest {
         .hasMessageContaining("6–10 位纯数字")
         .hasMessageContaining("罚款");
     assertThatThrownBy(() -> normalizeHsCode("851")).isInstanceOf(IllegalArgumentException.class);
-    assertThatThrownBy(() -> normalizeHsCode("  ")).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> normalizeHsCode("  "))
+        .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("请填写");
     assertThatThrownBy(() -> normalizeHsCode(null)).isInstanceOf(IllegalArgumentException.class);
   }
@@ -79,14 +99,17 @@ class CustomsAttributeRulesTest {
 
   @Test
   void 原产地国家码不是两位大写字母时被拒() {
-    assertThatThrownBy(() -> normalizeCountryCode("C", "原产地")).isInstanceOf(IllegalArgumentException.class);
-    assertThatThrownBy(() -> normalizeCountryCode("CHN", "原产地")).isInstanceOf(IllegalArgumentException.class);
-    assertThatThrownBy(() -> normalizeCountryCode("", "原产地")).isInstanceOf(IllegalArgumentException.class)
+    assertThatThrownBy(() -> normalizeCountryCode("C", "原产地"))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> normalizeCountryCode("CHN", "原产地"))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> normalizeCountryCode("", "原产地"))
+        .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("请填写原产地");
-    assertThatThrownBy(() -> normalizeCountryCode(null, "原产地")).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> normalizeCountryCode(null, "原产地"))
+        .isInstanceOf(IllegalArgumentException.class);
     // 报错文案必须点明后果：原产地错 = 税率错 = 优惠失效或被追缴。
-    assertThatThrownBy(() -> normalizeCountryCode("123", "原产地"))
-        .hasMessageContaining("追缴");
+    assertThatThrownBy(() -> normalizeCountryCode("123", "原产地")).hasMessageContaining("追缴");
   }
 
   // ============================================================ 规则 A2：享惠双向一致
@@ -114,14 +137,21 @@ class CustomsAttributeRulesTest {
 
   @Test
   void 申报要素按位次排序而不是按字母序() {
-    var sorted = ordered(
-        List.of(element(3, "03", "自用", true), element(1, "01", "手机", true),
-            element(2, "02", "品牌类型", true)));
+    var sorted =
+        ordered(
+            List.of(
+                element(3, "03", "自用", true),
+                element(1, "01", "手机", true),
+                element(2, "02", "品牌类型", true)));
     // 海关按序比对，顺序是业务事实 —— 不能按字母序（01/02/03 恰好同序，要用非字典序验）。
     assertThat(sorted).extracting(DeclarationElement::ordinal).containsExactly(1, 2, 3);
 
-    var reversed = ordered(
-        List.of(element(2, "B", "x", true), element(1, "A", "y", true), element(10, "C", "z", true)));
+    var reversed =
+        ordered(
+            List.of(
+                element(2, "B", "x", true),
+                element(1, "A", "y", true),
+                element(10, "C", "z", true)));
     assertThat(reversed).extracting(DeclarationElement::ordinal).containsExactly(1, 2, 10);
     // 位次 10 必须排在 2 之后：**数值序**，不是字符串序（"10" < "2"）。
     assertThat(reversed.get(2).elementCode()).isEqualTo("C");
@@ -130,7 +160,8 @@ class CustomsAttributeRulesTest {
   @Test
   void 必填且为空的申报要素被识别出来() {
     var elements =
-        List.of(element(1, "01", "手机", true), element(2, "02", "  ", true), element(3, "03", "", true));
+        List.of(
+            element(1, "01", "手机", true), element(2, "02", "  ", true), element(3, "03", "", true));
     assertThat(missingRequired(ordered(elements))).hasSize(2);
     // 非必填的空白**不算**未满足：可选要素留空是合法的。
     var optional = List.of(element(1, "01", "手机", true), element(2, "02", "", false));
@@ -139,8 +170,8 @@ class CustomsAttributeRulesTest {
 
   @Test
   void 申报要素拍成jsonb对象时键是要素码() {
-    var byCode = toByCode(ordered(
-        List.of(element(1, "01", "手机", true), element(2, "02", "自有品牌", true))));
+    var byCode =
+        toByCode(ordered(List.of(element(1, "01", "手机", true), element(2, "02", "自有品牌", true))));
     assertThat(byCode).containsEntry("01", "手机").containsEntry("02", "自有品牌");
     // 值 null 归一成空串：jsonb 里有 null 值与键缺失在 V85 的 CHECK 下是两种形状。
     var withNull = toByCode(ordered(List.of(element(1, "01", null, true))));
@@ -164,23 +195,27 @@ class CustomsAttributeRulesTest {
     assertThat(notSubmitted.ready()).isFalse();
     assertThat(notSubmitted.blockers()).containsExactly(NOT_APPROVED);
 
-    var awaiting = CustomsAttributeRules.verdict(profile(DRAFT, "2026-10-08T02:00:00Z", List.of()), List.of());
+    var awaiting =
+        CustomsAttributeRules.verdict(profile(DRAFT, "2026-10-08T02:00:00Z", List.of()), List.of());
     assertThat(awaiting.ready()).isFalse();
     assertThat(awaiting.blockers()).containsExactly(SUBMITTED_AWAITING_REVIEW);
   }
 
   @Test
   void 被驳回的判不可报关() {
-    var result = CustomsAttributeRules.verdict(profile(REJECTED, "2026-10-08T02:00:00Z", List.of()), List.of());
+    var result =
+        CustomsAttributeRules.verdict(
+            profile(REJECTED, "2026-10-08T02:00:00Z", List.of()), List.of());
     assertThat(result.ready()).isFalse();
     assertThat(result.blockers()).containsExactly(DECLARATION_REJECTED);
   }
 
   @Test
   void 只有审核通过且申报要素齐备才判可报关() {
-    var complete =
-        ordered(List.of(element(1, "01", "手机", true), element(2, "02", "自有品牌", true)));
-    var ok = CustomsAttributeRules.verdict(profile(APPROVED, "2026-10-08T02:00:00Z", complete), complete);
+    var complete = ordered(List.of(element(1, "01", "手机", true), element(2, "02", "自有品牌", true)));
+    var ok =
+        CustomsAttributeRules.verdict(
+            profile(APPROVED, "2026-10-08T02:00:00Z", complete), complete);
     assertThat(ok.ready()).isTrue();
     assertThat(ok.blockers()).isEmpty();
   }
@@ -189,12 +224,14 @@ class CustomsAttributeRulesTest {
   void 已审核通过但申报要素不齐仍然判不可报关() {
     // 审完之后把必填要素清空 —— 防御性判定：宁可拦住，也不要给下游一份残缺资料。
     var blank = ordered(List.of(element(1, "01", "手机", true), element(2, "02", "", true)));
-    var missing = CustomsAttributeRules.verdict(profile(APPROVED, "2026-10-08T02:00:00Z", blank), blank);
+    var missing =
+        CustomsAttributeRules.verdict(profile(APPROVED, "2026-10-08T02:00:00Z", blank), blank);
     assertThat(missing.ready()).isFalse();
     assertThat(missing.blockers()).containsExactly(REQUIRED_ELEMENTS_INCOMPLETE);
 
     var none = List.<DeclarationElement>of();
-    var empty = CustomsAttributeRules.verdict(profile(APPROVED, "2026-10-08T02:00:00Z", none), none);
+    var empty =
+        CustomsAttributeRules.verdict(profile(APPROVED, "2026-10-08T02:00:00Z", none), none);
     assertThat(empty.ready()).isFalse();
     assertThat(empty.blockers()).containsExactly(NO_ELEMENTS);
   }
@@ -203,8 +240,13 @@ class CustomsAttributeRulesTest {
   void 阻断原因永远有中文标签且不为空串() {
     // 页面直接渲染 blockerLabels：空标签会让界面上出现一个没有解释的红标。
     for (String code :
-        List.of(NOT_RECORDED, NOT_APPROVED, SUBMITTED_AWAITING_REVIEW, DECLARATION_REJECTED,
-            NO_ELEMENTS, REQUIRED_ELEMENTS_INCOMPLETE)) {
+        List.of(
+            NOT_RECORDED,
+            NOT_APPROVED,
+            SUBMITTED_AWAITING_REVIEW,
+            DECLARATION_REJECTED,
+            NO_ELEMENTS,
+            REQUIRED_ELEMENTS_INCOMPLETE)) {
       assertThat(blockerLabel(code)).isNotBlank();
       // 未知码原样返回而不是空串。
       assertThat(blockerLabel("SOME_FUTURE_CODE")).isEqualTo("SOME_FUTURE_CODE");
@@ -229,7 +271,8 @@ class CustomsAttributeRulesTest {
     assertThat(normalizeStatus("approved")).isEqualTo(APPROVED);
     assertThat(normalizeStatus(" REJECTED ")).isEqualTo(REJECTED);
     // 静默返回空集会让页面看起来像「没有结果」，而真相是「筛错了」。
-    assertThatThrownBy(() -> normalizeStatus("PENDING")).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> normalizeStatus("PENDING"))
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test
@@ -246,7 +289,8 @@ class CustomsAttributeRulesTest {
     assertThat(normalizeKeyword("   ")).isNull();
     assertThat(normalizeKeyword("  手机  ")).isEqualTo("手机");
     // 截断会搜出看不懂的结果集，所以报错而不是悄悄截。
-    assertThatThrownBy(() -> normalizeKeyword("x".repeat(65))).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> normalizeKeyword("x".repeat(65)))
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test

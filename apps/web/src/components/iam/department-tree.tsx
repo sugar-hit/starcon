@@ -83,7 +83,11 @@ export function DepartmentTree({
               'flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3 transition',
               depth === 0 ? 'bg-card' : 'bg-muted/40',
               isDragging ? 'opacity-40' : 'opacity-100',
-              isTarget ? (allowed ? 'border-brand bg-brand/5' : 'border-destructive') : 'border-control-border',
+              isTarget
+                ? allowed
+                  ? 'border-brand bg-brand/5'
+                  : 'border-destructive'
+                : 'border-control-border',
               blocked ? 'cursor-not-allowed' : '',
             ].join(' ')}
             style={{ marginInlineStart: depth * 20 }}
@@ -101,7 +105,9 @@ export function DepartmentTree({
                 {node.children.length > 0 ? ` · ${node.children.length} 个子部门` : ''}
               </p>
               {blocked && (
-                <p className="text-destructive mt-1 text-xs">非法目标：不能移动到自己或自己的下级。</p>
+                <p className="text-destructive mt-1 text-xs">
+                  非法目标：不能移动到自己或自己的下级。
+                </p>
               )}
             </div>
             <div className="flex flex-wrap gap-2">
@@ -130,7 +136,7 @@ export function DepartmentTree({
             </div>
           </div>
           {node.children.length > 0 && (
-            <ul className="mt-2 space-y-2 border-s-2 border-control-border ps-3">
+            <ul className="border-control-border mt-2 space-y-2 border-s-2 ps-3">
               {branch(node.children, depth + 1)}
             </ul>
           )}

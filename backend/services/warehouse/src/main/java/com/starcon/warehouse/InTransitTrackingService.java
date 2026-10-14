@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -34,27 +33,22 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>六条实现纪律：
  *
  * <ol>
- *   <li><b>不建第二张在途账</b>：在途腿与在途事件的写入所有者是 7.5.1.2，本模块
- *       <b>只读</b> {@code inventory_transfer} / {@code in_transit_event}。
- *       四个跟踪表里<b>没有任何数量余额列</b> —— 「发运 100、到 60、还剩 40」全部
- *       由 {@link #legRows} 现算后随响应返回。
- *   <li><b>预警按剩余窗口提前分级</b>：蓝图关系段原文「头程延误是断货的主要外因，
- *       预警必须提前到预计到港前若干天」。所以分级不是「到港当天才发现晚了」，
- *       而是 {@link #evaluateLevel} 用「剩余窗口 = 生效ETA − 现在」对阈值表逐级判定。
- *   <li><b>阈值落库可配置</b>：三档提前量来自 {@code first_mile_delay_threshold}，
- *       按 (运输方式, 目的国) 逐级回落匹配。代码里没有任何 if 里的天数常量。
- *   <li><b>外部同步未接入</b>：货代/船司/清关连接器（10.4.2.1）<b>未交付</b>，
- *       因此本模块<b>没有同步任务、没有定时器</b>。外部事实经
- *       {@link #recordEvent} 入口按 {@code sourceSystem} + {@code referenceId} 承载，
- *       DB 层钉死「外部来源必须有单号」，写不出出处的外部事实一条都不许入库。
- *   <li><b>只记收货确认，不写库存</b>：{@link #confirmReceipt} 只落
- *       「目的仓确认收到了」这个事实并关掉跟踪，入库落账归 7.5.1.2 的 arrive。
- *   <li><b>阶段只进不退</b>：DB 触发器 {@code guard_first_mile_tracking_event_source}
- *       用 {@code stage_rank()} 钉死；服务层再给一次可读报错，两处同一套序号。
+ *   <li><b>不建第二张在途账</b>：在途腿与在途事件的写入所有者是 7.5.1.2，本模块 <b>只读</b> {@code inventory_transfer} / {@code
+ *       in_transit_event}。 四个跟踪表里<b>没有任何数量余额列</b> —— 「发运 100、到 60、还剩 40」全部 由 {@link #legRows}
+ *       现算后随响应返回。
+ *   <li><b>预警按剩余窗口提前分级</b>：蓝图关系段原文「头程延误是断货的主要外因， 预警必须提前到预计到港前若干天」。所以分级不是「到港当天才发现晚了」， 而是 {@link
+ *       #evaluateLevel} 用「剩余窗口 = 生效ETA − 现在」对阈值表逐级判定。
+ *   <li><b>阈值落库可配置</b>：三档提前量来自 {@code first_mile_delay_threshold}， 按 (运输方式, 目的国) 逐级回落匹配。代码里没有任何 if
+ *       里的天数常量。
+ *   <li><b>外部同步未接入</b>：货代/船司/清关连接器（10.4.2.1）<b>未交付</b>， 因此本模块<b>没有同步任务、没有定时器</b>。外部事实经 {@link
+ *       #recordEvent} 入口按 {@code sourceSystem} + {@code referenceId} 承载， DB
+ *       层钉死「外部来源必须有单号」，写不出出处的外部事实一条都不许入库。
+ *   <li><b>只记收货确认，不写库存</b>：{@link #confirmReceipt} 只落 「目的仓确认收到了」这个事实并关掉跟踪，入库落账归 7.5.1.2 的 arrive。
+ *   <li><b>阶段只进不退</b>：DB 触发器 {@code guard_first_mile_tracking_event_source} 用 {@code stage_rank()}
+ *       钉死；服务层再给一次可读报错，两处同一套序号。
  * </ol>
  *
- * <p>状态机有两处真相：{@link TrackingStatus} 管跟踪记录自己的生死，
- * {@link TrackingStage} 管这批货走到哪了。两者分开才能表达
+ * <p>状态机有两处真相：{@link TrackingStatus} 管跟踪记录自己的生死， {@link TrackingStage} 管这批货走到哪了。两者分开才能表达
  * 「跟踪已关闭但清关仍在扣关中」这类真实组合。
  */
 @Service
@@ -79,10 +73,8 @@ public class InTransitTrackingService {
   /**
    * 在途跟踪能力：可跟踪来源、<b>未交付依赖逐条声明</b>、两级状态机与四条口径说明。
    *
-   * <p>本车道对集成头实查的依赖结论（不凭蓝图的「上游 =」假定）：
-   * 10.4.1.1 头程发运单（迁移 V80）<b>已交付</b>，因此跟踪真的挂在真实发运单上；
-   * 7.5.1.2 在途库存（迁移 V63）<b>已交付</b>，因此在途余量是 join 现算的真值，
-   * 不是本模块自己存的一份。外部连接器全部未交付。
+   * <p>本车道对集成头实查的依赖结论（不凭蓝图的「上游 =」假定）： 10.4.1.1 头程发运单（迁移 V80）<b>已交付</b>，因此跟踪真的挂在真实发运单上； 7.5.1.2
+   * 在途库存（迁移 V63）<b>已交付</b>，因此在途余量是 join 现算的真值， 不是本模块自己存的一份。外部连接器全部未交付。
    */
   public TransitTrackCapabilities capabilities() {
     List<TrackingDimension> sources =
@@ -159,7 +151,8 @@ public class InTransitTrackingService {
     List<TrackingTransition> statusTransitions = new ArrayList<>();
     for (var from : TrackingStatus.values()) {
       for (var to : allowedNextStatus(from)) {
-        statusTransitions.add(new TrackingTransition(from.name(), to.name(), transitionLabel(from, to)));
+        statusTransitions.add(
+            new TrackingTransition(from.name(), to.name(), transitionLabel(from, to)));
       }
     }
 
@@ -173,8 +166,7 @@ public class InTransitTrackingService {
 
     List<String> notes =
         List.of(
-            "预警按**剩余窗口**（预计到港 − 现在）提前分级，不是到港当天才发现晚了："
-                + "蓝图关系段原文「头程延误是断货的主要外因，预警必须提前到预计到港前若干天」。",
+            "预警按**剩余窗口**（预计到港 − 现在）提前分级，不是到港当天才发现晚了：" + "蓝图关系段原文「头程延误是断货的主要外因，预警必须提前到预计到港前若干天」。",
             "三档提前量（watch / warning / critical）来自阈值表 first_mile_delay_threshold，"
                 + "按 (运输方式, 目的国) 逐级回落匹配，**不是代码里的常量** —— 改一行就换口径。",
             "外部同步**未接入**：本模块没有常驻同步任务也没有定时器。货代/船司/清关事实"
@@ -196,9 +188,9 @@ public class InTransitTrackingService {
   /**
    * 枚举 → 词表。
    *
-   * <p>入参是 {@link Labelled[]}（{@code InTransitTrackingModels.Labelled}）而不是
-   * {@code Function<Object,String>}：后者会把枚举擦成 Object，编译器再也发现不了
-   * 「往里传了一个没有 label() 的类型」。数组协变让 {@code CustomsStatus[]} 直接可用。
+   * <p>入参是 {@link Labelled[]}（{@code InTransitTrackingModels.Labelled}）而不是 {@code
+   * Function<Object,String>}：后者会把枚举擦成 Object，编译器再也发现不了 「往里传了一个没有 label() 的类型」。数组协变让 {@code
+   * CustomsStatus[]} 直接可用。
    */
   private static List<TrackingOption> options(Labelled[] values) {
     var out = new ArrayList<TrackingOption>();
@@ -222,9 +214,8 @@ public class InTransitTrackingService {
   /**
    * 跟踪阶段合法推进。
    *
-   * <p>只允许**推进**（rank 递增）或原地自环（报同一阶段的位置更新）。
-   * EXCEPTION 从任何阶段都可达（出事不需要先走到某一步），
-   * 而 EXCEPTION 之后仍可推进到后续阶段（问题排除后货继续走）。
+   * <p>只允许**推进**（rank 递增）或原地自环（报同一阶段的位置更新）。 EXCEPTION 从任何阶段都可达（出事不需要先走到某一步）， 而 EXCEPTION
+   * 之后仍可推进到后续阶段（问题排除后货继续走）。
    */
   static List<TrackingStage> allowedNextStage(TrackingStage current) {
     var out = new ArrayList<TrackingStage>();
@@ -270,8 +261,7 @@ public class InTransitTrackingService {
   /**
    * 取当前生效阈值：按 (运输方式, 目的国) 逐级回落匹配，最后回落到 {@code (*,*)} 默认行。
    *
-   * <p>**没有落到 Java 常量**：最差情况命中的是表里的默认行，
-   * 它同样可被运营改。取阈值前先 {@link #ensureDefaultThreshold} 幂等补出这一行，
+   * <p>**没有落到 Java 常量**：最差情况命中的是表里的默认行， 它同样可被运营改。取阈值前先 {@link #ensureDefaultThreshold} 幂等补出这一行，
    * 之后每一次读都真的走表（不是第一次读之后就走缓存或常量）。
    */
   EffectiveThreshold effectiveThreshold(String transportMode, String countryCode) {
@@ -281,10 +271,7 @@ public class InTransitTrackingService {
     // 匹配顺序：精确两者 → 只精确运输方式 → 只精确国家 → 默认行。
     var candidates =
         List.of(
-            List.of(mode, country),
-            List.of(mode, "*"),
-            List.of("*", country),
-            List.of("*", "*"));
+            List.of(mode, country), List.of(mode, "*"), List.of("*", country), List.of("*", "*"));
     for (var pair : candidates) {
       var hit =
           sql.fetchOne(
@@ -308,10 +295,8 @@ public class InTransitTrackingService {
   /**
    * 幂等补出本租户的 {@code (*,*)} 默认阈值行。
    *
-   * <p>蓝图要求「阈值落库可配置」，那就**必须有一行真的在库里**才能读到口径 ——
-   * 新租户没有行时如果直接用 Java 常量兜底，运营看到的就永远是代码里的天数，
-   * 「改阈值」也永远无从谈起。所以第一次需要阈值时补一行默认值（7/3/0 天），
-   * **之后每次读都走表**：这个默认值仍然可被运营改，不是常量。
+   * <p>蓝图要求「阈值落库可配置」，那就**必须有一行真的在库里**才能读到口径 —— 新租户没有行时如果直接用 Java 常量兜底，运营看到的就永远是代码里的天数，
+   * 「改阈值」也永远无从谈起。所以第一次需要阈值时补一行默认值（7/3/0 天）， **之后每次读都走表**：这个默认值仍然可被运营改，不是常量。
    *
    * <p>用 {@code on conflict do nothing} 保证并发下只会有一行，且不会覆盖运营已改过的口径。
    */
@@ -341,8 +326,12 @@ public class InTransitTrackingService {
         r.get("warning_lead_days", Integer.class),
         r.get("critical_lead_days", Integer.class),
         "剩余窗口 = 生效预计到港 − 现在。"
-            + "剩余窗口 ≤ " + r.get("warning_lead_days", Integer.class) + " 天进 WARNING（延误预警）；"
-            + "≤ " + r.get("watch_lead_days", Integer.class) + " 天进 WATCH（临近到港提示）；"
+            + "剩余窗口 ≤ "
+            + r.get("warning_lead_days", Integer.class)
+            + " 天进 WARNING（延误预警）；"
+            + "≤ "
+            + r.get("watch_lead_days", Integer.class)
+            + " 天进 WATCH（临近到港提示）；"
             + "已经过了预计到港仍未到货进 CRITICAL（严重延误）。"
             + "三档提前量取自本租户阈值表，不是代码常量。");
   }
@@ -350,9 +339,8 @@ public class InTransitTrackingService {
   /**
    * 按剩余窗口分级 —— 蓝图的「预警必须提前到预计到港前若干天」就落在这三行。
    *
-   * <p>判定顺序是**从最严重往下**：已经过了预计到港还没到货（剩余 &lt; 0）最严重，
-   * 否则按 warning → watch 的提前量窗口逐级命中。三个天数全部来自
-   * {@link EffectiveThreshold}（阈值表行），代码里没有第二份。
+   * <p>判定顺序是**从最严重往下**：已经过了预计到港还没到货（剩余 &lt; 0）最严重， 否则按 warning → watch 的提前量窗口逐级命中。三个天数全部来自 {@link
+   * EffectiveThreshold}（阈值表行），代码里没有第二份。
    */
   static DelayLevel evaluateLevel(BigDecimal remainingDays, EffectiveThreshold t) {
     if (remainingDays == null) {
@@ -385,15 +373,19 @@ public class InTransitTrackingService {
     // 全新租户还没有任何阈值行：不补的话运营打开阈值页看到空列表，
     // 而「空」与「没有口径」在这里是同一件事 —— 读路径又会补行，两边口径必须一致。
     ensureDefaultThreshold();
-    var rows = sql.fetch("select * from first_mile_delay_threshold order by transport_mode,country_code");
+    var rows =
+        sql.fetch("select * from first_mile_delay_threshold order by transport_mode,country_code");
     // 统计每条阈值行当前命中多少个在途跟踪，用于标 inUse。
     var usage = new HashMap<UUID, Long>();
-    for (var t : sql.fetch("select transport_mode,destination_country_code from first_mile_tracking t"
-        + " join first_mile_shipment s on s.tenant_id=t.tenant_id and s.id=t.shipment_id"
-        + " where t.status='TRACKING'")) {
+    for (var t :
+        sql.fetch(
+            "select transport_mode,destination_country_code from first_mile_tracking t"
+                + " join first_mile_shipment s on s.tenant_id=t.tenant_id and s.id=t.shipment_id"
+                + " where t.status='TRACKING'")) {
       var e =
           effectiveThreshold(
-              t.get("transport_mode", String.class), t.get("destination_country_code", String.class));
+              t.get("transport_mode", String.class),
+              t.get("destination_country_code", String.class));
       if (e.thresholdId() != null) {
         usage.merge(e.thresholdId(), 1L, Long::sum);
       }
@@ -430,7 +422,9 @@ public class InTransitTrackingService {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "阈值行不存在或无权修改");
     }
     var watch =
-        req0.watchLeadDays() == null ? hit.get("watch_lead_days", Integer.class) : req0.watchLeadDays();
+        req0.watchLeadDays() == null
+            ? hit.get("watch_lead_days", Integer.class)
+            : req0.watchLeadDays();
     var warning =
         req0.warningLeadDays() == null
             ? hit.get("warning_lead_days", Integer.class)
@@ -442,17 +436,24 @@ public class InTransitTrackingService {
     // 递减性在服务层先给可读报错（DB 的 CHECK 会兜底，但错误文案指不到具体字段）。
     if (warning > watch) {
       throw new IllegalArgumentException(
-          "warningLeadDays(" + warning + ") 不能大于 watchLeadDays(" + watch
+          "warningLeadDays("
+              + warning
+              + ") 不能大于 watchLeadDays("
+              + watch
               + ")：三级必须递减，否则「进观察区」反而比「进提示区」晚，分级会静默倒挂");
     }
-    var notes =
-        req0.notes() == null ? hit.get("notes", String.class) : req0.notes();
+    var notes = req0.notes() == null ? hit.get("notes", String.class) : req0.notes();
     sql.execute(
         "update first_mile_delay_threshold set watch_lead_days=?,warning_lead_days=?,"
             + " critical_lead_days=?,notes=?,version=version+1,updated_at=now(),"
             + " updated_by=nullif(current_setting('app.actor',true),'')::uuid"
             + " where tenant_id=? and id=?",
-        watch, warning, critical, notes, currentTenant(), thresholdId);
+        watch,
+        warning,
+        critical,
+        notes,
+        currentTenant(),
+        thresholdId);
     // 改完直接从 thresholds() 重读（它会标 inUse），不重复拼一遍映射。
     return thresholds().stream()
         .filter(t -> t.id().equals(thresholdId))
@@ -523,7 +524,8 @@ public class InTransitTrackingService {
       var remaining = days(r.get("remaining_days_raw", BigDecimal.class));
       var t =
           effectiveThreshold(
-              r.get("transport_mode", String.class), r.get("destination_country_code", String.class));
+              r.get("transport_mode", String.class),
+              r.get("destination_country_code", String.class));
       var level = evaluateLevel(remaining, t);
       // delayedOnly 在**分级之后**过滤，保证筛选口径与看板显示的档位是同一个。
       if (q.delayLevel() != null && !q.delayLevel().isEmpty()) {
@@ -548,7 +550,9 @@ public class InTransitTrackingService {
         case CRITICAL -> stats[2]++;
         default -> {}
       }
-      if (remaining != null && remaining.signum() < 0 && r.get("status", String.class).equals("TRACKING")) {
+      if (remaining != null
+          && remaining.signum() < 0
+          && r.get("status", String.class).equals("TRACKING")) {
         stats[3]++;
       }
       if (r.get("customs_status", String.class).equals("HELD")
@@ -568,8 +572,12 @@ public class InTransitTrackingService {
     for (int i = from; i < to; i++) {
       var item = graded.get(i);
       pageRows.add(
-          rowOf((Record) item[0], (BigDecimal) item[1], (DelayLevel) item[2],
-              (Map<String, Long>) item[4], legs));
+          rowOf(
+              (Record) item[0],
+              (BigDecimal) item[1],
+              (DelayLevel) item[2],
+              (Map<String, Long>) item[4],
+              legs));
     }
 
     var stages =
@@ -580,7 +588,9 @@ public class InTransitTrackingService {
     return new TransitTrackPage(
         pageRows,
         graded.size(),
-        graded.stream().filter(o -> ((Record) o[0]).get("status", String.class).equals("TRACKING")).count(),
+        graded.stream()
+            .filter(o -> ((Record) o[0]).get("status", String.class).equals("TRACKING"))
+            .count(),
         stats[0],
         stats[1],
         stats[2],
@@ -634,10 +644,7 @@ public class InTransitTrackingService {
       Map<String, BigDecimal> legs) {
     var shipmentId = r.get("shipment_id", UUID.class);
     var key = shipmentId.toString();
-    var legCount =
-        legs.containsKey(key + "#count")
-            ? legs.get(key + "#count").longValue()
-            : 0L;
+    var legCount = legs.containsKey(key + "#count") ? legs.get(key + "#count").longValue() : 0L;
     return new TrackingRow(
         r.get("id", UUID.class),
         shipmentId,
@@ -683,12 +690,16 @@ public class InTransitTrackingService {
                 + " order by w.code")) {
       out.add(
           new TrackingWarehouseOption(
-              r.get(0, UUID.class), r.get(1, String.class), r.get(2, String.class), r.get(3, Long.class)));
+              r.get(0, UUID.class),
+              r.get(1, String.class),
+              r.get(2, String.class),
+              r.get(3, Long.class)));
     }
     return out;
   }
 
-  private static void filterIn(StringBuilder where, List<Object> args, String column, List<String> values) {
+  private static void filterIn(
+      StringBuilder where, List<Object> args, String column, List<String> values) {
     if (values == null || values.isEmpty()) {
       return;
     }
@@ -735,15 +746,15 @@ public class InTransitTrackingService {
   }
 
   private static TrackingQuery emptyQuery() {
-    return new TrackingQuery(null, null, null, null, null, null, null, null, null, null, null, 0, 50);
+    return new TrackingQuery(
+        null, null, null, null, null, null, null, null, null, null, null, 0, 50);
   }
 
   /**
    * 剩余窗口天数：保留两位、遇截断夹紧，避免 long 区间溢出成科学计数。
    *
    * <p>入参 {@code rawDays} 是 SQL 里 {@code extract(epoch from (eta - now()))/86400.0}
-   * 已经算好的**天**，这里只做舍入与夹紧，**不能再除一次 86400**：
-   * 秒→天的换算只有 SQL 里那一处，真在这里再除一遍会把「还剩 40 天」变成 0.0046 天，
+   * 已经算好的**天**，这里只做舍入与夹紧，**不能再除一次 86400**： 秒→天的换算只有 SQL 里那一处，真在这里再除一遍会把「还剩 40 天」变成 0.0046 天，
    * 于是每一条在途记录都会被判成「已经进预警区」—— 提前量口径整个失去意义。
    */
   private static BigDecimal days(BigDecimal rawDays) {
@@ -787,13 +798,7 @@ public class InTransitTrackingService {
             r.get("transport_mode", String.class), r.get("destination_country_code", String.class));
     var level = evaluateLevel(remaining, threshold);
 
-    var row =
-        rowOf(
-            r,
-            remaining,
-            level,
-            alertCountByTracking(),
-            legQuantityByTracking());
+    var row = rowOf(r, remaining, level, alertCountByTracking(), legQuantityByTracking());
     var status = TrackingStatus.parse(r.get("status", String.class));
     var stage = TrackingStage.parse(r.get("tracking_stage", String.class));
 
@@ -808,7 +813,8 @@ public class InTransitTrackingService {
   }
 
   private List<TrackingEventRow> eventRows(UUID trackingId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select * from first_mile_tracking_event where tracking_id=?"
                 + " order by occurred_at desc, id",
             trackingId)
@@ -840,9 +846,11 @@ public class InTransitTrackingService {
     var shipmentId =
         sql.fetchOne(
                 "select shipment_id from first_mile_tracking where tenant_id=? and id=?",
-                currentTenant(), trackingId)
+                currentTenant(),
+                trackingId)
             .get("shipment_id", UUID.class);
-    return sql.fetch(
+    return sql
+        .fetch(
             "select g.line_id,l.line_no,sk.code as sku_code,sk.name as sku_name,"
                 + " t.id as leg_id,t.status as leg_status,g.quantity as shipped_quantity,"
                 + " coalesce(t.settled_quantity,0) as settled_quantity,"
@@ -894,9 +902,7 @@ public class InTransitTrackingService {
             r.shipmentId());
     if (exists != null) {
       throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "该发运单已建立跟踪记录（重复建跟踪会让「这批货在哪」出现两个答案）："
-              + exists.get("id", UUID.class));
+          HttpStatus.CONFLICT, "该发运单已建立跟踪记录（重复建跟踪会让「这批货在哪」出现两个答案）：" + exists.get("id", UUID.class));
     }
     // 预读发运单只是为了给出可读报错；DB 触发器 guard_first_mile_tracking_shipment 会再钉一次。
     var head =
@@ -910,7 +916,8 @@ public class InTransitTrackingService {
     }
     if (!head.get("status", String.class).equals("DISPATCHED")) {
       throw new IllegalArgumentException(
-          "发运单当前状态是「" + head.get("status", String.class)
+          "发运单当前状态是「"
+              + head.get("status", String.class)
               + "」，货还没发出。此时建立跟踪记录会让未发运的单混进在途看板 —— "
               + "只有已发出的发运单才谈得上「在途」。");
     }
@@ -926,11 +933,13 @@ public class InTransitTrackingService {
     if (r.currentLocation() != null
         && !r.currentLocation().isBlank()
         && r.locationOccurredAt() == null) {
-      throw new IllegalArgumentException("报了位置就必须给出位置发生时间：currentLocation 有值时 locationOccurredAt 必填");
+      throw new IllegalArgumentException(
+          "报了位置就必须给出位置发生时间：currentLocation 有值时 locationOccurredAt 必填");
     }
     if ((customs == CustomsStatus.HELD || customs == CustomsStatus.REJECTED)
         && (r.customsHoldReason() == null || r.customsHoldReason().isBlank())) {
-      throw new IllegalArgumentException("清关状态「" + customs.label() + "」必须给出原因：没有原因的扣关事后没人知道该找谁、该补什么材料");
+      throw new IllegalArgumentException(
+          "清关状态「" + customs.label() + "」必须给出原因：没有原因的扣关事后没人知道该找谁、该补什么材料");
     }
 
     var id = UUID.randomUUID();
@@ -980,10 +989,8 @@ public class InTransitTrackingService {
   /**
    * 登记一个节点事件，并同步更新跟踪头。
    *
-   * <p>这是「货代/船司/清关状态同步」与「人工更新」的**同一个入口**：
-   * 外部连接器未交付（10.4.2.1），所以两种来源形状一样就走一条路径，
-   * 用 {@code sourceSystem} 区分来源而不是造两张雷同的表。
-   * 将来连接器接上后调用同一入口即可，本表结构不用再改。
+   * <p>这是「货代/船司/清关状态同步」与「人工更新」的**同一个入口**： 外部连接器未交付（10.4.2.1），所以两种来源形状一样就走一条路径， 用 {@code
+   * sourceSystem} 区分来源而不是造两张雷同的表。 将来连接器接上后调用同一入口即可，本表结构不用再改。
    */
   @Transactional
   public TrackingRow recordEvent(UUID trackingId, UUID actorId, TrackingEventRequest req) {
@@ -992,16 +999,14 @@ public class InTransitTrackingService {
     var status = TrackingStatus.parse(head.get("status", String.class));
     if (status != TrackingStatus.TRACKING) {
       throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "跟踪记录状态是「" + status.label() + "」，不再接受节点更新（货都闭环或取消了）");
+          HttpStatus.CONFLICT, "跟踪记录状态是「" + status.label() + "」，不再接受节点更新（货都闭环或取消了）");
     }
     var kind =
         r.kind() == null || r.kind().isBlank()
             ? throwBadKind()
             : TrackingEventKind.valueOf(r.kind().trim().toUpperCase());
     if (kind == TrackingEventKind.CREATED || kind == TrackingEventKind.RECEIPT) {
-      throw new IllegalArgumentException(
-          "事件类型「" + kind + "」不能经本入口登记：建跟踪走建单入口，收货确认走 /receipt 端点");
+      throw new IllegalArgumentException("事件类型「" + kind + "」不能经本入口登记：建跟踪走建单入口，收货确认走 /receipt 端点");
     }
     var source =
         r.sourceSystem() == null || r.sourceSystem().isBlank()
@@ -1009,7 +1014,9 @@ public class InTransitTrackingService {
             : TrackingSource.parse(r.sourceSystem());
     if (source.external() && (r.referenceId() == null || r.referenceId().isBlank())) {
       throw new IllegalArgumentException(
-          "来源「" + source.label() + "」是外部来源，必须给出该来源系统里的单号 referenceId："
+          "来源「"
+              + source.label()
+              + "」是外部来源，必须给出该来源系统里的单号 referenceId："
               + "写不出出处的外部事实不入库（连接器未交付，当前由人工代录，来源必须留痕）");
     }
     if (source == TrackingSource.MANUAL && actorId == null) {
@@ -1050,7 +1057,10 @@ public class InTransitTrackingService {
         }
         if (currentEta != null && r.etaAfter().isBefore(currentEta)) {
           throw new IllegalArgumentException(
-              "新的预计到港 " + r.etaAfter() + " 早于当前 ETA " + currentEta
+              "新的预计到港 "
+                  + r.etaAfter()
+                  + " 早于当前 ETA "
+                  + currentEta
                   + "：把 ETA 往前调会让「已经晚了几天」算成负数，而这正是本模块最需要答对的数");
         }
         etaBefore = currentEta;
@@ -1065,8 +1075,7 @@ public class InTransitTrackingService {
         if ((customs == CustomsStatus.HELD || customs == CustomsStatus.REJECTED)
             && (r.customsHoldReason() == null || r.customsHoldReason().isBlank())) {
           throw new IllegalArgumentException(
-              "清关状态「" + customs.label() + "」必须给出原因 customsHoldReason："
-                  + "没有原因的扣关事后没人知道该找谁、该补什么材料");
+              "清关状态「" + customs.label() + "」必须给出原因 customsHoldReason：" + "没有原因的扣关事后没人知道该找谁、该补什么材料");
         }
       }
       case STAGE -> {
@@ -1076,8 +1085,7 @@ public class InTransitTrackingService {
         var to = TrackingStage.parse(r.toStage());
         if (!allowedNextStage(stage).contains(to)) {
           throw new IllegalArgumentException(
-              "阶段不允许从「" + stage.label() + "」到「" + to.label() + "」："
-                  + "在途是推进过程，倒退会让「这批货到过哪」永远答不出来");
+              "阶段不允许从「" + stage.label() + "」到「" + to.label() + "」：" + "在途是推进过程，倒退会让「这批货到过哪」永远答不出来");
         }
         fromStage = stage.name();
         toStage = to.name();
@@ -1092,12 +1100,20 @@ public class InTransitTrackingService {
     }
 
     // 更新跟踪头（位置 / ETA / 清关 / 阶段一起落，保持头与事件流自洽）。
-    var newLocation = locationText.isBlank() ? head.get("current_location", String.class) : locationText;
+    var newLocation =
+        locationText.isBlank() ? head.get("current_location", String.class) : locationText;
     var newLocationAt =
-        locationText.isBlank() ? head.get("location_occurred_at", OffsetDateTime.class) : locationAt;
-    var newCustomsAt = kind == TrackingEventKind.CUSTOMS ? occurredAt : head.get("customs_status_at", OffsetDateTime.class);
+        locationText.isBlank()
+            ? head.get("location_occurred_at", OffsetDateTime.class)
+            : locationAt;
+    var newCustomsAt =
+        kind == TrackingEventKind.CUSTOMS
+            ? occurredAt
+            : head.get("customs_status_at", OffsetDateTime.class);
     var newHoldReason =
-        kind == TrackingEventKind.CUSTOMS ? nz(r.customsHoldReason()) : head.get("customs_hold_reason", String.class);
+        kind == TrackingEventKind.CUSTOMS
+            ? nz(r.customsHoldReason())
+            : head.get("customs_hold_reason", String.class);
 
     sql.execute(
         "update first_mile_tracking set"
@@ -1130,7 +1146,9 @@ public class InTransitTrackingService {
         toStage,
         fromStage,
         locationText,
-        kind == TrackingEventKind.ETA_REVISED ? nz(r.reason()) + (r.detail() == null ? "" : " · " + r.detail()) : nz(r.detail()),
+        kind == TrackingEventKind.ETA_REVISED
+            ? nz(r.reason()) + (r.detail() == null ? "" : " · " + r.detail())
+            : nz(r.detail()),
         etaBefore == null ? null : etaBefore.toInstant(),
         etaAfter == null ? null : etaAfter.toInstant(),
         source.name(),
@@ -1152,8 +1170,7 @@ public class InTransitTrackingService {
   /**
    * 目的仓收货确认：**只记确认事实，不写任何库存**。
    *
-   * <p>入库落账归 7.5.1.2 的 arrive。本方法把阶段推进到 RECEIVED、记确认人与回单号、
-   * 写下事件行并把跟踪关掉；短少/破损等差异如实写进 notes，不自动抹平。
+   * <p>入库落账归 7.5.1.2 的 arrive。本方法把阶段推进到 RECEIVED、记确认人与回单号、 写下事件行并把跟踪关掉；短少/破损等差异如实写进 notes，不自动抹平。
    */
   @Transactional
   public TrackingRow confirmReceipt(UUID trackingId, UUID actorId, TrackingReceiptRequest req) {
@@ -1165,8 +1182,7 @@ public class InTransitTrackingService {
     var stage = TrackingStage.parse(head.get("tracking_stage", String.class));
     if (!allowedNextStage(stage).contains(TrackingStage.RECEIVED)) {
       throw new IllegalArgumentException(
-          "当前阶段「" + stage.label() + "」不能直接进「已收货确认」："
-              + "清关未放行就确认收货会让「货被扣在关口却已入库」同时成立");
+          "当前阶段「" + stage.label() + "」不能直接进「已收货确认」：" + "清关未放行就确认收货会让「货被扣在关口却已入库」同时成立");
     }
     var receivedAt = r.receivedAt() == null ? OffsetDateTime.now() : r.receivedAt();
 
@@ -1185,7 +1201,9 @@ public class InTransitTrackingService {
         TrackingStage.RECEIVED.name(),
         stage.name(),
         "目的仓收货确认：回单 "
-            + (r.receiptReference() == null || r.receiptReference().isBlank() ? "（未填）" : r.receiptReference())
+            + (r.receiptReference() == null || r.receiptReference().isBlank()
+                ? "（未填）"
+                : r.receiptReference())
             + (r.notes() == null || r.notes().isBlank() ? "" : " · " + r.notes())
             + "。入库落账归 7.5.1.2 的 arrive，本模块只记确认事实。",
         TrackingSource.MANUAL.name(),
@@ -1218,7 +1236,8 @@ public class InTransitTrackingService {
     var head = lockTracking(trackingId);
     var status = TrackingStatus.parse(head.get("status", String.class));
     if (status != TrackingStatus.TRACKING) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "跟踪记录当前状态是「" + status.label() + "」，已闭环或已取消");
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "跟踪记录当前状态是「" + status.label() + "」，已闭环或已取消");
     }
     if (r.reason() == null || r.reason().isBlank()) {
       throw new IllegalArgumentException("关闭跟踪必须给出原因：没有原因的闭环事后无法解释这批货为什么停止跟踪");
@@ -1251,7 +1270,8 @@ public class InTransitTrackingService {
   // ================================================================ 预警
 
   /** 预警清单 + 分档汇总。 */
-  public DelayAlertPage alerts(List<String> level, List<String> status, String keyword, int page, int size) {
+  public DelayAlertPage alerts(
+      List<String> level, List<String> status, String keyword, int page, int size) {
     var where = new StringBuilder(" where 1=1 ");
     var args = new ArrayList<Object>();
     filterIn(where, args, "a.level", level);
@@ -1293,14 +1313,7 @@ public class InTransitTrackingService {
       rows.add(alertOf(all.get(i)));
     }
     return new DelayAlertPage(
-        rows,
-        all.size(),
-        open,
-        acked,
-        watch,
-        warning,
-        critical,
-        options(DelayLevel.values()));
+        rows, all.size(), open, acked, watch, warning, critical, options(DelayLevel.values()));
   }
 
   private DelayAlertRow alertOf(Record r) {
@@ -1324,11 +1337,11 @@ public class InTransitTrackingService {
   /**
    * 该跟踪下的预警行。
    *
-   * <p>{@code shipment_code} 一并 join 出来（而不是填空串）：告警列表里「是哪张发运单」
-   * 是人要看的第一列，填空串等于让界面上那一格永远空白。
+   * <p>{@code shipment_code} 一并 join 出来（而不是填空串）：告警列表里「是哪张发运单」 是人要看的第一列，填空串等于让界面上那一格永远空白。
    */
   private List<DelayAlertRow> alertRowsForTracking(UUID trackingId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select a.*,s.shipment_code from first_mile_delay_alert a"
                 + " join first_mile_tracking t on t.tenant_id=a.tenant_id and t.id=a.tracking_id"
                 + " join first_mile_shipment s on s.tenant_id=t.tenant_id and s.id=t.shipment_id"
@@ -1342,10 +1355,8 @@ public class InTransitTrackingService {
   /**
    * 评估并落库预警 —— 蓝图的「延误预警 + 到港提醒」。
    *
-   * <p>幂等：同一跟踪同一档位已有未结预警时只**刷新**（remaining_days 与 message），
-   * 不重复插行 —— 否则每评估一次看板上同一个延误会堆出十几条一模一样的告警。
-   * 档位降级（CRITICAL → WATCH）时把已结的旧档预警关掉，
-   * 保证「未结预警」永远等于「当前真实档位」。
+   * <p>幂等：同一跟踪同一档位已有未结预警时只**刷新**（remaining_days 与 message）， 不重复插行 —— 否则每评估一次看板上同一个延误会堆出十几条一模一样的告警。
+   * 档位降级（CRITICAL → WATCH）时把已结的旧档预警关掉， 保证「未结预警」永远等于「当前真实档位」。
    */
   @Transactional
   public int raiseAlerts(UUID trackingId, UUID actorId) {
@@ -1373,7 +1384,8 @@ public class InTransitTrackingService {
     }
     var threshold =
         effectiveThreshold(
-            head.get("transport_mode", String.class), head.get("destination_country_code", String.class));
+            head.get("transport_mode", String.class),
+            head.get("destination_country_code", String.class));
     var level = evaluateLevel(remaining, threshold);
     var shipmentCode =
         sql.fetchOne(
@@ -1398,16 +1410,16 @@ public class InTransitTrackingService {
         switch (level) {
           case CRITICAL ->
               remaining.signum() < 0
-                  ? "已过预计到港 " + remaining.abs().stripTrailingZeros().toPlainString()
-                      + " 天仍未到货（发运单 " + shipmentCode + "）"
-                  : "剩余窗口仅 " + remaining.toPlainString() + " 天，已进入严重延误区（发运单 "
-                      + shipmentCode + "）";
+                  ? "已过预计到港 "
+                      + remaining.abs().stripTrailingZeros().toPlainString()
+                      + " 天仍未到货（发运单 "
+                      + shipmentCode
+                      + "）"
+                  : "剩余窗口仅 " + remaining.toPlainString() + " 天，已进入严重延误区（发运单 " + shipmentCode + "）";
           case WARNING ->
-              "距预计到港只剩 " + remaining.toPlainString()
-                  + " 天（发运单 " + shipmentCode + "），已进入延误预警区";
+              "距预计到港只剩 " + remaining.toPlainString() + " 天（发运单 " + shipmentCode + "），已进入延误预警区";
           default ->
-              "距预计到港 " + remaining.toPlainString()
-                  + " 天（发运单 " + shipmentCode + "），进入临近到港提示区";
+              "距预计到港 " + remaining.toPlainString() + " 天（发运单 " + shipmentCode + "），进入临近到港提示区";
         };
 
     var existing =
@@ -1492,7 +1504,10 @@ public class InTransitTrackingService {
   @Transactional
   public int evaluateAll() {
     var ids =
-        sql.fetch("select id from first_mile_tracking where tenant_id=? and status='TRACKING'", currentTenant())
+        sql
+            .fetch(
+                "select id from first_mile_tracking where tenant_id=? and status='TRACKING'",
+                currentTenant())
             .stream()
             .map(r -> r.get("id", UUID.class))
             .toList();
@@ -1509,8 +1524,7 @@ public class InTransitTrackingService {
     var row = lockAlert(alertId);
     var status = row.get("status", String.class);
     if (!status.equals("OPEN")) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "预警当前状态是「" + status + "」，只有未处理的才能确认");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "预警当前状态是「" + status + "」，只有未处理的才能确认");
     }
     var note = req == null ? "" : nz(req.note());
     sql.execute(
@@ -1547,9 +1561,8 @@ public class InTransitTrackingService {
   /**
    * 重读预警行。
    *
-   * <p>必须把 {@code shipment_code} 一并 join 出来：{@link #alertOf} 会读这一列，
-   * 而 {@code select *} 不带它 —— 缺列时 jOOQ 抛的是 {@code IllegalArgumentException}
-   * （读一个 ResultSet 里不存在的字段名），被统一错误处理翻译成 400，
+   * <p>必须把 {@code shipment_code} 一并 join 出来：{@link #alertOf} 会读这一列， 而 {@code select *} 不带它 —— 缺列时
+   * jOOQ 抛的是 {@code IllegalArgumentException} （读一个 ResultSet 里不存在的字段名），被统一错误处理翻译成 400，
    * 看上去像「字段格式不正确」，实际是「回读时少查了一列」。这种 400 极难从现象反推。
    */
   private DelayAlertRow reloadAlert(UUID alertId) {
@@ -1596,9 +1609,8 @@ public class InTransitTrackingService {
   /**
    * 当前 RLS 租户：来自已认证成员关系，由 {@link AccessService#run} 在事务内设置。
    *
-   * <p>读的是 {@code nullif(current_setting('app.current_tenant',true),'')::uuid} ——
-   * 与 10.4.1.1 / 7.5.1.2 同一句：未设置时得到 {@code null} 而不是「解析空串抛异常」，
-   * RLS 随后把查询结果收成空集（租户没绑上时什么都查不到，而不是查到别人的）。
+   * <p>读的是 {@code nullif(current_setting('app.current_tenant',true),'')::uuid} —— 与 10.4.1.1 /
+   * 7.5.1.2 同一句：未设置时得到 {@code null} 而不是「解析空串抛异常」， RLS 随后把查询结果收成空集（租户没绑上时什么都查不到，而不是查到别人的）。
    */
   private UUID currentTenant() {
     return sql.fetchOne("select nullif(current_setting('app.current_tenant',true),'')::uuid")

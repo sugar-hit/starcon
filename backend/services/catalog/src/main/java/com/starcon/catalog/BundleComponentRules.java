@@ -4,18 +4,17 @@ import java.math.BigDecimal;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;/**
+import java.util.UUID;
+
+/**
  * 3.5.1.2 组件维护的纯规则层。
  *
- * <p>不碰数据库、时钟与随机数：给定同样的输入永远返回同样的结论，所以「怎么算成环」
- * 这件事可以被单元测试逐条钉死，而不必起一个 PG16 容器。
+ * <p>不碰数据库、时钟与随机数：给定同样的输入永远返回同样的结论，所以「怎么算成环」 这件事可以被单元测试逐条钉死，而不必起一个 PG16 容器。
  *
- * <p>本类最重要的产出是<b>循环引用的判定口径</b>（R6..R9，V24 文件头第三节有完整论证）。
- * 关键点是<b>成环不是「套装直接引用自己」</b>，而是要沿包含链走一圈：
+ * <p>本类最重要的产出是<b>循环引用的判定口径</b>（R6..R9，V24 文件头第三节有完整论证）。 关键点是<b>成环不是「套装直接引用自己」</b>，而是要沿包含链走一圈：
  *
  * <pre>
  *   套装 A 含 SKU S，而 S 是套装 B 的可售 SKU   ==   边 A → B
@@ -23,12 +22,11 @@ import java.util.UUID;/**
  *   套装 C 含 SKU S'，而 S' 是套装 A 的可售 SKU ==   边 C → A   ← 成环
  * </pre>
  *
- * <p>所以「A 含 B」永远是合法的（B 自己没被 A 包含过），只有<b>闭合成环</b>才拒绝。
- * 这个区别决定了 {@link #reaches} 是唯一的判定入口，而不是「直接查有没有反向边」。
+ * <p>所以「A 含 B」永远是合法的（B 自己没被 A 包含过），只有<b>闭合成环</b>才拒绝。 这个区别决定了 {@link #reaches}
+ * 是唯一的判定入口，而不是「直接查有没有反向边」。
  *
- * <p>DB 侧（{@code find_bundle_cycle_path} + 两个触发器）用同一套口径做纵深防线，
- * 两边必须给出同一个答案：服务层报「BND-A → BND-B → BND-C → BND-A」，
- * 触发器也必须报同一条环。
+ * <p>DB 侧（{@code find_bundle_cycle_path} + 两个触发器）用同一套口径做纵深防线， 两边必须给出同一个答案：服务层报「BND-A → BND-B →
+ * BND-C → BND-A」， 触发器也必须报同一条环。
  */
 public final class BundleComponentRules {
   private BundleComponentRules() {}
@@ -36,8 +34,7 @@ public final class BundleComponentRules {
   /**
    * 遍历的深度硬上限。
    *
-   * <p>理论上「是否成环」不需要它（路径去重已经保证终止），但一个 32 层深的套装链在业务上
-   * 没有意义，停在这里比继续走更便宜。它只影响「极深的环报出多长的路径」，
+   * <p>理论上「是否成环」不需要它（路径去重已经保证终止），但一个 32 层深的套装链在业务上 没有意义，停在这里比继续走更便宜。它只影响「极深的环报出多长的路径」，
    * <b>不影响是否成环的结论</b> —— 目标一旦被找到就立刻返回。
    */
   public static final int MAX_WALK_DEPTH = 32;
@@ -67,16 +64,13 @@ public final class BundleComponentRules {
   }
 
   public static String linkNoteProblem(String note) {
-    return note.length() > MAX_LINK_NOTE_LENGTH
-        ? "指向备注最多 " + MAX_LINK_NOTE_LENGTH + " 个字符"
-        : null;
+    return note.length() > MAX_LINK_NOTE_LENGTH ? "指向备注最多 " + MAX_LINK_NOTE_LENGTH + " 个字符" : null;
   }
 
   /**
    * 组件数量问题（与 3.5.1.1 的 {@code BundleRules.quantityProblem} 逐字同一口径）。
    *
-   * <p>转发而不是复制：同一个「数量必须大于 0」的规则写成两份，迟早会有一份被改松，
-   * 于是出现「3.5.1.1 拦得住、3.5.1.2 拦不住」这种只在跨模块操作里才暴露的漏洞。
+   * <p>转发而不是复制：同一个「数量必须大于 0」的规则写成两份，迟早会有一份被改松， 于是出现「3.5.1.1 拦得住、3.5.1.2 拦不住」这种只在跨模块操作里才暴露的漏洞。
    */
   public static String quantityProblem(BigDecimal quantity) {
     return BundleRules.quantityProblem(quantity);
@@ -85,8 +79,7 @@ public final class BundleComponentRules {
   /**
    * 单个版本的组件上限（与 {@code BundleRules.MAX_COMPONENTS_PER_VERSION} 同一口径）。
    *
-   * <p>逐行增删时也要查：整体替换会查清单规模，但「已经 50 个了再加一个」这条路
-   * 只在 3.5.1.2 的单行新增上出现。
+   * <p>逐行增删时也要查：整体替换会查清单规模，但「已经 50 个了再加一个」这条路 只在 3.5.1.2 的单行新增上出现。
    */
   public static String componentCountProblem(int count) {
     return BundleRules.componentCountProblem(count);
@@ -97,11 +90,10 @@ public final class BundleComponentRules {
   /**
    * 从 {@code from} 出发沿包含边能否走到 {@code to}（规则 R6 的判定核心）。
    *
-   * <p>{@code edges} 是「套装 → 它直接包含的套装」的邻接表，一条边的来源是
-   * 「{@code from} 的某个版本里有一个代表 {@code to} 的可售 SKU 作为组件」。
+   * <p>{@code edges} 是「套装 → 它直接包含的套装」的邻接表，一条边的来源是 「{@code from} 的某个版本里有一个代表 {@code to} 的可售 SKU
+   * 作为组件」。
    *
-   * <p>用广度优先而不是递归：套装数量可达几百，递归在 Java 里会顶爆调用栈，
-   * 而 BFS 顺带就是「最短环」—— 报错里给运营的那条环越短越好读。
+   * <p>用广度优先而不是递归：套装数量可达几百，递归在 Java 里会顶爆调用栈， 而 BFS 顺带就是「最短环」—— 报错里给运营的那条环越短越好读。
    *
    * <p>{@code from == to} 直接判可达（规则 R8：自引用是长度为 1 的环）。
    */
@@ -112,8 +104,7 @@ public final class BundleComponentRules {
   /**
    * 从 {@code from} 到 {@code to} 的一条最短包含路径；不可达时返回 null。
    *
-   * <p>路径首元素是 {@code from}、末元素是 {@code to}。调用方把首尾再接起来
-   * 就能得到一条闭合的环（{@code A → B → C → A}）。
+   * <p>路径首元素是 {@code from}、末元素是 {@code to}。调用方把首尾再接起来 就能得到一条闭合的环（{@code A → B → C → A}）。
    */
   public static List<UUID> cyclePath(Map<UUID, List<UUID>> edges, UUID from, UUID to) {
     if (from == null || to == null) return null;
@@ -165,7 +156,8 @@ public final class BundleComponentRules {
   }
 
   /** 指向变更成环的拒绝理由（换一种说法：环是「改指向」造出来的，不是「加组件」）。 */
-  public static String relinkProblem(String ring, String skuCode, String holderCode, String targetCode) {
+  public static String relinkProblem(
+      String ring, String skuCode, String holderCode, String targetCode) {
     return "这个指向会形成循环引用（"
         + ring
         + "）：SKU「"
@@ -184,8 +176,8 @@ public final class BundleComponentRules {
   /**
    * 已发布版本的组件一律不可改（蓝图原话：「已发布版本的组件不可改，只能新建版本」）。
    *
-   * <p>V23 的 {@code guard_bundle_component_published} 已经在 DB 层钉死这条，
-   * 这里给的是「为什么」—— 让人看见理由比让人撞一个 409 强。
+   * <p>V23 的 {@code guard_bundle_component_published} 已经在 DB 层钉死这条， 这里给的是「为什么」—— 让人看见理由比让人撞一个 409
+   * 强。
    */
   public static String publishedComponentProblem(String versionNo) {
     return "版本「"

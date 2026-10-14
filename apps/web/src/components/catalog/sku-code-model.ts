@@ -332,7 +332,10 @@ export function parseImportText(text: string, resolveSkuId: (code: string) => st
     const line = raw.trim();
     if (line === '' || line.startsWith('#')) return;
     const lineNo = index + 1;
-    const parts = line.split(/[\t,;]+|\s{2,}/).map((p) => p.trim()).filter((p) => p !== '');
+    const parts = line
+      .split(/[\t,;]+|\s{2,}/)
+      .map((p) => p.trim())
+      .filter((p) => p !== '');
     if (parts.length < 3) {
       problems.push({ line: lineNo, text: line, reason: '需要「SKU 编码 / scheme / 条码值」三列' });
       return;
@@ -354,7 +357,13 @@ export function parseImportText(text: string, resolveSkuId: (code: string) => st
       problems.push({ line: lineNo, text: line, reason: problem });
       return;
     }
-    rows.push({ skuId, scheme: normalized, value, isPrimary: /^(1|true|是)$/i.test(primary ?? ''), occurredAt: null });
+    rows.push({
+      skuId,
+      scheme: normalized,
+      value,
+      isPrimary: /^(1|true|是)$/i.test(primary ?? ''),
+      occurredAt: null,
+    });
   });
   return { rows, problems };
 }

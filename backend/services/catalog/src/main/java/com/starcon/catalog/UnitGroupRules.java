@@ -8,23 +8,19 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 3.3.3.1 计量单位（字典视角）的纯规则：单位组编码与名称、量纲词表、组内换算比例校验，
- * 以及蓝图点名的**换算查询拒绝原因码**。
+ * 3.3.3.1 计量单位（字典视角）的纯规则：单位组编码与名称、量纲词表、组内换算比例校验， 以及蓝图点名的**换算查询拒绝原因码**。
  *
  * <p>与 {@link BrandRules} / {@link UnitRules} / {@link CategoryTreeRules} 同一条纪律：
- * **能在保存前判定的，就不要留到换算时才炸**。量纲不匹配（件 → 千克）如果等到 07 库存
- * 记一笔账才发现，那笔账已经按错比例记完了。
+ * **能在保存前判定的，就不要留到换算时才炸**。量纲不匹配（件 → 千克）如果等到 07 库存 记一笔账才发现，那笔账已经按错比例记完了。
  *
  * <p>拒绝原因码（{@link #DENY_CODES}）是本模块的对外契约之一：换算查询不只回答「换不换得动」，
- * 还要说清**为什么换不动**——界面据此提示「这两个单位不在同一个单位组」还是「量纲不同」，
- * 下游 06 采购 / 07 库存 / 08 拣货也要按码走不同的处理（换一个同组单位 vs 补一条换算版本）。
- * 只返回一句中文的话，调用方只能去匹配字符串。
+ * 还要说清**为什么换不动**——界面据此提示「这两个单位不在同一个单位组」还是「量纲不同」， 下游 06 采购 / 07 库存 / 08 拣货也要按码走不同的处理（换一个同组单位 vs
+ * 补一条换算版本）。 只返回一句中文的话，调用方只能去匹配字符串。
  *
  * <p>本类不碰数据库，可以在离线单测里穷举，与前端 {@code unit-group-model.ts} 同口径。
  *
  * <p>类名不叫 {@code UnitGroup}：那是被静态导入的 DTO record（{@link CatalogModels}），
- * 两者在同一批文件里会直接撞名，构造器解析到纯规则类上，编译期才炸。
- * 与 {@link UnitRules} 同一个理由。
+ * 两者在同一批文件里会直接撞名，构造器解析到纯规则类上，编译期才炸。 与 {@link UnitRules} 同一个理由。
  */
 public final class UnitGroupRules {
   private UnitGroupRules() {}
@@ -77,8 +73,7 @@ public final class UnitGroupRules {
   /**
    * 单位组编码字符集：中文、拉丁字母、数字、下划线、短横线，1~32 位。
    *
-   * <p>与 {@link UnitRules#codeProblem} 同一口径（允许中文）：运营就是这么叫的，
-   * 「重量组」「长度组」是中文业务词。套 ASCII 词表会逼着所有人用拼音。
+   * <p>与 {@link UnitRules#codeProblem} 同一口径（允许中文）：运营就是这么叫的， 「重量组」「长度组」是中文业务词。套 ASCII 词表会逼着所有人用拼音。
    */
   private static final String CODE_PATTERN = "[\\p{IsHan}A-Za-z0-9][\\p{IsHan}A-Za-z0-9_-]{0,31}";
 
@@ -103,8 +98,7 @@ public final class UnitGroupRules {
     String code = normalizeCode(value);
     if (code.isEmpty()) return "单位组编码不能为空";
     if (code.length() > MAX_CODE_LENGTH) return "单位组编码最多 " + MAX_CODE_LENGTH + " 个字符";
-    if (!code.matches(CODE_PATTERN))
-      return "单位组编码只能使用中文、英文字母、数字、下划线或短横线，长度 1~32 位";
+    if (!code.matches(CODE_PATTERN)) return "单位组编码只能使用中文、英文字母、数字、下划线或短横线，长度 1~32 位";
     return null;
   }
 
@@ -127,16 +121,14 @@ public final class UnitGroupRules {
   /**
    * 组内换算比例的校验。返回 null 表示可用。
    *
-   * <p>与 {@link UnitRules#ratioProblem} 同一套约束（>0、6 位小数、整数部分 ≤13 位），
-   * 两条路径的比例列都是 {@code numeric(19,6)}，口径必须一致，否则同一份数据
-   * 在 SKU 侧能存、到组侧被判非法。
+   * <p>与 {@link UnitRules#ratioProblem} 同一套约束（>0、6 位小数、整数部分 ≤13 位）， 两条路径的比例列都是 {@code
+   * numeric(19,6)}，口径必须一致，否则同一份数据 在 SKU 侧能存、到组侧被判非法。
    */
   public static String ratioProblem(BigDecimal quantityPerBase) {
     if (quantityPerBase == null) return "换算比例不能为空";
     if (quantityPerBase.signum() <= 0) return "换算比例必须大于 0";
     if (quantityPerBase.scale() > 6) return "换算比例最多 6 位小数";
-    if (quantityPerBase.precision() - quantityPerBase.scale() > 13)
-      return "换算比例的整数部分最多 13 位";
+    if (quantityPerBase.precision() - quantityPerBase.scale() > 13) return "换算比例的整数部分最多 13 位";
     return null;
   }
 
@@ -156,10 +148,8 @@ public final class UnitGroupRules {
   /**
    * 组内换算：把「from 单位」的数量换成「to 单位」的数量。
    *
-   * <p>算式是 {@code quantity × fromPerBase ÷ toPerBase}，其中两者都是
-   * 「1 个该单位等于多少个组基础单位」：1 千克 = 1000 克、1 吨 = 1000000 克时，
-   * 2 吨换成克 = 2 × 1000000 ÷ 1000 = 2000。先乘后除（而不是先求比值再乘）
-   * 是为了让 6 位小数的中间精度损失最少。
+   * <p>算式是 {@code quantity × fromPerBase ÷ toPerBase}，其中两者都是 「1 个该单位等于多少个组基础单位」：1 千克 = 1000 克、1 吨 =
+   * 1000000 克时， 2 吨换成克 = 2 × 1000000 ÷ 1000 = 2000。先乘后除（而不是先求比值再乘） 是为了让 6 位小数的中间精度损失最少。
    *
    * <p>用 HALF_UP 而不是截断：截断会让账面比实盘少一点点，而差额不会留在任何地方。
    */
@@ -178,8 +168,7 @@ public final class UnitGroupRules {
   }
 
   /**
-   * 某一天命中哪一版换算。查不到就是查不到——调用方据此报
-   * {@link #DENY_NO_EFFECTIVE_VERSION}，**不要**回退到"最近的一版"。
+   * 某一天命中哪一版换算。查不到就是查不到——调用方据此报 {@link #DENY_NO_EFFECTIVE_VERSION}，**不要**回退到"最近的一版"。
    *
    * <p>与 {@link UnitRules#effectiveOn} 同一语义，两条换算路径不允许出现不同答案。
    */
@@ -190,16 +179,23 @@ public final class UnitGroupRules {
   /**
    * 量纲是否允许放进同一个组。
    *
-   * <p>与 {@link UnitRules} 的量纲词表同源，所以两边对同一个量纲的判定必然一致：
-   * 单位能在 SKU 侧换算，就一定能进同一个组，反之亦然。
+   * <p>与 {@link UnitRules} 的量纲词表同源，所以两边对同一个量纲的判定必然一致： 单位能在 SKU 侧换算，就一定能进同一个组，反之亦然。
    */
   public static boolean sameDimension(String left, String right) {
     return left != null && right != null && left.equals(right);
   }
 
   /** 量纲不一致时的解释文案。调用方要显示它而不是只显示「不允许」。 */
-  public static String dimensionMismatchMessage(String fromCode, String fromDimension, String toCode, String toDimension) {
-    return "量纲不匹配：「" + fromCode + "」属于" + dimensionLabel(fromDimension) + "，「" + toCode
-        + "」属于" + dimensionLabel(toDimension) + "，不同量纲的单位之间不允许换算";
+  public static String dimensionMismatchMessage(
+      String fromCode, String fromDimension, String toCode, String toDimension) {
+    return "量纲不匹配：「"
+        + fromCode
+        + "」属于"
+        + dimensionLabel(fromDimension)
+        + "，「"
+        + toCode
+        + "」属于"
+        + dimensionLabel(toDimension)
+        + "，不同量纲的单位之间不允许换算";
   }
 }

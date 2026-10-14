@@ -192,8 +192,8 @@ export function AllocationPriorityWorkspace() {
       setPreview(result ?? null);
       setNotice(
         result?.runId
-          ? `已落库为分摊批次 ${result.runId}。批次 append-only：改不了也删不掉，`
-            + '保底生效记录逐店留痕，下游 7.8.2.1 / 7.8.2.2 读的就是它。'
+          ? `已落库为分摊批次 ${result.runId}。批次 append-only：改不了也删不掉，` +
+              '保底生效记录逐店留痕，下游 7.8.2.1 / 7.8.2.2 读的就是它。'
           : '未落库：没有解析到任何生效的分摊策略。',
       );
       await load();
@@ -471,7 +471,8 @@ export function AllocationPriorityWorkspace() {
       >
         {resolutionMode === 'shortfall' ? (
           <p className="text-muted-foreground mb-2 text-xs">
-            保底没兑现 ≠ 店铺不重要，而是**货真的不够**：该补货或调低别人的保底，而不是先动这家店的优先级。
+            保底没兑现 ≠
+            店铺不重要，而是**货真的不够**：该补货或调低别人的保底，而不是先动这家店的优先级。
           </p>
         ) : null}
         {resolutionMode === 'suppressed' ? (
@@ -513,12 +514,19 @@ function PriorityResultView({ result }: { result: PriorityAllocationResult | nul
         {conservationText(result).map((line) => (
           <p key={line}>{line}</p>
         ))}
-        <p className={consistent ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>
+        <p
+          className={
+            consistent
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : 'text-rose-600 dark:text-rose-400'
+          }
+        >
           前端自算 Σ分摊 = {summed.toLocaleString('zh-CN')} 件，
           {consistent ? '与后端一致' : '与后端不一致 —— 这是必须被看见的错账'}
         </p>
         <p className="text-muted-foreground">
-          无保底基线合计 {qty(result.baseAllocatedTotal)} 件 · 最终分摊合计 {qty(result.allocatedTotal)} 件
+          无保底基线合计 {qty(result.baseAllocatedTotal)} 件 · 最终分摊合计{' '}
+          {qty(result.allocatedTotal)} 件
         </p>
       </div>
 
@@ -552,9 +560,7 @@ function PriorityResultView({ result }: { result: PriorityAllocationResult | nul
               <td className="py-1 text-right">{qty(l.residualQty)}</td>
               <td className="text-muted-foreground py-1 text-right">{qty(l.baseAllocatedQty)}</td>
               <td className="py-1 text-right font-medium">{qty(l.allocatedQty)}</td>
-              <td className={`py-1 text-xs ${floorStatusTone(l.floorStatus)}`}>
-                {reasonText(l)}
-              </td>
+              <td className={`py-1 text-xs ${floorStatusTone(l.floorStatus)}`}>{reasonText(l)}</td>
             </tr>
           ))}
         </tbody>
@@ -588,7 +594,9 @@ function reasonText(l: {
   const parts: string[] = [];
   const shortfall = Number(l.floorShortfall ?? 0);
   if (shortfall > 0) {
-    parts.push(`保底欠 ${qty(shortfall)} 件（${shortfallReasonLabels[l.shortfallReason ?? ''] ?? '原因未标注'}）`);
+    parts.push(
+      `保底欠 ${qty(shortfall)} 件（${shortfallReasonLabels[l.shortfallReason ?? ''] ?? '原因未标注'}）`,
+    );
   } else if (Number(l.floorRequested ?? 0) > 0) {
     parts.push('保底足额兑现');
   } else {
@@ -872,7 +880,9 @@ function ResolutionTable({ resolutions }: { resolutions: ResolutionPage | null }
             <td className="py-1">{r.referenceLabel || r.referenceId}</td>
             <td className="py-1 text-right">{qty(r.requestedQty)}</td>
             <td className={`py-1 text-right ${floorStatusTone(r.status)}`}>{qty(r.grantedQty)}</td>
-            <td className="py-1 text-right">{Number(r.shortfallQty ?? 0) > 0 ? qty(r.shortfallQty) : '—'}</td>
+            <td className="py-1 text-right">
+              {Number(r.shortfallQty ?? 0) > 0 ? qty(r.shortfallQty) : '—'}
+            </td>
             <td className="py-1 text-right">{qty(r.residualQty)}</td>
             <td className="text-muted-foreground py-1 text-right">{qty(r.baseAllocatedQty)}</td>
             <td className="py-1 text-right font-medium">{qty(r.allocatedQty)}</td>
@@ -895,7 +905,9 @@ function resolutionReason(r: {
     parts.push(shortfallReasonLabels[r.shortfallReason] ?? r.shortfallReason);
   }
   if (r.suppressed) {
-    parts.push(suppressionReasonLabels[r.suppressionReason ?? ''] ?? r.suppressionReason ?? '被压低');
+    parts.push(
+      suppressionReasonLabels[r.suppressionReason ?? ''] ?? r.suppressionReason ?? '被压低',
+    );
   }
   return parts.join(' · ');
 }

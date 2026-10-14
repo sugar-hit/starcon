@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { OutboundBulkFailure, OutboundOrderCapabilities, OutboundOrderSummary } from '../../../../../packages/api-contracts/src/index';
+import type {
+  OutboundBulkFailure,
+  OutboundOrderCapabilities,
+  OutboundOrderSummary,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   canCancel,
   canRequestPicking,
@@ -121,7 +125,9 @@ describe('8.3.1.1 出库单列表 · 展示口径', () => {
 
   it('调拨显示调拨单号，其余来源显示外部单号', () => {
     expect(
-      sourceText(order({ sourceType: 'TRANSFER', sourceTransferOrderId: 't1', sourceTransferCode: 'TR-1' })),
+      sourceText(
+        order({ sourceType: 'TRANSFER', sourceTransferOrderId: 't1', sourceTransferCode: 'TR-1' }),
+      ),
     ).toBe('TR-1');
     expect(sourceText(order())).toBe('SO-1001');
     // 外部单号缺失时如实显示占位，不编一个单号出来。
@@ -129,7 +135,9 @@ describe('8.3.1.1 出库单列表 · 展示口径', () => {
   });
 
   it('状态跃迁按 (from,to) 查说明，查不到返回 undefined', () => {
-    expect(transitionOf(capabilities, 'PENDING_RECHECK', 'PICKING')?.note).toBe('复核不通过退回拣货');
+    expect(transitionOf(capabilities, 'PENDING_RECHECK', 'PICKING')?.note).toBe(
+      '复核不通过退回拣货',
+    );
     expect(transitionOf(capabilities, 'PENDING_PICKING', 'SHIPPED')).toBeUndefined();
     expect(reasonRequired(capabilities, 'PENDING_RECHECK', 'PICKING')).toBe(true);
     expect(reasonRequired(capabilities, 'PENDING_PICKING', 'SHIPPED')).toBe(false);
@@ -161,7 +169,9 @@ describe('8.3.1.1 出库单列表 · 展示口径', () => {
 
   it('分页摘要不把空页说成没有数据', () => {
     expect(pageSummary({ items: [], total: 0, page: 0, size: 20 })).toBe('共 0 条');
-    expect(pageSummary({ items: [order()], total: 41, page: 1, size: 20 }).length).toBeGreaterThan(0);
+    expect(pageSummary({ items: [order()], total: 41, page: 1, size: 20 }).length).toBeGreaterThan(
+      0,
+    );
     expect(pageSummary({ items: [order()], total: 41, page: 1, size: 20 })).toContain('共 41 条');
   });
 

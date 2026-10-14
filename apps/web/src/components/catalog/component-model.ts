@@ -105,7 +105,11 @@ export function problemHint(code: string): string {
 
 /** 问题的视觉调子：结构性/成环类是红，个别行的错是黄。 */
 export function problemTone(code: string): 'danger' | 'warning' {
-  if (code === 'VERSION_FROZEN' || code === 'CIRCULAR_REFERENCE' || code === 'EMPTY_COMPONENT_LIST') {
+  if (
+    code === 'VERSION_FROZEN' ||
+    code === 'CIRCULAR_REFERENCE' ||
+    code === 'EMPTY_COMPONENT_LIST'
+  ) {
     return 'danger';
   }
   return 'warning';
@@ -140,7 +144,9 @@ export function nestedHint(row: Pick<BundleComponentItem, 'nested' | 'linkedBund
 // ================================================================ 展示辅助
 
 /** 组件行的版本归属标签。 */
-export function componentOrigin(row: Pick<BundleComponentItem, 'bundleCode' | 'versionNo'>): string {
+export function componentOrigin(
+  row: Pick<BundleComponentItem, 'bundleCode' | 'versionNo'>,
+): string {
   return `${row.bundleCode} · ${row.versionNo}`;
 }
 
@@ -178,7 +184,8 @@ export function quantityProblem(raw: string): string | null {
   if (!value) return '组件数量不能为空';
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return '组件数量不是数字';
-  if (parsed <= 0) return '组件数量必须大于 0：数量为 0 的组件会让订单展开出一条 0 子行、库存扣出一条 0 扣减';
+  if (parsed <= 0)
+    return '组件数量必须大于 0：数量为 0 的组件会让订单展开出一条 0 子行、库存扣出一条 0 扣减';
   const [, fraction = ''] = value.split('.');
   if (fraction.length > QUANTITY_SCALE) return `组件数量最多 ${QUANTITY_SCALE} 位小数`;
   return null;
@@ -284,7 +291,10 @@ export async function editComponent(
   return api<BundleComponentItem>(`catalog/components/${id}`, 'PUT', input);
 }
 
-export async function deleteComponent(id: string, rowVersion: number): Promise<{ deleted: boolean }> {
+export async function deleteComponent(
+  id: string,
+  rowVersion: number,
+): Promise<{ deleted: boolean }> {
   return api<{ deleted: boolean }>(`catalog/components/${id}?rowVersion=${rowVersion}`, 'DELETE');
 }
 
@@ -302,7 +312,10 @@ export async function deleteLink(id: string, rowVersion: number): Promise<{ dele
 
 // ================================================================ 表单辅助
 
-export function emptyComponentInput(skuId = '', quantity = '1'): {
+export function emptyComponentInput(
+  skuId = '',
+  quantity = '1',
+): {
   skuId: string;
   quantity: string;
 } {

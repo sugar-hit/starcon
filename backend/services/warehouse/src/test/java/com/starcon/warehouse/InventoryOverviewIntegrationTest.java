@@ -22,8 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.1.1.1 库存总览：六个数量维度的聚合口径、总览↔明细核对、超储与零库存识别、
- * 跨服务筛选的显式拒绝，以及租户隔离三断言。
+ * 7.1.1.1 库存总览：六个数量维度的聚合口径、总览↔明细核对、超储与零库存识别、 跨服务筛选的显式拒绝，以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
@@ -109,8 +108,7 @@ class InventoryOverviewIntegrationTest {
       // 只有读权限：阈值写端点必须 403。
       actors.put(
           "Bearer reader",
-          actor(
-              user, a, null, List.of(grant("ALL", List.of("warehouse.inventory.read")))));
+          actor(user, a, null, List.of(grant("ALL", List.of("warehouse.inventory.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -161,27 +159,58 @@ class InventoryOverviewIntegrationTest {
               + " restart identity cascade");
     }
     for (var tenant : List.of(a, b)) {
-      access.run(actorFor(tenant), "warehouse.inventory.read", () -> {
-        sql.execute(
-            "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-            idFor(tenant, 1), tenant, "LE-1", "主体一");
-        sql.execute(
-            "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-            idFor(tenant, 2), tenant, "SKU-1", "商品一");
-        sql.execute(
-            "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-            idFor(tenant, 3), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
-        sql.execute(
-            "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-            idFor(tenant, 4), tenant, "WH-SZ", "深圳仓", "CN", "Asia/Shanghai");
-        sql.execute(
-            "insert into inventory_quality_status(id,tenant_id,code,name,role) values"
-                + "(?,?,?,?,?),(?,?,?,?,?),(?,?,?,?,?)",
-            idFor(tenant, 5), tenant, "SELLABLE", "可售", "SELLABLE",
-            idFor(tenant, 6), tenant, "PENDING", "待检", "PENDING_INSPECTION",
-            idFor(tenant, 7), tenant, "DEFECT", "残次", "DEFECTIVE");
-        return null;
-      });
+      access.run(
+          actorFor(tenant),
+          "warehouse.inventory.read",
+          () -> {
+            sql.execute(
+                "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
+            sql.execute(
+                "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
+            sql.execute(
+                "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
+                idFor(tenant, 3),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
+            sql.execute(
+                "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
+                idFor(tenant, 4),
+                tenant,
+                "WH-SZ",
+                "深圳仓",
+                "CN",
+                "Asia/Shanghai");
+            sql.execute(
+                "insert into inventory_quality_status(id,tenant_id,code,name,role) values"
+                    + "(?,?,?,?,?),(?,?,?,?,?),(?,?,?,?,?)",
+                idFor(tenant, 5),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE",
+                idFor(tenant, 6),
+                tenant,
+                "PENDING",
+                "待检",
+                "PENDING_INSPECTION",
+                idFor(tenant, 7),
+                tenant,
+                "DEFECT",
+                "残次",
+                "DEFECTIVE");
+            return null;
+          });
     }
   }
 
@@ -191,40 +220,71 @@ class InventoryOverviewIntegrationTest {
 
   /** 写一行余额（租户 A）。 */
   void balance(UUID warehouse, UUID quality, String onHand, String reserved) {
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
-              + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
-          UUID.randomUUID(), a, skuA, warehouse, leA, quality, new BigDecimal(onHand),
-          new BigDecimal(reserved));
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
+                  + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
+              UUID.randomUUID(),
+              a,
+              skuA,
+              warehouse,
+              leA,
+              quality,
+              new BigDecimal(onHand),
+              new BigDecimal(reserved));
+          return null;
+        });
   }
 
   /** 一行在途：从上海仓发往深圳仓。 */
   void inTransit(String quantity) {
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,from_warehouse_id,"
-              + "to_warehouse_id,quality_status_id,quantity,shipped_at) values(?,?,?,?,?,?,?,?,now())",
-          UUID.randomUUID(), a, skuA, leA, whSh, whSz, qSellable, new BigDecimal(quantity));
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,from_warehouse_id,"
+                  + "to_warehouse_id,quality_status_id,quantity,shipped_at) values(?,?,?,?,?,?,?,?,now())",
+              UUID.randomUUID(),
+              a,
+              skuA,
+              leA,
+              whSh,
+              whSz,
+              qSellable,
+              new BigDecimal(quantity));
+          return null;
+        });
   }
 
   /** 一条阈值策略。 */
   void policy(String scopeType, String scopeKey, String maxOnHand) {
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_policy(id,tenant_id,scope_type,scope_key,max_on_hand) values(?,?,?,?,?)",
-          UUID.randomUUID(), a, scopeType, scopeKey, new BigDecimal(maxOnHand));
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_policy(id,tenant_id,scope_type,scope_key,max_on_hand) values(?,?,?,?,?)",
+              UUID.randomUUID(),
+              a,
+              scopeType,
+              scopeKey,
+              new BigDecimal(maxOnHand));
+          return null;
+        });
   }
 
   InventoryOverview overviewOf(AccessService.Access who) {
-    return access.run(who, "warehouse.inventory.read", () -> service.overview(new OverviewQuery(
-        null, null, null, null, null, null, null, null, null, null, null, null)));
+    return access.run(
+        who,
+        "warehouse.inventory.read",
+        () ->
+            service.overview(
+                new OverviewQuery(
+                    null, null, null, null, null, null, null, null, null, null, null, null)));
   }
 
   // ================================================================ 六个数量维度
@@ -259,8 +319,13 @@ class InventoryOverviewIntegrationTest {
     balance(whSh, qSellable, "100", "30");
     // 直接读 DB：available 恒等于 on_hand − reserved，与应用层无关。
     var row =
-        access.run(actorA, "warehouse.inventory.read", () -> sql.fetchOne(
-            "select on_hand,reserved,available from inventory_balance where tenant_id=?", a));
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                sql.fetchOne(
+                    "select on_hand,reserved,available from inventory_balance where tenant_id=?",
+                    a));
     assertThat(row.get("available", BigDecimal.class))
         .isEqualByComparingTo(
             row.get("on_hand", BigDecimal.class).subtract(row.get("reserved", BigDecimal.class)));
@@ -298,7 +363,8 @@ class InventoryOverviewIntegrationTest {
     assertThat(sumRows(rows, r -> r.reserved())).isEqualByComparingTo(s.reserved());
     assertThat(sumRows(rows, r -> r.available())).isEqualByComparingTo(s.available());
     assertThat(sumRows(rows, r -> r.sellable())).isEqualByComparingTo(s.sellable());
-    assertThat(sumRows(rows, r -> r.pendingInspection())).isEqualByComparingTo(s.pendingInspection());
+    assertThat(sumRows(rows, r -> r.pendingInspection()))
+        .isEqualByComparingTo(s.pendingInspection());
     assertThat(sumRows(rows, r -> r.defective())).isEqualByComparingTo(s.defective());
     assertThat(sumRows(rows, r -> r.inTransit())).isEqualByComparingTo(s.inTransit());
     // 行级可用之和 == 在仓实物 − 预占：说明没有第三处"可用量"来源。
@@ -319,17 +385,28 @@ class InventoryOverviewIntegrationTest {
     balance(whSz, qDefective, "20", "0");
 
     var page0 =
-        access.run(actorA, "warehouse.inventory.read", () -> service.overview(
-            new OverviewQuery(null, null, null, null, null, null, null, null, null, "ON_HAND", 0, 2)));
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.overview(
+                    new OverviewQuery(
+                        null, null, null, null, null, null, null, null, null, "ON_HAND", 0, 2)));
     var page1 =
-        access.run(actorA, "warehouse.inventory.read", () -> service.overview(
-            new OverviewQuery(null, null, null, null, null, null, null, null, null, "ON_HAND", 1, 2)));
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.overview(
+                    new OverviewQuery(
+                        null, null, null, null, null, null, null, null, null, "ON_HAND", 1, 2)));
 
     assertThat(page0.rows()).hasSize(2);
     assertThat(page1.rows()).hasSize(2);
     // 合计不受分页影响：否则守恒式只在第一页成立。
     assertThat(page0.summary().onHandAtWarehouse()).isEqualByComparingTo("70");
-    assertThat(page1.summary().onHandAtWarehouse()).isEqualByComparingTo("70");    // 两页的行不重叠：决胜键 id 生效。
+    assertThat(page1.summary().onHandAtWarehouse())
+        .isEqualByComparingTo("70"); // 两页的行不重叠：决胜键 id 生效。
     assertThat(page0.rows().stream().map(OverviewRow::balanceId))
         .doesNotContainAnyElementsOf(page1.rows().stream().map(OverviewRow::balanceId).toList());
   }
@@ -371,8 +448,7 @@ class InventoryOverviewIntegrationTest {
     var byRole = o.groups().stream().filter(g -> g.dimension().equals("QUALITY_ROLE")).toList();
     // 质量角色分组的"在手"同样含在途（在途挂在可售行上），所以对标的是 onHand 而不是
     // onHandAtWarehouse —— 分组口径必须与行级口径一致，否则图和表会差一个在途。
-    assertThat(sumGroups(byRole, OverviewGroup::onHand))
-        .isEqualByComparingTo(o.summary().onHand());
+    assertThat(sumGroups(byRole, OverviewGroup::onHand)).isEqualByComparingTo(o.summary().onHand());
   }
 
   // ================================================================ 零库存与超储
@@ -408,8 +484,8 @@ class InventoryOverviewIntegrationTest {
     assertThat(overRow.maxOnHand()).isEqualByComparingTo("50");
     assertThat(overRow.policyScope()).isEqualTo("WAREHOUSE");
 
-    var unsetRow = o.rows().stream()
-        .filter(r -> r.warehouseId().equals(whSh)).findFirst().orElseThrow();
+    var unsetRow =
+        o.rows().stream().filter(r -> r.warehouseId().equals(whSh)).findFirst().orElseThrow();
     assertThat(unsetRow.thresholdConfigured()).isFalse();
     assertThat(unsetRow.maxOnHand()).isNull();
     assertThat(unsetRow.overstock()).isFalse();
@@ -442,14 +518,26 @@ class InventoryOverviewIntegrationTest {
     balance(whSz, qSellable, "5", "5"); // available=0 → 零库存（预占满）
     policy("SKU", skuA.toString(), "50");
 
-    var over = access.run(actorA, "warehouse.inventory.read", () -> service.overview(
-        new OverviewQuery(null, null, null, null, null, null, null, null, true, null, 0, 50)));
+    var over =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.overview(
+                    new OverviewQuery(
+                        null, null, null, null, null, null, null, null, true, null, 0, 50)));
     assertThat(over.rows()).isNotEmpty().allMatch(OverviewRow::overstock);
     // 只有在手 100 的那行超储（阈值 50），在手 5 的不超
     assertThat(over.rows()).hasSize(1);
 
-    var zero = access.run(actorA, "warehouse.inventory.read", () -> service.overview(
-        new OverviewQuery(null, null, null, null, null, null, null, true, null, null, 0, 50)));
+    var zero =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.overview(
+                    new OverviewQuery(
+                        null, null, null, null, null, null, null, true, null, null, 0, 50)));
     assertThat(zero.rows()).isNotEmpty().allMatch(OverviewRow::zeroStock);
     assertThat(zero.rows()).hasSize(1);
   }
@@ -457,31 +545,64 @@ class InventoryOverviewIntegrationTest {
   @Test
   void 阈值可读可写() {
     var saved =
-        access.run(actorA, "warehouse.inventory.update", () -> references.savePolicy(
-            null, new InventoryPolicyInput("WAREHOUSE", whSh.toString(), new BigDecimal("80"), null)));
+        access.run(
+            actorA,
+            "warehouse.inventory.update",
+            () ->
+                references.savePolicy(
+                    null,
+                    new InventoryPolicyInput(
+                        "WAREHOUSE", whSh.toString(), new BigDecimal("80"), null)));
     assertThat(saved.id()).isNotNull();
-    var list = access.run(actorA, "warehouse.inventory.read", () -> references.policies("WAREHOUSE"));
+    var list =
+        access.run(actorA, "warehouse.inventory.read", () -> references.policies("WAREHOUSE"));
     assertThat(list).hasSize(1);
     assertThat(list.get(0).maxOnHand()).isEqualByComparingTo("80");
 
     // 同一范围重复保存即更新，不会插出第二条
-    access.run(actorA, "warehouse.inventory.update", () -> references.savePolicy(
-        saved.id(), new InventoryPolicyInput("WAREHOUSE", whSh.toString(), new BigDecimal("90"), null)));
-    assertThat(access.run(actorA, "warehouse.inventory.read", () -> references.policies("WAREHOUSE")))
+    access.run(
+        actorA,
+        "warehouse.inventory.update",
+        () ->
+            references.savePolicy(
+                saved.id(),
+                new InventoryPolicyInput(
+                    "WAREHOUSE", whSh.toString(), new BigDecimal("90"), null)));
+    assertThat(
+            access.run(actorA, "warehouse.inventory.read", () -> references.policies("WAREHOUSE")))
         .hasSize(1);
   }
 
   @Test
   void 默认级策略必须空键_其余范围必须带键() {
-    assertThatThrownBy(() -> access.run(actorA, "warehouse.inventory.update", () -> references.savePolicy(
-        null, new InventoryPolicyInput("DEFAULT", "x", new BigDecimal("10"), null))))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.update",
+                    () ->
+                        references.savePolicy(
+                            null,
+                            new InventoryPolicyInput("DEFAULT", "x", new BigDecimal("10"), null))))
         .isInstanceOf(IllegalArgumentException.class);
-    assertThatThrownBy(() -> access.run(actorA, "warehouse.inventory.update", () -> references.savePolicy(
-        null, new InventoryPolicyInput("SKU", "", new BigDecimal("10"), null))))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.update",
+                    () ->
+                        references.savePolicy(
+                            null, new InventoryPolicyInput("SKU", "", new BigDecimal("10"), null))))
         .isInstanceOf(IllegalArgumentException.class);
     // 没设上限 = 不参与超储判定，直接拒绝而不是存一条永不生效的策略
-    assertThatThrownBy(() -> access.run(actorA, "warehouse.inventory.update", () -> references.savePolicy(
-        null, new InventoryPolicyInput("SKU", skuA.toString(), null, null))))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.update",
+                    () ->
+                        references.savePolicy(
+                            null, new InventoryPolicyInput("SKU", skuA.toString(), null, null))))
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -496,14 +617,32 @@ class InventoryOverviewIntegrationTest {
           CatalogProjectionPort.Dimension.BRAND,
           CatalogProjectionPort.Dimension.SHOP
         }) {
-      assertThatThrownBy(() -> access.run(actorA, "warehouse.inventory.read", () -> service.overview(
-          new OverviewQuery(
-              null, null, null, null, List.of(UUID.randomUUID()), null, null, null, null, null, 0, 50))))
+      assertThatThrownBy(
+              () ->
+                  access.run(
+                      actorA,
+                      "warehouse.inventory.read",
+                      () ->
+                          service.overview(
+                              new OverviewQuery(
+                                  null,
+                                  null,
+                                  null,
+                                  null,
+                                  List.of(UUID.randomUUID()),
+                                  null,
+                                  null,
+                                  null,
+                                  null,
+                                  null,
+                                  0,
+                                  50))))
           .isInstanceOf(CatalogProjectionPort.DimensionUnavailableException.class);
     }
-    http.perform(get("/warehouse/inventory/overview")
-            .header("Authorization", "Bearer tenant-a")
-            .param("categoryIds", UUID.randomUUID().toString()))
+    http.perform(
+            get("/warehouse/inventory/overview")
+                .header("Authorization", "Bearer tenant-a")
+                .param("categoryIds", UUID.randomUUID().toString()))
         .andExpect(status().isUnprocessableEntity());
   }
 
@@ -521,25 +660,61 @@ class InventoryOverviewIntegrationTest {
   void 按仓库法人与关键字筛选() {
     balance(whSh, qSellable, "10", "0");
     balance(whSz, qSellable, "20", "0");
-    var byWarehouse = access.run(actorA, "warehouse.inventory.read", () -> service.overview(
-        new OverviewQuery(whSz, null, null, null, null, null, null, null, null, null, 0, 50)));
+    var byWarehouse =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.overview(
+                    new OverviewQuery(
+                        whSz, null, null, null, null, null, null, null, null, null, 0, 50)));
     assertThat(byWarehouse.rows()).hasSize(1);
     assertThat(byWarehouse.rows().get(0).onHand()).isEqualByComparingTo("20");
 
-    var byKeyword = access.run(actorA, "warehouse.inventory.read", () -> service.overview(
-        new OverviewQuery(null, null, null, "深圳", null, null, null, null, null, null, 0, 50)));
+    var byKeyword =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.overview(
+                    new OverviewQuery(
+                        null, null, null, "深圳", null, null, null, null, null, null, 0, 50)));
     assertThat(byKeyword.rows()).hasSize(1);
     assertThat(byKeyword.rows().get(0).warehouseCode()).isEqualTo("WH-SZ");
 
-    var byEntity = access.run(actorA, "warehouse.inventory.read", () -> service.overview(
-        new OverviewQuery(null, leA, null, null, null, null, null, null, null, null, 0, 50)));
+    var byEntity =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                service.overview(
+                    new OverviewQuery(
+                        null, leA, null, null, null, null, null, null, null, null, 0, 50)));
     assertThat(byEntity.rows()).hasSize(2);
   }
 
   @Test
   void 非法排序键被拒绝_排序键不来自白名单就拼不进SQL() {
-    assertThatThrownBy(() -> access.run(actorA, "warehouse.inventory.read", () -> service.overview(
-        new OverviewQuery(null, null, null, null, null, null, null, null, null, "1;drop table", 0, 50))))
+    assertThatThrownBy(
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () ->
+                        service.overview(
+                            new OverviewQuery(
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "1;drop table",
+                                0,
+                                50))))
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -580,13 +755,12 @@ class InventoryOverviewIntegrationTest {
 
   @Test
   void 无读权限不能写阈值() throws Exception {
-    http.perform(post("/warehouse/inventory/policies")
-            .header("Authorization", "Bearer reader")
-            .contentType("application/json")
-            .content(
-                "{\"scopeType\":\"WAREHOUSE\",\"scopeKey\":\""
-                    + whSh
-                    + "\",\"maxOnHand\":10}"))
+    http.perform(
+            post("/warehouse/inventory/policies")
+                .header("Authorization", "Bearer reader")
+                .contentType("application/json")
+                .content(
+                    "{\"scopeType\":\"WAREHOUSE\",\"scopeKey\":\"" + whSh + "\",\"maxOnHand\":10}"))
         .andExpect(status().isForbidden());
   }
 
@@ -614,16 +788,18 @@ class InventoryOverviewIntegrationTest {
   void 断言二_伪造租户头无效() throws Exception {
     balance(whSh, qSellable, "100", "0");
     // 浏览器伪造 X-Tenant-Id 指向 A，身份仍是 B → 只能看到 B 的（空）视图
-    http.perform(get("/warehouse/inventory/overview")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/overview")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rows.length()").value(0))
         .andExpect(jsonPath("$.summary.onHandAtWarehouse").value(0));
     // 反向：身份是 A 时伪造 B 也拿不到 B 的数据
-    http.perform(get("/warehouse/inventory/overview")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/inventory/overview")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rows.length()").value(1));
   }
@@ -648,8 +824,13 @@ class InventoryOverviewIntegrationTest {
   void 超卖在DB层被拒绝_绕过应用层也不行() {
     balance(whSh, qSellable, "10", "0");
     assertThatThrownBy(
-            () -> access.run(actorA, "warehouse.inventory.read", () -> sql.execute(
-                "update inventory_balance set reserved=9999 where tenant_id=?", a)))
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () ->
+                        sql.execute(
+                            "update inventory_balance set reserved=9999 where tenant_id=?", a)))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
   }
 
@@ -657,20 +838,38 @@ class InventoryOverviewIntegrationTest {
   void 非可售质量状态不允许被预占() {
     balance(whSh, qDefective, "10", "0");
     assertThatThrownBy(
-            () -> access.run(actorA, "warehouse.inventory.read", () -> sql.execute(
-                "update inventory_balance set reserved=1 where tenant_id=? and quality_status_id=?",
-                a, qDefective)))
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () ->
+                        sql.execute(
+                            "update inventory_balance set reserved=1 where tenant_id=? and quality_status_id=?",
+                            a,
+                            qDefective)))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
   }
 
   @Test
   void 在途记录的状态与时间戳必须一致() {
     assertThatThrownBy(
-            () -> access.run(actorA, "warehouse.inventory.read", () -> sql.execute(
-                "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,from_warehouse_id,"
-                    + "to_warehouse_id,quality_status_id,quantity,shipped_at,received_at)"
-                    + " values(?,?,?,?,?,?,?,?,now(),now())",
-                UUID.randomUUID(), a, skuA, leA, whSh, whSz, qSellable, new BigDecimal("1"))))
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () ->
+                        sql.execute(
+                            "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,from_warehouse_id,"
+                                + "to_warehouse_id,quality_status_id,quantity,shipped_at,received_at)"
+                                + " values(?,?,?,?,?,?,?,?,now(),now())",
+                            UUID.randomUUID(),
+                            a,
+                            skuA,
+                            leA,
+                            whSh,
+                            whSz,
+                            qSellable,
+                            new BigDecimal("1"))))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
   }
 
@@ -680,38 +879,68 @@ class InventoryOverviewIntegrationTest {
     balance(whSh, qSellable, "10", "0");
     var txn = UUID.randomUUID();
     var entry = UUID.randomUUID();
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id)"
-              + " values(?,?,?,?,?,now(),?)",
-          txn, a, "RECEIPT", "PURCHASE_RECEIPT", UUID.randomUUID(), user);
-      var balanceId = sql.fetchOne("select id from inventory_balance where tenant_id=? limit 1", a)
-          .get(0, UUID.class);
-      sql.execute(
-          "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta)"
-              + " values(?,?,?,?,?)",
-          entry, a, txn, balanceId, new BigDecimal("5"));
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id)"
+                  + " values(?,?,?,?,?,now(),?)",
+              txn,
+              a,
+              "RECEIPT",
+              "PURCHASE_RECEIPT",
+              UUID.randomUUID(),
+              user);
+          var balanceId =
+              sql.fetchOne("select id from inventory_balance where tenant_id=? limit 1", a)
+                  .get(0, UUID.class);
+          sql.execute(
+              "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta)"
+                  + " values(?,?,?,?,?)",
+              entry,
+              a,
+              txn,
+              balanceId,
+              new BigDecimal("5"));
+          return null;
+        });
     // 改一条已落库的分录 = 直接毁掉余额的真相来源，DB 拒绝
     assertThatThrownBy(
-            () -> access.run(actorA, "warehouse.inventory.read", () -> sql.execute(
-                "update inventory_entry set on_hand_delta=1 where tenant_id=? and id=?", a, entry)))
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () ->
+                        sql.execute(
+                            "update inventory_entry set on_hand_delta=1 where tenant_id=? and id=?",
+                            a,
+                            entry)))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
     assertThatThrownBy(
-            () -> access.run(actorA, "warehouse.inventory.read", () -> sql.execute(
-                "delete from inventory_entry where tenant_id=? and id=?", a, entry)))
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () ->
+                        sql.execute(
+                            "delete from inventory_entry where tenant_id=? and id=?", a, entry)))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
   }
 
   @Test
   void 跨服务不得建外键_sku只以逻辑ID存在() {
     // sku_ref 是本服务的引用登记；余额行上不 REFERENCES 任何对方表
-    var fkCount = access.run(actorA, "warehouse.inventory.read", () -> sql.fetchOne(
-        "select count(*) from information_schema.table_constraints"
-            + " where constraint_type='FOREIGN KEY'"
-            + " and table_name in ('inventory_balance','inventory_transfer')"
-            + " and (constraint_name like '%sku%')"));
+    var fkCount =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                sql.fetchOne(
+                    "select count(*) from information_schema.table_constraints"
+                        + " where constraint_type='FOREIGN KEY'"
+                        + " and table_name in ('inventory_balance','inventory_transfer')"
+                        + " and (constraint_name like '%sku%')"));
     assertThat(fkCount.get(0, Long.class)).isZero();
   }
 

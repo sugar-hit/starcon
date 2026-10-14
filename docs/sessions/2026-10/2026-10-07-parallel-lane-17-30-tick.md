@@ -11,7 +11,7 @@
    典型两例：
    - `duplicate-candidates/{uuid}(?:/decision)?` → `...(?:\/(?:decision|merge-preview|merge)?)?`
    - `legal-entities/references` → `legal-entities/(?:[0-9a-f-]+/accounting-books|references)`
-   求并 = ours 基底 + **替换**该条为宽的那版 + 追加新增分支。
+     求并 = ours 基底 + **替换**该条为宽的那版 + 追加新增分支。
 3. **文件尾双侧追加**（route.test.ts）：见 17:10 那份记录，公共收尾 `});` 只剩一份。
 
 **改宽的语义依据要写进 commit**：3.9.1.1 那轮刻意不放行 `merge`，
@@ -40,6 +40,7 @@ if (lit.split(OLD).length - 1 !== 1) throw new Error('ambiguous replacement');
 ## 验证脚本自身也要审
 
 我这次连续三次把自己的断言写反/写漏：
+
 - 三元标签 `A.test(p) ? 'DENY->ALLOW' : 'ALLOW->DENY'` —— A 为 false 时打的是后者，全是反的；
 - 期望清单漏了 `sku-merges` 本身（车道的分支把整段后缀做成可选，裸路径确实该放行）；
 - 同一个路径同时列进「必须不变」和「新增放行」两张表。

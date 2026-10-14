@@ -18,28 +18,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * 4.2.2.2 描述模板：五段骨架（产品介绍 / 使用场景 / 规格参数 / 注意事项 / 售后承诺）、
- * 变量绑定、多语言版本与图片插入位。
+ * 4.2.2.2 描述模板：五段骨架（产品介绍 / 使用场景 / 规格参数 / 注意事项 / 售后承诺）、 变量绑定、多语言版本与图片插入位。
  *
- * <p>蓝图原文：「职责：管理富文本描述模板：段落结构（产品介绍、使用场景、规格参数、
- * 注意事项、售后承诺）、变量占位、多语言版本、图片插入位。」
- * 「输出：描述模板 + 渲染后的描述 HTML（供编辑器与平台上传）。」
- * 「关系：上游 = 3.4.2.2 描述库、3.4.3 多语言；下游 = 4.2.1.1。
- * <b>变量未绑定必须显式提示</b>，不允许把 {@code {{尺寸}}} 原样发到平台。」
+ * <p>蓝图原文：「职责：管理富文本描述模板：段落结构（产品介绍、使用场景、规格参数、 注意事项、售后承诺）、变量占位、多语言版本、图片插入位。」 「输出：描述模板 + 渲染后的描述
+ * HTML（供编辑器与平台上传）。」 「关系：上游 = 3.4.2.2 描述库、3.4.3 多语言；下游 = 4.2.1.1。 <b>变量未绑定必须显式提示</b>，不允许把 {@code
+ * {{尺寸}}} 原样发到平台。」
  *
- * <p><b>与 3.4.2.2（V21）的边界是这个类最重要的一件事</b>：段落正文、变量声明、
- * 译文、短语池**一律走 V21 那套表**（content_template / content_template_variable /
- * content_template_translation / content_phrase），本模块只新增「五段骨架」
- * （description_template / description_template_section / description_image_slot）。
- * 逐条理由写在 V96 文件头，代码层的落点就是本类的
- * {@link #saveSectionContent}：它建/改的是 content_template 行，不是另一张表。
+ * <p><b>与 3.4.2.2（V21）的边界是这个类最重要的一件事</b>：段落正文、变量声明、 译文、短语池**一律走 V21 那套表**（content_template /
+ * content_template_variable / content_template_translation / content_phrase），本模块只新增「五段骨架」
+ * （description_template / description_template_section / description_image_slot）。 逐条理由写在 V96
+ * 文件头，代码层的落点就是本类的 {@link #saveSectionContent}：它建/改的是 content_template 行，不是另一张表。
  *
- * <p>所以「{{尺寸}} 的绑定源」在全仓只有一个答案：去 3.4.2.2 的内容模板编辑器改。
- * 04 刊登将来问「这个占位符取自哪里」时不会得到两个答案。
+ * <p>所以「{{尺寸}} 的绑定源」在全仓只有一个答案：去 3.4.2.2 的内容模板编辑器改。 04 刊登将来问「这个占位符取自哪里」时不会得到两个答案。
  *
- * <p>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}：描述模板挂在
- * SKU 上、上游是 3.1.1.1 的 SPU/SKU，所以复用已有词表而不是新造
- * （新词表要改 identity 服务的迁移，属于另一个服务的写入所有权）。
+ * <p>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}：描述模板挂在 SKU 上、上游是 3.1.1.1 的
+ * SPU/SKU，所以复用已有词表而不是新造 （新词表要改 identity 服务的迁移，属于另一个服务的写入所有权）。
  *
  * <p>渲染在 {@link DescriptionTemplateRenderService}，同一套纪律。
  */
@@ -61,10 +54,8 @@ public class DescriptionTemplateService {
   /**
    * 描述模板概览。
    *
-   * <p>{@code missingSectionTypeCount}（有多少模板缺五类里的某一类）与
-   * {@code issueCount}（渲染报告里累计缺了多少个变量 / 缺图）是这个模块
-   * 唯一需要每天盯的两个数字。缺段落不拦保存——很多商品本来就没有独立售后承诺段——
-   * 但它是「这个模板还不完整」的唯一可查询信号。
+   * <p>{@code missingSectionTypeCount}（有多少模板缺五类里的某一类）与 {@code issueCount}（渲染报告里累计缺了多少个变量 / 缺图）是这个模块
+   * 唯一需要每天盯的两个数字。缺段落不拦保存——很多商品本来就没有独立售后承诺段—— 但它是「这个模板还不完整」的唯一可查询信号。
    */
   public DescriptionTemplateOverview overview() {
     UUID tenantId = currentTenantId();
@@ -180,7 +171,10 @@ public class DescriptionTemplateService {
         row.get("source_locale", String.class),
         Boolean.TRUE.equals(row.get("enabled", Boolean.class)),
         summaries,
-        summaries.stream().mapToInt(s -> s.locales() == null ? 0 : s.locales().size()).max().orElse(0),
+        summaries.stream()
+            .mapToInt(s -> s.locales() == null ? 0 : s.locales().size())
+            .max()
+            .orElse(0),
         renderCount(id),
         row.get("version", Long.class),
         instant(row.get("created_at", OffsetDateTime.class)),
@@ -190,13 +184,10 @@ public class DescriptionTemplateService {
   /**
    * 建模板或改模板（id 为空即新建）。**段落与插图位整体替换。**
    *
-   * <p>整体替换而不是增量增删：段落集合是「这个模板长什么样」的完整口径，
-   * 增删式会让「当前有哪些段落」这个问题有两个答案
-   * （与 3.4.2.2 的变量整体替换同一纪律）。
+   * <p>整体替换而不是增量增删：段落集合是「这个模板长什么样」的完整口径， 增删式会让「当前有哪些段落」这个问题有两个答案 （与 3.4.2.2 的变量整体替换同一纪律）。
    *
-   * <p>编码建后不可改：段落背后的 content_template 编码由它派生，
-   * 改了会让「这段正文是哪一版模板」在历史渲染里对不上
-   * （与 {@code MediaService.saveTag} / {@code TitleService.saveTemplate} 同一纪律）。
+   * <p>编码建后不可改：段落背后的 content_template 编码由它派生， 改了会让「这段正文是哪一版模板」在历史渲染里对不上 （与 {@code
+   * MediaService.saveTag} / {@code TitleService.saveTemplate} 同一纪律）。
    */
   public DescriptionTemplateSaved saveTemplate(
       AccessService.Access actor, UUID id, DescriptionTemplateInput input) {
@@ -217,9 +208,7 @@ public class DescriptionTemplateService {
     String sourceLocale = DescriptionTemplateRules.normalizeLocale(input.sourceLocale());
     String code = MediaRules.normalize(input.code()).toUpperCase(Locale.ROOT);
     CatalogService.check(
-        sectionInputs.size() > 0,
-        "一个描述模板至少要有一段：蓝图要求的是「段落结构」，"
-            + "至少配一段（建议五段齐全）才能渲染出描述 HTML");
+        sectionInputs.size() > 0, "一个描述模板至少要有一段：蓝图要求的是「段落结构」，" + "至少配一段（建议五段齐全）才能渲染出描述 HTML");
 
     UUID tenantId = currentTenantId();
     if (id != null) {
@@ -227,8 +216,7 @@ public class DescriptionTemplateService {
       long version = existing.get("version", Long.class);
       CatalogService.check(
           version == input.version(),
-          "这个描述模板已被他人改动（当前版本 " + version + "，你提交的是 " + input.version()
-              + "）：请刷新后重新编辑，避免覆盖掉别人的修改");
+          "这个描述模板已被他人改动（当前版本 " + version + "，你提交的是 " + input.version() + "）：请刷新后重新编辑，避免覆盖掉别人的修改");
       int updated =
           sql.execute(
               "update description_template set name=?,note=?,source_locale=?,enabled=?,"
@@ -287,7 +275,10 @@ public class DescriptionTemplateService {
       CatalogService.check(slotProblem == null, slotProblem);
       CatalogService.check(
           slot.slotNo() == i,
-          "图片插入位的编号必须从 0 连续递增（当前第 " + (i + 1) + " 个是 " + slot.slotNo()
+          "图片插入位的编号必须从 0 连续递增（当前第 "
+              + (i + 1)
+              + " 个是 "
+              + slot.slotNo()
               + "）：data-slot-no 是渲染出来给平台侧定位用的位置，编号不连续会让下游数不清图序");
       // assetId 有意**不**必填：RENDER_INPUT 的定义就是「这一位完全由渲染请求给 URL」，
       // 素材只是可选项（给了就能带上素材库探测出的宽高与 alt 兜底）。
@@ -297,9 +288,8 @@ public class DescriptionTemplateService {
   /**
    * 变量的双向校验：正文里的占位符与声明必须互相对得上。
    *
-   * <p>与 3.4.2.2 的 {@code DescriptionService.variablesProblem} 同一纪律，
-   * 连校验函数都用同一份（{@link DescriptionRules#variableBindingProblem}）。
-   * 配置期的缺失比渲染期的缺失更早暴露，成本也更低。
+   * <p>与 3.4.2.2 的 {@code DescriptionService.variablesProblem} 同一纪律， 连校验函数都用同一份（{@link
+   * DescriptionRules#variableBindingProblem}）。 配置期的缺失比渲染期的缺失更早暴露，成本也更低。
    */
   private String variablesProblem(DescriptionSectionInput section) {
     List<String> names = new ArrayList<>();
@@ -311,12 +301,11 @@ public class DescriptionTemplateService {
         String sourceProblem = DescriptionRules.sourceProblem(variable.source());
         if (sourceProblem != null) return sourceProblem;
         if (names.contains(MediaRules.normalize(variable.name())))
-          return "变量名重复："
-              + MediaRules.normalize(variable.name())
-              + "（同一个占位符只能有一个绑定源）";
+          return "变量名重复：" + MediaRules.normalize(variable.name()) + "（同一个占位符只能有一个绑定源）";
         names.add(MediaRules.normalize(variable.name()));
       }
-    return DescriptionRules.variableBindingProblem(DescriptionRules.normalizeBody(section.body()), names);
+    return DescriptionRules.variableBindingProblem(
+        DescriptionRules.normalizeBody(section.body()), names);
   }
 
   /** 段落整体替换：先删旧段落（连带插图位），再按输入顺序重建。 */
@@ -333,11 +322,12 @@ public class DescriptionTemplateService {
         sql.fetch(
             "select content_template_id from description_template_section"
                 + " where tenant_id=? and template_id=?",
-            tenantId, templateId))
-      oldContentTemplateIds.add(r.get("content_template_id", UUID.class));
+            tenantId,
+            templateId)) oldContentTemplateIds.add(r.get("content_template_id", UUID.class));
     sql.execute(
         "delete from description_template_section where tenant_id=? and template_id=?",
-        tenantId, templateId);
+        tenantId,
+        templateId);
 
     int order = 0;
     for (DescriptionSectionInput section : sectionInputs) {
@@ -378,8 +368,7 @@ public class DescriptionTemplateService {
     for (Record r :
         sql.fetch(
             "select content_template_id from description_template_section where tenant_id=?",
-            tenantId))
-      kept.add(r.get("content_template_id", UUID.class));
+            tenantId)) kept.add(r.get("content_template_id", UUID.class));
     for (UUID oldId : oldContentTemplateIds)
       if (!kept.contains(oldId)) {
         long refs =
@@ -395,9 +384,8 @@ public class DescriptionTemplateService {
   /**
    * 建/改一个段落背后的 content_template（3.4.2.2 的表，本模块**不复制**内容）。
    *
-   * <p>段落编码由「模板编码 + 段落类型」派生而不是让调用方传：
-   * 一个段落天然属于一个描述模板，让运营再填一遍编码只会产生两套不一致的编码。
-   * 长度截断到 32（V21 的 content_template.code 硬上限），冲突时报可读的错。
+   * <p>段落编码由「模板编码 + 段落类型」派生而不是让调用方传： 一个段落天然属于一个描述模板，让运营再填一遍编码只会产生两套不一致的编码。 长度截断到 32（V21 的
+   * content_template.code 硬上限），冲突时报可读的错。
    */
   private UUID saveSectionContent(
       UUID tenantId,
@@ -455,16 +443,21 @@ public class DescriptionTemplateService {
           case "SERVICE_PROMISE" -> "PROMISE";
           default -> "SEC";
         };
-    String base = templateCode.length() + 1 + suffix.length() <= 32 ? templateCode : templateCode.substring(0, 32 - 1 - suffix.length());
+    String base =
+        templateCode.length() + 1 + suffix.length() <= 32
+            ? templateCode
+            : templateCode.substring(0, 32 - 1 - suffix.length());
     String code = base + "_" + suffix;
     return code.replaceAll("[^A-Z0-9_-]", "");
   }
 
   /** 变量整体替换：先删后插，保证「当前有哪些变量」只有一份答案。 */
-  private void replaceVariables(UUID tenantId, UUID contentTemplateId, List<ContentTemplateVariableInput> variables) {
+  private void replaceVariables(
+      UUID tenantId, UUID contentTemplateId, List<ContentTemplateVariableInput> variables) {
     sql.execute(
         "delete from content_template_variable where tenant_id=? and template_id=?",
-        tenantId, contentTemplateId);
+        tenantId,
+        contentTemplateId);
     if (variables == null || variables.isEmpty()) return;
     int slot = 0;
     for (ContentTemplateVariableInput variable : variables)
@@ -484,7 +477,9 @@ public class DescriptionTemplateService {
         sql.execute(
             "update description_template set enabled=?,version=version+1,updated_at=now()"
                 + " where tenant_id=? and id=?",
-            enabled, currentTenantId(), id);
+            enabled,
+            currentTenantId(),
+            id);
     if (updated != 1) throw CatalogService.missing();
     audit(actor, id, "DescriptionTemplateEnabled", enabled ? "启用" : "停用");
     return templateSaved(id);
@@ -493,8 +488,7 @@ public class DescriptionTemplateService {
   /**
    * 删除模板：连带段落、插图位与段落背后的内容模板一起删。
    *
-   * <p>仍被渲染结果引用时返回 400 并说明被引用多少次——历史渲染的 HTML 是按当时的
-   * 段落与变量绑定产出的，删掉之后「这份 HTML 是哪套模板渲染的」就答不上来了。
+   * <p>仍被渲染结果引用时返回 400 并说明被引用多少次——历史渲染的 HTML 是按当时的 段落与变量绑定产出的，删掉之后「这份 HTML 是哪套模板渲染的」就答不上来了。
    * 要清理请改用停用（停用后不能再用它发起渲染，历史渲染照常可读）。
    */
   public void deleteTemplate(AccessService.Access actor, UUID id, long version) {
@@ -510,8 +504,11 @@ public class DescriptionTemplateService {
             + "要清理请改用停用（停用后不能再用它发起渲染，历史渲染照常可读）");
     CatalogService.check(
         existing.get("version", Long.class) == version,
-        "这个描述模板已被他人改动（当前版本 " + existing.get("version", Long.class)
-            + "，你提交的是 " + version + "）：请刷新后重试");
+        "这个描述模板已被他人改动（当前版本 "
+            + existing.get("version", Long.class)
+            + "，你提交的是 "
+            + version
+            + "）：请刷新后重试");
 
     UUID tenantId = currentTenantId();
     // 段落背后的 content_template 要在删模板**之前**取出来：删模板会级联删掉段落，
@@ -521,8 +518,8 @@ public class DescriptionTemplateService {
         sql.fetch(
             "select content_template_id from description_template_section"
                 + " where tenant_id=? and template_id=?",
-            tenantId, id))
-      contentTemplateIds.add(r.get("content_template_id", UUID.class));
+            tenantId,
+            id)) contentTemplateIds.add(r.get("content_template_id", UUID.class));
 
     // 被 3.4.2.2 的填充批次引用过的段落内容不能删，而留着它又会变成
     // 「不在任何描述模板里的孤儿模板」。所以在动手之前就报清楚，
@@ -567,12 +564,16 @@ public class DescriptionTemplateService {
                 + "c.body from description_template_section s"
                 + " join content_template c on c.tenant_id=s.tenant_id and c.id=s.content_template_id"
                 + " where s.tenant_id=? and s.template_id=? order by s.sort_order,s.id",
-            currentTenantId(), templateId);
+            currentTenantId(),
+            templateId);
     if (rows.isEmpty()) return List.of();
     List<UUID> sectionIds = rows.stream().map(r -> r.get("id", UUID.class)).toList();
-    List<UUID> contentTemplateIds = rows.stream().map(r -> r.get("content_template_id", UUID.class)).toList();
-    Map<UUID, List<ContentTemplateVariable>> variables = descriptions.variablesOf(contentTemplateIds);
-    Map<UUID, List<ContentTranslation>> translations = descriptions.translationRows(contentTemplateIds);
+    List<UUID> contentTemplateIds =
+        rows.stream().map(r -> r.get("content_template_id", UUID.class)).toList();
+    Map<UUID, List<ContentTemplateVariable>> variables =
+        descriptions.variablesOf(contentTemplateIds);
+    Map<UUID, List<ContentTranslation>> translations =
+        descriptions.translationRows(contentTemplateIds);
     Map<UUID, List<DescriptionImageSlotRow>> slots = imageSlotsOf(sectionIds);
 
     List<DescriptionSectionRow> out = new ArrayList<>(rows.size());
@@ -612,7 +613,8 @@ public class DescriptionTemplateService {
                 DescriptionRules.FACT_SOURCES.stream(), DescriptionRules.PHRASE_SOURCES.stream())
             .map(
                 source ->
-                    new DescriptionTemplateRules.Option(source, DescriptionRules.sourceLabel(source)))
+                    new DescriptionTemplateRules.Option(
+                        source, DescriptionRules.sourceLabel(source)))
             .toList(),
         DescriptionTemplateRules.defaultPhrasesBySectionType(),
         "变量绑定源与 3.4.2.2 完全同一份词表：{{尺寸}} 的绑定源在全仓只有一个答案，"
@@ -655,7 +657,12 @@ public class DescriptionTemplateService {
                 id)
             .get(0, Integer.class);
     return new DescriptionTemplateSaved(
-        id, row.get("code", String.class), row.get("version", Long.class), sections, slots, renderCount(id));
+        id,
+        row.get("code", String.class),
+        row.get("version", Long.class),
+        sections,
+        slots,
+        renderCount(id));
   }
 
   /** 段落摘要按模板分组（列表页一次查齐，避免逐模板查一次）。 */
@@ -754,7 +761,9 @@ public class DescriptionTemplateService {
 
   java.util.Optional<UUID> findContentTemplateByCode(String code) {
     var row = sql.fetchOne("select id from content_template where code=?", code);
-    return row == null ? java.util.Optional.empty() : java.util.Optional.of(row.get("id", UUID.class));
+    return row == null
+        ? java.util.Optional.empty()
+        : java.util.Optional.of(row.get("id", UUID.class));
   }
 
   UUID currentTenantId() {
@@ -765,7 +774,11 @@ public class DescriptionTemplateService {
   void audit(AccessService.Access actor, UUID resourceId, String action, String detail) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), resourceId, action);
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        resourceId,
+        action);
   }
 
   static String instant(OffsetDateTime value) {

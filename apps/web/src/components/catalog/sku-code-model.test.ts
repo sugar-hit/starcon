@@ -130,9 +130,9 @@ describe('规则表单', () => {
     expect(validateRule({ ...emptyRuleDraft(), code: 'a b', name: 'x' }).join()).toContain(
       '规则编码',
     );
-    expect(validateRule({ ...emptyRuleDraft(), code: 'R1', name: 'x', prefix: 'SKU 1' }).join()).toContain(
-      '编码前缀',
-    );
+    expect(
+      validateRule({ ...emptyRuleDraft(), code: 'R1', name: 'x', prefix: 'SKU 1' }).join(),
+    ).toContain('编码前缀');
     expect(
       validateRule({ ...emptyRuleDraft(), code: 'R1', name: 'x', suffix: '商品' }).join(),
     ).toContain('编码后缀');
@@ -146,9 +146,9 @@ describe('规则表单', () => {
   });
 
   it('限定商品族必须选 SPU', () => {
-    expect(validateRule({ ...emptyRuleDraft(), code: 'R', name: 'n', scope: 'SPU' }).join()).toContain(
-      '必须指定 SPU',
-    );
+    expect(
+      validateRule({ ...emptyRuleDraft(), code: 'R', name: 'n', scope: 'SPU' }).join(),
+    ).toContain('必须指定 SPU');
   });
 
   it('草稿与请求体互转，且 version 原样带上', () => {

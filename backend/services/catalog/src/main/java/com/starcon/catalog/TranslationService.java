@@ -24,30 +24,25 @@ import org.springframework.web.server.ResponseStatusException;
  * 3.4.3.1 多语言内容：SPU/SKU 的多语言名称与描述（{@code spu_translation} / {@code sku_translation}）、
  * 租户语言需求（人工维护的一侧）、AI 翻译建议与采纳流程、翻译完整度。
  *
- * <p>蓝图原文：「职责：维护 SPU/SKU 的多语言名称与描述（`spu_translation` `sku_translation`），
- * 按语言唯一，支持人工校对与 AI 翻译的建议采纳流程。」
- * 「输入：翻译文本（人工/AI 建议）；语言列表（由店铺启用的站点决定实际需要哪些语言）。」
- * 「输出：各语言的名称与描述记录 + 翻译状态（待翻/已翻/已校对）。」
- * 「下游 = 04 刊登填充。**需要哪些语言由店铺启用站点推导**，不靠人肉记忆。」
+ * <p>蓝图原文：「职责：维护 SPU/SKU 的多语言名称与描述（`spu_translation` `sku_translation`）， 按语言唯一，支持人工校对与 AI
+ * 翻译的建议采纳流程。」 「输入：翻译文本（人工/AI 建议）；语言列表（由店铺启用的站点决定实际需要哪些语言）。」 「输出：各语言的名称与描述记录 + 翻译状态（待翻/已翻/已校对）。」 「下游
+ * = 04 刊登填充。**需要哪些语言由店铺启用站点推导**，不靠人肉记忆。」
  *
  * <p>本类的纪律：
  *
  * <ol>
- *   <li><b>「待翻」是一等状态而不是「行不存在」。</b>否则「这个商品的德语还没翻」只能靠
- *       「查哪些行不存在」得到，完整度报表也无从汇总。V22 用三条 CHECK 把三态互斥的形状
+ *   <li><b>「待翻」是一等状态而不是「行不存在」。</b>否则「这个商品的德语还没翻」只能靠 「查哪些行不存在」得到，完整度报表也无从汇总。V22 用三条 CHECK 把三态互斥的形状
  *       钉死，这里是同口径的应用层校验。
- *   <li><b>只有 {@code REVIEWED} 可刊登。</b>「已翻」是机器译文，拿去发平台等于没做校对
- *       ——所以 {@link #coverage} 把 publishable 与 status 分开报，04 刊登只读 publishable。
- *   <li><b>语言需求不从站点编。</b>站点推导走 {@link TranslationLocaleProjectionPort}，
- *       未接入时 {@link #requirementView()} 返回 available=false 并写明归 02 渠道，
+ *   <li><b>只有 {@code REVIEWED} 可刊登。</b>「已翻」是机器译文，拿去发平台等于没做校对 ——所以 {@link #coverage} 把 publishable 与
+ *       status 分开报，04 刊登只读 publishable。
+ *   <li><b>语言需求不从站点编。</b>站点推导走 {@link TranslationLocaleProjectionPort}， 未接入时 {@link
+ *       #requirementView()} 返回 available=false 并写明归 02 渠道，
  *       而不是回一个空语言列表（空列表会被读成「不需要做多语言」——本模块最危险的错误方向）。
- *   <li><b>建议处置是终态。</b>采纳错了直接改译文，不把建议改回待处置再走一遍
- *       ——否则同一条建议两次采纳产出两条不同译文历史，无从判断哪次算数。
+ *   <li><b>建议处置是终态。</b>采纳错了直接改译文，不把建议改回待处置再走一遍 ——否则同一条建议两次采纳产出两条不同译文历史，无从判断哪次算数。
  * </ol>
  *
- * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}。
- * 译文挂在商品上、与 3.4.2.2 同为商品文案，所以沿用 spu 词表
- * （不新造——新词表要改 identity 服务的迁移，属于另一个服务的写入所有权）。
+ * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}。 译文挂在商品上、与 3.4.2.2 同为商品文案，所以沿用
+ * spu 词表 （不新造——新词表要改 identity 服务的迁移，属于另一个服务的写入所有权）。
  *
  * <p>批量操作在 {@link TranslationBatchService}，同一套纪律。
  */
@@ -70,14 +65,15 @@ public class TranslationService {
   // ============================================================ 表名与主体的映射
 
   /**
-   * 译文表名。由已校验的 {@code targetType} 决定，**不是用户输入**，
-   * 所以拼进 SQL 不构成注入面（与 {@link DescriptionService} 用 enum 分派同一判断）。
+   * 译文表名。由已校验的 {@code targetType} 决定，**不是用户输入**， 所以拼进 SQL 不构成注入面（与 {@link DescriptionService} 用
+   * enum 分派同一判断）。
    *
-   * <p>分两张表而不是一张多态表的理由写在 V22 文件头：合表就没法建复合外键，
-   * 「译文必须挂在一个真实存在的商品上」只能降级成触发器。
+   * <p>分两张表而不是一张多态表的理由写在 V22 文件头：合表就没法建复合外键， 「译文必须挂在一个真实存在的商品上」只能降级成触发器。
    */
   static String tableOf(String targetType) {
-    return "SKU".equals(MediaRules.normalizeUpper(targetType)) ? "sku_translation" : "spu_translation";
+    return "SKU".equals(MediaRules.normalizeUpper(targetType))
+        ? "sku_translation"
+        : "spu_translation";
   }
 
   /** 译文表上的外键列名。 */
@@ -90,8 +86,7 @@ public class TranslationService {
   /**
    * 多语言内容概览。
    *
-   * <p>{@code pendingTranslationCount} 是这个模块唯一需要每天盯的数字：
-   * 语言需求推导出来之后，待翻积压直接决定 04 刊登能不能上新。
+   * <p>{@code pendingTranslationCount} 是这个模块唯一需要每天盯的数字： 语言需求推导出来之后，待翻积压直接决定 04 刊登能不能上新。
    */
   public TranslationOverview overview() {
     UUID tenantId = currentTenantId();
@@ -149,7 +144,9 @@ public class TranslationService {
                 + "count(*) filter (where status='PENDING') as pending,"
                 + "count(*) filter (where status='TRANSLATED') as translated,"
                 + "count(*) filter (where status='REVIEWED') as reviewed"
-                + " from " + table + " where tenant_id=?",
+                + " from "
+                + table
+                + " where tenant_id=?",
             tenantId);
     return new long[] {
       r.get("total", Long.class),
@@ -177,7 +174,8 @@ public class TranslationService {
     }
     String source = MediaRules.normalizeUpper(query.source());
     if (!source.isEmpty()) {
-      check(TranslationRules.localeSourceProblem(source) == null,
+      check(
+          TranslationRules.localeSourceProblem(source) == null,
           TranslationRules.localeSourceProblem(source));
       where.append(" and source=?");
       binds.add(source);
@@ -197,7 +195,9 @@ public class TranslationService {
     var rows =
         sql.fetch(
             "select id,locale,locale_name,source,enabled,note,version,created_at,updated_at"
-                + " from translation_locale" + where + " order by locale limit ? offset ?",
+                + " from translation_locale"
+                + where
+                + " order by locale limit ? offset ?",
             pageBinds.toArray());
     Map<String, long[]> coverage = localeCoverage();
     List<TranslationLocaleRow> items = new ArrayList<>(rows.size());
@@ -206,7 +206,8 @@ public class TranslationService {
       long[] stat = coverage.getOrDefault(locale, new long[4]);
       items.add(localeRow(r, stat));
     }
-    return new TranslationLocalePage(items, page, size, total, (int) Math.ceil(total / (double) size));
+    return new TranslationLocalePage(
+        items, page, size, total, (int) Math.ceil(total / (double) size));
   }
 
   /** 单条语言需求。 */
@@ -215,7 +216,8 @@ public class TranslationService {
         sql.fetchOne(
             "select id,locale,locale_name,source,enabled,note,version,created_at,updated_at"
                 + " from translation_locale where tenant_id=? and id=?",
-            currentTenantId(), id);
+            currentTenantId(),
+            id);
     if (r == null) throw notFound("语言需求不存在");
     String locale = r.get("locale", String.class);
     return localeRow(r, localeCoverage().getOrDefault(locale, new long[4]));
@@ -243,8 +245,7 @@ public class TranslationService {
   /**
    * 建语言需求或改语言需求（id 为空即新建）。
    *
-   * <p>语言标签**建后不可改**：译文行的键是 {@code (主体, locale)}，改标签等于把一个商品上
-   * 所有同语言译文一次性变成「非需求语言」，而没人会想到去重新校对。
+   * <p>语言标签**建后不可改**：译文行的键是 {@code (主体, locale)}，改标签等于把一个商品上 所有同语言译文一次性变成「非需求语言」，而没人会想到去重新校对。
    */
   public TranslationLocaleSaved saveLocale(
       AccessService.Access actor, UUID id, TranslationLocaleInput input) {
@@ -264,7 +265,12 @@ public class TranslationService {
         sql.execute(
             "insert into translation_locale(id,tenant_id,locale,locale_name,source,enabled,note,version)"
                 + " values(?,?,?,?,'MANUAL',?,?,0)",
-            newId, tenantId, locale, localeName, enabled, note);
+            newId,
+            tenantId,
+            locale,
+            localeName,
+            enabled,
+            note);
       } catch (DataAccessException e) {
         throw conflict(
             "语言「"
@@ -280,11 +286,13 @@ public class TranslationService {
     var current =
         sql.fetchOne(
             "select locale,version from translation_locale where tenant_id=? and id=?",
-            tenantId, id);
+            tenantId,
+            id);
     if (current == null) throw notFound("语言需求不存在");
     checkVersion(current.get("version", Long.class), input.version());
     String currentLocale = current.get("locale", String.class);
-    check(currentLocale.equals(locale),
+    check(
+        currentLocale.equals(locale),
         "语言标签建后不可改：这行需求的标签是它下面所有商品译文主键的一部分，"
             + "改标签等于把「"
             + currentLocale
@@ -293,19 +301,27 @@ public class TranslationService {
         sql.execute(
             "update translation_locale set locale_name=?,enabled=?,note=?,version=version+1,"
                 + "updated_at=now() where tenant_id=? and id=? and version=?",
-            localeName, enabled, note, tenantId, id, input.version());
+            localeName,
+            enabled,
+            note,
+            tenantId,
+            id,
+            input.version());
     check(affected == 1, "这条语言需求刚被别人改过（版本不是 " + input.version() + "），请刷新后重试");
     audit(actor, id, "TranslationLocaleUpdated");
     return new TranslationLocaleSaved(locale(id), false, "语言需求已更新");
   }
 
   /** 停用/启用语言需求。停用后不再出现在批量操作的默认语言里，已建的译文照常可读。 */
-  public TranslationLocaleRow setLocaleEnabled(AccessService.Access actor, UUID id, boolean enabled) {
+  public TranslationLocaleRow setLocaleEnabled(
+      AccessService.Access actor, UUID id, boolean enabled) {
     int affected =
         sql.execute(
             "update translation_locale set enabled=?,version=version+1,updated_at=now()"
                 + " where tenant_id=? and id=?",
-            enabled, actor.tenantId(), id);
+            enabled,
+            actor.tenantId(),
+            id);
     if (affected == 0) throw notFound("语言需求不存在");
     audit(actor, id, enabled ? "TranslationLocaleEnabled" : "TranslationLocaleDisabled");
     return locale(id);
@@ -316,13 +332,16 @@ public class TranslationService {
     var current =
         sql.fetchOne(
             "select version from translation_locale where tenant_id=? and id=?",
-            actor.tenantId(), id);
+            actor.tenantId(),
+            id);
     if (current == null) throw notFound("语言需求不存在");
     checkVersion(current.get("version", Long.class), version);
     try {
       sql.execute(
           "delete from translation_locale where tenant_id=? and id=? and version=?",
-          actor.tenantId(), id, version);
+          actor.tenantId(),
+          id,
+          version);
     } catch (DataAccessException e) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, rootMessage(e));
     }
@@ -334,12 +353,11 @@ public class TranslationService {
   /**
    * 合并视图：租户需要哪些语言（人工维护 ∪ 店铺启用站点推导）。
    *
-   * <p>蓝图硬要求「需要哪些语言由店铺启用站点推导，不靠人肉记忆」。站点是 02 渠道的事实，
-   * catalog 禁止跨服务 SQL，所以推导走 {@link TranslationLocaleProjectionPort}。
+   * <p>蓝图硬要求「需要哪些语言由店铺启用站点推导，不靠人肉记忆」。站点是 02 渠道的事实， catalog 禁止跨服务 SQL，所以推导走 {@link
+   * TranslationLocaleProjectionPort}。
    *
-   * <p><b>未接入时返回 {@code siteLocaleAvailable=false} 且 {@code siteNote} 写明归 02 渠道</b>，
-   * {@code requirements} 里 {@code fromSite} 一条都没有——空的站点推导列表会被读成
-   * 「这个租户不需要多语言」，那是本模块最危险的错误方向。
+   * <p><b>未接入时返回 {@code siteLocaleAvailable=false} 且 {@code siteNote} 写明归 02 渠道</b>， {@code
+   * requirements} 里 {@code fromSite} 一条都没有——空的站点推导列表会被读成 「这个租户不需要多语言」，那是本模块最危险的错误方向。
    */
   public TranslationRequirementView requirementView() {
     UUID tenantId = currentTenantId();
@@ -405,8 +423,7 @@ public class TranslationService {
   /**
    * 从店铺启用站点同步语言需求。
    *
-   * <p>02 渠道未接入时返回 409 并写明归 02 渠道，**不写入任何行**——编一份「推导结果」写进
-   * 语言需求表，会让「人工维护」与「站点推导」两个来源在数据上分不开，
+   * <p>02 渠道未接入时返回 409 并写明归 02 渠道，**不写入任何行**——编一份「推导结果」写进 语言需求表，会让「人工维护」与「站点推导」两个来源在数据上分不开，
    * 而那正是本模块要消除的东西。
    */
   public TranslationRequirementView syncFromSites(AccessService.Access actor) {
@@ -444,8 +461,7 @@ public class TranslationService {
   /**
    * 某个 SPU / SKU 的多语言工作台视图。
    *
-   * <p>把「需要哪些语言」（租户语言需求）与「翻到什么程度」（译文状态）在**同一行**对上，
-   * 页面不必自己拼两张表再对齐——而「这个商品还差哪几种语言」正是运营唯一要问的问题。
+   * <p>把「需要哪些语言」（租户语言需求）与「翻到什么程度」（译文状态）在**同一行**对上， 页面不必自己拼两张表再对齐——而「这个商品还差哪几种语言」正是运营唯一要问的问题。
    *
    * <p>租户语言需求之外的译文也会显示，但 {@code required=false}：有人手工翻了一条不在需求里的
    * 语言是有价值的（它可能对应一个刚开的站点），静默隐藏会让运营以为那条译文不存在。
@@ -462,12 +478,23 @@ public class TranslationService {
       rows.put(
           r.get("locale", String.class),
           new TranslationProductRow(
-              r.get("locale", String.class), r.get("locale_name", String.class), true,
-              null, null, null, null, false));
+              r.get("locale", String.class),
+              r.get("locale_name", String.class),
+              true,
+              null,
+              null,
+              null,
+              null,
+              false));
     for (Record r :
         sql.fetch(
-            "select * from " + tableOf(type) + " where tenant_id=? and " + subjectColumnOf(type) + "=?",
-            currentTenantId(), targetId)) {
+            "select * from "
+                + tableOf(type)
+                + " where tenant_id=? and "
+                + subjectColumnOf(type)
+                + "=?",
+            currentTenantId(),
+            targetId)) {
       String locale = r.get("locale", String.class);
       String status = r.get("status", String.class);
       TranslationProductRow existing = rows.get(locale);
@@ -486,8 +513,11 @@ public class TranslationService {
     long pendingSuggestions =
         sql.fetchOne(
                 "select count(*) from translation_suggestion where tenant_id=? and status='PENDING'"
-                    + " and " + subjectColumnOf(type) + "=?",
-                currentTenantId(), targetId)
+                    + " and "
+                    + subjectColumnOf(type)
+                    + "=?",
+                currentTenantId(),
+                targetId)
             .get(0, Long.class);
     var site = sitePort.derivedLocales(currentTenantId());
     return new TranslationProductView(
@@ -499,8 +529,7 @@ public class TranslationService {
         pendingSuggestions,
         site.available(),
         site.note(),
-        "只有「已校对」的译文能刊登：「已翻」是机器译文或刚填的草稿，发到平台上等于没做校对这一步。"
-            + "不在这行里的译文标成「非需求语言」，它们照常可读，不会被刊登取用。");
+        "只有「已校对」的译文能刊登：「已翻」是机器译文或刚填的草稿，发到平台上等于没做校对这一步。" + "不在这行里的译文标成「非需求语言」，它们照常可读，不会被刊登取用。");
   }
 
   // ============================================================ 译文列表与详情
@@ -508,8 +537,7 @@ public class TranslationService {
   /**
    * 译文列表：分页 + 关键词 + 状态 + 语言 + 主体类型 + 具体主体。
    *
-   * <p>两张表用 {@code UNION ALL} 一次查完再排序分页——在 Java 里合并两页再切片会造出
-   * 「总数对不上、且翻页会漏行或重行」的假分页。
+   * <p>两张表用 {@code UNION ALL} 一次查完再排序分页——在 Java 里合并两页再切片会造出 「总数对不上、且翻页会漏行或重行」的假分页。
    */
   public TranslationEntryPage entries(TranslationEntryQuery query) {
     int page = Math.max(0, query.page());
@@ -520,7 +548,8 @@ public class TranslationService {
     List<Record> rows = selectEntries(filter, size, (long) page * size);
     List<TranslationEntry> items = new ArrayList<>(rows.size());
     for (Record r : rows) items.add(toEntry(r, r.get("target_type", String.class)));
-    return new TranslationEntryPage(items, page, size, total, (int) Math.ceil(total / (double) size));
+    return new TranslationEntryPage(
+        items, page, size, total, (int) Math.ceil(total / (double) size));
   }
 
   /** 单条译文详情。 */
@@ -532,8 +561,8 @@ public class TranslationService {
   /**
    * 建译文或改译文。
    *
-   * <p>语言**不可改**（{@link TranslationEntryEdit} 里没有 locale 字段）：唯一性主键是
-   * {@code (主体, locale)}，「把德语译文改成法语」不是编辑而是删一条建一条。
+   * <p>语言**不可改**（{@link TranslationEntryEdit} 里没有 locale 字段）：唯一性主键是 {@code (主体,
+   * locale)}，「把德语译文改成法语」不是编辑而是删一条建一条。
    */
   public TranslationEntry saveEntry(
       AccessService.Access actor, String targetType, UUID targetId, UUID id, Object input) {
@@ -627,7 +656,8 @@ public class TranslationService {
       return entry(newId);
     }
 
-    var current = sql.fetchOne("select * from " + table + " where tenant_id=? and id=?", tenantId, id);
+    var current =
+        sql.fetchOne("select * from " + table + " where tenant_id=? and id=?", tenantId, id);
     if (current == null) throw notFound("译文不存在");
     checkVersion(current.get("version", Long.class), version);
     problem =
@@ -660,8 +690,7 @@ public class TranslationService {
   /**
    * 翻译状态流转（人工校对 / 退回）。
    *
-   * <p>单独一个端点而不是复用编辑：改状态会**留下校对人与校对时刻**，而普通编辑不该能
-   * 顺手伪造这两样。V22 的触发器在 DB 层再兜一次。
+   * <p>单独一个端点而不是复用编辑：改状态会**留下校对人与校对时刻**，而普通编辑不该能 顺手伪造这两样。V22 的触发器在 DB 层再兜一次。
    */
   public TranslationEntry setEntryStatus(
       AccessService.Access actor, UUID id, TranslationStatusInput input) {
@@ -694,7 +723,10 @@ public class TranslationService {
             id,
             input.version());
     check(affected == 1, "这条译文刚被别人改过（版本不是 " + input.version() + "），请刷新后重试");
-    audit(actor, id, "TranslationStatusChanged:" + current.get("status", String.class) + "->" + status);
+    audit(
+        actor,
+        id,
+        "TranslationStatusChanged:" + current.get("status", String.class) + "->" + status);
     return entry(id);
   }
 
@@ -705,7 +737,9 @@ public class TranslationService {
     int affected =
         sql.execute(
             "delete from " + located.table() + " where tenant_id=? and id=? and version=?",
-            actor.tenantId(), id, version);
+            actor.tenantId(),
+            id,
+            version);
     if (affected == 0) throw notFound("译文不存在或刚被别人改过");
     audit(actor, id, "TranslationEntryDeleted");
   }
@@ -715,8 +749,7 @@ public class TranslationService {
   /**
    * 翻译完整度：这个商品在这些语言上能不能直接刊登。
    *
-   * <p>04 刊登填充的读形状。只有 {@code publishable=true}（status='REVIEWED'）才可刊登：
-   * 「已翻」是机器译文，拿去发平台等于没做校对这一步。
+   * <p>04 刊登填充的读形状。只有 {@code publishable=true}（status='REVIEWED'）才可刊登： 「已翻」是机器译文，拿去发平台等于没做校对这一步。
    *
    * @param locales 要检查的语言；为空时用租户启用的语言需求
    */
@@ -726,16 +759,23 @@ public class TranslationService {
     List<String> wanted = normalizeLocales(locales);
     if (wanted.isEmpty()) wanted = requiredLocales();
     java.util.Set<String> requiredSet =
-        sql.fetch("select locale from translation_locale where tenant_id=? and enabled", currentTenantId())
+        sql
+            .fetch(
+                "select locale from translation_locale where tenant_id=? and enabled",
+                currentTenantId())
             .stream()
             .map(r -> r.get(0, String.class))
             .collect(Collectors.toSet());
     Map<String, Record> entries = new LinkedHashMap<>();
     for (Record r :
         sql.fetch(
-            "select * from " + tableOf(type) + " where tenant_id=? and " + subjectColumnOf(type) + "=?",
-            currentTenantId(), targetId))
-      entries.put(r.get("locale", String.class), r);
+            "select * from "
+                + tableOf(type)
+                + " where tenant_id=? and "
+                + subjectColumnOf(type)
+                + "=?",
+            currentTenantId(),
+            targetId)) entries.put(r.get("locale", String.class), r);
 
     List<TranslationCoverageRow> rows = new ArrayList<>(wanted.size());
     long pending = 0, translated = 0, reviewed = 0, publishable = 0, requiredCount = 0;
@@ -771,8 +811,7 @@ public class TranslationService {
         pending,
         translated,
         reviewed,
-        "只有「已校对」才可刊登。缺哪些语言看 required=true 且 publishable=false 的行——"
-            + "那正是 04 刊登填充时会取到空的那几行。");
+        "只有「已校对」才可刊登。缺哪些语言看 required=true 且 publishable=false 的行——" + "那正是 04 刊登填充时会取到空的那几行。");
   }
 
   // ============================================================ AI 翻译建议
@@ -786,14 +825,16 @@ public class TranslationService {
     binds.add(currentTenantId());
     String type = MediaRules.normalizeUpper(query.targetType());
     if (!type.isEmpty()) {
-      check(TranslationRules.targetTypeProblem(type) == null,
+      check(
+          TranslationRules.targetTypeProblem(type) == null,
           TranslationRules.targetTypeProblem(type));
       where.append(" and s.target_type=?");
       binds.add(type);
     }
     String status = MediaRules.normalizeUpper(query.status());
     if (!status.isEmpty()) {
-      check(TranslationRules.suggestionStatusProblem(status) == null,
+      check(
+          TranslationRules.suggestionStatusProblem(status) == null,
           TranslationRules.suggestionStatusProblem(status));
       where.append(" and s.status=?");
       binds.add(status);
@@ -837,15 +878,20 @@ public class TranslationService {
     List<Object> pageBinds = new ArrayList<>(binds);
     pageBinds.add(size);
     pageBinds.add((long) page * size);
-    var rows = sql.fetch(suggestionSelect() + where + " order by s.created_at desc,s.id desc limit ? offset ?", pageBinds.toArray());
+    var rows =
+        sql.fetch(
+            suggestionSelect() + where + " order by s.created_at desc,s.id desc limit ? offset ?",
+            pageBinds.toArray());
     List<TranslationSuggestionRow> items = new ArrayList<>(rows.size());
     for (Record r : rows) items.add(toSuggestion(r));
-    return new TranslationSuggestionPage(items, page, size, total, (int) Math.ceil(total / (double) size));
+    return new TranslationSuggestionPage(
+        items, page, size, total, (int) Math.ceil(total / (double) size));
   }
 
   /** 单条建议。 */
   public TranslationSuggestionRow suggestion(UUID id) {
-    var r = sql.fetchOne(suggestionSelect() + " where s.tenant_id=? and s.id=?", currentTenantId(), id);
+    var r =
+        sql.fetchOne(suggestionSelect() + " where s.tenant_id=? and s.id=?", currentTenantId(), id);
     if (r == null) throw notFound("翻译建议不存在");
     return toSuggestion(r);
   }
@@ -853,8 +899,7 @@ public class TranslationService {
   /**
    * 登记一批 AI 翻译建议（18 AI 翻译回写）。
    *
-   * <p>catalog 不调 AI：调它等于跨服务依赖调用顺序（catalog 就得知道 18 什么时候能回）。
-   * 18 翻完调这里写回，catalog 侧再由人工采纳或驳回。
+   * <p>catalog 不调 AI：调它等于跨服务依赖调用顺序（catalog 就得知道 18 什么时候能回）。 18 翻完调这里写回，catalog 侧再由人工采纳或驳回。
    */
   public TranslationSuggestionPage submitSuggestions(
       AccessService.Access actor, TranslationSuggestionSubmit submit) {
@@ -879,8 +924,7 @@ public class TranslationService {
     check(problem == null, problem);
     problem = TranslationRules.descriptionProblem(description);
     check(problem == null, problem);
-    check(!name.isEmpty() || !description.isEmpty(),
-        "这条翻译建议既没有名称也没有描述：采纳一个空字符串没有任何意义");
+    check(!name.isEmpty() || !description.isEmpty(), "这条翻译建议既没有名称也没有描述：采纳一个空字符串没有任何意义");
     String origin = MediaRules.normalizeUpper(input.origin());
     if (origin.isEmpty()) origin = "AI";
     problem = TranslationRules.suggestionOriginProblem(origin);
@@ -933,8 +977,7 @@ public class TranslationService {
    * <p>采纳后译文落在 {@code TRANSLATED}（已翻）而不是 {@code REVIEWED}（已校对）——
    * 机器译文拿去发平台等于没做校对这一步。人工校对是**另一次显式的动作**。
    *
-   * <p>已有译文时直接改正文，但状态回到「已翻」并清掉校对留痕：之前校对的是上一版正文，
-   * AI 建议刚把正文换掉，那份校对结论已经不对应当前文本了。
+   * <p>已有译文时直接改正文，但状态回到「已翻」并清掉校对留痕：之前校对的是上一版正文， AI 建议刚把正文换掉，那份校对结论已经不对应当前文本了。
    */
   public TranslationEntry adoptSuggestion(AccessService.Access actor, UUID id) {
     Record current = locateSuggestion(id);
@@ -957,8 +1000,14 @@ public class TranslationService {
 
     var existing =
         sql.fetchOne(
-            "select id,version from " + table + " where tenant_id=? and " + column + "=? and locale=?",
-            actor.tenantId(), subject, locale);
+            "select id,version from "
+                + table
+                + " where tenant_id=? and "
+                + column
+                + "=? and locale=?",
+            actor.tenantId(),
+            subject,
+            locale);
     TranslationEntry entry;
     if (existing == null) {
       UUID newId = Ids.next();
@@ -969,7 +1018,13 @@ public class TranslationService {
               + column
               + ",locale,name,description,origin,status,version,translated_at)"
               + " values(?,?,?,?,?,?,'AI','TRANSLATED',0,?::timestamptz)",
-          newId, actor.tenantId(), subject, locale, name, description, now);
+          newId,
+          actor.tenantId(),
+          subject,
+          locale,
+          name,
+          description,
+          now);
       entry = entry(newId);
     } else {
       UUID existingId = existing.get("id", UUID.class);
@@ -980,7 +1035,12 @@ public class TranslationService {
                   + " set name=?,description=?,origin='AI',status='TRANSLATED',reviewed_by=null,"
                   + "reviewed_at=null,version=version+1,updated_at=now(),translated_at=?::timestamptz"
                   + " where tenant_id=? and id=? and version=?",
-              name, description, now, actor.tenantId(), existingId, existing.get("version", Long.class));
+              name,
+              description,
+              now,
+              actor.tenantId(),
+              existingId,
+              existing.get("version", Long.class));
       check(affected == 1, "这条译文刚被别人改过，本次采纳没有生效，请刷新后重试");
       entry = entry(existingId);
     }
@@ -990,7 +1050,10 @@ public class TranslationService {
             "update translation_suggestion set status='ADOPTED',decided_by=?,decided_at=?::timestamptz,"
                 + "reject_reason='',version=version+1,updated_at=now() where tenant_id=? and id=?"
                 + " and status='PENDING'",
-            actor.userId(), now, actor.tenantId(), id);
+            actor.userId(),
+            now,
+            actor.tenantId(),
+            id);
     check(decided == 1, "这条建议刚被别人处置过，本次采纳没有生效，请刷新后重试");
     audit(actor, id, "TranslationSuggestionAdopted");
     return entry;
@@ -1005,16 +1068,18 @@ public class TranslationService {
     String status = locateSuggestion(id).get("status", String.class);
     if (!"PENDING".equals(status))
       throw conflict(
-          "这条翻译建议已经被处置过（"
-              + TranslationRules.suggestionStatusLabel(status)
-              + "）：处置结果是终态");
+          "这条翻译建议已经被处置过（" + TranslationRules.suggestionStatusLabel(status) + "）：处置结果是终态");
     OffsetDateTime now = utcNow();
     int affected =
         sql.execute(
             "update translation_suggestion set status='REJECTED',decided_by=?,decided_at=?::timestamptz,"
                 + "reject_reason=?,version=version+1,updated_at=now()"
                 + " where tenant_id=? and id=? and status='PENDING'",
-            actor.userId(), now, reason, actor.tenantId(), id);
+            actor.userId(),
+            now,
+            reason,
+            actor.tenantId(),
+            id);
     check(affected == 1, "这条建议刚被别人处置过，本次驳回没有生效，请刷新后重试");
     audit(actor, id, "TranslationSuggestionRejected");
     return suggestion(id);
@@ -1024,7 +1089,8 @@ public class TranslationService {
   public void deleteSuggestion(AccessService.Access actor, UUID id, long version) {
     var current = locateSuggestion(id);
     String status = current.get("status", String.class);
-    check("REJECTED".equals(status),
+    check(
+        "REJECTED".equals(status),
         "只有「已驳回」的建议可以删除，当前是「"
             + TranslationRules.suggestionStatusLabel(status)
             + "」：待处置的建议删掉等于让 18 的成果无声消失，"
@@ -1032,7 +1098,9 @@ public class TranslationService {
     checkVersion(current.get("version", Long.class), version);
     sql.execute(
         "delete from translation_suggestion where tenant_id=? and id=? and version=?",
-        actor.tenantId(), id, version);
+        actor.tenantId(),
+        id,
+        version);
     audit(actor, id, "TranslationSuggestionDeleted");
   }
 
@@ -1041,13 +1109,11 @@ public class TranslationService {
   /**
    * 导出译文 CSV（04 刊登与 18 批量校对取用）。
    *
-   * <p>表头先写、数据按 {@value #CSV_CHUNK} 行分批写出，峰值内存与结果集大小无关。
-   * 走 GET + query 而不是 POST：导出结果与当前筛选完全一致。
+   * <p>表头先写、数据按 {@value #CSV_CHUNK} 行分批写出，峰值内存与结果集大小无关。 走 GET + query 而不是 POST：导出结果与当前筛选完全一致。
    */
   public void streamEntriesCsv(
       TranslationEntryQuery query, java.util.function.Consumer<String> chunk) {
-    chunk.accept(
-        "\ufeff对象类型,对象编码,对象名称,语言,名称,描述,来源,状态,是否可刊登,创建时间,校对时间\n");
+    chunk.accept("\ufeff对象类型,对象编码,对象名称,语言,名称,描述,来源,状态,是否可刊登,创建时间,校对时间\n");
     Filters filter = entryFilter(query);
     int offset = 0;
     while (true) {
@@ -1058,18 +1124,34 @@ public class TranslationService {
         String rowType = r.get("target_type", String.class);
         String rowStatus = r.get("status", String.class);
         buffer
-            .append(csv(rowType)).append(',')
-            .append(csv("SKU".equals(rowType) ? r.get("sku_code", String.class) : r.get("spu_code", String.class)))
+            .append(csv(rowType))
             .append(',')
-            .append(csv("SKU".equals(rowType) ? r.get("sku_name", String.class) : r.get("spu_name", String.class)))
+            .append(
+                csv(
+                    "SKU".equals(rowType)
+                        ? r.get("sku_code", String.class)
+                        : r.get("spu_code", String.class)))
             .append(',')
-            .append(csv(r.get("locale", String.class))).append(',')
-            .append(csv(r.get("name", String.class))).append(',')
-            .append(csv(r.get("description", String.class))).append(',')
-            .append(csv(TranslationRules.originLabel(r.get("origin", String.class)))).append(',')
-            .append(csv(TranslationRules.statusLabel(rowStatus))).append(',')
-            .append(csv("REVIEWED".equals(rowStatus) ? "可刊登" : "不可刊登")).append(',')
-            .append(csv(instant(r.get("created_at", OffsetDateTime.class)))).append(',')
+            .append(
+                csv(
+                    "SKU".equals(rowType)
+                        ? r.get("sku_name", String.class)
+                        : r.get("spu_name", String.class)))
+            .append(',')
+            .append(csv(r.get("locale", String.class)))
+            .append(',')
+            .append(csv(r.get("name", String.class)))
+            .append(',')
+            .append(csv(r.get("description", String.class)))
+            .append(',')
+            .append(csv(TranslationRules.originLabel(r.get("origin", String.class))))
+            .append(',')
+            .append(csv(TranslationRules.statusLabel(rowStatus)))
+            .append(',')
+            .append(csv("REVIEWED".equals(rowStatus) ? "可刊登" : "不可刊登"))
+            .append(',')
+            .append(csv(instant(r.get("created_at", OffsetDateTime.class))))
+            .append(',')
             .append(csv(instant(r.get("reviewed_at", OffsetDateTime.class))))
             .append('\n');
       }
@@ -1138,9 +1220,8 @@ public class TranslationService {
   /**
    * 译文 SELECT：两张表 UNION ALL 后再排序分页，避免「在 Java 里合并两页再切片」的假分页。
    *
-   * <p>每个分支只 join 它自己那张商品表：{@code spu_translation} 行上没有 {@code sku_id} 列，
-   * 硬把两个商品表都 join 上会得到 PG 的 {@code column t.sku_id does not exist}。
-   * 另一侧的商品编码那一列直接给空串 —— 一行只属于一个主体，另一侧本来就没有值。
+   * <p>每个分支只 join 它自己那张商品表：{@code spu_translation} 行上没有 {@code sku_id} 列， 硬把两个商品表都 join 上会得到 PG 的
+   * {@code column t.sku_id does not exist}。 另一侧的商品编码那一列直接给空串 —— 一行只属于一个主体，另一侧本来就没有值。
    */
   private String entrySelect(String type) {
     boolean sku = "SKU".equals(type);
@@ -1162,8 +1243,10 @@ public class TranslationService {
   }
 
   private List<Record> selectEntries(Filters filter, int size, long offset) {
-    List<String> tables = filter.targetType().isEmpty() ? TranslationRules.TARGET_TYPES
-        : List.of(filter.targetType());
+    List<String> tables =
+        filter.targetType().isEmpty()
+            ? TranslationRules.TARGET_TYPES
+            : List.of(filter.targetType());
     StringBuilder sqlText = new StringBuilder();
     List<Object> binds = new ArrayList<>();
     for (String type : tables) {
@@ -1179,8 +1262,10 @@ public class TranslationService {
   }
 
   private long countEntries(Filters filter) {
-    List<String> tables = filter.targetType().isEmpty() ? TranslationRules.TARGET_TYPES
-        : List.of(filter.targetType());
+    List<String> tables =
+        filter.targetType().isEmpty()
+            ? TranslationRules.TARGET_TYPES
+            : List.of(filter.targetType());
     StringBuilder sqlText = new StringBuilder("select coalesce(sum(total),0) from (");
     List<Object> binds = new ArrayList<>();
     for (int i = 0; i < tables.size(); i++) {
@@ -1221,7 +1306,8 @@ public class TranslationService {
                 + "count(*) filter (where status='TRANSLATED') as translated,"
                 + "count(*) filter (where status='REVIEWED') as reviewed"
                 + " from sku_translation where tenant_id=? group by locale",
-            currentTenantId(), currentTenantId());
+            currentTenantId(),
+            currentTenantId());
     Map<String, long[]> out = new LinkedHashMap<>();
     for (Record r : rows) {
       String locale = r.get("locale", String.class);
@@ -1281,7 +1367,9 @@ public class TranslationService {
   private Record locateSuggestion(UUID id) {
     var r =
         sql.fetchOne(
-            "select * from translation_suggestion where tenant_id=? and id=?", currentTenantId(), id);
+            "select * from translation_suggestion where tenant_id=? and id=?",
+            currentTenantId(),
+            id);
     if (r == null) throw notFound("翻译建议不存在");
     return r;
   }
@@ -1291,7 +1379,9 @@ public class TranslationService {
     String table = "SKU".equals(type) ? "sku" : "spu";
     var r =
         sql.fetchOne(
-            "select code,name from " + table + " where tenant_id=? and id=?", currentTenantId(), id);
+            "select code,name from " + table + " where tenant_id=? and id=?",
+            currentTenantId(),
+            id);
     if (r == null) throw notFound("商品不存在：" + TranslationRules.targetTypeLabel(type) + " " + id);
     return Map.of("code", r.get("code", String.class), "name", r.get("name", String.class));
   }
@@ -1299,9 +1389,8 @@ public class TranslationService {
   /**
    * 组装一条译文。
    *
-   * <p>{@code targetType} 由调用方给出而不是从行里取：按 id 定位走的是 {@code select *}，
-   * 那种行里既没有 {@code target_type} 也没有另一张表的主体列
-   * （{@code spu_translation} 没有 {@code sku_id}），让记录自己报会得到假值。
+   * <p>{@code targetType} 由调用方给出而不是从行里取：按 id 定位走的是 {@code select *}， 那种行里既没有 {@code target_type}
+   * 也没有另一张表的主体列 （{@code spu_translation} 没有 {@code sku_id}），让记录自己报会得到假值。
    */
   private TranslationEntry toEntry(Record r, String targetType) {
     boolean sku = "SKU".equals(targetType);
@@ -1375,7 +1464,8 @@ public class TranslationService {
 
   /** 租户启用的语言需求（「需要哪些语言」的默认取值）。 */
   List<String> requiredLocales() {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select locale from translation_locale where tenant_id=? and enabled order by locale",
             currentTenantId())
         .stream()
@@ -1402,8 +1492,7 @@ public class TranslationService {
   }
 
   static void checkVersion(long current, long submitted) {
-    check(current == submitted,
-        "这条记录刚被别人改过（版本是 " + current + "，你提交的是 " + submitted + "），请刷新后重试");
+    check(current == submitted, "这条记录刚被别人改过（版本是 " + current + "，你提交的是 " + submitted + "），请刷新后重试");
   }
 
   static UUID requireUuid(String value, String field) {
@@ -1455,6 +1544,10 @@ public class TranslationService {
   void audit(AccessService.Access actor, UUID resourceId, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), resourceId, action);
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        resourceId,
+        action);
   }
 }

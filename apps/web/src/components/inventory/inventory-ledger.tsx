@@ -103,9 +103,7 @@ export function InventoryLedger({ drill }: { drill: LedgerDrill | null }) {
       try {
         setDrillDown({ id: target, data: await fetchLedgerDrill(target) });
       } catch (e) {
-        setDrillError(
-          `${errorText(e)}（该笔流水可能不在当前时间区间内，可放宽区间后再试）`,
-        );
+        setDrillError(`${errorText(e)}（该笔流水可能不在当前时间区间内，可放宽区间后再试）`);
         setDrillDown(null);
         setExpanded(null);
       } finally {

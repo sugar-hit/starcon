@@ -171,8 +171,7 @@ export function DropshipTrackingWorkspace() {
 
   const openExceptions = exceptions.filter((e) => e.status === 'OPEN');
   const criticalCount = openExceptions.filter((e) => e.severity === 'CRITICAL').length;
-  const switchedCount =
-    trackings?.items.filter((t) => t.activeLeg === 'OWN').length ?? 0;
+  const switchedCount = trackings?.items.filter((t) => t.activeLeg === 'OWN').length ?? 0;
   const pendingTasks = tasks?.items.filter((t) => t.taskStatus === 'OPEN').length ?? 0;
 
   return (
@@ -252,7 +251,7 @@ export function DropshipTrackingWorkspace() {
           </Button>
           <Field label="异常类型">
             <select
-              className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
               value={exceptionKindFilter}
               onChange={(e) => {
                 setPage(0);
@@ -269,7 +268,7 @@ export function DropshipTrackingWorkspace() {
           </Field>
           <Field label="状态">
             <select
-              className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
               value={exceptionStatusFilter}
               onChange={(e) => {
                 setPage(0);
@@ -374,7 +373,7 @@ export function DropshipTrackingWorkspace() {
         <div className="mb-4 flex flex-wrap items-end gap-3">
           <Field label="生效段">
             <select
-              className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
               value={legFilter}
               onChange={(e) => {
                 setPage(0);
@@ -443,7 +442,8 @@ export function DropshipTrackingWorkspace() {
                   {supplierLegAbandoned(t) && <Badge tone="warning">供应商段已废弃</Badge>}
                   {t.urgeCount > 0 && <Badge tone="warning">已催 {t.urgeCount} 次</Badge>}
                   <span className="text-copy-13 text-muted ml-auto">
-                    承诺 {timeText(t.supplierPromisedShipAt)}（{promisedText(t.supplierPromisedShipAt)}）
+                    承诺 {timeText(t.supplierPromisedShipAt)}（
+                    {promisedText(t.supplierPromisedShipAt)}）
                   </span>
                 </div>
 
@@ -504,7 +504,8 @@ export function DropshipTrackingWorkspace() {
                             'SHIPPED',
                           );
                           if (!status) return '已取消录入。';
-                          const carrier = window.prompt('承运商编码（给了运单号时必填）：', '') ?? '';
+                          const carrier =
+                            window.prompt('承运商编码（给了运单号时必填）：', '') ?? '';
                           const trackingNo = window.prompt('供应商运单号：', '') ?? '';
                           const shippedAt =
                             window.prompt(
@@ -544,7 +545,8 @@ export function DropshipTrackingWorkspace() {
                             'HANDED_OVER',
                           );
                           if (!status) return '已取消录入。';
-                          const carrier = window.prompt('承运商编码（给了运单号时必填）：', '') ?? '';
+                          const carrier =
+                            window.prompt('承运商编码（给了运单号时必填）：', '') ?? '';
                           const trackingNo = window.prompt('我方运单号：', '') ?? '';
                           const handedOverAt =
                             window.prompt(
@@ -624,7 +626,7 @@ export function DropshipTrackingWorkspace() {
         <div className="mb-4 flex flex-wrap items-end gap-3">
           <Field label="任务状态">
             <select
-              className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
               value={taskStatusFilter}
               onChange={(e) => setTaskStatusFilter(e.target.value)}
             >
@@ -840,9 +842,7 @@ function ExceptionItem({
         <Badge tone={row.severity === 'CRITICAL' ? 'danger' : 'warning'}>
           {severityLabel(row.severity)}
         </Badge>
-        <span className="text-label-13 text-foreground font-medium">
-          {row.exceptionKindLabel}
-        </span>
+        <span className="text-label-13 text-foreground font-medium">{row.exceptionKindLabel}</span>
         <span className="text-copy-13 text-muted">
           {row.orderNo} / {row.salesOrderNo}
         </span>
@@ -915,9 +915,7 @@ function TaskItem({
             ? `退款 ${moneyText(payload.refundAmount, payload.refundCurrencyCode ?? undefined)}`
             : payload.note || '—'}
       </p>
-      {row.lastError && (
-        <p className="text-copy-13 text-danger mt-1">失败原因：{row.lastError}</p>
-      )}
+      {row.lastError && <p className="text-copy-13 text-danger mt-1">失败原因：{row.lastError}</p>}
       <div className="mt-2 flex gap-2">
         {row.taskStatus === 'OPEN' && (
           <Button size="sm" variant="outline" disabled={busy !== null} onClick={onClaim}>
@@ -1009,7 +1007,7 @@ function PolicyEditor({
       <div className="flex flex-wrap items-end gap-3">
         <Field label="供应商报发货必须给运单号">
           <select
-            className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+            className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
             value={requireTrackingNoOnShipped ? '1' : '0'}
             onChange={(e) => setRequireTrackingNoOnShipped(e.target.value === '1')}
           >

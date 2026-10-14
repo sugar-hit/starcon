@@ -125,7 +125,13 @@ describe('校验报告模型', () => {
 
   it('分类计数与问题列过滤', () => {
     expect(
-      categoryIssueCount({ category: 'X', label: 'x', rowCount: 1, errorCount: 2, warningCount: 1 }),
+      categoryIssueCount({
+        category: 'X',
+        label: 'x',
+        rowCount: 1,
+        errorCount: 2,
+        warningCount: 1,
+      }),
     ).toBe(3);
     // 「哪一列错得最多」只给真的有问题的列，0 条的列不该占版面
     expect(

@@ -3,8 +3,20 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, RefreshCw, Trash2 } from 'lucide-react';
-import { Button, EmptyState, FormField, Input, Notice, PageHeader, SectionCard, StatCard } from '@starcon/ui';
-import type { LocationTree, LocationTreeCapabilities } from '../../../../../packages/api-contracts/src/index';
+import {
+  Button,
+  EmptyState,
+  FormField,
+  Input,
+  Notice,
+  PageHeader,
+  SectionCard,
+  StatCard,
+} from '@starcon/ui';
+import type {
+  LocationTree,
+  LocationTreeCapabilities,
+} from '../../../../../packages/api-contracts/src/index';
 import { useIdentity } from '../iam/identity-shell';
 import {
   createLocation,
@@ -119,7 +131,8 @@ export function WarehouseLocationTreeWorkspace({ warehouseId }: { warehouseId: s
       type: row.type,
       pickable: row.pickable,
       capacity: row.capacity === null || row.capacity === undefined ? '' : String(row.capacity),
-      weightLimit: row.weightLimit === null || row.weightLimit === undefined ? '' : String(row.weightLimit),
+      weightLimit:
+        row.weightLimit === null || row.weightLimit === undefined ? '' : String(row.weightLimit),
     });
     // 改属性默认**不动层级**：挪层级是另一个决定，要显式勾。
     setMoveToo(false);
@@ -209,7 +222,7 @@ export function WarehouseLocationTreeWorkspace({ warehouseId }: { warehouseId: s
         </Notice>
       )}
 
-      {loading && !tree && <p className="py-8 text-sm text-muted-foreground">正在加载库位树…</p>}
+      {loading && !tree && <p className="text-muted-foreground py-8 text-sm">正在加载库位树…</p>}
 
       {tree && totals && (
         <>
@@ -257,7 +270,7 @@ export function WarehouseLocationTreeWorkspace({ warehouseId }: { warehouseId: s
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b text-left text-xs text-muted-foreground">
+                    <tr className="text-muted-foreground border-b text-left text-xs">
                       <th className="py-2 pr-3">库位</th>
                       <th className="py-2 pr-3">类型</th>
                       <th className="py-2 pr-3">可拣</th>
@@ -277,18 +290,20 @@ export function WarehouseLocationTreeWorkspace({ warehouseId }: { warehouseId: s
                         <tr key={node.id} className="border-b last:border-0">
                           <td className="py-2 pr-3">
                             <span style={{ paddingLeft: `${depth * 16}px` }}>
-                              <span className="mr-1 text-muted-foreground">
+                              <span className="text-muted-foreground mr-1">
                                 {depth > 0 ? '└' : ''}
                               </span>
                               <span className="font-medium">{node.code}</span>
-                              <span className="ml-2 text-muted-foreground">{node.name}</span>
+                              <span className="text-muted-foreground ml-2">{node.name}</span>
                             </span>
                           </td>
                           <td className="py-2 pr-3">{locationTypeLabel(node.type)}</td>
                           <td className="py-2 pr-3">
                             {node.pickable ? '可拣' : '不可拣'}
                             {occ.pickableHint && (
-                              <span className="ml-1 text-xs text-muted-foreground">（{occ.pickableHint}）</span>
+                              <span className="text-muted-foreground ml-1 text-xs">
+                                （{occ.pickableHint}）
+                              </span>
                             )}
                           </td>
                           <td className="py-2 pr-3">{measureText(node.capacity)}</td>
@@ -299,14 +314,18 @@ export function WarehouseLocationTreeWorkspace({ warehouseId }: { warehouseId: s
                           <td className="py-2 pr-3">
                             {utilizationText(node.occupied.capacityUtilization)}
                             {node.occupied.capacityExceeded && (
-                              <span className="ml-1 text-xs text-destructive">超容</span>
+                              <span className="text-destructive ml-1 text-xs">超容</span>
                             )}
                           </td>
                           <td className="py-2 pr-3">{measureText(node.subtreeOccupancy.onHand)}</td>
                           <td className="py-2 pr-3 text-right">
                             {updatable && (
                               <>
-                                <Button variant="ghost" size="sm" onClick={() => startEdit(node.id)}>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => startEdit(node.id)}
+                                >
                                   编辑
                                 </Button>
                                 <Button
@@ -330,7 +349,10 @@ export function WarehouseLocationTreeWorkspace({ warehouseId }: { warehouseId: s
           </SectionCard>
 
           {(creating || editingId) && (
-            <SectionCard title={creating ? '新建库位' : '改库位属性'} description="层级调整是独立的一步，需显式勾选。">
+            <SectionCard
+              title={creating ? '新建库位' : '改库位属性'}
+              description="层级调整是独立的一步，需显式勾选。"
+            >
               <div className="grid gap-3 md:grid-cols-2">
                 <FormField id="loc-code" label="库位编码">
                   <Input
@@ -340,11 +362,14 @@ export function WarehouseLocationTreeWorkspace({ warehouseId }: { warehouseId: s
                   />
                 </FormField>
                 <FormField id="loc-name" label="库位名称">
-                  <Input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+                  <Input
+                    value={draft.name}
+                    onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                  />
                 </FormField>
                 <FormField id="loc-type" label="库位类型">
                   <select
-                    className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                    className="border-input bg-background h-9 w-full rounded-md border px-2 text-sm"
                     value={draft.type}
                     onChange={(e) => setDraft({ ...draft, type: e.target.value })}
                   >
@@ -376,7 +401,11 @@ export function WarehouseLocationTreeWorkspace({ warehouseId }: { warehouseId: s
                   />
                 </FormField>
                 {!creating && (
-                  <FormField id="loc-move" label="调整层级" hint="勾选后父库位才生效；留空表示升为顶层">
+                  <FormField
+                    id="loc-move"
+                    label="调整层级"
+                    hint="勾选后父库位才生效；留空表示升为顶层"
+                  >
                     <input
                       id="loc-move"
                       type="checkbox"
@@ -414,8 +443,13 @@ export function WarehouseLocationTreeWorkspace({ warehouseId }: { warehouseId: s
           {caps && (
             <SectionCard title="能力声明" description="哪些维度有真相来源、哪些尚未交付。">
               <ul className="space-y-1 text-sm">
-                <li>层级维护：{caps.hierarchyMaintained ? '已交付（防环与跨仓库挂接由数据库拒绝）' : '未交付'}</li>
-                <li>容量与承重：{caps.capacityTracked && caps.weightTracked ? '已交付' : '未交付'}</li>
+                <li>
+                  层级维护：
+                  {caps.hierarchyMaintained ? '已交付（防环与跨仓库挂接由数据库拒绝）' : '未交付'}
+                </li>
+                <li>
+                  容量与承重：{caps.capacityTracked && caps.weightTracked ? '已交付' : '未交付'}
+                </li>
                 <li>占用情况：{caps.occupancyLive ? '实时来自库存明细' : '未交付'}</li>
                 <li>
                   库位自动分配：
@@ -423,16 +457,19 @@ export function WarehouseLocationTreeWorkspace({ warehouseId }: { warehouseId: s
                     ? '已交付'
                     : `未接入（属 ${caps.autoAllocationOwnerModule}）`}
                 </li>
-                <li>拣货路径：{caps.pickPathOwnerModule ? `未接入（属 ${caps.pickPathOwnerModule}）` : '已交付'}</li>
+                <li>
+                  拣货路径：
+                  {caps.pickPathOwnerModule ? `未接入（属 ${caps.pickPathOwnerModule}）` : '已交付'}
+                </li>
                 <li>层级上限：{caps.maxDepth} 层（区 → 巷 → 排 → 架 → 层 → 格）</li>
               </ul>
-              <p className="mt-2 text-xs text-muted-foreground">{caps.note}</p>
+              <p className="text-muted-foreground mt-2 text-xs">{caps.note}</p>
             </SectionCard>
           )}
         </>
       )}
 
-      <p className="mt-6 text-xs text-muted-foreground">
+      <p className="text-muted-foreground mt-6 text-xs">
         <Link href="/warehouse/facilities" className="underline">
           返回仓库档案
         </Link>

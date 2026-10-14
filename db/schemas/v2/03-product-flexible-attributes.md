@@ -19,11 +19,11 @@ SPU 保存该款商品的公共资料和公共属性；SKU 表达某个具体规
 
 一个属性配置包含显示名称、稳定属性键、类型、单位、可选值、是否必填、是否多值、是否作为规格轴、显示顺序、分组以及取值模式。
 
-| 取值模式 value_mode | SPU 值 | SKU 值 | SKU 有效值 |
-| --- | --- | --- | --- |
-| COMMON_LOCKED 公共固定 | 统一配置 | 禁止覆写 | SPU 公共值 |
+| 取值模式 value_mode     | SPU 值   | SKU 值           | SKU 有效值                 |
+| ----------------------- | -------- | ---------------- | -------------------------- |
+| COMMON_LOCKED 公共固定  | 统一配置 | 禁止覆写         | SPU 公共值                 |
 | COMMON_DEFAULT 公共默认 | 可设默认 | 可覆写或显式清空 | SKU 覆写优先，否则继承 SPU |
-| SKU_ONLY 按 SKU 配置 | 不配置 | 各 SKU 单独设置 | SKU 自身值 |
+| SKU_ONLY 按 SKU 配置    | 不配置   | 各 SKU 单独设置  | SKU 自身值                 |
 
 例子：视频规格所有 SKU 均为 4K → COMMON_LOCKED；随箱配件多数相同、特殊版本不同 → COMMON_DEFAULT；颜色各 SKU 不同 → SKU_ONLY。
 
@@ -41,18 +41,18 @@ SPU 保存该款商品的公共资料和公共属性；SKU 表达某个具体规
 
 以下替代先前 attribute_definition 的 usage=VARIANT/DESCRIPTIVE 和分散 sku_variant_value 作为第二套值源的设计。旧名称是历史设计，未有数据库迁移，无需迁移实际数据。
 
-| 表 | 主要字段与关系 |
-| --- | --- |
-| attribute_definition | tenant_id, id, code, name, data_type, cardinality, unit_dimension?, definition_scope(TENANT/SPU), owner_spu_id?, status；类型属于定义，引用后不可原地改变 |
-| attribute_option | tenant_id, id, attribute_id, code, label, position, status；UNIQUE(tenant,attribute_id,code) |
-| category_attribute_rule | category_id, attribute_id, recommended_value_mode, required, is_variant_axis, group_name?, position；为复制模板，不是实时继承配置 |
-| spu_attribute_group | tenant_id, id, spu_id, code, name, position；UNIQUE(tenant,spu_id,code) |
-| spu_attribute_binding | tenant_id, id, spu_id, attribute_id, group_id?, display_name?, value_mode, required, is_variant_axis, position, binding_revision, status；UNIQUE(tenant,spu,attribute)，配置以此为准 |
-| spu_attribute_allowed_option | tenant_id, binding_id, attribute_id, option_id；限制本 SPU 可选集；复合 FK 确认 option 属于绑定属性 |
-| spu_attribute_default | tenant_id, binding_id, value_revision；一个 binding 至多一个 SPU 值集合头；COMMON_LOCKED/COMMON_DEFAULT 使用 |
-| spu_attribute_default_item | tenant_id, default_id, ordinal, value_type, text_value?, decimal_value?, boolean_value?, date_value?, option_id?, uom_id?；公共值集合明细 |
-| sku_attribute_override | tenant_id, id, sku_id, spu_id, binding_id, override_state(SET/CLEAR), value_revision；UNIQUE(tenant,sku,binding)，SKU 与 binding 必须同 SPU |
-| sku_attribute_override_item | tenant_id, override_id, ordinal, value_type 及相应类型值；SKU 值集合明细 |
+| 表                           | 主要字段与关系                                                                                                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| attribute_definition         | tenant_id, id, code, name, data_type, cardinality, unit_dimension?, definition_scope(TENANT/SPU), owner_spu_id?, status；类型属于定义，引用后不可原地改变                            |
+| attribute_option             | tenant_id, id, attribute_id, code, label, position, status；UNIQUE(tenant,attribute_id,code)                                                                                         |
+| category_attribute_rule      | category_id, attribute_id, recommended_value_mode, required, is_variant_axis, group_name?, position；为复制模板，不是实时继承配置                                                    |
+| spu_attribute_group          | tenant_id, id, spu_id, code, name, position；UNIQUE(tenant,spu_id,code)                                                                                                              |
+| spu_attribute_binding        | tenant_id, id, spu_id, attribute_id, group_id?, display_name?, value_mode, required, is_variant_axis, position, binding_revision, status；UNIQUE(tenant,spu,attribute)，配置以此为准 |
+| spu_attribute_allowed_option | tenant_id, binding_id, attribute_id, option_id；限制本 SPU 可选集；复合 FK 确认 option 属于绑定属性                                                                                  |
+| spu_attribute_default        | tenant_id, binding_id, value_revision；一个 binding 至多一个 SPU 值集合头；COMMON_LOCKED/COMMON_DEFAULT 使用                                                                         |
+| spu_attribute_default_item   | tenant_id, default_id, ordinal, value_type, text_value?, decimal_value?, boolean_value?, date_value?, option_id?, uom_id?；公共值集合明细                                            |
+| sku_attribute_override       | tenant_id, id, sku_id, spu_id, binding_id, override_state(SET/CLEAR), value_revision；UNIQUE(tenant,sku,binding)，SKU 与 binding 必须同 SPU                                          |
+| sku_attribute_override_item  | tenant_id, override_id, ordinal, value_type 及相应类型值；SKU 值集合明细                                                                                                             |
 
 `definition_scope=TENANT` 时 owner_spu_id=NULL；SPU 时 owner_spu_id 必填且本地复合 FK→spu。绑定须属于同租户，局部属性只能绑定自身 SPU；组也必须属于绑定 SPU。后续 SQL 应用复合唯一键/FK并结合事务校验实现，不能只校验前端选项。
 

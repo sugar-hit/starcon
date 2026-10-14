@@ -131,9 +131,7 @@ export function fetchDropshipCapabilities(): Promise<DropshipCapabilities> {
   return api<DropshipCapabilities>(`${base}/capabilities`);
 }
 
-export function fetchShopRefs(
-  params: DropshipShopRefParams,
-): Promise<DropshipShopRefPage> {
+export function fetchShopRefs(params: DropshipShopRefParams): Promise<DropshipShopRefPage> {
   return api<DropshipShopRefPage>(`${base}/shop-refs${query(params)}`);
 }
 
@@ -147,7 +145,9 @@ export function fetchSupplierRefs(
   return api<DropshipSupplierRefPage>(`${base}/supplier-refs${query(params)}`);
 }
 
-export function saveSupplierRef(input: DropshipSupplierRefInput): Promise<DropshipSupplierRefSaved> {
+export function saveSupplierRef(
+  input: DropshipSupplierRefInput,
+): Promise<DropshipSupplierRefSaved> {
   return api<DropshipSupplierRefSaved>(`${base}/supplier-refs`, 'POST', input);
 }
 
@@ -195,7 +195,9 @@ export function fetchEvaluations(
   return api<DropshipEvaluationPage>(`${base}/evaluations${query(params)}`);
 }
 
-export function evaluateDropship(input: DropshipEvaluationRequest): Promise<DropshipEvaluationSaved> {
+export function evaluateDropship(
+  input: DropshipEvaluationRequest,
+): Promise<DropshipEvaluationSaved> {
   return api<DropshipEvaluationSaved>(`${base}/evaluations`, 'POST', input);
 }
 

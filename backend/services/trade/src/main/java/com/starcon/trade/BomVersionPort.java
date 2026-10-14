@@ -15,35 +15,32 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 6.4.1.1 读取上游 3.5.2.1 BOM 的**跨服务端口**。
  *
- * <p>蓝图关系句写死「上游 = 3.5.2.1 BOM」，而 BOM 表在 **catalog 服务的库**里。
- * AGENTS.md 模块边界纪律禁止跨服务 SQL / FK / 共享视图，所以本端口
- * **只经 catalog 的授权 HTTP 接口**读，不直连对方库、不建跨库外键。
+ * <p>蓝图关系句写死「上游 = 3.5.2.1 BOM」，而 BOM 表在 **catalog 服务的库**里。 AGENTS.md 模块边界纪律禁止跨服务 SQL / FK /
+ * 共享视图，所以本端口 **只经 catalog 的授权 HTTP 接口**读，不直连对方库、不建跨库外键。
  *
  * <p>用的是 catalog V25 文件头第六节**明确留给下游**的那两个接口：
  *
  * <ul>
- *   <li>{@code GET /catalog/bom-versions/{id}/requirement?outputQuantity=} ——
- *       规则 R7 的单层需求量，返回 {@code unitQuantity} / {@code scrapRate} /
- *       {@code requiredQuantity} 三元组；
- *   <li>{@code GET /catalog/bom-versions/{id}} ——
- *       取回版本本身（bomId / versionNo / 成品 SKU / 状态）。
+ *   <li>{@code GET /catalog/bom-versions/{id}/requirement?outputQuantity=} —— 规则 R7 的单层需求量，返回
+ *       {@code unitQuantity} / {@code scrapRate} / {@code requiredQuantity} 三元组；
+ *   <li>{@code GET /catalog/bom-versions/{id}} —— 取回版本本身（bomId / versionNo / 成品 SKU / 状态）。
  * </ul>
  *
- * <p><b>R6 / R7 语义逐字沿用，不重新定义</b>：损耗率是百分数（5 = 5%），
- * 需求量 = 单位用量 × 产量 × (1 + 损耗率/100)、6 位小数 HALF_UP、**不取整**。
- * 本端口原样搬运 catalog 返回的三元组，不在本服务重算 ——
- * 两处各实现一遍 R7 必然漂移，而漂移的后果是「按不同口径领料」。
+ * <p><b>R6 / R7 语义逐字沿用，不重新定义</b>：损耗率是百分数（5 = 5%）， 需求量 = 单位用量 × 产量 × (1 + 损耗率/100)、6 位小数
+ * HALF_UP、**不取整**。 本端口原样搬运 catalog 返回的三元组，不在本服务重算 —— 两处各实现一遍 R7 必然漂移，而漂移的后果是「按不同口径领料」。
  *
- * <p>取不到就**显式失败**，绝不返回空组件列表冒充「这个 BOM 没有组件」：
- * 那会让加工单凭空生成一张零组件的单子，而这恰恰被 DB 触发器
- * {@code guard_processing_order_released} 之外的路径漏过去。
+ * <p>取不到就**显式失败**，绝不返回空组件列表冒充「这个 BOM 没有组件」： 那会让加工单凭空生成一张零组件的单子，而这恰恰被 DB 触发器 {@code
+ * guard_processing_order_released} 之外的路径漏过去。
  */
 @Service
 public class BomVersionPort {
 
   /** catalog 返回的单层需求量（字段名逐字对齐 catalog 的 BomRequirement 契约）。 */
   record RequirementLine(
-      UUID skuId, String skuCode, BigDecimal unitQuantity, BigDecimal scrapRate,
+      UUID skuId,
+      String skuCode,
+      BigDecimal unitQuantity,
+      BigDecimal scrapRate,
       BigDecimal requiredQuantity) {}
 
   /** catalog 返回的 BOM 版本（字段名逐字对齐 catalog 的 BomVersionView 契约）。 */
@@ -92,12 +89,10 @@ public class BomVersionPort {
       return view;
     } catch (RestClientResponseException e) {
       if (e.getStatusCode().value() == 404) {
-        throw new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "BOM 版本不存在或无权查看：" + versionId);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "BOM 版本不存在或无权查看：" + versionId);
       }
       if (e.getStatusCode().value() == 401 || e.getStatusCode().value() == 403) {
-        throw new ResponseStatusException(
-            HttpStatus.FORBIDDEN, "当前身份无权读取该 BOM 版本，加工单无法绑定 BOM");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "当前身份无权读取该 BOM 版本，加工单无法绑定 BOM");
       }
       throw unavailable("商品中心返回 " + e.getStatusCode().value() + "，加工单暂时无法读取 BOM");
     } catch (RestClientException e) {
@@ -130,8 +125,7 @@ public class BomVersionPort {
       return requirement;
     } catch (RestClientResponseException e) {
       if (e.getStatusCode().value() == 404) {
-        throw new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "BOM 版本不存在或无权查看：" + versionId);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "BOM 版本不存在或无权查看：" + versionId);
       }
       throw unavailable("商品中心返回 " + e.getStatusCode().value() + "，加工单暂时无法读取组件需求量");
     } catch (RestClientException e) {
@@ -143,8 +137,6 @@ public class BomVersionPort {
   private ResponseStatusException unavailable(String reason) {
     return new ResponseStatusException(
         HttpStatus.SERVICE_UNAVAILABLE,
-        reason
-            + "：加工单的组件领用量必须由商品中心的 BOM 版本算出（3.5.2.1 已交付，"
-            + "规则 R6/R7），本服务不复制一份算法，也不会凭空生成组件行");
+        reason + "：加工单的组件领用量必须由商品中心的 BOM 版本算出（3.5.2.1 已交付，" + "规则 R6/R7），本服务不复制一份算法，也不会凭空生成组件行");
   }
 }

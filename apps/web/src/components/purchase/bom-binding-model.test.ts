@@ -88,7 +88,7 @@ describe('requiredText：需求量不取整（R7）', () => {
   it('6 位小数原样显示，只去掉无意义的尾随零', () => {
     expect(requiredText(5.25)).toBe('5.25');
     expect(requiredText(10.0000001)).toBe('10');
-    expect(requiredText(0.500000)).toBe('0.5');
+    expect(requiredText(0.5)).toBe('0.5');
   });
 
   it('不取整：小数必须留到第 6 位', () => {
@@ -143,13 +143,16 @@ describe('展开树形态', () => {
 describe('冻结状态与漂移的展示口径', () => {
   it('截断必须是 danger，完整是 success，没有快照是 neutral', () => {
     // 静默显示一份不完整的清单比不显示更危险 —— 页面必须显红。
-    expect(snapshotTone(binding({ snapshot: null } as unknown as Partial<BomBinding>).snapshot)).toBe(
-      'neutral',
-    );
+    expect(
+      snapshotTone(binding({ snapshot: null } as unknown as Partial<BomBinding>).snapshot),
+    ).toBe('neutral');
     expect(snapshotTone(binding().snapshot)).toBe('success');
-    expect(snapshotTone({ ...(binding().snapshot as object), truncated: true } as BomBinding['snapshot'])).toBe(
-      'danger',
-    );
+    expect(
+      snapshotTone({
+        ...(binding().snapshot as object),
+        truncated: true,
+      } as BomBinding['snapshot']),
+    ).toBe('danger');
   });
 
   it('漂移时说出「冻结的是哪一版、此刻生效的是哪一版」', () => {

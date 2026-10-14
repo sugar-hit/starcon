@@ -313,9 +313,7 @@ export function LabelPrintingWorkspace() {
         cartonCode: newCarton || undefined,
         weightKg: newWeight ? Number(newWeight) : undefined,
       });
-      setNotice(
-        `已登记打印对象 ${created.externalRef}（打印次数 0 次，由打印动作产生首印）`,
-      );
+      setNotice(`已登记打印对象 ${created.externalRef}（打印次数 0 次，由打印动作产生首印）`);
       setNewRef('');
       setNewWaybill('');
       setNewSku('');
@@ -374,7 +372,7 @@ export function LabelPrintingWorkspace() {
         description="打印面单、装箱单、SKU 条码、库位标签、箱唛：批量打印、模板配置与逐次打印次数记录。"
         actions={
           <div className="flex items-center gap-2">
-            <div className="flex rounded-md border border-control-border p-0.5">
+            <div className="border-control-border flex rounded-md border p-0.5">
               {(
                 [
                   ['TARGETS', '打印对象'],
@@ -401,7 +399,9 @@ export function LabelPrintingWorkspace() {
               ))}
             </div>
             <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
-              <RefreshCw className={loading ? 'mr-2 h-3.5 w-3.5 animate-spin' : 'mr-2 h-3.5 w-3.5'} />
+              <RefreshCw
+                className={loading ? 'mr-2 h-3.5 w-3.5 animate-spin' : 'mr-2 h-3.5 w-3.5'}
+              />
               刷新
             </Button>
           </div>
@@ -443,12 +443,15 @@ export function LabelPrintingWorkspace() {
             />
           </div>
 
-          <SectionCard title="登记打印对象" description="面单号、路由等字段由调用方传入；登记不产生打印次数。">
+          <SectionCard
+            title="登记打印对象"
+            description="面单号、路由等字段由调用方传入；登记不产生打印次数。"
+          >
             {writable && (
               <div className="grid gap-3 md:grid-cols-4">
                 <FormField id="print-object-type" label="对象类型" required>
                   <select
-                    className="w-full rounded-md border border-control-border bg-background px-2 py-1.5 text-sm"
+                    className="border-control-border bg-background w-full rounded-md border px-2 py-1.5 text-sm"
                     value={objectType}
                     onChange={(e) => {
                       setObjectType(e.target.value);
@@ -463,7 +466,12 @@ export function LabelPrintingWorkspace() {
                     ))}
                   </select>
                 </FormField>
-                <FormField id="print-external-ref" label="外部引用" required hint="上游单据标识，如出库单号">
+                <FormField
+                  id="print-external-ref"
+                  label="外部引用"
+                  required
+                  hint="上游单据标识，如出库单号"
+                >
                   <Input value={newRef} onChange={(e) => setNewRef(e.target.value)} />
                 </FormField>
                 <FormField id="print-waybill" label="面单号 / 条码码值">
@@ -491,7 +499,11 @@ export function LabelPrintingWorkspace() {
                   <Input value={newWeight} onChange={(e) => setNewWeight(e.target.value)} />
                 </FormField>
                 <div className="md:col-span-4">
-                  <Button size="sm" onClick={() => void submitTarget()} disabled={saving || !newRef}>
+                  <Button
+                    size="sm"
+                    onClick={() => void submitTarget()}
+                    disabled={saving || !newRef}
+                  >
                     登记
                   </Button>
                 </div>
@@ -506,7 +518,7 @@ export function LabelPrintingWorkspace() {
             <div className="flex flex-wrap items-end gap-3">
               <FormField id="print-object-type" label="对象类型">
                 <select
-                  className="rounded-md border border-control-border bg-background px-2 py-1.5 text-sm"
+                  className="border-control-border bg-background rounded-md border px-2 py-1.5 text-sm"
                   value={objectType}
                   onChange={(e) => {
                     setObjectType(e.target.value);
@@ -533,7 +545,7 @@ export function LabelPrintingWorkspace() {
               </Button>
             </div>
 
-            {loading && <p className="mt-4 text-sm text-muted-foreground">正在加载打印对象…</p>}
+            {loading && <p className="text-muted-foreground mt-4 text-sm">正在加载打印对象…</p>}
             {!loading && targets && targets.rows.length === 0 && (
               <EmptyState
                 title={keyword || objectType ? '没有符合条件的打印对象' : '尚未登记打印对象'}
@@ -560,7 +572,9 @@ export function LabelPrintingWorkspace() {
                           onChange={(e) =>
                             setSelected(
                               e.target.checked
-                                ? Array.from(new Set([...selected, ...targets.rows.map((t) => t.id)]))
+                                ? Array.from(
+                                    new Set([...selected, ...targets.rows.map((t) => t.id)]),
+                                  )
                                 : selected.filter((id) => !targets.rows.some((t) => t.id === id)),
                             )
                           }
@@ -580,7 +594,7 @@ export function LabelPrintingWorkspace() {
                   </thead>
                   <tbody>
                     {targets.rows.map((t) => (
-                      <tr key={t.id} className="border-t border-control-border">
+                      <tr key={t.id} className="border-control-border border-t">
                         <td className="px-3 py-2">
                           <input
                             type="checkbox"
@@ -602,27 +616,27 @@ export function LabelPrintingWorkspace() {
                           {t.waybillNo || t.skuCode || t.locationCode || t.cartonCode || '—'}
                         </td>
                         <td className="px-3 py-2 tabular-nums">{weightText(t.weightKg)}</td>
-                        <td className="px-3 py-2 text-right tabular-nums font-medium">
+                        <td className="px-3 py-2 text-right font-medium tabular-nums">
                           {t.printCount} 次
                         </td>
-                        <td className="px-3 py-2 text-xs text-muted-foreground">
+                        <td className="text-muted-foreground px-3 py-2 text-xs">
                           {warningText(t.warningCount)} · {limitText(t.maxCount)}
                         </td>
                         <td className="px-3 py-2">
                           <span className={toneClass(verdictTone(t.nextVerdict))}>
                             {verdictLabel(t.nextVerdict)}
                           </span>
-                          <span className="ml-2 text-xs text-muted-foreground">
+                          <span className="text-muted-foreground ml-2 text-xs">
                             {remainingText(t)}
                           </span>
                         </td>
-                        <td className="px-3 py-2 text-xs text-muted-foreground">
+                        <td className="text-muted-foreground px-3 py-2 text-xs">
                           {formatMoment(t.lastPrintedAt)}
                         </td>
                         <td className="px-3 py-2">
                           <button
                             type="button"
-                            className="text-xs text-primary underline-offset-2 hover:underline"
+                            className="text-primary text-xs underline-offset-2 hover:underline"
                             onClick={() => void openHistory(t)}
                           >
                             打印历史
@@ -647,7 +661,7 @@ export function LabelPrintingWorkspace() {
               <div className="grid gap-3 md:grid-cols-4">
                 <FormField id="print-template" label="模板" required>
                   <select
-                    className="w-full rounded-md border border-control-border bg-background px-2 py-1.5 text-sm"
+                    className="border-control-border bg-background w-full rounded-md border px-2 py-1.5 text-sm"
                     value={templateId}
                     onChange={(e) => setTemplateId(e.target.value)}
                   >
@@ -665,12 +679,14 @@ export function LabelPrintingWorkspace() {
                     min={1}
                     max={20}
                     value={copies}
-                    onChange={(e) => setCopies(Math.max(1, Math.min(20, Number(e.target.value) || 1)))}
+                    onChange={(e) =>
+                      setCopies(Math.max(1, Math.min(20, Number(e.target.value) || 1)))
+                    }
                   />
                 </FormField>
                 <FormField id="print-printer" label="打印机">
                   <select
-                    className="w-full rounded-md border border-control-border bg-background px-2 py-1.5 text-sm"
+                    className="border-control-border bg-background w-full rounded-md border px-2 py-1.5 text-sm"
                     value={printerId}
                     onChange={(e) => setPrinterId(e.target.value)}
                   >
@@ -683,7 +699,7 @@ export function LabelPrintingWorkspace() {
                   </select>
                 </FormField>
                 <div className="flex items-end">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground text-sm">
                     将产出 {selected.length * copies} 张标签
                     {templateForSelection
                       ? `（${templateForSelection.paperSize} · ${templateForSelection.orientation}）`
@@ -695,7 +711,10 @@ export function LabelPrintingWorkspace() {
               {(blockedSelected.length > 0 || warnedSelected.length > 0) && (
                 <div className="mt-3 space-y-2">
                   {warnedSelected.length > 0 && (
-                    <Notice tone="warning" title={`${warnedSelected.length} 个对象落在重复打印告警区间`}>
+                    <Notice
+                      tone="warning"
+                      title={`${warnedSelected.length} 个对象落在重复打印告警区间`}
+                    >
                       {warnedSelected
                         .slice(0, 6)
                         .map((t) => `${t.externalRef}（已印 ${t.printCount} 次）`)
@@ -705,10 +724,16 @@ export function LabelPrintingWorkspace() {
                     </Notice>
                   )}
                   {blockedSelected.length > 0 && (
-                    <Notice tone="danger" title={`${blockedSelected.length} 个对象已超出平台重复打印上限`}>
+                    <Notice
+                      tone="danger"
+                      title={`${blockedSelected.length} 个对象已超出平台重复打印上限`}
+                    >
                       {blockedSelected
                         .slice(0, 6)
-                        .map((t) => `${t.externalRef}（已印 ${t.printCount} 次，${limitText(t.maxCount)}）`)
+                        .map(
+                          (t) =>
+                            `${t.externalRef}（已印 ${t.printCount} 次，${limitText(t.maxCount)}）`,
+                        )
                         .join('；')}
                       {blockedSelected.length > 6 ? ' 等' : ''}
                       　默认会整体拒绝这次批量打印。
@@ -731,7 +756,7 @@ export function LabelPrintingWorkspace() {
                     <FormField id="print-override-reason" label="强制重打理由" required>
                       <textarea
                         rows={2}
-                        className="w-full rounded-md border border-control-border bg-background px-2 py-1.5 text-sm"
+                        className="border-control-border bg-background w-full rounded-md border px-2 py-1.5 text-sm"
                         value={overrideReason}
                         onChange={(e) => setOverrideReason(e.target.value)}
                         placeholder="例：面单贴错，第 4 次强制重打（已与平台报备）"
@@ -759,10 +784,8 @@ export function LabelPrintingWorkspace() {
                   清空选择
                 </Button>
                 {templateForSelection &&
-                  selectedTargets.some(
-                    (t) => t.objectType !== templateForSelection.objectType,
-                  ) && (
-                    <span className="text-sm text-destructive">
+                  selectedTargets.some((t) => t.objectType !== templateForSelection.objectType) && (
+                    <span className="text-destructive text-sm">
                       模板与所选对象类型不一致，打出来的标签没有意义
                     </span>
                   )}
@@ -777,7 +800,7 @@ export function LabelPrintingWorkspace() {
               extra={
                 <button
                   type="button"
-                  className="text-sm text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground text-sm"
                   onClick={() => setHistory(null)}
                 >
                   关闭
@@ -801,11 +824,15 @@ export function LabelPrintingWorkspace() {
                   </thead>
                   <tbody>
                     {history.rows.map((l) => (
-                      <tr key={l.id} className="border-t border-control-border">
-                        <td className="px-3 py-2 font-medium tabular-nums">第 {l.printSequence} 次</td>
+                      <tr key={l.id} className="border-control-border border-t">
+                        <td className="px-3 py-2 font-medium tabular-nums">
+                          第 {l.printSequence} 次
+                        </td>
                         <td className="px-3 py-2 tabular-nums">{l.copyIndex}</td>
                         <td className="px-3 py-2 text-xs">{l.contentFormat}</td>
-                        <td className="px-3 py-2 font-mono text-xs">{l.contentChecksum.slice(0, 16)}…</td>
+                        <td className="px-3 py-2 font-mono text-xs">
+                          {l.contentChecksum.slice(0, 16)}…
+                        </td>
                         <td className="px-3 py-2">
                           {l.reprintWarning ? (
                             <span className={toneClass('warn')}>重复打印告警</span>
@@ -820,7 +847,7 @@ export function LabelPrintingWorkspace() {
                             <span className="text-muted-foreground">—</span>
                           )}
                         </td>
-                        <td className="px-3 py-2 text-xs text-muted-foreground">
+                        <td className="text-muted-foreground px-3 py-2 text-xs">
                           {formatMoment(l.printedAt)}
                         </td>
                       </tr>
@@ -839,7 +866,7 @@ export function LabelPrintingWorkspace() {
           <div className="flex flex-wrap items-end gap-3">
             <FormField id="job-status" label="状态">
               <select
-                className="rounded-md border border-control-border bg-background px-2 py-1.5 text-sm"
+                className="border-control-border bg-background rounded-md border px-2 py-1.5 text-sm"
                 value={status}
                 onChange={(e) => {
                   setStatus(e.target.value);
@@ -855,14 +882,18 @@ export function LabelPrintingWorkspace() {
               </select>
             </FormField>
             <FormField id="print-keyword" label="关键词">
-              <Input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="作业号 / 备注" />
+              <Input
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="作业号 / 备注"
+              />
             </FormField>
             <Button variant="outline" size="sm" onClick={() => void loadJobs()}>
               查询
             </Button>
           </div>
 
-          {loading && <p className="mt-4 text-sm text-muted-foreground">正在加载打印任务…</p>}
+          {loading && <p className="text-muted-foreground mt-4 text-sm">正在加载打印任务…</p>}
           {!loading && jobs && jobs.rows.length === 0 && (
             <EmptyState
               title={status || keyword ? '没有符合条件的打印任务' : '尚未创建打印任务'}
@@ -888,7 +919,7 @@ export function LabelPrintingWorkspace() {
                 </thead>
                 <tbody>
                   {jobs.rows.map((j: LabelPrintJob) => (
-                    <tr key={j.id} className="border-t border-control-border">
+                    <tr key={j.id} className="border-control-border border-t">
                       <td className="px-3 py-2 font-mono text-xs">{j.jobNo}</td>
                       <td className="px-3 py-2">{j.templateName || '—'}</td>
                       <td className="px-3 py-2">{j.printerName || '—'}</td>
@@ -898,7 +929,7 @@ export function LabelPrintingWorkspace() {
                         </span>
                       </td>
                       <td className="px-3 py-2 text-right tabular-nums">{j.targetCount}</td>
-                      <td className="px-3 py-2 text-right tabular-nums font-medium">
+                      <td className="px-3 py-2 text-right font-medium tabular-nums">
                         {j.labelCount}
                       </td>
                       <td className="px-3 py-2 text-right tabular-nums">{j.reprintWarningCount}</td>
@@ -909,14 +940,14 @@ export function LabelPrintingWorkspace() {
                           0
                         )}
                       </td>
-                      <td className="px-3 py-2 text-xs text-muted-foreground">
+                      <td className="text-muted-foreground px-3 py-2 text-xs">
                         {formatMoment(j.createdAt)}
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            className="text-xs text-primary underline-offset-2 hover:underline"
+                            className="text-primary text-xs underline-offset-2 hover:underline"
                             onClick={() => void openJob(j.id)}
                           >
                             详情
@@ -924,7 +955,7 @@ export function LabelPrintingWorkspace() {
                           {admin && (j.status === 'DRAFT' || j.status === 'QUEUED') && (
                             <button
                               type="button"
-                              className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                              className="text-muted-foreground text-xs underline-offset-2 hover:underline"
                               onClick={() => void runCancel(j.id)}
                               disabled={saving}
                             >
@@ -952,7 +983,7 @@ export function LabelPrintingWorkspace() {
           extra={
             <button
               type="button"
-              className="text-sm text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground text-sm"
               onClick={() => setDetail(null)}
             >
               关闭
@@ -964,9 +995,7 @@ export function LabelPrintingWorkspace() {
               理由：{detail.job.overrideReason || '（未填写）'}
             </Notice>
           )}
-          {drilling && (
-            <p className="mt-3 text-sm text-muted-foreground">正在加载任务明细…</p>
-          )}
+          {drilling && <p className="text-muted-foreground mt-3 text-sm">正在加载任务明细…</p>}
           {!drilling && detail.items.length === 0 && (
             <EmptyState title="没有明细行" description="该任务没有可打印的对象。" />
           )}
@@ -986,7 +1015,7 @@ export function LabelPrintingWorkspace() {
                 </thead>
                 <tbody>
                   {detail.items.map((item) => (
-                    <tr key={item.id} className="border-t border-control-border">
+                    <tr key={item.id} className="border-control-border border-t">
                       <td className="px-3 py-2 tabular-nums">{item.lineNo}</td>
                       <td className="px-3 py-2 font-mono text-xs">{item.externalRef}</td>
                       <td className="px-3 py-2 font-mono text-xs">{item.externalRef}</td>
@@ -994,13 +1023,13 @@ export function LabelPrintingWorkspace() {
                       <td className="px-3 py-2 text-right tabular-nums">
                         {item.printCountAtRender} 次
                       </td>
-                      <td className="px-3 py-2 text-xs text-muted-foreground">
+                      <td className="text-muted-foreground px-3 py-2 text-xs">
                         {item.contentFormat} · {item.contentBytes} 字节
                       </td>
                       <td className="px-3 py-2">
                         <a
                           href={contentUrl(detail.job.id, item.id)}
-                          className="inline-flex items-center gap-1 text-xs text-primary underline-offset-2 hover:underline"
+                          className="text-primary inline-flex items-center gap-1 text-xs underline-offset-2 hover:underline"
                         >
                           <FileText className="h-3 w-3" />
                           下载内容
@@ -1035,7 +1064,7 @@ export function LabelPrintingWorkspace() {
             </label>
           </div>
 
-          {loading && <p className="mt-4 text-sm text-muted-foreground">正在加载打印日志…</p>}
+          {loading && <p className="text-muted-foreground mt-4 text-sm">正在加载打印日志…</p>}
           {!loading && logs && logs.rows.length === 0 && (
             <EmptyState
               title={warningOnly ? '没有重复打印告警记录' : '尚无打印日志'}
@@ -1059,10 +1088,10 @@ export function LabelPrintingWorkspace() {
                 </thead>
                 <tbody>
                   {logs.rows.map((l: LabelPrintLog) => (
-                    <tr key={l.id} className="border-t border-control-border">
+                    <tr key={l.id} className="border-control-border border-t">
                       <td className="px-3 py-2 font-mono text-xs">{l.externalRef}</td>
                       <td className="px-3 py-2">{objectTypeLabel(l.objectType)}</td>
-                      <td className="px-3 py-2 text-right tabular-nums font-medium">
+                      <td className="px-3 py-2 text-right font-medium tabular-nums">
                         {l.printSequence}
                       </td>
                       <td className="px-3 py-2 text-right tabular-nums">{l.copyIndex}</td>
@@ -1081,7 +1110,7 @@ export function LabelPrintingWorkspace() {
                           <span className="text-muted-foreground">—</span>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-xs text-muted-foreground">
+                      <td className="text-muted-foreground px-3 py-2 text-xs">
                         {formatMoment(l.printedAt)}
                       </td>
                     </tr>
@@ -1105,7 +1134,7 @@ export function LabelPrintingWorkspace() {
           <div className="flex flex-wrap items-end gap-3">
             <FormField id="print-object-type" label="对象类型">
               <select
-                className="rounded-md border border-control-border bg-background px-2 py-1.5 text-sm"
+                className="border-control-border bg-background rounded-md border px-2 py-1.5 text-sm"
                 value={objectType}
                 onChange={(e) => {
                   setObjectType(e.target.value);
@@ -1126,20 +1155,20 @@ export function LabelPrintingWorkspace() {
           </div>
 
           {capabilities && (
-            <div className="mt-4 rounded-md border border-control-border p-3 text-xs">
+            <div className="border-control-border mt-4 rounded-md border p-3 text-xs">
               <p className="mb-2 font-medium">各对象的默认渲染形态与必填字段</p>
-              <ul className="space-y-1 text-muted-foreground">
+              <ul className="text-muted-foreground space-y-1">
                 {capabilities.objectTypes.map((t) => (
                   <li key={t.code}>
-                    <span className="text-foreground">{t.label}</span>：{t.defaultFormat} ·
-                    必填 {t.requiredFields.join('、')} · {t.description}
+                    <span className="text-foreground">{t.label}</span>：{t.defaultFormat} · 必填{' '}
+                    {t.requiredFields.join('、')} · {t.description}
                   </li>
                 ))}
               </ul>
             </div>
           )}
 
-          {loading && <p className="mt-4 text-sm text-muted-foreground">正在加载模板…</p>}
+          {loading && <p className="text-muted-foreground mt-4 text-sm">正在加载模板…</p>}
           {!loading && templates && templates.rows.length === 0 && (
             <EmptyState title="尚无打印模板" description="没有模板就无法建打印任务。" />
           )}
@@ -1159,7 +1188,7 @@ export function LabelPrintingWorkspace() {
                 </thead>
                 <tbody>
                   {templates.rows.map((t: LabelPrintTemplate) => (
-                    <tr key={t.id} className="border-t border-control-border">
+                    <tr key={t.id} className="border-control-border border-t">
                       <td className="px-3 py-2 font-mono text-xs">{t.code}</td>
                       <td className="px-3 py-2">{t.name}</td>
                       <td className="px-3 py-2">{objectTypeLabel(t.objectType)}</td>
@@ -1190,16 +1219,21 @@ export function LabelPrintingWorkspace() {
               title="判定口径"
               description="判定基准：下一次打印的序号 = 该对象当前打印次数 + 本次份数。"
             >
-              <ul className="space-y-1 text-sm text-muted-foreground">
+              <ul className="text-muted-foreground space-y-1 text-sm">
                 {capabilities.reprint.ranges.map((r) => (
                   <li key={r.verdict}>
-                    <span className={toneClass(verdictTone(r.verdict))}>{r.label}</span>：{r.condition}
+                    <span className={toneClass(verdictTone(r.verdict))}>{r.label}</span>：
+                    {r.condition}
                     {r.blocked ? '（默认拒绝，需强制重打 + 理由）' : ''}
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-sm text-muted-foreground">{capabilities.reprint.overrideRule}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{capabilities.reprint.ruleTableNote}</p>
+              <p className="text-muted-foreground mt-3 text-sm">
+                {capabilities.reprint.overrideRule}
+              </p>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {capabilities.reprint.ruleTableNote}
+              </p>
             </SectionCard>
           )}
 
@@ -1214,7 +1248,7 @@ export function LabelPrintingWorkspace() {
                 </FormField>
                 <FormField id="print-object-type" label="对象类型" required>
                   <select
-                    className="w-full rounded-md border border-control-border bg-background px-2 py-1.5 text-sm"
+                    className="border-control-border bg-background w-full rounded-md border px-2 py-1.5 text-sm"
                     value={ruleType}
                     onChange={(e) => setRuleType(e.target.value)}
                   >
@@ -1246,7 +1280,7 @@ export function LabelPrintingWorkspace() {
               </div>
             )}
 
-            {loading && <p className="mt-4 text-sm text-muted-foreground">正在加载规则…</p>}
+            {loading && <p className="text-muted-foreground mt-4 text-sm">正在加载规则…</p>}
             {!loading && rules.length === 0 && (
               <EmptyState
                 title="尚未配置重复打印规则"
@@ -1266,14 +1300,14 @@ export function LabelPrintingWorkspace() {
                 </thead>
                 <tbody>
                   {rules.map((r) => (
-                    <tr key={r.id} className="border-t border-control-border">
+                    <tr key={r.id} className="border-control-border border-t">
                       <td className="px-3 py-2 font-mono text-xs">
                         {r.platformCode === '*' ? '*（通配）' : r.platformCode}
                       </td>
                       <td className="px-3 py-2">{objectTypeLabel(r.objectType)}</td>
                       <td className="px-3 py-2">{warningText(r.warningCount)}</td>
                       <td className="px-3 py-2">{limitText(r.maxCount)}</td>
-                      <td className="px-3 py-2 text-xs text-muted-foreground">{r.note || '—'}</td>
+                      <td className="text-muted-foreground px-3 py-2 text-xs">{r.note || '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1284,12 +1318,12 @@ export function LabelPrintingWorkspace() {
       )}
 
       {!readable && (
-        <p className="flex items-center gap-2 text-sm text-muted-foreground">
+        <p className="text-muted-foreground flex items-center gap-2 text-sm">
           <Tag className="h-3.5 w-3.5" />
           当前会话没有查看权限，面板不会显示任何数据。
         </p>
       )}
-      <p className="flex items-center gap-2 text-xs text-muted-foreground">
+      <p className="text-muted-foreground flex items-center gap-2 text-xs">
         <ScrollText className="h-3.5 w-3.5" />
         打印次数是权威事实：每次打印都会 +1 并留一条凭据，两者由数据库约束保持一致。
       </p>
@@ -1327,12 +1361,7 @@ function Pager({
       <span className="text-muted-foreground">
         共 {total} 条 · 第 {page + 1}/{pages} 页
       </span>
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={page <= 0}
-        onClick={() => onChange(page - 1)}
-      >
+      <Button variant="outline" size="sm" disabled={page <= 0} onClick={() => onChange(page - 1)}>
         上一页
       </Button>
       <Button

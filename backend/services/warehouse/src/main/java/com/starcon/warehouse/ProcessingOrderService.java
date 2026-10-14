@@ -19,24 +19,17 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 6.4.1.1 加工单的**仓库侧消费**：组件出库 + 成品入库（**一个本地事务**）。
  *
- * <p><b>本类是蓝图那句加粗要求的落点</b>：
- * 「加工是『消耗组件产生成品』的库存动作，**必须在 warehouse 本地事务完成**，
- * 不能由 trade 直接改库存。」
+ * <p><b>本类是蓝图那句加粗要求的落点</b>： 「加工是『消耗组件产生成品』的库存动作，**必须在 warehouse 本地事务完成**， 不能由 trade 直接改库存。」
  *
- * <p>因此加工单据在 trade（V97），库存动作在这里，且
- * {@link #issue} 标注 {@code @Transactional} —— 组件出库与成品入库
- * 要么都成、要么都回滚。<b>绝不允许</b>出现「组件扣了成品没进」或反之：
- * 那正是「凭空多出成品」与「凭空少掉组件」两种账实不符的来源。
+ * <p>因此加工单据在 trade（V97），库存动作在这里，且 {@link #issue} 标注 {@code @Transactional} —— 组件出库与成品入库
+ * 要么都成、要么都回滚。<b>绝不允许</b>出现「组件扣了成品没进」或反之： 那正是「凭空多出成品」与「凭空少掉组件」两种账实不符的来源。
  *
- * <p><b>复用 V1 既有分录模型，不新建表</b>（与 8.2.1.2 收货差异处理同一纪律）：
- * 一次加工 = 一个 {@code inventory_transaction}
- * （{@code kind='ADJUSTMENT'}、{@code ref_type='PROCESSING_ORDER'}、{@code ref_id=加工单 ID}）
- * + N 条带符号 {@code inventory_entry}。
- * {@code UNIQUE(tenant_id, ref_type, ref_id)} 顺带给了**幂等**：
+ * <p><b>复用 V1 既有分录模型，不新建表</b>（与 8.2.1.2 收货差异处理同一纪律）： 一次加工 = 一个 {@code inventory_transaction}
+ * （{@code kind='ADJUSTMENT'}、{@code ref_type='PROCESSING_ORDER'}、{@code ref_id=加工单 ID}） + N 条带符号
+ * {@code inventory_entry}。 {@code UNIQUE(tenant_id, ref_type, ref_id)} 顺带给了**幂等**：
  * 同一张加工单重复投递时靠它去重，不会重复扣料重复入货。
  *
- * <p>组件出库方向是负向分录（{@code on_hand_delta} 为负），
- * 成品入库方向是正向分录，两者挂在**同一个 transaction_id** 下 ——
+ * <p>组件出库方向是负向分录（{@code on_hand_delta} 为负）， 成品入库方向是正向分录，两者挂在**同一个 transaction_id** 下 ——
  * 账上「这一批料为什么消失了、这批货为什么出现了」永远指向同一条单据。
  */
 @Service
@@ -55,8 +48,7 @@ public class ProcessingOrderService {
   /**
    * 能力与上游可用性。
    *
-   * <p>存在的理由：把「库存动作归 warehouse」与「单据归 trade」这条边界显式报出来，
-   * 让调用方不会误以为应该由 trade 去改库存。
+   * <p>存在的理由：把「库存动作归 warehouse」与「单据归 trade」这条边界显式报出来， 让调用方不会误以为应该由 trade 去改库存。
    */
   public ProcessingStockCapabilities capabilities() {
     return new ProcessingStockCapabilities(
@@ -68,13 +60,17 @@ public class ProcessingOrderService {
             + "由 catalog 3.5.2.1 的规则 R6/R7 定义并在 trade 侧冻结，本服务不重算、不取整。",
         List.of(
             new ProcessingStockCapabilities.DownstreamGap(
-                "8.4.1.1", "组装单", "warehouse", false,
-                "仓库现场作业单据未交付：当前只做库存层面的组件出库与成品入库，"
-                    + "拣货 / 复核 / 上架的现场任务流尚未建模。"),
+                "8.4.1.1",
+                "组装单",
+                "warehouse",
+                false,
+                "仓库现场作业单据未交付：当前只做库存层面的组件出库与成品入库，" + "拣货 / 复核 / 上架的现场任务流尚未建模。"),
             new ProcessingStockCapabilities.DownstreamGap(
-                "6.4.1.2", "BOM 关联", "trade", false,
-                "同组兄弟模块未交付：冻结展开结果由 trade 在下达时落到组件领用记录，"
-                    + "本服务消费的是已冻结的数量，不需要再回查 BOM。")),
+                "6.4.1.2",
+                "BOM 关联",
+                "trade",
+                false,
+                "同组兄弟模块未交付：冻结展开结果由 trade 在下达时落到组件领用记录，" + "本服务消费的是已冻结的数量，不需要再回查 BOM。")),
         "组件出库与成品入库在**同一个本地事务**里完成，任一环节失败整体回滚；"
             + "库存分录挂在一条 inventory_transaction 上（ref_type=PROCESSING_ORDER），"
             + "同一张加工单重复投递靠 UNIQUE(tenant_id,ref_type,ref_id) 去重。");
@@ -86,8 +82,7 @@ public class ProcessingOrderService {
         "warehouse",
         "组件出库与成品入库在 warehouse 的一个本地事务内完成",
         "trade 拥有加工单据与组件领用记录，不直接改库存",
-        "这是蓝图 6.4.1.1 关系段的加粗要求：加工是『消耗组件产生成品』的库存动作，"
-            + "必须在库存所有者服务内完成，不能由单据服务代劳。");
+        "这是蓝图 6.4.1.1 关系段的加粗要求：加工是『消耗组件产生成品』的库存动作，" + "必须在库存所有者服务内完成，不能由单据服务代劳。");
   }
 
   // ================================================================ 组件出库 + 成品入库
@@ -95,8 +90,7 @@ public class ProcessingOrderService {
   /**
    * 执行一张加工单：组件出库 + 成品入库，**一个本地事务**。
    *
-   * <p>顺序刻意是「先出料、后入货」：任何一个组件不足就抛异常回滚，
-   * 此时成品**还没有**入账，账上不会出现「凭空多出来的成品」。
+   * <p>顺序刻意是「先出料、后入货」：任何一个组件不足就抛异常回滚， 此时成品**还没有**入账，账上不会出现「凭空多出来的成品」。
    * 反过来先入货再出料的话，出料失败时货已经入库，账上凭空多出成品。
    */
   @Transactional
@@ -130,8 +124,7 @@ public class ProcessingOrderService {
     if (existing != null) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "加工单 " + input.processingOrderId() + " 已经执行过入库（分录 "
-              + existing + "）：同一张加工单不能重复扣料重复入货");
+          "加工单 " + input.processingOrderId() + " 已经执行过入库（分录 " + existing + "）：同一张加工单不能重复扣料重复入货");
     }
 
     OffsetDateTime at = OffsetDateTime.now();
@@ -157,11 +150,9 @@ public class ProcessingOrderService {
       if (issued.stream().anyMatch(done -> done.skuId().equals(issue.skuId()))) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
-            "加工单里组件 SKU " + issue.skuId() + " 出现了两次：同一组件只能有一行，"
-                + "两行时「这个组件要几件」无法回答");
+            "加工单里组件 SKU " + issue.skuId() + " 出现了两次：同一组件只能有一行，" + "两行时「这个组件要几件」无法回答");
       }
-      UUID balanceId =
-          balanceId(issue.skuId(), warehouseId, legalEntityId, outboundQualityId);
+      UUID balanceId = balanceId(issue.skuId(), warehouseId, legalEntityId, outboundQualityId);
       BigDecimal posted =
           postOutbound(
               balanceId,
@@ -170,8 +161,8 @@ public class ProcessingOrderService {
               want,
               transactionId,
               at);
-      issued.add(new ComponentIssued(issue.skuId(), want, balanceId, input.outboundLocationId(),
-          posted));
+      issued.add(
+          new ComponentIssued(issue.skuId(), want, balanceId, input.outboundLocationId(), posted));
     }
 
     // ---- 第二步：成品入库（正向分录）。与上面的出库同属这一个事务。
@@ -195,7 +186,8 @@ public class ProcessingOrderService {
         issued,
         issued.size() + 1,
         "组件出库与成品入库已在 warehouse 的同一个本地事务内完成（分录 "
-            + transactionId + "）：任一环节失败都会整体回滚，不会出现「组件扣了成品没进」或反之。"
+            + transactionId
+            + "）：任一环节失败都会整体回滚，不会出现「组件扣了成品没进」或反之。"
             + "成品入库质量状态是 "
             + qualityLabel(inboundQualityId)
             + "；入库数量按库存刻度（4 位小数）对齐后入账。");
@@ -237,7 +229,8 @@ public class ProcessingOrderService {
     List<ProcessingStockRow> items =
         sql.fetch(
                 "select id,ref_id,occurred_at,actor_id,notes from inventory_transaction"
-                    + " where ref_type = ?" + clause
+                    + " where ref_type = ?"
+                    + clause
                     + " order by occurred_at desc, id limit ? offset ?",
                 append(listBinds, safeSize, safePage * safeSize).toArray())
             .map(this::executionRow);
@@ -299,8 +292,7 @@ public class ProcessingOrderService {
    * 出库：减余额 + 同步减库位明细（V2 守恒触发器要求两处同动）。
    *
    * <p>先查库位上的实际在手量并给出可读报错：V1 / V2 的 {@code CHECK(available>=0)}
-   * 确实会挡住扣成负数，但那条报错只说「违反检查约束」，完全不指到是哪批货、
-   * 在哪个库位、差多少 —— 而加工出料失败正是「组件不够」这个业务事实。
+   * 确实会挡住扣成负数，但那条报错只说「违反检查约束」，完全不指到是哪批货、 在哪个库位、差多少 —— 而加工出料失败正是「组件不够」这个业务事实。
    */
   private BigDecimal postOutbound(
       UUID balanceId,
@@ -311,9 +303,7 @@ public class ProcessingOrderService {
       OffsetDateTime at) {
     BigDecimal qty = stock(want);
     if (qty.signum() <= 0) {
-      throw bad(
-          "组件出库量 " + want + " 在库存刻度（4 位小数）下取整后为 0："
-              + "领料量必须是能被仓库真正发出的数");
+      throw bad("组件出库量 " + want + " 在库存刻度（4 位小数）下取整后为 0：" + "领料量必须是能被仓库真正发出的数");
     }
     if (locationId == null) {
       // 没给库位就无法定位 bucket：V2 的守恒触发器要求 bucket 与 balance 同步变动。
@@ -325,17 +315,20 @@ public class ProcessingOrderService {
         sql.fetchOne(
             "select id,on_hand,reserved from stock_bucket where balance_id=? and location_id=?"
                 + " and lot_id is not distinct from ?",
-            balanceId, locationId, lotId);
+            balanceId,
+            locationId,
+            lotId);
     if (bucket == null) {
-      throw bad(
-          "出库失败：库位上没有这个组件的库存行。加工领料必须从真实存在的库位发出，"
-              + "不能凭空扣一个 SKU 的库存");
+      throw bad("出库失败：库位上没有这个组件的库存行。加工领料必须从真实存在的库位发出，" + "不能凭空扣一个 SKU 的库存");
     }
     BigDecimal onHand = stock(decimal(bucket, "on_hand"));
     BigDecimal reserved = stock(decimal(bucket, "reserved"));
     if (onHand.compareTo(qty) < 0) {
       throw bad(
-          "出库失败：库位上只有 " + onHand + "，本次加工要发 " + qty
+          "出库失败：库位上只有 "
+              + onHand
+              + "，本次加工要发 "
+              + qty
               + (reserved.signum() > 0 ? "（其中 " + reserved + " 已被销售预占）" : "")
               + "。组件不足会让加工做不完 —— 请先补料或调整本单的需求量");
     }
@@ -343,33 +336,48 @@ public class ProcessingOrderService {
         "update stock_bucket set on_hand=on_hand-?,"
             + " last_movement_at=greatest(?::timestamptz,last_movement_at"
             + " + interval '1 microsecond') where id=?",
-        qty, at, bucket.get("id", UUID.class));
+        qty,
+        at,
+        bucket.get("id", UUID.class));
     sql.execute(
         "update inventory_balance set on_hand=on_hand-?,version=version+1,updated_at=now()"
             + " where id=?",
-        qty, balanceId);
+        qty,
+        balanceId);
     sql.execute(
         "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
             + "reserved_delta) values(?,?,?,?,?,0)",
-        UUID.randomUUID(), currentTenant(), transactionId, balanceId, qty.negate());
+        UUID.randomUUID(),
+        currentTenant(),
+        transactionId,
+        balanceId,
+        qty.negate());
     return qty;
   }
 
   /** 入库：加余额 + 同步加库位明细（V2 守恒触发器要求两处同动）。 */
   private void postInbound(
-      UUID balanceId, UUID locationId, UUID lotId, BigDecimal qty, UUID transactionId,
+      UUID balanceId,
+      UUID locationId,
+      UUID lotId,
+      BigDecimal qty,
+      UUID transactionId,
       OffsetDateTime at) {
     Record existing =
         sql.fetchOne(
             "select id from stock_bucket where balance_id=? and location_id=?"
                 + " and lot_id is not distinct from ?",
-            balanceId, locationId, lotId);
+            balanceId,
+            locationId,
+            lotId);
     if (existing != null) {
       sql.execute(
           "update stock_bucket set on_hand=on_hand+?,"
               + " last_movement_at=greatest(?::timestamptz,last_movement_at"
               + " + interval '1 microsecond') where id=?",
-          qty, at, existing.get("id", UUID.class));
+          qty,
+          at,
+          existing.get("id", UUID.class));
     } else {
       Record bal = sql.fetchOne("select * from inventory_balance where id=?", balanceId);
       sql.execute(
@@ -391,19 +399,23 @@ public class ProcessingOrderService {
     sql.execute(
         "update inventory_balance set on_hand=on_hand+?,version=version+1,updated_at=now()"
             + " where id=?",
-        qty, balanceId);
+        qty,
+        balanceId);
     sql.execute(
         "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
             + "reserved_delta) values(?,?,?,?,?,0)",
-        UUID.randomUUID(), currentTenant(), transactionId, balanceId, qty);
+        UUID.randomUUID(),
+        currentTenant(),
+        transactionId,
+        balanceId,
+        qty);
   }
 
   // ================================================================ 主数据校验
 
   private void requireWarehouse(UUID warehouseId) {
     if (sql.fetchOne("select 1 from warehouse where id = ?", warehouseId) == null) {
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "仓库 " + warehouseId + " 不存在或无权使用");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "仓库 " + warehouseId + " 不存在或无权使用");
     }
   }
 
@@ -417,8 +429,7 @@ public class ProcessingOrderService {
   private void requireSku(UUID skuId, String label) {
     if (sql.fetchOne("select 1 from sku_ref where id = ?", skuId) == null) {
       throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND,
-          label + " " + skuId + " 没有在本服务登记（sku_ref）：库存分录要落到真实存在的 SKU 上");
+          HttpStatus.NOT_FOUND, label + " " + skuId + " 没有在本服务登记（sku_ref）：库存分录要落到真实存在的 SKU 上");
     }
   }
 
@@ -444,9 +455,7 @@ public class ProcessingOrderService {
             "select id from inventory_quality_status where role = 'SELLABLE' and enabled"
                 + " order by code limit 1");
     if (row == null) {
-      throw bad(
-          "本租户没有启用的可售质量状态，无法确定成品入库去向。"
-              + "请先在质量状态字典里启用一个 role=SELLABLE 的状态");
+      throw bad("本租户没有启用的可售质量状态，无法确定成品入库去向。" + "请先在质量状态字典里启用一个 role=SELLABLE 的状态");
     }
     return row.get("id", UUID.class);
   }
@@ -456,7 +465,8 @@ public class ProcessingOrderService {
         sql.fetchOne(
             "select 1 from warehouse_location where id = ? and warehouse_id = ?"
                 + " and status = 'ACTIVE'",
-            locationId, warehouseId);
+            locationId,
+            warehouseId);
     if (row == null) {
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND, label + " " + locationId + " 不存在、不属于该仓或已停用");
@@ -472,18 +482,21 @@ public class ProcessingOrderService {
     Record row =
         sql.fetchOne(
             "select id from inventory_transaction where ref_type = ? and ref_id = ?",
-            REF_TYPE, processingOrderId);
+            REF_TYPE,
+            processingOrderId);
     return row == null ? null : row.get("id", UUID.class);
   }
 
   /** 取（或建）一条余额行。跨租户塞进来的仓/法人/质量状态会被 UNIQUE 或 RLS 挡住。 */
-  private UUID balanceId(
-      UUID skuId, UUID warehouseId, UUID legalEntityId, UUID qualityStatusId) {
+  private UUID balanceId(UUID skuId, UUID warehouseId, UUID legalEntityId, UUID qualityStatusId) {
     var found =
         sql.fetchOne(
             "select id from inventory_balance where sku_id=? and warehouse_id=?"
                 + " and legal_entity_id=? and quality_status_id=?",
-            skuId, warehouseId, legalEntityId, qualityStatusId);
+            skuId,
+            warehouseId,
+            legalEntityId,
+            qualityStatusId);
     if (found != null) {
       return found.get("id", UUID.class);
     }
@@ -491,7 +504,12 @@ public class ProcessingOrderService {
     sql.execute(
         "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
             + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,0,0)",
-        id, currentTenant(), skuId, warehouseId, legalEntityId, qualityStatusId);
+        id,
+        currentTenant(),
+        skuId,
+        warehouseId,
+        legalEntityId,
+        qualityStatusId);
     return id;
   }
 
@@ -500,9 +518,8 @@ public class ProcessingOrderService {
   /**
    * 当前 RLS 租户。由 backend/libraries/tenancy 在事务内设置，客户端头改不动它。
    *
-   * <p>表达式里的 nullif 不是洁癖：事务局部的 set_config 提交之后，PostgreSQL 会把自定义
-   * GUC **复位成空串**而不是「回到未设置」，直接 cast 会报 uuid 语法错
-   * （与 warehouse V1 / trade V92 同一句写法）。
+   * <p>表达式里的 nullif 不是洁癖：事务局部的 set_config 提交之后，PostgreSQL 会把自定义 GUC **复位成空串**而不是「回到未设置」，直接 cast 会报
+   * uuid 语法错 （与 warehouse V1 / trade V92 同一句写法）。
    */
   private UUID currentTenant() {
     return sql.fetchOne("select nullif(current_setting('app.current_tenant',true),'')::uuid")

@@ -16,10 +16,8 @@ import org.springframework.stereotype.Service;
 /**
  * 7.1.1.1 库存总览：**纯 SQL 聚合视图**，不存任何独立汇总数据。
  *
- * <p>蓝图硬约束：「总览数字必须能下钻到明细且能核对上，总览只是聚合视图，不存独立数据」。
- * 这里是这句话的字面兑现：没有 overview_summary 之类的表，合计、每页行、分组统计图
- * **全部由同一条 FROM 上的聚合得出**，所以"总览合计 == 明细逐行求和"不是靠约定成立，
- * 而是结构上无从违反 —— 合计与行读的是同一批列，求和顺序不同也不会差出一个数。
+ * <p>蓝图硬约束：「总览数字必须能下钻到明细且能核对上，总览只是聚合视图，不存独立数据」。 这里是这句话的字面兑现：没有 overview_summary 之类的表，合计、每页行、分组统计图
+ * **全部由同一条 FROM 上的聚合得出**，所以"总览合计 == 明细逐行求和"不是靠约定成立， 而是结构上无从违反 —— 合计与行读的是同一批列，求和顺序不同也不会差出一个数。
  *
  * <p>口径（与 V1 迁移文件头一致，此处不重新定义）：
  *
@@ -54,9 +52,8 @@ public class InventoryOverviewService {
   /**
    * 行的在途量表达式。
    *
-   * <p>在途按**收货仓**归属，这样"这批货到哪个仓"在行上直接看得见；按发货仓归属会让
-   * 总览显示"某个仓有在途"，而货其实在去这个仓的路上，两种口径都会让运营算错可用量。
-   * 同一行里它被 SELECT 与 ORDER BY 共用，避免两处口径漂移。
+   * <p>在途按**收货仓**归属，这样"这批货到哪个仓"在行上直接看得见；按发货仓归属会让 总览显示"某个仓有在途"，而货其实在去这个仓的路上，两种口径都会让运营算错可用量。 同一行里它被
+   * SELECT 与 ORDER BY 共用，避免两处口径漂移。
    */
   private static final String IN_TRANSIT =
       """
@@ -71,10 +68,9 @@ public class InventoryOverviewService {
   /**
    * 文本块片段的前导空格兜底。
    *
-   * <p>Java 文本块会丢掉 {@code """} 之后的那一个换行（这是 JLS 的 incidental whitespace 规则），
-   * 于是 {@code FROM} 常量实际上**不带前导换行**。直接拼在 {@code " as in_transit"} 后面会得到
-   * {@code as in_transitfrom inventory_balance b} —— 一个只在运行时才炸的语法错误。
-   * 这里统一给每个片段补一个前导空格，让片段之间靠常量本身就能安全拼接。
+   * <p>Java 文本块会丢掉 {@code """} 之后的那一个换行（这是 JLS 的 incidental whitespace 规则）， 于是 {@code FROM}
+   * 常量实际上**不带前导换行**。直接拼在 {@code " as in_transit"} 后面会得到 {@code as in_transitfrom inventory_balance
+   * b} —— 一个只在运行时才炸的语法错误。 这里统一给每个片段补一个前导空格，让片段之间靠常量本身就能安全拼接。
    */
   private static String clause(String fragment) {
     return " " + fragment.stripLeading();
@@ -97,10 +93,7 @@ public class InventoryOverviewService {
 
   // ------------------------------------------------------------ 能力声明
 
-  /**
-   * 跨服务筛选维度接入情况。前端据此**禁用**不可用的筛选项并说明归属服务，
-   * 而不是让用户填完再收一个 422。
-   */
+  /** 跨服务筛选维度接入情况。前端据此**禁用**不可用的筛选项并说明归属服务， 而不是让用户填完再收一个 422。 */
   public List<DimensionCapability> capabilities() {
     return Arrays.stream(CatalogProjectionPort.Dimension.values())
         .map(
@@ -129,7 +122,8 @@ public class InventoryOverviewService {
     // （LATERAL 子查询引用 b.*，b 必须先在 FROM 里出现）。
     String from = FROM + policyLateral();
 
-    long total = sql.fetchOne("select count(*)" + from + sqlWhere, binds.toArray()).get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*)" + from + sqlWhere, binds.toArray()).get(0, Long.class);
 
     var rows =
         sql.fetch(
@@ -168,8 +162,8 @@ public class InventoryOverviewService {
   /**
    * 合计（含零库存 / 超储 / 未设阈值三个计数）。
    *
-   * <p>超储判定用**该行自己的**在手量与解析出的 max_on_hand，不用"整租户合计 vs 合计阈值"：
-   * 阈值挂在 SKU / 仓上，用合计比会把"这个 SKU 超储"说成"整个租户超储"。
+   * <p>超储判定用**该行自己的**在手量与解析出的 max_on_hand，不用"整租户合计 vs 合计阈值"： 阈值挂在 SKU / 仓上，用合计比会把"这个 SKU
+   * 超储"说成"整个租户超储"。
    */
   private OverviewSummary summary(String from, String sqlWhere, List<Object> binds) {
     Record r =
@@ -180,7 +174,9 @@ public class InventoryOverviewService {
                 + " coalesce(sum(case when q.role='SELLABLE' then b.on_hand else 0 end),0) as sellable,"
                 + " coalesce(sum(case when q.role='PENDING_INSPECTION' then b.on_hand else 0 end),0) as pending,"
                 + " coalesce(sum(case when q.role='DEFECTIVE' then b.on_hand else 0 end),0) as defective,"
-                + " coalesce(sum(" + IN_TRANSIT + "),0) as in_transit,"
+                + " coalesce(sum("
+                + IN_TRANSIT
+                + "),0) as in_transit,"
                 + " count(*) as row_count,"
                 + " count(*) filter (where b.available<=0) as zero_rows,"
                 // 超储 = 已设阈值且在手超过阈值。未设阈值的行既不算超储，也不算"查过没超"，
@@ -223,10 +219,20 @@ public class InventoryOverviewService {
   /** 分组统计：仓库 / 法人 / 质量角色 / SKU 四个维度，全部来自同一份余额数据。 */
   private List<OverviewGroup> groups(String from, String sqlWhere, List<Object> binds) {
     var out = new ArrayList<OverviewGroup>();
-    out.addAll(group(from, "WAREHOUSE", "b.warehouse_id", "w.code||' '||w.name", sqlWhere, binds, 0));
-    out.addAll(group(from, "LEGAL_ENTITY", "b.legal_entity_id", "le.code||' '||le.name", sqlWhere, binds, 0));
+    out.addAll(
+        group(from, "WAREHOUSE", "b.warehouse_id", "w.code||' '||w.name", sqlWhere, binds, 0));
+    out.addAll(
+        group(
+            from,
+            "LEGAL_ENTITY",
+            "b.legal_entity_id",
+            "le.code||' '||le.name",
+            sqlWhere,
+            binds,
+            0));
     out.addAll(group(from, "QUALITY_ROLE", "null::uuid", "q.name", sqlWhere, binds, 0));
-    out.addAll(group(from, "SKU", "b.sku_id", "s.code||' '||s.name", sqlWhere, binds, MAX_SKU_GROUPS));
+    out.addAll(
+        group(from, "SKU", "b.sku_id", "s.code||' '||s.name", sqlWhere, binds, MAX_SKU_GROUPS));
     return out;
   }
 
@@ -240,19 +246,28 @@ public class InventoryOverviewService {
       int limit) {
     var rows =
         sql.fetch(
-            "select " + keyExpr + " as gkey," + labelExpr + " as glabel,"
+            "select "
+                + keyExpr
+                + " as gkey,"
+                + labelExpr
+                + " as glabel,"
                 + " coalesce(sum(b.on_hand),0) as on_hand, coalesce(sum(b.reserved),0) as reserved,"
                 + " coalesce(sum(b.available),0) as available,"
                 + " coalesce(sum(case when q.role='SELLABLE' then b.on_hand else 0 end),0) as sellable,"
                 + " coalesce(sum(case when q.role='PENDING_INSPECTION' then b.on_hand else 0 end),0) as pending,"
                 + " coalesce(sum(case when q.role='DEFECTIVE' then b.on_hand else 0 end),0) as defective,"
-                + " coalesce(sum(" + IN_TRANSIT + "),0) as in_transit,"
+                + " coalesce(sum("
+                + IN_TRANSIT
+                + "),0) as in_transit,"
                 + " count(*) as row_count,"
                 + " count(*) filter (where b.available<=0) as zero_rows,"
                 + " count(*) filter (where pol.max_on_hand is not null and b.on_hand>pol.max_on_hand) as over_rows"
                 + from
                 + sqlWhere
-                + " group by " + keyExpr + "," + labelExpr
+                + " group by "
+                + keyExpr
+                + ","
+                + labelExpr
                 // 排序键末尾恒定追加 gkey：同数量时分组顺序稳定，汇总图不会在两次刷新间跳。
                 + " order by sum(b.on_hand) desc,gkey"
                 + (limit > 0 ? " limit " + limit : ""),

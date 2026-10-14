@@ -15,12 +15,12 @@
 
 同刻进程取证：
 
-| 负载源 | 读数 |
-| ------ | ---- |
-| `java` (openjdk-25) | 160% CPU（刚起 13s 的 maven） |
-| Docker VM (`com.apple.Virtualization.VirtualMachine`) | 56% → 93% CPU / 614MB RSS |
-| Testcontainers | 新起 2 个 `postgres:16-alpine` + 2 个 `ryuk` |
-| WeChat | 51% → 45% CPU |
+| 负载源                                                | 读数                                         |
+| ----------------------------------------------------- | -------------------------------------------- |
+| `java` (openjdk-25)                                   | 160% CPU（刚起 13s 的 maven）                |
+| Docker VM (`com.apple.Virtualization.VirtualMachine`) | 56% → 93% CPU / 614MB RSS                    |
+| Testcontainers                                        | 新起 2 个 `postgres:16-alpine` + 2 个 `ryuk` |
+| WeChat                                                | 51% → 45% CPU                                |
 
 **结论：错在采样时机，不在算术。** 单条车道并发 verify 的真实成本 =
 1 个 maven JVM + N 个 surefire fork JVM + 1 个独立 PG 容器 + 1 个 ryuk。

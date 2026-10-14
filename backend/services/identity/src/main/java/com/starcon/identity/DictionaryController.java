@@ -39,28 +39,22 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>蓝图点名的三条硬要求在这里各有明确落点：
  *
  * <ul>
- *   <li><b>租户级自定义扩展</b>：{@code dict_catalog} 是平台随代码发布的字典目录
- *       （全局码表，只读），{@code dict_item} 是租户私有的字典项。目录不出租户、
- *       项才出租户，租户往目录里加自己的条目就是「自定义扩展」。
- *   <li><b>不允许修改已被历史数据引用的编码</b>：{@code /dict-items/{id}} 允许改名称、
- *       说明、排序，但 {@code itemCode} 一旦被引用就拒改（409）。数据库层还有
- *       {@code dict_item_update_guard()} 触发器兜底，不依赖调用方自觉。
- *   <li><b>被引用后只能停用不能删除</b>：本控制器**没有 DELETE 端点**，
- *       停用走 {@code POST /dict-items/{id}/deactivate}、恢复走
- *       {@code POST /dict-items/{id}/reactivate}。删除防线不止一处：
- *       控制器无 DELETE 端点、迁移不授予 {@code identity_app} DELETE、
- *       {@code dict_item_usage.item_id} 外键 RESTRICT、{@code dict_item_delete_guard()}
- *       触发器在数据库层挡掉一切 DELETE。
+ *   <li><b>租户级自定义扩展</b>：{@code dict_catalog} 是平台随代码发布的字典目录 （全局码表，只读），{@code dict_item}
+ *       是租户私有的字典项。目录不出租户、 项才出租户，租户往目录里加自己的条目就是「自定义扩展」。
+ *   <li><b>不允许修改已被历史数据引用的编码</b>：{@code /dict-items/{id}} 允许改名称、 说明、排序，但 {@code itemCode}
+ *       一旦被引用就拒改（409）。数据库层还有 {@code dict_item_update_guard()} 触发器兜底，不依赖调用方自觉。
+ *   <li><b>被引用后只能停用不能删除</b>：本控制器**没有 DELETE 端点**， 停用走 {@code POST /dict-items/{id}/deactivate}、恢复走
+ *       {@code POST /dict-items/{id}/reactivate}。删除防线不止一处： 控制器无 DELETE 端点、迁移不授予 {@code
+ *       identity_app} DELETE、 {@code dict_item_usage.item_id} 外键 RESTRICT、{@code
+ *       dict_item_delete_guard()} 触发器在数据库层挡掉一切 DELETE。
  * </ul>
  *
- * <p><b>引用统计不是常数</b>：{@code referenceCount} 与 {@code referencingSystems}
- * 来自 {@code dict_item_usage} 的 {@code left join + sum} 聚合，字典项从未被下游登记
- * 引用时才是 0。下游经 {@code POST /dict-items/{id}/usage} 登记「我这边有 N 条记录
- * 用了这个字典项」，identity 不去查它们的库（跨服务读表是 AGENTS.md 明令禁止的）。
+ * <p><b>引用统计不是常数</b>：{@code referenceCount} 与 {@code referencingSystems} 来自 {@code dict_item_usage}
+ * 的 {@code left join + sum} 聚合，字典项从未被下游登记 引用时才是 0。下游经 {@code POST /dict-items/{id}/usage} 登记「我这边有 N
+ * 条记录 用了这个字典项」，identity 不去查它们的库（跨服务读表是 AGENTS.md 明令禁止的）。
  *
- * <p>独立成 {@code DictionaryController} 而不并进 {@code BusinessParameterController}：
- * 17.5.2.1 与 17.5.1.1 是两个独立 L4 单元，约束完全不同（一个是分档生效值，
- * 一个是禁删字典项），同文件各自生长会让两侧改动在合并时互相打架。
+ * <p>独立成 {@code DictionaryController} 而不并进 {@code BusinessParameterController}： 17.5.2.1 与 17.5.1.1
+ * 是两个独立 L4 单元，约束完全不同（一个是分档生效值， 一个是禁删字典项），同文件各自生长会让两侧改动在合并时互相打架。
  */
 @RestController
 @RequestMapping("/identity")
@@ -85,8 +79,7 @@ public class DictionaryController {
   /**
    * 出厂字典目录。
    *
-   * <p>{@code codeLocked} 是显式字段而不是由调用方猜：这决定了该字典下的字典项
-   * 被引用后编码能不能改，页面上要能直接看到「这类字典的编码是锁死的」。
+   * <p>{@code codeLocked} 是显式字段而不是由调用方猜：这决定了该字典下的字典项 被引用后编码能不能改，页面上要能直接看到「这类字典的编码是锁死的」。
    */
   public record DictCatalogView(
       String code,
@@ -101,11 +94,8 @@ public class DictionaryController {
   /**
    * 字典项 + 引用统计。
    *
-   * <p>{@code referenceCount} 是各来源系统登记的引用条数之和，
-   * {@code referencingSystems} 是有登记记录的来源系统个数，
-   * {@code referenced} 由「是否存在登记记录」判定——不是按当前计数是否大于 0。
-   * 一个字典项的计数归零只说明当下没人用它，历史单据里还留着它，
-   * 编码依然锁死、依然不能删。
+   * <p>{@code referenceCount} 是各来源系统登记的引用条数之和， {@code referencingSystems} 是有登记记录的来源系统个数， {@code
+   * referenced} 由「是否存在登记记录」判定——不是按当前计数是否大于 0。 一个字典项的计数归零只说明当下没人用它，历史单据里还留着它， 编码依然锁死、依然不能删。
    */
   public record DictItemView(
       UUID id,
@@ -130,14 +120,18 @@ public class DictionaryController {
   /** 引用台账一行：一个来源系统对某个字典项登记的引用条数。 */
   public record DictItemUsageView(
       UUID id,
-      String sourceSystem, long usageCount, String note, OffsetDateTime firstReferencedAt,
-      OffsetDateTime lastReferencedAt, OffsetDateTime updatedAt) {}
+      String sourceSystem,
+      long usageCount,
+      String note,
+      OffsetDateTime firstReferencedAt,
+      OffsetDateTime lastReferencedAt,
+      OffsetDateTime updatedAt) {}
 
   /**
    * 变更历史一行。
    *
-   * <p>停用/恢复额外记录 {@code beforeStatus}/{@code afterStatus} 与原因；
-   * 改名称与说明时记录前后名称，其余字段为空——每一行的含义由 action 决定。
+   * <p>停用/恢复额外记录 {@code beforeStatus}/{@code afterStatus} 与原因； 改名称与说明时记录前后名称，其余字段为空——每一行的含义由 action
+   * 决定。
    */
   public record DictHistoryView(
       UUID id,
@@ -159,8 +153,7 @@ public class DictionaryController {
   /**
    * 字典项输入。
    *
-   * <p>{@code itemCode} 在新建时必填、更新时可空：更新时留空表示不改编码，
-   * 显式传一个不同的值则走「已被引用则 409」这条判定，而不是静默忽略。
+   * <p>{@code itemCode} 在新建时必填、更新时可空：更新时留空表示不改编码， 显式传一个不同的值则走「已被引用则 409」这条判定，而不是静默忽略。
    */
   public record DictItemInput(
       @NotBlank @Size(max = 64) String dictCode,
@@ -172,9 +165,8 @@ public class DictionaryController {
   /**
    * 停用/恢复输入。
    *
-   * <p>停用必须带原因：事后无法解释「为什么这个字典项不能选了」。{@code status} 用
-   * {@code ACTIVE|DISABLED} 的 Pattern 约束，与 {@code BusinessParameterOverrideInput} 的
-   * {@code scopeType} 同一写法；端点再各自校验方向（停用端点只收 DISABLED）。
+   * <p>停用必须带原因：事后无法解释「为什么这个字典项不能选了」。{@code status} 用 {@code ACTIVE|DISABLED} 的 Pattern 约束，与 {@code
+   * BusinessParameterOverrideInput} 的 {@code scopeType} 同一写法；端点再各自校验方向（停用端点只收 DISABLED）。
    */
   public record DictItemStatusInput(
       @NotNull @Pattern(regexp = "ACTIVE|DISABLED") String status,
@@ -191,13 +183,16 @@ public class DictionaryController {
   private static final String DICT_UPDATE = "identity.dictionary.update";
 
   /**
-   * 与 {@code BusinessParameterController.call} 同口径：解析会话 → 切到该会话的租户事务 →
-   * 锁会话 → 二次校验租户未切换 → 校验权限码 → 组织变更要求 OWNER。
+   * 与 {@code BusinessParameterController.call} 同口径：解析会话 → 切到该会话的租户事务 → 锁会话 → 二次校验租户未切换 → 校验权限码 →
+   * 组织变更要求 OWNER。
    *
    * <p>租户来自会话成员关系，{@code X-Tenant-Id} 头在这里从头到尾没有出现过。
    */
   private <T> T call(
-      String auth, String permission, boolean mutation, Function<IdentityController.Access, T> work) {
+      String auth,
+      String permission,
+      boolean mutation,
+      Function<IdentityController.Access, T> work) {
     var initial = identity.resolve(auth);
     return tenants.run(
         initial.tenantId(),
@@ -209,7 +204,8 @@ public class DictionaryController {
           require(a.tenantId().equals(initial.tenantId()), "租户已切换，请重试");
           require(
               a.grants().stream()
-                  .anyMatch(g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
+                  .anyMatch(
+                      g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
               "当前角色没有此操作权限");
           if (mutation) require(a.owner(), "数据字典变更需由当前租户所有者执行");
           return work.apply(a);
@@ -244,8 +240,7 @@ public class DictionaryController {
   /**
    * 出厂字典目录 + 每个字典下的字典项计数。
    *
-   * <p>全租户共用一份目录，不带租户上下文；计数来自本租户的字典项，
-   * 所以同一个目录在不同租户下看到的 itemCount 可以不同——这正是租户级扩展的体现。
+   * <p>全租户共用一份目录，不带租户上下文；计数来自本租户的字典项， 所以同一个目录在不同租户下看到的 itemCount 可以不同——这正是租户级扩展的体现。
    */
   @GetMapping("/dict-catalog")
   public List<DictCatalogView> catalog(
@@ -263,12 +258,10 @@ public class DictionaryController {
   /**
    * 字典项列表，带真实引用统计。
    *
-   * <p>可按字典、状态过滤，可按编码或名称搜索。不带过滤时返回本租户全部字典项，
-   * 因为配置页常态就是「这个字典里现在有哪些项」。
+   * <p>可按字典、状态过滤，可按编码或名称搜索。不带过滤时返回本租户全部字典项， 因为配置页常态就是「这个字典里现在有哪些项」。
    *
-   * <p>默认<b>包含</b>停用项：停用项要看得见才能判断「这个值还在用不用」，
-   * 把它藏起来等于让用户以为被删了。下拉选项场景请走
-   * {@code /dict-items/options/{dictCode}}，那里只给 ACTIVE。
+   * <p>默认<b>包含</b>停用项：停用项要看得见才能判断「这个值还在用不用」， 把它藏起来等于让用户以为被删了。下拉选项场景请走 {@code
+   * /dict-items/options/{dictCode}}，那里只给 ACTIVE。
    */
   @GetMapping("/dict-items")
   public List<DictItemView> items(
@@ -289,9 +282,7 @@ public class DictionaryController {
             condition.bind(dictCode.trim());
           }
           if (status != null && !status.isBlank()) {
-            check(
-                List.of("ACTIVE", "DISABLED").contains(status),
-                "状态只能是 ACTIVE 或 DISABLED");
+            check(List.of("ACTIVE", "DISABLED").contains(status), "状态只能是 ACTIVE 或 DISABLED");
             condition.add(" and i.status=?");
             condition.bind(status);
           }
@@ -301,7 +292,8 @@ public class DictionaryController {
             condition.bind(like);
             condition.bind(like);
           }
-          return sql.fetch(ITEM_SELECT + condition.sql() + ITEM_ORDER, condition.bindings())
+          return sql
+              .fetch(ITEM_SELECT + condition.sql() + ITEM_ORDER, condition.bindings())
               .stream()
               .map(DictionaryController::toItem)
               .toList();
@@ -311,12 +303,10 @@ public class DictionaryController {
   /**
    * 下拉选项：某个字典下所有 ACTIVE 的字典项。
    *
-   * <p>这是「下游 = 各业务系统下拉选项」的读出口：停用项不进这里，
-   * 所以停用一个字典项不会让新单据选不到——而历史单据仍能读回它（见
-   * {@code /dict-items} 与 {@code /dict-items/{id}}）。
+   * <p>这是「下游 = 各业务系统下拉选项」的读出口：停用项不进这里， 所以停用一个字典项不会让新单据选不到——而历史单据仍能读回它（见 {@code /dict-items} 与
+   * {@code /dict-items/{id}}）。
    *
-   * <p>字典不存在或已下线返回 404，而不是空数组：空数组会被调用方渲染成
-   * 「这个字典没有可选项」，与「这个字典配错了」是两种完全不同的事故。
+   * <p>字典不存在或已下线返回 404，而不是空数组：空数组会被调用方渲染成 「这个字典没有可选项」，与「这个字典配错了」是两种完全不同的事故。
    */
   @GetMapping("/dict-items/options/{dictCode}")
   public List<DictItemView> options(
@@ -334,7 +324,8 @@ public class DictionaryController {
           check(
               catalog.get("status", String.class).equals("ACTIVE"),
               "字典 " + dictCode + " 已下线，不能再取选项");
-          return sql.fetch(
+          return sql
+              .fetch(
                   ITEM_SELECT
                       + " where i.tenant_id=? and i.dict_code=? and i.status='ACTIVE'"
                       + ITEM_ORDER,
@@ -353,7 +344,8 @@ public class DictionaryController {
    */
   @GetMapping("/dict-items/{id}")
   public DictItemView item(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(
         auth,
         DICT_READ,
@@ -362,8 +354,7 @@ public class DictionaryController {
           var row = fetchItem(a.tenantId(), id);
           // 404 而不是 403：跨租户拿到的 id 与真正不存在的 id 在这里不可区分，
           // 返回 403 会泄露「这个 id 存在」。
-          if (row == null)
-            throw IdentityController.error(HttpStatus.NOT_FOUND, "字典项不存在或不属于当前租户");
+          if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "字典项不存在或不属于当前租户");
           return toItem(row);
         });
   }
@@ -371,16 +362,17 @@ public class DictionaryController {
   /** 某个字典项的引用台账明细，按来源系统列出。 */
   @GetMapping("/dict-items/{id}/usage")
   public List<DictItemUsageView> usages(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(
         auth,
         DICT_READ,
         false,
         a -> {
           var row = fetchItem(a.tenantId(), id);
-          if (row == null)
-            throw IdentityController.error(HttpStatus.NOT_FOUND, "字典项不存在或不属于当前租户");
-          return sql.fetch(
+          if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "字典项不存在或不属于当前租户");
+          return sql
+              .fetch(
                   "select id,source_system,usage_count,note,first_referenced_at,last_referenced_at,"
                       + " updated_at from dict_item_usage where tenant_id=? and item_id=? order by source_system",
                   a.tenantId(),
@@ -421,7 +413,8 @@ public class DictionaryController {
             condition.add(" and h.item_id=?");
             condition.bind(itemId);
           }
-          return sql.fetch(
+          return sql
+              .fetch(
                   "select h.id,h.dict_code,h.item_id,h.item_code,h.item_name,h.action,"
                       + " h.before_name,h.before_description,h.after_name,h.after_description,"
                       + " h.before_status,h.after_status,h.reason,h.actor_name,h.changed_at"
@@ -442,8 +435,7 @@ public class DictionaryController {
   /**
    * 新建字典项（租户级自定义扩展的主入口）。
    *
-   * <p>同一字典下编码唯一：撞码返回 409 而不是覆盖——覆盖会让历史单据里
-   * 同一个编码在今天与昨天指向两个不同的东西。
+   * <p>同一字典下编码唯一：撞码返回 409 而不是覆盖——覆盖会让历史单据里 同一个编码在今天与昨天指向两个不同的东西。
    */
   @PostMapping("/dict-items")
   public UUID create(
@@ -479,18 +471,35 @@ public class DictionaryController {
                 utcNow(),
                 a.membershipId());
           } catch (DataIntegrityViolationException e) {
-            reject(
-                "字典 " + input.dictCode() + " 下已存在编码「" + code + "」，请直接编辑现有字典项");
+            reject("字典 " + input.dictCode() + " 下已存在编码「" + code + "」，请直接编辑现有字典项");
           }
           // CREATED 的「变更前」为空，「变更后」就是这次新建的值——
           // 只记 after 不记 before 的历史读起来会像"这个字典项一直叫这个名字"。
-          history(a, auth, id, input.dictCode().trim(), code, input.name().trim(),
-              note(input.description()), "CREATED", null, null,
-              input.name().trim(), note(input.description()), null, "ACTIVE", "新建字典项");
+          history(
+              a,
+              auth,
+              id,
+              input.dictCode().trim(),
+              code,
+              input.name().trim(),
+              note(input.description()),
+              "CREATED",
+              null,
+              null,
+              input.name().trim(),
+              note(input.description()),
+              null,
+              "ACTIVE",
+              "新建字典项");
           audit.record(
-              a, auth, "identity.dictionary", id,
-              input.dictCode().trim() + " · " + code, "DictionaryItemCreated",
-              null, itemSnapshot(id));
+              a,
+              auth,
+              "identity.dictionary",
+              id,
+              input.dictCode().trim() + " · " + code,
+              "DictionaryItemCreated",
+              null,
+              itemSnapshot(id));
           return id;
         });
   }
@@ -498,12 +507,9 @@ public class DictionaryController {
   /**
    * 更新字典项。
    *
-   * <p>名称、说明、排序随时可改；<b>编码只在未被引用时可改</b>。被引用后显式传新编码
-   * 返回 409，而不是静默忽略——静默忽略会让用户以为编码改成功了，
-   * 几天后在别处发现编码没变。
+   * <p>名称、说明、排序随时可改；<b>编码只在未被引用时可改</b>。被引用后显式传新编码 返回 409，而不是静默忽略——静默忽略会让用户以为编码改成功了， 几天后在别处发现编码没变。
    *
-   * <p>停用中的字典项可以改名称与说明（停用只是不能选，不是冻结），
-   * 但改完仍保持停用状态，这里不偷偷把它放回 ACTIVE。
+   * <p>停用中的字典项可以改名称与说明（停用只是不能选，不是冻结）， 但改完仍保持停用状态，这里不偷偷把它放回 ACTIVE。
    */
   @PutMapping("/dict-items/{id}")
   public void update(
@@ -516,8 +522,7 @@ public class DictionaryController {
         true,
         a -> {
           var row = fetchItem(a.tenantId(), id);
-          if (row == null)
-            throw IdentityController.error(HttpStatus.NOT_FOUND, "字典项不存在或不属于当前租户");
+          if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "字典项不存在或不属于当前租户");
           var usage = usageCount(a.tenantId(), id);
           String existingCode = row.get("item_code", String.class);
           String nextCode = existingCode;
@@ -526,11 +531,7 @@ public class DictionaryController {
             checkCode(nextCode);
             if (!nextCode.equals(existingCode) && usage > 0)
               reject(
-                  "字典项「"
-                      + existingCode
-                      + "」已被历史数据引用（"
-                      + usage
-                      + " 个来源系统登记），不能修改编码；名称、说明、排序仍可修改");
+                  "字典项「" + existingCode + "」已被历史数据引用（" + usage + " 个来源系统登记），不能修改编码；名称、说明、排序仍可修改");
           }
           // 字典归属不可改：换字典等于换一条记录，否则历史引用统计会被切成两半。
           check(
@@ -545,30 +546,43 @@ public class DictionaryController {
                 nextCode,
                 name,
                 description,
-                input.sortOrder() == null ? row.get("sort_order", Integer.class) : input.sortOrder(),
+                input.sortOrder() == null
+                    ? row.get("sort_order", Integer.class)
+                    : input.sortOrder(),
                 utcNow(),
                 a.tenantId(),
                 id);
           } catch (DataIntegrityViolationException e) {
-            reject(
-                "字典 "
-                    + row.get("dict_code", String.class)
-                    + " 下已存在编码「"
-                    + nextCode
-                    + "」，请换一个编码");
+            reject("字典 " + row.get("dict_code", String.class) + " 下已存在编码「" + nextCode + "」，请换一个编码");
           }
           if (!name.equals(row.get("name", String.class))
               || !description.equals(row.get("description", String.class))
               || !nextCode.equals(existingCode))
             history(
-                a, auth, id, row.get("dict_code", String.class), nextCode, name, description,
-                "UPDATED", row.get("name", String.class), row.get("description", String.class),
-                name, description, row.get("status", String.class), row.get("status", String.class),
+                a,
+                auth,
+                id,
+                row.get("dict_code", String.class),
+                nextCode,
+                name,
+                description,
+                "UPDATED",
+                row.get("name", String.class),
+                row.get("description", String.class),
+                name,
+                description,
+                row.get("status", String.class),
+                row.get("status", String.class),
                 "编辑字典项");
           audit.record(
-              a, auth, "identity.dictionary", id,
-              row.get("dict_code", String.class) + " · " + existingCode, "DictionaryItemUpdated",
-              rowSnapshot(row), itemSnapshot(id));
+              a,
+              auth,
+              "identity.dictionary",
+              id,
+              row.get("dict_code", String.class) + " · " + existingCode,
+              "DictionaryItemUpdated",
+              rowSnapshot(row),
+              itemSnapshot(id));
           return null;
         });
   }
@@ -576,8 +590,7 @@ public class DictionaryController {
   /**
    * 停用字典项。
    *
-   * <p>停用 = 不再出现在新单据的下拉里，历史单据照常能读回它并渲染成标签——
-   * 这正是「不能删」的原因。停用必须带原因，且是幂等的：已停用的再停一次直接 409，
+   * <p>停用 = 不再出现在新单据的下拉里，历史单据照常能读回它并渲染成标签—— 这正是「不能删」的原因。停用必须带原因，且是幂等的：已停用的再停一次直接 409，
    * 而不是悄悄改一次时刻、让变更历史里出现两条看不出差别的记录。
    */
   @PostMapping("/dict-items/{id}/deactivate")
@@ -591,13 +604,10 @@ public class DictionaryController {
         true,
         a -> {
           var row = fetchItem(a.tenantId(), id);
-          if (row == null)
-            throw IdentityController.error(HttpStatus.NOT_FOUND, "字典项不存在或不属于当前租户");
+          if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "字典项不存在或不属于当前租户");
           // 方向先于状态判定：拿 ACTIVE 去调停用端点是请求本身写错了（400），
           // 与「这个字典项当前是什么状态」无关。先查状态会把调用方的笔误报成 409。
-          check(
-              input.status() == null || input.status().equals("DISABLED"),
-              "停用端点只接受 DISABLED");
+          check(input.status() == null || input.status().equals("DISABLED"), "停用端点只接受 DISABLED");
           if (!row.get("status", String.class).equals("ACTIVE"))
             reject("字典项「" + row.get("item_code", String.class) + "」已经是停用状态");
           String reason = requiredReason(input.reason());
@@ -613,21 +623,38 @@ public class DictionaryController {
               a.tenantId(),
               id);
           history(
-              a, auth, id, row.get("dict_code", String.class), row.get("item_code", String.class),
-              row.get("name", String.class), row.get("description", String.class), "DEACTIVATED",
-              row.get("name", String.class), row.get("description", String.class),
-              row.get("name", String.class), row.get("description", String.class),
-              "ACTIVE", "DISABLED", reason);
+              a,
+              auth,
+              id,
+              row.get("dict_code", String.class),
+              row.get("item_code", String.class),
+              row.get("name", String.class),
+              row.get("description", String.class),
+              "DEACTIVATED",
+              row.get("name", String.class),
+              row.get("description", String.class),
+              row.get("name", String.class),
+              row.get("description", String.class),
+              "ACTIVE",
+              "DISABLED",
+              reason);
           audit.record(
-              a, auth, "identity.dictionary", id,
+              a,
+              auth,
+              "identity.dictionary",
+              id,
               row.get("dict_code", String.class) + " · " + row.get("item_code", String.class),
               "DictionaryItemDeactivated",
               rowSnapshot(row),
               Map.of(
-                  "itemCode", row.get("item_code", String.class),
-                  "status", "DISABLED",
-                  "reason", reason,
-                  "referenceCount", usage));
+                  "itemCode",
+                  row.get("item_code", String.class),
+                  "status",
+                  "DISABLED",
+                  "reason",
+                  reason,
+                  "referenceCount",
+                  usage));
           return null;
         });
   }
@@ -635,8 +662,7 @@ public class DictionaryController {
   /**
    * 恢复字典项。
    *
-   * <p>停用是可逆的：停用错了就恢复，而不是删掉重建——重建会换一个 id，
-   * 把已经登记的引用统计与变更历史一起割断。
+   * <p>停用是可逆的：停用错了就恢复，而不是删掉重建——重建会换一个 id， 把已经登记的引用统计与变更历史一起割断。
    */
   @PostMapping("/dict-items/{id}/reactivate")
   public void reactivate(
@@ -649,12 +675,9 @@ public class DictionaryController {
         true,
         a -> {
           var row = fetchItem(a.tenantId(), id);
-          if (row == null)
-            throw IdentityController.error(HttpStatus.NOT_FOUND, "字典项不存在或不属于当前租户");
+          if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "字典项不存在或不属于当前租户");
           // 方向先于状态判定，理由同上。
-          check(
-              input.status() == null || input.status().equals("ACTIVE"),
-              "恢复端点只接受 ACTIVE");
+          check(input.status() == null || input.status().equals("ACTIVE"), "恢复端点只接受 ACTIVE");
           if (!row.get("status", String.class).equals("DISABLED"))
             reject("字典项「" + row.get("item_code", String.class) + "」当前不是停用状态");
           String reason = requiredReason(input.reason());
@@ -666,20 +689,36 @@ public class DictionaryController {
               a.tenantId(),
               id);
           history(
-              a, auth, id, row.get("dict_code", String.class), row.get("item_code", String.class),
-              row.get("name", String.class), row.get("description", String.class), "REACTIVATED",
-              row.get("name", String.class), row.get("description", String.class),
-              row.get("name", String.class), row.get("description", String.class),
-              "DISABLED", "ACTIVE", reason);
+              a,
+              auth,
+              id,
+              row.get("dict_code", String.class),
+              row.get("item_code", String.class),
+              row.get("name", String.class),
+              row.get("description", String.class),
+              "REACTIVATED",
+              row.get("name", String.class),
+              row.get("description", String.class),
+              row.get("name", String.class),
+              row.get("description", String.class),
+              "DISABLED",
+              "ACTIVE",
+              reason);
           audit.record(
-              a, auth, "identity.dictionary", id,
+              a,
+              auth,
+              "identity.dictionary",
+              id,
               row.get("dict_code", String.class) + " · " + row.get("item_code", String.class),
               "DictionaryItemReactivated",
               rowSnapshot(row),
               Map.of(
-                  "itemCode", row.get("item_code", String.class),
-                  "status", "ACTIVE",
-                  "reason", reason));
+                  "itemCode",
+                  row.get("item_code", String.class),
+                  "status",
+                  "ACTIVE",
+                  "reason",
+                  reason));
           return null;
         });
   }
@@ -688,16 +727,12 @@ public class DictionaryController {
    * 登记 / 更新引用计数。
    *
    * <p>下游各业务服务的表在各自库里，identity 不能查（跨服务读表是 AGENTS.md 明令禁止的），
-   * 所以引用统计靠下游经这个端点登记。这也是「引用统计是真实数据而非写死数字」的来源：
-   * 计数来自下游的真实登记，字典项从未被登记时才是 0。
+   * 所以引用统计靠下游经这个端点登记。这也是「引用统计是真实数据而非写死数字」的来源： 计数来自下游的真实登记，字典项从未被登记时才是 0。
    *
-   * <p>同一个「字典项 × 来源系统」只有一行，重复登记是覆盖而不是追加——
-   * 追加会让同一个来源系统的计数累加成一个永远对不上的天文数字。
-   * {@code first_referenced_at} 保留首次登记时刻，所以统计能回答
-   * 「这个字典项最早从什么时候起被用过」。
+   * <p>同一个「字典项 × 来源系统」只有一行，重复登记是覆盖而不是追加—— 追加会让同一个来源系统的计数累加成一个永远对不上的天文数字。 {@code
+   * first_referenced_at} 保留首次登记时刻，所以统计能回答 「这个字典项最早从什么时候起被用过」。
    *
-   * <p>停用中的字典项也允许登记引用：停用是配置决定，已经发生的历史引用是事实，
-   * 不能因为「现在不让选了」就假装它没被用过。
+   * <p>停用中的字典项也允许登记引用：停用是配置决定，已经发生的历史引用是事实， 不能因为「现在不让选了」就假装它没被用过。
    */
   @PostMapping("/dict-items/{id}/usage")
   public void recordUsage(
@@ -710,8 +745,7 @@ public class DictionaryController {
         true,
         a -> {
           var row = fetchItem(a.tenantId(), id);
-          if (row == null)
-            throw IdentityController.error(HttpStatus.NOT_FOUND, "字典项不存在或不属于当前租户");
+          if (row == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "字典项不存在或不属于当前租户");
           check(input.usageCount() >= 0, "引用条数不能为负数");
           String source = input.sourceSystem().trim();
           // upsert：first_referenced_at 用 min() 保住首次登记时刻，
@@ -735,7 +769,10 @@ public class DictionaryController {
               note(input.note()),
               utcNow());
           audit.record(
-              a, auth, "identity.dictionary", id,
+              a,
+              auth,
+              "identity.dictionary",
+              id,
               row.get("dict_code", String.class) + " · " + row.get("item_code", String.class),
               "DictionaryItemUsageRecorded",
               null,
@@ -754,8 +791,7 @@ public class DictionaryController {
   /**
    * 目录 + 字典项计数。
    *
-   * <p>{@code count(i.id)} 在 {@code left join} 上聚合，所以没有字典项的目录也返回一行
-   * （计数为 0），而不是从结果里消失——「这个字典一个项都没配」和
+   * <p>{@code count(i.id)} 在 {@code left join} 上聚合，所以没有字典项的目录也返回一行 （计数为 0），而不是从结果里消失——「这个字典一个项都没配」和
    * 「这个字典不存在」在页面上要能区分开。
    */
   private static final String CATALOG_SQL =
@@ -770,15 +806,12 @@ public class DictionaryController {
   /**
    * 字典项 + 引用统计的唯一查询入口。
    *
-   * <p>引用统计是 {@code left join dict_item_usage} 后的 {@code sum}：
-   * 没有登记过时 {@code sum} 为 NULL，用 {@code coalesce} 归 0。
-   * {@code referencing_systems} 是 {@code count} ——「有几个来源系统登记过」，
-   * 与「一共引用了多少条」是两件事，停用一个引用了 9000 条的字典项和
-   * 停用一个引用了 1 条的字典项，风险完全不同。
+   * <p>引用统计是 {@code left join dict_item_usage} 后的 {@code sum}： 没有登记过时 {@code sum} 为 NULL，用 {@code
+   * coalesce} 归 0。 {@code referencing_systems} 是 {@code count} ——「有几个来源系统登记过」，
+   * 与「一共引用了多少条」是两件事，停用一个引用了 9000 条的字典项和 停用一个引用了 1 条的字典项，风险完全不同。
    *
-   * <p>{@code referenced} 按「有没有登记记录」判定（{@code count(u.id)>0}），
-   * 不是按 {@code usage_count} 是否大于 0：计数归零只说明当下没人用它，
-   * 历史单据里还留着它，编码依然锁死、依然不能删。
+   * <p>{@code referenced} 按「有没有登记记录」判定（{@code count(u.id)>0}）， 不是按 {@code usage_count} 是否大于
+   * 0：计数归零只说明当下没人用它， 历史单据里还留着它，编码依然锁死、依然不能删。
    */
   private static final String ITEM_SELECT =
       "select i.id,i.dict_code,c.name as dict_name,c.item_kind,c.code_locked,i.item_code,i.name,"
@@ -866,9 +899,7 @@ public class DictionaryController {
   /**
    * 字典项编码合法性。
    *
-   * <p>编码会进单据、报表与导出，口径与 V48 编号前缀一致：大写字母开头、
-   * 字母数字下划线、2–64 位。小写与空格会让「同一个字典项」在不同系统里
-   * 出现两种写法，跨服务对齐时永远对不上。
+   * <p>编码会进单据、报表与导出，口径与 V48 编号前缀一致：大写字母开头、 字母数字下划线、2–64 位。小写与空格会让「同一个字典项」在不同系统里 出现两种写法，跨服务对齐时永远对不上。
    */
   private static void checkCode(String code) {
     check(
@@ -889,13 +920,14 @@ public class DictionaryController {
   /**
    * 引用登记条数：有多少个来源系统为这个字典项留过记录。
    *
-   * <p>按「登记记录是否存在」计数而不是按 {@code usage_count} 求和：
-   * 计数归零的字典项同样算被引用过——它进过历史单据，编码不能改、项不能删。
+   * <p>按「登记记录是否存在」计数而不是按 {@code usage_count} 求和： 计数归零的字典项同样算被引用过——它进过历史单据，编码不能改、项不能删。
    */
   private long usageCount(UUID tenantId, UUID itemId) {
     var row =
-        sql.fetchOne("select count(*) as n from dict_item_usage where tenant_id=? and item_id=?",
-            tenantId, itemId);
+        sql.fetchOne(
+            "select count(*) as n from dict_item_usage where tenant_id=? and item_id=?",
+            tenantId,
+            itemId);
     return row == null ? 0 : row.get("n", Long.class);
   }
 

@@ -12,11 +12,10 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 3.2.1.1 属性定义列表：租户级属性字典、选项集合与类目绑定规则。
  *
- * <p>路由挂在 {@code /catalog/attributes} 之下，**不挂 {@code /products}**：属性字典是租户级
- * 的全局配置（所有商品共用同一套字典），而 {@code /catalog/products/{id}} 是单个商品的档案页。
- * 两者混在一个前缀下会让「这是谁的属性」在 URL 上就分不清，运营很容易把商品属性页当成字典页。
- * 蓝图台账里的 {@code /products/attributes} 是**前端页面路径**，与 {@code /products/sku/spec-axis}
- * 同一性质——它的后端同样挂在 {@code /catalog/spec-axis}。
+ * <p>路由挂在 {@code /catalog/attributes} 之下，**不挂 {@code /products}**：属性字典是租户级 的全局配置（所有商品共用同一套字典），而
+ * {@code /catalog/products/{id}} 是单个商品的档案页。 两者混在一个前缀下会让「这是谁的属性」在 URL 上就分不清，运营很容易把商品属性页当成字典页。 蓝图台账里的
+ * {@code /products/attributes} 是**前端页面路径**，与 {@code /products/sku/spec-axis} 同一性质——它的后端同样挂在 {@code
+ * /catalog/spec-axis}。
  *
  * <p>权限沿用属性域：读 {@code catalog.attribute.read}，写 {@code catalog.attribute.update}。
  */
@@ -41,8 +40,7 @@ public class AttributeDictionaryController {
   /**
    * 字典列表（真实分页：返回 total 与当前页，筛选后 total 同步变化）。
    *
-   * <p>「参与筛选」与「启用」用 {@link Boolean} 收参：三态（不筛 / 只要启用的 / 只要停用的）
-   * 用基本类型表达不出来，硬塞成枚举字符串只会让前端更容易传错。
+   * <p>「参与筛选」与「启用」用 {@link Boolean} 收参：三态（不筛 / 只要启用的 / 只要停用的） 用基本类型表达不出来，硬塞成枚举字符串只会让前端更容易传错。
    */
   @GetMapping
   public AttributeDefinitionPage list(
@@ -81,8 +79,7 @@ public class AttributeDictionaryController {
   /**
    * 更新字典条目，走 version 乐观锁。
    *
-   * <p>编码、数据类型与是否规格轴建后不可改——它们是 SPU 级定义与规格轴按 code 对齐的锚点，
-   * 改动会让已有对齐在下一次写入时突然报「不一致」。这里给 400 并说明原因，
+   * <p>编码、数据类型与是否规格轴建后不可改——它们是 SPU 级定义与规格轴按 code 对齐的锚点， 改动会让已有对齐在下一次写入时突然报「不一致」。这里给 400 并说明原因，
    * 比让用户改完存不进去再猜要好。
    */
   @PutMapping("/{id}")
@@ -159,8 +156,8 @@ public class AttributeDictionaryController {
   /**
    * 类目属性规则（按类目配置必填与可选范围）。
    *
-   * <p>只交付规则本身：类目树（3.3.1.1）与「按规则生成录入表单 schema」（3.3.1.2 的输出）
-   * 不在本模块内，所以 {@code category} 是 {@code spu.category} 的自由文本而非外键。
+   * <p>只交付规则本身：类目树（3.3.1.1）与「按规则生成录入表单 schema」（3.3.1.2 的输出） 不在本模块内，所以 {@code category} 是 {@code
+   * spu.category} 的自由文本而非外键。
    */
   @GetMapping("/category-rules")
   public List<CategoryAttributeRule> categoryRules(

@@ -13,12 +13,10 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 导出数据源注册表：把容器里所有 {@link ExportDataSource} 收集成 {@code key → 数据源}。
  *
- * <p>这就是「多数据源注册式设计」的全部机制：**没有 switch、没有枚举白名单表**。
- * 加一个数据源只需要新增一个 {@code @Component}，Spring 注入进来就自动出现在
+ * <p>这就是「多数据源注册式设计」的全部机制：**没有 switch、没有枚举白名单表**。 加一个数据源只需要新增一个 {@code @Component}，Spring 注入进来就自动出现在
  * 能力声明、可选字段与执行路径里 —— 迁移、服务层与前端都不需要改。
  *
- * <p>键冲突在这里失败（构造期抛错）而不是静默取第一个：两个数据源抢同一个键时，
- * 后注册的那个会悄悄顶掉前一个，用户导出拿到的是另一个数据源的行却标着这个源的标题。
+ * <p>键冲突在这里失败（构造期抛错）而不是静默取第一个：两个数据源抢同一个键时， 后注册的那个会悄悄顶掉前一个，用户导出拿到的是另一个数据源的行却标着这个源的标题。
  */
 @Component
 public class ExportDataSources {
@@ -36,8 +34,7 @@ public class ExportDataSources {
   /**
    * 按键取数据源。
    *
-   * <p>键不存在 → 404（前端据此提示「该数据源不存在」，而不是抛一个泛化的 500）。
-   * 存在但 {@code available=false} → 422 并写明缺哪个上游模块。
+   * <p>键不存在 → 404（前端据此提示「该数据源不存在」，而不是抛一个泛化的 500）。 存在但 {@code available=false} → 422 并写明缺哪个上游模块。
    */
   public ExportDataSource require(String key) {
     if (key == null || key.isBlank())

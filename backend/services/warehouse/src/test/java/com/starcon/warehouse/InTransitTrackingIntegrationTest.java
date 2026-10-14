@@ -31,19 +31,17 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * <p>本测试要证明的不是「接口通不通」，而是六条会算错的口径：
  *
  * <ol>
- *   <li><b>预警提前到预计到港前若干天</b>，且档位边界由**本租户阈值表**决定 ——
- *       改一行阈值，同一条跟踪的档位随之改变（证明分级不是代码里的常量）。
- *   <li><b>不建第二张在途账</b>：发运 / 已了结 / 未达三个数一律 join 7.5.1.2 的
- *       {@code inventory_transfer} 现算，到货 60 是真的走了 7.5.1.2 的到达登记。
+ *   <li><b>预警提前到预计到港前若干天</b>，且档位边界由**本租户阈值表**决定 —— 改一行阈值，同一条跟踪的档位随之改变（证明分级不是代码里的常量）。
+ *   <li><b>不建第二张在途账</b>：发运 / 已了结 / 未达三个数一律 join 7.5.1.2 的 {@code inventory_transfer} 现算，到货 60 是真的走了
+ *       7.5.1.2 的到达登记。
  *   <li><b>timestamptz 真的写回正确时刻</b>（含时区偏移），不是只断言非空。
  *   <li><b>阶段只进不退</b>，服务层与 DB 触发器两处同一套序号。
  *   <li><b>收货确认只记事实不写库存</b>：确认后 {@code inventory_transfer} 一行未改。
  *   <li><b>租户隔离三断言</b>：互不可见、伪造头无效、连接池归还不串租户。
  * </ol>
  *
- * <p>夹具写法与 {@link FirstMileShipmentIntegrationTest} 一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场），
- * 派生 id 前缀不同，避免与别的车道互相污染。
+ * <p>夹具写法与 {@link FirstMileShipmentIntegrationTest} 一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）， 派生 id 前缀不同，避免与别的车道互相污染。
  *
  * <p>连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  */
@@ -186,54 +184,107 @@ class InTransitTrackingIntegrationTest {
   private void seedTenant(UUID tenant) {
     sql.execute(
         "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-        idFor(tenant, 1), tenant, "LE-1", "主体一");
+        idFor(tenant, 1),
+        tenant,
+        "LE-1",
+        "主体一");
     sql.execute(
         "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-        idFor(tenant, 2), tenant, "SKU-1", "商品一");
+        idFor(tenant, 2),
+        tenant,
+        "SKU-1",
+        "商品一");
     sql.execute(
         "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-        idFor(tenant, 3), tenant, "SKU-2", "商品二");
+        idFor(tenant, 3),
+        tenant,
+        "SKU-2",
+        "商品二");
     sql.execute(
         "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-        idFor(tenant, 4), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
+        idFor(tenant, 4),
+        tenant,
+        "WH-SH",
+        "上海仓",
+        "CN",
+        "Asia/Shanghai");
     sql.execute(
         "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-        idFor(tenant, 5), tenant, "WH-LA", "洛杉矶海外仓", "US", "America/Los_Angeles");
+        idFor(tenant, 5),
+        tenant,
+        "WH-LA",
+        "洛杉矶海外仓",
+        "US",
+        "America/Los_Angeles");
     sql.execute(
         "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
             + " values(?,?,?,?,?,'STORAGE',true)",
-        idFor(tenant, 6), tenant, idFor(tenant, 4), "SH-01", "库位 SH-01");
+        idFor(tenant, 6),
+        tenant,
+        idFor(tenant, 4),
+        "SH-01",
+        "库位 SH-01");
     sql.execute(
         "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
             + " values(?,?,?,?,?,'STORAGE',true)",
-        idFor(tenant, 7), tenant, idFor(tenant, 5), "LA-01", "库位 LA-01");
+        idFor(tenant, 7),
+        tenant,
+        idFor(tenant, 5),
+        "LA-01",
+        "库位 LA-01");
     sql.execute(
         "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-        idFor(tenant, 8), tenant, "SELLABLE", "可售", "SELLABLE");
+        idFor(tenant, 8),
+        tenant,
+        "SELLABLE",
+        "可售",
+        "SELLABLE");
     sql.execute(
         "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on) values(?,?,?,?,?)",
-        idFor(tenant, 9), tenant, idFor(tenant, 2), "LOT-1", LocalDate.of(2027, 3, 1));
+        idFor(tenant, 9),
+        tenant,
+        idFor(tenant, 2),
+        "LOT-1",
+        LocalDate.of(2027, 3, 1));
     // 8.2.1.1 收货单 + 逐次实收行：头程发运的货物来源。
     sql.execute(
         "insert into goods_receipt(id,tenant_id,receipt_code,source_type,source_ref_code,"
             + "warehouse_id,legal_entity_id,status,created_by) values(?,?,?,'TRANSFER','TO-1',?,?,'RECEIVED',?)",
-        idFor(tenant, 20), tenant, "GR-20261001-000001", idFor(tenant, 4), idFor(tenant, 1), user);
+        idFor(tenant, 20),
+        tenant,
+        "GR-20261001-000001",
+        idFor(tenant, 4),
+        idFor(tenant, 1),
+        user);
     sql.execute(
         "insert into goods_receipt_line(id,tenant_id,receipt_id,sku_id,quality_status_id,"
             + "expected_quantity) values(?,?,?,?,?,?)",
-        idFor(tenant, 21), tenant, idFor(tenant, 20), idFor(tenant, 2), idFor(tenant, 8),
+        idFor(tenant, 21),
+        tenant,
+        idFor(tenant, 20),
+        idFor(tenant, 2),
+        idFor(tenant, 8),
         new BigDecimal("2000"));
     sql.execute(
         "insert into goods_receipt_event(id,tenant_id,receipt_id,received_at,location_id,"
             + "waybill_no,actor_id) values(?,?,?,?::timestamptz,?,?,?)",
-        idFor(tenant, 22), tenant, idFor(tenant, 20),
+        idFor(tenant, 22),
+        tenant,
+        idFor(tenant, 20),
         OffsetDateTime.of(2026, 10, 1, 9, 30, 0, 0, ZoneOffset.ofHours(8)),
-        idFor(tenant, 6), "WB-1", user);
+        idFor(tenant, 6),
+        "WB-1",
+        user);
     sql.execute(
         "insert into goods_receipt_event_line(id,tenant_id,event_id,line_id,received_quantity,"
             + "rejected_quantity,lot_id,expiry_date) values(?,?,?,?,?,0,?,?)",
-        idFor(tenant, 23), tenant, idFor(tenant, 22), idFor(tenant, 21), new BigDecimal("2000"),
-        idFor(tenant, 9), LocalDate.of(2027, 3, 1));
+        idFor(tenant, 23),
+        tenant,
+        idFor(tenant, 22),
+        idFor(tenant, 21),
+        new BigDecimal("2000"),
+        idFor(tenant, 9),
+        LocalDate.of(2027, 3, 1));
   }
 
   AccessService.Access actorFor(UUID tenant) {
@@ -260,22 +311,55 @@ class InTransitTrackingIntegrationTest {
 
   /** ETA：相对现在的天数。 */
   static OffsetDateTime eta(int daysFromNow) {
-    return OffsetDateTime.now(ZoneOffset.ofHours(8)).plusDays(daysFromNow).withMinute(0).withSecond(0).withNano(0);
+    return OffsetDateTime.now(ZoneOffset.ofHours(8))
+        .plusDays(daysFromNow)
+        .withMinute(0)
+        .withSecond(0)
+        .withNano(0);
   }
 
   private FirstMileShipmentModels.FirstMileCreateRequest shipmentReq(UUID tenant, int etaDays) {
     return new FirstMileShipmentModels.FirstMileCreateRequest(
-        "GOODS_RECEIPT", idFor(tenant, 20), "GR-20261001-000001",
-        idFor(tenant, 1), idFor(tenant, 4), idFor(tenant, 5), "US", "洛杉矶海外仓",
-        "SEA", "中远海运", "COSCO-" + etaDays, "COSCO SHIPPING ARIES", "FOB", "SELLER", "USD",
-        new BigDecimal("2200.0000"), new BigDecimal("150.0000"), new BigDecimal("380.0000"),
-        new BigDecimal("260.0000"), "某某报关行", eta(etaDays - 30), eta(etaDays), "首批头程",
+        "GOODS_RECEIPT",
+        idFor(tenant, 20),
+        "GR-20261001-000001",
+        idFor(tenant, 1),
+        idFor(tenant, 4),
+        idFor(tenant, 5),
+        "US",
+        "洛杉矶海外仓",
+        "SEA",
+        "中远海运",
+        "COSCO-" + etaDays,
+        "COSCO SHIPPING ARIES",
+        "FOB",
+        "SELLER",
+        "USD",
+        new BigDecimal("2200.0000"),
+        new BigDecimal("150.0000"),
+        new BigDecimal("380.0000"),
+        new BigDecimal("260.0000"),
+        "某某报关行",
+        eta(etaDays - 30),
+        eta(etaDays),
+        "首批头程",
         List.of(
             new FirstMileShipmentModels.FirstMileLineRequest(
-                idFor(tenant, 2), idFor(tenant, 8), idFor(tenant, 23), idFor(tenant, 9),
-                new BigDecimal("100"), "棉制男士衬衫", "6205200090", "ACME", "CN",
-                new BigDecimal("12.5000"), new BigDecimal("1250.0000"), new BigDecimal("180.0000"),
-                new BigDecimal("160.0000"), new BigDecimal("1.250000"), 12)));
+                idFor(tenant, 2),
+                idFor(tenant, 8),
+                idFor(tenant, 23),
+                idFor(tenant, 9),
+                new BigDecimal("100"),
+                "棉制男士衬衫",
+                "6205200090",
+                "ACME",
+                "CN",
+                new BigDecimal("12.5000"),
+                new BigDecimal("1250.0000"),
+                new BigDecimal("180.0000"),
+                new BigDecimal("160.0000"),
+                new BigDecimal("1.250000"),
+                12)));
   }
 
   /** 建一张发运单（草稿）。 */
@@ -312,7 +396,9 @@ class InTransitTrackingIntegrationTest {
         tenant,
         s.id(),
         new FirstMileShipmentModels.FirstMileDispatchRequest(
-            c.version(), null, "已装船",
+            c.version(),
+            null,
+            "已装船",
             List.of(
                 new FirstMileShipmentModels.FirstMileDispatchLineRequest(
                     lineId, new BigDecimal(qty)))));
@@ -339,7 +425,9 @@ class InTransitTrackingIntegrationTest {
                 asAWrite(
                     () ->
                         tracking.create(
-                            user, new TrackingCreateRequest(draftId, null, null, null, null, null, null))))
+                            user,
+                            new TrackingCreateRequest(
+                                draftId, null, null, null, null, null, null))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("货还没发出");
 
@@ -355,8 +443,16 @@ class InTransitTrackingIntegrationTest {
     assertThatThrownBy(() -> createTracking(a, shipmentId))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已建立跟踪记录");
-    assertThat(asA(() -> tracking.page(new TrackingQuery(null, null, null, null, null, null, null, null,
-        null, null, null, 0, 50)).total())).isEqualTo(1L);
+    assertThat(
+            asA(
+                () ->
+                    tracking
+                        .page(
+                            new TrackingQuery(
+                                null, null, null, null, null, null, null, null, null, null, null, 0,
+                                50))
+                        .total()))
+        .isEqualTo(1L);
     assertThat(mine.status()).isEqualTo("TRACKING");
   }
 
@@ -409,10 +505,11 @@ class InTransitTrackingIntegrationTest {
     // 把 warning 提前量从 3 放宽到 9：剩余 5 天现在就进预警区。
     // watch 必须一并抬到 9 —— 三档递减是硬约束（否则「进观察区」反而比「进提示区」晚，
     // 分级会静默倒挂），所以这一改是**两档一起动**，不是单行孤立地改 warning。
-    var defaults = asA(() -> tracking.thresholds()).stream()
-        .filter(t -> t.transportMode().equals("*") && t.countryCode().equals("*"))
-        .findFirst()
-        .orElseThrow();
+    var defaults =
+        asA(() -> tracking.thresholds()).stream()
+            .filter(t -> t.transportMode().equals("*") && t.countryCode().equals("*"))
+            .findFirst()
+            .orElseThrow();
     asAWrite(
         () ->
             tracking.updateThreshold(
@@ -446,7 +543,12 @@ class InTransitTrackingIntegrationTest {
     var saved = actors.get("Bearer tenant-a");
     var other =
         new AccessService.Access(
-            user, fresh, "Fresh", UUID.randomUUID(), null, allPermissions,
+            user,
+            fresh,
+            "Fresh",
+            UUID.randomUUID(),
+            null,
+            allPermissions,
             List.of(grant("ALL", allPermissions)));
     // 第一次要口径（看板就会触发）即惰性补出默认行，不是 409，也不是空列表。
     var after =
@@ -481,16 +583,20 @@ class InTransitTrackingIntegrationTest {
             tracking.recordEvent(
                 trackingId,
                 user,
-                ev().kind("ETA_REVISED").eta(eta(60), "货代通知延后")
-                    .detail("货代通知延后 60 天").occurredAt(eta(0)).build()));
+                ev().kind("ETA_REVISED")
+                    .eta(eta(60), "货代通知延后")
+                    .detail("货代通知延后 60 天")
+                    .occurredAt(eta(0))
+                    .build()));
     var detail = asA(() -> tracking.detail(trackingId));
     assertThat(detail.tracking().delayLevel()).isEqualTo("ON_TRACK");
-    assertThat(
-            detail.alerts().stream().filter(x -> !x.status().equals("CLOSED")).count())
-        .isZero();
+    assertThat(detail.alerts().stream().filter(x -> !x.status().equals("CLOSED")).count()).isZero();
     // 改期事件留下了前后值与改期次数，延误历史不被抹平。
     var revised =
-        detail.events().stream().filter(e -> e.kind().equals("ETA_REVISED")).findFirst().orElseThrow();
+        detail.events().stream()
+            .filter(e -> e.kind().equals("ETA_REVISED"))
+            .findFirst()
+            .orElseThrow();
     assertThat(revised.etaBefore()).isNotNull();
     assertThat(revised.etaAfter()).isNotNull();
     assertThat(detail.tracking().etaRevisedCount()).isEqualTo(1);
@@ -506,11 +612,11 @@ class InTransitTrackingIntegrationTest {
     createTracking(a, shipmentId);
     var legId =
         asA(
-                () ->
-                    sql.fetchOne(
-                            "select transit_leg_id from first_mile_shipment_leg_receipt where shipment_id=?",
-                            shipmentId)
-                        .get(0, UUID.class));
+            () ->
+                sql.fetchOne(
+                        "select transit_leg_id from first_mile_shipment_leg_receipt where shipment_id=?",
+                        shipmentId)
+                    .get(0, UUID.class));
     // 真走 7.5.1.2 的到达登记落 60（不是直接改 settled_quantity，那里有约束触发器）。
     asAWrite(
         () ->
@@ -550,8 +656,7 @@ class InTransitTrackingIntegrationTest {
     assertThat(detail.tracking().status()).isEqualTo("CLOSED");
     assertThat(detail.tracking().receiptConfirmedAt()).isNotNull();
     // timestamptz 写回：断言具体时刻与时区，不是只断言非空。
-    assertThat(detail.tracking().receiptConfirmedAt().toInstant())
-        .isEqualTo(receiptAt.toInstant());
+    assertThat(detail.tracking().receiptConfirmedAt().toInstant()).isEqualTo(receiptAt.toInstant());
     // 本模块一个库存字段都没碰。
     assertThat(asA(() -> legRow(shipmentId).toString())).isEqualTo(legBefore);
     // 已闭环后不再接受位置/阶段类事件（DB 触发器 guard_first_mile_tracking_event_source 兜底）。
@@ -562,26 +667,28 @@ class InTransitTrackingIntegrationTest {
                         tracking.recordEvent(
                             trackingId,
                             user,
-                            ev().kind("LOCATION").location("东京", eta(0))
-                                .detail("还在海上").occurredAt(eta(0)).build())))
+                            ev().kind("LOCATION")
+                                .location("东京", eta(0))
+                                .detail("还在海上")
+                                .occurredAt(eta(0))
+                                .build())))
         .isInstanceOf(ResponseStatusException.class);
   }
 
   /**
    * 该发运单在 7.5.1.2 名下那条在途腿的三列快照。
    *
-   * <p>按 {@code first_mile_shipment_leg_receipt.transit_leg_id} 定位，而不是拿发运单 id
-   * 去 like {@code inventory_transfer.source_reference}：那里的锚点是
-   * 「发运单**号**-行号」（V80 定的幂等锚点），拿 UUID 去 like 永远匹配不到，
+   * <p>按 {@code first_mile_shipment_leg_receipt.transit_leg_id} 定位，而不是拿发运单 id 去 like {@code
+   * inventory_transfer.source_reference}：那里的锚点是 「发运单**号**-行号」（V80 定的幂等锚点），拿 UUID 去 like 永远匹配不到，
    * 断言会在「查不到行」上空转，等于没验。
    */
   private org.jooq.Record legRow(UUID shipmentId) {
     return sql.fetchOne(
-            "select t.status,t.quantity,t.settled_quantity"
-                + " from first_mile_shipment_leg_receipt g"
-                + " join inventory_transfer t on t.tenant_id=g.tenant_id and t.id=g.transit_leg_id"
-                + " where g.shipment_id=?",
-            shipmentId);
+        "select t.status,t.quantity,t.settled_quantity"
+            + " from first_mile_shipment_leg_receipt g"
+            + " join inventory_transfer t on t.tenant_id=g.tenant_id and t.id=g.transit_leg_id"
+            + " where g.shipment_id=?",
+        shipmentId);
   }
 
   // ================================================================ 节点事件与来源纪律
@@ -598,8 +705,11 @@ class InTransitTrackingIntegrationTest {
             tracking.recordEvent(
                 trackingId,
                 user,
-                ev().kind("LOCATION").location("Singapore", locatedAt)
-                    .detail("过境新加坡").occurredAt(locatedAt).build()));
+                ev().kind("LOCATION")
+                    .location("Singapore", locatedAt)
+                    .detail("过境新加坡")
+                    .occurredAt(locatedAt)
+                    .build()));
     var detail = asA(() -> tracking.detail(trackingId));
     assertThat(detail.tracking().currentLocation()).isEqualTo("Singapore");
     assertThat(detail.tracking().locationOccurredAt().toInstant()).isEqualTo(locatedAt.toInstant());
@@ -610,14 +720,21 @@ class InTransitTrackingIntegrationTest {
             tracking.recordEvent(
                 trackingId,
                 user,
-                ev().kind("ETA_REVISED").source("FORWARDER", "FF-BOOK-77").eta(newEta, "船公司跳港")
-                    .detail("船公司通知跳港").occurredAt(eta(0)).build()));
+                ev().kind("ETA_REVISED")
+                    .source("FORWARDER", "FF-BOOK-77")
+                    .eta(newEta, "船公司跳港")
+                    .detail("船公司通知跳港")
+                    .occurredAt(eta(0))
+                    .build()));
     var after = asA(() -> tracking.detail(trackingId));
     assertThat(after.tracking().revisedEta().toInstant()).isEqualTo(newEta.toInstant());
     assertThat(after.tracking().effectiveEta().toInstant()).isEqualTo(newEta.toInstant());
     // 外部来源的单号必须留痕。
     var external =
-        after.events().stream().filter(e -> e.kind().equals("ETA_REVISED")).findFirst().orElseThrow();
+        after.events().stream()
+            .filter(e -> e.kind().equals("ETA_REVISED"))
+            .findFirst()
+            .orElseThrow();
     assertThat(external.sourceSystem()).isEqualTo("FORWARDER");
     assertThat(external.referenceId()).isEqualTo("FF-BOOK-77");
   }
@@ -636,8 +753,12 @@ class InTransitTrackingIntegrationTest {
                         tracking.recordEvent(
                             trackingId,
                             user,
-                            ev().kind("LOCATION").source("CARRIER", "").location("上海", eta(0))
-                                .detail("船司报的").occurredAt(eta(0)).build())))
+                            ev().kind("LOCATION")
+                                .source("CARRIER", "")
+                                .location("上海", eta(0))
+                                .detail("船司报的")
+                                .occurredAt(eta(0))
+                                .build())))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("referenceId");
 
@@ -649,8 +770,11 @@ class InTransitTrackingIntegrationTest {
                         tracking.recordEvent(
                             trackingId,
                             user,
-                            ev().kind("CUSTOMS").customs("HELD", null)
-                                .detail("被扣关").occurredAt(eta(0)).build())))
+                            ev().kind("CUSTOMS")
+                                .customs("HELD", null)
+                                .detail("被扣关")
+                                .occurredAt(eta(0))
+                                .build())))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("必须给出原因");
 
@@ -660,8 +784,12 @@ class InTransitTrackingIntegrationTest {
             tracking.recordEvent(
                 trackingId,
                 user,
-                ev().kind("CUSTOMS").source("CUSTOMS_BROKER", "DECL-9911").customs("HELD", "查验未通过，缺少成分报告")
-                    .detail("扣关").occurredAt(eta(0)).build()));
+                ev().kind("CUSTOMS")
+                    .source("CUSTOMS_BROKER", "DECL-9911")
+                    .customs("HELD", "查验未通过，缺少成分报告")
+                    .detail("扣关")
+                    .occurredAt(eta(0))
+                    .build()));
     assertThat(asA(() -> tracking.detail(trackingId).tracking().customsStatus())).isEqualTo("HELD");
   }
 
@@ -675,8 +803,11 @@ class InTransitTrackingIntegrationTest {
             tracking.recordEvent(
                 trackingId,
                 user,
-                ev().kind("STAGE").toStage("IN_CUSTOMS")
-                    .detail("已到港进关").occurredAt(eta(0)).build()));
+                ev().kind("STAGE")
+                    .toStage("IN_CUSTOMS")
+                    .detail("已到港进关")
+                    .occurredAt(eta(0))
+                    .build()));
     assertThat(asA(() -> tracking.detail(trackingId).tracking().trackingStage()))
         .isEqualTo("IN_CUSTOMS");
     // 倒退（IN_CUSTOMS → IN_TRANSIT）被服务层拒。
@@ -687,8 +818,11 @@ class InTransitTrackingIntegrationTest {
                         tracking.recordEvent(
                             trackingId,
                             user,
-                            ev().kind("STAGE").toStage("IN_TRANSIT")
-                                .detail("往回退").occurredAt(eta(0)).build())))
+                            ev().kind("STAGE")
+                                .toStage("IN_TRANSIT")
+                                .detail("往回退")
+                                .occurredAt(eta(0))
+                                .build())))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不允许");
     // 任何阶段都能进 EXCEPTION（出事不需要先走到某一步）。
@@ -697,8 +831,11 @@ class InTransitTrackingIntegrationTest {
             tracking.recordEvent(
                 trackingId,
                 user,
-                ev().kind("STAGE").toStage("EXCEPTION")
-                    .detail("查验期间货损").occurredAt(eta(0)).build()));
+                ev().kind("STAGE")
+                    .toStage("EXCEPTION")
+                    .detail("查验期间货损")
+                    .occurredAt(eta(0))
+                    .build()));
     assertThat(asA(() -> tracking.detail(trackingId).tracking().trackingStage()))
         .isEqualTo("EXCEPTION");
   }
@@ -712,11 +849,12 @@ class InTransitTrackingIntegrationTest {
     assertThat(caps.dependencies())
         .filteredOn(d -> d.code().equals("FORWARDER_CONNECTOR"))
         .singleElement()
-        .satisfies(d -> {
-          assertThat(d.available()).isFalse();
-          assertThat(d.ownerModule()).isEqualTo("10.4.2.1");
-          assertThat(d.note()).contains("未交付");
-        });
+        .satisfies(
+            d -> {
+              assertThat(d.available()).isFalse();
+              assertThat(d.ownerModule()).isEqualTo("10.4.2.1");
+              assertThat(d.note()).contains("未交付");
+            });
     // 已交付的依赖标 true：跟踪真的挂在 10.4.1.1 发运单上，在途余量真的读 7.5.1.2。
     assertThat(
             caps.dependencies().stream()
@@ -876,12 +1014,11 @@ class InTransitTrackingIntegrationTest {
     assertThat(boardJson.get("watchCount").asLong()).isEqualTo(1L);
 
     var alertId =
-        asA(
-                () ->
-                    sql.fetchOne(
-                            "select id from first_mile_delay_alert where tracking_id=?::uuid order by raised_at desc",
-                            id)
-                        .get(0, UUID.class))
+        asA(() ->
+                sql.fetchOne(
+                        "select id from first_mile_delay_alert where tracking_id=?::uuid order by raised_at desc",
+                        id)
+                    .get(0, UUID.class))
             .toString();
     http.perform(
             post("/warehouse/transit-trackings/alerts/" + alertId + "/acknowledge")
@@ -923,8 +1060,7 @@ class InTransitTrackingIntegrationTest {
                             user,
                             ev().kind("NOTE").detail("偷看").occurredAt(eta(0)).build())))
         .isInstanceOf(ResponseStatusException.class);
-    assertThatThrownBy(
-            () -> asBWrite(() -> tracking.confirmReceipt(mineA.id(), user, null)))
+    assertThatThrownBy(() -> asBWrite(() -> tracking.confirmReceipt(mineA.id(), user, null)))
         .isInstanceOf(ResponseStatusException.class);
     assertThatThrownBy(() -> asBWrite(() -> tracking.close(mineA.id(), user, null)))
         .isInstanceOf(ResponseStatusException.class);
@@ -933,11 +1069,19 @@ class InTransitTrackingIntegrationTest {
     assertThatThrownBy(() -> asBWrite(() -> tracking.updateThreshold(UUID.randomUUID(), null)))
         .isInstanceOf(ResponseStatusException.class);
     // B 租户**能**用自己那份夹具建出跟踪（不是「B 因缺来源而建不出来」）
-    var mineB = asBWrite(() -> tracking.create(
-        user,
-        new TrackingCreateRequest(
-            dispatchedAs(b, ETA_ONT, "100", true),
-            "上海洋山港", eta(0), null, null, null, null)));
+    var mineB =
+        asBWrite(
+            () ->
+                tracking.create(
+                    user,
+                    new TrackingCreateRequest(
+                        dispatchedAs(b, ETA_ONT, "100", true),
+                        "上海洋山港",
+                        eta(0),
+                        null,
+                        null,
+                        null,
+                        null)));
     assertThat(asB(() -> tracking.page(query(null, null, null, null, 0, 50)).rows()))
         .extracting(TrackingRow::id)
         .containsExactly(mineB.id());
@@ -1019,7 +1163,12 @@ class InTransitTrackingIntegrationTest {
                     user,
                     new TrackingCreateRequest(
                         dispatchedAs(b, ETA_ONT, "100", true),
-                        "上海洋山港", eta(0), null, null, null, null)));
+                        "上海洋山港",
+                        eta(0),
+                        null,
+                        null,
+                        null,
+                        null)));
     for (int i = 0; i < 20; i++) {
       assertThat(asA(() -> tracking.page(query(null, null, null, null, 0, 50)).rows()))
           .extracting(TrackingRow::id)
@@ -1039,8 +1188,9 @@ class InTransitTrackingIntegrationTest {
     }
     assertThat(asA(() -> tracking.detail(mineA.id()).events()).size()).isGreaterThanOrEqualTo(2);
     // B 的事件流里一条 A 的都没有
-    assertThat(asB(() -> tracking.detail(mineB.id()).events()).stream()
-            .anyMatch(e -> e.detail() != null && e.detail().contains("A 的备注")))
+    assertThat(
+            asB(() -> tracking.detail(mineB.id()).events()).stream()
+                .anyMatch(e -> e.detail() != null && e.detail().contains("A 的备注")))
         .isFalse();
     // 事件行也确实按 tenant_id 分开落库
     assertThat(
@@ -1114,8 +1264,18 @@ class InTransitTrackingIntegrationTest {
 
     TrackingEventRequest build() {
       return new TrackingEventRequest(
-          kind, sourceSystem, referenceId, locationText, locationOccurredAt, etaAfter, reason,
-          customsStatus, customsHoldReason, toStage, detail, occurredAt);
+          kind,
+          sourceSystem,
+          referenceId,
+          locationText,
+          locationOccurredAt,
+          etaAfter,
+          reason,
+          customsStatus,
+          customsHoldReason,
+          toStage,
+          detail,
+          occurredAt);
     }
   }
 

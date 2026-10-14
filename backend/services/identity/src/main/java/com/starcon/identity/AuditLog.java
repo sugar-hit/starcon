@@ -13,15 +13,13 @@ import org.jooq.DSLContext;
 /**
  * 17.5.3.1 审计写入侧。
  *
- * <p>所有关键操作点都经这一个入口落审计，所以「授权上下文 + 变更前后值 + 脱敏」的口径只有一处，
- * 不会因为某个操作点自己拼参数而漏字段。
+ * <p>所有关键操作点都经这一个入口落审计，所以「授权上下文 + 变更前后值 + 脱敏」的口径只有一处， 不会因为某个操作点自己拼参数而漏字段。
  *
- * <p>脱敏在这里（写入侧）发生：{@link AuditRedactor} 产出的就已经是脱敏后的值，
- * 库里不存在明文，因此导出与任何直连 SQL 都拿不到原始凭证。
+ * <p>脱敏在这里（写入侧）发生：{@link AuditRedactor} 产出的就已经是脱敏后的值， 库里不存在明文，因此导出与任何直连 SQL 都拿不到原始凭证。
  *
- * <p>{@code occurred_at} 显式绑定而不是依赖列默认值：审计时间是**系统时间**（操作发生的时刻），
- * 与业务单据上的业务时间分开存。这里用 {@code LocalDateTime.ofInstant(…, ZoneOffset.UTC)}
- * 转换——直接把 {@code LocalDateTime.now()} 塞进 timestamptz 会静默按 Asia/Shanghai 偏移 -28800 秒。
+ * <p>{@code occurred_at} 显式绑定而不是依赖列默认值：审计时间是**系统时间**（操作发生的时刻）， 与业务单据上的业务时间分开存。这里用 {@code
+ * LocalDateTime.ofInstant(…, ZoneOffset.UTC)} 转换——直接把 {@code LocalDateTime.now()} 塞进 timestamptz
+ * 会静默按 Asia/Shanghai 偏移 -28800 秒。
  */
 final class AuditLog {
   private static final ObjectMapper JSON = new ObjectMapper();
@@ -37,14 +35,13 @@ final class AuditLog {
   /**
    * timestamptz 绑定的唯一安全姿势：直接给 {@link OffsetDateTime}。
    *
-   * <p>踩过的坑：{@code Timestamp.valueOf(LocalDateTime.ofInstant(now, ZoneOffset.UTC))} 看着已经
-   * 「显式 UTC」，实测在 Asia/Shanghai 下仍会静默偏 −28800 秒——因为 {@code Timestamp.valueOf}
-   * 把这串墙钟按 JVM 默认时区换算成 epoch，等于又偏回本地时区一次。实测 drift：
-   * {@code valueOf(...UTC)} = −28800s，{@code Timestamp.from} = 0，{@link OffsetDateTime} = 0。
+   * <p>踩过的坑：{@code Timestamp.valueOf(LocalDateTime.ofInstant(now, ZoneOffset.UTC))} 看着已经 「显式
+   * UTC」，实测在 Asia/Shanghai 下仍会静默偏 −28800 秒——因为 {@code Timestamp.valueOf} 把这串墙钟按 JVM 默认时区换算成
+   * epoch，等于又偏回本地时区一次。实测 drift： {@code valueOf(...UTC)} = −28800s，{@code Timestamp.from} = 0，{@link
+   * OffsetDateTime} = 0。
    *
-   * <p>选 {@link OffsetDateTime} 而不是 {@code Timestamp.from}：前者的类型语义就是「带偏移的
-   * 绝对时刻」，PG 驱动按 timestamptz 直接解释，不经过任何本地时区换算；后者仍是无时区的
-   * {@code Timestamp}，留给驱动去猜会话时区。
+   * <p>选 {@link OffsetDateTime} 而不是 {@code Timestamp.from}：前者的类型语义就是「带偏移的 绝对时刻」，PG 驱动按 timestamptz
+   * 直接解释，不经过任何本地时区换算；后者仍是无时区的 {@code Timestamp}，留给驱动去猜会话时区。
    */
   static OffsetDateTime utc(Instant instant) {
     return OffsetDateTime.ofInstant(instant, ZoneOffset.UTC);
@@ -62,12 +59,12 @@ final class AuditLog {
   /**
    * 授权上下文快照：角色编码 + 数据范围 + 当时的权限集。
    *
-   * <p>这是事后解释「凭什么放行这次操作」的唯一依据，所以连权限集一起快照——
-   * 角色后续被改写也改不了当时的事实。
+   * <p>这是事后解释「凭什么放行这次操作」的唯一依据，所以连权限集一起快照—— 角色后续被改写也改不了当时的事实。
    */
   private String authorization(IdentityController.Access a) {
     var roles = a.grants().stream().map(IdentityController.Grant::roleCode).sorted().toList();
-    var scopes = a.grants().stream().map(IdentityController.Grant::scopeMode).sorted().distinct().toList();
+    var scopes =
+        a.grants().stream().map(IdentityController.Grant::scopeMode).sorted().distinct().toList();
     var permissions = a.permissions().stream().sorted().toList();
     var context = new LinkedHashMap<String, Object>();
     context.put("membershipId", a.membershipId().toString());

@@ -63,7 +63,9 @@ export function transitTrackingQuery(params: TransitTrackingParams): string {
     parts.push(`destinationWarehouseId=${encodeURIComponent(params.destinationWarehouseId)}`);
   }
   if (params.destinationCountryCode?.trim()) {
-    parts.push(`destinationCountryCode=${encodeURIComponent(params.destinationCountryCode.trim())}`);
+    parts.push(
+      `destinationCountryCode=${encodeURIComponent(params.destinationCountryCode.trim())}`,
+    );
   }
   if (params.transportMode) parts.push(`transportMode=${encodeURIComponent(params.transportMode)}`);
   if (params.delayedOnly) parts.push('delayedOnly=true');
@@ -83,9 +85,7 @@ export function fetchTransitTrackingCapabilities() {
 }
 
 export function fetchTransitTrackingDetail(trackingId: string) {
-  return api<TransitTrackDetail>(
-    `warehouse/transit-trackings/${encodeURIComponent(trackingId)}`,
-  );
+  return api<TransitTrackDetail>(`warehouse/transit-trackings/${encodeURIComponent(trackingId)}`);
 }
 
 export function createTransitTracking(input: TrackingCreateRequest) {
@@ -93,10 +93,7 @@ export function createTransitTracking(input: TrackingCreateRequest) {
 }
 
 /** 登记节点：位置 / 改期 / 清关 / 阶段推进 / 备注，五合一入口。 */
-export function recordTransitTrackingEvent(
-  trackingId: string,
-  input: TrackingEventRequest,
-) {
+export function recordTransitTrackingEvent(trackingId: string, input: TrackingEventRequest) {
   return api<TrackingRow>(
     `warehouse/transit-trackings/${encodeURIComponent(trackingId)}/events`,
     'POST',
@@ -105,10 +102,7 @@ export function recordTransitTrackingEvent(
 }
 
 /** 目的仓收货确认：只记确认事实，入库落账归 7.5.1.2。 */
-export function confirmTransitTrackingReceipt(
-  trackingId: string,
-  input: TrackingReceiptRequest,
-) {
+export function confirmTransitTrackingReceipt(trackingId: string, input: TrackingReceiptRequest) {
   return api<TrackingRow>(
     `warehouse/transit-trackings/${encodeURIComponent(trackingId)}/receipt`,
     'POST',
@@ -138,7 +132,9 @@ export function fetchDelayAlerts(params: {
   if (params.keyword?.trim()) parts.push(`keyword=${encodeURIComponent(params.keyword.trim())}`);
   if (params.page !== undefined) parts.push(`page=${params.page}`);
   if (params.size !== undefined) parts.push(`size=${params.size}`);
-  return api<DelayAlertPage>(`warehouse/transit-trackings/alerts${parts.length ? `?${parts.join('&')}` : ''}`);
+  return api<DelayAlertPage>(
+    `warehouse/transit-trackings/alerts${parts.length ? `?${parts.join('&')}` : ''}`,
+  );
 }
 
 export function evaluateOneAlert(trackingId: string) {
@@ -214,9 +210,7 @@ export function delayLevelLabel(code: string): string {
  * 前端再判一次就会出现「行上写着 WATCH、卡片染成红色」这种自相矛盾。
  * 未收录的档位给中性色而不是猜一个红色 —— 猜错等于把未知状态说成最严重。
  */
-export function delayTone(
-  code: string,
-): 'neutral' | 'warning' | 'danger' | 'info' {
+export function delayTone(code: string): 'neutral' | 'warning' | 'danger' | 'info' {
   switch (code) {
     case 'CRITICAL':
       return 'danger';
@@ -244,10 +238,10 @@ export const transitTrackingSortOptions = [
  * <p>这两种情况严重度完全不同（一个是正常在途，一个是严重延误），混成一句
  * 「延期中」会把最该被处理的那批货显示成最正常的样子。
  */
-export function remainingWindow(row: {
-  remainingDays: number | null;
-  overdue: boolean;
-}): { text: string; late: boolean } {
+export function remainingWindow(row: { remainingDays: number | null; overdue: boolean }): {
+  text: string;
+  late: boolean;
+} {
   if (row.remainingDays === null || row.remainingDays === undefined) {
     return { text: '未给 ETA，无法分级', late: false };
   }

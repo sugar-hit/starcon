@@ -18,10 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
  * 8.3.4.1 发货交接入口。
  *
  * <p>命名空间 {@code /warehouse/shipment-handovers}。<b>刻意不挂在 {@code outbound-orders} 之下</b>：
- * 出库单是履约单据（8.3.1.x），交接是现场作业凭据 —— 交接单要自带冻结的包裹、实测重量体积、
- * 交接人与交接时刻，挂在出库单底下会让契约看起来像「一张单只有一次交接数据」（与 8.3.3.2
- * 打包单同一理由）。也不挂在 {@code packing-orders} 之下：打包单可以失败重开多张，
- * 而交接单是「货真的出去了」的那一张。
+ * 出库单是履约单据（8.3.1.x），交接是现场作业凭据 —— 交接单要自带冻结的包裹、实测重量体积、 交接人与交接时刻，挂在出库单底下会让契约看起来像「一张单只有一次交接数据」（与
+ * 8.3.3.2 打包单同一理由）。也不挂在 {@code packing-orders} 之下：打包单可以失败重开多张， 而交接单是「货真的出去了」的那一张。
  *
  * <p>七个形状，刻意逐个列出、不做通配：
  *
@@ -36,13 +34,12 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>{@code POST /{id}/cancel} 作废（<b>库存不动</b>，本来也没扣）
  * </ul>
  *
- * <p>刻意<b>没有</b> PUT / DELETE：交接是事实，流水是 append-only（V123 的守卫会拒），
- * 作废一次就不能复活。要更正就作废重开一张 —— 货已经交出去的更不许改写。
+ * <p>刻意<b>没有</b> PUT / DELETE：交接是事实，流水是 append-only（V123 的守卫会拒）， 作废一次就不能复活。要更正就作废重开一张 ——
+ * 货已经交出去的更不许改写。
  *
- * <p>权限码<b>复用</b> {@code warehouse.inventory.read} / {@code warehouse.inventory.update}，
- * 不新起 {@code warehouse.handover.*}：identity 只注册了 {@code warehouse.inventory} 与
- * {@code warehouse.facilities} 两个页面资源的权限码，用一个<b>没有被注册</b>的码会让
- * 连 OWNER 都 403（8.1.2.1 车道踩过这个坑并在台账里记了原因）。
+ * <p>权限码<b>复用</b> {@code warehouse.inventory.read} / {@code warehouse.inventory.update}， 不新起 {@code
+ * warehouse.handover.*}：identity 只注册了 {@code warehouse.inventory} 与 {@code warehouse.facilities}
+ * 两个页面资源的权限码，用一个<b>没有被注册</b>的码会让 连 OWNER 都 403（8.1.2.1 车道踩过这个坑并在台账里记了原因）。
  */
 @RestController
 @RequestMapping("/warehouse/shipment-handovers")
@@ -62,10 +59,7 @@ public class ShipmentHandoverController {
     return access.run(actor, "warehouse." + permission, () -> work.apply(actor));
   }
 
-  /**
-   * 能力声明：预占转实扣的同事务口径、承运渠道与运单号的归属、序列号出库口径，
-   * 以及尚未交付的 10 轨迹 / 2 平台回写 / 9 订单推进。
-   */
+  /** 能力声明：预占转实扣的同事务口径、承运渠道与运单号的归属、序列号出库口径， 以及尚未交付的 10 轨迹 / 2 平台回写 / 9 订单推进。 */
   @GetMapping("/capabilities")
   public ShipmentHandoverCapabilities capabilities(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
@@ -98,9 +92,21 @@ public class ShipmentHandoverController {
       @RequestParam(required = false, defaultValue = "CREATED_AT") String sort,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "50") int size) {
-    return call(auth, "inventory.read",
-        a -> handover.page(warehouseId, outboundOrderId, packingOrderId, status, carrierCode,
-            handoverUserId, keyword, sort, page, size));
+    return call(
+        auth,
+        "inventory.read",
+        a ->
+            handover.page(
+                warehouseId,
+                outboundOrderId,
+                packingOrderId,
+                status,
+                carrierCode,
+                handoverUserId,
+                keyword,
+                sort,
+                page,
+                size));
   }
 
   /** 详情：包裹 + 明细 + 预占消费 + 时间线 + 可消费预占候选 + 完成判据 + 边界声明。 */
@@ -131,18 +137,22 @@ public class ShipmentHandoverController {
   /**
    * 交接确认 —— <b>实发扣减与预占消费在这一个事务里完成</b>。
    *
-   * <p>同事务里做四件事：写出库台账（幂等锚点）、扣 {@code on_hand} 与 {@code reserved}
-   * 并写带符号分录、消费 {@code reservation_allocation} 并落预占消费行、
-   * 带序列号的件置 SOLD。任一步失败整体回滚。
+   * <p>同事务里做四件事：写出库台账（幂等锚点）、扣 {@code on_hand} 与 {@code reserved} 并写带符号分录、消费 {@code
+   * reservation_allocation} 并落预占消费行、 带序列号的件置 SOLD。任一步失败整体回滚。
    */
   @PostMapping("/{id}/confirm")
   public HandoverConfirmed confirm(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable String id,
       @RequestBody(required = false) HandoverConfirmInput input) {
-    return call(auth, "inventory.update",
-        a -> handover.confirm(id, input == null ? new HandoverConfirmInput(null, null, null, null,
-            null) : input, a.userId()));
+    return call(
+        auth,
+        "inventory.update",
+        a ->
+            handover.confirm(
+                id,
+                input == null ? new HandoverConfirmInput(null, null, null, null, null) : input,
+                a.userId()));
   }
 
   /** 作废交接单（货没交出去，<b>库存一分不动</b>）。原因必填。 */

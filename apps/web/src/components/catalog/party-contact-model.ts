@@ -270,7 +270,12 @@ export function saveContact(partyId: string, contactId: string, input: PartyCont
 }
 
 /** 设 / 取消默认联系人。日常换签字人走这个独立端点，不混在编辑别的字段里。 */
-export function setPrimaryContact(partyId: string, contactId: string, isPrimary: boolean, version: number) {
+export function setPrimaryContact(
+  partyId: string,
+  contactId: string,
+  isPrimary: boolean,
+  version: number,
+) {
   return api<{ id: string; version: number; isPrimary: boolean }>(
     `catalog/parties/${partyId}/contacts/${contactId}/primary`,
     'PUT',
@@ -313,7 +318,11 @@ export function streetLine1Problem(value: string): string | null {
 }
 
 /** 可空列：空着没问题，填了但只有空格是脏数据。与后端 `optionalProblem` 同一口径。 */
-function optionalProblem(value: string | null | undefined, max: number, label: string): string | null {
+function optionalProblem(
+  value: string | null | undefined,
+  max: number,
+  label: string,
+): string | null {
   if (value === null || value === undefined || value === '') return null;
   if (value.trim() === '') return `${label}填了但只有空格，请清空或填写内容`;
   if (value.length > max) return `${label}最多 ${max} 个字符`;
@@ -399,7 +408,10 @@ export function contactReachProblem(
     [email, '邮箱'],
     [phone, '电话'],
     [mobile, '手机号'],
-  ].find(([value]) => value !== null && value !== undefined && value !== '' && (value as string).trim() === '');
+  ].find(
+    ([value]) =>
+      value !== null && value !== undefined && value !== '' && (value as string).trim() === '',
+  );
   if (dirty) return `${dirty[1]}填了但只有空格，请清空或填写内容`;
   return (
     contactEmailProblem(email) ??
@@ -452,7 +464,10 @@ export function toAddressInput(address: PartyAddress): PartyAddressInput {
     streetLine2: address.streetLine2,
     label: address.label,
     changeNote: null,
-    usages: (address.usages ?? []).map((usage) => ({ usage, isDefault: address.defaultUsages.includes(usage) })),
+    usages: (address.usages ?? []).map((usage) => ({
+      usage,
+      isDefault: address.defaultUsages.includes(usage),
+    })),
     version: address.version,
   };
 }
@@ -523,8 +538,10 @@ export function contactEmptyHint(filtered: boolean) {
 }
 
 export function addressVersionEmptyHint() {
-  return '这条地址还没有历史版本。地址内容每改一次会留下一版，' +
-    '已发生单据上的地址是冻结快照，改地址不会影响它们。';
+  return (
+    '这条地址还没有历史版本。地址内容每改一次会留下一版，' +
+    '已发生单据上的地址是冻结快照，改地址不会影响它们。'
+  );
 }
 
 /** 错误文案：后端给的是可执行的中文原因，这里只补上上下文。 */

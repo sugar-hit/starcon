@@ -8,11 +8,11 @@
 
 新建三张表承载「按连接、站点、资源、分区保存游标；只有处理提交后推进，失败可续传」：
 
-| 表 | 承担的约束 |
-|---|---|
-| `sync_cursor` | 任务粒度唯一键（连接, 站点, 资源, 分区）；`cursor_value` + `external_marker` 双水位；连续失败计数 |
-| `sync_run` | 单次运行的时间线与处理计数；`cursor_before` / `cursor_after` 快照；同游标单飞 |
-| `sync_failure` | 失败队列；原因分类聚类；授权失效自动升级待办；重放幂等 |
+| 表             | 承担的约束                                                                                        |
+| -------------- | ------------------------------------------------------------------------------------------------- |
+| `sync_cursor`  | 任务粒度唯一键（连接, 站点, 资源, 分区）；`cursor_value` + `external_marker` 双水位；连续失败计数 |
+| `sync_run`     | 单次运行的时间线与处理计数；`cursor_before` / `cursor_after` 快照；同游标单飞                     |
+| `sync_failure` | 失败队列；原因分类聚类；授权失效自动升级待办；重放幂等                                            |
 
 **游标推进的三重保证**（缺一件就退化成「看起来能续传、实际会漏单」）：
 
@@ -29,14 +29,14 @@
 
 ## 关键 trade-off
 
-| 决策 | 取舍 |
-|---|---|
-| `marketplace_id` 在 `sync_cursor` 上 NOT NULL | 蓝图明确要求（连接, 站点, 资源类型）是任务粒度。保持 NOT NULL 也避开「NULL 在唯一索引里的重复语义」造出两个看起来一样的游标 |
-| 重拉窗口（`from` 早于水位）不推进水位 | 否则「往回拉数据」会成为绕过游标方向守卫的第二条路径。回退只能走显式端点 |
-| 同步数据用 `channel_scope(..., NULL, NULL)` | 任务粒度本身是连接级事实，不带店铺归属维度。沿用 `credential_scope` 先例；SELF/DEPARTMENT 数据范围只作用于 2.3.2.2 有归属语义的店铺数据 |
-| `sync_failure` 不冗余 `marketplace_id` | 读取时 join `sync_cursor` 得到，避免第三份可能漂移的副本（实现时正是这个冗余字段先写错后被测试抓出） |
-| 授权失效用 CHECK 约束强制 `escalated` | 2.4.2.1 说它「自动升级」，那就不能给「忘记点升级」留缝 |
-| 前端页面不做 | 队列把前端列为 stretch goal。时间优先给迁移 + 测试 |
+| 决策                                          | 取舍                                                                                                                                    |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `marketplace_id` 在 `sync_cursor` 上 NOT NULL | 蓝图明确要求（连接, 站点, 资源类型）是任务粒度。保持 NOT NULL 也避开「NULL 在唯一索引里的重复语义」造出两个看起来一样的游标             |
+| 重拉窗口（`from` 早于水位）不推进水位         | 否则「往回拉数据」会成为绕过游标方向守卫的第二条路径。回退只能走显式端点                                                                |
+| 同步数据用 `channel_scope(..., NULL, NULL)`   | 任务粒度本身是连接级事实，不带店铺归属维度。沿用 `credential_scope` 先例；SELF/DEPARTMENT 数据范围只作用于 2.3.2.2 有归属语义的店铺数据 |
+| `sync_failure` 不冗余 `marketplace_id`        | 读取时 join `sync_cursor` 得到，避免第三份可能漂移的副本（实现时正是这个冗余字段先写错后被测试抓出）                                    |
+| 授权失效用 CHECK 约束强制 `escalated`         | 2.4.2.1 说它「自动升级」，那就不能给「忘记点升级」留缝                                                                                  |
+| 前端页面不做                                  | 队列把前端列为 stretch goal。时间优先给迁移 + 测试                                                                                      |
 
 ## 踩坑记录（下次直接照做）
 
@@ -51,6 +51,7 @@
 ## 文件清单
 
 新增
+
 - `backend/services/channel/src/main/resources/db/migration/V2__channel_sync_cursor_run_failure.sql`
 - `backend/services/channel/src/main/java/com/starcon/channel/ChannelSyncModels.java`
 - `backend/services/channel/src/main/java/com/starcon/channel/ChannelSyncService.java`
@@ -58,6 +59,7 @@
 - `backend/services/channel/src/test/java/com/starcon/channel/ChannelSyncIntegrationTest.java`
 
 改动（codegen 产物，勿手改）
+
 - `packages/api-contracts/src/catalog.ts`
 - `packages/api-contracts/src/channel.openapi.json`
 
@@ -72,11 +74,11 @@
 
 本切片 push 后 CI 7 个 job 里 6 个红。逐条查过，**没有一条是本切片造成的**：
 
-| Job | 失败原因 | 归属 |
-|---|---|---|
+| Job                                               | 失败原因                                                                                                                                                           | 归属 |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- |
 | Lint / Typecheck / Unit / Catalog Browser（4 个） | `pnpm/action-setup@v4` 报 `Multiple versions of pnpm specified`：workflow 里 `version: 9`，`package.json#packageManager` 又写了 `pnpm@9.0.0`。在任何脚本执行前就挂 | 既有 |
-| Java 21 & PostgreSQL Integration | **57 个测试全部通过**（含本切片新增的 18 个），只挂在 `spotless:check` | 既有 |
-| Security Scan | 未细查 | — |
+| Java 21 & PostgreSQL Integration                  | **57 个测试全部通过**（含本切片新增的 18 个），只挂在 `spotless:check`                                                                                             | 既有 |
+| Security Scan                                     | 未细查                                                                                                                                                             | —    |
 
 `gh run list --branch main` 显示 **main 上连续 5 次 push 全红**（从仓库 bootstrap 起），
 说明 CI 从未绿过。作业手册第 6 节记录的门禁是**本地**门禁，本地三项全绿，符合"门禁不过就不 push"的约束。
@@ -104,6 +106,7 @@
   `sync_failure` 幂等键同源，重放去重口径要保持一致。
 - 调度器本身（真正按 cron 拉起 `beginRun`）尚未实现；当前只有可被调度的端点与不变量。
 - `sync_run` 的日志保留期（2.4.1.2「超期只保留聚合统计」）未做，需要定时归档作业。
+
 ---
 
 ## 后续：本次合并的去重处理（2026-10-07）
@@ -113,12 +116,12 @@
 原因：本分支与 `main` 已交付的 2.4（`V2__sync_runtime_and_platform_operations.sql`）
 是同能力的两套并行实现，三层全部冲突——
 
-| 层 | `main`（已交付 2.4） | 本分支 |
-| --- | --- | --- |
-| Flyway | `V2__sync_runtime_and_platform_operations.sql` | `V2__channel_sync_cursor_run_failure.sql`（版本号重复） |
-| 表 | `sync_cursor` / `sync_run` / `sync_failure` | 同样三张表（完全重复） |
-| API | `/channel/sync-cursors|sync-runs|sync-failures` | `/channel/sync/runs|tasks|failures`（形状不同） |
-| OpenAPI | `SyncCursorView` / `SyncRunView` / `SyncFailureView` | 同名（schema 命名空间撞车，弄坏 `main` 前端） |
+| 层      | `main`（已交付 2.4）                                 | 本分支                                                  |
+| ------- | ---------------------------------------------------- | ------------------------------------------------------- |
+| Flyway  | `V2__sync_runtime_and_platform_operations.sql`       | `V2__channel_sync_cursor_run_failure.sql`（版本号重复） |
+| 表      | `sync_cursor` / `sync_run` / `sync_failure`          | 同样三张表（完全重复）                                  |
+| API     | `/channel/sync-cursors                               | sync-runs                                               | sync-failures` | `/channel/sync/runs | tasks | failures`（形状不同） |
+| OpenAPI | `SyncCursorView` / `SyncRunView` / `SyncFailureView` | 同名（schema 命名空间撞车，弄坏 `main` 前端）           |
 
 合并时已移除本分支的 `ChannelSyncController` / `ChannelSyncModels` /
 `ChannelSyncService` / `V2__channel_sync_cursor_run_failure.sql` /

@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Package, RefreshCw } from 'lucide-react';
 import { Button, EmptyState, Input, Notice, PageHeader, SectionCard, StatCard } from '@starcon/ui';
-import type { ParcelDetail, ParcelDetailCapabilities } from '../../../../../packages/api-contracts/src/index';
+import type {
+  ParcelDetail,
+  ParcelDetailCapabilities,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   actionHint,
   allocationVerdict,
@@ -104,7 +107,7 @@ export function ParcelDetailWorkspace() {
 
       {caps && (
         <SectionCard title="能力与边界" description="哪些段是真数据，哪些段归别的模块。">
-          <ul className="space-y-2 text-copy-13">
+          <ul className="text-copy-13 space-y-2">
             {caps.sections.map((s) => (
               <li key={s.label} className="flex flex-wrap items-start gap-2">
                 <span
@@ -121,12 +124,12 @@ export function ParcelDetailWorkspace() {
                   {s.ownerModule && (
                     <span className="text-muted-foreground"> · 归 {s.ownerModule}</span>
                   )}
-                  <span className="text-muted-foreground block text-copy-12">{s.reason}</span>
+                  <span className="text-muted-foreground text-copy-12 block">{s.reason}</span>
                 </span>
               </li>
             ))}
           </ul>
-          <p className="text-muted-foreground border-border mt-4 border-t pt-3 text-copy-12">
+          <p className="text-muted-foreground border-border text-copy-12 mt-4 border-t pt-3">
             {caps.note}
           </p>
         </SectionCard>
@@ -135,7 +138,7 @@ export function ParcelDetailWorkspace() {
       <SectionCard title="按包裹 ID 查看" description="蓝图输入是 parcel_id。">
         <div className="flex flex-wrap items-end gap-2">
           <div className="min-w-[280px] flex-1">
-            <label className="text-muted-foreground mb-1 block text-copy-12" htmlFor="parcel-id">
+            <label className="text-muted-foreground text-copy-12 mb-1 block" htmlFor="parcel-id">
               包裹 ID
             </label>
             <Input
@@ -145,7 +148,10 @@ export function ParcelDetailWorkspace() {
               onChange={(e) => setParcelId(e.target.value)}
             />
           </div>
-          <Button onClick={() => void loadDetail(parcelId)} disabled={detailLoading || !parcelId.trim()}>
+          <Button
+            onClick={() => void loadDetail(parcelId)}
+            disabled={detailLoading || !parcelId.trim()}
+          >
             查看详情
           </Button>
         </div>
@@ -173,7 +179,11 @@ export function ParcelDetailWorkspace() {
       {detail && (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="包裹件数" value={quantityCell(detail.header.totalQuantity)} unit="件" />
+            <StatCard
+              label="包裹件数"
+              value={quantityCell(detail.header.totalQuantity)}
+              unit="件"
+            />
             <StatCard label="明细行数" value={detail.header.itemCount} />
             <StatCard
               label="实测毛重"
@@ -190,9 +200,7 @@ export function ParcelDetailWorkspace() {
               <Field label="所属出库单">
                 {detail.header.outboundOrderCode} · {detail.header.outboundSourceLabel}
               </Field>
-              <Field label="发货仓">
-                {detail.header.warehouseName ?? '—'}
-              </Field>
+              <Field label="发货仓">{detail.header.warehouseName ?? '—'}</Field>
               <Field label="包材">
                 {detail.header.materialName ?? '—'}
                 {detail.header.fillerMaterialName
@@ -212,7 +220,7 @@ export function ParcelDetailWorkspace() {
                 {weightCell(detail.header.netContentWeightG, 'g')}
               </Field>
             </dl>
-            <p className="text-muted-foreground border-border mt-4 border-t pt-3 text-copy-12">
+            <p className="text-muted-foreground border-border text-copy-12 mt-4 border-t pt-3">
               {detail.header.volumeDivisorNote}
             </p>
           </SectionCard>
@@ -228,14 +236,12 @@ export function ParcelDetailWorkspace() {
               >
                 {verdict.label}
                 {detail.costAllocation.fallbackReason && (
-                  <span className="block text-copy-12">{detail.costAllocation.fallbackReason}</span>
+                  <span className="text-copy-12 block">{detail.costAllocation.fallbackReason}</span>
                 )}
               </Notice>
             )}
             <dl className="mt-4 grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
-              <Field label="合计件数">
-                {quantityCell(detail.costAllocation.totalQuantity)} 件
-              </Field>
+              <Field label="合计件数">{quantityCell(detail.costAllocation.totalQuantity)} 件</Field>
               <Field label="已关联件数">
                 {quantityCell(detail.costAllocation.matchedQuantity)} 件
               </Field>
@@ -249,7 +255,7 @@ export function ParcelDetailWorkspace() {
             </dl>
             {unmatchedRows(detail.costAllocation).length > 0 && (
               <div className="mt-4">
-                <p className="text-muted-foreground mb-2 text-copy-12">未关联的明细项：</p>
+                <p className="text-muted-foreground text-copy-12 mb-2">未关联的明细项：</p>
                 <ul className="text-copy-13 space-y-1">
                   {unmatchedRows(detail.costAllocation).map((row) => (
                     <li key={row}>· {row}</li>
@@ -257,7 +263,7 @@ export function ParcelDetailWorkspace() {
                 </ul>
               </div>
             )}
-            <p className="text-muted-foreground border-border mt-4 border-t pt-3 text-copy-12">
+            <p className="text-muted-foreground border-border text-copy-12 mt-4 border-t pt-3">
               {detail.costAllocation.note}
             </p>
           </SectionCard>
@@ -279,14 +285,17 @@ export function ParcelDetailWorkspace() {
                   {item.salesOrderLines.length > 0 ? (
                     <ul className="mt-2 space-y-1">
                       {item.salesOrderLines.map((link) => (
-                        <li key={link.linkId} className="text-copy-12 flex flex-wrap items-center gap-2">
+                        <li
+                          key={link.linkId}
+                          className="text-copy-12 flex flex-wrap items-center gap-2"
+                        >
                           <span className="text-foreground">{orderLineLabel(link)}</span>
                           <span className="text-muted-foreground">{matchBasisLabel(link)}</span>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-warning mt-2 text-copy-12">{item.orderLineNote}</p>
+                    <p className="text-warning text-copy-12 mt-2">{item.orderLineNote}</p>
                   )}
                 </div>
               ))}
@@ -300,7 +309,10 @@ export function ParcelDetailWorkspace() {
             </div>
           </SectionCard>
 
-          <SectionCard title="面单" description="读 8.3.4.2 已交付的打印记录，本模块不自建渲染引擎。">
+          <SectionCard
+            title="面单"
+            description="读 8.3.4.2 已交付的打印记录，本模块不自建渲染引擎。"
+          >
             {detail.label.available ? (
               <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
                 <Field label="运单号">{detail.label.waybillNo ?? '—'}</Field>
@@ -309,9 +321,7 @@ export function ParcelDetailWorkspace() {
                   {detail.label.jobNo}（{detail.label.jobStatusLabel ?? '—'}）
                 </Field>
                 <Field label="本包裹打印次数">{detail.label.printCount}</Field>
-                <Field label="目标累计打印次数">
-                  {detail.label.targetPrintCount ?? '—'} 次
-                </Field>
+                <Field label="目标累计打印次数">{detail.label.targetPrintCount ?? '—'} 次</Field>
                 <Field label="寄件">{detail.label.shipToName ?? '—'}</Field>
               </dl>
             ) : (
@@ -319,7 +329,7 @@ export function ParcelDetailWorkspace() {
                 {detail.label.note}
               </Notice>
             )}
-            <p className="text-muted-foreground border-border mt-4 border-t pt-3 text-copy-12">
+            <p className="text-muted-foreground border-border text-copy-12 mt-4 border-t pt-3">
               {detail.label.note}
             </p>
           </SectionCard>
@@ -327,7 +337,7 @@ export function ParcelDetailWorkspace() {
           <SectionCard title="操作入口" description="本模块只读，动作都在归属模块里做。">
             <ul className="space-y-2">
               {detail.actions.map((a) => (
-                <li key={a.action} className="flex flex-wrap items-baseline gap-2 text-copy-13">
+                <li key={a.action} className="text-copy-13 flex flex-wrap items-baseline gap-2">
                   <span className="text-foreground">{a.label}</span>
                   <span className="text-muted-foreground">{actionHint(a)}</span>
                   {a.href && (
@@ -340,7 +350,7 @@ export function ParcelDetailWorkspace() {
                       前往
                     </a>
                   )}
-                  <span className="text-muted-foreground block w-full text-copy-12">{a.note}</span>
+                  <span className="text-muted-foreground text-copy-12 block w-full">{a.note}</span>
                 </li>
               ))}
             </ul>
@@ -351,14 +361,14 @@ export function ParcelDetailWorkspace() {
               {detail.unavailable.map((u) => (
                 <li key={u.label} className="text-copy-13">
                   <span className="text-foreground">{unavailableText(u)}</span>
-                  <span className="text-muted-foreground block text-copy-12">{u.reason}</span>
+                  <span className="text-muted-foreground text-copy-12 block">{u.reason}</span>
                 </li>
               ))}
             </ul>
           </SectionCard>
 
           <SectionCard title="口径说明">
-            <ul className="text-muted-foreground space-y-1 text-copy-12">
+            <ul className="text-muted-foreground text-copy-12 space-y-1">
               {detail.notes.map((n) => (
                 <li key={n}>· {n}</li>
               ))}

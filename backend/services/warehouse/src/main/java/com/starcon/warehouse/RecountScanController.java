@@ -18,16 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
  * 8.3.3.1 复核扫描入口。
  *
  * <p>命名空间 {@code /warehouse/recount-scans}。<b>刻意不挂在 {@code outbound-orders} 之下</b>：
- * 出库单是履约单据（8.3.1.x），复核是现场核对工单 —— 一张出库单可以复核多次
- * （判异常 → 退回拣货 → 重拣 → 再复核），每次是一张独立的复核单，
- * 挂在出库单底下会让契约看起来像「一张单只有一次复核」。
- * 也不挂在 {@code pick-tasks} 底下：拣货完成 ≠ 可以复核，中间还隔着「出库单进入待复核」。
+ * 出库单是履约单据（8.3.1.x），复核是现场核对工单 —— 一张出库单可以复核多次 （判异常 → 退回拣货 → 重拣 → 再复核），每次是一张独立的复核单，
+ * 挂在出库单底下会让契约看起来像「一张单只有一次复核」。 也不挂在 {@code pick-tasks} 底下：拣货完成 ≠ 可以复核，中间还隔着「出库单进入待复核」。
  *
  * <p>十四个形状，刻意逐个列出、不做通配：
  *
  * <ul>
  *   <li>{@code capabilities} 能力与上下游声明（含「复核不动库存」「高价值只取件数」两条口径）
- *   <li>{@code POST /rules}、{@code GET /rules}、{@code GET /rules/{id}}、{@code POST /rules/{id}/retire}
+ *   <li>{@code POST /rules}、{@code GET /rules}、{@code GET /rules/{id}}、{@code POST
+ *       /rules/{id}/retire}
  *   <li>{@code POST /} 开复核单（读 8.3.2.1 的已完成拣货任务接手 + 冻结订单明细为基线）
  *   <li>{@code GET /} 列表（真分页 / 真筛选 / 排序白名单 / 汇总）
  *   <li>{@code GET /{id}} 详情（单头 + 基线行 + 扫描记录 + 异常 + 时间线 + 结论报告）
@@ -40,13 +39,11 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>{@code POST /{id}/cancel} 取消（<b>不动库存</b>）
  * </ul>
  *
- * <p>刻意<b>没有</b> PUT / DELETE：扫描记录与复核流水是事实（V117 的 append-only
- * 守卫会直接拒），异常只能处置一次。要更正就再扫一次，要放弃就取消留原因。
+ * <p>刻意<b>没有</b> PUT / DELETE：扫描记录与复核流水是事实（V117 的 append-only 守卫会直接拒），异常只能处置一次。要更正就再扫一次，要放弃就取消留原因。
  *
- * <p>权限码<b>复用</b> {@code warehouse.inventory.read} / {@code warehouse.inventory.update}，
- * 不新起 {@code warehouse.recount.*}：identity 只注册了 {@code warehouse.inventory} 与
- * {@code warehouse.facilities} 两个页面资源的权限码，用一个<b>没有被注册</b>的码会让
- * 连 OWNER 都 403（8.1.2.1 车道踩过这个坑并在台账里记了原因）。
+ * <p>权限码<b>复用</b> {@code warehouse.inventory.read} / {@code warehouse.inventory.update}， 不新起 {@code
+ * warehouse.recount.*}：identity 只注册了 {@code warehouse.inventory} 与 {@code warehouse.facilities}
+ * 两个页面资源的权限码，用一个<b>没有被注册</b>的码会让 连 OWNER 都 403（8.1.2.1 车道踩过这个坑并在台账里记了原因）。
  */
 @RestController
 @RequestMapping("/warehouse/recount-scans")
@@ -66,10 +63,7 @@ public class RecountScanController {
     return access.run(actor, "warehouse." + permission, () -> work.apply(actor));
   }
 
-  /**
-   * 能力声明：序列号逐件核对的集合相等判据、检出哪几类异常、开箱复核口径、
-   * 与「复核不动库存」这条边界，以及未交付的 8.3.3.2。
-   */
+  /** 能力声明：序列号逐件核对的集合相等判据、检出哪几类异常、开箱复核口径、 与「复核不动库存」这条边界，以及未交付的 8.3.3.2。 */
   @GetMapping("/capabilities")
   public RecountCapabilities capabilities(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
@@ -145,8 +139,16 @@ public class RecountScanController {
         "inventory.read",
         a ->
             recounts.page(
-                warehouseId, outboundOrderId, status, reviewerUserId, openBoxOnly,
-                exceptionsOnly, keyword, sort, page, size));
+                warehouseId,
+                outboundOrderId,
+                status,
+                reviewerUserId,
+                openBoxOnly,
+                exceptionsOnly,
+                keyword,
+                sort,
+                page,
+                size));
   }
 
   /** 详情：基线行 + 扫描记录 + 异常 + 时间线 + 结论报告。 */
@@ -178,8 +180,7 @@ public class RecountScanController {
   /**
    * 结算复核：逐行比订单明细，检出漏件 / 多件 / 序列号不符，给出通过或异常的结论。
    *
-   * <p>漏件与多件<b>只能</b>在这里报 —— 扫描过程中「还没扫齐」和「扫完发现少了」
-   * 根本区分不出来。
+   * <p>漏件与多件<b>只能</b>在这里报 —— 扫描过程中「还没扫齐」和「扫完发现少了」 根本区分不出来。
    */
   @PostMapping("/{id}/settle")
   public RecountVerdictReport settle(
@@ -189,8 +190,7 @@ public class RecountScanController {
   }
 
   /**
-   * 完成复核：结算 + 判定。判通过的四个前提（每一行核过、序列号集合相等、
-   * 无未处置异常、出库单本来就在待复核）同时在 DB 层拒一遍。
+   * 完成复核：结算 + 判定。判通过的四个前提（每一行核过、序列号集合相等、 无未处置异常、出库单本来就在待复核）同时在 DB 层拒一遍。
    *
    * <p>通过时把出库单推到「待打包」交给 8.3.3.2，<b>从不碰已发货</b>。
    */
@@ -218,7 +218,9 @@ public class RecountScanController {
       @PathVariable String exceptionId,
       @Valid @RequestBody RecountResolveInput input) {
     return call(
-        auth, "inventory.update", a -> recounts.resolveException(id, exceptionId, input, a.userId()));
+        auth,
+        "inventory.update",
+        a -> recounts.resolveException(id, exceptionId, input, a.userId()));
   }
 
   /** 取消复核（<b>不动库存</b>，复核本来就不碰库存）。原因必填。 */

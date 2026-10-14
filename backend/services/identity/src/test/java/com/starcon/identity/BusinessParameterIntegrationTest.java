@@ -6,7 +6,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.starcon.tenancy.TenantTransactions;
-import java.math.BigDecimal;
 import java.sql.DriverManager;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -24,28 +23,26 @@ import org.springframework.transaction.support.TransactionTemplate;
  *
  * <ol>
  *   <li><b>参数必须有默认值</b>——每个参数都有出厂默认值，且默认值的类型自洽（数值型带 NUMERIC）。
- *   <li><b>参数必须有生效范围</b>——全局 / 按法人 / 按店铺三档，优先级严格是
- *       <b>店铺 &gt; 法人 &gt; 全局 &gt; 出厂默认</b>，且生效值同时告诉调用方"这个值从哪一档来"。
- *   <li><b>改参数不改历史单据已冻结的行为</b>——冻结后改参数，读回单据快照仍是冻结那一刻的值；
- *       重复冻结被 409 挡下；变更历史追加不可改。
+ *   <li><b>参数必须有生效范围</b>——全局 / 按法人 / 按店铺三档，优先级严格是 <b>店铺 &gt; 法人 &gt; 全局 &gt;
+ *       出厂默认</b>，且生效值同时告诉调用方"这个值从哪一档来"。
+ *   <li><b>改参数不改历史单据已冻结的行为</b>——冻结后改参数，读回单据快照仍是冻结那一刻的值； 重复冻结被 409 挡下；变更历史追加不可改。
  * </ol>
  *
- * <p>时间字段全部按值断言：用 {@code Timestamp.valueOf(LocalDateTime)} 绑 timestamptz
- * 会静默偏 −28800 秒，所以 {@code effectiveFrom} / {@code changedAt} / {@code frozenAt}
- * 都落在"请求前后两个墙钟之间"才算通过。
+ * <p>时间字段全部按值断言：用 {@code Timestamp.valueOf(LocalDateTime)} 绑 timestamptz 会静默偏 −28800 秒，所以 {@code
+ * effectiveFrom} / {@code changedAt} / {@code frozenAt} 都落在"请求前后两个墙钟之间"才算通过。
  */
 class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
 
   /**
    * 每个用例前清空本模块的数据。
    *
-   * <p>容器与 local-admin 租户在所有测试类之间共享（见 IdentityIntegrationTestBase），
-   * 同一个「参数 × GLOBAL 档」被上一个用例配过就会撞唯一约束。变更历史有不可篡改触发器，
-   * 普通 DELETE 会被它挡住，所以用 TRUNCATE —— 它不触发行级触发器。
+   * <p>容器与 local-admin 租户在所有测试类之间共享（见 IdentityIntegrationTestBase）， 同一个「参数 × GLOBAL
+   * 档」被上一个用例配过就会撞唯一约束。变更历史有不可篡改触发器， 普通 DELETE 会被它挡住，所以用 TRUNCATE —— 它不触发行级触发器。
    */
   @org.junit.jupiter.api.BeforeEach
   void resetModule() throws Exception {
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
         var s = c.createStatement()) {
       s.execute(
           "truncate business_parameter_freeze_value, business_parameter_freeze,"
@@ -89,7 +86,12 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
   }
 
   private Map<String, Object> overrideInput(
-      String code, String scopeType, UUID legalEntityId, UUID shopId, String shopLabel, String value) {
+      String code,
+      String scopeType,
+      UUID legalEntityId,
+      UUID shopId,
+      String shopLabel,
+      String value) {
     var input = new LinkedHashMap<String, Object>();
     input.put("parameterCode", code);
     input.put("scopeType", scopeType);
@@ -122,7 +124,8 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
 
   private UUID entity(String token, String code) throws Exception {
     return UUID.fromString(
-        request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "USD"), 200).asText());
+        request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "USD"), 200)
+            .asText());
   }
 
   // ------------------------------------------------------------------
@@ -182,7 +185,8 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
     // 只配全局时，任何上下文都拿到全局值
     createOverride(token, "COST_BASIS", "GLOBAL", null, null, null, "FIFO");
     assertThat(effective(token, null, null).get(0)).isNotNull();
-    assertThat(find(effective(token, null, null), "COST_BASIS").get("value").asText()).isEqualTo("FIFO");
+    assertThat(find(effective(token, null, null), "COST_BASIS").get("value").asText())
+        .isEqualTo("FIFO");
 
     // 加法人档后：法人上下文取法人值，其他租户级上下文仍取全局值
     createOverride(token, "COST_BASIS", "LEGAL_ENTITY", entity, null, null, "LIFO");
@@ -210,9 +214,19 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
         .isEqualTo("IMPORTED_COST");
 
     // 删除店铺档后立刻退回法人档——「删除 = 退回继承」必须真的退回
-    var shopOverride = find(request(token, "GET", "/identity/business-parameters/overrides?scopeType=SHOP", null, 200), "COST_BASIS");
-    request(token, "DELETE", "/identity/business-parameters/overrides/" + shopOverride.get("id").asText(), null, 200);
-    assertThat(find(effective(token, entity, shop), "COST_BASIS").get("value").asText()).isEqualTo("LIFO");
+    var shopOverride =
+        find(
+            request(
+                token, "GET", "/identity/business-parameters/overrides?scopeType=SHOP", null, 200),
+            "COST_BASIS");
+    request(
+        token,
+        "DELETE",
+        "/identity/business-parameters/overrides/" + shopOverride.get("id").asText(),
+        null,
+        200);
+    assertThat(find(effective(token, entity, shop), "COST_BASIS").get("value").asText())
+        .isEqualTo("LIFO");
   }
 
   @Test
@@ -296,8 +310,7 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
         400);
 
     // 多选参数的空串是合法配置（当前不设必退情形），不该被当成漏填
-    createOverride(
-        token, "AFTERSALE_MUST_REFUND_REASONS", "LEGAL_ENTITY", entity, null, null, "");
+    createOverride(token, "AFTERSALE_MUST_REFUND_REASONS", "LEGAL_ENTITY", entity, null, null, "");
     var row = find(effective(token, entity, null), "AFTERSALE_MUST_REFUND_REASONS");
     assertThat(row.get("value").asText()).isEmpty();
     assertThat(row.get("valueCodes")).isEmpty();
@@ -359,9 +372,11 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
     // 必须放进租户事务数——事务外 RLS 会把表读空，那样的 0 证明不了任何事。
     assertThat(
             tx().run(
-                UUID.fromString(
-                    request(token, "GET", "/identity/tenants/current", null, 200).get("tenantId").asText()),
-                () -> sql.fetch("select id from business_parameter_override")))
+                    UUID.fromString(
+                        request(token, "GET", "/identity/tenants/current", null, 200)
+                            .get("tenantId")
+                            .asText()),
+                    () -> sql.fetch("select id from business_parameter_override")))
         .hasSize(1);
   }
 
@@ -377,7 +392,10 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
         createOverride(token, "AFTERSALE_RETURN_WINDOW_DAYS", "GLOBAL", null, null, null, "45");
     Instant after = Instant.now();
 
-    var row = find(request(token, "GET", "/identity/business-parameters/overrides", null, 200), "AFTERSALE_RETURN_WINDOW_DAYS");
+    var row =
+        find(
+            request(token, "GET", "/identity/business-parameters/overrides", null, 200),
+            "AFTERSALE_RETURN_WINDOW_DAYS");
     assertThat(UUID.fromString(row.get("id").asText())).isEqualTo(id);
     // 文本与数值必须能互相还原出同一个数（NUMERIC(19,6)，禁浮点）
     assertThat(row.get("value").asText()).isEqualTo("45");
@@ -389,7 +407,13 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(effectiveFrom.toInstant()).isBetween(before.minusSeconds(1), after.plusSeconds(1));
 
     // 变更历史的 changed_at 同样按值断言
-    var history = request(token, "GET", "/identity/business-parameters/history?parameterCode=AFTERSALE_RETURN_WINDOW_DAYS", null, 200);
+    var history =
+        request(
+            token,
+            "GET",
+            "/identity/business-parameters/history?parameterCode=AFTERSALE_RETURN_WINDOW_DAYS",
+            null,
+            200);
     assertThat(history).hasSize(1);
     OffsetDateTime changedAt = OffsetDateTime.parse(history.get(0).get("changedAt").asText());
     assertThat(changedAt.toInstant()).isBetween(before.minusSeconds(1), after.plusSeconds(1));
@@ -404,8 +428,7 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
     String token = login(), tag = suffix();
     UUID entity = entity(token, "CH" + tag);
 
-    UUID id =
-        createOverride(token, "COST_BASIS", "LEGAL_ENTITY", entity, null, null, "FIFO");
+    UUID id = createOverride(token, "COST_BASIS", "LEGAL_ENTITY", entity, null, null, "FIFO");
     request(
         token,
         "PUT",
@@ -414,7 +437,13 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
         200);
     request(token, "DELETE", "/identity/business-parameters/overrides/" + id, null, 200);
 
-    var history = request(token, "GET", "/identity/business-parameters/history?parameterCode=COST_BASIS&scopeType=LEGAL_ENTITY", null, 200);
+    var history =
+        request(
+            token,
+            "GET",
+            "/identity/business-parameters/history?parameterCode=COST_BASIS&scopeType=LEGAL_ENTITY",
+            null,
+            200);
     assertThat(history).hasSize(3);
     // 按时间倒序：删除 → 更新 → 新建
     assertThat(history.get(0).get("action").asText()).isEqualTo("DELETED");
@@ -441,7 +470,13 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
   void historyRowsCannotBeUpdatedOrDeleted() throws Exception {
     String token = login();
     createOverride(token, "COST_BASIS", "GLOBAL", null, null, null, "FIFO");
-    var history = request(token, "GET", "/identity/business-parameters/history?parameterCode=COST_BASIS", null, 200);
+    var history =
+        request(
+            token,
+            "GET",
+            "/identity/business-parameters/history?parameterCode=COST_BASIS",
+            null,
+            200);
     UUID id = UUID.fromString(history.get(0).get("id").asText());
 
     // 用 identity_app 直连：权限层已经不给 UPDATE/DELETE
@@ -450,31 +485,44 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
               () ->
                   c.createStatement()
                       .executeUpdate(
-                          "update business_parameter_history set action='Tampered' where id='" + id + "'"))
+                          "update business_parameter_history set action='Tampered' where id='"
+                              + id
+                              + "'"))
           .isInstanceOf(java.sql.SQLException.class);
-      assertThatThrownBy(
-              () ->
-                  c.createStatement()
-                      .executeUpdate("delete from business_parameter_history where id='" + id + "'"))
-          .isInstanceOf(java.sql.SQLException.class);
-    }
-
-    // 用超级用户直连：权限被绕过，但触发器仍挡住——这才是真正的不可篡改
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword())) {
       assertThatThrownBy(
               () ->
                   c.createStatement()
                       .executeUpdate(
-                          "update business_parameter_history set action='Tampered' where id='" + id + "'"))
+                          "delete from business_parameter_history where id='" + id + "'"))
+          .isInstanceOf(java.sql.SQLException.class);
+    }
+
+    // 用超级用户直连：权限被绕过，但触发器仍挡住——这才是真正的不可篡改
+    try (var c =
+        DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword())) {
+      assertThatThrownBy(
+              () ->
+                  c.createStatement()
+                      .executeUpdate(
+                          "update business_parameter_history set action='Tampered' where id='"
+                              + id
+                              + "'"))
           .hasMessageContaining("不可修改或删除");
       assertThatThrownBy(
               () ->
                   c.createStatement()
-                      .executeUpdate("delete from business_parameter_history where id='" + id + "'"))
+                      .executeUpdate(
+                          "delete from business_parameter_history where id='" + id + "'"))
           .hasMessageContaining("不可修改或删除");
     }
 
-    var still = request(token, "GET", "/identity/business-parameters/history?parameterCode=COST_BASIS", null, 200);
+    var still =
+        request(
+            token,
+            "GET",
+            "/identity/business-parameters/history?parameterCode=COST_BASIS",
+            null,
+            200);
     assertThat(still.get(0).get("action").asText()).isEqualTo("CREATED");
   }
 
@@ -499,8 +547,12 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
         overrideInput("INVENTORY_POLICY", "GLOBAL", null, null, null, "ALLOW_NEGATIVE"),
         400);
     // 原值未被改动
-    assertThat(find(request(token, "GET", "/identity/business-parameters/overrides", null, 200), "COST_BASIS")
-            .get("value").asText())
+    assertThat(
+            find(
+                    request(token, "GET", "/identity/business-parameters/overrides", null, 200),
+                    "COST_BASIS")
+                .get("value")
+                .asText())
         .isEqualTo("FIFO");
   }
 
@@ -526,10 +578,12 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
     freezeInput.put("note", "售后单创建时冻结");
     UUID freezeId =
         UUID.fromString(
-            request(token, "POST", "/identity/business-parameters/freezes", freezeInput, 200).asText());
+            request(token, "POST", "/identity/business-parameters/freezes", freezeInput, 200)
+                .asText());
 
     var snapshot =
-        request(token, "GET", "/identity/business-parameters/freezes/AFTERSALE/AS-" + tag, null, 200);
+        request(
+            token, "GET", "/identity/business-parameters/freezes/AFTERSALE/AS-" + tag, null, 200);
     assertThat(UUID.fromString(snapshot.get("id").asText())).isEqualTo(freezeId);
     var frozenValue = find(snapshot.get("values"), "AFTERSALE_RETURN_WINDOW_DAYS");
     assertThat(frozenValue.get("value").asText()).isEqualTo("45");
@@ -543,7 +597,13 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(snapshot.get("values").size()).isEqualTo(definitions(token).size());
 
     // ---- 关键：之后把参数改掉 ----
-    var globalOverrides = request(token, "GET", "/identity/business-parameters/overrides?parameterCode=AFTERSALE_RETURN_WINDOW_DAYS&scopeType=GLOBAL", null, 200);
+    var globalOverrides =
+        request(
+            token,
+            "GET",
+            "/identity/business-parameters/overrides?parameterCode=AFTERSALE_RETURN_WINDOW_DAYS&scopeType=GLOBAL",
+            null,
+            200);
     request(
         token,
         "PUT",
@@ -553,16 +613,22 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
     createOverride(token, "DISPLAY_CURRENCY", "GLOBAL", null, null, null, "USD");
 
     // 新单据看到的是新值
-    assertThat(find(effective(token, entity, null), "AFTERSALE_RETURN_WINDOW_DAYS").get("value").asText())
+    assertThat(
+            find(effective(token, entity, null), "AFTERSALE_RETURN_WINDOW_DAYS")
+                .get("value")
+                .asText())
         .isEqualTo("45");
     assertThat(find(effective(token, null, null), "DISPLAY_CURRENCY").get("value").asText())
         .isEqualTo("USD");
 
     // 旧单据读到的仍然是冻结那一刻的值，不受任何影响
-    var after = request(token, "GET", "/identity/business-parameters/freezes/AFTERSALE/AS-" + tag, null, 200);
+    var after =
+        request(
+            token, "GET", "/identity/business-parameters/freezes/AFTERSALE/AS-" + tag, null, 200);
     assertThat(find(after.get("values"), "AFTERSALE_RETURN_WINDOW_DAYS").get("value").asText())
         .isEqualTo("45");
-    assertThat(find(after.get("values"), "DISPLAY_CURRENCY").get("value").asText()).isEqualTo("CNY");
+    assertThat(find(after.get("values"), "DISPLAY_CURRENCY").get("value").asText())
+        .isEqualTo("CNY");
 
     // 重复冻结被 409 挡下：一张单据只冻结一次
     request(token, "POST", "/identity/business-parameters/freezes", freezeInput, 409);
@@ -589,10 +655,12 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
     freezeInput.put("shopLabel", "店铺 " + tag);
     UUID freezeId =
         UUID.fromString(
-            request(token, "POST", "/identity/business-parameters/freezes", freezeInput, 200).asText());
+            request(token, "POST", "/identity/business-parameters/freezes", freezeInput, 200)
+                .asText());
     assertThat(freezeId).isNotNull();
 
-    var snapshot = request(token, "GET", "/identity/business-parameters/freezes/ORDER/SO-" + tag, null, 200);
+    var snapshot =
+        request(token, "GET", "/identity/business-parameters/freezes/ORDER/SO-" + tag, null, 200);
     assertThat(snapshot.get("shopId").asText()).isEqualTo(shop.toString());
     // 店铺标签被快照下来，即使后续解析时店铺已不存在也不影响可读性
     assertThat(snapshot.get("shopLabel").asText()).isEqualTo("店铺 " + tag);
@@ -611,7 +679,8 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
     request(token, "POST", "/identity/business-parameters/freezes", freezeInput, 200);
     Instant after = Instant.now();
 
-    var snapshot = request(token, "GET", "/identity/business-parameters/freezes/ORDER/SO-DRIFT", null, 200);
+    var snapshot =
+        request(token, "GET", "/identity/business-parameters/freezes/ORDER/SO-DRIFT", null, 200);
     OffsetDateTime frozenAt = OffsetDateTime.parse(snapshot.get("frozenAt").asText());
     assertThat(frozenAt.toInstant()).isBetween(before.minusSeconds(1), after.plusSeconds(1));
   }
@@ -629,13 +698,17 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
                 "POST",
                 "/identity/roles",
                 Map.of(
-                    "code", "NOPARAM_" + tag,
-                    "name", "无参数权限",
-                    "status", "ACTIVE",
-                    "permissions", List.of("identity.member.read")),
+                    "code",
+                    "NOPARAM_" + tag,
+                    "name",
+                    "无参数权限",
+                    "status",
+                    "ACTIVE",
+                    "permissions",
+                    List.of("identity.member.read")),
                 200)
             .asText();
-        // assignments 是 AssignmentInput{roleId, scopeMode}，不是裸 role id 字符串
+    // assignments 是 AssignmentInput{roleId, scopeMode}，不是裸 role id 字符串
     request(
         owner,
         "POST",
@@ -651,8 +724,12 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
     request(member, "GET", "/identity/business-parameters/effective", null, 403);
     request(member, "GET", "/identity/business-parameters/overrides", null, 403);
     request(member, "GET", "/identity/business-parameters/history", null, 403);
-    request(member, "POST", "/identity/business-parameters/overrides",
-        overrideInput("COST_BASIS", "GLOBAL", null, null, null, "FIFO"), 403);
+    request(
+        member,
+        "POST",
+        "/identity/business-parameters/overrides",
+        overrideInput("COST_BASIS", "GLOBAL", null, null, null, "FIFO"),
+        403);
 
     // 所有者可读
     assertThat(definitions(owner)).isNotEmpty();
@@ -682,14 +759,19 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
         "POST",
         "/identity/children",
         Map.of(
-            "code", "BPC" + tag,
-            "name", "业务参数子租户",
-            "ownerUsername", childUser,
-            "ownerPassword", "test-member-password"),
+            "code",
+            "BPC" + tag,
+            "name",
+            "业务参数子租户",
+            "ownerUsername",
+            childUser,
+            "ownerPassword",
+            "test-member-password"),
         200);
     String childToken = loginUser(childUser);
     UUID childEntity = entity(childToken, "CT" + tag);
-    createOverride(childToken, "COST_BASIS", "LEGAL_ENTITY", childEntity, null, null, "IMPORTED_COST");
+    createOverride(
+        childToken, "COST_BASIS", "LEGAL_ENTITY", childEntity, null, null, "IMPORTED_COST");
     createOverride(childToken, "DISPLAY_CURRENCY", "GLOBAL", null, null, null, "JPY");
 
     // 断言一：两租户互不可见
@@ -704,9 +786,12 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(childView.toString()).doesNotContain(parentEntity.toString());
 
     // 覆盖值列表、历史、冻结同样隔离
-    assertThat(request(owner, "GET", "/identity/business-parameters/overrides", null, 200).toString())
+    assertThat(
+            request(owner, "GET", "/identity/business-parameters/overrides", null, 200).toString())
         .doesNotContain("CT" + tag);
-    assertThat(request(childToken, "GET", "/identity/business-parameters/overrides", null, 200).toString())
+    assertThat(
+            request(childToken, "GET", "/identity/business-parameters/overrides", null, 200)
+                .toString())
         .doesNotContain("PT" + tag);
     assertThat(request(owner, "GET", "/identity/business-parameters/history", null, 200).toString())
         .doesNotContain(childEntity.toString());
@@ -719,15 +804,28 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
         Map.of("documentType", "ORDER", "documentNo", "SO-CHILD-" + tag),
         200);
     request(owner, "GET", "/identity/business-parameters/freezes/ORDER/SO-CHILD-" + tag, null, 404);
-    assertThat(request(owner, "GET", "/identity/business-parameters/freezes/ORDER/SO-PARENT-" + tag, null, 200)
-            .get("documentNo").asText())
+    assertThat(
+            request(
+                    owner,
+                    "GET",
+                    "/identity/business-parameters/freezes/ORDER/SO-PARENT-" + tag,
+                    null,
+                    200)
+                .get("documentNo")
+                .asText())
         .isEqualTo("SO-PARENT-" + tag);
     // 父租户改不动子租户的覆盖值：拿子租户的覆盖 id 去父租户删，必须 404
-    var childOverrides = request(childToken, "GET", "/identity/business-parameters/overrides", null, 200);
+    var childOverrides =
+        request(childToken, "GET", "/identity/business-parameters/overrides", null, 200);
     UUID childOverrideId = UUID.fromString(find(childOverrides, "COST_BASIS").get("id").asText());
-    request(owner, "DELETE", "/identity/business-parameters/overrides/" + childOverrideId, null, 404);
-    request(owner, "PUT", "/identity/business-parameters/overrides/" + childOverrideId,
-        overrideInput("COST_BASIS", "LEGAL_ENTITY", parentEntity, null, null, "FIFO"), 404);
+    request(
+        owner, "DELETE", "/identity/business-parameters/overrides/" + childOverrideId, null, 404);
+    request(
+        owner,
+        "PUT",
+        "/identity/business-parameters/overrides/" + childOverrideId,
+        overrideInput("COST_BASIS", "LEGAL_ENTITY", parentEntity, null, null, "FIFO"),
+        404);
 
     // 断言二：伪造 tenant header 无效。request() 每次都带随机 X-Tenant-Id。
     String forged = UUID.randomUUID().toString();
@@ -760,7 +858,8 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
                 .header("Authorization", "Bearer " + owner))
         .andExpect(status().isNotFound());
     // 未登录查不到任何参数
-    http.perform(get("/identity/business-parameters/effective")).andExpect(status().isUnauthorized());
+    http.perform(get("/identity/business-parameters/effective"))
+        .andExpect(status().isUnauthorized());
 
     // 断言三：连接池归还后不串租户。池大小被压到 1，交替租户请求复用同一物理连接。
     for (int i = 0; i < 3; i++) {
@@ -775,17 +874,27 @@ class BusinessParameterIntegrationTest extends IdentityIntegrationTestBase {
           .isEqualTo("IMPORTED_COST");
       assertThat(child.toString()).doesNotContain("LIFO");
       // 冻结快照也必须跟着租户走
-      assertThat(request(owner, "GET", "/identity/business-parameters/freezes/ORDER/SO-CHILD-" + tag, null, 404)).isNotNull();
+      assertThat(
+              request(
+                  owner,
+                  "GET",
+                  "/identity/business-parameters/freezes/ORDER/SO-CHILD-" + tag,
+                  null,
+                  404))
+          .isNotNull();
     }
 
     // 事务外（无租户上下文）直查应当为空
     assertThat(sql.fetch("select id from business_parameter_override")).isEmpty();
     assertThat(sql.fetch("select id from business_parameter_freeze")).isEmpty();
-    assertThat(tx().run(tenantOf(owner), () -> sql.fetch("select id from business_parameter_override")))
+    assertThat(
+            tx().run(
+                    tenantOf(owner), () -> sql.fetch("select id from business_parameter_override")))
         .isNotEmpty();
   }
 
   private UUID tenantOf(String token) throws Exception {
-    return UUID.fromString(request(token, "GET", "/identity/tenants/current", null, 200).get("tenantId").asText());
+    return UUID.fromString(
+        request(token, "GET", "/identity/tenants/current", null, 200).get("tenantId").asText());
   }
 }

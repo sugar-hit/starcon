@@ -82,9 +82,7 @@ export function LegalEntityWorkspace() {
 
   const term = search.trim().toLowerCase();
   const filtered = entities.filter((e) =>
-    `${e.code} ${e.legalName} ${e.registrationNo} ${e.taxNo}`
-      .toLowerCase()
-      .includes(term),
+    `${e.code} ${e.legalName} ${e.registrationNo} ${e.taxNo}`.toLowerCase().includes(term),
   );
 
   return (
@@ -202,7 +200,9 @@ export function LegalEntityWorkspace() {
                     </div>
                     <div>
                       <dt className="inline">金额精度：</dt>
-                      <dd className="inline">{e.amountScale} 位 · {roundingLabel(e.rounding)}</dd>
+                      <dd className="inline">
+                        {e.amountScale} 位 · {roundingLabel(e.rounding)}
+                      </dd>
                     </div>
                   </dl>
                 </div>
@@ -213,7 +213,12 @@ export function LegalEntityWorkspace() {
                     </Button>
                   )}
                   {can('identity.legal_entity.delete') && (
-                    <Button size="sm" variant="ghost" disabled={busy} onClick={() => void remove(e)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={busy}
+                      onClick={() => void remove(e)}
+                    >
                       删除
                     </Button>
                   )}
@@ -252,7 +257,9 @@ function LegalEntityForm({
 }) {
   const [code, setCode] = useState(entity?.code ?? '');
   const [legalName, setLegalName] = useState(entity?.legalName ?? '');
-  const [registrationCountry, setRegistrationCountry] = useState(entity?.registrationCountry ?? 'CN');
+  const [registrationCountry, setRegistrationCountry] = useState(
+    entity?.registrationCountry ?? 'CN',
+  );
   const [registrationNo, setRegistrationNo] = useState(entity?.registrationNo ?? '');
   const [taxNo, setTaxNo] = useState(entity?.taxNo ?? '');
   const [baseCurrency, setBaseCurrency] = useState(entity?.baseCurrency ?? 'USD');
@@ -267,11 +274,7 @@ function LegalEntityForm({
       <p className="text-copy-14 font-medium">{entity ? '编辑法人' : '新建法人'}</p>
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         <Field label="法人编码" hint="大写字母数字下划线中划线">
-          <input
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            className={inputClass}
-          />
+          <input value={code} onChange={(e) => setCode(e.target.value)} className={inputClass} />
         </Field>
         <Field label="法定名称">
           <input
@@ -405,6 +408,7 @@ function Field({
 
 function roundingLabel(value: string) {
   return (
-    { HALF_UP: '四舍五入', HALF_EVEN: '银行家舍入', DOWN: '向下取整', UP: '向上取整' }[value] ?? value
+    { HALF_UP: '四舍五入', HALF_EVEN: '银行家舍入', DOWN: '向下取整', UP: '向上取整' }[value] ??
+    value
   );
 }

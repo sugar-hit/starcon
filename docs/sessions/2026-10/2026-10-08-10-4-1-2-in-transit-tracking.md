@@ -15,17 +15,17 @@
 上一轮的接手备注把 9 例红归为「断言与实现冲突」+「NPE 与 SQL 错误」。实跑后发现，
 **大部分是被掩盖的实现 bug**，断言反而是对的：
 
-| # | 位置 | 性质 | 后果 |
-|---|------|------|------|
-| 1 | `Service.days()` | **真 bug** | SQL 已把 `remaining_days_raw` 换算成「天」，Java 又除了一次 86400 → 「还剩 40 天」变成 0.0046 天 → **每一条在途记录都会被判成已进预警区**，提前量口径整个失去意义 |
-| 2 | `Service.recordEvent` 事件 insert | **真 bug** | 15 个 `?` 对 14 列，且 `eta_before` 漏 `::timestamptz` → 改期类事件一律 BadSqlGrammar |
-| 3 | `Service.confirmReceipt` update | **真 bug** | `receipt_confirmed_at` / `closed_at` 同样漏 cast |
-| 4 | `Service.reloadAlert` | **真 bug** | `select *` 不含 `shipment_code`，而 `alertOf` 要读它 → jOOQ 抛 `IllegalArgumentException` → 被翻成 **400「字段格式不正确」**。这个最阴：现象完全指不到「回读时少查了一列」 |
-| 5 | `Service.confirmReceipt` 顺序 | **真 bug** | 先 UPDATE 关记录再 INSERT 事件，被自己的 DB 触发器 `guard_first_mile_tracking_event_source`（已闭环不接受 RECEIPT 类更新）当场拒掉、整笔回滚。**事件必须先写** |
-| 6 | V84 `guard_first_mile_tracking_state` | **真 bug** | 条件写反：`status <> 'CANCELLED'` 应为 `= 'CANCELLED'`。结果**正常的收货确认被自己的约束拒绝** |
-| 7 | `Service.page` 的 `delayedOnly` | **真 bug（设计）** | 把 WATCH 行过滤掉了。而 WATCH（默认到港前 7 天进区）恰恰是蓝图要求的「提前若干天」里提前量最大的那一档 —— 这个筛选正好把本模块最该被看见的那批货藏起来 |
-| 8 | 测试 `idOfShipment(...)` 传错参 | 断言错 | 把 tracking id 当 shipment id 传，查询必然空 → NPE |
-| 9 | 测试 `收货确认_不写库存` 用 `source_reference like '%shipmentId%'` | 断言错 | 10.4.1.1 写的锚点是「发运单**号**-行号」不是 UUID，拿 UUID 去 like 永远匹配不到，断言在「查不到行」上空转 |
+| #   | 位置                                                               | 性质               | 后果                                                                                                                                                                       |
+| --- | ------------------------------------------------------------------ | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `Service.days()`                                                   | **真 bug**         | SQL 已把 `remaining_days_raw` 换算成「天」，Java 又除了一次 86400 → 「还剩 40 天」变成 0.0046 天 → **每一条在途记录都会被判成已进预警区**，提前量口径整个失去意义          |
+| 2   | `Service.recordEvent` 事件 insert                                  | **真 bug**         | 15 个 `?` 对 14 列，且 `eta_before` 漏 `::timestamptz` → 改期类事件一律 BadSqlGrammar                                                                                      |
+| 3   | `Service.confirmReceipt` update                                    | **真 bug**         | `receipt_confirmed_at` / `closed_at` 同样漏 cast                                                                                                                           |
+| 4   | `Service.reloadAlert`                                              | **真 bug**         | `select *` 不含 `shipment_code`，而 `alertOf` 要读它 → jOOQ 抛 `IllegalArgumentException` → 被翻成 **400「字段格式不正确」**。这个最阴：现象完全指不到「回读时少查了一列」 |
+| 5   | `Service.confirmReceipt` 顺序                                      | **真 bug**         | 先 UPDATE 关记录再 INSERT 事件，被自己的 DB 触发器 `guard_first_mile_tracking_event_source`（已闭环不接受 RECEIPT 类更新）当场拒掉、整笔回滚。**事件必须先写**             |
+| 6   | V84 `guard_first_mile_tracking_state`                              | **真 bug**         | 条件写反：`status <> 'CANCELLED'` 应为 `= 'CANCELLED'`。结果**正常的收货确认被自己的约束拒绝**                                                                             |
+| 7   | `Service.page` 的 `delayedOnly`                                    | **真 bug（设计）** | 把 WATCH 行过滤掉了。而 WATCH（默认到港前 7 天进区）恰恰是蓝图要求的「提前若干天」里提前量最大的那一档 —— 这个筛选正好把本模块最该被看见的那批货藏起来                     |
+| 8   | 测试 `idOfShipment(...)` 传错参                                    | 断言错             | 把 tracking id 当 shipment id 传，查询必然空 → NPE                                                                                                                         |
+| 9   | 测试 `收货确认_不写库存` 用 `source_reference like '%shipmentId%'` | 断言错             | 10.4.1.1 写的锚点是「发运单**号**-行号」不是 UUID，拿 UUID 去 like 永远匹配不到，断言在「查不到行」上空转                                                                  |
 
 **关键 trade-off**：第 7 条我改了**实现**而不是改测试断言。测试说「`delayedOnly` 该返回 WATCH 行」，
 从代码看测试像是在迁就实现，但对照蓝图原文「预警必须提前到预计到港前若干天」——
@@ -52,6 +52,7 @@
 ## 文件清单
 
 **新增**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V84__warehouse_in_transit_tracking.sql`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/InTransitTrackingModels.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/InTransitTrackingService.java`
@@ -63,6 +64,7 @@
 - `apps/web/src/components/logistics/transit-tracking-model.test.ts`
 
 **修改**
+
 - `apps/web/src/lib/api-proxy.ts`（白名单**求和**追加 transit-trackings 分支）
 - `apps/web/src/app/api/warehouse/[...path]/route.test.ts`（放行 13 条 + 拒绝 8 条后端不存在的路径）
 - `packages/api-contracts/src/catalog.ts`、`packages/api-contracts/src/warehouse.openapi.json`（codegen 产物）
@@ -79,14 +81,14 @@
 
 ## 验证（实跑）
 
-| 命令 | 结果 |
-|------|------|
-| `./mvnw verify` | **BUILD SUCCESS**，7 模块全绿；warehouse **820 例零失败**（含本模块 18 例 + 7.5.1.2 的 24 + 10.4.1.1 的 29 回归）；`Successfully applied 30 migrations … now at version v84` |
-| `pnpm typecheck` | 3/3 **零错误** |
-| `pnpm lint` | 3/3 **零错误零新增 warning** |
-| `pnpm test` | **86 文件 / 1587 例全过**（本车道新增 49 例：模型 27 + 白名单 22） |
-| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 成功，`/logistics/transit-tracking` **11 kB** |
-| `node tools/module-progress/sync.mjs --check` | 一致 |
+| 命令                                                         | 结果                                                                                                                                                                         |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `./mvnw verify`                                              | **BUILD SUCCESS**，7 模块全绿；warehouse **820 例零失败**（含本模块 18 例 + 7.5.1.2 的 24 + 10.4.1.1 的 29 回归）；`Successfully applied 30 migrations … now at version v84` |
+| `pnpm typecheck`                                             | 3/3 **零错误**                                                                                                                                                               |
+| `pnpm lint`                                                  | 3/3 **零错误零新增 warning**                                                                                                                                                 |
+| `pnpm test`                                                  | **86 文件 / 1587 例全过**（本车道新增 49 例：模型 27 + 白名单 22）                                                                                                           |
+| `NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` | 成功，`/logistics/transit-tracking` **11 kB**                                                                                                                                |
+| `node tools/module-progress/sync.mjs --check`                | 一致                                                                                                                                                                         |
 
 **并发 flake 记录（不要重复排查）**：首次 verify 时 catalog 的
 `ImportValidationReportIntegrationTest` 挂 2 例 503、warehouse 的

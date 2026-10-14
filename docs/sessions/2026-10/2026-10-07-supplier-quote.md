@@ -15,10 +15,10 @@
    - 它会禁掉"两个币种并存"这类合法行（1688 上同一卖家美元与人民币报价并存是常态）；
    - 更要紧的是它把歧义从一个**必须由人解决的状态**变成一个**根本写不进来的状态** ——
      运营会以为"系统不允许重复优先级"，于是改填别的数字绕过，而真实的价格歧义还在。
-   落地：`GET /catalog/supplier-quotes/effective` 返回全部有效报价并逐条标 `selectionState`，
-   歧义时 `selected` 是 **null 而不是随便一条**；`/effective/resolve`（06 采购带出价格走它）
-   直接 409 并在 ProblemDetail 附 `candidates`。集成测试断言了 409 的 body 里真的带得出候选 ——
-   "报错让用户选"的后半句是**让用户选得了**，只报一句话等于没让用户选。
+     落地：`GET /catalog/supplier-quotes/effective` 返回全部有效报价并逐条标 `selectionState`，
+     歧义时 `selected` 是 **null 而不是随便一条**；`/effective/resolve`（06 采购带出价格走它）
+     直接 409 并在 ProblemDetail 附 `candidates`。集成测试断言了 409 的 body 里真的带得出候选 ——
+     "报错让用户选"的后半句是**让用户选得了**，只报一句话等于没让用户选。
 
 3. **优先级只在同一供应商内部可比。**
    星尘的优先级 1 与宏远的优先级 1 之间没有可比性 —— 那是两家供应商在竞价。
@@ -74,6 +74,7 @@
 ## 文件清单
 
 新增：
+
 - `backend/services/catalog/src/main/resources/db/migration/V32__supplier_quote.sql`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/SupplierQuoteRules.java`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/SupplierQuoteService.java`
@@ -86,6 +87,7 @@
 - `apps/web/src/app/partners/offers/page.tsx`
 
 改动：
+
 - `backend/services/catalog/src/main/java/com/starcon/catalog/CatalogModels.java`（追加 DTO + `java.time.LocalDate` import）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/ApiErrorHandler.java`（歧义 409 的 candidates）
 - `apps/web/src/lib/api-proxy.ts`（白名单放行 + 注释）

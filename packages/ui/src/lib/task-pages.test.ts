@@ -62,9 +62,7 @@ it('账户页面不被任何业务系统解析认领', () => {
   for (const page of ACCOUNT_TASKS) {
     const system = resolveSystemFromPath(page.href);
     // 不应落到某个业务系统的功能上；组织页面统一从账户入口进入
-    expect(
-      system.items.some((item) => item.href === `/${page.domain}`),
-    ).toBe(false);
+    expect(system.items.some((item) => item.href === `/${page.domain}`)).toBe(false);
   }
   // 反向不变量：账户任务页必须都有菜单入口，杜绝「有页面没入口」的割裂
   const accountHrefs = new Set(ACCOUNT_DESTINATIONS.map((d) => d.href));
@@ -83,7 +81,9 @@ it('每个导航分组都有子页面，账户页不混进业务分组', () => {
       for (const child of group.children ?? []) {
         const page = findTaskPage(child.href);
         expect(page, `子页面 ${child.href} 不是任务页`).toBeDefined();
-        expect(isAccountDomain(page!.domain), `${child.href} 是账户页，不应出现在业务分组`).toBe(false);
+        expect(isAccountDomain(page!.domain), `${child.href} 是账户页，不应出现在业务分组`).toBe(
+          false,
+        );
       }
     }
   for (const item of TOP_LEVEL_ITEMS) expect(item.href.startsWith('/')).toBe(true);

@@ -387,7 +387,9 @@ export function MediaWorkspace() {
     try {
       const saved = await removeReference(detail.asset.id, referenceIdValue);
       setNotice(
-        saved.deletable ? '引用已解除：这个素材现在可以删除了' : `引用已解除，仍有 ${saved.referenceCount} 处引用`,
+        saved.deletable
+          ? '引用已解除：这个素材现在可以删除了'
+          : `引用已解除，仍有 ${saved.referenceCount} 处引用`,
       );
       await openDetail(detail.asset.id);
       await load();
@@ -468,7 +470,11 @@ export function MediaWorkspace() {
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="素材总数" value={overview?.assetCount ?? 0} icon={<ImageIcon className="h-4 w-4" />} />
+        <StatCard
+          label="素材总数"
+          value={overview?.assetCount ?? 0}
+          icon={<ImageIcon className="h-4 w-4" />}
+        />
         <StatCard
           label="图片 / 视频"
           value={`${overview?.imageCount ?? 0} / ${overview?.videoCount ?? 0}`}
@@ -527,7 +533,10 @@ export function MediaWorkspace() {
         >
           {uploading ? (
             <div className="space-y-3">
-              <Field label="文件" hint="单文件上限 50 MiB；支持 PNG / JPEG / GIF / BMP，MP4 / MOV / WEBM / AVI">
+              <Field
+                label="文件"
+                hint="单文件上限 50 MiB；支持 PNG / JPEG / GIF / BMP，MP4 / MOV / WEBM / AVI"
+              >
                 <input
                   ref={fileInput}
                   type="file"
@@ -538,7 +547,10 @@ export function MediaWorkspace() {
                     setUploadFile(file);
                     // 名称默认取文件名去掉扩展名：运营上传时最不想做的一件事就是再打一遍名字。
                     if (file && !uploadInput.name.trim())
-                      setUploadInput((prev) => ({ ...prev, name: file.name.replace(/\.[^.]+$/, '') }));
+                      setUploadInput((prev) => ({
+                        ...prev,
+                        name: file.name.replace(/\.[^.]+$/, ''),
+                      }));
                     // 媒体类型跟着探测提示走，但**不自动定**——最终以服务端探测为准。
                   }}
                 />
@@ -552,9 +564,7 @@ export function MediaWorkspace() {
                     className={control}
                     value={uploadInput.name}
                     placeholder="白底主图-正面"
-                    onChange={(e) =>
-                      setUploadInput((prev) => ({ ...prev, name: e.target.value }))
-                    }
+                    onChange={(e) => setUploadInput((prev) => ({ ...prev, name: e.target.value }))}
                   />
                 </Field>
                 <Field label="媒体类型">
@@ -651,8 +661,8 @@ export function MediaWorkspace() {
             </div>
           ) : (
             <p className="text-muted-foreground text-sm">
-              同内容的素材不会重复存一份：重复上传同一张图会直接复用既有素材。
-              WEBP 暂不支持直接上传（服务端无法可靠读出它的宽高），请先转成 PNG 或 JPEG。
+              同内容的素材不会重复存一份：重复上传同一张图会直接复用既有素材。 WEBP
+              暂不支持直接上传（服务端无法可靠读出它的宽高），请先转成 PNG 或 JPEG。
             </p>
           )}
         </SectionCard>
@@ -885,8 +895,7 @@ export function MediaWorkspace() {
               <div className="text-muted-foreground flex items-center justify-between text-xs">
                 <span>
                   共 {total} 条 · 校验不通过 {failingCount} 条 · 无引用 {unreferencedCount} 条 ·
-                  停用 {disabledCount} 条
-                  {note ? ` · ${note}` : ''}
+                  停用 {disabledCount} 条{note ? ` · ${note}` : ''}
                 </span>
                 <div className="flex items-center gap-2">
                   <Button
@@ -1128,7 +1137,10 @@ export function MediaWorkspace() {
               )}
               {writable && (
                 <div className="space-y-2">
-                  <Field label="上传新版本" hint="旧版本永远保留：图片处理的结果落成新版本，原图不被覆盖">
+                  <Field
+                    label="上传新版本"
+                    hint="旧版本永远保留：图片处理的结果落成新版本，原图不被覆盖"
+                  >
                     <input
                       ref={versionInput}
                       type="file"
@@ -1242,9 +1254,7 @@ export function MediaWorkspace() {
                         <Badge tone={integrityTone(check.integrityStatus)}>
                           {integrityLabel(check.integrityStatus)}
                         </Badge>
-                        <span className="text-muted-foreground text-xs">
-                          {check.checkedAt}
-                        </span>
+                        <span className="text-muted-foreground text-xs">{check.checkedAt}</span>
                       </div>
                       <div className="text-muted-foreground text-xs">{check.detail}</div>
                       {check.sha256Actual && (
@@ -1284,10 +1294,7 @@ export function MediaWorkspace() {
           {tagInput && (
             <div className="border-border space-y-3 border-t pt-3">
               <div className="grid gap-3 sm:grid-cols-2">
-                <Field
-                  label="标签编码"
-                  hint="英文字母、数字、下划线或短横线；建后不可改"
-                >
+                <Field label="标签编码" hint="英文字母、数字、下划线或短横线；建后不可改">
                   <input
                     className={control}
                     value={tagInput.code}
@@ -1394,9 +1401,7 @@ export function MediaWorkspace() {
                               variant="destructive"
                               disabled={busy || tag.usageCount > 0}
                               title={
-                                tag.usageCount > 0
-                                  ? '仍被素材使用，请改用停用'
-                                  : '删除这个标签'
+                                tag.usageCount > 0 ? '仍被素材使用，请改用停用' : '删除这个标签'
                               }
                               onClick={() => void removeTag(tag)}
                             >

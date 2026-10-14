@@ -65,7 +65,11 @@ export type TitleRecordQuery = {
 export const KEYWORD_TYPES = [
   { value: 'CORE', label: '核心词', hint: '标题主体：品类或用途。批量生成的「词根」默认取这一类' },
   { value: 'SELLING', label: '卖点', hint: '标题里的卖点短语（短词，长文本归 3.4.2.2 描述库）' },
-  { value: 'MODIFIER', label: '修饰词', hint: '差异化主力：换平台标题靠它。池子太小就凑不出不雷同的候选' },
+  {
+    value: 'MODIFIER',
+    label: '修饰词',
+    hint: '差异化主力：换平台标题靠它。池子太小就凑不出不雷同的候选',
+  },
 ] as const;
 
 /** 变量绑定源词表：事实字段从 SPU/SKU 取，词根类从上面三类池子取。 */
@@ -144,7 +148,9 @@ export function similarityText(permille: number | null | undefined): string {
  * <p>阈值用 0.9 而不是 1.0：完全相同是 100%，而 90% 以上已经足够像到
  * 「换平台可能被判重复」了。分三档是为了让列表一眼能扫出问题行。
  */
-export function similarityTone(permille: number | null | undefined): 'neutral' | 'warning' | 'danger' {
+export function similarityTone(
+  permille: number | null | undefined,
+): 'neutral' | 'warning' | 'danger' {
   if (permille === null || permille === undefined) return 'neutral';
   if (permille >= 900) return 'danger';
   if (permille >= 700) return 'warning';
@@ -172,7 +178,10 @@ export function saveTemplate(id: string | null, input: TitleTemplateInput) {
 }
 
 export function setTemplateEnabled(id: string, enabled: boolean) {
-  return api<TitleTemplateSaved>(`catalog/titles/templates/${id}/enabled?enabled=${enabled}`, 'PUT');
+  return api<TitleTemplateSaved>(
+    `catalog/titles/templates/${id}/enabled?enabled=${enabled}`,
+    'PUT',
+  );
 }
 
 export function deleteTemplate(id: string, version: number) {
@@ -211,7 +220,12 @@ export function generateTitles(
   return api<TitleGeneration>('catalog/titles/generations', 'POST', input);
 }
 
-export function fetchGenerations(params: { keyword?: string; status?: string; page: number; size: number }) {
+export function fetchGenerations(params: {
+  keyword?: string;
+  status?: string;
+  page: number;
+  size: number;
+}) {
   const query = new URLSearchParams();
   if (params.keyword?.trim()) query.set('keyword', params.keyword.trim());
   if (params.status) query.set('status', params.status);
@@ -249,7 +263,9 @@ export function rejectRecord(id: string) {
 }
 
 /** 导出 CSV 的浏览器地址（用普通 <a download>，不走 api()：它无条件设 JSON content-type）。 */
-export function csvExportUrl(query: Pick<TitleRecordQuery, 'skuId' | 'platform' | 'status'>): string {
+export function csvExportUrl(
+  query: Pick<TitleRecordQuery, 'skuId' | 'platform' | 'status'>,
+): string {
   const params = new URLSearchParams();
   if (query.skuId) params.set('skuId', query.skuId);
   if (query.platform?.trim()) params.set('platform', query.platform.trim());
@@ -352,15 +368,11 @@ export function patternProblem(value: string): string | null {
 }
 
 /** 模板整体校验。与后端 TitleService.variablesProblem + platformsProblem 同口径。 */
-export function templateProblem(
-  input: TitleTemplateInput,
-): string | null {
+export function templateProblem(input: TitleTemplateInput): string | null {
   const pattern = patternProblem(input.pattern);
   if (pattern) return pattern;
 
-  const variables = (input.variables ?? []).filter(
-    (v): v is NonNullable<typeof v> => v !== null,
-  );
+  const variables = (input.variables ?? []).filter((v): v is NonNullable<typeof v> => v !== null);
   if (variables.length === 0) return '模板至少要声明一个变量占位';
   if (variables.length > 12) return '一个模板最多 12 个变量占位';
 
@@ -397,9 +409,7 @@ export function templateProblem(
   if (!sources.some((s) => s.startsWith('KEYWORD_')))
     return '模板至少要有一个词根变量（核心词 / 卖点 / 修饰词）：只绑 SPU/SKU 字段的话每个 SKU 只有一种文本，候选会彼此雷同';
 
-  const platforms = (input.platforms ?? []).filter(
-    (p): p is NonNullable<typeof p> => p !== null,
-  );
+  const platforms = (input.platforms ?? []).filter((p): p is NonNullable<typeof p> => p !== null);
   if (platforms.length === 0) return '模板至少要配置一个平台的长度上限';
   if (platforms.length > 12) return '一个模板最多配 12 个平台长度上限';
   const seenPlatforms = new Set<string>();
@@ -429,7 +439,8 @@ export const MAX_CANDIDATES_PER_SKU = 8;
 
 export function skusSizeProblem(count: number): string | null {
   if (count === 0) return '请至少选择一个要生成标题的 SKU';
-  if (count > MAX_SKUS_PER_GENERATION) return `单次最多为 ${MAX_SKUS_PER_GENERATION} 个 SKU 生成标题`;
+  if (count > MAX_SKUS_PER_GENERATION)
+    return `单次最多为 ${MAX_SKUS_PER_GENERATION} 个 SKU 生成标题`;
   return null;
 }
 
@@ -449,13 +460,17 @@ export function templateSummary(template: {
   candidateCount: number;
   platforms: { platform: string; maxLength: number }[] | null;
 }): string {
-  const platforms = (template.platforms ?? []).map((p) => `${p.platform} ≤${p.maxLength}`).join(' · ');
+  const platforms = (template.platforms ?? [])
+    .map((p) => `${p.platform} ≤${p.maxLength}`)
+    .join(' · ');
   return [
     template.pattern,
     `候选 ${template.candidateCount} 条/平台`,
     `重复度上限 ${similarityText(template.maxSimilarityPermille)}`,
     platforms,
-  ].filter(Boolean).join(' · ');
+  ]
+    .filter(Boolean)
+    .join(' · ');
 }
 
 /** 词根溯源：把候选实际用到的三类词讲成一句人话。 */

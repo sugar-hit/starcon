@@ -22,15 +22,13 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.2.1.2 属性选项管理：跨属性聚合视图、启用/停用生命周期、批量重排、真实分页与排序，
- * 以及租户隔离三断言。
+ * 3.2.1.2 属性选项管理：跨属性聚合视图、启用/停用生命周期、批量重排、真实分页与排序， 以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
  * <p>连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>每个用例用独立编码/类目（{@code uniqueCode} / {@code uniqueCategory}）：
- * 容器在整个测试类共用，固定编码会互相抢占字典位。
+ * <p>每个用例用独立编码/类目（{@code uniqueCode} / {@code uniqueCategory}）： 容器在整个测试类共用，固定编码会互相抢占字典位。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -218,9 +216,7 @@ class AttributeOptionIntegrationTest {
         .filteredOn(r -> r.attributeId().equals(color))
         .extracting(AttributeOptionOverviewRow::value)
         .containsExactlyInAnyOrder("红", "蓝");
-    assertThat(page.items())
-        .filteredOn(r -> r.attributeId().equals(size))
-        .hasSize(3);
+    assertThat(page.items()).filteredOn(r -> r.attributeId().equals(size)).hasSize(3);
 
     // 归属信息必须一起带出来，否则用户在总览里认不出某个值属于哪个属性。
     var colorRow =
@@ -240,19 +236,19 @@ class AttributeOptionIntegrationTest {
     // 建一个 SPU 级属性定义并给它挂选项：那是商品自己的取值，不该出现在字典总览里。
     UUID spuId =
         write(
-                actor,
-                () ->
-                    catalog.saveSpu(
-                        actor,
-                        null,
-                        new SpuInput(
-                            "AO-" + UUID.randomUUID().toString().substring(0, 8),
-                            "SPU 级选项测试",
-                            "描述",
-                            "品牌",
-                            uniqueCategory("spu"),
-                            "DRAFT",
-                            0)));
+            actor,
+            () ->
+                catalog.saveSpu(
+                    actor,
+                    null,
+                    new SpuInput(
+                        "AO-" + UUID.randomUUID().toString().substring(0, 8),
+                        "SPU 级选项测试",
+                        "描述",
+                        "品牌",
+                        uniqueCategory("spu"),
+                        "DRAFT",
+                        0)));
     UUID spuLevel =
         write(
                 actor,
@@ -271,13 +267,13 @@ class AttributeOptionIntegrationTest {
     // RLS 会把这条 UPDATE 直接挡掉（0 行），属性就仍然是字典条目——那会让断言假绿。
     write(
         actor,
-        () ->
-            sql.execute(
-                "update attribute_definition set spu_id=? where id=?", spuId, spuLevel));
+        () -> sql.execute("update attribute_definition set spu_id=? where id=?", spuId, spuLevel));
 
     var page = list(new AttributeOptionQuery(null, null, null, null, null, 0, 500));
     assertThat(page.items()).extracting(AttributeOptionOverviewRow::attributeId).contains(mine);
-    assertThat(page.items()).extracting(AttributeOptionOverviewRow::value).doesNotContain("SPU 私有值");
+    assertThat(page.items())
+        .extracting(AttributeOptionOverviewRow::value)
+        .doesNotContain("SPU 私有值");
   }
 
   @Test
@@ -352,8 +348,7 @@ class AttributeOptionIntegrationTest {
     String code = uniqueCode("PVC");
     UUID dict = optionDict(code, "商品引用属性", List.of("从没被赋值的值"));
 
-    var row =
-        list(new AttributeOptionQuery(null, dict, null, null, null, 0, 200)).items().get(0);
+    var row = list(new AttributeOptionQuery(null, dict, null, null, null, 0, 200)).items().get(0);
 
     // attribute_value 的复合外键仍锁在 SPU 作用域，字典条目拿不到商品属性值。
     // 这里断言它**如实为 0**，同时断言聚合视图没有偷偷编一个数出来。
@@ -423,7 +418,8 @@ class AttributeOptionIntegrationTest {
 
     // 筛选后 total 同步变化。
     write(actor, () -> options.toggle(actor, dict, "v0", new AttributeOptionToggleInput(false)));
-    assertThat(list(new AttributeOptionQuery(null, dict, false, null, null, 0, 200)).total()).isEqualTo(1);
+    assertThat(list(new AttributeOptionQuery(null, dict, false, null, null, 0, 200)).total())
+        .isEqualTo(1);
   }
 
   @Test
@@ -460,9 +456,8 @@ class AttributeOptionIntegrationTest {
 
     // 注入串与未知档位都必须退回默认排序，不能原样拼进 SQL，也不能直接报错。
     assertThat(
-            list(
-                    new AttributeOptionQuery(
-                        null, dict, null, null, "value; drop table attribute_option", 0, 200))
+            list(new AttributeOptionQuery(
+                    null, dict, null, null, "value; drop table attribute_option", 0, 200))
                 .items())
         .hasSize(3);
     assertThat(list(new AttributeOptionQuery(null, dict, null, null, "NOT_A_SORT", 0, 200)).items())
@@ -506,9 +501,7 @@ class AttributeOptionIntegrationTest {
     assertThat(
             write(
                     actor,
-                    () ->
-                        options.toggle(
-                            actor, dict, "停用值", new AttributeOptionToggleInput(true)))
+                    () -> options.toggle(actor, dict, "停用值", new AttributeOptionToggleInput(true)))
                 .enabled())
         .isTrue();
   }
@@ -531,17 +524,14 @@ class AttributeOptionIntegrationTest {
             write(
                     actor,
                     () ->
-                        options.toggle(
-                            actor, dict, "被引用的值", new AttributeOptionToggleInput(false)))
+                        options.toggle(actor, dict, "被引用的值", new AttributeOptionToggleInput(false)))
                 .enabled())
         .isFalse();
     // 删除不行——守卫必须对聚合视图同样生效
-    assertThatThrownBy(
-            () -> write(actor, () -> dictionary.deleteOption(actor, dict, "被引用的值")))
+    assertThatThrownBy(() -> write(actor, () -> dictionary.deleteOption(actor, dict, "被引用的值")))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(400));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(400));
     // 无引用的选项：删除可以
     write(actor, () -> dictionary.deleteOption(actor, dict, "自由的值"));
     assertThat(list(new AttributeOptionQuery(null, dict, null, null, null, 0, 200)).items())
@@ -583,9 +573,7 @@ class AttributeOptionIntegrationTest {
             () ->
                 write(
                     actor,
-                    () ->
-                        options.toggle(
-                            actor, dict, "子选项", new AttributeOptionToggleInput(true))))
+                    () -> options.toggle(actor, dict, "子选项", new AttributeOptionToggleInput(true))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
             e -> {
@@ -598,11 +586,14 @@ class AttributeOptionIntegrationTest {
   void togglingUnknownOptionOrForeignAttributeIsNotFound() {
     UUID dict = optionDict(uniqueCode("MISS"), "缺失选项属性", List.of("存在的值"));
     assertThatThrownBy(
-            () -> write(actor, () -> options.toggle(actor, dict, "不存在", new AttributeOptionToggleInput(false))))
+            () ->
+                write(
+                    actor,
+                    () ->
+                        options.toggle(actor, dict, "不存在", new AttributeOptionToggleInput(false))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
   }
 
   // ------------------------------------------------------------ 批量重排
@@ -649,19 +640,21 @@ class AttributeOptionIntegrationTest {
                 actor,
                 new AttributeOptionOrderInput(
                     dict,
-                    List.of(new AttributeOptionOrderItem("一", 0), new AttributeOptionOrderItem("二", 1)))));
+                    List.of(
+                        new AttributeOptionOrderItem("一", 0),
+                        new AttributeOptionOrderItem("二", 1)))));
 
     var again =
         write(
-                actor,
-                () ->
-                    options.reorder(
-                        actor,
-                        new AttributeOptionOrderInput(
-                            dict,
-                            List.of(
-                                new AttributeOptionOrderItem("一", 0),
-                                new AttributeOptionOrderItem("二", 1)))));
+            actor,
+            () ->
+                options.reorder(
+                    actor,
+                    new AttributeOptionOrderInput(
+                        dict,
+                        List.of(
+                            new AttributeOptionOrderItem("一", 0),
+                            new AttributeOptionOrderItem("二", 1)))));
     assertThat(again.submitted()).isEqualTo(2);
     assertThat(again.applied()).isZero();
   }
@@ -712,7 +705,10 @@ class AttributeOptionIntegrationTest {
     var tooMany = new ArrayList<AttributeOptionOrderItem>();
     for (int i = 0; i < 51; i++) tooMany.add(new AttributeOptionOrderItem("值" + i, i));
     assertThatThrownBy(
-            () -> write(actor, () -> options.reorder(actor, new AttributeOptionOrderInput(dict, tooMany))))
+            () ->
+                write(
+                    actor,
+                    () -> options.reorder(actor, new AttributeOptionOrderInput(dict, tooMany))))
         .isInstanceOf(ResponseStatusException.class);
 
     assertThat(list(new AttributeOptionQuery(null, other, null, null, null, 0, 200)).items())
@@ -777,7 +773,8 @@ class AttributeOptionIntegrationTest {
         .extracting(AttributeOptionOverviewRow::value)
         .containsExactlyInAnyOrder("我租户的颜色值", "我租户第二个值");
     assertThat(
-            listOf(actorB, new AttributeOptionQuery(myCode, null, null, null, null, 0, 200)).items())
+            listOf(actorB, new AttributeOptionQuery(myCode, null, null, null, null, 0, 200))
+                .items())
         .extracting(AttributeOptionOverviewRow::value)
         .containsExactly("B 的值");
     assertThat(
@@ -785,7 +782,8 @@ class AttributeOptionIntegrationTest {
         .extracting(AttributeOptionOverviewRow::attributeId)
         .containsOnly(myId);
     assertThat(
-            listOf(actorB, new AttributeOptionQuery(myCode, null, null, null, null, 0, 200)).items())
+            listOf(actorB, new AttributeOptionQuery(myCode, null, null, null, null, 0, 200))
+                .items())
         .extracting(AttributeOptionOverviewRow::attributeId)
         .containsOnly(theirId);
     // B 的总览里永远看不到 A 的选项
@@ -794,7 +792,8 @@ class AttributeOptionIntegrationTest {
         .extracting(AttributeOptionOverviewRow::value)
         .doesNotContain("我租户的颜色值");
     // 按 A 的 attributeId 直接筛也筛不出来（RLS 已把行过滤掉，不是服务层漏判）
-    assertThat(listOf(actorB, new AttributeOptionQuery(null, myId, null, null, null, 0, 200)).items())
+    assertThat(
+            listOf(actorB, new AttributeOptionQuery(null, myId, null, null, null, 0, 200)).items())
         .isEmpty();
     // B 停用 / 重排 A 的选项 → 404
     assertThatThrownBy(
@@ -806,8 +805,7 @@ class AttributeOptionIntegrationTest {
                             actorB, myId, "我租户的颜色值", new AttributeOptionToggleInput(false))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     assertThatThrownBy(
             () ->
                 write(
@@ -819,14 +817,12 @@ class AttributeOptionIntegrationTest {
                                 myId, List.of(new AttributeOptionOrderItem("我租户的颜色值", 7))))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     // B 删 A 的选项 → 404（守卫先看归属，再看引用）
     assertThatThrownBy(() -> write(actorB, () -> dictionary.deleteOption(actorB, myId, "我租户的颜色值")))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     // A 的数据仍在
     assertThat(list(new AttributeOptionQuery(null, myId, null, null, null, 0, 200)).items())
         .hasSize(2);
@@ -878,7 +874,9 @@ class AttributeOptionIntegrationTest {
                   .items())
           .extracting(AttributeOptionOverviewRow::value)
           .containsExactly("B 的值");
-      assertThat(listOf(actorB, new AttributeOptionQuery(null, myId, null, null, null, 0, 200)).items())
+      assertThat(
+              listOf(actorB, new AttributeOptionQuery(null, myId, null, null, null, 0, 200))
+                  .items())
           .isEmpty();
       assertThatThrownBy(
               () ->
@@ -888,7 +886,8 @@ class AttributeOptionIntegrationTest {
                           options.toggle(
                               actorB, myId, "我租户的颜色值", new AttributeOptionToggleInput(false))))
           .isInstanceOf(ResponseStatusException.class);
-      assertThat(listOf(actor, new AttributeOptionQuery(null, myId, null, true, null, 0, 200)).items())
+      assertThat(
+              listOf(actor, new AttributeOptionQuery(null, myId, null, true, null, 0, 200)).items())
           .extracting(AttributeOptionOverviewRow::value)
           .containsExactly("我租户的颜色值");
       assertThat(
@@ -902,8 +901,7 @@ class AttributeOptionIntegrationTest {
 
   @Test
   void readOnlyRoleCanListButNotWrite() throws Exception {
-    http.perform(
-            get("/catalog/attributes/options").header("Authorization", "Bearer reader"))
+    http.perform(get("/catalog/attributes/options").header("Authorization", "Bearer reader"))
         .andExpect(status().isOk());
     http.perform(
             put("/catalog/attributes/options/lifecycle?attributeId="

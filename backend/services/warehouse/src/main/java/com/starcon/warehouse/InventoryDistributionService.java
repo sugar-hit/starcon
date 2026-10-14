@@ -25,31 +25,25 @@ import org.springframework.stereotype.Service;
  * <h2>本模块的三条硬纪律</h2>
  *
  * <ol>
- *   <li><b>自有账本量与平台观测量永不相加。</b>FBA 库存是平台仓观测值，不是自有账本
- *       （蓝图原话，10 号卷同款要求）。所以 {@link DistributionRow} 里两组列互斥有值，
- *       {@link DistributionTotals} 里两组合计也分开。合成一个「总库存」列看着方便，
- *       但那个数没有任何一个来源背书 —— 它既是账又是快照，出问题时无法判断该信谁。
- *   <li><b>在途不是「在某仓的在手」。</b>自有仓的在途取 {@code inventory_transfer}
- *       中 {@code status='IN_TRANSIT'} 且 {@code to_warehouse_id} 为该仓的部分
- *       （货权已离开原仓、尚未入该仓），与该仓 {@code on_hand} 天然不重叠；
- *       平台仓的在途是平台报出来的 {@code observed_inbound}，与上面那批货不是同一批。
+ *   <li><b>自有账本量与平台观测量永不相加。</b>FBA 库存是平台仓观测值，不是自有账本 （蓝图原话，10 号卷同款要求）。所以 {@link DistributionRow}
+ *       里两组列互斥有值， {@link DistributionTotals} 里两组合计也分开。合成一个「总库存」列看着方便， 但那个数没有任何一个来源背书 ——
+ *       它既是账又是快照，出问题时无法判断该信谁。
+ *   <li><b>在途不是「在某仓的在手」。</b>自有仓的在途取 {@code inventory_transfer} 中 {@code status='IN_TRANSIT'} 且
+ *       {@code to_warehouse_id} 为该仓的部分 （货权已离开原仓、尚未入该仓），与该仓 {@code on_hand} 天然不重叠； 平台仓的在途是平台报出来的
+ *       {@code observed_inbound}，与上面那批货不是同一批。
  *   <li><b>周转天数算不出就返回 null 并说明原因</b>，不用 0 也不用假数。
  * </ol>
  *
  * <h2>数量来源与读表选择</h2>
  *
- * <p>自有仓的四个数量列聚合自 {@code inventory_balance}（V1 注释：「权威可用量」），
- * <b>不是</b> {@code stock_bucket}。原因：7.1.1.2 的桶层守恒允许一条 balance 还没有任何
- * bucket（「尚未拆到库位」是合法状态）。矩阵若只从 bucket 聚合，这类仓会在调拨决策里
- * 凭空消失 —— 那正是最不该消失的一类（明明有货、只是没拆货位）。
- * bucket 仍然被读，但只用于给出分解度（bucket / 库位 / 批次条数）与最近变动时间，
- * 并以 {@code bucketCount=0} 如实标出未分解状态。
+ * <p>自有仓的四个数量列聚合自 {@code inventory_balance}（V1 注释：「权威可用量」）， <b>不是</b> {@code
+ * stock_bucket}。原因：7.1.1.2 的桶层守恒允许一条 balance 还没有任何 bucket（「尚未拆到库位」是合法状态）。矩阵若只从 bucket 聚合，这类仓会在调拨决策里
+ * 凭空消失 —— 那正是最不该消失的一类（明明有货、只是没拆货位）。 bucket 仍然被读，但只用于给出分解度（bucket / 库位 / 批次条数）与最近变动时间， 并以 {@code
+ * bucketCount=0} 如实标出未分解状态。
  *
- * <p>行数 = 仓库数（有界，几十到几百），因此这里<b>不做分页</b>，排序在 Java 侧做。
- * 分页一个长度等于仓库数的列表只会让「翻页后某仓不见了」看起来像丢数据。
+ * <p>行数 = 仓库数（有界，几十到几百），因此这里<b>不做分页</b>，排序在 Java 侧做。 分页一个长度等于仓库数的列表只会让「翻页后某仓不见了」看起来像丢数据。
  *
- * <p>本服务是 Spring 单例，因此**不持有任何请求态字段**：仓库档案缓存是
- * {@code distribution()} 内的局部变量。把它提成字段会在并发的两个租户请求之间串数据。
+ * <p>本服务是 Spring 单例，因此**不持有任何请求态字段**：仓库档案缓存是 {@code distribution()} 内的局部变量。把它提成字段会在并发的两个租户请求之间串数据。
  */
 @Service
 public class InventoryDistributionService {
@@ -151,11 +145,27 @@ public class InventoryDistributionService {
       Turnover turnover = ownTurnover(onHand, outbound.get(e.getKey()), lookback);
       var row =
           new DistributionRow(
-              w.id(), w.code(), w.name(), w.kind(), w.countryCode(), w.timezone(),
-              onHand, reserved, available, inTransit,
-              null, null, null, null,
-              null, null, null,
-              turnover.days(), turnover.computable(), turnover.basis(), turnover.note(),
+              w.id(),
+              w.code(),
+              w.name(),
+              w.kind(),
+              w.countryCode(),
+              w.timezone(),
+              onHand,
+              reserved,
+              available,
+              inTransit,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              turnover.days(),
+              turnover.computable(),
+              turnover.basis(),
+              turnover.note(),
               stats == null ? 0 : stats.buckets(),
               stats == null ? 0 : stats.locations(),
               stats == null ? 0 : stats.lots(),
@@ -179,15 +189,33 @@ public class InventoryDistributionService {
       Turnover turnover = platformTurnover(key, q, history.get(key.warehouseId()));
       var row =
           new DistributionRow(
-              w.id(), w.code(), w.name(), w.kind(), w.countryCode(), w.timezone(),
-              null, null, null, null,
-              q.onHand(), q.reserved(), q.available(), q.inbound(),
-              key.source(), q.collectedAt(),
+              w.id(),
+              w.code(),
+              w.name(),
+              w.kind(),
+              w.countryCode(),
+              w.timezone(),
+              null,
+              null,
+              null,
+              null,
+              q.onHand(),
+              q.reserved(),
+              q.available(),
+              q.inbound(),
+              key.source(),
+              q.collectedAt(),
               q.collectedAt() == null
                   ? null
                   : Duration.between(q.collectedAt(), OffsetDateTime.now()).getSeconds(),
-              turnover.days(), turnover.computable(), turnover.basis(), turnover.note(),
-              0, 0, 0, null);
+              turnover.days(),
+              turnover.computable(),
+              turnover.basis(),
+              turnover.note(),
+              0,
+              0,
+              0,
+              null);
       rows.add(row);
       totals.addPlatform(row);
     }
@@ -222,12 +250,10 @@ public class InventoryDistributionService {
     boolean hasSku = query.skuId() != null;
     boolean hasSpu = query.spuId() != null;
     if (!hasSku && !hasSpu) {
-      throw new IllegalArgumentException(
-          "必须指定 skuId 或 spuId 之一：矩阵按「SKU 或 SPU」查看，不提供全租户视图");
+      throw new IllegalArgumentException("必须指定 skuId 或 spuId 之一：矩阵按「SKU 或 SPU」查看，不提供全租户视图");
     }
     if (hasSku && hasSpu) {
-      throw new IllegalArgumentException(
-          "skuId 与 spuId 只能给一个：同时给会让「是这两个 SKU 还是这个 SPU」产生歧义");
+      throw new IllegalArgumentException("skuId 与 spuId 只能给一个：同时给会让「是这两个 SKU 还是这个 SPU」产生歧义");
     }
   }
 
@@ -250,8 +276,8 @@ public class InventoryDistributionService {
   /**
    * 本租户登记过 SPU 的 SPU 列表（矩阵的 SPU 下拉）。
    *
-   * <p>返回的是 {@code sku_ref.spu_id} 上的登记值，不是 catalog 的 SPU 档案 —— 权威在 catalog，
-   * 这里只是把"我这边哪些 SKU 挂在哪个 SPU 下"摆出来供选择。
+   * <p>返回的是 {@code sku_ref.spu_id} 上的登记值，不是 catalog 的 SPU 档案 —— 权威在 catalog， 这里只是把"我这边哪些 SKU 挂在哪个
+   * SPU 下"摆出来供选择。
    *
    * <p>没有登记 SPU 的 SKU 不会出现在这里，那正是 {@code unregisteredSpuCount} 要报的事。
    */
@@ -264,8 +290,7 @@ public class InventoryDistributionService {
     return rows.stream()
         .map(
             r ->
-                new DistributionSpuRef(
-                    r.get("spu_id", UUID.class), r.get("sku_count", Long.class)))
+                new DistributionSpuRef(r.get("spu_id", UUID.class), r.get("sku_count", Long.class)))
         .toList();
   }
 
@@ -274,9 +299,8 @@ public class InventoryDistributionService {
   /**
    * 解析本次查询覆盖的 SKU 集合。
    *
-   * <p>{@code sku_ref.spu_id} 是 V55 新增的**引用登记**列（catalog 才是 SPU 归属的权威）。
-   * 存量 SKU 没有这一列，所以按 SPU 查时天然覆盖不到它们 —— 这一点由
-   * {@link DistributionSkuScope#unregisteredSpuCount()} 如实报出，而不是让筛选看起来是完整的。
+   * <p>{@code sku_ref.spu_id} 是 V55 新增的**引用登记**列（catalog 才是 SPU 归属的权威）。 存量 SKU 没有这一列，所以按 SPU
+   * 查时天然覆盖不到它们 —— 这一点由 {@link DistributionSkuScope#unregisteredSpuCount()} 如实报出，而不是让筛选看起来是完整的。
    */
   private List<UUID> resolveSkuIds(DistributionQuery query) {
     UUID tenant = tenantId();
@@ -285,10 +309,14 @@ public class InventoryDistributionService {
       // 直接返回空矩阵才是正确行为；报 404 反而会泄露「这个 id 在别的租户存在」。
       return List.of(query.skuId());
     }
-    var rows = sql.fetch("select id from sku_ref where tenant_id=? and spu_id=?", tenant, query.spuId());
+    var rows =
+        sql.fetch("select id from sku_ref where tenant_id=? and spu_id=?", tenant, query.spuId());
     if (rows.size() > MAX_SPU_SKUS) {
       throw new IllegalArgumentException(
-          "该 SPU 下有 " + rows.size() + " 个 SKU，超过单次矩阵查询上限 " + MAX_SPU_SKUS
+          "该 SPU 下有 "
+              + rows.size()
+              + " 个 SKU，超过单次矩阵查询上限 "
+              + MAX_SPU_SKUS
               + "：已显式拒绝而不是截断，否则你会看到一部分 SKU 的仓却以为看全了");
     }
     var ids = new ArrayList<UUID>();
@@ -312,7 +340,8 @@ public class InventoryDistributionService {
       var r =
           sql.fetchOne(
               "select code,name,spu_id from sku_ref where tenant_id=? and id=?",
-              tenantId(), query.skuId());
+              tenantId(),
+              query.skuId());
       return new DistributionSubject(
           query.skuId(),
           r == null ? null : r.get("code", String.class),
@@ -434,7 +463,8 @@ public class InventoryDistributionService {
     return out;
   }
 
-  private record BucketStats(long buckets, long locations, long lots, OffsetDateTime lastMovementAt) {}
+  private record BucketStats(
+      long buckets, long locations, long lots, OffsetDateTime lastMovementAt) {}
 
   /** bucket 分解度统计。只用于说明「拆得有多细」，不参与任何数量合计。 */
   private Map<UUID, BucketStats> bucketStats(UUID tenant, List<UUID> skuIds) {
@@ -468,17 +498,15 @@ public class InventoryDistributionService {
   /**
    * 回看窗口内的自有出库量按仓聚合 —— 周转天数的分母来源。
    *
-   * <p>只取 {@code kind='SHIPMENT'}：调拨出库（TRANSFER_OUT）不是消耗，把货从一个自有仓
-   * 挪到另一个自有仓不该让这个仓看起来「卖得快」。而本模块的下游正是 7.5.1.1 调拨，
-   * 它要拿周转天数决定往哪调 —— 把调拨混进出库速度，会让调拨决策把自己的依据算错。
+   * <p>只取 {@code kind='SHIPMENT'}：调拨出库（TRANSFER_OUT）不是消耗，把货从一个自有仓 挪到另一个自有仓不该让这个仓看起来「卖得快」。而本模块的下游正是
+   * 7.5.1.1 调拨， 它要拿周转天数决定往哪调 —— 把调拨混进出库速度，会让调拨决策把自己的依据算错。
    *
    * <p>两个易错点都在这里被显式避开：
    *
    * <ul>
-   *   <li>{@code ?::timestamptz} 的位置排在 SKU 列表绑定**之前**。cast 落在绑定序列末位会让
-   *       jOOQ 整体绑定错位一格（历史踩过的坑）。
-   *   <li>绑定值用 {@code OffsetDateTime}，不用 {@code Timestamp.valueOf(LocalDateTime)} ——
-   *       后者按 JVM 默认时区静默偏 8 小时，而 {@code timestamptz} 存的是带偏移的时刻。
+   *   <li>{@code ?::timestamptz} 的位置排在 SKU 列表绑定**之前**。cast 落在绑定序列末位会让 jOOQ 整体绑定错位一格（历史踩过的坑）。
+   *   <li>绑定值用 {@code OffsetDateTime}，不用 {@code Timestamp.valueOf(LocalDateTime)} —— 后者按 JVM
+   *       默认时区静默偏 8 小时，而 {@code timestamptz} 存的是带偏移的时刻。
    * </ul>
    */
   private Map<UUID, BigDecimal> outboundByWarehouse(
@@ -533,11 +561,10 @@ public class InventoryDistributionService {
   /**
    * 每个（仓, SKU, 来源）的**最新一条**观测。
    *
-   * <p>观测表 append-only（历史保留供断货风险回溯），矩阵取当前值用
-   * {@code distinct on ... order by collected_at desc}。
+   * <p>观测表 append-only（历史保留供断货风险回溯），矩阵取当前值用 {@code distinct on ... order by collected_at desc}。
    *
-   * <p>同一（仓, 来源）的多个 SKU 相加：它们都是同一来源的同类观测量，加总是同质的。
-   * {@code collectedAt} 取各 SKU 中**最旧**的一条 —— 整体新鲜度由最不鲜的那部分决定。
+   * <p>同一（仓, 来源）的多个 SKU 相加：它们都是同一来源的同类观测量，加总是同质的。 {@code collectedAt} 取各 SKU 中**最旧**的一条 ——
+   * 整体新鲜度由最不鲜的那部分决定。
    */
   private Map<PlatformKey, PlatformQuantities> platformLatest(UUID tenant, List<UUID> skuIds) {
     if (skuIds.isEmpty()) {
@@ -641,9 +668,8 @@ public class InventoryDistributionService {
   /**
    * 自有仓周转天数 = 在手 ÷ 日均出库速度。
    *
-   * <p>出库速度来自真实的 {@code inventory_entry} 发货分录（回看窗口内 Σ 负向 on_hand_delta），
-   * 不是任何估计值。出库量为 0 时**不返回天数**：此时真实结论是「没有出库速度」，
-   * 0 会被读成「瞬间卖完」，无穷大没人看得懂。
+   * <p>出库速度来自真实的 {@code inventory_entry} 发货分录（回看窗口内 Σ 负向 on_hand_delta）， 不是任何估计值。出库量为 0
+   * 时**不返回天数**：此时真实结论是「没有出库速度」， 0 会被读成「瞬间卖完」，无穷大没人看得懂。
    */
   private Turnover ownTurnover(BigDecimal onHand, BigDecimal outbound, int lookback) {
     if (outbound == null || outbound.signum() <= 0) {
@@ -674,9 +700,8 @@ public class InventoryDistributionService {
   /**
    * 平台仓周转天数 = 最新观测在手 ÷ 日均减少速度（观测快照差分）。
    *
-   * <p>平台仓没有自有出库流水，只能用观测序列的**净减少**近似消耗速度。这与自有仓口径不同，
-   * 因此 {@code basis} 明确标成 {@code PLATFORM_OBSERVATION_DIFF}，界面上必须与自有仓的行
-   * 分开解读 —— 两个口径的数不能直接比大小。
+   * <p>平台仓没有自有出库流水，只能用观测序列的**净减少**近似消耗速度。这与自有仓口径不同， 因此 {@code basis} 明确标成 {@code
+   * PLATFORM_OBSERVATION_DIFF}，界面上必须与自有仓的行 分开解读 —— 两个口径的数不能直接比大小。
    *
    * <p>需要至少两条观测、跨度大于 0、且净减少为正；任何一条不满足就留空并说明原因。
    */
@@ -684,11 +709,7 @@ public class InventoryDistributionService {
       PlatformKey key, PlatformQuantities quantities, Map<String, PlatformHistory> bySource) {
     PlatformHistory stats = bySource == null ? null : bySource.get(key.source());
     if (stats == null || stats.samples() < 2 || stats.firstAt() == null || stats.lastAt() == null) {
-      return new Turnover(
-          null,
-          false,
-          "NONE",
-          "该仓该来源的观测样本少于 2 条或缺少采集时间，无法做快照差分，周转天数不可计算");
+      return new Turnover(null, false, "NONE", "该仓该来源的观测样本少于 2 条或缺少采集时间，无法做快照差分，周转天数不可计算");
     }
     BigDecimal depletion = BigDecimal.ZERO;
     for (BigDecimal latest : quantities.perSkuOnHand().values()) {
@@ -698,19 +719,11 @@ public class InventoryDistributionService {
       }
     }
     if (depletion.signum() <= 0) {
-      return new Turnover(
-          null,
-          false,
-          "NONE",
-          "该仓该来源的观测序列里在手量没有净减少（可能是补货或调仓），无法据此估算周转天数");
+      return new Turnover(null, false, "NONE", "该仓该来源的观测序列里在手量没有净减少（可能是补货或调仓），无法据此估算周转天数");
     }
     long spanSeconds = Duration.between(stats.firstAt(), stats.lastAt()).getSeconds();
     if (spanSeconds <= 0) {
-      return new Turnover(
-          null,
-          false,
-          "NONE",
-          "该仓该来源的多条观测采集时间相同，无法做差分，周转天数不可计算");
+      return new Turnover(null, false, "NONE", "该仓该来源的多条观测采集时间相同，无法做差分，周转天数不可计算");
     }
     BigDecimal spanDays =
         BigDecimal.valueOf(spanSeconds).divide(BigDecimal.valueOf(86400), 8, RoundingMode.HALF_UP);
@@ -777,10 +790,18 @@ public class InventoryDistributionService {
 
     DistributionTotals build() {
       return new DistributionTotals(
-          ownOnHand, ownReserved, ownAvailable, ownInTransit,
-          ownWarehouses, ownZeroWarehouses,
-          platformOnHand, platformReserved, platformAvailable, platformInbound,
-          platformWarehouses, earliestCollectedAt);
+          ownOnHand,
+          ownReserved,
+          ownAvailable,
+          ownInTransit,
+          ownWarehouses,
+          ownZeroWarehouses,
+          platformOnHand,
+          platformReserved,
+          platformAvailable,
+          platformInbound,
+          platformWarehouses,
+          earliestCollectedAt);
     }
   }
 
@@ -790,26 +811,33 @@ public class InventoryDistributionService {
    * 下游操作入口。
    *
    * <p>与 7.1.1.2 同一套语义：{@code available=false} 时 href 仍是**路由契约**，
-   * 说明这个操作落在哪个模块、带哪些定位维度。调拨（7.5.1.1）尚未交付，只有它不可用；
-   * 下钻明细（7.1.1.2）与流水（7.1.2.1）都已交付，如实标为可用 ——
+   * 说明这个操作落在哪个模块、带哪些定位维度。调拨（7.5.1.1）尚未交付，只有它不可用； 下钻明细（7.1.1.2）与流水（7.1.2.1）都已交付，如实标为可用 ——
    * 把已交付的入口也标成"未交付"，就是在页面上说一个假状态。
    */
   private List<DistributionAction> actions(DistributionQuery query) {
     String drill = query.skuId() != null ? "skuId={skuId}" : "spuId={spuId}";
     return List.of(
         new DistributionAction(
-            "TRANSFER", "发起调拨",
+            "TRANSFER",
+            "发起调拨",
             "/inventory/transfer?" + drill + "&warehouseId={warehouseId}",
-            false, "7.5.1.1",
+            false,
+            "7.5.1.1",
             "目标模块 7.5.1.1 调拨尚未交付，入口契约已就位但暂不可用"),
         new DistributionAction(
-            "BUCKET", "查看库存明细",
+            "BUCKET",
+            "查看库存明细",
             "/inventory?" + drill + "&warehouseId={warehouseId}",
-            true, "7.1.1.2", "7.1.1.2 已交付，可下钻到该仓的 bucket 明细"),
+            true,
+            "7.1.1.2",
+            "7.1.1.2 已交付，可下钻到该仓的 bucket 明细"),
         new DistributionAction(
-            "LEDGER", "查看库存流水",
+            "LEDGER",
+            "查看库存流水",
             "/inventory/ledger?" + drill + "&warehouseId={warehouseId}",
-            true, "7.1.2.1", "7.1.2.1 已交付，可查看该仓该 SKU 的流水台账"));
+            true,
+            "7.1.2.1",
+            "7.1.2.1 已交付，可查看该仓该 SKU 的流水台账"));
   }
 
   // ================================================================ 平台观测写入
@@ -817,12 +845,10 @@ public class InventoryDistributionService {
   /**
    * 记录一条平台仓观测。
    *
-   * <p>这是矩阵里平台行数量的**唯一**来源。它是显式的写入面而不是 mock 数据源：
-   * 10 号卷的采集器交付后会调它；在此之前它也可被人工录入，于是页面上的平台数量
+   * <p>这是矩阵里平台行数量的**唯一**来源。它是显式的写入面而不是 mock 数据源： 10 号卷的采集器交付后会调它；在此之前它也可被人工录入，于是页面上的平台数量
    * 永远来自真实落库的行，而不是代码里的常量。
    *
-   * <p>不覆盖历史：同一来源同一时点重复投递会撞唯一约束（让调用方知道重试没生效），
-   * 不同时点则各存一条 —— 序列本身就是断货风险分析的依据。
+   * <p>不覆盖历史：同一来源同一时点重复投递会撞唯一约束（让调用方知道重试没生效）， 不同时点则各存一条 —— 序列本身就是断货风险分析的依据。
    */
   public PlatformObservationSaved recordObservation(PlatformObservationInput input) {
     if (input == null) {
@@ -852,19 +878,30 @@ public class InventoryDistributionService {
             + "source,collected_at,observed_on_hand,observed_reserved,observed_available,"
             + "observed_inbound,raw_reference)"
             + " values(?,?,?,?,?,?,?::timestamptz,?,?,?,?,?)",
-        id, tenant, input.warehouseId(), input.skuId(), input.legalEntityId(), source,
-        input.collectedAt(), nz(input.observedOnHand()), nz(input.observedReserved()),
-        nz(input.observedAvailable()), nz(input.observedInbound()),
+        id,
+        tenant,
+        input.warehouseId(),
+        input.skuId(),
+        input.legalEntityId(),
+        source,
+        input.collectedAt(),
+        nz(input.observedOnHand()),
+        nz(input.observedReserved()),
+        nz(input.observedAvailable()),
+        nz(input.observedInbound()),
         input.rawReference() == null ? "" : input.rawReference());
 
     var w =
         sql.fetchOne(
-            "select kind from warehouse where tenant_id=? and id=?",
-            tenant, input.warehouseId());
+            "select kind from warehouse where tenant_id=? and id=?", tenant, input.warehouseId());
     return new PlatformObservationSaved(
-        id, input.warehouseId(), input.skuId(),
+        id,
+        input.warehouseId(),
+        input.skuId(),
         w == null ? null : w.get("kind", String.class),
-        source, input.collectedAt(), OffsetDateTime.now());
+        source,
+        input.collectedAt(),
+        OffsetDateTime.now());
   }
 
   private static void requireNonNegative(BigDecimal value, String field) {

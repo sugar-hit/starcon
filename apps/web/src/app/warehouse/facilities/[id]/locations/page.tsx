@@ -17,6 +17,11 @@ import { WarehouseLocationTreeWorkspace } from '@/components/warehouse/warehouse
  * 层级调整、防环与跨仓库挂接的拒绝提示、以及来自 stock_bucket 的实时占用，
  * 全部来自 PostgreSQL 16 上真实落库的查询。加载 / 空 / 错误三态分开渲染。
  */
-export default function WarehouseLocationTreePage({ params }: { params: { id: string } }) {
-  return <WarehouseLocationTreeWorkspace warehouseId={params.id} />;
+export default async function WarehouseLocationTreePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = await params;
+  return <WarehouseLocationTreeWorkspace warehouseId={resolvedParams.id} />;
 }

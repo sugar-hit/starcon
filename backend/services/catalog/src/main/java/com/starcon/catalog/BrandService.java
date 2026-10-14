@@ -28,22 +28,17 @@ import org.springframework.web.server.ResponseStatusException;
  *
  * <ol>
  *   <li><b>判定只有一处实现</b>。{@link BrandRules#publishBlock} 是唯一的「能不能刊登」判定，
- *       列表行、详情、批量判定三个出口都调它。前端也只用同一份原因码显示提示
- *       （{@code brand-model.ts}），不在浏览器里再写一套——两处各判一次的症状是
+ *       列表行、详情、批量判定三个出口都调它。前端也只用同一份原因码显示提示 （{@code brand-model.ts}），不在浏览器里再写一套——两处各判一次的症状是
  *       「页面说能刊登，接口说不能」，而这种事只有真要发的那天才会暴露。
- *   <li><b>建档不要求凭证，刊登才要求</b>。允许「先登记成需授权、凭证稍后补」是正常业务流，
- *       所以授权状态与凭证的配对关系**不写成 brand 表的 CHECK**：
+ *   <li><b>建档不要求凭证，刊登才要求</b>。允许「先登记成需授权、凭证稍后补」是正常业务流， 所以授权状态与凭证的配对关系**不写成 brand 表的 CHECK**：
  *       那样会连建档都拒，而被拒的本来应该是刊登（V16 迁移第 6 节有同一段理由）。
- *   <li><b>撤销不是删除</b>。凭证 {@code enabled=false} 是撤销，行仍在：
- *       16 侵权检测要回溯「出事那天有没有授权」，删了行就查不到了。
- *   <li><b>关联类目指向 3.3.1.1 的类目主键</b>，不复刻一份类目文本：
- *       {@code brand_category.category_id} 走复合外键，类目改名后关联自动跟着变。
- *       {@code spu.brand} 的自由文本本模块不夺走（V1 的列，属已交付模块的写入所有权）。
+ *   <li><b>撤销不是删除</b>。凭证 {@code enabled=false} 是撤销，行仍在： 16 侵权检测要回溯「出事那天有没有授权」，删了行就查不到了。
+ *   <li><b>关联类目指向 3.3.1.1 的类目主键</b>，不复刻一份类目文本： {@code brand_category.category_id}
+ *       走复合外键，类目改名后关联自动跟着变。 {@code spu.brand} 的自由文本本模块不夺走（V1 的列，属已交付模块的写入所有权）。
  * </ol>
  *
  * <p>权限口径：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}。
- * 品牌是商品主数据的一部分，与分类树（3.3.1.1）同域；不新造权限词表
- * （那需要改 identity 服务的迁移，属于另一个服务的写入所有权）。
+ * 品牌是商品主数据的一部分，与分类树（3.3.1.1）同域；不新造权限词表 （那需要改 identity 服务的迁移，属于另一个服务的写入所有权）。
  */
 @Service
 public class BrandService {
@@ -53,10 +48,8 @@ public class BrandService {
   /**
    * 刊登判定的基准日。
    *
-   * <p>用 UTC 当天而不是服务器本地当天：仓库里跨时区约定是业务时间用 IANA/UTC 表达，
-   * 而「凭证今天是否有效」如果按服务器本地时区算，同一份数据在 UTC 机器与
-   * Asia/Shanghai 机器上会给出不同结论——这正是 16 侵权判定最不能容忍的一类漂移。
-   * 判定结果里回带 {@code asOf}，调用方能看到这是按哪一天判的。
+   * <p>用 UTC 当天而不是服务器本地当天：仓库里跨时区约定是业务时间用 IANA/UTC 表达， 而「凭证今天是否有效」如果按服务器本地时区算，同一份数据在 UTC 机器与
+   * Asia/Shanghai 机器上会给出不同结论——这正是 16 侵权判定最不能容忍的一类漂移。 判定结果里回带 {@code asOf}，调用方能看到这是按哪一天判的。
    */
   private LocalDate asOf() {
     return LocalDate.now(ZoneOffset.UTC);
@@ -94,9 +87,8 @@ public class BrandService {
   /**
    * 品牌列表：关键词搜索（编码 / 名称 / 多语言名）+ 授权状态 / 启用状态 / 刊登可行性 / 关联类目筛选。
    *
-   * <p>关键词覆盖多语言名：刊登侧按 locale 渲染品牌名时搜的是本地化名，
-   * 只搜基础名的话运营搜「ニomsday」会搜不到那条挂着日文名的品牌。
-   * 那一段用 {@code exists} 子查询而不是 join——join 会让一个品牌因为有 3 条语言名而在结果里出现 3 次。
+   * <p>关键词覆盖多语言名：刊登侧按 locale 渲染品牌名时搜的是本地化名， 只搜基础名的话运营搜「ニomsday」会搜不到那条挂着日文名的品牌。 那一段用 {@code exists}
+   * 子查询而不是 join——join 会让一个品牌因为有 3 条语言名而在结果里出现 3 次。
    */
   public BrandPage list(BrandQuery query) {
     int page = query.page();
@@ -128,7 +120,8 @@ public class BrandService {
     long blockedCount =
         sql.fetchOne(
                 "select count(*) from ("
-                    + SELECT_COLUMNS + FROM_BRAND
+                    + SELECT_COLUMNS
+                    + FROM_BRAND
                     + ") x where not x.enabled or"
                     + " (x.authorization_status='LICENSED' and x.valid_authorization_count=0)",
                 selectBinds.toArray())
@@ -136,7 +129,9 @@ public class BrandService {
 
     var rows =
         sql.fetch(
-            SELECT_COLUMNS + FROM_BRAND + sqlWhere
+            SELECT_COLUMNS
+                + FROM_BRAND
+                + sqlWhere
                 + " order by b.authorization_status,b.code,b.id limit ? offset ?",
             concat(selectBinds, concat(binds, List.of(size, (long) page * size))).toArray());
     List<BrandRow> items = withNames(rows.stream().map(this::toRow).toList());
@@ -147,8 +142,7 @@ public class BrandService {
         size,
         enabledCount,
         blockedCount,
-        "刊登判定基准日为 " + asOf + "（UTC）。授权状态 OWNED / AGENCY 恒可刊登；"
-            + "LICENSED 需至少一条在有效期内的授权凭证。");
+        "刊登判定基准日为 " + asOf + "（UTC）。授权状态 OWNED / AGENCY 恒可刊登；" + "LICENSED 需至少一条在有效期内的授权凭证。");
   }
 
   private void conditions(
@@ -199,8 +193,11 @@ public class BrandService {
   }
 
   private BrandRow toRow(Record r) {
-    String block = blockedCode(r.get("enabled", Boolean.class), r.get("authorization_status", String.class),
-        r.get("valid_authorization_count", Long.class));
+    String block =
+        blockedCode(
+            r.get("enabled", Boolean.class),
+            r.get("authorization_status", String.class),
+            r.get("valid_authorization_count", Long.class));
     return new BrandRow(
         r.get("id", UUID.class),
         r.get("code", String.class),
@@ -224,12 +221,9 @@ public class BrandService {
   /**
    * SQL 侧的阻止判定（列表用）。
    *
-   * <p>只覆盖「数量为 0」这一种阻断（停用 / 需授权而无有效凭证），
-   * 而 BrandRules.publishBlock 额外区分「未生效」与「已过期」——
-   * 那两种区分需要在内存里逐条看凭证（要拿到 valid_from 与 asOf 的先后），
-   * SQL 侧只数条数区分不出来。详情与批量判定端点走 BrandRules，给出完整原因码。
-   * 列表页显示的「不可刊登」在两种口径下**是同一个集合**：BrandRules 只在计数为 0 时
-   * 才给出 BLOCK_*（非零但全不在有效期内的情况，BrandRules 也返回阻断码），
+   * <p>只覆盖「数量为 0」这一种阻断（停用 / 需授权而无有效凭证）， 而 BrandRules.publishBlock 额外区分「未生效」与「已过期」——
+   * 那两种区分需要在内存里逐条看凭证（要拿到 valid_from 与 asOf 的先后）， SQL 侧只数条数区分不出来。详情与批量判定端点走 BrandRules，给出完整原因码。
+   * 列表页显示的「不可刊登」在两种口径下**是同一个集合**：BrandRules 只在计数为 0 时 才给出 BLOCK_*（非零但全不在有效期内的情况，BrandRules 也返回阻断码），
    * 而 SQL 侧此时 valid_authorization_count=0，与 BrandRules 一致。
    */
   private static String blockedCode(boolean enabled, String status, Long validCount) {
@@ -246,7 +240,8 @@ public class BrandService {
     for (Record r :
         sql.fetch(
             "select brand_id,locale,name from brand_name where brand_id in ("
-                + placeholders(ids) + ")",
+                + placeholders(ids)
+                + ")",
             ids.toArray()))
       byBrand
           .computeIfAbsent(r.get("brand_id", UUID.class), k -> new LinkedHashMap<>())
@@ -258,10 +253,23 @@ public class BrandService {
 
   private static BrandRow withNames(BrandRow row, Map<String, String> names) {
     return new BrandRow(
-        row.id(), row.code(), row.name(), row.logoUri(), row.authorizationStatus(), row.enabled(),
-        row.publishable(), row.publishBlockCode(), row.publishBlockLabel(), row.authorizationCount(),
-        row.validAuthorizationCount(), row.categoryCount(), row.categoryNames(), names,
-        row.version(), row.createdAt(), row.updatedAt());
+        row.id(),
+        row.code(),
+        row.name(),
+        row.logoUri(),
+        row.authorizationStatus(),
+        row.enabled(),
+        row.publishable(),
+        row.publishBlockCode(),
+        row.publishBlockLabel(),
+        row.authorizationCount(),
+        row.validAuthorizationCount(),
+        row.categoryCount(),
+        row.categoryNames(),
+        names,
+        row.version(),
+        row.createdAt(),
+        row.updatedAt());
   }
 
   // ============================================================ 详情
@@ -294,9 +302,7 @@ public class BrandService {
   }
 
   /**
-   * 给详情补上刊登判定。判定必须带上**已经取出来的凭证行**，
-   * 不能在 SQL 里重查一遍：两处各查一次的话，中间被人改掉一条凭证就会得到
-   * 「凭证列表说已过期、判定说可刊登」的自相矛盾页面。
+   * 给详情补上刊登判定。判定必须带上**已经取出来的凭证行**， 不能在 SQL 里重查一遍：两处各查一次的话，中间被人改掉一条凭证就会得到 「凭证列表说已过期、判定说可刊登」的自相矛盾页面。
    */
   private BrandDetail decorateEligibility(
       BrandDetail detail, List<BrandAuthorization> credentials, LocalDate asOf) {
@@ -316,18 +322,25 @@ public class BrandService {
         (int)
             credentials.stream()
                 .filter(
-                    c ->
-                        validOn(
-                            c.enabled(),
-                            date(c.validFrom()),
-                            dateOrNull(c.validTo()),
-                            asOf))
+                    c -> validOn(c.enabled(), date(c.validFrom()), dateOrNull(c.validTo()), asOf))
                 .count();
     return new BrandDetail(
-        detail.id(), detail.code(), detail.name(), detail.logoUri(),
-        detail.authorizationStatus(), detail.enabled(), detail.version(), detail.names(),
-        detail.categories(), detail.authorizations(), block == null, block,
-        blockMessage(block, detail.name()), valid, detail.asOf(), detail.createdAt(),
+        detail.id(),
+        detail.code(),
+        detail.name(),
+        detail.logoUri(),
+        detail.authorizationStatus(),
+        detail.enabled(),
+        detail.version(),
+        detail.names(),
+        detail.categories(),
+        detail.authorizations(),
+        block == null,
+        block,
+        blockMessage(block, detail.name()),
+        valid,
+        detail.asOf(),
+        detail.createdAt(),
         detail.updatedAt());
   }
 
@@ -335,8 +348,7 @@ public class BrandService {
   private Map<String, String> namesOf(UUID brandId) {
     Map<String, String> names = new LinkedHashMap<>();
     for (Record r :
-        sql.fetch(
-            "select locale,name from brand_name where brand_id=? order by locale", brandId))
+        sql.fetch("select locale,name from brand_name where brand_id=? order by locale", brandId))
       names.put(r.get("locale", String.class), r.get("name", String.class));
     return names;
   }
@@ -344,8 +356,7 @@ public class BrandService {
   /**
    * 关联类目：带路径串。
    *
-   * <p>类目取的是**当前名称**（不是建关联时的快照），所以分类树那边重命名之后
-   * 这里的显示自动跟着变——与 CategoryTreeService 路径串同一口径。
+   * <p>类目取的是**当前名称**（不是建关联时的快照），所以分类树那边重命名之后 这里的显示自动跟着变——与 CategoryTreeService 路径串同一口径。
    * 停用的类目照样返回：运营需要看见「这个品牌挂在哪个已停用的类目上」。
    */
   private List<BrandCategoryLink> categoryLinks(UUID brandId) {
@@ -429,8 +440,7 @@ public class BrandService {
   /**
    * 单个品牌的刊登判定。04 刊登与 16 侵权检测都调它。
    *
-   * <p>判定不可绕过：不提供 {@code force} 参数，也不接受调用方自带结论——
-   * 一旦有了开关，第一个「先发出去再说」的调用就会把这条规则永久废掉。
+   * <p>判定不可绕过：不提供 {@code force} 参数，也不接受调用方自带结论—— 一旦有了开关，第一个「先发出去再说」的调用就会把这条规则永久废掉。
    */
   public BrandPublishEligibility eligibility(UUID brandId) {
     return eligibility(asOf(), brandId);
@@ -442,14 +452,15 @@ public class BrandService {
     List<UUID> distinct = brandIds == null ? List.of() : brandIds.stream().distinct().toList();
     if (distinct.isEmpty()) return List.of();
     if (distinct.size() > 500)
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "一次最多判定 500 个品牌，请分批提交");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "一次最多判定 500 个品牌，请分批提交");
     Map<UUID, List<BrandAuthorization>> credentials = new LinkedHashMap<>();
     for (Record r :
         sql.fetch(
             "select brand_id,id,certificate_no,grantor,valid_from,valid_to,evidence_uri,note,"
                 + "enabled,version,created_at,updated_at from brand_authorization"
-                + " where brand_id in (" + placeholders(distinct) + ")",
+                + " where brand_id in ("
+                + placeholders(distinct)
+                + ")",
             distinct.toArray()))
       credentials
           .computeIfAbsent(r.get("brand_id", UUID.class), k -> new ArrayList<>())
@@ -457,7 +468,8 @@ public class BrandService {
     var rows =
         sql.fetch(
             "select id,name,authorization_status,enabled from brand where id in ("
-                + placeholders(distinct) + ")",
+                + placeholders(distinct)
+                + ")",
             distinct.toArray());
     Map<UUID, Record> byId = new LinkedHashMap<>();
     for (Record r : rows) byId.put(r.get("id", UUID.class), r);
@@ -494,7 +506,8 @@ public class BrandService {
     int valid =
         (int)
             credentials.stream()
-                .filter(c -> validOn(c.enabled(), date(c.validFrom()), dateOrNull(c.validTo()), asOf))
+                .filter(
+                    c -> validOn(c.enabled(), date(c.validFrom()), dateOrNull(c.validTo()), asOf))
                 .count();
     return new BrandPublishEligibility(
         brandId,
@@ -515,11 +528,9 @@ public class BrandService {
   /**
    * 建品牌或改品牌（id 为空即新建），走 version 乐观锁。
    *
-   * <p>编码建后不可改：它是刊登的品牌字段与 16 侵权检测对齐这个品牌的锚点，
-   * 改编码会让已有对齐在下一次写入时突然报「对不上」。要改就新建一条品牌。
+   * <p>编码建后不可改：它是刊登的品牌字段与 16 侵权检测对齐这个品牌的锚点， 改编码会让已有对齐在下一次写入时突然报「对不上」。要改就新建一条品牌。
    *
-   * <p>授权状态**可以**改（自有 → 需授权是真实业务动作），且改完立刻反映到刊登判定：
-   * 一个自有品牌转成需授权的瞬间就会变成「不可刊登」，这是对的——
+   * <p>授权状态**可以**改（自有 → 需授权是真实业务动作），且改完立刻反映到刊登判定： 一个自有品牌转成需授权的瞬间就会变成「不可刊登」，这是对的——
    * 运营改状态就是想表达「这个品牌从现在起需要凭证」。
    */
   public BrandSaved save(AccessService.Access actor, UUID id, BrandInput input) {
@@ -533,7 +544,8 @@ public class BrandService {
     CatalogService.check(problem == null, problem);
     String code = normalizeCode(input.code());
     String status = normalizeStatus(input.authorizationStatus());
-    String logo = input.logoUri() == null || input.logoUri().isBlank() ? null : input.logoUri().trim();
+    String logo =
+        input.logoUri() == null || input.logoUri().isBlank() ? null : input.logoUri().trim();
 
     if (id == null) {
       if (sql.fetchOne("select id from brand where code=?", code) != null)
@@ -543,7 +555,12 @@ public class BrandService {
         sql.execute(
             "insert into brand(id,tenant_id,code,name,logo_uri,authorization_status,enabled)"
                 + " values(?,?,?,?,?,?,?)",
-            newId, actor.tenantId(), code, normalizeName(input.name()), logo, status,
+            newId,
+            actor.tenantId(),
+            code,
+            normalizeName(input.name()),
+            logo,
+            status,
             input.enabled());
       } catch (DataAccessException e) {
         throw conflict("品牌编码已被并发创建或占用，请刷新后重试");
@@ -566,12 +583,16 @@ public class BrandService {
           sql.execute(
               "update brand set name=?,logo_uri=?,authorization_status=?,enabled=?,"
                   + "version=version+1,updated_at=now() where id=? and version=?",
-              normalizeName(input.name()), logo, status, input.enabled(), id, input.version());
+              normalizeName(input.name()),
+              logo,
+              status,
+              input.enabled(),
+              id,
+              input.version());
     } catch (DataAccessException e) {
       throw conflict("品牌保存失败，请刷新后重试");
     }
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "品牌已被他人修改，请刷新后重试");
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "品牌已被他人修改，请刷新后重试");
     replaceNames(actor.tenantId(), id, input.names());
     replaceCategories(actor.tenantId(), id, input.categories());
     audit(actor, id, "BrandSaved");
@@ -581,13 +602,20 @@ public class BrandService {
   private BrandSaved savedResult(UUID id) {
     var e = eligibility(id);
     return new BrandSaved(
-        id, brandRow(id).get("version", Long.class), e.authorizationStatus(), e.publishable(),
+        id,
+        brandRow(id).get("version", Long.class),
+        e.authorizationStatus(),
+        e.publishable(),
         e.blockCode());
   }
 
   /** 启用停用。停用会立刻让刊登判定变成 {@code BRAND_DISABLED}——那正是停用的目的。 */
   public void setEnabled(AccessService.Access actor, UUID id, boolean enabled) {
-    int updated = sql.execute("update brand set enabled=?,version=version+1,updated_at=now() where id=?", enabled, id);
+    int updated =
+        sql.execute(
+            "update brand set enabled=?,version=version+1,updated_at=now() where id=?",
+            enabled,
+            id);
     if (updated != 1) throw CatalogService.missing();
     audit(actor, id, "BrandEnabledChanged");
   }
@@ -595,8 +623,7 @@ public class BrandService {
   /**
    * 删除品牌：连同多语言名、凭证与类目关联一起级联删除（DB 外键已声明）。
    *
-   * <p>停用不删除：品牌被商品与历史刊登引用着，删了就查不到「当时用的是哪个品牌」，
-   * 而 16 侵权检测要回溯的正是这个。所以只有明确知道没人引用时才删。
+   * <p>停用不删除：品牌被商品与历史刊登引用着，删了就查不到「当时用的是哪个品牌」， 而 16 侵权检测要回溯的正是这个。所以只有明确知道没人引用时才删。
    */
   public void delete(AccessService.Access actor, UUID id, long version) {
     var row = brandRow(id);
@@ -613,7 +640,10 @@ public class BrandService {
     for (BrandNameInput entry : names)
       sql.execute(
           "insert into brand_name(tenant_id,brand_id,locale,name) values(?,?,?,?)",
-          tenantId, brandId, normalizeLocale(entry.locale()), normalizeName(entry.name()));
+          tenantId,
+          brandId,
+          normalizeLocale(entry.locale()),
+          normalizeName(entry.name()));
   }
 
   /**
@@ -622,8 +652,7 @@ public class BrandService {
    * <p>提交前逐个确认类目真实存在且属于本租户：{@code brand_category} 的复合外键
    * 会拒跨租户引用，但报出来的是约束名；这里先给「类目不存在或不属于当前租户」这种可读原因。
    *
-   * <p>停用的类目不允许**新增**关联（新建一个关联指向一个已停用的类目没有意义），
-   * 但保留已有关联——类目停用时不会级联删关联，那种情况下运营要能看到并自己解掉它。
+   * <p>停用的类目不允许**新增**关联（新建一个关联指向一个已停用的类目没有意义）， 但保留已有关联——类目停用时不会级联删关联，那种情况下运营要能看到并自己解掉它。
    */
   private void replaceCategories(UUID tenantId, UUID brandId, List<BrandCategoryLinkInput> links) {
     if (links != null && links.size() > 50)
@@ -635,7 +664,8 @@ public class BrandService {
       var row =
           sql.fetchOne(
               "select id,enabled from product_category where tenant_id=? and id=?",
-              tenantId, link.categoryId());
+              tenantId,
+              link.categoryId());
       if (row == null) throw CatalogService.missing();
       CatalogService.check(
           Boolean.TRUE.equals(row.get("enabled", Boolean.class)),
@@ -644,7 +674,10 @@ public class BrandService {
       try {
         sql.execute(
             "insert into brand_category(tenant_id,brand_id,category_id,position) values(?,?,?,?)",
-            tenantId, brandId, link.categoryId(), slot);
+            tenantId,
+            brandId,
+            link.categoryId(),
+            slot);
       } catch (DataAccessException e) {
         throw conflict("关联类目重复或已被并发写入，请刷新后重试");
       }
@@ -710,8 +743,7 @@ public class BrandService {
     } catch (DataAccessException e) {
       throw conflict("凭证保存失败：该品牌下凭证编号已被占用，请刷新后重试");
     }
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "凭证已被他人修改，请刷新后重试");
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "凭证已被他人修改，请刷新后重试");
     audit(actor, existing.get("brand_id", UUID.class), "BrandAuthorizationSaved");
     return savedResult(brandId);
   }
@@ -719,16 +751,17 @@ public class BrandService {
   /**
    * 撤销一条凭证（{@code enabled=false}）。
    *
-   * <p>刻意**不提供删除凭证的端点**：撤销与删除在这里是两件事，
-   * 而 16 侵权检测要回溯「曾经有过授权、后来被撤销」，删行就把这个事实抹掉了。
+   * <p>刻意**不提供删除凭证的端点**：撤销与删除在这里是两件事， 而 16 侵权检测要回溯「曾经有过授权、后来被撤销」，删行就把这个事实抹掉了。
    * 真要清理试录进来的脏数据，也让运营走停用而不是删除——它同样不参与刊登判定。
    */
-  public BrandSaved revokeAuthorization(AccessService.Access actor, UUID brandId, UUID id, boolean enabled) {
+  public BrandSaved revokeAuthorization(
+      AccessService.Access actor, UUID brandId, UUID id, boolean enabled) {
     authorizationRow(brandId, id);
     int updated =
         sql.execute(
             "update brand_authorization set enabled=?,version=version+1,updated_at=now() where id=?",
-            enabled, id);
+            enabled,
+            id);
     if (updated != 1) throw CatalogService.missing();
     audit(actor, brandId, "BrandAuthorizationRevoked");
     return savedResult(brandId);
@@ -739,14 +772,13 @@ public class BrandService {
   /**
    * 刊登 / 合规的品牌引用候选。
    *
-   * <p>与列表端点的区别是**语义**：列表是给运营维护用的（带停用项、带全部状态），
-   * 候选是给 04 刊登与 16 侵权检测用的——默认只给启用且可刊登的品牌，
+   * <p>与列表端点的区别是**语义**：列表是给运营维护用的（带停用项、带全部状态）， 候选是给 04 刊登与 16 侵权检测用的——默认只给启用且可刊登的品牌，
    * 且每条带上刊登判定，调用方不必再打一次判定端点。
    *
-   * <p>{@code includeBlocked=true} 时连不可刊登的品牌一起返回（带原因码），
-   * 用于刊登表单要显示「这个品牌为什么选不了」而不是让它凭空消失。
+   * <p>{@code includeBlocked=true} 时连不可刊登的品牌一起返回（带原因码）， 用于刊登表单要显示「这个品牌为什么选不了」而不是让它凭空消失。
    */
-  public List<BrandPublishEligibility> candidates(UUID categoryId, String keyword, boolean includeBlocked) {
+  public List<BrandPublishEligibility> candidates(
+      UUID categoryId, String keyword, boolean includeBlocked) {
     BrandQuery query =
         new BrandQuery(
             keyword,
@@ -799,10 +831,13 @@ public class BrandService {
     long blocked =
         sql.fetchOne(
                 "select count(*) from ("
-                    + SELECT_COLUMNS + FROM_BRAND
+                    + SELECT_COLUMNS
+                    + FROM_BRAND
                     + ") x where not x.enabled or"
                     + " (x.authorization_status='LICENSED' and x.valid_authorization_count=0)",
-                asOf, asOf, tenantId)
+                asOf,
+                asOf,
+                tenantId)
             .get(0, Long.class);
     long licensedWithoutCredential =
         sql.fetchOne(
@@ -816,7 +851,9 @@ public class BrandService {
         sql.fetchOne(
                 "select count(*) from brand_authorization where tenant_id=? and enabled"
                     + " and valid_to is not null and valid_to>=? and valid_to<=?",
-                tenantId, asOf, asOf.plusDays(30))
+                tenantId,
+                asOf,
+                asOf.plusDays(30))
             .get(0, Long.class);
     long links =
         sql.fetchOne("select count(*) from brand_category where tenant_id=?", tenantId)
@@ -832,7 +869,9 @@ public class BrandService {
         licensedWithoutCredential,
         expiring,
         links,
-        "刊登判定基准日为 " + asOf + "（UTC）。blockedListingCount 是当前不允许刊登的品牌数："
+        "刊登判定基准日为 "
+            + asOf
+            + "（UTC）。blockedListingCount 是当前不允许刊登的品牌数："
             + "停用的品牌，以及标记为需授权却没有一条有效凭证的品牌。");
   }
 
@@ -846,7 +885,11 @@ public class BrandService {
 
   private Record authorizationRow(UUID brandId, UUID id) {
     var row =
-        sql.fetchOne("select * from brand_authorization where tenant_id=? and brand_id=? and id=?", currentTenantId(), brandId, id);
+        sql.fetchOne(
+            "select * from brand_authorization where tenant_id=? and brand_id=? and id=?",
+            currentTenantId(),
+            brandId,
+            id);
     if (row == null) throw CatalogService.missing();
     return row;
   }
@@ -854,9 +897,8 @@ public class BrandService {
   /**
    * 拼出一串 {@code ?,?,?} 占位符。
    *
-   * <p>不用 {@code = any(?::uuid[])}：jOOQ 把 {@code UUID[]} 绑成**一个** uuid 参数
-   * （而不是 uuid[]），整条语句会报 {@code cannot cast type uuid to uuid[]}。
-   * 与 {@link CategoryTreeService} 同一做法。调用方必须先判空。
+   * <p>不用 {@code = any(?::uuid[])}：jOOQ 把 {@code UUID[]} 绑成**一个** uuid 参数 （而不是 uuid[]），整条语句会报
+   * {@code cannot cast type uuid to uuid[]}。 与 {@link CategoryTreeService} 同一做法。调用方必须先判空。
    */
   private static String placeholders(List<UUID> ids) {
     return String.join(",", java.util.Collections.nCopies(ids.size(), "?"));
@@ -889,8 +931,7 @@ public class BrandService {
     try {
       return LocalDate.parse(value.trim());
     } catch (DateTimeParseException e) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "日期格式需为 yyyy-MM-dd，例如 2026-12-31");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "日期格式需为 yyyy-MM-dd，例如 2026-12-31");
     }
   }
 
@@ -909,7 +950,11 @@ public class BrandService {
   private void audit(AccessService.Access actor, UUID resourceId, String action) {
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
-        Ids.next(), actor.tenantId(), actor.userId(), resourceId, action);
+        Ids.next(),
+        actor.tenantId(),
+        actor.userId(),
+        resourceId,
+        action);
   }
 
   private static String instant(OffsetDateTime value) {

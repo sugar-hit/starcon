@@ -12,15 +12,12 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 3.5.2.1 BOM 版本管理：BOM 档案、版本（草稿/已发布）、生效区间、组件清单、单层需求量、倒排查询。
  *
- * <p>路由挂在 {@code /catalog/boms} 与 {@code /catalog/bom-versions} 之下，
- * 与 {@code /catalog/bundles}、{@code /catalog/versions}（3.5.1.1）**并列**：
- * 名字都叫「版本」但语义不同 —— 那边是「几个 SKU 捆在一起卖」，
- * 这边是「这个成品要领哪些料」。合并会让「v2 指哪个版本」在 URL 上无法回答。
- * 台账里的 {@code /products/bom} 是**前端页面路径**。
+ * <p>路由挂在 {@code /catalog/boms} 与 {@code /catalog/bom-versions} 之下， 与 {@code
+ * /catalog/bundles}、{@code /catalog/versions}（3.5.1.1）**并列**： 名字都叫「版本」但语义不同 —— 那边是「几个 SKU 捆在一起卖」，
+ * 这边是「这个成品要领哪些料」。合并会让「v2 指哪个版本」在 URL 上无法回答。 台账里的 {@code /products/bom} 是**前端页面路径**。
  *
- * <p>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}：BOM 挂在商品域下
- * （下游是 06 采购建议与 08 加工单领料），复用已有词表而不新造 ——
- * 新词表要改 identity 服务的迁移，属于另一个服务的写入所有权。
+ * <p>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}：BOM 挂在商品域下 （下游是 06 采购建议与 08
+ * 加工单领料），复用已有词表而不新造 —— 新词表要改 identity 服务的迁移，属于另一个服务的写入所有权。
  *
  * <p><b>三条是下游的权威入口</b>，形状与蓝图点名的一致：
  *
@@ -69,8 +66,7 @@ public class BomVersionController {
       @RequestParam(required = false) String status,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
-    return call(
-        auth, "spu.read", a -> boms.boms(new BomQuery(keyword, status, page, size)));
+    return call(auth, "spu.read", a -> boms.boms(new BomQuery(keyword, status, page, size)));
   }
 
   @GetMapping("/boms/{id}")
@@ -124,8 +120,7 @@ public class BomVersionController {
   /**
    * 当前生效版本（规则 R4）。
    *
-   * <p>不传 {@code at} 就是查「此刻」。这是 06 采购建议与 08 加工单取版本的权威入口：
-   * 生效区间是左闭右开的 [起点, 终点)，重叠一律拒绝，所以一个时刻至多命中一个版本。
+   * <p>不传 {@code at} 就是查「此刻」。这是 06 采购建议与 08 加工单取版本的权威入口： 生效区间是左闭右开的 [起点, 终点)，重叠一律拒绝，所以一个时刻至多命中一个版本。
    */
   @GetMapping("/boms/{id}/effective")
   public BomEffectiveView effectiveVersion(
@@ -188,8 +183,7 @@ public class BomVersionController {
   /**
    * 发布版本。
    *
-   * <p>三道关：组件齐备、生效区间不与已发布版本重叠（重叠一律拒绝，不做裁决）、记发布留痕。
-   * 返回的是「已发布」状态，不是「已受理」。
+   * <p>三道关：组件齐备、生效区间不与已发布版本重叠（重叠一律拒绝，不做裁决）、记发布留痕。 返回的是「已发布」状态，不是「已受理」。
    */
   @PostMapping("/bom-versions/{id}/publish")
   public BomVersionRow publishVersion(
@@ -201,8 +195,7 @@ public class BomVersionController {
   /**
    * 提前停用本版（把生效终点收紧到某个仍在未来的时刻）。
    *
-   * <p>这是已发布版本上<b>唯一</b>合法的写操作：它不改内容、不改历史，只让本版从那一刻起失效，
-   * 由下一个版本接替。若连这一条都禁掉，第一个开放区间的版本发布后就永远无法被接替。
+   * <p>这是已发布版本上<b>唯一</b>合法的写操作：它不改内容、不改历史，只让本版从那一刻起失效， 由下一个版本接替。若连这一条都禁掉，第一个开放区间的版本发布后就永远无法被接替。
    */
   @PutMapping("/bom-versions/{id}/close")
   public BomVersionRow closeVersion(
@@ -215,8 +208,8 @@ public class BomVersionController {
   /**
    * 版本复制：把一个已有版本整份复制成新草稿（组件、单位用量、损耗率都带走）。
    *
-   * <p>{@code versionNo} 必填（复制品要有自己的身份）；{@code effectiveFrom} 不传就是「此刻」——
-   * 沿用源版本的起点会直接撞上规则 R2，而且运营要的是「改完这一版从现在起接替」。
+   * <p>{@code versionNo} 必填（复制品要有自己的身份）；{@code effectiveFrom} 不传就是「此刻」—— 沿用源版本的起点会直接撞上规则
+   * R2，而且运营要的是「改完这一版从现在起接替」。
    */
   @PostMapping("/bom-versions/{id}/copy")
   public BomVersionRow copyVersion(
@@ -256,8 +249,7 @@ public class BomVersionController {
   /**
    * 整体替换组件清单。
    *
-   * <p>整体替换而不是增删式：保存后清单就是提交的那份，不会剩「幽灵组件」。
-   * 已发布版本一律拒绝（V25 触发器同口径兜底）。
+   * <p>整体替换而不是增删式：保存后清单就是提交的那份，不会剩「幽灵组件」。 已发布版本一律拒绝（V25 触发器同口径兜底）。
    */
   @PutMapping("/bom-versions/{id}/components")
   public BomVersionDetail replaceComponents(
@@ -270,11 +262,9 @@ public class BomVersionController {
   /**
    * 单层需求量：生产 {@code outputQuantity} 个成品需要哪些料（规则 R7）。
    *
-   * <p><b>单层</b>：多级递归展开是 3.5.2.2 的职责。返回里 {@code singleLevel=true}，
-   * 页面据此把「这里不含子 BOM 里的料」写在结果上方。
+   * <p><b>单层</b>：多级递归展开是 3.5.2.2 的职责。返回里 {@code singleLevel=true}， 页面据此把「这里不含子 BOM 里的料」写在结果上方。
    *
-   * <p><b>不取整</b>：结果是 6 位小数的精确需求量。取整、补安全库存、判缺口是
-   * 3.5.2.2 与 06 的决定。
+   * <p><b>不取整</b>：结果是 6 位小数的精确需求量。取整、补安全库存、判缺口是 3.5.2.2 与 06 的决定。
    */
   @GetMapping("/bom-versions/{id}/requirement")
   public BomRequirement requirement(
@@ -289,8 +279,7 @@ public class BomVersionController {
   /**
    * 倒排：某个 SKU 被哪些 BOM 版本当组件用着。
    *
-   * <p>改组件用量之前要先看这个方向（改了会影响谁），06 采购建议算「这批料要买给谁」也读它。
-   * {@code onlyEffective=true} 时只列此刻正在生效的版本。
+   * <p>改组件用量之前要先看这个方向（改了会影响谁），06 采购建议算「这批料要买给谁」也读它。 {@code onlyEffective=true} 时只列此刻正在生效的版本。
    */
   @GetMapping("/bom-components/usage")
   public BomUsagePage usage(
@@ -301,6 +290,8 @@ public class BomVersionController {
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
     return call(
-        auth, "spu.read", a -> boms.usage(new BomUsageQuery(skuId, keyword, onlyEffective, page, size)));
+        auth,
+        "spu.read",
+        a -> boms.usage(new BomUsageQuery(skuId, keyword, onlyEffective, page, size)));
   }
 }

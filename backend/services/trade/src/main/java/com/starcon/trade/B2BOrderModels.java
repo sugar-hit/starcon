@@ -1,7 +1,6 @@
 package com.starcon.trade;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Max;
@@ -10,7 +9,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -20,34 +18,28 @@ import java.util.UUID;
 /**
  * 9.7.1.1 批发订单与账期的传输模型。
  *
- * <p>蓝图原话：「支持 B2B/批发订单：客户分级价、起订量、阶梯价、账期结算（不即时收款）、
- * 开票与对账；与零售订单在订单类型、收款方式、成本口径上区分」，
- * 输出「批发订单 + 应收（按账期，12 应收）；开票需求」。
+ * <p>蓝图原话：「支持 B2B/批发订单：客户分级价、起订量、阶梯价、账期结算（不即时收款）、 开票与对账；与零售订单在订单类型、收款方式、成本口径上区分」， 输出「批发订单 +
+ * 应收（按账期，12 应收）；开票需求」。
  *
- * <p><b>本文件的每一个字段都对应 V120 迁移里的一个真实列</b>，枚举值域与 DB 的 CHECK
- * 逐条对齐 —— 只改 Java 不改迁移，DB 会拒绝写入，而报错对调用方毫无意义。
+ * <p><b>本文件的每一个字段都对应 V120 迁移里的一个真实列</b>，枚举值域与 DB 的 CHECK 逐条对齐 —— 只改 Java 不改迁移，DB 会拒绝写入，而报错对调用方毫无意义。
  *
  * <p><b>四条建模纪律</b>：
  *
  * <ul>
- *   <li><b>与零售区分是三个字段，不是一个标记</b>：{@link B2BOrderType}（订单类型）、
- *       {@link B2BPaymentMethod}（收款方式）、{@link B2BCostBasis}（成本口径）三者都写在自己的
- *       {@code b2b_order} 表上，与零售的 {@code sales_order} 互不覆盖。「区分」因此是结构性的。
+ *   <li><b>与零售区分是三个字段，不是一个标记</b>：{@link B2BOrderType}（订单类型）、 {@link B2BPaymentMethod}（收款方式）、{@link
+ *       B2BCostBasis}（成本口径）三者都写在自己的 {@code b2b_order} 表上，与零售的 {@code sales_order} 互不覆盖。「区分」因此是结构性的。
  *   <li><b>收款方式决定要不要产生应收</b>：{@link B2BPaymentMethod#ORDER_SETTLEMENT} 下单结算时
- *       款项已收讫，<b>不产生应收</b>；{@link B2BPaymentMethod#ON_RECEIPT} 与
- *       {@link B2BPaymentMethod#CREDIT_TERM} 在<b>发货确认时</b>产生应收，到期日按同一算法算。
- *       「账期结算不即时收款」因此是数据层的 CHECK。
- *   <li><b>单价不接受调用方传值</b>：批发单价由<b>阶梯价落档</b>算出，
- *       {@link B2BOrderLineInput} 只有 {@code skuId} 与 {@code quantity}。
- *       允许客户端传单价等于允许绕过阶梯价与起订量两条硬规则。
- *   <li><b>客户分级与账期取自上游投影</b>：{@link B2BCustomerTermsInput} 是 3.6.1.2 的
- *       trade 侧只读投影的写入形状，订单创建时读取它决定账期天数，
- *       <b>不跨库回查 catalog</b>（AGENTS.md 模块边界纪律）。
+ *       款项已收讫，<b>不产生应收</b>；{@link B2BPaymentMethod#ON_RECEIPT} 与 {@link
+ *       B2BPaymentMethod#CREDIT_TERM} 在<b>发货确认时</b>产生应收，到期日按同一算法算。 「账期结算不即时收款」因此是数据层的 CHECK。
+ *   <li><b>单价不接受调用方传值</b>：批发单价由<b>阶梯价落档</b>算出， {@link B2BOrderLineInput} 只有 {@code skuId} 与 {@code
+ *       quantity}。 允许客户端传单价等于允许绕过阶梯价与起订量两条硬规则。
+ *   <li><b>客户分级与账期取自上游投影</b>：{@link B2BCustomerTermsInput} 是 3.6.1.2 的 trade
+ *       侧只读投影的写入形状，订单创建时读取它决定账期天数， <b>不跨库回查 catalog</b>（AGENTS.md 模块边界纪律）。
  * </ul>
  *
- * <p>命名统一用 {@code B2B*} 前缀：全仓契约是 {@code tools/codegen/catalog-contracts.py} 把
- * <b>所有服务</b>的 spec 合并进同一个扁平文件，同名 key 后者覆盖前者且不报冲突，
- * 故刻意避开 {@code Trade*}（crm 贸易合规域）与已占用的 {@code SalesOrder*} / {@code ProcessingOrder*}。
+ * <p>命名统一用 {@code B2B*} 前缀：全仓契约是 {@code tools/codegen/catalog-contracts.py} 把 <b>所有服务</b>的 spec
+ * 合并进同一个扁平文件，同名 key 后者覆盖前者且不报冲突， 故刻意避开 {@code Trade*}（crm 贸易合规域）与已占用的 {@code SalesOrder*} / {@code
+ * ProcessingOrder*}。
  */
 public final class B2BOrderModels {
 
@@ -68,8 +60,7 @@ public final class B2BOrderModels {
   /**
    * 收款方式（DB {@code b2b_order.payment_method} 的 CHECK 值域）。
    *
-   * <p>蓝图硬要求：「账期结算不即时收款 —— 收款方式字段要能表达
-   * 「下单结算 / 确认收货后结算 / 账期」」。三个值一字对应那句话里的三个词。
+   * <p>蓝图硬要求：「账期结算不即时收款 —— 收款方式字段要能表达 「下单结算 / 确认收货后结算 / 账期」」。三个值一字对应那句话里的三个词。
    */
   public enum B2BPaymentMethod {
     /** 下单结算：下单时款项已收讫，<b>不产生应收</b>。 */
@@ -121,8 +112,7 @@ public final class B2BOrderModels {
   /**
    * 开票需求状态（DB {@code b2b_receivable.invoice_state}）。
    *
-   * <p>蓝图输出里的「开票需求」。本服务只把需求标记出来，
-   * <b>不写 12 财务的表</b>：12.6.2 发票交付后由它读这张表。
+   * <p>蓝图输出里的「开票需求」。本服务只把需求标记出来， <b>不写 12 财务的表</b>：12.6.2 发票交付后由它读这张表。
    */
   public enum B2BInvoiceState {
     NOT_REQUESTED,
@@ -152,8 +142,7 @@ public final class B2BOrderModels {
       @Size(max = 160) String customerName,
       @NotNull B2BCustomerLevel customerLevel,
       @Min(0) @Max(365) Integer paymentTermsDays,
-      @Pattern(regexp = "^[A-Z]{3}$", message = "默认币种必须是 ISO 4217 三位码")
-          String defaultCurrency,
+      @Pattern(regexp = "^[A-Z]{3}$", message = "默认币种必须是 ISO 4217 三位码") String defaultCurrency,
       @DecimalMin(value = "0", inclusive = false) @Digits(integer = 15, fraction = 4)
           BigDecimal creditLimit,
       @Min(0) Long sourceVersion) {}
@@ -198,9 +187,7 @@ public final class B2BOrderModels {
   /**
    * 订单行输入。
    *
-   * <p><b>刻意没有 unitPrice 字段</b>：批发单价是阶梯价落档的结果。
-   * 允许客户端传单价等于允许绕过起订量与阶梯价两条硬规则 ——
-   * 那正是本模块要防的事。
+   * <p><b>刻意没有 unitPrice 字段</b>：批发单价是阶梯价落档的结果。 允许客户端传单价等于允许绕过起订量与阶梯价两条硬规则 —— 那正是本模块要防的事。
    */
   public record B2BOrderLineInput(
       @NotNull UUID skuId,
@@ -329,7 +316,11 @@ public final class B2BOrderModels {
 
   /** 发货明细行。 */
   public record B2BShipmentLineRow(
-      UUID id, UUID orderLineId, String skuCode, BigDecimal quantity, BigDecimal unitPrice,
+      UUID id,
+      UUID orderLineId,
+      String skuCode,
+      BigDecimal quantity,
+      BigDecimal unitPrice,
       BigDecimal lineAmount) {}
 
   /** 应收单读模型。 */
@@ -354,7 +345,11 @@ public final class B2BOrderModels {
 
   /** 应收明细行。 */
   public record B2BReceivableLineRow(
-      UUID id, UUID orderLineId, String skuCode, BigDecimal quantity, BigDecimal unitPrice,
+      UUID id,
+      UUID orderLineId,
+      String skuCode,
+      BigDecimal quantity,
+      BigDecimal unitPrice,
       BigDecimal lineAmount) {}
 
   /** 订单事件流行。 */
@@ -381,8 +376,7 @@ public final class B2BOrderModels {
       List<B2BCustomerTermsRow> items, int page, int size, long total) {}
 
   /** 阶梯价列表：真分页，每项自带全部档位。 */
-  public record B2BPriceBookPage(
-      List<B2BPriceBookRow> items, int page, int size, long total) {}
+  public record B2BPriceBookPage(List<B2BPriceBookRow> items, int page, int size, long total) {}
 
   /** 订单列表：真分页 + 与分页无关的全量汇总。 */
   public record B2BOrderPage(
@@ -413,8 +407,8 @@ public final class B2BOrderModels {
   /**
    * 阶梯价试算返回：每一行命中的档位与「再买多少进下一档」。
    *
-   * <p>刻意叫 {@code B2BQuoteResponse} 而不是 {@code QuoteResponse}：全仓契约是所有服务的
-   * spec 合并后的产物，一个过于通用的名字迟早会与别的域撞上。
+   * <p>刻意叫 {@code B2BQuoteResponse} 而不是 {@code QuoteResponse}：全仓契约是所有服务的 spec
+   * 合并后的产物，一个过于通用的名字迟早会与别的域撞上。
    */
   public record B2BQuoteResponse(List<B2BPriceQuoteRow> items) {}
 

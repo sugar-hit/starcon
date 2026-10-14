@@ -1,7 +1,7 @@
 package com.starcon.catalog;
 
-import static com.starcon.catalog.CategoryAttributeRequirementRules.*;
 import static com.starcon.catalog.CatalogModels.*;
+import static com.starcon.catalog.CategoryAttributeRequirementRules.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -15,27 +15,23 @@ import java.util.UUID;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * 3.3.1.2 的两个输出：**录入表单 schema 生成**与**保存前校验**。
  *
- * <p>与 {@link CategoryAttributeRequirementService} 分开成两个类，因为两者的职责性质不同：
- * 配置侧是「按类目维护规则」，输出侧是「按类目 + 按当前填写值现算」。前者关心写入冲突与继承，
- * 后者关心求值与顺序。混在一个类里会让「改一条规则」和「渲染一个表单」互相牵连。
+ * <p>与 {@link CategoryAttributeRequirementService} 分开成两个类，因为两者的职责性质不同： 配置侧是「按类目维护规则」，输出侧是「按类目 +
+ * 按当前填写值现算」。前者关心写入冲突与继承， 后者关心求值与顺序。混在一个类里会让「改一条规则」和「渲染一个表单」互相牵连。
  *
  * <p>本类的两条硬纪律：
  *
  * <ol>
- *   <li><b>条件必填必须真正求值，且与校验共用同一个判定</b>。
- *       schema 里的 {@code required} 与 {@code dependency.active}、校验里的
+ *   <li><b>条件必填必须真正求值，且与校验共用同一个判定</b>。 schema 里的 {@code required} 与 {@code dependency.active}、校验里的
  *       {@code conditionActive} 全部来自 {@link CategoryAttributeRequirementRules#conditionHolds}。
  *       两处若各写一遍，天平早晚会歪：表单亮着必填星号、提交却被放行。
  *   <li><b>派生结果不落表</b>。表单依赖「当前已填了什么」，任何缓存都会在用户改完前置字段后过期。
  * </ol>
  *
- * <p>字段顺序：先按规则 position，再按条件依赖拓扑排序。**依赖必须在被依赖之后出现**——
- * 否则录入表单会把「保修期」排在「颜色」前面，用户还不知道为什么这个字段突然必填了。
+ * <p>字段顺序：先按规则 position，再按条件依赖拓扑排序。**依赖必须在被依赖之后出现**—— 否则录入表单会把「保修期」排在「颜色」前面，用户还不知道为什么这个字段突然必填了。
  */
 @Service
 public class CategoryAttributeRequirementForms {
@@ -57,26 +53,26 @@ public class CategoryAttributeRequirementForms {
   /**
    * 生成某个类目的录入表单 schema。
    *
-   * <p>{@code currentValues} 是**已填写的值**（key = 属性 code 或 id），用于求值条件必填：
-   * 不传时所有条件字段的 {@code dependency.active=false}、{@code required=false}
-   * ——不是「未知」，而是「还没触发」，前端初始渲染据此不亮必填星号。
+   * <p>{@code currentValues} 是**已填写的值**（key = 属性 code 或 id），用于求值条件必填： 不传时所有条件字段的 {@code
+   * dependency.active=false}、{@code required=false} ——不是「未知」，而是「还没触发」，前端初始渲染据此不亮必填星号。
    *
-   * @param includeDisabled 是否包含停用规则的字段。默认 {@code false}：停用的规则不参与校验，
-   *     字段就不该出现在录入表单里（仍可用 {@code true} 做影响面排查）
+   * @param includeDisabled 是否包含停用规则的字段。默认 {@code false}：停用的规则不参与校验， 字段就不该出现在录入表单里（仍可用 {@code true}
+   *     做影响面排查）
    */
-  public EntryFormSchema schema(UUID categoryId, Map<String, String> currentValues, boolean includeDisabled) {
+  public EntryFormSchema schema(
+      UUID categoryId, Map<String, String> currentValues, boolean includeDisabled) {
     var category = categoryRow(categoryId);
     // 平台类目映射树的节点归 04 刊登维护，蓝图明确「此处只管内部类目」。
     // 早拒绝好过生成一份「用不上的内部表单」——04 侧要的是平台自己的要求，两套不能混。
     CatalogService.check(
         "INTERNAL".equals(treeKind(categoryId)),
-        "平台类目映射树的属性要求由 04 刊登按平台维护，本端点只服务内部管理分类"
-            + "：不同平台的类目要求可能不同，混用会让刊登合规判断失效");
+        "平台类目映射树的属性要求由 04 刊登按平台维护，本端点只服务内部管理分类" + "：不同平台的类目要求可能不同，混用会让刊登合规判断失效");
 
     List<CategoryAttributeRequirement> rules = requirements.effectiveRequirements(categoryId);
     if (includeDisabled) {
       rules = new ArrayList<>(rules);
-      rules.addAll(requirements.ownRequirements(categoryId).stream().filter(r -> !r.enabled()).toList());
+      rules.addAll(
+          requirements.ownRequirements(categoryId).stream().filter(r -> !r.enabled()).toList());
     }
     List<CategoryAttributeRequirement> ordered = orderForEntry(rules);
 
@@ -88,7 +84,8 @@ public class CategoryAttributeRequirementForms {
       String dependencyValue =
           rule.condition() == null
               ? null
-              : submitted(currentValues, rule.condition().attributeId(), rule.condition().attributeCode());
+              : submitted(
+                  currentValues, rule.condition().attributeId(), rule.condition().attributeCode());
       fields.add(toField(rule, dependencyValue));
     }
     long requiredCount = fields.stream().filter(EntryFormField::required).count();
@@ -103,19 +100,17 @@ public class CategoryAttributeRequirementForms {
         (int) requiredCount,
         (int) conditionalCount,
         fields,
-        "字段顺序按规则的 position 排，条件依赖的前置字段排在依赖它的字段之前。"
-            + "停用的规则不参与校验，因此默认不出现在表单里。");
+        "字段顺序按规则的 position 排，条件依赖的前置字段排在依赖它的字段之前。" + "停用的规则不参与校验，因此默认不出现在表单里。");
   }
 
   /**
    * 字段顺序：position 升序 + 条件依赖拓扑。
    *
-   * <p>拓扑这一层不是可有可无的美化：条件必填的字段排在它的前置字段**之前**时，
-   * 用户在表单上先看到一个必填星号，却要往下滚很久才找到决定它亮不亮的那个字段。
-   * 稳定排序（position → code）保证同样的配置每次生成的顺序一致，
-   * 否则集成测试与前端快照都会不稳定。
+   * <p>拓扑这一层不是可有可无的美化：条件必填的字段排在它的前置字段**之前**时， 用户在表单上先看到一个必填星号，却要往下滚很久才找到决定它亮不亮的那个字段。 稳定排序（position
+   * → code）保证同样的配置每次生成的顺序一致， 否则集成测试与前端快照都会不稳定。
    */
-  private List<CategoryAttributeRequirement> orderForEntry(List<CategoryAttributeRequirement> rules) {
+  private List<CategoryAttributeRequirement> orderForEntry(
+      List<CategoryAttributeRequirement> rules) {
     List<CategoryAttributeRequirement> base = new ArrayList<>(rules);
     base.sort(CategoryAttributeRequirementService.byFormOrder());
     Map<UUID, CategoryAttributeRequirement> byAttribute = new LinkedHashMap<>();
@@ -193,8 +188,7 @@ public class CategoryAttributeRequirementForms {
   /**
    * 控件类型：由属性数据类型推导，前端不再自己映射一遍。
    *
-   * <p>映射错了的代价是「数字属性给了文本框」，用户输进来的值到校验那步才发现不合法——
-   * 提前到 schema 层解决。
+   * <p>映射错了的代价是「数字属性给了文本框」，用户输进来的值到校验那步才发现不合法—— 提前到 schema 层解决。
    */
   private static String control(String dataType) {
     return switch (dataType == null ? "" : dataType.trim().toUpperCase(Locale.ROOT)) {
@@ -209,17 +203,20 @@ public class CategoryAttributeRequirementForms {
   /**
    * 枚举属性的可选项，停用的也返回。
    *
-   * <p>停用项必须返回而不能消失：消失会让运营以为自己配的选项不见了，
-   * 而实际上它只是被 3.2.1.2 停用了（既有商品还要按它解析）。前端按 {@code enabled} 置灰。
+   * <p>停用项必须返回而不能消失：消失会让运营以为自己配的选项不见了， 而实际上它只是被 3.2.1.2 停用了（既有商品还要按它解析）。前端按 {@code enabled} 置灰。
    */
   private List<EntryFormOption> options(CategoryAttributeRequirement rule) {
     if (!"OPTION".equals(rule.dataType())) return List.of();
     Map<String, Boolean> enabled = new LinkedHashMap<>();
     for (Record r :
-        sql.fetch("select value,enabled from attribute_option where attribute_id=? order by value",
+        sql.fetch(
+            "select value,enabled from attribute_option where attribute_id=? order by value",
             rule.attributeId()))
-      enabled.put(r.get("value", String.class), Boolean.TRUE.equals(r.get("enabled", Boolean.class)));
-    return enabled.keySet().stream().map(v -> new EntryFormOption(v, enabled.getOrDefault(v, true))).toList();
+      enabled.put(
+          r.get("value", String.class), Boolean.TRUE.equals(r.get("enabled", Boolean.class)));
+    return enabled.keySet().stream()
+        .map(v -> new EntryFormOption(v, enabled.getOrDefault(v, true)))
+        .toList();
   }
 
   // ============================================================ 保存前校验
@@ -227,24 +224,21 @@ public class CategoryAttributeRequirementForms {
   /**
    * 按类目的有效规则集校验一份提交的属性值。
    *
-   * <p>逐字段返回结果（不是遇错就抛 400）：录入表单需要「同时高亮所有不合法字段」，
-   * 一次报一个错误会让用户来回提交十几轮。整体结论放在 {@code valid} 上。
+   * <p>逐字段返回结果（不是遇错就抛 400）：录入表单需要「同时高亮所有不合法字段」， 一次报一个错误会让用户来回提交十几轮。整体结论放在 {@code valid} 上。
    *
    * <p>三条口径：
+   *
    * <ul>
    *   <li><b>未提交且非必填 → PASSED</b>。可选属性不填是合法的，不该报错。
-   *   <li><b>条件必填在条件不成立时不算缺失</b>：此时它就是一个普通可选项。
-   *       条件成立却没填，才报 {@code CONDITION_UNMET}——把「条件触发了但没填」
+   *   <li><b>条件必填在条件不成立时不算缺失</b>：此时它就是一个普通可选项。 条件成立却没填，才报 {@code CONDITION_UNMET}——把「条件触发了但没填」
    *       与「没触发」分成两个码，运营看到提示才知道该去改哪个字段。
-   *   <li><b>提交了本类目未配置的属性 → {@code UNKNOWN_ATTRIBUTE}</b>（失败）。
-   *       静默丢弃会让人以为值存进去了，实际被扔掉。
+   *   <li><b>提交了本类目未配置的属性 → {@code UNKNOWN_ATTRIBUTE}</b>（失败）。 静默丢弃会让人以为值存进去了，实际被扔掉。
    * </ul>
    */
   public AttributeValidationReport validate(UUID categoryId, AttributeValidationInput input) {
     var category = categoryRow(categoryId);
     CatalogService.check(
-        "INTERNAL".equals(treeKind(categoryId)),
-        "平台类目映射树的属性要求由 04 刊登按平台维护，本端点只服务内部管理分类");
+        "INTERNAL".equals(treeKind(categoryId)), "平台类目映射树的属性要求由 04 刊登按平台维护，本端点只服务内部管理分类");
 
     List<CategoryAttributeRequirement> rules =
         requirements.effectiveRequirements(categoryId).stream()
@@ -256,12 +250,13 @@ public class CategoryAttributeRequirementForms {
     Map<UUID, String> submittedById = new LinkedHashMap<>();
     for (AttributeValueInput entry : input.values()) {
       UUID attributeId = resolveAttributeId(entry);
-      CatalogService.check(attributeId != null,
-          "每个提交项都要带 attributeId 或 attributeCode");
-      boolean known =
-          rules.stream().anyMatch(r -> r.attributeId().equals(attributeId));
-      CatalogService.check(known,
-          "属性「" + entry.attributeCode() + "」在这个类目上没有生效的属性要求，无法校验："
+      CatalogService.check(attributeId != null, "每个提交项都要带 attributeId 或 attributeCode");
+      boolean known = rules.stream().anyMatch(r -> r.attributeId().equals(attributeId));
+      CatalogService.check(
+          known,
+          "属性「"
+              + entry.attributeCode()
+              + "」在这个类目上没有生效的属性要求，无法校验："
               + "请先在类目属性要求里配置它，或检查是否误传了别的类目的属性");
       submittedById.put(attributeId, entry.value());
     }
@@ -282,8 +277,7 @@ public class CategoryAttributeRequirementForms {
         results.size(),
         (int) failed,
         results,
-        "校验基于该类目的有效属性要求（含从祖先类目继承的）。条件必填只在条件成立时才判必填，"
-            + "条件不成立时该字段等同于可选项。");
+        "校验基于该类目的有效属性要求（含从祖先类目继承的）。条件必填只在条件成立时才判必填，" + "条件不成立时该字段等同于可选项。");
   }
 
   /** 单条规则的校验：缺失 → 类型 → 取值约束，按这个顺序短路，每条规则最多给一个原因。 */
@@ -300,9 +294,18 @@ public class CategoryAttributeRequirementForms {
               rule.condition().dataType(),
               dependencyValue);
       if (active && blank)
-        return result(rule, "CONDITION_UNMET", active, value,
-            "「" + rule.attributeName() + "」在「" + rule.condition().attributeName() + "」取 "
-                + String.join(" / ", rule.conditionValues()) + " 时必填，请补填");
+        return result(
+            rule,
+            "CONDITION_UNMET",
+            active,
+            value,
+            "「"
+                + rule.attributeName()
+                + "」在「"
+                + rule.condition().attributeName()
+                + "」取 "
+                + String.join(" / ", rule.conditionValues())
+                + " 时必填，请补填");
       if (blank) return result(rule, "PASSED", active, value, null);
       return checkValue(rule, value, active);
     }
@@ -317,33 +320,66 @@ public class CategoryAttributeRequirementForms {
   private AttributeValidationResult checkValue(
       CategoryAttributeRequirement rule, String value, Boolean conditionActive) {
     String typeProblem = typeProblem(rule.dataType(), value);
-    if (typeProblem != null) return result(rule, "TYPE_MISMATCH", conditionActive, value, typeProblem);
+    if (typeProblem != null)
+      return result(rule, "TYPE_MISMATCH", conditionActive, value, typeProblem);
 
     if (rule.minValue() != null || rule.maxValue() != null) {
       BigDecimal number = new BigDecimal(value);
       if (rule.minValue() != null && number.compareTo(rule.minValue()) < 0)
-        return result(rule, "OUT_OF_RANGE", conditionActive, value,
+        return result(
+            rule,
+            "OUT_OF_RANGE",
+            conditionActive,
+            value,
             "「" + rule.attributeName() + "」不能小于 " + rule.minValue());
       if (rule.maxValue() != null && number.compareTo(rule.maxValue()) > 0)
-        return result(rule, "OUT_OF_RANGE", conditionActive, value,
+        return result(
+            rule,
+            "OUT_OF_RANGE",
+            conditionActive,
+            value,
             "「" + rule.attributeName() + "」不能大于 " + rule.maxValue());
     }
     if (rule.maxLength() != null && value.length() > rule.maxLength())
-      return result(rule, "LENGTH_EXCEEDED", conditionActive, value,
-          "「" + rule.attributeName() + "」最多 " + rule.maxLength() + " 个字符，当前 " + value.length() + " 个");
+      return result(
+          rule,
+          "LENGTH_EXCEEDED",
+          conditionActive,
+          value,
+          "「"
+              + rule.attributeName()
+              + "」最多 "
+              + rule.maxLength()
+              + " 个字符，当前 "
+              + value.length()
+              + " 个");
 
     if ("OPTION".equals(rule.dataType())) {
-      boolean allowed =
-          rule.allowedOptions().isEmpty() || rule.allowedOptions().contains(value);
+      boolean allowed = rule.allowedOptions().isEmpty() || rule.allowedOptions().contains(value);
       if (!allowed && !rule.allowFreeText())
-        return result(rule, "OPTION_NOT_ALLOWED", conditionActive, value,
-            "「" + value + "」不在该类目允许的取值范围内"
-                + (rule.allowedOptions().isEmpty() ? "" : "：" + String.join(" / ", rule.allowedOptions())));
+        return result(
+            rule,
+            "OPTION_NOT_ALLOWED",
+            conditionActive,
+            value,
+            "「"
+                + value
+                + "」不在该类目允许的取值范围内"
+                + (rule.allowedOptions().isEmpty()
+                    ? ""
+                    : "：" + String.join(" / ", rule.allowedOptions())));
       boolean exists =
-          sql.fetchOne("select 1 from attribute_option where attribute_id=? and value=?",
-              rule.attributeId(), value) != null;
+          sql.fetchOne(
+                  "select 1 from attribute_option where attribute_id=? and value=?",
+                  rule.attributeId(),
+                  value)
+              != null;
       if (!exists && !rule.allowFreeText())
-        return result(rule, "OPTION_NOT_ALLOWED", conditionActive, value,
+        return result(
+            rule,
+            "OPTION_NOT_ALLOWED",
+            conditionActive,
+            value,
             "「" + value + "」不是属性「" + rule.attributeName() + "」的选项值");
     }
     return result(rule, "PASSED", conditionActive, value, null);
@@ -352,9 +388,8 @@ public class CategoryAttributeRequirementForms {
   /**
    * 类型校验。返回可读原因或 {@code null}。
    *
-   * <p>BOOLEAN 刻意只接受 {@code true}/{@code false} 字面量：把 {@code 1} / {@code yes} /
-   * {@code 是} 都算成 true 会让「勾选框没勾但值是 1」这类数据静默通过。
-   * DATE 按 ISO {@code yyyy-MM-dd}：与属性字典的 DATE 存法一致。
+   * <p>BOOLEAN 刻意只接受 {@code true}/{@code false} 字面量：把 {@code 1} / {@code yes} / {@code 是} 都算成 true
+   * 会让「勾选框没勾但值是 1」这类数据静默通过。 DATE 按 ISO {@code yyyy-MM-dd}：与属性字典的 DATE 存法一致。
    */
   private static String typeProblem(String dataType, String value) {
     String type = dataType == null ? "" : dataType.trim().toUpperCase(Locale.ROOT);
@@ -384,7 +419,11 @@ public class CategoryAttributeRequirementForms {
   }
 
   private AttributeValidationResult result(
-      CategoryAttributeRequirement rule, String code, Boolean conditionActive, String value, String message) {
+      CategoryAttributeRequirement rule,
+      String code,
+      Boolean conditionActive,
+      String value,
+      String message) {
     return new AttributeValidationResult(
         rule.attributeId(),
         rule.attributeCode(),
@@ -392,7 +431,9 @@ public class CategoryAttributeRequirementForms {
         code,
         message,
         "PASSED".equals(code),
-        rule.condition() != null ? Boolean.TRUE.equals(conditionActive) : "REQUIRED".equals(rule.requirement()),
+        rule.condition() != null
+            ? Boolean.TRUE.equals(conditionActive)
+            : "REQUIRED".equals(rule.requirement()),
         rule.requirement(),
         conditionActive,
         value);
@@ -432,14 +473,14 @@ public class CategoryAttributeRequirementForms {
         counts.get("requirement_count", Long.class),
         counts.get("conditional_count", Long.class),
         counts.get("disabled_count", Long.class),
-        "覆盖率按内部管理分类树的类目统计（含从祖先继承到至少一条要求的类目）。"
-            + "没有要求的类目，其录入表单不做必填校验。");
+        "覆盖率按内部管理分类树的类目统计（含从祖先继承到至少一条要求的类目）。" + "没有要求的类目，其录入表单不做必填校验。");
   }
 
   // ============================================================ 工具
 
   /** 提交值取值：id 优先，其次 code（前端拿的是 schema，用 code 最顺手）。 */
-  private static String submitted(Map<String, String> values, UUID attributeId, String attributeCode) {
+  private static String submitted(
+      Map<String, String> values, UUID attributeId, String attributeCode) {
     if (values == null || values.isEmpty()) return NO_VALUE_SENTINEL;
     String byId = values.get(attributeId.toString());
     return byId != null ? byId : values.get(attributeCode);
@@ -449,7 +490,9 @@ public class CategoryAttributeRequirementForms {
   private UUID resolveAttributeId(AttributeValueInput entry) {
     if (entry.attributeId() != null) return entry.attributeId();
     if (entry.attributeCode() == null || entry.attributeCode().isBlank()) return null;
-    var row = sql.fetchOne("select id from attribute_definition where code=?", entry.attributeCode().trim());
+    var row =
+        sql.fetchOne(
+            "select id from attribute_definition where code=?", entry.attributeCode().trim());
     return row == null ? null : row.get("id", UUID.class);
   }
 
@@ -473,9 +516,11 @@ public class CategoryAttributeRequirementForms {
     if (path == null || path.length == 0) return "";
     Map<UUID, String> names = new LinkedHashMap<>();
     for (Record r :
-        sql.fetch("select id,name from product_category where id in ("
-                + String.join(",", java.util.Collections.nCopies(path.length, "?")) + ")", path))
-      names.put(r.get("id", UUID.class), r.get("name", String.class));
+        sql.fetch(
+            "select id,name from product_category where id in ("
+                + String.join(",", java.util.Collections.nCopies(path.length, "?"))
+                + ")",
+            path)) names.put(r.get("id", UUID.class), r.get("name", String.class));
     List<String> parts = new ArrayList<>();
     for (UUID id : path) if (names.containsKey(id)) parts.add(names.get(id));
     return String.join(" / ", parts);

@@ -19,21 +19,16 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.4.2.2 描述与卖点库的批量填充与段落查询。
  *
- * <p>蓝图硬要求落在这里：「<b>变量缺失必须在填充时报告，不能静默留下占位符。</b>」
- * 具体做法由 {@link DescriptionRenderer}（纯函数）负责产出，
+ * <p>蓝图硬要求落在这里：「<b>变量缺失必须在填充时报告，不能静默留下占位符。</b>」 具体做法由 {@link DescriptionRenderer}（纯函数）负责产出，
  * 本类负责把它落成三张表：批次 → 逐 SKU 结果 → 段落 + 缺失变量报告。
  *
  * <p>本类的纪律：
  *
  * <ol>
- *   <li><b>SKU 范围、短语池与译文在提交时快照。</b>批量跑到一半商品改名、短语库被改，
- *       这一批段落的口径都必须仍是提交那一刻的，否则「这段当时填了什么」答不出来。
- *   <li><b>缺变量是一种输出，不是一种失败。</b>照样产出正文（占位符被剥掉），
- *       段落标成 INCOMPLETE，缺了什么逐变量落在 {@code content_render_issue} 上。
- *       批次状态因此是三态：SUCCEEDED（全部填好）/ PARTIAL（有段落缺变量）/
- *       FAILED（一个可用段落都没有）。
- *   <li><b>填充是同步的「已完成」语义</b>，与 3.4.2.1 一致：成本只与 SKU 数成正比
- *       （每个 SKU 一次字符串替换），几百个 SKU 是几十毫秒。
+ *   <li><b>SKU 范围、短语池与译文在提交时快照。</b>批量跑到一半商品改名、短语库被改， 这一批段落的口径都必须仍是提交那一刻的，否则「这段当时填了什么」答不出来。
+ *   <li><b>缺变量是一种输出，不是一种失败。</b>照样产出正文（占位符被剥掉）， 段落标成 INCOMPLETE，缺了什么逐变量落在 {@code
+ *       content_render_issue} 上。 批次状态因此是三态：SUCCEEDED（全部填好）/ PARTIAL（有段落缺变量）/ FAILED（一个可用段落都没有）。
+ *   <li><b>填充是同步的「已完成」语义</b>，与 3.4.2.1 一致：成本只与 SKU 数成正比 （每个 SKU 一次字符串替换），几百个 SKU 是几十毫秒。
  *       做成异步只会让运营为几十毫秒去盯进度条。
  * </ol>
  */
@@ -43,7 +38,8 @@ public class DescriptionRenderService {
   private final AccessService access;
   private final DescriptionService descriptions;
 
-  public DescriptionRenderService(DSLContext sql, AccessService access, DescriptionService descriptions) {
+  public DescriptionRenderService(
+      DSLContext sql, AccessService access, DescriptionService descriptions) {
     this.sql = sql;
     this.access = access;
     this.descriptions = descriptions;
@@ -54,13 +50,10 @@ public class DescriptionRenderService {
   /**
    * 批量填充（同步，返回即已完成）。
    *
-   * <p>流程刻意是「先把输入查齐并校验，再开始渲染」：用户点了提交之后才发现
-   * 「这个语言根本没配译文」，而批次已经建好了，这体验很糟。
+   * <p>流程刻意是「先把输入查齐并校验，再开始渲染」：用户点了提交之后才发现 「这个语言根本没配译文」，而批次已经建好了，这体验很糟。
    *
-   * <p>译文缺失在提交时就拒（整批拒，不产出段落）——因为「缺译文」的正确修法是去补译文，
-   * 而按源语言正文填出来的段落会被误当成译文发到平台上，那比不填更糟。
-   * 相比之下，<b>商品字段为空</b>与<b>短语池为空</b>不拒：它们是逐 SKU / 逐类型的正常状态，
-   * 交由渲染器逐变量报告，让运营看到「哪 30 个 SKU 因为哪个变量没填上」。
+   * <p>译文缺失在提交时就拒（整批拒，不产出段落）——因为「缺译文」的正确修法是去补译文， 而按源语言正文填出来的段落会被误当成译文发到平台上，那比不填更糟。
+   * 相比之下，<b>商品字段为空</b>与<b>短语池为空</b>不拒：它们是逐 SKU / 逐类型的正常状态， 交由渲染器逐变量报告，让运营看到「哪 30 个 SKU 因为哪个变量没填上」。
    */
   public ContentRender render(AccessService.Access actor, ContentRenderInput input) {
     String problem =
@@ -75,8 +68,7 @@ public class DescriptionRenderService {
     var template = descriptions.templateRow(input.templateId());
     CatalogService.check(
         Boolean.TRUE.equals(template.get("enabled", Boolean.class)),
-        "模板「" + template.get("name", String.class) + "」已停用，不能用它填充。"
-            + "请换一个启用的模板，或先启用它");
+        "模板「" + template.get("name", String.class) + "」已停用，不能用它填充。" + "请换一个启用的模板，或先启用它");
 
     String sourceLocale = template.get("source_locale", String.class);
     String sourceBody = template.get("body", String.class);
@@ -87,14 +79,18 @@ public class DescriptionRenderService {
       Record translation = translationRow(input.templateId(), locale);
       CatalogService.check(
           translation != null,
-          "模板没有语言「" + locale + "」的译文，不能用这个语言填充："
+          "模板没有语言「"
+              + locale
+              + "」的译文，不能用这个语言填充："
               + "缺译文时按源语言正文填出来的那段会被当成译文发到平台上。"
-              + "请先补一条 " + locale + " 的译文（AI 预填后请复核占位符），或改用源语言 " + sourceLocale);
+              + "请先补一条 "
+              + locale
+              + " 的译文（AI 预填后请复核占位符），或改用源语言 "
+              + sourceLocale);
       renderBody = translation.get("body", String.class);
     }
 
-    Map<String, DescriptionRenderer.VariableSpec> variables =
-        templateVariables(input.templateId());
+    Map<String, DescriptionRenderer.VariableSpec> variables = templateVariables(input.templateId());
     DescriptionRenderer.TemplateSpec spec =
         new DescriptionRenderer.TemplateSpec(
             template.get("content_type", String.class),
@@ -134,24 +130,36 @@ public class DescriptionRenderService {
           rendered.issues().isEmpty()
               ? ""
               : rendered.issues().stream()
-                  .map(issue -> issue.variableName() + "（"
-                      + DescriptionRules.issueKindLabel(issue.issueKind()) + "）")
+                  .map(
+                      issue ->
+                          issue.variableName()
+                              + "（"
+                              + DescriptionRules.issueKindLabel(issue.issueKind())
+                              + "）")
                   .collect(java.util.stream.Collectors.joining("、"));
       UUID renderSkuId = Ids.next();
       String outcome =
-          rendered.complete() ? "RENDERED" : (rendered.text().isEmpty() ? "REJECTED" : "INCOMPLETE");
+          rendered.complete()
+              ? "RENDERED"
+              : (rendered.text().isEmpty() ? "REJECTED" : "INCOMPLETE");
       skuRows.add(
           new ContentRenderSkuRow(
-              renderSkuId, renderId, sku.skuId(), sku.skuCode(), sku.skuName(), sku.spuName(),
-              sku.brand(), sku.category(), outcome,
+              renderSkuId,
+              renderId,
+              sku.skuId(),
+              sku.skuCode(),
+              sku.skuName(),
+              sku.spuName(),
+              sku.brand(),
+              sku.category(),
+              outcome,
               DescriptionRules.outcomeLabel(outcome),
               rendered.complete() ? 1 : 0,
               rendered.complete() ? 0 : 1,
               rendered.issues().size(),
               reason));
       drafts.add(new SectionDraft(renderSkuId, sku, rendered));
-      if (outcome.equals("REJECTED"))
-        errors.add(sku.skuCode() + "：" + reason);
+      if (outcome.equals("REJECTED")) errors.add(sku.skuCode() + "：" + reason);
     }
 
     // 批次三态。判据是「有没有产出正文」，不是「有没有全部变量都有值」：
@@ -184,8 +192,15 @@ public class DescriptionRenderService {
       sql.execute(
           "insert into content_render_sku(id,tenant_id,render_id,sku_id,outcome,complete_count,"
               + "incomplete_count,issue_count,reason) values(?,?,?,?,?,?,?,?,?)",
-          row.id(), tenantId, renderId, row.skuId(), row.outcome(), row.completeCount(),
-          row.incompleteCount(), row.issueCount(), row.reason());
+          row.id(),
+          tenantId,
+          renderId,
+          row.skuId(),
+          row.outcome(),
+          row.completeCount(),
+          row.incompleteCount(),
+          row.issueCount(),
+          row.reason());
 
     // 段落与缺失报告。渲染时算出的 issues 与短语文本快照原样写入，不在落库时重算——
     // 重算就等于「落库的值」与「决定它算不算缺的那个判断」可能不是一回事。
@@ -215,13 +230,32 @@ public class DescriptionRenderService {
         sql.execute(
             "insert into content_render_issue(id,tenant_id,render_id,section_id,render_sku_id,sku_id,"
                 + "variable_name,issue_kind,detail) values(?,?,?,?,?,?,?,?,?)",
-            Ids.next(), tenantId, renderId, sectionId, draft.renderSkuId(),
-            draft.sku().skuId(), issue.variableName(), issue.issueKind(), issue.detail());
+            Ids.next(),
+            tenantId,
+            renderId,
+            sectionId,
+            draft.renderSkuId(),
+            draft.sku().skuId(),
+            issue.variableName(),
+            issue.issueKind(),
+            issue.detail());
     }
 
-    descriptions.audit(actor, renderId, "ContentRenderSubmitted",
-        "模板 " + template.get("code", String.class) + "，语言 " + locale + "，" + skus.size()
-            + " 个 SKU，" + complete + " 段已填好，" + incomplete + " 段缺变量");
+    descriptions.audit(
+        actor,
+        renderId,
+        "ContentRenderSubmitted",
+        "模板 "
+            + template.get("code", String.class)
+            + "，语言 "
+            + locale
+            + "，"
+            + skus.size()
+            + " 个 SKU，"
+            + complete
+            + " 段已填好，"
+            + incomplete
+            + " 段缺变量");
     return render(renderId);
   }
 
@@ -284,7 +318,8 @@ public class DescriptionRenderService {
                 + "t.content_type"
                 + " from content_render r join content_template t"
                 + " on t.tenant_id=r.tenant_id and t.id=r.template_id"
-                + " where r.tenant_id=?" + clause
+                + " where r.tenant_id=?"
+                + clause
                 + " order by r.created_at desc,r.id desc limit ? offset ?",
             bindsPage.toArray());
     List<ContentRenderRow> items = new ArrayList<>();
@@ -298,8 +333,7 @@ public class DescriptionRenderService {
         counts.get("partial_count", Long.class),
         counts.get("failed_count", Long.class),
         counts.get("issue_count", Long.class),
-        "缺变量不是失败：「部分段落缺变量」表示正文照样产出了，只是其中若干变量没填上，"
-            + "缺了什么在批次详情里逐条列出。补完模板变量或短语池后重跑这一批即可。");
+        "缺变量不是失败：「部分段落缺变量」表示正文照样产出了，只是其中若干变量没填上，" + "缺了什么在批次详情里逐条列出。补完模板变量或短语池后重跑这一批即可。");
   }
 
   /** 批次详情：批次 + 逐 SKU 结果 + 全部段落（含缺失报告）+ 按变量汇总。 */
@@ -311,7 +345,10 @@ public class DescriptionRenderService {
     String note =
         missing.isEmpty()
             ? "这一批的变量都填上了：" + sections.size() + " 段正文可直接被 04 刊登与 15 客服引用。"
-            : "有 " + missing.size() + " 个变量在填充时取不到值（合计 " + row.issueCount()
+            : "有 "
+                + missing.size()
+                + " 个变量在填充时取不到值（合计 "
+                + row.issueCount()
                 + " 次）。正文里对应的占位符已被剥掉，不会带着 {brand} 这样的字面量发到平台上；"
                 + "把变量补上后重跑这一批即可。";
     return new ContentRenderDetail(row, skus, sections, missing, note);
@@ -319,14 +356,16 @@ public class DescriptionRenderService {
 
   /** 某批次的逐 SKU 结果。 */
   public List<ContentRenderSkuRow> renderSkus(UUID renderId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select r.id,r.render_id,r.sku_id,s.code,s.name,p.name as spu_name,p.brand,p.category,"
                 + "r.outcome,r.complete_count,r.incomplete_count,r.issue_count,r.reason"
                 + " from content_render_sku r"
                 + " join sku s on s.tenant_id=r.tenant_id and s.id=r.sku_id"
                 + " join spu p on p.tenant_id=s.tenant_id and p.id=s.spu_id"
                 + " where r.tenant_id=? and r.render_id=? order by s.code,r.id",
-            descriptions.currentTenantId(), renderId)
+            descriptions.currentTenantId(),
+            renderId)
         .stream()
         .map(
             r -> {
@@ -353,17 +392,18 @@ public class DescriptionRenderService {
   /**
    * 按变量汇总的缺失情况。
    *
-   * <p>逐变量加总而不是逐段落罗列：200 个 SKU 各缺 brand 时，
-   * 「brand 缺 200 次」比 200 行「brand 缺了」有用得多，
+   * <p>逐变量加总而不是逐段落罗列：200 个 SKU 各缺 brand 时， 「brand 缺 200 次」比 200 行「brand 缺了」有用得多，
    * 而且它直接对应「该去补品牌字段还是该去补短语库」这个决定。
    */
   public List<ContentMissingVariable> missingVariablesOf(UUID renderId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select i.variable_name,i.issue_kind,count(*) as occurrences,min(i.detail) as detail"
                 + " from content_render_issue i where i.tenant_id=? and i.render_id=?"
                 + " group by i.variable_name,i.issue_kind"
                 + " order by count(*) desc,i.variable_name",
-            descriptions.currentTenantId(), renderId)
+            descriptions.currentTenantId(),
+            renderId)
         .stream()
         .map(
             r -> {
@@ -426,23 +466,21 @@ public class DescriptionRenderService {
         counts.get("complete_count", Long.class),
         counts.get("incomplete_count", Long.class),
         issueCount,
-        "只有「已填好」的段落才会被 04 刊登与 15 客服引用；缺变量的段落正文里没有占位符，"
-            + "但标着缺变量，不能当成可发布内容。");
+        "只有「已填好」的段落才会被 04 刊登与 15 客服引用；缺变量的段落正文里没有占位符，" + "但标着缺变量，不能当成可发布内容。");
   }
 
   /**
    * 导出段落 CSV（供 04 刊登与 15 客服取用）。
    *
-   * <p>每批在流式线程里用 {@code access.run} 重新开租户事务：那批连接上没有
-   * {@code app.current_tenant}，FORCE RLS 会把所有行藏起来，
-   * 于是导出只有一个表头（3.4.2.1 的 {@code TitleService.streamCsv} 踩过这个坑，
-   * 症状是「查出来 0 行还不报错」）。
+   * <p>每批在流式线程里用 {@code access.run} 重新开租户事务：那批连接上没有 {@code app.current_tenant}，FORCE RLS 会把所有行藏起来，
+   * 于是导出只有一个表头（3.4.2.1 的 {@code TitleService.streamCsv} 踩过这个坑， 症状是「查出来 0 行还不报错」）。
    *
-   * <p>筛选条件与 {@code listSections} 共用同一段 SQL 拼装，
-   * 所以「导出结果」与「当前筛选」永远一致。
+   * <p>筛选条件与 {@code listSections} 共用同一段 SQL 拼装， 所以「导出结果」与「当前筛选」永远一致。
    */
   public void streamCsv(
-      AccessService.Access actor, ContentSectionQuery query, java.util.function.Consumer<String> emit) {
+      AccessService.Access actor,
+      ContentSectionQuery query,
+      java.util.function.Consumer<String> emit) {
     int size = 200;
     int offset = 0;
     String where = sectionWhere(query);
@@ -452,8 +490,7 @@ public class DescriptionRenderService {
     List<Object> binds = new ArrayList<>();
     binds.add(actor.tenantId());
     binds.addAll(filterBinds);
-    emit.accept(
-        "SKU编码,SPU名称,商品名称,品牌,分类,内容类型,语言,状态,字符数,缺失变量,缺失原因,正文\n");
+    emit.accept("SKU编码,SPU名称,商品名称,品牌,分类,内容类型,语言,状态,字符数,缺失变量,缺失原因,正文\n");
     while (true) {
       int at = offset;
       List<Record> batch =
@@ -581,7 +618,8 @@ public class DescriptionRenderService {
                 + " join sku k on k.tenant_id=s.tenant_id and k.id=s.sku_id"
                 + " join spu p on p.tenant_id=k.tenant_id and p.id=k.spu_id"
                 + " where s.tenant_id=? and s.render_id=? order by k.code,s.id",
-            descriptions.currentTenantId(), renderId);
+            descriptions.currentTenantId(),
+            renderId);
     Map<UUID, List<ContentRenderIssue>> issueMap = issuesOfSections(rows);
     List<ContentSection> out = new ArrayList<>(rows.size());
     for (Record r : rows) out.add(toSection(r, issueMap));
@@ -598,11 +636,11 @@ public class DescriptionRenderService {
             "select i.id,i.section_id,i.sku_id,i.variable_name,i.issue_kind,i.detail,k.code"
                 + " from content_render_issue i"
                 + " join sku k on k.tenant_id=i.tenant_id and k.id=i.sku_id"
-                + " where i.tenant_id=? and i.section_id in (" + DescriptionService.placeholders(ids)
+                + " where i.tenant_id=? and i.section_id in ("
+                + DescriptionService.placeholders(ids)
                 + ") order by i.variable_name",
             concat(List.of(descriptions.currentTenantId()), ids).toArray()))
-      out.computeIfAbsent(r.get("section_id", UUID.class), k -> new ArrayList<>())
-          .add(toIssue(r));
+      out.computeIfAbsent(r.get("section_id", UUID.class), k -> new ArrayList<>()).add(toIssue(r));
     return out;
   }
 
@@ -659,12 +697,12 @@ public class DescriptionRenderService {
     String contentType = r.get("content_type", String.class);
     String note =
         "FAILED".equals(status)
-            ? "这一批一个可用段落都没产出：看批次详情里逐 SKU 的原因，"
-                + "通常是绑定的短语池一条短语都没有。"
-            : "已填出 " + complete + " 段可直接引用的正文"
+            ? "这一批一个可用段落都没产出：看批次详情里逐 SKU 的原因，" + "通常是绑定的短语池一条短语都没有。"
+            : "已填出 "
+                + complete
+                + " 段可直接引用的正文"
                 + (incomplete > 0
-                    ? "，另有 " + incomplete + " 段缺变量（合计 " + issueCount
-                        + " 次，缺了什么逐条列在批次详情里）"
+                    ? "，另有 " + incomplete + " 段缺变量（合计 " + issueCount + " 次，缺了什么逐条列在批次详情里）"
                     : "")
                 + "。缺变量的段落里占位符已被剥掉，不会带着字面量发到平台上。";
     return new ContentRender(
@@ -726,7 +764,8 @@ public class DescriptionRenderService {
   private Record translationRow(UUID templateId, String locale) {
     return sql.fetchOne(
         "select body from content_template_translation where template_id=? and locale=?",
-        templateId, locale);
+        templateId,
+        locale);
   }
 
   /** 填充用：模板变量的 name → spec。 */
@@ -746,8 +785,8 @@ public class DescriptionRenderService {
   /**
    * 填充用：SKU 事实快照（含 SPU 的品牌与分类，以及同 SPU 下的型号清单）。
    *
-   * <p>{@code p.name} 必须显式起别名 {@code as spu_name}：不起别名时 s.name 与 p.name
-   * 都落在 "name" 列上，取到的会是**后一列**的值，于是每个 SKU 的商品名都变成 SPU 名。
+   * <p>{@code p.name} 必须显式起别名 {@code as spu_name}：不起别名时 s.name 与 p.name 都落在 "name"
+   * 列上，取到的会是**后一列**的值，于是每个 SKU 的商品名都变成 SPU 名。
    */
   private List<DescriptionRenderer.SkuFacts> skuFacts(List<UUID> skuIds) {
     List<DescriptionRenderer.SkuFacts> out = new ArrayList<>();
@@ -760,10 +799,10 @@ public class DescriptionRenderService {
                   + "  as sibling_codes"
                   + " from sku s join spu p on p.tenant_id=s.tenant_id and p.id=s.spu_id"
                   + " where s.tenant_id=? and s.id=?",
-              descriptions.currentTenantId(), skuId);
+              descriptions.currentTenantId(),
+              skuId);
       if (row == null)
-        throw new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "SKU 不存在或不属于当前租户：" + skuId);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "SKU 不存在或不属于当前租户：" + skuId);
       String siblings = row.get("sibling_codes", String.class);
       out.add(
           new DescriptionRenderer.SkuFacts(

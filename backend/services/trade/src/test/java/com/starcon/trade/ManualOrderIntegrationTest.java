@@ -6,9 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.util.LinkedHashMap;
@@ -31,12 +29,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 9.1.2.2 手工订单。
  *
- * <p>本测试逐条验证蓝图本模块的五条硬要求，外加 AGENTS.md 明文要求的三条多租户断言。
- * 全部走 <b>HTTP 端点 + 真实 PostgreSQL 16 + 强制 RLS</b>，不使用任何内存替身：
- * 走端点才能同时证明「服务层 + DB 层」两层都没把闸门漏掉。
+ * <p>本测试逐条验证蓝图本模块的五条硬要求，外加 AGENTS.md 明文要求的三条多租户断言。 全部走 <b>HTTP 端点 + 真实 PostgreSQL 16 + 强制
+ * RLS</b>，不使用任何内存替身： 走端点才能同时证明「服务层 + DB 层」两层都没把闸门漏掉。
  *
- * <p><b>刻意不提供 catalog / crm 的 stub</b>：本模块对它们的依赖只有「逻辑 ID + 快照」，
- * 一次回查都不该发生。测试里出现 catalog 客户端反而说明快照纪律破了。
+ * <p><b>刻意不提供 catalog / crm 的 stub</b>：本模块对它们的依赖只有「逻辑 ID + 快照」， 一次回查都不该发生。测试里出现 catalog
+ * 客户端反而说明快照纪律破了。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -97,8 +94,7 @@ class ManualOrderIntegrationTest {
       actors.put("Bearer tenant-a", actor(user, a, List.of(grant("ALL", allPermissions))));
       actors.put("Bearer tenant-b", actor(user, b, List.of(grant("ALL", allPermissions))));
       actors.put(
-          "Bearer read-only",
-          actor(user, a, List.of(grant("ALL", List.of("trade.orders.read")))));
+          "Bearer read-only", actor(user, a, List.of(grant("ALL", List.of("trade.orders.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -192,14 +188,50 @@ class ManualOrderIntegrationTest {
     m.put(
         "charges",
         List.of(
-            Map.of("chargeType", "SHIPPING", "label", "海运费", "amount", "8.00",
-                "chargeLevel", "ORDER", "note", ""),
-            Map.of("chargeType", "DISCOUNT", "label", "老客户折扣", "amount", "-3.00",
-                "chargeLevel", "ORDER", "note", ""),
-            Map.of("chargeType", "TAX", "label", "进口税", "amount", "1.50",
-                "chargeLevel", "ORDER", "note", ""),
-            Map.of("chargeType", "PACKAGING", "label", "加固包装", "amount", "2.00",
-                "chargeLevel", "ORDER", "note", "")));
+            Map.of(
+                "chargeType",
+                "SHIPPING",
+                "label",
+                "海运费",
+                "amount",
+                "8.00",
+                "chargeLevel",
+                "ORDER",
+                "note",
+                ""),
+            Map.of(
+                "chargeType",
+                "DISCOUNT",
+                "label",
+                "老客户折扣",
+                "amount",
+                "-3.00",
+                "chargeLevel",
+                "ORDER",
+                "note",
+                ""),
+            Map.of(
+                "chargeType",
+                "TAX",
+                "label",
+                "进口税",
+                "amount",
+                "1.50",
+                "chargeLevel",
+                "ORDER",
+                "note",
+                ""),
+            Map.of(
+                "chargeType",
+                "PACKAGING",
+                "label",
+                "加固包装",
+                "amount",
+                "2.00",
+                "chargeLevel",
+                "ORDER",
+                "note",
+                "")));
     return m;
   }
 
@@ -219,8 +251,15 @@ class ManualOrderIntegrationTest {
     l.put(
         "attributes",
         List.of(
-            Map.of("attributeName", "克重", "attributeValue", "180", "attributeUnit", "g",
-                "sourceVersion", "cat-v7")));
+            Map.of(
+                "attributeName",
+                "克重",
+                "attributeValue",
+                "180",
+                "attributeUnit",
+                "g",
+                "sourceVersion",
+                "cat-v7")));
     return l;
   }
 
@@ -271,8 +310,7 @@ class ManualOrderIntegrationTest {
     List<String> tables =
         inA(
             () ->
-                sql.fetch(
-                        "select tablename from pg_tables where schemaname = current_schema()")
+                sql.fetch("select tablename from pg_tables where schemaname = current_schema()")
                     .getValues("tablename", String.class));
     assertThat(tables)
         .as("来源必须是字段而不是表：出现手工订单专用表就意味着平台单将来要另建一套流程")
@@ -296,8 +334,12 @@ class ManualOrderIntegrationTest {
                     .contains("ALIBABA_1688"));
 
     String source =
-        inA(() -> sql.fetchOne("select order_source from sales_order where id = ?::uuid", UUID.fromString(id))
-            .get(0, String.class));
+        inA(
+            () ->
+                sql.fetchOne(
+                        "select order_source from sales_order where id = ?::uuid",
+                        UUID.fromString(id))
+                    .get(0, String.class));
     assertThat(source).as("本模块只写手工来源").isEqualTo("MANUAL");
   }
 
@@ -321,11 +363,11 @@ class ManualOrderIntegrationTest {
     String source =
         inA(
             () ->
-                sql.fetchOne("select order_source from sales_order where id = ?::uuid", UUID.fromString(id))
+                sql.fetchOne(
+                        "select order_source from sales_order where id = ?::uuid",
+                        UUID.fromString(id))
                     .get(0, String.class));
-    assertThat(source)
-        .as("让客户端能选来源等于开了一条「手工录入通道写平台单」的后门")
-        .isEqualTo("MANUAL");
+    assertThat(source).as("让客户端能选来源等于开了一条「手工录入通道写平台单」的后门").isEqualTo("MANUAL");
   }
 
   // ================================================================
@@ -338,7 +380,8 @@ class ManualOrderIntegrationTest {
 
     ManualOrderModels.SalesOrderDetail detail = inA(() -> service.order(UUID.fromString(id)));
 
-    assertThat(detail.order().paymentMethod()).isEqualTo(ManualOrderModels.SalesOrderPaymentMethod.CREDIT_TERM);
+    assertThat(detail.order().paymentMethod())
+        .isEqualTo(ManualOrderModels.SalesOrderPaymentMethod.CREDIT_TERM);
     assertThat(detail.charges())
         .as("费用是表单的一部分，四笔费用各自成行")
         .hasSize(4)
@@ -374,7 +417,8 @@ class ManualOrderIntegrationTest {
     String idB = postOrderId(second, "Bearer tenant-a");
 
     assertThat(inA(() -> service.order(UUID.fromString(idA))).order().grandTotalAmount())
-        .isNotEqualByComparingTo(inA(() -> service.order(UUID.fromString(idB))).order().grandTotalAmount());
+        .isNotEqualByComparingTo(
+            inA(() -> service.order(UUID.fromString(idB))).order().grandTotalAmount());
   }
 
   @Test
@@ -490,8 +534,8 @@ class ManualOrderIntegrationTest {
   @Test
   void 硬要求4_地址是快照而非活地址引用() throws Exception {
     String id = postOrderId(validBody(), "Bearer tenant-a");
-    ManualOrderModels.SalesOrderAddressRow addr = inA(() -> service.order(UUID.fromString(id)))
-        .addresses().get(0);
+    ManualOrderModels.SalesOrderAddressRow addr =
+        inA(() -> service.order(UUID.fromString(id))).addresses().get(0);
 
     assertThat(addr.recipientName()).isEqualTo("Jane Doe");
     assertThat(addr.addressLine1()).isEqualTo("100 Main St");
@@ -576,8 +620,9 @@ class ManualOrderIntegrationTest {
     String predicate =
         inA(
             () ->
-                sql.fetchOne("select pg_get_expr(indpred, indrelid) d from pg_index"
-                        + " where indexrelid='sales_order_external_no_unique'::regclass")
+                sql.fetchOne(
+                        "select pg_get_expr(indpred, indrelid) d from pg_index"
+                            + " where indexrelid='sales_order_external_no_unique'::regclass")
                     .get(0, String.class));
     assertThat(predicate)
         .as("空号必须被排除在唯一性之外，否则「没填参考号」会被判成「重复」")
@@ -630,7 +675,8 @@ class ManualOrderIntegrationTest {
                               + "currency,payment_method,payment_terms_days,status) values"
                               + "(gen_random_uuid(),nullif(current_setting('app.current_tenant',true),'')::uuid,"
                               + "?,'MANUAL','SAMPLE','USD','PREPAID',0,'DRAFT')",
-                          "MO-NOLINE-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase());
+                          "MO-NOLINE-"
+                              + UUID.randomUUID().toString().substring(0, 6).toUpperCase());
                       sql.execute(
                           "update sales_order set status='SUBMITTED', submitted_at=now()"
                               + " where order_no like 'MO-NOLINE-%'");
@@ -651,7 +697,8 @@ class ManualOrderIntegrationTest {
                               + "currency,payment_method,payment_terms_days,status) values"
                               + "(gen_random_uuid(),nullif(current_setting('app.current_tenant',true),'')::uuid,"
                               + "?,'MANUAL','SAMPLE','USD','PREPAID',0,'DRAFT')",
-                          "MO-NOADDR-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase());
+                          "MO-NOADDR-"
+                              + UUID.randomUUID().toString().substring(0, 6).toUpperCase());
                       sql.execute(
                           "insert into sales_order_line(id,tenant_id,order_id,line_no,sku_id,"
                               + "sku_code,sku_name,quantity,unit_price,line_amount) select"
@@ -679,21 +726,29 @@ class ManualOrderIntegrationTest {
 
     Map<String, Object> update =
         Map.of(
-            "manualKind", "SAMPLE",
-            "currency", "USD",
-            "paymentMethod", "PREPAID",
-            "paymentTermsDays", 0,
-            "note", "",
+            "manualKind",
+            "SAMPLE",
+            "currency",
+            "USD",
+            "paymentMethod",
+            "PREPAID",
+            "paymentTermsDays",
+            0,
+            "note",
+            "",
             "customer",
-                Map.of(
-                    "customerPartyId", partyOrg.toString(),
-                    "customerCode", "CUST-001",
-                    "customerName", "改名了",
-                    "customerType", "ORGANIZATION",
-                    "customerDefaultCurrency", "USD"),
-            "lines", List.of(line()),
-            "addresses", List.of(),
-            "charges", List.of());
+            Map.of(
+                "customerPartyId", partyOrg.toString(),
+                "customerCode", "CUST-001",
+                "customerName", "改名了",
+                "customerType", "ORGANIZATION",
+                "customerDefaultCurrency", "USD"),
+            "lines",
+            List.of(line()),
+            "addresses",
+            List.of(),
+            "charges",
+            List.of());
     http.perform(
             put("/trade/sales-orders/" + id)
                 .header("Authorization", "Bearer tenant-a")
@@ -770,8 +825,7 @@ class ManualOrderIntegrationTest {
         .isNotNull();
     assertThatThrownBy(
             () ->
-                access.run(
-                    actorB, "trade.orders.read", () -> service.order(UUID.fromString(idA))))
+                access.run(actorB, "trade.orders.read", () -> service.order(UUID.fromString(idA))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("无权查看");
 
@@ -781,15 +835,19 @@ class ManualOrderIntegrationTest {
             actorB,
             "trade.orders.read",
             () ->
-                service.pageOrders(
+                service
+                    .pageOrders(
                         new ManualOrderModels.SalesOrderQuery(null, null, null, null, noA, 0, 50))
                     .total());
     assertThat(bSees).isZero();
-    assertThat(inA(
-            () ->
-                service.pageOrders(
-                        new ManualOrderModels.SalesOrderQuery(null, null, null, null, noA, 0, 50))
-                    .total()))
+    assertThat(
+            inA(
+                () ->
+                    service
+                        .pageOrders(
+                            new ManualOrderModels.SalesOrderQuery(
+                                null, null, null, null, noA, 0, 50))
+                        .total()))
         .as("A 用自己的单号当然查得到 —— 否则上面「B 查不到」可能只是搜索没命中")
         .isPositive();
     assertThat(idB).isNotEqualTo(idA);
@@ -807,13 +865,14 @@ class ManualOrderIntegrationTest {
         .andExpect(status().isOk());
     assertThat(
             access.run(
-                    actorB,
-                    "trade.orders.read",
-                    () ->
-                        service.pageOrders(
-                                new ManualOrderModels.SalesOrderQuery(
-                                    null, null, null, null, noA, 0, 50))
-                            .total()))
+                actorB,
+                "trade.orders.read",
+                () ->
+                    service
+                        .pageOrders(
+                            new ManualOrderModels.SalesOrderQuery(
+                                null, null, null, null, noA, 0, 50))
+                        .total()))
         .as("伪造的租户头不得让 A 的单出现在 B 的列表里")
         .isZero();
   }
@@ -829,7 +888,8 @@ class ManualOrderIntegrationTest {
                   actorA,
                   "trade.orders.read",
                   () ->
-                      service.pageOrders(
+                      service
+                          .pageOrders(
                               new ManualOrderModels.SalesOrderQuery(
                                   null, null, null, null, noA, 0, 50))
                           .total()))
@@ -839,7 +899,8 @@ class ManualOrderIntegrationTest {
                   actorB,
                   "trade.orders.read",
                   () ->
-                      service.pageOrders(
+                      service
+                          .pageOrders(
                               new ManualOrderModels.SalesOrderQuery(
                                   null, null, null, null, noA, 0, 50))
                           .total()))
@@ -895,9 +956,7 @@ class ManualOrderIntegrationTest {
         new ManualOrderModels.SalesOrderQuery(null, null, null, null, null, 0, 1);
     ManualOrderModels.SalesOrderPage page2 = inA(() -> service.pageOrders(small));
     assertThat(page2.rows()).hasSize(1);
-    assertThat(page2.total())
-        .as("汇总必须与分页无关：翻页不该让「一共多少张单」变来变去")
-        .isEqualTo(page.total());
+    assertThat(page2.total()).as("汇总必须与分页无关：翻页不该让「一共多少张单」变来变去").isEqualTo(page.total());
   }
 
   @Test
@@ -909,7 +968,8 @@ class ManualOrderIntegrationTest {
     long hit =
         inA(
             () ->
-                service.pageOrders(
+                service
+                    .pageOrders(
                         new ManualOrderModels.SalesOrderQuery(null, null, null, null, no, 0, 50))
                     .total());
     assertThat(hit).isPositive();
@@ -917,7 +977,8 @@ class ManualOrderIntegrationTest {
     long miss =
         inA(
             () ->
-                service.pageOrders(
+                service
+                    .pageOrders(
                         new ManualOrderModels.SalesOrderQuery(
                             null, null, null, null, "ZZZ" + UUID.randomUUID(), 0, 50))
                     .total());
@@ -927,14 +988,13 @@ class ManualOrderIntegrationTest {
   @Test
   void 能力声明如实报出下游缺口与价格来源() {
     ManualOrderModels.SalesOrderCapabilities caps = inA(service::capabilities);
-    assertThat(caps.priceSourceAvailable())
-        .as("05 价目未交付，必须如实说没有，不能假装有")
-        .isFalse();
+    assertThat(caps.priceSourceAvailable()).as("05 价目未交付，必须如实说没有，不能假装有").isFalse();
     assertThat(caps.priceSourceNote()).contains("05 价目");
     assertThat(caps.downstreamReviewAvailable()).isFalse();
     assertThat(caps.sources())
         .as("来源是一个字段：能力声明里 MANUAL 与平台来源并列")
-        .contains(ManualOrderModels.SalesOrderSource.MANUAL, ManualOrderModels.SalesOrderSource.AMAZON);
+        .contains(
+            ManualOrderModels.SalesOrderSource.MANUAL, ManualOrderModels.SalesOrderSource.AMAZON);
     assertThat(caps.downstreamGaps())
         .extracting(ManualOrderModels.SalesOrderDownstreamGap::moduleId)
         .contains("9.2.1.1", "9.1.2.1");

@@ -24,17 +24,14 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.3.1.2 效期与先进先出：FEFO / FIFO / 指定批次三种分配策略、过期排除、临期阈值可配置、
- * 策略开关，以及租户隔离三断言。
+ * 7.3.1.2 效期与先进先出：FEFO / FIFO / 指定批次三种分配策略、过期排除、临期阈值可配置、 策略开关，以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具与写入约定与 {@code InventoryLotIntegrationTest} 完全一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
+ * <p>夹具与写入约定与 {@code InventoryLotIntegrationTest} 完全一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
  *
- * <p><b>最关键的一个用例是 FEFO 与 FIFO 的顺序断言</b>：夹具刻意让「失效日期先后」与
- * 「收货日期先后」完全相反（先到期的反而后入库），于是两种策略排出的批次序列必然不同 ——
+ * <p><b>最关键的一个用例是 FEFO 与 FIFO 的顺序断言</b>：夹具刻意让「失效日期先后」与 「收货日期先后」完全相反（先到期的反而后入库），于是两种策略排出的批次序列必然不同 ——
  * 这样断言才真的钉住了「两种排序」，而不是两个策略碰巧排出了同一个顺序。
  */
 @SpringBootTest
@@ -70,7 +67,8 @@ class InventoryExpiryIntegrationTest {
   static final UUID locB1 = idFor(b, 8);
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-warehouse-expiry-test-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-warehouse-expiry-test-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(
@@ -170,53 +168,119 @@ class InventoryExpiryIntegrationTest {
         dbToday = rs.getObject(1, LocalDate.class);
       }
     }
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-          leA, a, "LE-1", "主体一");
-      sql.execute(
-          "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)", skuA, a, "SKU-1", "效期商品");
-      sql.execute(
-          "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-          whSh, a, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
-      sql.execute(
-          "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-          qSellable, a, "SELLABLE", "可售", "SELLABLE");
-      sql.execute(
-          "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-          qHold, a, "PENDING_INSPECTION", "待检", "PENDING_INSPECTION");
-      sql.execute(
-          "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
-              + " values(?,?,?,?,?,?,?)",
-          locSh1, a, whSh, "SH-01", "上海一区", "STORAGE", true);
-      sql.execute(
-          "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
-              + " values(?,?,?,?,?,?,?)",
-          locSh2, a, whSh, "SH-02", "上海二区", "STORAGE", true);
-      sql.execute(
-          "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
-              + " values(?,?,?,?,?,?,?)",
-          locFrozen, a, whSh, "SH-FROZEN", "冻结区", "FROZEN", false);
-      return null;
-    });
-    access.run(actorB, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-          leB, b, "LE-1", "主体一");
-      sql.execute(
-          "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)", skuB, b, "SKU-B", "B 租户商品");
-      sql.execute(
-          "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-          whB, b, "WH-BJ", "北京仓", "CN", "Asia/Shanghai");
-      sql.execute(
-          "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-          qSellableB, b, "SELLABLE", "可售", "SELLABLE");
-      sql.execute(
-          "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
-              + " values(?,?,?,?,?,?,?)",
-          locB1, b, whB, "BJ-01", "北京一区", "STORAGE", true);
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
+              leA,
+              a,
+              "LE-1",
+              "主体一");
+          sql.execute(
+              "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+              skuA,
+              a,
+              "SKU-1",
+              "效期商品");
+          sql.execute(
+              "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
+              whSh,
+              a,
+              "WH-SH",
+              "上海仓",
+              "CN",
+              "Asia/Shanghai");
+          sql.execute(
+              "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
+              qSellable,
+              a,
+              "SELLABLE",
+              "可售",
+              "SELLABLE");
+          sql.execute(
+              "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
+              qHold,
+              a,
+              "PENDING_INSPECTION",
+              "待检",
+              "PENDING_INSPECTION");
+          sql.execute(
+              "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
+                  + " values(?,?,?,?,?,?,?)",
+              locSh1,
+              a,
+              whSh,
+              "SH-01",
+              "上海一区",
+              "STORAGE",
+              true);
+          sql.execute(
+              "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
+                  + " values(?,?,?,?,?,?,?)",
+              locSh2,
+              a,
+              whSh,
+              "SH-02",
+              "上海二区",
+              "STORAGE",
+              true);
+          sql.execute(
+              "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
+                  + " values(?,?,?,?,?,?,?)",
+              locFrozen,
+              a,
+              whSh,
+              "SH-FROZEN",
+              "冻结区",
+              "FROZEN",
+              false);
+          return null;
+        });
+    access.run(
+        actorB,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
+              leB,
+              b,
+              "LE-1",
+              "主体一");
+          sql.execute(
+              "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+              skuB,
+              b,
+              "SKU-B",
+              "B 租户商品");
+          sql.execute(
+              "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
+              whB,
+              b,
+              "WH-BJ",
+              "北京仓",
+              "CN",
+              "Asia/Shanghai");
+          sql.execute(
+              "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
+              qSellableB,
+              b,
+              "SELLABLE",
+              "可售",
+              "SELLABLE");
+          sql.execute(
+              "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
+                  + " values(?,?,?,?,?,?,?)",
+              locB1,
+              b,
+              whB,
+              "BJ-01",
+              "北京一区",
+              "STORAGE",
+              true);
+          return null;
+        });
   }
 
   // ================================================================ 夹具写入
@@ -227,11 +291,10 @@ class InventoryExpiryIntegrationTest {
   /**
    * 建余额行并按库位/批次拆成若干 bucket，**同一事务**写入。
    *
-   * <p>必须同一事务：V2 的守恒（{@code guard_bucket_conservation}）是延迟约束触发器，
-   * 提交前才把 balance 与它的 bucket 汇总对平，分两次写第二次提交就会报不平。
+   * <p>必须同一事务：V2 的守恒（{@code guard_bucket_conservation}）是延迟约束触发器， 提交前才把 balance 与它的 bucket
+   * 汇总对平，分两次写第二次提交就会报不平。
    *
-   * <p>同一仓 × SKU × 货权法人 × 质量状态只有**一条** balance（唯一键里没有批次），
-   * 所以同仓同质量状态下的多个批次必须共用这条 balance。
+   * <p>同一仓 × SKU × 货权法人 × 质量状态只有**一条** balance（唯一键里没有批次）， 所以同仓同质量状态下的多个批次必须共用这条 balance。
    */
   UUID balance(
       AccessService.Access actor,
@@ -242,63 +305,88 @@ class InventoryExpiryIntegrationTest {
       UUID quality,
       List<B> buckets) {
     var balanceId = UUID.randomUUID();
-    access.run(actor, "warehouse.inventory.read", () -> {
-      var onHand = BigDecimal.ZERO;
-      var reserved = BigDecimal.ZERO;
-      for (var x : buckets) {
-        onHand = onHand.add(new BigDecimal(x.onHand()));
-        reserved = reserved.add(new BigDecimal(x.reserved()));
-      }
-      sql.execute(
-          "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
-              + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
-          balanceId, tenant, sku, warehouse, legalEntity, quality, onHand, reserved);
-      for (var x : buckets) {
-        sql.execute(
-            "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
-                + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved)"
-                + " values(?,?,?,?,?,?,?,?,?,?,?)",
-            UUID.randomUUID(),
-            tenant,
-            legalEntity,
-            sku,
-            warehouse,
-            x.location(),
-            x.lotId(),
-            quality,
-            balanceId,
-            new BigDecimal(x.onHand()),
-            new BigDecimal(x.reserved()));
-      }
-      return null;
-    });
+    access.run(
+        actor,
+        "warehouse.inventory.read",
+        () -> {
+          var onHand = BigDecimal.ZERO;
+          var reserved = BigDecimal.ZERO;
+          for (var x : buckets) {
+            onHand = onHand.add(new BigDecimal(x.onHand()));
+            reserved = reserved.add(new BigDecimal(x.reserved()));
+          }
+          sql.execute(
+              "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
+                  + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
+              balanceId,
+              tenant,
+              sku,
+              warehouse,
+              legalEntity,
+              quality,
+              onHand,
+              reserved);
+          for (var x : buckets) {
+            sql.execute(
+                "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
+                    + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved)"
+                    + " values(?,?,?,?,?,?,?,?,?,?,?)",
+                UUID.randomUUID(),
+                tenant,
+                legalEntity,
+                sku,
+                warehouse,
+                x.location(),
+                x.lotId(),
+                quality,
+                balanceId,
+                new BigDecimal(x.onHand()),
+                new BigDecimal(x.reserved()));
+          }
+          return null;
+        });
     return balanceId;
   }
 
   /** 建批次。expiresOn 传 null 表示非效期品；收货日期单独给（FIFO 的排序依据）。 */
   UUID lot(String code, LocalDate expiresOn, LocalDate receivedOn) {
     var id = UUID.randomUUID();
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,"
-              + "origin,source_system,source_ref_id,source_ref_code)"
-              + " values(?,?,?,?,?::date,?::date,'MANUAL','PURCHASE',?,'PO-EXPIRY')",
-          id, a, skuA, code, expiresOn, receivedOn, UUID.randomUUID());
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,"
+                  + "origin,source_system,source_ref_id,source_ref_code)"
+                  + " values(?,?,?,?,?::date,?::date,'MANUAL','PURCHASE',?,'PO-EXPIRY')",
+              id,
+              a,
+              skuA,
+              code,
+              expiresOn,
+              receivedOn,
+              UUID.randomUUID());
+          return null;
+        });
     return id;
   }
 
   /** 建租户 B 的批次（只用于隔离断言）。 */
   UUID lotB(String code) {
     var id = UUID.randomUUID();
-    access.run(actorB, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,origin)"
-              + " values(?,?,?,?,current_date+3,current_date-1,'MANUAL')",
-          id, b, skuB, code);
-      return null;
-    });
+    access.run(
+        actorB,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,origin)"
+                  + " values(?,?,?,?,current_date+3,current_date-1,'MANUAL')",
+              id,
+              b,
+              skuB,
+              code);
+          return null;
+        });
     return id;
   }
 
@@ -306,24 +394,32 @@ class InventoryExpiryIntegrationTest {
    * 建一个**同租户但归属另一个 SKU** 的批次。
    *
    * <p>专供「指定批次跨 SKU」那条 DB 触发器用例：外键 {@code (tenant_id, specified_lot_id)}
-   * 只保证批次在本租户存在，这个批次在本租户，所以外键会放行 —— 必须由
-   * {@code guard_expiry_policy_lot_sku} 挡住。用别的租户的批次测不出这一条，
+   * 只保证批次在本租户存在，这个批次在本租户，所以外键会放行 —— 必须由 {@code guard_expiry_policy_lot_sku} 挡住。用别的租户的批次测不出这一条，
    * 因为它会先被外键拦下，根本走不到触发器。
    */
   UUID lotOfOtherSku(String code) {
     var id = UUID.randomUUID();
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      if (sql.fetchOne("select s.id from sku_ref s where s.id=?", skuA2) == null) {
-        sql.execute(
-            "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-            skuA2, a, "SKU-2", "另一个商品");
-      }
-      sql.execute(
-          "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,origin)"
-              + " values(?,?,?,?,current_date+30,current_date-2,'MANUAL')",
-          id, a, skuA2, code);
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          if (sql.fetchOne("select s.id from sku_ref s where s.id=?", skuA2) == null) {
+            sql.execute(
+                "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+                skuA2,
+                a,
+                "SKU-2",
+                "另一个商品");
+          }
+          sql.execute(
+              "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on,origin)"
+                  + " values(?,?,?,?,current_date+30,current_date-2,'MANUAL')",
+              id,
+              a,
+              skuA2,
+              code);
+          return null;
+        });
     return id;
   }
 
@@ -338,8 +434,7 @@ class InventoryExpiryIntegrationTest {
   /**
    * 铺好「失效顺序与入库顺序完全相反」的一组批次。
    *
-   * <p>这是整个测试类最重要的夹具：先到期的反而后入库，于是
-   * FEFO 排出来是 A→C→B，FIFO 排出来是 B→C→A，两种策略的顺序必然不同。
+   * <p>这是整个测试类最重要的夹具：先到期的反而后入库，于是 FEFO 排出来是 A→C→B，FIFO 排出来是 B→C→A，两种策略的顺序必然不同。
    * 如果两者碰巧同序，就断言不出「两种排序」的区别。
    *
    * <p>另有两个反例批次：已过期的 lotOld、以及没有失效日期的 lotNoExp。
@@ -371,24 +466,15 @@ class InventoryExpiryIntegrationTest {
             new B(lotNoExp, locSh2, "30", "0"),
             new B(lotB, locFrozen, "40", "0")));
     // 待检质量状态另起一条 balance：验证「非可售不参与出库」
-    balance(
-        actorA,
-        a,
-        skuA,
-        whSh,
-        leA,
-        qHold,
-        List.of(new B(lotC, locSh2, "15", "0")));
+    balance(actorA, a, skuA, whSh, leA, qHold, List.of(new B(lotC, locSh2, "15", "0")));
     return new Fixture(lotA, lotB, lotC, lotOld, lotNoExp);
   }
 
   /**
    * 数据库当天。
    *
-   * <p>刻意从 PG 读而不是用 {@code LocalDate.now()}：服务层的过期判定用的是
-   * {@code current_date}（数据库当天），而容器时区通常是 UTC。JVM 在东八区，
-   * 16:00~24:00 之间两边的「今天」会差一天 —— 那会让 `daysToExpiry` 的断言变成
-   * 「看跑测试的时刻而定」。基准必须与被测逻辑同源。
+   * <p>刻意从 PG 读而不是用 {@code LocalDate.now()}：服务层的过期判定用的是 {@code current_date}（数据库当天），而容器时区通常是
+   * UTC。JVM 在东八区， 16:00~24:00 之间两边的「今天」会差一天 —— 那会让 `daysToExpiry` 的断言变成 「看跑测试的时刻而定」。基准必须与被测逻辑同源。
    */
   static LocalDate dbToday;
 
@@ -425,8 +511,11 @@ class InventoryExpiryIntegrationTest {
     assertThat(plan.policyEnabled()).isTrue();
     assertThat(plan.strategySource()).isEqualTo("POLICY");
     // 失效顺序 A(+3) → C(+10) → B(+20)：先到期的先出，前两批正好凑满 100。
-    assertThat(plan.lines()).extracting(FefoAllocationLine::lotId).containsExactly(f.lotA(), f.lotC());
-    assertThat(plan.lines()).extracting(FefoAllocationLine::quantity)
+    assertThat(plan.lines())
+        .extracting(FefoAllocationLine::lotId)
+        .containsExactly(f.lotA(), f.lotC());
+    assertThat(plan.lines())
+        .extracting(FefoAllocationLine::quantity)
         .allMatch(q -> q.compareTo(new BigDecimal("50")) == 0);
     assertThat(plan.allocatedQuantity()).isEqualByComparingTo("100");
     assertThat(plan.shortfallQuantity()).isEqualByComparingTo("0");
@@ -474,7 +563,9 @@ class InventoryExpiryIntegrationTest {
 
     assertThat(plan.strategy()).isEqualTo("FIFO");
     // 入库顺序 B(-30) → C(-15) → A(-5)：与 FEFO 的 A → C → B 完全相反。
-    assertThat(plan.lines()).extracting(FefoAllocationLine::lotId).containsExactly(f.lotB(), f.lotC());
+    assertThat(plan.lines())
+        .extracting(FefoAllocationLine::lotId)
+        .containsExactly(f.lotB(), f.lotC());
     assertThat(plan.lines().get(0).lotId()).isNotEqualTo(f.lotA());
     assertThat(plan.lines().get(0).sortBasis()).isEqualTo("入库时间");
     assertThat(plan.lines().get(0).sortBasisValue()).isEqualTo(today(-30).toString());
@@ -491,7 +582,8 @@ class InventoryExpiryIntegrationTest {
 
     assertThat(plan.allocatedQuantity()).isEqualByComparingTo("180");
     assertThat(plan.shortfallQuantity()).isEqualByComparingTo("70");
-    assertThat(plan.lines()).extracting(FefoAllocationLine::lotId)
+    assertThat(plan.lines())
+        .extracting(FefoAllocationLine::lotId)
         .containsExactly(f.lotB(), f.lotC(), f.lotA(), f.lotNoExp());
     assertThat(plan.lines()).extracting(FefoAllocationLine::lotId).doesNotContain(f.lotOld());
     // FIFO 下非效期批次是可用的，因此这一项必须是 0（否则说明 FEFO 的排除逻辑串到了 FIFO）。
@@ -506,7 +598,12 @@ class InventoryExpiryIntegrationTest {
     var x = lot("LOT-NORECEIPT", today(50), null);
     var y = lot("LOT-NORECEIPT2", today(60), null);
     balance(
-        actorA, a, skuA, whSh, leA, qSellable,
+        actorA,
+        a,
+        skuA,
+        whSh,
+        leA,
+        qSellable,
         List.of(new B(x, locSh1, "10", "0"), new B(y, locSh2, "10", "0")));
     policy("FIFO", true, 30, null);
 
@@ -584,21 +681,37 @@ class InventoryExpiryIntegrationTest {
 
     // 提前 7 天：LOT-A（还有 3 天）与 LOT-C（还有 10 天）里只有 A 进临期。
     policy("FEFO", true, 7, null);
-    var seven = asA(() -> service.alerts(new ExpiryAlertQuery(skuA, null, null, null, null, null, null, 0, 50)));
-    assertThat(seven.rows()).extracting(ExpiryAlertRow::lotId).containsExactly(f.lotOld(), f.lotA());
-    assertThat(seven.rows()).filteredOn(r -> r.lotId().equals(f.lotA())).singleElement()
-        .satisfies(r -> {
-          assertThat(r.expiryStatus()).isEqualTo("EXPIRING");
-          assertThat(r.leadDays()).isEqualTo(7);
-          assertThat(r.leadDaysSource()).isEqualTo("POLICY");
-        });
+    var seven =
+        asA(
+            () ->
+                service.alerts(
+                    new ExpiryAlertQuery(skuA, null, null, null, null, null, null, 0, 50)));
+    assertThat(seven.rows())
+        .extracting(ExpiryAlertRow::lotId)
+        .containsExactly(f.lotOld(), f.lotA());
+    assertThat(seven.rows())
+        .filteredOn(r -> r.lotId().equals(f.lotA()))
+        .singleElement()
+        .satisfies(
+            r -> {
+              assertThat(r.expiryStatus()).isEqualTo("EXPIRING");
+              assertThat(r.leadDays()).isEqualTo(7);
+              assertThat(r.leadDaysSource()).isEqualTo("POLICY");
+            });
 
     // 提前 90 天：LOT-C 也进临期，且已过期的 LOT-OLD 仍单列在过期档。
     policy("FEFO", true, 90, null);
-    var ninety = asA(() -> service.alerts(new ExpiryAlertQuery(skuA, null, null, null, null, null, null, 0, 50)));
-    assertThat(ninety.rows()).extracting(ExpiryAlertRow::lotId)
+    var ninety =
+        asA(
+            () ->
+                service.alerts(
+                    new ExpiryAlertQuery(skuA, null, null, null, null, null, null, 0, 50)));
+    assertThat(ninety.rows())
+        .extracting(ExpiryAlertRow::lotId)
         .containsExactly(f.lotOld(), f.lotA(), f.lotC(), f.lotB());
-    assertThat(ninety.rows()).filteredOn(r -> r.lotId().equals(f.lotC())).singleElement()
+    assertThat(ninety.rows())
+        .filteredOn(r -> r.lotId().equals(f.lotC()))
+        .singleElement()
         .satisfies(r -> assertThat(r.expiryStatus()).isEqualTo("EXPIRING"));
   }
 
@@ -609,11 +722,16 @@ class InventoryExpiryIntegrationTest {
     var f = expiryFixture();
     policy("FEFO", true, 30, null);
 
-    var page = asA(() -> service.alerts(new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
+    var page =
+        asA(
+            () ->
+                service.alerts(
+                    new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
 
     // 默认只看「需要处理」的两档：过期 + 临期。30 天窗口内 A(+3)、C(+10)、B(+20) 三批都算临期。
     // LOT-NOEXP（非效期品）不该挤在预警清单里。
-    assertThat(page.rows()).extracting(ExpiryAlertRow::lotId)
+    assertThat(page.rows())
+        .extracting(ExpiryAlertRow::lotId)
         .containsExactly(f.lotOld(), f.lotA(), f.lotC(), f.lotB());
 
     var old = rowOf(page, f.lotOld());
@@ -653,12 +771,21 @@ class InventoryExpiryIntegrationTest {
         asA(
             () ->
                 service.alerts(
-                    new ExpiryAlertQuery(null, null, List.of("HEALTHY", "NO_EXPIRY"), null, null, null,
-                        null, 0, 50)));
+                    new ExpiryAlertQuery(
+                        null,
+                        null,
+                        List.of("HEALTHY", "NO_EXPIRY"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        0,
+                        50)));
 
     // 1 天窗口：LOT-A(+3)、LOT-C(+10)、LOT-B(+20) 都超出窗口 → 正常档；LOT-NOEXP → 非效期品档。
     // 默认按剩余天数升序，所以是 A → C → B，无失效日期的排最后。
-    assertThat(page.rows()).extracting(ExpiryAlertRow::lotId)
+    assertThat(page.rows())
+        .extracting(ExpiryAlertRow::lotId)
         .containsExactly(f.lotA(), f.lotC(), f.lotB(), f.lotNoExp());
     var noExp = rowOf(page, f.lotNoExp());
     assertThat(noExp.expiryStatus()).isEqualTo("NO_EXPIRY");
@@ -679,7 +806,10 @@ class InventoryExpiryIntegrationTest {
     var empty = lot("LOT-EMPTY", today(2), today(0));
 
     var stocked =
-        asA(() -> service.alerts(new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
+        asA(
+            () ->
+                service.alerts(
+                    new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
     assertThat(stocked.rows()).extracting(ExpiryAlertRow::lotId).doesNotContain(empty);
 
     var all =
@@ -697,7 +827,10 @@ class InventoryExpiryIntegrationTest {
 
     // 不覆盖时 LOT-A(+3) 是正常档（默认只看两档，所以不在列表里）
     var without =
-        asA(() -> service.alerts(new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
+        asA(
+            () ->
+                service.alerts(
+                    new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
     assertThat(without.rows()).extracting(ExpiryAlertRow::lotId).doesNotContain(f.lotA());
     assertThat(without.leadDaysOverride()).isNull();
     assertThat(without.leadDaysNote()).contains("逐 SKU");
@@ -740,12 +873,20 @@ class InventoryExpiryIntegrationTest {
                       sql.execute(
                           "insert into inventory_expiry_policy(id,tenant_id,sku_id,strategy,"
                               + "enabled,lead_days,specified_lot_id) values(?,?,?,?,?,?,?)",
-                          UUID.randomUUID(), a, skuA, "SPECIFIED_LOT", true, 30, otherSkuLot);
+                          UUID.randomUUID(),
+                          a,
+                          skuA,
+                          "SPECIFIED_LOT",
+                          true,
+                          30,
+                          otherSkuLot);
                       return null;
                     }))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
     // 触发器拒绝后确实没有留下行
-    assertThat(asA(() -> service.policies(new ExpiryPolicyQuery(null, null, null, null, null, 0, 50))).total())
+    assertThat(
+            asA(() -> service.policies(new ExpiryPolicyQuery(null, null, null, null, null, 0, 50)))
+                .total())
         .isEqualTo(0);
   }
 
@@ -772,8 +913,7 @@ class InventoryExpiryIntegrationTest {
             () ->
                 asA(
                     () -> {
-                      sql.execute(
-                          "delete from inventory_expiry_policy where tenant_id=?", a);
+                      sql.execute("delete from inventory_expiry_policy where tenant_id=?", a);
                       return null;
                     }))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
@@ -793,7 +933,8 @@ class InventoryExpiryIntegrationTest {
 
     assertThat(second.strategy()).isEqualTo("FIFO");
     assertThat(second.leadDays()).isEqualTo(90);
-    var page = asA(() -> service.policies(new ExpiryPolicyQuery(null, null, null, null, null, 0, 50)));
+    var page =
+        asA(() -> service.policies(new ExpiryPolicyQuery(null, null, null, null, null, 0, 50)));
     assertThat(page.total()).isEqualTo(1);
     assertThat(page.summary().fefoCount()).isEqualTo(0);
     assertThat(page.summary().fifoCount()).isEqualTo(1);
@@ -813,8 +954,7 @@ class InventoryExpiryIntegrationTest {
             () ->
                 asA(
                     () ->
-                        service.recommend(
-                            new FefoAllocationRequest(skuA, whSh, null, null, null))))
+                        service.recommend(new FefoAllocationRequest(skuA, whSh, null, null, null))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("出库数量不能为空");
     assertThatThrownBy(
@@ -822,7 +962,8 @@ class InventoryExpiryIntegrationTest {
                 asA(
                     () ->
                         service.alerts(
-                            new ExpiryAlertQuery(null, null, List.of("SOON"), null, null, null, null, 0, 50))))
+                            new ExpiryAlertQuery(
+                                null, null, List.of("SOON"), null, null, null, null, 0, 50))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("未知的效期档位");
     assertThatThrownBy(
@@ -850,26 +991,39 @@ class InventoryExpiryIntegrationTest {
     var f = expiryFixture();
     policy("FEFO", true, 30, null);
     var lotB = lotB("LOT-B-TENANT");
-    balance(
-        actorB, b, skuB, whB, leB, qSellableB, List.of(new B(lotB, locB1, "80", "0")));
+    balance(actorB, b, skuB, whB, leB, qSellableB, List.of(new B(lotB, locB1, "80", "0")));
 
     // A 只看得到自己的批次与分配
-    var pageA = asA(() -> service.alerts(new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
-    assertThat(pageA.rows()).extracting(ExpiryAlertRow::lotId)
+    var pageA =
+        asA(
+            () ->
+                service.alerts(
+                    new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
+    assertThat(pageA.rows())
+        .extracting(ExpiryAlertRow::lotId)
         .containsExactly(f.lotOld(), f.lotA(), f.lotC(), f.lotB());
 
     // B 只看得到自己的
-    var pageB = asB(() -> service.alerts(new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
+    var pageB =
+        asB(
+            () ->
+                service.alerts(
+                    new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
     assertThat(pageB.rows()).extracting(ExpiryAlertRow::lotId).containsExactly(lotB);
 
     // A 的 SKU 在 B 那里查不到策略 → 404，不泄露存在性
     assertThatThrownBy(() -> asB(() -> service.policy(skuA)))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     // B 的批次列表也不含 A 的
-    assertThat(asB(() -> service.lots(skuB))).extracting(ExpiryLotOption::lotId).containsExactly(lotB);
+    assertThat(asB(() -> service.lots(skuB)))
+        .extracting(ExpiryLotOption::lotId)
+        .containsExactly(lotB);
     // A 配的策略在 B 的策略列表里一条都没有
-    assertThat(asB(() -> service.policies(new ExpiryPolicyQuery(null, null, null, null, null, 0, 50))).total())
+    assertThat(
+            asB(() -> service.policies(new ExpiryPolicyQuery(null, null, null, null, null, 0, 50)))
+                .total())
         .isEqualTo(0);
   }
 
@@ -878,40 +1032,49 @@ class InventoryExpiryIntegrationTest {
     expiryFixture();
     policy("FEFO", true, 30, null);
     var lotB = lotB("LOT-B-TENANT");
-    balance(
-        actorB, b, skuB, whB, leB, qSellableB, List.of(new B(lotB, locB1, "80", "0")));
+    balance(actorB, b, skuB, whB, leB, qSellableB, List.of(new B(lotB, locB1, "80", "0")));
 
     // 身份是 B 但伪造 X-Tenant-Id 指向 A → 只能看到 B 自己的预警
-    http.perform(get("/warehouse/inventory/expiry/alerts")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/expiry/alerts")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.rows[0].lotCode").value("LOT-B-TENANT"));
 
     // 反向：身份是 A 伪造 B 的头也拿不到 B 的数据
-    http.perform(get("/warehouse/inventory/expiry/alerts")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/inventory/expiry/alerts")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rows[0].lotCode").value("LOT-OLD"));
 
     // 分配推荐同样不受伪造头影响
-    http.perform(post("/warehouse/inventory/expiry/allocation")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString())
-            .contentType("application/json")
-            .content(
-                "{\"skuId\":\"" + skuA + "\",\"warehouseId\":\"" + whSh + "\",\"quantity\":10}"))
+    http.perform(
+            post("/warehouse/inventory/expiry/allocation")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString())
+                .contentType("application/json")
+                .content(
+                    "{\"skuId\":\""
+                        + skuA
+                        + "\",\"warehouseId\":\""
+                        + whSh
+                        + "\",\"quantity\":10}"))
         .andExpect(status().isNotFound());
 
     // 策略写入同样不接受伪造头（只能写到自己的租户）
-    http.perform(post("/warehouse/inventory/expiry/policy")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString())
-            .contentType("application/json")
-            .content(
-                "{\"skuId\":\"" + skuB + "\",\"strategy\":\"FEFO\",\"enabled\":true,\"leadDays\":15}"))
+    http.perform(
+            post("/warehouse/inventory/expiry/policy")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString())
+                .contentType("application/json")
+                .content(
+                    "{\"skuId\":\""
+                        + skuB
+                        + "\",\"strategy\":\"FEFO\",\"enabled\":true,\"leadDays\":15}"))
         .andExpect(status().isOk());
     assertThat(asB(() -> service.policy(skuB)).leadDays()).isEqualTo(15);
     assertThat(asA(() -> service.policy(skuA)).leadDays()).isEqualTo(30);
@@ -919,10 +1082,11 @@ class InventoryExpiryIntegrationTest {
     // 未认证 401
     http.perform(get("/warehouse/inventory/expiry/alerts")).andExpect(status().isUnauthorized());
     // 写策略要 update 权限：只有 read 的角色不能改防错发的配置
-    http.perform(post("/warehouse/inventory/expiry/policy")
-            .header("Authorization", "Bearer self-only")
-            .contentType("application/json")
-            .content("{\"skuId\":\"" + skuA + "\",\"strategy\":\"FEFO\"}"))
+    http.perform(
+            post("/warehouse/inventory/expiry/policy")
+                .header("Authorization", "Bearer self-only")
+                .contentType("application/json")
+                .content("{\"skuId\":\"" + skuA + "\",\"strategy\":\"FEFO\"}"))
         .andExpect(status().isForbidden());
   }
 
@@ -931,17 +1095,23 @@ class InventoryExpiryIntegrationTest {
     var f = expiryFixture();
     policy("FEFO", true, 30, null);
     var lotB = lotB("LOT-B-TENANT");
-    balance(
-        actorB, b, skuB, whB, leB, qSellableB, List.of(new B(lotB, locB1, "80", "0")));
+    balance(actorB, b, skuB, whB, leB, qSellableB, List.of(new B(lotB, locB1, "80", "0")));
 
     // 池大小为 1，同一条连接被反复借还：交替访问两个租户 20 轮，
     // 每一轮都要同时校验预警清单、分配推荐、策略三条路径都不串租户。
     for (int i = 0; i < 20; i++) {
       var pageA =
-          asA(() -> service.alerts(new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
+          asA(
+              () ->
+                  service.alerts(
+                      new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
       var pageB =
-          asB(() -> service.alerts(new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
-      assertThat(pageA.rows()).extracting(ExpiryAlertRow::lotId)
+          asB(
+              () ->
+                  service.alerts(
+                      new ExpiryAlertQuery(null, null, null, null, null, null, null, 0, 50)));
+      assertThat(pageA.rows())
+          .extracting(ExpiryAlertRow::lotId)
           .containsExactly(f.lotOld(), f.lotA(), f.lotC(), f.lotB());
       assertThat(pageB.rows()).extracting(ExpiryAlertRow::lotId).containsExactly(lotB);
 
@@ -970,21 +1140,29 @@ class InventoryExpiryIntegrationTest {
   void 端点_策略配置后分配推荐与预警清单可读() throws Exception {
     expiryFixture();
 
-    http.perform(post("/warehouse/inventory/expiry/policy")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content(
-                "{\"skuId\":\"" + skuA + "\",\"strategy\":\"FEFO\",\"enabled\":true,\"leadDays\":30}"))
+    http.perform(
+            post("/warehouse/inventory/expiry/policy")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    "{\"skuId\":\""
+                        + skuA
+                        + "\",\"strategy\":\"FEFO\",\"enabled\":true,\"leadDays\":30}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.strategy").value("FEFO"))
         .andExpect(jsonPath("$.enabled").value(true))
         .andExpect(jsonPath("$.leadDays").value(30));
 
-    http.perform(post("/warehouse/inventory/expiry/allocation")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content(
-                "{\"skuId\":\"" + skuA + "\",\"warehouseId\":\"" + whSh + "\",\"quantity\":60}"))
+    http.perform(
+            post("/warehouse/inventory/expiry/allocation")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    "{\"skuId\":\""
+                        + skuA
+                        + "\",\"warehouseId\":\""
+                        + whSh
+                        + "\",\"quantity\":60}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.strategy").value("FEFO"))
         .andExpect(jsonPath("$.policyEnabled").value(true))
@@ -995,62 +1173,70 @@ class InventoryExpiryIntegrationTest {
         // 缺口与不可用量分项都要随响应给出
         .andExpect(jsonPath("$.ineligible.expiredAvailable").value(20));
 
-    http.perform(get("/warehouse/inventory/expiry/alerts")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/expiry/alerts").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.summary.expiredLotCount").value(1))
         .andExpect(jsonPath("$.summary.expiringLotCount").value(3))
         .andExpect(jsonPath("$.statusOptions[0].value").exists())
         .andExpect(jsonPath("$.leadDaysNote").exists());
 
-    http.perform(get("/warehouse/inventory/expiry/policies")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/expiry/policies").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.rows[0].skuCode").value("SKU-1"))
         .andExpect(jsonPath("$.rows[0].expiringLotCount").value(3));
 
-    http.perform(get("/warehouse/inventory/expiry/policy/" + skuA)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/expiry/policy/" + skuA)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.configured").value(true))
         .andExpect(jsonPath("$.nearestExpiry").exists());
 
-    http.perform(get("/warehouse/inventory/expiry/warehouses")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/expiry/warehouses")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].code").value("WH-SH"));
 
-    http.perform(get("/warehouse/inventory/expiry/lots/" + skuA)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/expiry/lots/" + skuA)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(5));
   }
 
   @Test
   void 端点_非法参数返回400且无权限返回401() throws Exception {
-    http.perform(get("/warehouse/inventory/expiry/alerts")
-            .header("Authorization", "Bearer tenant-a")
-            .param("expiryStatus", "SOON"))
+    http.perform(
+            get("/warehouse/inventory/expiry/alerts")
+                .header("Authorization", "Bearer tenant-a")
+                .param("expiryStatus", "SOON"))
         .andExpect(status().isBadRequest());
-    http.perform(get("/warehouse/inventory/expiry/alerts")
-            .header("Authorization", "Bearer tenant-a")
-            .param("leadDays", "-1"))
+    http.perform(
+            get("/warehouse/inventory/expiry/alerts")
+                .header("Authorization", "Bearer tenant-a")
+                .param("leadDays", "-1"))
         .andExpect(status().isBadRequest());
-    http.perform(get("/warehouse/inventory/expiry/alerts")
-            .header("Authorization", "Bearer tenant-a")
-            .param("sort", "DROP_TABLE"))
+    http.perform(
+            get("/warehouse/inventory/expiry/alerts")
+                .header("Authorization", "Bearer tenant-a")
+                .param("sort", "DROP_TABLE"))
         .andExpect(status().isBadRequest());
-    http.perform(post("/warehouse/inventory/expiry/allocation")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content(
-                "{\"skuId\":\"" + skuA + "\",\"warehouseId\":\"" + whSh + "\",\"quantity\":0}"))
+    http.perform(
+            post("/warehouse/inventory/expiry/allocation")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    "{\"skuId\":\"" + skuA + "\",\"warehouseId\":\"" + whSh + "\",\"quantity\":0}"))
         .andExpect(status().isBadRequest());
-    http.perform(post("/warehouse/inventory/expiry/allocation")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"quantity\":10}"))
+    http.perform(
+            post("/warehouse/inventory/expiry/allocation")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"quantity\":10}"))
         .andExpect(status().isBadRequest());
     // 越权读：没有任何 warehouse.inventory.* 权限
     http.perform(get("/warehouse/inventory/expiry/alerts").header("Authorization", "Bearer nope"))

@@ -24,7 +24,8 @@ public class ChannelController {
   private final ChannelService service;
   private final OAuthAuthorizationService oauth;
 
-  public ChannelController(AccessService access, ChannelService service, OAuthAuthorizationService oauth) {
+  public ChannelController(
+      AccessService access, ChannelService service, OAuthAuthorizationService oauth) {
     this.access = access;
     this.service = service;
     this.oauth = oauth;
@@ -35,12 +36,16 @@ public class ChannelController {
     return access.run(actor, permission, () -> work.apply(actor));
   }
 
-  private void callVoid(String bearer, String permission, java.util.function.Consumer<AccessService.Access> work) {
+  private void callVoid(
+      String bearer, String permission, java.util.function.Consumer<AccessService.Access> work) {
     var actor = access.require(bearer, permission);
-    access.run(actor, permission, () -> {
-      work.accept(actor);
-      return null;
-    });
+    access.run(
+        actor,
+        permission,
+        () -> {
+          work.accept(actor);
+          return null;
+        });
   }
 
   // ---- 2.1 平台目录 ----
@@ -58,14 +63,14 @@ public class ChannelController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable String platformCode,
       @RequestParam(defaultValue = "") String kind) {
-    return call(auth, "channel.registry.read", a -> service.enumMappings(a.tenantId(), platformCode, kind));
+    return call(
+        auth, "channel.registry.read", a -> service.enumMappings(a.tenantId(), platformCode, kind));
   }
 
   /**
    * 2.1.2.1 登记本租户映射覆盖。
    *
-   * <p>平台默认表 {@code platform_enum_mapping} 是全局只读码表，故意不给写端点：租户改它
-   * 会污染别的租户的订单状态机。要改口径只能写自己的覆盖层。
+   * <p>平台默认表 {@code platform_enum_mapping} 是全局只读码表，故意不给写端点：租户改它 会污染别的租户的订单状态机。要改口径只能写自己的覆盖层。
    */
   @PostMapping("/platforms/{platformCode}/enums")
   public UUID enumOverrideCreate(
@@ -82,10 +87,7 @@ public class ChannelController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable String platformCode,
       @PathVariable UUID id) {
-    callVoid(
-        auth,
-        "channel.registry.delete",
-        a -> service.deleteEnumOverride(a, platformCode, id));
+    callVoid(auth, "channel.registry.delete", a -> service.deleteEnumOverride(a, platformCode, id));
   }
 
   // ---- 2.2 授权与连接 ----
@@ -111,8 +113,7 @@ public class ChannelController {
   /**
    * 2.2.1.2 第 1–3 步：发起授权并拿到跳转地址。
    *
-   * <p>前端的全部动作就是 {@code window.location.href = authorizeUrl}，之后由平台跳回
-   * {@link #oauthCallback}。
+   * <p>前端的全部动作就是 {@code window.location.href = authorizeUrl}，之后由平台跳回 {@link #oauthCallback}。
    */
   @PostMapping("/oauth/sessions")
   public OAuthStartView oauthStart(
@@ -128,14 +129,16 @@ public class ChannelController {
    */
   @GetMapping("/oauth/sessions/{id}")
   public OAuthSessionView oauthSession(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "channel.connection.read", a -> oauth.session(a, id));
   }
 
   /** 2.2.1.2 第 5 步：账号下的店铺候选。 */
   @GetMapping("/oauth/sessions/{id}/shops")
   public List<OAuthShopCandidateView> oauthShops(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "channel.connection.read", a -> oauth.candidates(a, id));
   }
 
@@ -151,18 +154,18 @@ public class ChannelController {
   /** 2.2.1.2 放弃本次授权：state 立刻作废。 */
   @PostMapping("/oauth/sessions/{id}/cancel")
   public void oauthCancel(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     callVoid(auth, "channel.connection.create", a -> oauth.cancel(a, id));
   }
 
   /**
    * 2.2.1.2 平台回调。
    *
-   * <p>唯一不接受客户端身份的端点：租户与权限由 {@code state} 反查授权发起会话得到，
-   * 因此不需要也不能依赖 Authorization 头。
+   * <p>唯一不接受客户端身份的端点：租户与权限由 {@code state} 反查授权发起会话得到， 因此不需要也不能依赖 Authorization 头。
    *
-   * <p>浏览器导航（Accept 含 text/html）处理完 302 回前端向导并带上 sessionId，
-   * 用户才不会停在一段 JSON 上；其余调用方（例如向导的轮询、集成测试）拿 JSON。
+   * <p>浏览器导航（Accept 含 text/html）处理完 302 回前端向导并带上 sessionId， 用户才不会停在一段 JSON 上；其余调用方（例如向导的轮询、集成测试）拿
+   * JSON。
    */
   @GetMapping("/oauth/callback")
   public ResponseEntity<?> oauthCallback(
@@ -200,7 +203,8 @@ public class ChannelController {
   /** 2.2.2.1 健康诊断。 */
   @GetMapping("/connections/{id}/health")
   public ConnectionHealthView connectionHealth(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "channel.connection.read", a -> service.health(a, id));
   }
 
@@ -225,7 +229,8 @@ public class ChannelController {
   /** 2.3.1.2 店铺详情。 */
   @GetMapping("/shops/{id}")
   public ShopView shop(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "channel.shop.read", a -> service.shop(a.tenantId(), id));
   }
 

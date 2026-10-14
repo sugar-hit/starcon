@@ -10,8 +10,7 @@ import org.junit.jupiter.api.Test;
  * 3.6.3.1 地址与联系人的纯规则单测（不碰数据库）。
  *
  * <p>这里把 {@code V31__party_addresses_contacts.sql} 第九节的规则逐条钉死成断言，
- * 因为「数据库为什么这样设计」与「服务层为什么这样判」必须是同一份承诺：
- * 两处各说一套的话，下一个改代码的人只会读到其中一处。
+ * 因为「数据库为什么这样设计」与「服务层为什么这样判」必须是同一份承诺： 两处各说一套的话，下一个改代码的人只会读到其中一处。
  *
  * <p>与前端 {@code party-contact-model.test.ts} 的用例一一对应 —— 那是同一份规则的第二份实现。
  */
@@ -39,7 +38,8 @@ class PartyAddressContactRulesTest {
     // 「填了但只有空格」是脏数据。
     assertThat(PartyAddressRules.postalCodeProblem("   ")).contains("空格");
     // 超过列宽上限（32）被拒。
-    assertThat(PartyAddressRules.postalCodeProblem("518000123456789012345678901234567890")).contains("最多");
+    assertThat(PartyAddressRules.postalCodeProblem("518000123456789012345678901234567890"))
+        .contains("最多");
   }
 
   @Test
@@ -53,13 +53,20 @@ class PartyAddressContactRulesTest {
 
   @Test
   void 整体校验返回第一条可执行原因() {
-    assertThat(PartyAddressRules.addressProblem("", "深圳", "科技园 1 号", null, null, null, null, null, null))
+    assertThat(
+            PartyAddressRules.addressProblem(
+                "", "深圳", "科技园 1 号", null, null, null, null, null, null))
         .contains("国家");
-    assertThat(PartyAddressRules.addressProblem("CN", "", "科技园 1 号", null, null, null, null, null, null))
+    assertThat(
+            PartyAddressRules.addressProblem(
+                "CN", "", "科技园 1 号", null, null, null, null, null, null))
         .contains("城市");
-    assertThat(PartyAddressRules.addressProblem("CN", "深圳", "  ", null, null, null, null, null, null))
+    assertThat(
+            PartyAddressRules.addressProblem("CN", "深圳", "  ", null, null, null, null, null, null))
         .contains("街道地址");
-    assertThat(PartyAddressRules.addressProblem("CN", "深圳", "科技园 1 号", null, null, null, null, null, null))
+    assertThat(
+            PartyAddressRules.addressProblem(
+                "CN", "深圳", "科技园 1 号", null, null, null, null, null, null))
         .isNull();
   }
 
@@ -67,7 +74,8 @@ class PartyAddressContactRulesTest {
 
   @Test
   void 用途词表只有收货发货提货三个() {
-    assertThat(PartyAddressRules.USAGES).containsExactlyInAnyOrder("SHIP_TO", "SHIP_FROM", "PICKUP");
+    assertThat(PartyAddressRules.USAGES)
+        .containsExactlyInAnyOrder("SHIP_TO", "SHIP_FROM", "PICKUP");
     assertThat(PartyAddressRules.usageProblem("SHIP_TO")).isNull();
     assertThat(PartyAddressRules.usageProblem(" warehouse ")).contains("只能是");
     assertThat(PartyAddressRules.usageProblem("")).contains("不能为空");
@@ -78,12 +86,16 @@ class PartyAddressContactRulesTest {
 
   @Test
   void 同一用途不能标两次() {
-    assertThat(PartyAddressRules.usagesProblem(List.of(new PartyAddressUsageInput("SHIP_TO", false)))).isNull();
+    assertThat(
+            PartyAddressRules.usagesProblem(List.of(new PartyAddressUsageInput("SHIP_TO", false))))
+        .isNull();
     assertThat(PartyAddressRules.usagesProblem(null)).isNull();
     assertThat(PartyAddressRules.usagesProblem(List.of())).isNull();
     assertThat(
             PartyAddressRules.usagesProblem(
-                List.of(new PartyAddressUsageInput("SHIP_TO", true), new PartyAddressUsageInput("SHIP_TO", false))))
+                List.of(
+                    new PartyAddressUsageInput("SHIP_TO", true),
+                    new PartyAddressUsageInput("SHIP_TO", false))))
         .contains("只能标一次");
     // 三个用途全用上是合法的（真实场景：同一个仓既发货又被提货）。
     assertThat(
@@ -108,32 +120,49 @@ class PartyAddressContactRulesTest {
   @Test
   void 内容一致不追加版本而任何一列变了都追加() {
     String base =
-        PartyAddressRules.contentFingerprint("CN", "广东省", "深圳市", "南山区", "518000", "科技园 1 号", "3 楼", "仓库");
+        PartyAddressRules.contentFingerprint(
+            "CN", "广东省", "深圳市", "南山区", "518000", "科技园 1 号", "3 楼", "仓库");
     assertThat(PartyAddressRules.appendsVersion(base, base)).isFalse();
     // 换门牌号。
-    assertThat(PartyAddressRules.appendsVersion(base,
-            PartyAddressRules.contentFingerprint("CN", "广东省", "深圳市", "南山区", "518000", "科技园 2 号", "3 楼", "仓库")))
+    assertThat(
+            PartyAddressRules.appendsVersion(
+                base,
+                PartyAddressRules.contentFingerprint(
+                    "CN", "广东省", "深圳市", "南山区", "518000", "科技园 2 号", "3 楼", "仓库")))
         .isTrue();
     // 换邮编。
-    assertThat(PartyAddressRules.appendsVersion(base,
-            PartyAddressRules.contentFingerprint("CN", "广东省", "深圳市", "南山区", "518001", "科技园 1 号", "3 楼", "仓库")))
+    assertThat(
+            PartyAddressRules.appendsVersion(
+                base,
+                PartyAddressRules.contentFingerprint(
+                    "CN", "广东省", "深圳市", "南山区", "518001", "科技园 1 号", "3 楼", "仓库")))
         .isTrue();
     // 换地址名。
-    assertThat(PartyAddressRules.appendsVersion(base,
-            PartyAddressRules.contentFingerprint("CN", "广东省", "深圳市", "南山区", "518000", "科技园 1 号", "3 楼", "办公室")))
+    assertThat(
+            PartyAddressRules.appendsVersion(
+                base,
+                PartyAddressRules.contentFingerprint(
+                    "CN", "广东省", "深圳市", "南山区", "518000", "科技园 1 号", "3 楼", "办公室")))
         .isTrue();
     // 国家代码大小写不同不算变更（规范化过）。
-    assertThat(PartyAddressRules.appendsVersion(base,
-            PartyAddressRules.contentFingerprint("cn", "广东省", "深圳市", "南山区", "518000", "科技园 1 号", "3 楼", "仓库")))
+    assertThat(
+            PartyAddressRules.appendsVersion(
+                base,
+                PartyAddressRules.contentFingerprint(
+                    "cn", "广东省", "深圳市", "南山区", "518000", "科技园 1 号", "3 楼", "仓库")))
         .isFalse();
     // 清空一个可空列算变更。
-    assertThat(PartyAddressRules.appendsVersion(base,
-            PartyAddressRules.contentFingerprint("CN", "广东省", "深圳市", "南山区", "518000", "科技园 1 号", null, "仓库")))
+    assertThat(
+            PartyAddressRules.appendsVersion(
+                base,
+                PartyAddressRules.contentFingerprint(
+                    "CN", "广东省", "深圳市", "南山区", "518000", "科技园 1 号", null, "仓库")))
         .isTrue();
     // null 与空串是同一个「没填」，不算变更（否则「清空邮编」会被判成两次变更）。
     assertThat(
             PartyAddressRules.appendsVersion(
-                PartyAddressRules.contentFingerprint("CN", null, "深圳市", null, null, "科技园 1 号", null, null),
+                PartyAddressRules.contentFingerprint(
+                    "CN", null, "深圳市", null, null, "科技园 1 号", null, null),
                 PartyAddressRules.contentFingerprint("CN", "", "深圳市", "", "", "科技园 1 号", "", "")))
         .isFalse();
   }
@@ -168,10 +197,12 @@ class PartyAddressContactRulesTest {
                 new PartyAddressRules.SelectionInputs(false, false, "BLACKLISTED")))
         .isEqualTo("PARTY_BLACKLISTED");
     assertThat(
-            PartyAddressRules.selectionBlock(new PartyAddressRules.SelectionInputs(false, false, "INACTIVE")))
+            PartyAddressRules.selectionBlock(
+                new PartyAddressRules.SelectionInputs(false, false, "INACTIVE")))
         .isEqualTo("PARTY_INACTIVE");
     assertThat(
-            PartyAddressRules.selectionBlock(new PartyAddressRules.SelectionInputs(false, false, "ACTIVE")))
+            PartyAddressRules.selectionBlock(
+                new PartyAddressRules.SelectionInputs(false, false, "ACTIVE")))
         .isNull();
   }
 
@@ -184,7 +215,8 @@ class PartyAddressContactRulesTest {
             PartyAddressRules.BLOCK_PARTY_INACTIVE,
             PartyAddressRules.BLOCK_PARTY_BLACKLISTED);
     assertThat(codes.stream().map(PartyAddressRules::selectionBlockLabel).distinct()).hasSize(4);
-    assertThat(codes.stream().map(c -> PartyAddressRules.selectionBlockMessage(c, "深圳仓库")).distinct())
+    assertThat(
+            codes.stream().map(c -> PartyAddressRules.selectionBlockMessage(c, "深圳仓库")).distinct())
         .as("四个原因的处理动作不同，文案也不能相同")
         .hasSize(4);
     assertThat(PartyAddressRules.selectionBlockLabel(null)).isEqualTo("可选");
@@ -201,11 +233,16 @@ class PartyAddressContactRulesTest {
                 new PartyContactRules.SelectionInputs(false, "BLACKLISTED")))
         .isEqualTo("PARTY_BLACKLISTED");
     assertThat(
-            PartyContactRules.selectionBlock(new PartyContactRules.SelectionInputs(false, "INACTIVE")))
+            PartyContactRules.selectionBlock(
+                new PartyContactRules.SelectionInputs(false, "INACTIVE")))
         .isEqualTo("PARTY_INACTIVE");
-    assertThat(PartyContactRules.selectionBlock(new PartyContactRules.SelectionInputs(false, "ACTIVE"))).isNull();
+    assertThat(
+            PartyContactRules.selectionBlock(
+                new PartyContactRules.SelectionInputs(false, "ACTIVE")))
+        .isNull();
     assertThat(PartyContactRules.selectionBlockLabel(null)).isEqualTo("可选");
-    assertThat(PartyContactRules.selectionBlockLabel(PartyContactRules.BLOCK_PARTY_INACTIVE)).isEqualTo("主体已停用");
+    assertThat(PartyContactRules.selectionBlockLabel(PartyContactRules.BLOCK_PARTY_INACTIVE))
+        .isEqualTo("主体已停用");
   }
 
   // ================================================================ C1 联系方式

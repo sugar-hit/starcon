@@ -72,12 +72,30 @@ describe('9.3.2.2 履约路径展示口径', () => {
       createdAt: '2026-10-01T00:00:00Z',
       updatedAt: '2026-10-01T00:00:00Z',
     };
-    expect(mcfUsable({ ...base, status: 'AUTHORIZED', expired: false, verifiedAt: null, expiresAt: null })).toBe(true);
+    expect(
+      mcfUsable({
+        ...base,
+        status: 'AUTHORIZED',
+        expired: false,
+        verifiedAt: null,
+        expiresAt: null,
+      }),
+    ).toBe(true);
     // 有资质但已过期：仍不可用 —— 页面据此提示「需先续期」而不是「需先核验」。
-    expect(mcfUsable({ ...base, status: 'AUTHORIZED', expired: true, verifiedAt: null, expiresAt: null })).toBe(false);
+    expect(
+      mcfUsable({
+        ...base,
+        status: 'AUTHORIZED',
+        expired: true,
+        verifiedAt: null,
+        expiresAt: null,
+      }),
+    ).toBe(false);
     // 从未核验：状态名与「已授权」差得足够远，不会被误读成可用。
     expect(mcfStatusLabel('UNKNOWN')).toBe('未核验');
-    expect(mcfUsable({ ...base, status: 'UNKNOWN', expired: false, verifiedAt: null, expiresAt: null })).toBe(false);
+    expect(
+      mcfUsable({ ...base, status: 'UNKNOWN', expired: false, verifiedAt: null, expiresAt: null }),
+    ).toBe(false);
   });
 
   it('只有待确认的决策可以推进状态', () => {

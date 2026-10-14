@@ -30,23 +30,19 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 8.1.2.1 库位树。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p>本测试钉住七件「错了会误导人」的事：
  *
  * <ul>
- *   <li><b>跨租户与跨仓库挂父子被 DB 拒。</b>蓝图的红线是「库位不能跨租户引用，
- *       也不允许跨仓库」—— 所以用<b>超级用户连接直连 SQL</b> 绕开服务层去挂，
+ *   <li><b>跨租户与跨仓库挂父子被 DB 拒。</b>蓝图的红线是「库位不能跨租户引用， 也不允许跨仓库」—— 所以用<b>超级用户连接直连 SQL</b> 绕开服务层去挂，
  *       外键必须当场拒绝。只在应用层挡的话，运维脚本一挂就破。
- *   <li><b>防环是 DB 不变量。</b>成环会让递归 CTE 永不收敛，整棵树查询打不出结果 ——
- *       所以它不能只是服务层一个 if。
+ *   <li><b>防环是 DB 不变量。</b>成环会让递归 CTE 永不收敛，整棵树查询打不出结果 —— 所以它不能只是服务层一个 if。
  *   <li><b>租户隔离三断言</b>实跑 + FORCE RLS 逐张断言。
  *   <li><b>NUMERIC 精确</b>：0.1×3 读回必须是 0.3，不是 0.30000000000000004。
  *   <li><b>「没量过」≠ 0</b>：容量未填时利用率给 null；量过且空置才是 0.0000。
  *   <li><b>手数与预占不相加</b>。
- *   <li><b>根节点 parent_id 允许 NULL</b>：这是「区」合法存在的形状，
- *       也是 V105 补三列时不能改成 NOT NULL 的原因（那会破坏既有 INSERT）。
+ *   <li><b>根节点 parent_id 允许 NULL</b>：这是「区」合法存在的形状， 也是 V105 补三列时不能改成 NOT NULL 的原因（那会破坏既有 INSERT）。
  * </ul>
  */
 @SpringBootTest
@@ -58,7 +54,10 @@ class WarehouseLocationTreeIntegrationTest {
   static HttpServer identity;
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
   static final List<String> allPermissions =
-      List.of("warehouse.facilities.read", "warehouse.facilities.create", "warehouse.facilities.update");
+      List.of(
+          "warehouse.facilities.read",
+          "warehouse.facilities.create",
+          "warehouse.facilities.update");
 
   static UUID idFor(UUID tenant, int ordinal) {
     return UUID.nameUUIDFromBytes(("starcon-location-tree-" + tenant + "-" + ordinal).getBytes());
@@ -66,8 +65,13 @@ class WarehouseLocationTreeIntegrationTest {
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -77,7 +81,8 @@ class WarehouseLocationTreeIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -92,7 +97,8 @@ class WarehouseLocationTreeIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -158,30 +164,60 @@ class WarehouseLocationTreeIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 3), tenant, "SKU-2", "商品二");
+                idFor(tenant, 3),
+                tenant,
+                "SKU-2",
+                "商品二");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                UUID.nameUUIDFromBytes(("third-sku-" + tenant).getBytes()), tenant, "SKU-3", "商品三");
+                UUID.nameUUIDFromBytes(("third-sku-" + tenant).getBytes()),
+                tenant,
+                "SKU-3",
+                "商品三");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 4),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,kind,country_code,timezone,"
                     + "default_legal_entity_id,status) values(?,?,?,?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-" + (tenant.equals(a) ? "A" : "B"), "本租仓库",
-                "LOCAL", tenant.equals(a) ? "CN" : "US", "Asia/Shanghai", idFor(tenant, 1), "ACTIVE");
+                idFor(tenant, 5),
+                tenant,
+                "WH-" + (tenant.equals(a) ? "A" : "B"),
+                "本租仓库",
+                "LOCAL",
+                tenant.equals(a) ? "CN" : "US",
+                "Asia/Shanghai",
+                idFor(tenant, 1),
+                "ACTIVE");
             // 第二个仓库：**同租户**、另一个仓 —— 用来验「不允许跨仓库挂父子」。
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,kind,country_code,timezone,"
                     + "default_legal_entity_id,status) values(?,?,?,?,?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "WH2-" + (tenant.equals(a) ? "A" : "B"), "本租第二仓",
-                "LOCAL", "CN", "Asia/Shanghai", idFor(tenant, 1), "ACTIVE");
+                idFor(tenant, 6),
+                tenant,
+                "WH2-" + (tenant.equals(a) ? "A" : "B"),
+                "本租第二仓",
+                "LOCAL",
+                "CN",
+                "Asia/Shanghai",
+                idFor(tenant, 1),
+                "ACTIVE");
             return null;
           });
     }
@@ -200,8 +236,7 @@ class WarehouseLocationTreeIntegrationTest {
   }
 
   LocationTree tree(UUID tenant, UUID warehouse) {
-    return access.run(
-        actorFor(tenant), "warehouse.facilities.read", () -> service.tree(warehouse));
+    return access.run(actorFor(tenant), "warehouse.facilities.read", () -> service.tree(warehouse));
   }
 
   UUID wh(UUID tenant) {
@@ -216,43 +251,76 @@ class WarehouseLocationTreeIntegrationTest {
 
   /** 直接落库一个库位（不走服务层），用于构造树形。 */
   UUID insertLocation(
-      UUID tenant, UUID warehouse, String code, String type, UUID parent,
-      BigDecimal capacity, BigDecimal weight) {
+      UUID tenant,
+      UUID warehouse,
+      String code,
+      String type,
+      UUID parent,
+      BigDecimal capacity,
+      BigDecimal weight) {
     // 必须在**写入行的那个租户**的上下文里跑：RLS 的 WITH CHECK 会拿
     // app.current_tenant 比对 tenant_id，用 A 的上下文写 B 的行会被 DB 拒（这本身就是好事）。
-    return access.run(actorFor(tenant), "warehouse.facilities.read", () -> {
-      UUID id = UUID.randomUUID();
-      sql.execute(
-          "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
-              + "pickable,parent_id,capacity,weight_limit) values(?,?,?,?,?,?,'ACTIVE',true,"
-              + "cast(? as uuid),cast(? as numeric),cast(? as numeric))",
-          // 三个可空列必须带 SQL 类型：jOOQ 绑定无类型 null 时会抛
-          // "Type class java.lang.Class is not supported in dialect POSTGRES"。
-          id, tenant, warehouse, code, code + " 位", type,
-          parent == null ? DSL.val((UUID) null, UUID.class) : DSL.val(parent, UUID.class),
-          capacity == null ? DSL.val((BigDecimal) null, BigDecimal.class) : DSL.val(capacity, BigDecimal.class),
-          weight == null ? DSL.val((BigDecimal) null, BigDecimal.class) : DSL.val(weight, BigDecimal.class));
-      return id;
-    });
+    return access.run(
+        actorFor(tenant),
+        "warehouse.facilities.read",
+        () -> {
+          UUID id = UUID.randomUUID();
+          sql.execute(
+              "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
+                  + "pickable,parent_id,capacity,weight_limit) values(?,?,?,?,?,?,'ACTIVE',true,"
+                  + "cast(? as uuid),cast(? as numeric),cast(? as numeric))",
+              // 三个可空列必须带 SQL 类型：jOOQ 绑定无类型 null 时会抛
+              // "Type class java.lang.Class is not supported in dialect POSTGRES"。
+              id,
+              tenant,
+              warehouse,
+              code,
+              code + " 位",
+              type,
+              parent == null ? DSL.val((UUID) null, UUID.class) : DSL.val(parent, UUID.class),
+              capacity == null
+                  ? DSL.val((BigDecimal) null, BigDecimal.class)
+                  : DSL.val(capacity, BigDecimal.class),
+              weight == null
+                  ? DSL.val((BigDecimal) null, BigDecimal.class)
+                  : DSL.val(weight, BigDecimal.class));
+          return id;
+        });
   }
 
   /** 一条库位明细（占用来源）。数量走 NUMERIC 绑定，绝不经过 double。 */
   void bucket(UUID tenant, UUID warehouse, UUID location, UUID sku, String quantity) {
-    access.run(actorFor(tenant), "warehouse.facilities.read", () -> {
-      UUID balanceId = UUID.randomUUID();
-      sql.execute(
-          "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
-              + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-          balanceId, tenant, sku, warehouse, idFor(tenant, 1), idFor(tenant, 4),
-          new BigDecimal(quantity));
-      sql.execute(
-          "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,location_id,"
-              + "quality_status_id,balance_id,on_hand,reserved,last_movement_at) "
-              + "values(?,?,?,?,?,?,?,?,?,0::numeric,?::timestamptz)",
-          UUID.randomUUID(), tenant, idFor(tenant, 1), sku, warehouse, location,
-          idFor(tenant, 4), balanceId, new BigDecimal(quantity), now());
-      return null;
-    });
+    access.run(
+        actorFor(tenant),
+        "warehouse.facilities.read",
+        () -> {
+          UUID balanceId = UUID.randomUUID();
+          sql.execute(
+              "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
+                  + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
+              balanceId,
+              tenant,
+              sku,
+              warehouse,
+              idFor(tenant, 1),
+              idFor(tenant, 4),
+              new BigDecimal(quantity));
+          sql.execute(
+              "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,location_id,"
+                  + "quality_status_id,balance_id,on_hand,reserved,last_movement_at) "
+                  + "values(?,?,?,?,?,?,?,?,?,0::numeric,?::timestamptz)",
+              UUID.randomUUID(),
+              tenant,
+              idFor(tenant, 1),
+              sku,
+              warehouse,
+              location,
+              idFor(tenant, 4),
+              balanceId,
+              new BigDecimal(quantity),
+              now());
+          return null;
+        });
   }
 
   static OffsetDateTime now() {
@@ -262,8 +330,8 @@ class WarehouseLocationTreeIntegrationTest {
   /**
    * 在超级用户连接上执行 —— 用来证明「绕过应用角色也被 DB 拒绝」。
    *
-   * <p>失败时抛 {@link IllegalStateException}（包着 SQLException 的 sqlstate 文本），
-   * 与 {@code assertThatThrownBy} 的用法对齐。
+   * <p>失败时抛 {@link IllegalStateException}（包着 SQLException 的 sqlstate 文本）， 与 {@code
+   * assertThatThrownBy} 的用法对齐。
    */
   void asSuperuser(String sqlText, Object... binds) {
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
@@ -285,9 +353,12 @@ class WarehouseLocationTreeIntegrationTest {
 
   @Test
   void 库位树按层级输出且根可为空父() {
-    UUID zone = insertLocation(a, wh(a), "ZONE-A", "STORAGE", null, new BigDecimal("100"), new BigDecimal("500"));
+    UUID zone =
+        insertLocation(
+            a, wh(a), "ZONE-A", "STORAGE", null, new BigDecimal("100"), new BigDecimal("500"));
     UUID aisle = insertLocation(a, wh(a), "A-01", "STORAGE", zone, null, null);
-    insertLocation(a, wh(a), "R-01", "RECEIVING", aisle, new BigDecimal("10"), new BigDecimal("50"));
+    insertLocation(
+        a, wh(a), "R-01", "RECEIVING", aisle, new BigDecimal("10"), new BigDecimal("50"));
 
     LocationTree t = tree(a, wh(a));
     // 扁平层级行：父先于子，depth 表达缩进
@@ -295,7 +366,7 @@ class WarehouseLocationTreeIntegrationTest {
     assertThat(t.rootCount()).isEqualTo(1);
     LocationNode root = t.levels().get(0);
     assertThat(root.code()).isEqualTo("ZONE-A");
-    assertThat(root.parentId()).isNull();          // 根节点 parent_id 必须是 NULL（不是漏填）
+    assertThat(root.parentId()).isNull(); // 根节点 parent_id 必须是 NULL（不是漏填）
     assertThat(root.depth()).isZero();
     LocationNode child = t.levels().get(1);
     assertThat(child.code()).isEqualTo("A-01");
@@ -320,7 +391,7 @@ class WarehouseLocationTreeIntegrationTest {
     LocationNode leaf = t.levels().get(1);
 
     assertThat(leaf.occupied().onHand()).isEqualByComparingTo("8");
-    assertThat(leaf.occupied().reserved()).isEqualByComparingTo("0");   // 两个数不相加
+    assertThat(leaf.occupied().reserved()).isEqualByComparingTo("0"); // 两个数不相加
     assertThat(leaf.occupied().skuCount()).isEqualTo(2);
     assertThat(leaf.occupied().bucketRows()).isEqualTo(2);
     // 子树占用：父节点自己没货，但子树有 —— 「这棵树占了多少」与「这个库位占了多少」是两个数
@@ -352,13 +423,17 @@ class WarehouseLocationTreeIntegrationTest {
   @Test
   void 容量利用率区分未量过与量过且空置() {
     UUID zone = insertLocation(a, wh(a), "ZONE-A", "STORAGE", null, null, null);
-    UUID measured = insertLocation(a, wh(a), "B-M", "STORAGE", zone, new BigDecimal("50"), new BigDecimal("100"));
+    UUID measured =
+        insertLocation(
+            a, wh(a), "B-M", "STORAGE", zone, new BigDecimal("50"), new BigDecimal("100"));
     UUID unmeasured = insertLocation(a, wh(a), "B-U", "STORAGE", zone, null, null);
     bucket(a, wh(a), measured, idFor(a, 2), "10");
 
     LocationTree t = tree(a, wh(a));
-    LocationNode m = t.levels().stream().filter(n -> n.code().equals("B-M")).findFirst().orElseThrow();
-    LocationNode u = t.levels().stream().filter(n -> n.code().equals("B-U")).findFirst().orElseThrow();
+    LocationNode m =
+        t.levels().stream().filter(n -> n.code().equals("B-M")).findFirst().orElseThrow();
+    LocationNode u =
+        t.levels().stream().filter(n -> n.code().equals("B-U")).findFirst().orElseThrow();
 
     assertThat(m.occupied().capacityUtilization()).isEqualByComparingTo("0.2000");
     assertThat(m.occupied().capacityExceeded()).isFalse();
@@ -371,7 +446,8 @@ class WarehouseLocationTreeIntegrationTest {
   @Test
   void 超出量得容量的库位被标出来() {
     UUID zone = insertLocation(a, wh(a), "ZONE-A", "STORAGE", null, null, null);
-    UUID tiny = insertLocation(a, wh(a), "B-T", "STORAGE", zone, new BigDecimal("2"), new BigDecimal("1"));
+    UUID tiny =
+        insertLocation(a, wh(a), "B-T", "STORAGE", zone, new BigDecimal("2"), new BigDecimal("1"));
     bucket(a, wh(a), tiny, idFor(a, 2), "10");
 
     LocationNode leaf = tree(a, wh(a)).levels().get(1);
@@ -383,21 +459,44 @@ class WarehouseLocationTreeIntegrationTest {
     UUID zone = insertLocation(a, wh(a), "ZONE-A", "STORAGE", null, null, null);
     // 应用层先拦（nonNegative → IllegalArgumentException → ApiErrorHandler 翻成 400）；
     // 绕过应用层时 DB 的 CHECK 是第二道，下面用超级用户连接单独证明它。
-    assertThatThrownBy(() -> { asA("create", () -> service.create(
-        wh(a), new LocationCreateInput("B-N", "负容量", zone, "STORAGE", null,
-            new BigDecimal("-1"), null))); })
+    assertThatThrownBy(
+            () -> {
+              asA(
+                  "create",
+                  () ->
+                      service.create(
+                          wh(a),
+                          new LocationCreateInput(
+                              "B-N", "负容量", zone, "STORAGE", null, new BigDecimal("-1"), null)));
+            })
         .isInstanceOf(IllegalArgumentException.class);
     // DB 兜底：超级用户绕过服务层直连写负容量，CHECK 仍当场拒绝（23514 = check_violation）
-    assertThatThrownBy(() -> asSuperuser(
-            "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
-                + "pickable,parent_id,capacity,weight_limit) values(?,?,?,?,'x','STORAGE','ACTIVE',true,?,?,?)",
-            UUID.randomUUID(), a, wh(a), "B-NEG", zone, new BigDecimal("-1"), null))
+    assertThatThrownBy(
+            () ->
+                asSuperuser(
+                    "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
+                        + "pickable,parent_id,capacity,weight_limit) values(?,?,?,?,'x','STORAGE','ACTIVE',true,?,?,?)",
+                    UUID.randomUUID(),
+                    a,
+                    wh(a),
+                    "B-NEG",
+                    zone,
+                    new BigDecimal("-1"),
+                    null))
         .hasMessageContaining("23514");
     // 负承重同理
-    assertThatThrownBy(() -> asSuperuser(
-            "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
-                + "pickable,parent_id,capacity,weight_limit) values(?,?,?,?,'y','STORAGE','ACTIVE',true,?,?,?)",
-            UUID.randomUUID(), a, wh(a), "B-NEG-W", zone, new BigDecimal("1"), new BigDecimal("-5")))
+    assertThatThrownBy(
+            () ->
+                asSuperuser(
+                    "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
+                        + "pickable,parent_id,capacity,weight_limit) values(?,?,?,?,'y','STORAGE','ACTIVE',true,?,?,?)",
+                    UUID.randomUUID(),
+                    a,
+                    wh(a),
+                    "B-NEG-W",
+                    zone,
+                    new BigDecimal("1"),
+                    new BigDecimal("-5")))
         .hasMessageContaining("23514");
   }
 
@@ -408,13 +507,25 @@ class WarehouseLocationTreeIntegrationTest {
     UUID zone = insertLocation(a, wh(a), "ZONE-A", "STORAGE", null, null, null);
     UUID aisle = insertLocation(a, wh(a), "A-01", "STORAGE", zone, null, null);
 
-    assertThatThrownBy(() -> { asA("update", () -> service.update(
-        wh(a), zone,
-        new LocationUpdateInput(null, null, null, null, null, null, aisle, true))); })
+    assertThatThrownBy(
+            () -> {
+              asA(
+                  "update",
+                  () ->
+                      service.update(
+                          wh(a),
+                          zone,
+                          new LocationUpdateInput(
+                              null, null, null, null, null, null, aisle, true)));
+            })
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-        .satisfies(e -> assertThat(
-            ((org.springframework.web.server.ResponseStatusException) e).getStatusCode().value())
-            .isEqualTo(400));
+        .satisfies(
+            e ->
+                assertThat(
+                        ((org.springframework.web.server.ResponseStatusException) e)
+                            .getStatusCode()
+                            .value())
+                    .isEqualTo(400));
   }
 
   @Test
@@ -424,16 +535,23 @@ class WarehouseLocationTreeIntegrationTest {
 
     // 超级用户连接直连 SQL：应用层那道 if 在这里根本没有执行的机会，
     // 成环必须由 V105 的 guard_warehouse_location_tree 触发器拒绝。
-    assertThatThrownBy(() -> asSuperuser(
-            "update warehouse_location set parent_id=? where tenant_id=? and id=?",
-            aisle, a, zone))
+    assertThatThrownBy(
+            () ->
+                asSuperuser(
+                    "update warehouse_location set parent_id=? where tenant_id=? and id=?",
+                    aisle,
+                    a,
+                    zone))
         .hasMessageContaining("23514");
     // 事务回滚后层级未变
     var afterRollback =
-        asA("read", () -> sql.fetchOne(
-            "select parent_id from warehouse_location where tenant_id=current_setting"
-                + "('app.current_tenant',true)::uuid and id=?",
-            zone));
+        asA(
+            "read",
+            () ->
+                sql.fetchOne(
+                    "select parent_id from warehouse_location where tenant_id=current_setting"
+                        + "('app.current_tenant',true)::uuid and id=?",
+                    zone));
     assertThat(afterRollback == null ? null : afterRollback.get(0, UUID.class)).isNull();
   }
 
@@ -443,9 +561,13 @@ class WarehouseLocationTreeIntegrationTest {
     UUID inWh2 = insertLocation(a, wh2(a), "ZONE-B", "STORAGE", null, null, null);
 
     // 蓝图红线：「库位不允许跨仓库挂接」。超级用户直连，绕开服务层。
-    assertThatThrownBy(() -> asSuperuser(
-            "update warehouse_location set parent_id=? where tenant_id=? and id=?",
-            inWh2, a, inWh1))
+    assertThatThrownBy(
+            () ->
+                asSuperuser(
+                    "update warehouse_location set parent_id=? where tenant_id=? and id=?",
+                    inWh2,
+                    a,
+                    inWh1))
         .hasMessageContaining("warehouse_location_parent_fk");
   }
 
@@ -455,15 +577,24 @@ class WarehouseLocationTreeIntegrationTest {
     UUID inWh2 = insertLocation(a, wh2(a), "ZONE-B", "STORAGE", null, null, null);
     UUID child = insertLocation(a, wh2(a), "B-01", "STORAGE", inWh2, null, null);
 
-    assertThatThrownBy(() -> { asA("update", () -> service.update(
-        wh2(a), child,
-        new LocationUpdateInput(null, null, null, null, null, null, inWh1, true))); })
+    assertThatThrownBy(
+            () -> {
+              asA(
+                  "update",
+                  () ->
+                      service.update(
+                          wh2(a),
+                          child,
+                          new LocationUpdateInput(
+                              null, null, null, null, null, null, inWh1, true)));
+            })
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-        .satisfies(e -> {
-          var ex = (org.springframework.web.server.ResponseStatusException) e;
-          assertThat(ex.getStatusCode().value()).isEqualTo(400);
-          assertThat(ex.getReason()).contains("跨仓库");
-        });
+        .satisfies(
+            e -> {
+              var ex = (org.springframework.web.server.ResponseStatusException) e;
+              assertThat(ex.getStatusCode().value()).isEqualTo(400);
+              assertThat(ex.getReason()).contains("跨仓库");
+            });
   }
 
   @Test
@@ -474,10 +605,16 @@ class WarehouseLocationTreeIntegrationTest {
     }
     UUID seventh = UUID.randomUUID();
     UUID deepest = parent;
-    assertThatThrownBy(() -> asSuperuser(
-            "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
-                + "pickable,parent_id) values(?,?,?,?,'第七层','STORAGE','ACTIVE',true,?)",
-            seventh, a, wh(a), "L7", deepest))
+    assertThatThrownBy(
+            () ->
+                asSuperuser(
+                    "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
+                        + "pickable,parent_id) values(?,?,?,?,'第七层','STORAGE','ACTIVE',true,?)",
+                    seventh,
+                    a,
+                    wh(a),
+                    "L7",
+                    deepest))
         .hasMessageContaining("23514");
   }
 
@@ -485,12 +622,36 @@ class WarehouseLocationTreeIntegrationTest {
 
   @Test
   void 新建库位能挂在指定父节点下() {
-    LocationSaved zone = asA("create", () -> service.create(
-        wh(a), new LocationCreateInput("ZONE-A", "A 区", null, "STORAGE", null, new BigDecimal("80"), new BigDecimal("400"))));
+    LocationSaved zone =
+        asA(
+            "create",
+            () ->
+                service.create(
+                    wh(a),
+                    new LocationCreateInput(
+                        "ZONE-A",
+                        "A 区",
+                        null,
+                        "STORAGE",
+                        null,
+                        new BigDecimal("80"),
+                        new BigDecimal("400"))));
     assertThat(zone.id()).isNotNull();
 
-    LocationSaved bin = asA("create", () -> service.create(
-        wh(a), new LocationCreateInput("B-01", "01 货架 1 层", zone.id(), "STORAGE", null, new BigDecimal("5"), null)));
+    LocationSaved bin =
+        asA(
+            "create",
+            () ->
+                service.create(
+                    wh(a),
+                    new LocationCreateInput(
+                        "B-01",
+                        "01 货架 1 层",
+                        zone.id(),
+                        "STORAGE",
+                        null,
+                        new BigDecimal("5"),
+                        null)));
     assertThat(bin.action()).isEqualTo("CREATED");
 
     LocationTree t = tree(a, wh(a));
@@ -508,16 +669,30 @@ class WarehouseLocationTreeIntegrationTest {
     UUID z2 = insertLocation(a, wh(a), "ZONE-B", "STORAGE", null, null, null);
     UUID bin = insertLocation(a, wh(a), "B-01", "STORAGE", z1, null, null);
 
-    LocationSaved moved = asA("update", () -> service.update(
-        wh(a), bin, new LocationUpdateInput(null, null, null, null, null, null, z2, true)));
+    LocationSaved moved =
+        asA(
+            "update",
+            () ->
+                service.update(
+                    wh(a),
+                    bin,
+                    new LocationUpdateInput(null, null, null, null, null, null, z2, true)));
     assertThat(moved.action()).isEqualTo("MOVED");
 
     LocationTree t = tree(a, wh(a));
-    assertThat(t.levels().stream().filter(n -> n.code().equals("B-01")).findFirst().orElseThrow()
-            .parentId())
+    assertThat(
+            t.levels().stream()
+                .filter(n -> n.code().equals("B-01"))
+                .findFirst()
+                .orElseThrow()
+                .parentId())
         .isEqualTo(z2);
-    assertThat(t.levels().stream().filter(n -> n.code().equals("ZONE-A")).findFirst().orElseThrow()
-            .id())
+    assertThat(
+            t.levels().stream()
+                .filter(n -> n.code().equals("ZONE-A"))
+                .findFirst()
+                .orElseThrow()
+                .id())
         .isEqualTo(z1);
   }
 
@@ -527,8 +702,13 @@ class WarehouseLocationTreeIntegrationTest {
     UUID z2 = insertLocation(a, wh(a), "ZONE-B", "STORAGE", null, null, null);
     UUID bin = insertLocation(a, wh(a), "B-01", "STORAGE", z1, null, null);
 
-    asA("update", () -> service.update(
-        wh(a), bin, new LocationUpdateInput("改名了", null, null, null, null, null, null, null)));
+    asA(
+        "update",
+        () ->
+            service.update(
+                wh(a),
+                bin,
+                new LocationUpdateInput("改名了", null, null, null, null, null, null, null)));
     // 只改名，层级保持原样（null 与「升为根」不是同一件事）
     LocationTree t = tree(a, wh(a));
     assertThat(t.levels()).hasSize(3);
@@ -539,13 +719,22 @@ class WarehouseLocationTreeIntegrationTest {
   void 改属性可把库位升为根节点() {
     UUID zone = insertLocation(a, wh(a), "ZONE-A", "STORAGE", null, null, null);
     UUID bin = insertLocation(a, wh(a), "B-01", "STORAGE", zone, null, null);
-    asA("update", () -> service.update(
-        wh(a), bin, new LocationUpdateInput(null, null, null, null, null, null, null, true)));
+    asA(
+        "update",
+        () ->
+            service.update(
+                wh(a),
+                bin,
+                new LocationUpdateInput(null, null, null, null, null, null, null, true)));
     LocationTree t = tree(a, wh(a));
     assertThat(t.totals().rootCount()).isEqualTo(2);
     assertThat(t.rootCount()).isEqualTo(2);
-    assertThat(t.levels().stream().filter(n -> n.code().equals("B-01")).findFirst().orElseThrow()
-            .parentId())
+    assertThat(
+            t.levels().stream()
+                .filter(n -> n.code().equals("B-01"))
+                .findFirst()
+                .orElseThrow()
+                .parentId())
         .isNull();
   }
 
@@ -556,32 +745,63 @@ class WarehouseLocationTreeIntegrationTest {
     bucket(a, wh(a), bin, idFor(a, 2), "1");
 
     // 有库存：409，且把话说清楚
-    assertThatThrownBy(() -> { asA("update", () -> { service.delete(wh(a), bin); return null; }); })
+    assertThatThrownBy(
+            () -> {
+              asA(
+                  "update",
+                  () -> {
+                    service.delete(wh(a), bin);
+                    return null;
+                  });
+            })
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-        .satisfies(e -> {
-          var ex = (org.springframework.web.server.ResponseStatusException) e;
-          assertThat(ex.getStatusCode().value()).isEqualTo(409);
-          assertThat(ex.getReason()).contains("库存");
-        });
+        .satisfies(
+            e -> {
+              var ex = (org.springframework.web.server.ResponseStatusException) e;
+              assertThat(ex.getStatusCode().value()).isEqualTo(409);
+              assertThat(ex.getReason()).contains("库存");
+            });
 
     // 有子节点：zone 下面还挂着 bin（与 empty），删 zone 必须 409
     UUID empty = insertLocation(a, wh(a), "B-02", "STORAGE", zone, null, null);
-    assertThatThrownBy(() -> { asA("update", () -> { service.delete(wh(a), zone); return null; }); })
+    assertThatThrownBy(
+            () -> {
+              asA(
+                  "update",
+                  () -> {
+                    service.delete(wh(a), zone);
+                    return null;
+                  });
+            })
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-        .satisfies(e -> assertThat(
-            ((org.springframework.web.server.ResponseStatusException) e).getStatusCode().value())
-            .isEqualTo(409));
+        .satisfies(
+            e ->
+                assertThat(
+                        ((org.springframework.web.server.ResponseStatusException) e)
+                            .getStatusCode()
+                            .value())
+                    .isEqualTo(409));
 
     // 空叶子可删
-    asA("update", () -> { service.delete(wh(a), empty); return null; });
+    asA(
+        "update",
+        () -> {
+          service.delete(wh(a), empty);
+          return null;
+        });
     assertThat(tree(a, wh(a)).totals().locationCount()).isEqualTo(2);
   }
 
   @Test
   void 六类库位类型都能维护且待检残次冻结标为天然不可拣() {
     for (LocationType type : LocationType.values()) {
-      asA("create", () -> service.create(
-          wh(a), new LocationCreateInput(type.name() + "-1", type.label(), null, type.name(), null, null, null)));
+      asA(
+          "create",
+          () ->
+              service.create(
+                  wh(a),
+                  new LocationCreateInput(
+                      type.name() + "-1", type.label(), null, type.name(), null, null, null)));
     }
     List<LocationNode> nodes = tree(a, wh(a)).levels();
     assertThat(nodes).hasSize(LocationType.values().length);
@@ -589,8 +809,16 @@ class WarehouseLocationTreeIntegrationTest {
     for (LocationNode n : nodes) {
       assertThat(n.type().label()).isNotBlank();
     }
-    assertThatThrownBy(() -> { asA("create", () -> service.create(
-        wh(a), new LocationCreateInput("X", "非法类型", null, "NOT_A_TYPE", null, null, null))); })
+    assertThatThrownBy(
+            () -> {
+              asA(
+                  "create",
+                  () ->
+                      service.create(
+                          wh(a),
+                          new LocationCreateInput(
+                              "X", "非法类型", null, "NOT_A_TYPE", null, null, null)));
+            })
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -619,18 +847,35 @@ class WarehouseLocationTreeIntegrationTest {
     assertThat(tree(a, wh(a)).levels().get(0).code()).isEqualTo("ZONE-A");
     assertThat(tree(b, wh(b)).levels().get(0).code()).isEqualTo("ZONE-B");
     // B 用 A 的仓 id 取树 → 404，不是「同名仓库」
-    assertThatThrownBy(() -> { tree(b, wh(a)); })
+    assertThatThrownBy(
+            () -> {
+              tree(b, wh(a));
+            })
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-        .satisfies(e -> assertThat(((org.springframework.web.server.ResponseStatusException) e)
-                .getStatusCode().value()).isEqualTo(404));
+        .satisfies(
+            e ->
+                assertThat(
+                        ((org.springframework.web.server.ResponseStatusException) e)
+                            .getStatusCode()
+                            .value())
+                    .isEqualTo(404));
   }
 
   @Test
   void 伪造tenant头无效() {
     UUID bin = insertLocation(a, wh(a), "B-01", "STORAGE", null, null, null);
     // B 拿 A 的库位 id 改属性 → 404
-    assertThatThrownBy(() -> { asB("update", () -> service.update(
-        wh(b), bin, new LocationUpdateInput("B 改的", null, null, null, null, null, null, null))); })
+    assertThatThrownBy(
+            () -> {
+              asB(
+                  "update",
+                  () ->
+                      service.update(
+                          wh(b),
+                          bin,
+                          new LocationUpdateInput(
+                              "B 改的", null, null, null, null, null, null, null)));
+            })
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
     // A 的库位未被改动
     assertThat(tree(a, wh(a)).levels().get(0).name()).isEqualTo("B-01 位");
@@ -650,7 +895,8 @@ class WarehouseLocationTreeIntegrationTest {
 
   @Test
   void 本模块读到的表逐张FORCE_RLS且无租户上下文读不到行() {
-    for (var table : List.of("warehouse", "warehouse_location", "stock_bucket", "inventory_balance")) {
+    for (var table :
+        List.of("warehouse", "warehouse_location", "stock_bucket", "inventory_balance")) {
       boolean forced =
           sql.fetchOne(
                   "select (relrowsecurity and relforcerowsecurity) as on from pg_class"
@@ -659,10 +905,12 @@ class WarehouseLocationTreeIntegrationTest {
               .get("on", Boolean.class);
       assertThat(forced).as("%s 必须 FORCE RLS", table).isTrue();
     }
-    assertThat(sql.fetchOne(
-            "select count(*) from warehouse_location"
-                + " where tenant_id=nullif(current_setting('app.current_tenant',true),'')::uuid")
-        .get(0, Long.class)).isZero();
+    assertThat(
+            sql.fetchOne(
+                    "select count(*) from warehouse_location"
+                        + " where tenant_id=nullif(current_setting('app.current_tenant',true),'')::uuid")
+                .get(0, Long.class))
+        .isZero();
   }
 
   @Test
@@ -686,11 +934,21 @@ class WarehouseLocationTreeIntegrationTest {
       assertThat(nullable).as("%s 必须 nullable", column).isEqualTo("YES");
     }
     // 不带列名的 INSERT 依然可用（既有列默认值仍生效），证明没有 SET NOT NULL 兜底要求
-    asA("read", () -> sql.execute(
-        "insert into warehouse_location(id,tenant_id,warehouse_id,code,name) values(?,?,?,?,'省略列名')",
-        UUID.randomUUID(), a, wh(a), "MINIMAL-INSERT"));
-    assertThat(tree(a, wh(a)).levels().stream()
-            .filter(n -> n.code().equals("MINIMAL-INSERT")).findFirst().orElseThrow().parentId())
+    asA(
+        "read",
+        () ->
+            sql.execute(
+                "insert into warehouse_location(id,tenant_id,warehouse_id,code,name) values(?,?,?,?,'省略列名')",
+                UUID.randomUUID(),
+                a,
+                wh(a),
+                "MINIMAL-INSERT"));
+    assertThat(
+            tree(a, wh(a)).levels().stream()
+                .filter(n -> n.code().equals("MINIMAL-INSERT"))
+                .findFirst()
+                .orElseThrow()
+                .parentId())
         .isNull();
   }
 
@@ -699,54 +957,68 @@ class WarehouseLocationTreeIntegrationTest {
   @Test
   void 端点按权限码裁决且租户来自已认证成员关系() throws Exception {
     UUID whId = wh(a);
-    http.perform(get("/warehouse/location-trees/{id}", whId).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/location-trees/{id}", whId).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.warehouseId").value(whId.toString()))
         .andExpect(jsonPath("$.levels").isArray());
 
-    http.perform(get("/warehouse/location-trees/capabilities").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/location-trees/capabilities")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.autoAllocationAvailable").value(false))
         .andExpect(jsonPath("$.autoAllocationOwnerModule").value("8.1.2.2"));
 
     // 无凭据 401、无权限 403
     http.perform(get("/warehouse/location-trees/{id}", whId)).andExpect(status().isUnauthorized());
-    http.perform(get("/warehouse/location-trees/{id}", whId).header("Authorization", "Bearer no-permission"))
+    http.perform(
+            get("/warehouse/location-trees/{id}", whId)
+                .header("Authorization", "Bearer no-permission"))
         .andExpect(status().isForbidden());
     // 只读角色不能建库位
-    http.perform(post("/warehouse/location-trees/{id}/locations", whId)
-            .header("Authorization", "Bearer read-only")
-            .contentType("application/json")
-            .content("{\"code\":\"X\",\"name\":\"X\"}"))
+    http.perform(
+            post("/warehouse/location-trees/{id}/locations", whId)
+                .header("Authorization", "Bearer read-only")
+                .contentType("application/json")
+                .content("{\"code\":\"X\",\"name\":\"X\"}"))
         .andExpect(status().isForbidden());
 
     // 新建 → 出现在树里
-    http.perform(post("/warehouse/location-trees/{id}/locations", whId)
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"code\":\"H-01\",\"name\":\"HTTP 建的\",\"type\":\"STORAGE\"}"))
+    http.perform(
+            post("/warehouse/location-trees/{id}/locations", whId)
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"code\":\"H-01\",\"name\":\"HTTP 建的\",\"type\":\"STORAGE\"}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.action").value("CREATED"));
-    assertThat(tree(a, whId).levels().stream()
-            .filter(n -> n.code().equals("H-01")).findFirst().orElseThrow()).isNotNull();
+    assertThat(
+            tree(a, whId).levels().stream()
+                .filter(n -> n.code().equals("H-01"))
+                .findFirst()
+                .orElseThrow())
+        .isNotNull();
 
     // 不属于本租户的仓库 → 404
-    http.perform(get("/warehouse/location-trees/{id}", wh(b)).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/location-trees/{id}", wh(b)).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isNotFound());
   }
 
   @Test
   void 非法类型与空编码返回400() throws Exception {
     UUID whId = wh(a);
-    http.perform(post("/warehouse/location-trees/{id}/locations", whId)
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"code\":\"Y\",\"name\":\"Y\",\"type\":\"NOT_A_TYPE\"}"))
+    http.perform(
+            post("/warehouse/location-trees/{id}/locations", whId)
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"code\":\"Y\",\"name\":\"Y\",\"type\":\"NOT_A_TYPE\"}"))
         .andExpect(status().isBadRequest());
-    http.perform(post("/warehouse/location-trees/{id}/locations", whId)
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"code\":\"  \",\"name\":\"Y\"}"))
+    http.perform(
+            post("/warehouse/location-trees/{id}/locations", whId)
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"code\":\"  \",\"name\":\"Y\"}"))
         .andExpect(status().isBadRequest());
   }
 }

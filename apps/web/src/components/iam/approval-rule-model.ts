@@ -30,11 +30,12 @@ export const RULE_SET_STATUS_LABELS: Record<string, string> = {
   ACTIVE: '生效中',
   DISABLED: '已停用',
 };
-export const RULE_SET_STATUS_TONES: Record<string, 'neutral' | 'primary' | 'success' | 'warning'> = {
-  DRAFT: 'neutral',
-  ACTIVE: 'success',
-  DISABLED: 'warning',
-};
+export const RULE_SET_STATUS_TONES: Record<string, 'neutral' | 'primary' | 'success' | 'warning'> =
+  {
+    DRAFT: 'neutral',
+    ACTIVE: 'success',
+    DISABLED: 'warning',
+  };
 
 /** 命中后的动作：送审（走流程）或免审（直接通过）。 */
 export const DECISION_LABELS: Record<string, string> = {
@@ -189,8 +190,7 @@ export function validateDraft(draft: RuleSetDraft, knownFlows: string[]): string
       errors.push(`${label}：只填币种不填金额区间等于没约束金额，请把币种也清空`);
     if (min && !MONEY.test(min)) errors.push(`${label}：金额下限必须是非负数字`);
     if (max && !MONEY.test(max)) errors.push(`${label}：金额上限必须是非负数字`);
-    if (min && max && Number(max) <= Number(min))
-      errors.push(`${label}：上限必须大于下限`);
+    if (min && max && Number(max) <= Number(min)) errors.push(`${label}：上限必须大于下限`);
 
     if (r.decision === 'EXEMPT') {
       // 蓝图那句「免审要设上限金额」的前端第一道闸。
@@ -198,10 +198,8 @@ export function validateDraft(draft: RuleSetDraft, knownFlows: string[]): string
         errors.push(
           `${label}：免审必须设置上限金额；免审没有上限就能被用来绕过大额管控（后端同样会拒）`,
         );
-      else if (Number(max) <= 0)
-        errors.push(`${label}：免审上限金额必须大于 0`);
-      if (r.targetFlowId)
-        errors.push(`${label}：免审不指向流程，免审就是不走审批，请把审批流清空`);
+      else if (Number(max) <= 0) errors.push(`${label}：免审上限金额必须大于 0`);
+      if (r.targetFlowId) errors.push(`${label}：免审不指向流程，免审就是不走审批，请把审批流清空`);
       // 第二道闸：免审不得豁免蓝图点名的四个高风险条件。
       for (const guard of GUARD_DIMENSIONS)
         if (r[guard.field] === 'REQUIRED')
@@ -246,15 +244,22 @@ export function conditionSummary(rule: {
   const parts: string[] = [];
   const currency = rule.amountCurrencyCode?.trim();
   if (currency) {
-    const min = rule.amountMinAmount === null || rule.amountMinAmount === undefined ? '' : String(rule.amountMinAmount);
-    const max = rule.amountMaxAmount === null || rule.amountMaxAmount === undefined ? '' : String(rule.amountMaxAmount);
+    const min =
+      rule.amountMinAmount === null || rule.amountMinAmount === undefined
+        ? ''
+        : String(rule.amountMinAmount);
+    const max =
+      rule.amountMaxAmount === null || rule.amountMaxAmount === undefined
+        ? ''
+        : String(rule.amountMaxAmount);
     if (!min && !max) parts.push(`任意金额 ${currency}`);
     else if (!min) parts.push(`${currency} ${max} 以内`);
     else if (!max) parts.push(`${currency} ${min} 及以上`);
     else parts.push(`${currency} ${min} ~ ${max}`);
   }
   for (const guard of GUARD_DIMENSIONS)
-    if (rule[guard.field] !== 'ANY') parts.push(`${guard.label}·${DIMENSION_LABELS[rule[guard.field]]}`);
+    if (rule[guard.field] !== 'ANY')
+      parts.push(`${guard.label}·${DIMENSION_LABELS[rule[guard.field]]}`);
   return parts.length === 0 ? '任何提交' : parts.join(' · ');
 }
 
@@ -273,7 +278,9 @@ export function ruleSetSummary(set: {
  *
  * <p>停用的规则不计入：停用等于这条额度当前不存在，留在清单里会让人以为还在免审。
  */
-export function activeExemptionCeilings<T extends { status: string; decision: string }>(rules: T[]): T[] {
+export function activeExemptionCeilings<T extends { status: string; decision: string }>(
+  rules: T[],
+): T[] {
   return rules.filter((r) => r.status === 'ACTIVE' && r.decision === 'EXEMPT');
 }
 

@@ -20,38 +20,32 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 7.7.1.2 寄售与代销：寄售协议 → 寄售可用量 → 销售事实 → 结算触发单（→ 12 应付）→ 未售退货与期末清理。
  *
- * <p>蓝图原话：「管理寄售与代销业务：寄售协议（供应商货、我方销，结算按实际售出）、寄售可用量、
- * 销售触发结算数量、未售退货与期末清理。支持『寄售库存不计入我方采购入库成本，仅在售出时结转』。」
+ * <p>蓝图原话：「管理寄售与代销业务：寄售协议（供应商货、我方销，结算按实际售出）、寄售可用量、 销售触发结算数量、未售退货与期末清理。支持『寄售库存不计入我方采购入库成本，仅在售出时结转』。」
  *
- * <p><b>本模块只有一条不可让步的财务语义：寄售未售出不产生采购成本与应付。</b>
- * 它写在 V71 的四道数据库不变量里，不是这里的自觉：
+ * <p><b>本模块只有一条不可让步的财务语义：寄售未售出不产生采购成本与应付。</b> 它写在 V71 的四道数据库不变量里，不是这里的自觉：
  *
  * <ol>
- *   <li>协议行的 {@code remaining_quantity} 是生成列（寄售 − 已售 − 已退回 − 已转采购），
- *       且 {@code CHECK(remaining>=0)}：寄售量这个数永远只是寄售量，不会变成成本或负债。
+ *   <li>协议行的 {@code remaining_quantity} 是生成列（寄售 − 已售 − 已退回 − 已转采购）， 且 {@code
+ *       CHECK(remaining>=0)}：寄售量这个数永远只是寄售量，不会变成成本或负债。
  *   <li>结算明细的 {@code amount} 是生成列（已售数量 × 结算价）：应付**只有**这一个来源。
- *   <li>结算明细 {@code UNIQUE(tenant_id, sale_id)}：一条销售事实最多进一张结算单，
- *       「售出 → 应付」不会重复发生。
+ *   <li>结算明细 {@code UNIQUE(tenant_id, sale_id)}：一条销售事实最多进一张结算单， 「售出 → 应付」不会重复发生。
  *   <li>退货单的 {@code CHECK((disposition='CONVERT_TO_PURCHASE') OR total_payable_amount=0)}：
  *       未售退回不产生应付，转入采购是协议写明的**唯一**例外。
  * </ol>
  *
- * <p><b>货主建模是自落地的，不动 {@code stock_bucket}。</b>兄弟模块 7.7.1.1「货主与所有权」
- * 尚未交付且会自己给 bucket 加 {@code stock_owner} 列；本模块因此把寄售事实落成
- * 自成体系的一组表，明细行自带 {@code stockOwnerType='SUPPLIER'} 与恒为 false 的
- * {@code countsAsOwnedAsset}（DB CHECK 钉死）。这样两条车道各写各的 DDL，合并期不冲突，
- * 同时满足 07-inventory.md:24「寄售货主是供应商，我方只记持有位置与可销售权，不记为自有资产」。
+ * <p><b>货主建模是自落地的，不动 {@code stock_bucket}。</b>兄弟模块 7.7.1.1「货主与所有权」 尚未交付且会自己给 bucket 加 {@code
+ * stock_owner} 列；本模块因此把寄售事实落成 自成体系的一组表，明细行自带 {@code stockOwnerType='SUPPLIER'} 与恒为 false 的 {@code
+ * countsAsOwnedAsset}（DB CHECK 钉死）。这样两条车道各写各的 DDL，合并期不冲突， 同时满足
+ * 07-inventory.md:24「寄售货主是供应商，我方只记持有位置与可销售权，不记为自有资产」。
  *
- * <p><b>销售事实自落地</b>：9 订单尚未交付，而「销售触发结算数量」是本模块职责，不能因上游缺席
- * 就停摆。本模块自落地 {@code consignment_sale}，以 {@code (agreement_line_id, sale_ref)}
- * 幂等；9 交付后由它推，本表即为那份事实的唯一出处。
+ * <p><b>销售事实自落地</b>：9 订单尚未交付，而「销售触发结算数量」是本模块职责，不能因上游缺席 就停摆。本模块自落地 {@code consignment_sale}，以 {@code
+ * (agreement_line_id, sale_ref)} 幂等；9 交付后由它推，本表即为那份事实的唯一出处。
  *
- * <p><b>对外只留定位键</b>：12 应付 / 10 物流 / 6 采购均未交付，本模块只出单据并写
- * {@code source_system + reference_id}，不跨库读写、不建跨服务 FK（AGENTS.md 同一纪律）。
+ * <p><b>对外只留定位键</b>：12 应付 / 10 物流 / 6 采购均未交付，本模块只出单据并写 {@code source_system +
+ * reference_id}，不跨库读写、不建跨服务 FK（AGENTS.md 同一纪律）。
  *
- * <p><b>时间绑定纪律</b>：{@code ?::timestamptz} 一律出现在语句最前面的 {@code t} CTE 里，
- * 后面全是普通绑定，cast 永远不在绑定序列末位。写入用 {@link OffsetDateTime} 绑定，
- * 不走 {@code Timestamp.valueOf} —— 后者按 JVM 本地时区解释裸本地时间，在东八区会静默偏 −28800s。
+ * <p><b>时间绑定纪律</b>：{@code ?::timestamptz} 一律出现在语句最前面的 {@code t} CTE 里， 后面全是普通绑定，cast 永远不在绑定序列末位。写入用
+ * {@link OffsetDateTime} 绑定， 不走 {@code Timestamp.valueOf} —— 后者按 JVM 本地时区解释裸本地时间，在东八区会静默偏 −28800s。
  */
 @Service
 public class ConsignmentService {
@@ -98,8 +92,7 @@ public class ConsignmentService {
           + "定位键，12 交付后按该键读回；本模块不替 12 写应付、不建跨服务 FK、不查对方的表。";
 
   private static final String RETURN_HANDOFF_NOTE =
-      "期末退回只出单据：10 物流（运输）与 6 采购（转采购）均未交付，"
-          + "本模块写 source_system + reference_id 交接键，不跨库写它们的表。";
+      "期末退回只出单据：10 物流（运输）与 6 采购（转采购）均未交付，" + "本模块写 source_system + reference_id 交接键，不跨库写它们的表。";
 
   private final DSLContext sql;
 
@@ -111,19 +104,28 @@ public class ConsignmentService {
 
   /** 寄售能力说明：前端据此渲染选项与提示，而不是把规则硬编码在界面上。 */
   public ConsignmentCapabilities capabilities() {
-    var modes = List.of(ConsignmentMode.values()).stream()
-        .map(m -> new ConsignmentOption(m.name(), m.label(), m.description(), true))
-        .toList();
-    var cycles = List.of(ConsignmentSettlementCycle.values()).stream()
-        .map(c -> new ConsignmentOption(c.name(), c.label(), c.description(), true))
-        .toList();
-    var treatments = List.of(ConsignmentEndTreatment.values()).stream()
-        .map(t -> new ConsignmentOption(t.name(), t.label(), t.description(),
-            t == ConsignmentEndTreatment.CONVERT_TO_PURCHASE))
-        .toList();
-    var kinds = List.of(ConsignmentReturnKind.values()).stream()
-        .map(k -> new ConsignmentOption(k.name(), k.label(), k.description(), false))
-        .toList();
+    var modes =
+        List.of(ConsignmentMode.values()).stream()
+            .map(m -> new ConsignmentOption(m.name(), m.label(), m.description(), true))
+            .toList();
+    var cycles =
+        List.of(ConsignmentSettlementCycle.values()).stream()
+            .map(c -> new ConsignmentOption(c.name(), c.label(), c.description(), true))
+            .toList();
+    var treatments =
+        List.of(ConsignmentEndTreatment.values()).stream()
+            .map(
+                t ->
+                    new ConsignmentOption(
+                        t.name(),
+                        t.label(),
+                        t.description(),
+                        t == ConsignmentEndTreatment.CONVERT_TO_PURCHASE))
+            .toList();
+    var kinds =
+        List.of(ConsignmentReturnKind.values()).stream()
+            .map(k -> new ConsignmentOption(k.name(), k.label(), k.description(), false))
+            .toList();
     return new ConsignmentCapabilities(
         modes,
         cycles,
@@ -145,8 +147,7 @@ public class ConsignmentService {
   /**
    * 建寄售协议（草稿），并同时写入明细行（寄售量 + 结算价）。
    *
-   * <p>协议与明细一起提交：一张没有寄售量与结算价的协议没有任何业务含义。
-   * 明细为空时显式拒绝 —— 悄悄建一张零行协议会让台账上看起来像「已经开始寄售了」。
+   * <p>协议与明细一起提交：一张没有寄售量与结算价的协议没有任何业务含义。 明细为空时显式拒绝 —— 悄悄建一张零行协议会让台账上看起来像「已经开始寄售了」。
    */
   @Transactional
   public ConsignmentAgreementDetail createAgreement(ConsignmentAgreementInput input, UUID actorId) {
@@ -180,9 +181,21 @@ public class ConsignmentService {
             + "supplier_code,supplier_name,legal_entity_id,currency,settlement_cycle,end_treatment,"
             + "start_date,end_date,status,note,created_by_user_id) "
             + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,'DRAFT',?,?)",
-        id, tenant, nextCode("CG"), mode, input.supplierPartyId(), input.supplierCode().trim(),
-        input.supplierName().trim(), input.legalEntityId(), currency, cycle, treatment,
-        input.startDate(), input.endDate(), nz(input.note()), actorId);
+        id,
+        tenant,
+        nextCode("CG"),
+        mode,
+        input.supplierPartyId(),
+        input.supplierCode().trim(),
+        input.supplierName().trim(),
+        input.legalEntityId(),
+        currency,
+        cycle,
+        treatment,
+        input.startDate(),
+        input.endDate(),
+        nz(input.note()),
+        actorId);
 
     for (var line : input.lines()) {
       insertLine(tenant, id, line);
@@ -209,7 +222,8 @@ public class ConsignmentService {
       binds.add(mode.trim().toUpperCase(Locale.ROOT));
     }
     if (notBlank(keyword)) {
-      where.add("(a.agreement_code ilike ? or a.supplier_code ilike ? or a.supplier_name ilike ? or a.note ilike ?)");
+      where.add(
+          "(a.agreement_code ilike ? or a.supplier_code ilike ? or a.supplier_name ilike ? or a.note ilike ?)");
       String k = "%" + keyword.trim() + "%";
       binds.add(k);
       binds.add(k);
@@ -222,11 +236,17 @@ public class ConsignmentService {
             .get(0, Long.class);
     var rows =
         sql.fetch(
-            AGREEMENT_COLUMNS + " from " + AGREEMENT_FROM + sqlWhere
+            AGREEMENT_COLUMNS
+                + " from "
+                + AGREEMENT_FROM
+                + sqlWhere
                 + " order by a.created_at desc, a.id limit ? offset ?",
             append(binds, limit, (long) offset).toArray());
     return new ConsignmentAgreementPage(
-        rows.stream().map(ConsignmentService::agreement).toList(), total, Math.max(0, pageNo), limit);
+        rows.stream().map(ConsignmentService::agreement).toList(),
+        total,
+        Math.max(0, pageNo),
+        limit);
   }
 
   /** 协议详情 = 头部 + 全部明细 + 审计时间线。跨租户 → 404。 */
@@ -241,11 +261,19 @@ public class ConsignmentService {
     var tenant = tenant();
     var head = requireHead(tenant, agreementId);
     if (!"DRAFT".equals(head.get("status", String.class))) {
-      throw conflict("只有草稿协议能加行；当前状态 " + head.get("status", String.class)
-          + "。已在跑的协议要改寄售量请新建协议，否则中途改价会让已出结算单与协议对不上。");
+      throw conflict(
+          "只有草稿协议能加行；当前状态 "
+              + head.get("status", String.class)
+              + "。已在跑的协议要改寄售量请新建协议，否则中途改价会让已出结算单与协议对不上。");
     }
-    insertLine(tenant, agreementId, new ConsignmentLineInput(
-        input.skuId(), input.warehouseId(), input.consignedQuantity(), input.settlementPrice()));
+    insertLine(
+        tenant,
+        agreementId,
+        new ConsignmentLineInput(
+            input.skuId(),
+            input.warehouseId(),
+            input.consignedQuantity(),
+            input.settlementPrice()));
     audit(tenant, agreementId, "LINE_ADDED", "新增寄售明细行", actorId);
     return detail(agreementId);
   }
@@ -273,7 +301,12 @@ public class ConsignmentService {
             "update consignment_agreement set status='CLOSED', closed_at=?::timestamptz,"
                 + " closed_by_user_id=?, note=coalesce(nullif(?,''),note), updated_at=?::timestamptz"
                 + " where tenant_id=? and id=? and status in ('ACTIVE','SUSPENDED')",
-            now, actorId, note(input), now, tenant, agreementId);
+            now,
+            actorId,
+            note(input),
+            now,
+            tenant,
+            agreementId);
     if (changed == 0) {
       throw conflict("只有生效中或已暂停的协议能关闭（草稿请直接删掉重建）。");
     }
@@ -282,7 +315,12 @@ public class ConsignmentService {
   }
 
   private ConsignmentAgreement transition(
-      UUID agreementId, String from, String to, String event, ConsignmentNoteInput input, UUID actorId) {
+      UUID agreementId,
+      String from,
+      String to,
+      String event,
+      ConsignmentNoteInput input,
+      UUID actorId) {
     var tenant = tenant();
     requireHead(tenant, agreementId);
     OffsetDateTime now = OffsetDateTime.now();
@@ -292,7 +330,14 @@ public class ConsignmentService {
             + " activated_by_user_id=coalesce(activated_by_user_id,?),"
             + " note=coalesce(nullif(?,''),note), updated_at=?::timestamptz"
             + " where tenant_id=? and id=? and status=?",
-        to, now, actorId, note(input), now, tenant, agreementId, from);
+        to,
+        now,
+        actorId,
+        note(input),
+        now,
+        tenant,
+        agreementId,
+        from);
     audit(tenant, agreementId, event, "协议状态 " + from + " → " + to, actorId);
     return single(agreementId);
   }
@@ -300,14 +345,16 @@ public class ConsignmentService {
   /**
    * 单份协议的完整读模型。
    *
-   * <p><b>刻意不走 {@link #agreements} 的分页列表再回头找自己</b>：那会让一次状态流转在
-   * 「这份协议恰好排在第 21 条」时返回 404 —— 刚改完状态却读不到自己，是最难查的一类错。
+   * <p><b>刻意不走 {@link #agreements} 的分页列表再回头找自己</b>：那会让一次状态流转在 「这份协议恰好排在第 21 条」时返回 404 ——
+   * 刚改完状态却读不到自己，是最难查的一类错。
    */
   private ConsignmentAgreement single(UUID agreementId) {
     var tenant = tenant();
     var head =
-        sql.fetchOne(AGREEMENT_COLUMNS + " from " + AGREEMENT_FROM + " where a.tenant_id=? and a.id=?",
-            tenant, agreementId);
+        sql.fetchOne(
+            AGREEMENT_COLUMNS + " from " + AGREEMENT_FROM + " where a.tenant_id=? and a.id=?",
+            tenant,
+            agreementId);
     if (head == null) {
       throw notFound("寄售协议", agreementId);
     }
@@ -320,8 +367,7 @@ public class ConsignmentService {
    * 寄售库存视图（蓝图的「寄售量/已售/剩余」）。
    *
    * <p><b>{@code ownedAssetValue} 恒为 null</b>，并且 {@code countsAsOwnedAsset} 恒为 false：
-   * 寄售货主是供应商，不是自有资产，而本模块也没有任何库存成本列可算。
-   * 如实给 null 而不是给 0 —— 给 0 会被读成「这些货值 0 元」。
+   * 寄售货主是供应商，不是自有资产，而本模块也没有任何库存成本列可算。 如实给 null 而不是给 0 —— 给 0 会被读成「这些货值 0 元」。
    */
   public ConsignmentStockView stockView(UUID agreementId) {
     var tenant = tenant();
@@ -334,7 +380,8 @@ public class ConsignmentService {
                 + " coalesce(sum(remaining_quantity),0) as remaining,"
                 + " count(*) filter (where remaining_quantity = 0) as zero_lines"
                 + " from consignment_agreement_line where tenant_id=? and agreement_id=?",
-            tenant, agreementId);
+            tenant,
+            agreementId);
     var unsettled =
         sql.fetchOne(
             "select coalesce(sum(s.sold_quantity),0) as qty,"
@@ -344,7 +391,8 @@ public class ConsignmentService {
                 + " where l.agreement_id = ? and s.tenant_id = ?"
                 + " and not exists (select 1 from consignment_settlement_line sl"
                 + "                 where sl.tenant_id = s.tenant_id and sl.sale_id = s.id)",
-            agreementId, tenant);
+            agreementId,
+            tenant);
     return new ConsignmentStockView(
         agreementId,
         head.get("agreement_code", String.class),
@@ -378,10 +426,9 @@ public class ConsignmentService {
    *
    * <ol>
    *   <li>协议必须已启用（ACTIVE）：草稿/暂停/关闭的协议不产生销售。
-   *   <li>本次售出量不得超过该行剩余：剩余 = 寄售 − 已售 − 已退回 − 已转采购。
-   *       超卖在数据库的 {@code CHECK(remaining>=0)} 之外再挡一次，好让人看得懂。
-   *   <li>{@code (agreement_line_id, sale_ref)} 唯一：同一外部订单行重复推送会撞 409，
-   *       于是「卖一次算两次应付」这条路没有。
+   *   <li>本次售出量不得超过该行剩余：剩余 = 寄售 − 已售 − 已退回 − 已转采购。 超卖在数据库的 {@code CHECK(remaining>=0)}
+   *       之外再挡一次，好让人看得懂。
+   *   <li>{@code (agreement_line_id, sale_ref)} 唯一：同一外部订单行重复推送会撞 409， 于是「卖一次算两次应付」这条路没有。
    * </ol>
    */
   @Transactional
@@ -395,7 +442,9 @@ public class ConsignmentService {
     var line =
         sql.fetchOne(
             "select * from consignment_agreement_line where tenant_id=? and id=? and agreement_id=?",
-            tenant, lineId, agreementId);
+            tenant,
+            lineId,
+            agreementId);
     if (line == null) {
       throw notFound("寄售协议明细行", lineId);
     }
@@ -410,9 +459,13 @@ public class ConsignmentService {
     String currency = head.get("currency", String.class);
     BigDecimal remaining = line.get("remaining_quantity", BigDecimal.class);
     if (qty.compareTo(remaining) > 0) {
-      throw conflict("本次售出 " + qty.toPlainString() + " 超过该行剩余寄售量 "
-          + remaining.toPlainString() + "，已拒绝。寄售货主是供应商：在卖供应商没给我们的货之前，"
-          + "不能先记销售 —— 那会凭空生成一笔应付。");
+      throw conflict(
+          "本次售出 "
+              + qty.toPlainString()
+              + " 超过该行剩余寄售量 "
+              + remaining.toPlainString()
+              + "，已拒绝。寄售货主是供应商：在卖供应商没给我们的货之前，"
+              + "不能先记销售 —— 那会凭空生成一笔应付。");
     }
     UUID id = UUID.randomUUID();
     String source = notBlank(input.sourceSystem()) ? input.sourceSystem().trim() : "MANUAL";
@@ -423,20 +476,34 @@ public class ConsignmentService {
               + "insert into consignment_sale(id,tenant_id,agreement_line_id,sold_quantity,sale_ref,"
               + "source_system,sale_price,currency,occurred_at,recorded_by_user_id,created_at) "
               + "select ?,?,?,?,?,?,?,?,t.at,?,t.at from t",
-          input.occurredAt(), id, tenant, lineId, qty, input.saleRef().trim(), source,
-          input.salePrice(), currency, actorId);
+          input.occurredAt(),
+          id,
+          tenant,
+          lineId,
+          qty,
+          input.saleRef().trim(),
+          source,
+          input.salePrice(),
+          currency,
+          actorId);
     } catch (org.springframework.dao.DataAccessException e) {
       // jOOQ 挂在 Spring 的异常转换器上，撞唯一约束抛的是
       // DuplicateKeyException（org.springframework.dao），不是 jOOQ 自己的异常类型。
-      throw conflict("这条销售事实已经记过（同一协议行 + saleRef=" + input.saleRef().trim()
-          + " 唯一）。重复推送不会重复计应付。");
+      throw conflict("这条销售事实已经记过（同一协议行 + saleRef=" + input.saleRef().trim() + " 唯一）。重复推送不会重复计应付。");
     }
     sql.execute(
         "update consignment_agreement_line set sold_quantity = sold_quantity + ?,"
             + " version = version + 1, updated_at = ?::timestamptz where tenant_id = ? and id = ?",
-        qty, OffsetDateTime.now(), tenant, lineId);
-    audit(tenant, agreementId, "SALE_RECORDED",
-        "记录售出 " + qty.toPlainString() + "（ref " + input.saleRef().trim() + "）", actorId);
+        qty,
+        OffsetDateTime.now(),
+        tenant,
+        lineId);
+    audit(
+        tenant,
+        agreementId,
+        "SALE_RECORDED",
+        "记录售出 " + qty.toPlainString() + "（ref " + input.saleRef().trim() + "）",
+        actorId);
     return sale(tenant, id);
   }
 
@@ -454,19 +521,27 @@ public class ConsignmentService {
     where.add("l.tenant_id = ?");
     binds.add(tenant);
     if (Boolean.TRUE.equals(unsettleableOnly)) {
-      where.add("not exists (select 1 from consignment_settlement_line sl"
-          + " where sl.tenant_id = s.tenant_id and sl.sale_id = s.id)");
+      where.add(
+          "not exists (select 1 from consignment_settlement_line sl"
+              + " where sl.tenant_id = s.tenant_id and sl.sale_id = s.id)");
     }
     String sqlWhere = " where " + String.join(" and ", where);
-    long total = sql.fetchOne("select count(*) from" + SALE_FROM + sqlWhere, binds.toArray())
-        .get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*) from" + SALE_FROM + sqlWhere, binds.toArray())
+            .get(0, Long.class);
     var rows =
         sql.fetch(
-            SALE_COLUMNS + " from" + SALE_FROM + sqlWhere
+            SALE_COLUMNS
+                + " from"
+                + SALE_FROM
+                + sqlWhere
                 + " order by s.occurred_at desc, s.id limit ? offset ?",
             append(binds, limit, (long) offset).toArray());
     return new ConsignmentSalePage(
-        rows.stream().map(ConsignmentService::saleRecord).toList(), total, Math.max(0, pageNo), limit);
+        rows.stream().map(ConsignmentService::saleRecord).toList(),
+        total,
+        Math.max(0, pageNo),
+        limit);
   }
 
   // ============================================================ 结算触发单
@@ -474,11 +549,11 @@ public class ConsignmentService {
   /**
    * 出结算触发单：把区间内**已售但还没进任何结算单**的销售事实收成一张单，交给 12 应付。
    *
-   * <p>这条路径刻意**没有**「按寄售量出应付」的兄弟端点：V71 的 amount 生成列
-   * 与 {@code UNIQUE(tenant_id, sale_id)} 已经让「售出才产生应付」成为数据库事实。
+   * <p>这条路径刻意**没有**「按寄售量出应付」的兄弟端点：V71 的 amount 生成列 与 {@code UNIQUE(tenant_id, sale_id)}
+   * 已经让「售出才产生应付」成为数据库事实。
    *
-   * <p>归期按**售出时刻**落期（{@code occurred_at} 的 UTC 日期），区间由服务层显式落到
-   * {@code period_start/period_end}，DB 只校验 end > start。
+   * <p>归期按**售出时刻**落期（{@code occurred_at} 的 UTC 日期），区间由服务层显式落到 {@code period_start/period_end}，DB
+   * 只校验 end > start。
    */
   @Transactional
   public ConsignmentSettlementDetail createSettlement(
@@ -506,16 +581,16 @@ public class ConsignmentService {
                 + " and not exists (select 1 from consignment_settlement_line sl"
                 + "                 where sl.tenant_id = s.tenant_id and sl.sale_id = s.id)"
                 + " order by s.occurred_at, s.id limit ?",
-            agreementId, tenant, input.periodStart().atStartOfDay().atOffset(ZoneOffset.UTC),
+            agreementId,
+            tenant,
+            input.periodStart().atStartOfDay().atOffset(ZoneOffset.UTC),
             input.periodEnd().plusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC),
             MAX_SETTLEMENT_LINES + 1L);
     if (pending.isEmpty()) {
-      throw bad("该区间内没有「已售出且尚未结算」的销售事实，结算触发单必须是空的单据时，"
-          + "说明这期根本没卖出东西 —— 未售出不产生应付，这正是寄售该有的结果。");
+      throw bad("该区间内没有「已售出且尚未结算」的销售事实，结算触发单必须是空的单据时，" + "说明这期根本没卖出东西 —— 未售出不产生应付，这正是寄售该有的结果。");
     }
     if (pending.size() > MAX_SETTLEMENT_LINES) {
-      throw bad("该区间待结算的销售事实超过 " + MAX_SETTLEMENT_LINES
-          + " 条，请把结算区间拆小后分批出单。");
+      throw bad("该区间待结算的销售事实超过 " + MAX_SETTLEMENT_LINES + " 条，请把结算区间拆小后分批出单。");
     }
     String code = nextCode("ST");
     UUID id = UUID.randomUUID();
@@ -524,23 +599,40 @@ public class ConsignmentService {
             + "insert into consignment_settlement(id,tenant_id,settlement_code,agreement_id,period_start,"
             + "period_end,currency,status,source_system,note,created_by_user_id,created_at) "
             + "select ?,?,?,?,?,?,?,'OPEN','WAREHOUSE',?,?,t.at from t",
-        OffsetDateTime.now(), id, tenant, code, agreementId, input.periodStart(), input.periodEnd(),
-        head.get("currency", String.class), nz(input.note()), actorId);
+        OffsetDateTime.now(),
+        id,
+        tenant,
+        code,
+        agreementId,
+        input.periodStart(),
+        input.periodEnd(),
+        head.get("currency", String.class),
+        nz(input.note()),
+        actorId);
     for (var row : pending) {
       sql.execute(
           "insert into consignment_settlement_line(id,tenant_id,settlement_id,agreement_line_id,"
               + "sale_id,quantity,unit_price) values(?,?,?,?,?,?,?)",
-          UUID.randomUUID(), tenant, id, row.get("agreement_line_id", UUID.class),
-          row.get("id", UUID.class), row.get("sold_quantity", BigDecimal.class),
+          UUID.randomUUID(),
+          tenant,
+          id,
+          row.get("agreement_line_id", UUID.class),
+          row.get("id", UUID.class),
+          row.get("sold_quantity", BigDecimal.class),
           row.get("settlement_price", BigDecimal.class));
     }
-    audit(tenant, agreementId, "SETTLEMENT_TRIGGERED",
-        "按已售事实出结算触发单 " + code + "（" + pending.size() + " 条销售事实）", actorId);
+    audit(
+        tenant,
+        agreementId,
+        "SETTLEMENT_TRIGGERED",
+        "按已售事实出结算触发单 " + code + "（" + pending.size() + " 条销售事实）",
+        actorId);
     return settlementDetail(id);
   }
 
   /** 结算单列表（真分页；合计由 V71 的延迟约束触发器保证 == Σ 明细）。 */
-  public ConsignmentSettlementPage settlements(UUID agreementId, String status, int pageNo, int size) {
+  public ConsignmentSettlementPage settlements(
+      UUID agreementId, String status, int pageNo, int size) {
     var tenant = tenant();
     int limit = Math.min(MAX_PAGE_SIZE, Math.max(1, size <= 0 ? 20 : size));
     int offset = Math.max(0, pageNo) * limit;
@@ -562,19 +654,27 @@ public class ConsignmentService {
             .get(0, Long.class);
     var rows =
         sql.fetch(
-            SETTLEMENT_COLUMNS + " from " + SETTLEMENT_FROM + sqlWhere
+            SETTLEMENT_COLUMNS
+                + " from "
+                + SETTLEMENT_FROM
+                + sqlWhere
                 + " order by s.created_at desc, s.id limit ? offset ?",
             append(binds, limit, (long) offset).toArray());
     return new ConsignmentSettlementPage(
-        rows.stream().map(ConsignmentService::settlement).toList(), total, Math.max(0, pageNo), limit);
+        rows.stream().map(ConsignmentService::settlement).toList(),
+        total,
+        Math.max(0, pageNo),
+        limit);
   }
 
   /** 结算单详情：每行都指回触发它的那条销售事实，「应付从哪来」必须一眼可追。 */
   public ConsignmentSettlementDetail settlementDetail(UUID settlementId) {
     var tenant = tenant();
     var head =
-        sql.fetchOne(SETTLEMENT_COLUMNS + " from " + SETTLEMENT_FROM + " where s.tenant_id=? and s.id=?",
-            tenant, settlementId);
+        sql.fetchOne(
+            SETTLEMENT_COLUMNS + " from " + SETTLEMENT_FROM + " where s.tenant_id=? and s.id=?",
+            tenant,
+            settlementId);
     if (head == null) {
       throw notFound("结算触发单", settlementId);
     }
@@ -587,7 +687,8 @@ public class ConsignmentService {
                 + " join consignment_agreement_line l on l.tenant_id = sl.tenant_id and l.id = sl.agreement_line_id"
                 + " join sku_ref k on k.tenant_id = l.tenant_id and k.id = l.sku_id"
                 + " where sl.tenant_id = ? and sl.settlement_id = ? order by s.occurred_at, sl.id",
-            tenant, settlementId);
+            tenant,
+            settlementId);
     return new ConsignmentSettlementDetail(
         settlement(head),
         lines.stream()
@@ -623,17 +724,28 @@ public class ConsignmentService {
             "update consignment_settlement set status='CONFIRMED', confirmed_at=?::timestamptz,"
                 + " confirmed_by_user_id=?, note=coalesce(nullif(?,''),note), updated_at=?::timestamptz"
                 + " where tenant_id=? and id=? and status='OPEN'",
-            now, actorId, note(input), now, tenant, settlementId);
+            now,
+            actorId,
+            note(input),
+            now,
+            tenant,
+            settlementId);
     if (changed == 0) {
       throw conflict("只有待确认（OPEN）的结算触发单能确认；已确认或已作废的单据不可再动。");
     }
     var referenceId = "CS-" + settlementId;
     sql.execute(
         "update consignment_settlement set reference_id=? where tenant_id=? and id=?",
-        referenceId, tenant, settlementId);
+        referenceId,
+        tenant,
+        settlementId);
     var agreementId = agreementIdOf(tenant, settlementId);
-    audit(tenant, agreementId, "SETTLEMENT_CONFIRMED",
-        "确认结算触发单，应付交 12 应付（ref " + referenceId + "）：" + note(input), actorId);
+    audit(
+        tenant,
+        agreementId,
+        "SETTLEMENT_CONFIRMED",
+        "确认结算触发单，应付交 12 应付（ref " + referenceId + "）：" + note(input),
+        actorId);
     return settlementDetail(settlementId).settlement();
   }
 
@@ -646,12 +758,11 @@ public class ConsignmentService {
    *
    * <ul>
    *   <li>RETURN_TO_SUPPLIER —— 未售货退回供应商，<b>不产生任何应付</b>。
-   *   <li>CONVERT_TO_PURCHASE —— 期末我方买断未售货，<b>才</b>产生应付，
-   *       且必须协议上 {@code endTreatment = CONVERT_TO_PURCHASE}。
+   *   <li>CONVERT_TO_PURCHASE —— 期末我方买断未售货，<b>才</b>产生应付， 且必须协议上 {@code endTreatment =
+   *       CONVERT_TO_PURCHASE}。
    * </ul>
    *
-   * <p>草稿期不改动任何数量：真正动数量在 {@link #executeReturn}。这样「先拟单、后执行」
-   * 与其他单据一致，也不会让还没确认的草稿把寄售剩余量提前吃掉。
+   * <p>草稿期不改动任何数量：真正动数量在 {@link #executeReturn}。这样「先拟单、后执行」 与其他单据一致，也不会让还没确认的草稿把寄售剩余量提前吃掉。
    */
   @Transactional
   public ConsignmentReturnDetail createReturn(
@@ -669,12 +780,16 @@ public class ConsignmentService {
     }
     String kind = requireEnum(input.kind(), ConsignmentReturnKind.class, "退货性质");
     String disposition =
-        requireEnum(input.disposition(), List.of("RETURN_TO_SUPPLIER", "CONVERT_TO_PURCHASE"),
-            "清理方式");
+        requireEnum(
+            input.disposition(), List.of("RETURN_TO_SUPPLIER", "CONVERT_TO_PURCHASE"), "清理方式");
     String agreed = head.get("end_treatment", String.class);
     if ("PERIOD_END_CLEANUP".equals(kind) && !agreed.equals(disposition)) {
-      throw conflict("协议约定的期末处理是 " + agreed + "，与本次清理方式 " + disposition
-          + " 不一致。期末清理必须按协议走 —— 否则「协议写退回、账上却转采购」就是凭空多一笔应付。");
+      throw conflict(
+          "协议约定的期末处理是 "
+              + agreed
+              + "，与本次清理方式 "
+              + disposition
+              + " 不一致。期末清理必须按协议走 —— 否则「协议写退回、账上却转采购」就是凭空多一笔应付。");
     }
     UUID id = UUID.randomUUID();
     sql.execute(
@@ -682,8 +797,15 @@ public class ConsignmentService {
             + "insert into consignment_return(id,tenant_id,return_code,agreement_id,kind,disposition,status,"
             + "source_system,note,created_by_user_id,created_at) "
             + "select ?,?,?,?,?,?,'DRAFT','WAREHOUSE',?,?,t.at from t",
-        OffsetDateTime.now(), id, tenant, nextCode("CR"), agreementId, kind, disposition,
-        nz(input.note()), actorId);
+        OffsetDateTime.now(),
+        id,
+        tenant,
+        nextCode("CR"),
+        agreementId,
+        kind,
+        disposition,
+        nz(input.note()),
+        actorId);
     for (var line : input.lines()) {
       if (line.agreementLineId() == null) {
         throw bad("每一行都必须指明是哪条寄售协议明细行 agreementLineId。");
@@ -692,70 +814,109 @@ public class ConsignmentService {
       var price =
           sql.fetchOne(
                   "select settlement_price from consignment_agreement_line where tenant_id=? and id=? and agreement_id=?",
-                  tenant, line.agreementLineId(), agreementId)
+                  tenant,
+                  line.agreementLineId(),
+                  agreementId)
               .get("settlement_price", BigDecimal.class);
       sql.execute(
           "insert into consignment_return_line(id,tenant_id,return_id,agreement_line_id,quantity,"
               + "settlement_price) values(?,?,?,?,?,?)",
-          UUID.randomUUID(), tenant, id, line.agreementLineId(), qty, price);
+          UUID.randomUUID(),
+          tenant,
+          id,
+          line.agreementLineId(),
+          qty,
+          price);
     }
-    audit(tenant, agreementId, "RETURN_CREATED",
-        "建立" + ("PERIOD_END_CLEANUP".equals(kind) ? "期末清理" : "未售退货") + "单（" + disposition + "）", actorId);
+    audit(
+        tenant,
+        agreementId,
+        "RETURN_CREATED",
+        "建立" + ("PERIOD_END_CLEANUP".equals(kind) ? "期末清理" : "未售退货") + "单（" + disposition + "）",
+        actorId);
     return returnDetail(id);
   }
 
   /**
    * 执行退货/清理单：DRAFT → EXECUTED。**这一步才真正改动寄售数量。**
    *
-   * <p>RETURN_TO_SUPPLIER 把数量记进 {@code returned_quantity}，CONVERT_TO_PURCHASE 记进
-   * {@code converted_quantity}；两者都从剩余量里扣（剩余是生成列，守恒式自动成立）。
-   * 「退回」与「转采购」的差别就在这里：退回的货我方不再持有，转采购的货我方买断了。
+   * <p>RETURN_TO_SUPPLIER 把数量记进 {@code returned_quantity}，CONVERT_TO_PURCHASE 记进 {@code
+   * converted_quantity}；两者都从剩余量里扣（剩余是生成列，守恒式自动成立）。 「退回」与「转采购」的差别就在这里：退回的货我方不再持有，转采购的货我方买断了。
    */
   @Transactional
   public ConsignmentReturn executeReturn(UUID returnId, ConsignmentNoteInput input, UUID actorId) {
     var tenant = tenant();
     var head =
-        sql.fetchOne("select * from consignment_return where tenant_id=? and id=?", tenant, returnId);
+        sql.fetchOne(
+            "select * from consignment_return where tenant_id=? and id=?", tenant, returnId);
     if (head == null) {
       throw notFound("退货/清理单", returnId);
     }
     if (!"DRAFT".equals(head.get("status", String.class))) {
-      throw conflict("只有草稿状态的退货/清理单能执行；当前状态 "
-          + head.get("status", String.class) + "，数量早已动过，不能重复执行。");
+      throw conflict(
+          "只有草稿状态的退货/清理单能执行；当前状态 " + head.get("status", String.class) + "，数量早已动过，不能重复执行。");
     }
     UUID agreementId = head.get("agreement_id", UUID.class);
     requireHead(tenant, agreementId);
     String disposition = head.get("disposition", String.class);
     var lines =
-        sql.fetch("select * from consignment_return_line where tenant_id=? and return_id=? order by id",
-            tenant, returnId);
+        sql.fetch(
+            "select * from consignment_return_line where tenant_id=? and return_id=? order by id",
+            tenant,
+            returnId);
     for (var line : lines) {
       UUID lineId = line.get("agreement_line_id", UUID.class);
       BigDecimal qty = line.get("quantity", BigDecimal.class);
       var current =
           sql.fetchOne(
               "select remaining_quantity from consignment_agreement_line where tenant_id=? and id=?",
-              tenant, lineId);
+              tenant,
+              lineId);
       BigDecimal remaining = current.get("remaining_quantity", BigDecimal.class);
       if (qty.compareTo(remaining) > 0) {
-        throw conflict("该行未售数量 " + qty.toPlainString() + " 超过当前剩余 " + remaining.toPlainString()
-            + "，已阻止执行。期间这批货可能已经卖出一部分：请重新按当前剩余拟单。");
+        throw conflict(
+            "该行未售数量 "
+                + qty.toPlainString()
+                + " 超过当前剩余 "
+                + remaining.toPlainString()
+                + "，已阻止执行。期间这批货可能已经卖出一部分：请重新按当前剩余拟单。");
       }
-      String column = "RETURN_TO_SUPPLIER".equals(disposition) ? "returned_quantity" : "converted_quantity";
+      String column =
+          "RETURN_TO_SUPPLIER".equals(disposition) ? "returned_quantity" : "converted_quantity";
       sql.execute(
-          "update consignment_agreement_line set " + column + " = " + column + " + ?,"
+          "update consignment_agreement_line set "
+              + column
+              + " = "
+              + column
+              + " + ?,"
               + " version = version + 1, updated_at = ?::timestamptz where tenant_id = ? and id = ?",
-          qty, OffsetDateTime.now(), tenant, lineId);
+          qty,
+          OffsetDateTime.now(),
+          tenant,
+          lineId);
     }
     OffsetDateTime now = OffsetDateTime.now();
     sql.execute(
         "update consignment_return set status='EXECUTED', executed_at=?::timestamptz,"
             + " executed_by_user_id=?, reference_id=?, note=coalesce(nullif(?,''),note), updated_at=?::timestamptz"
             + " where tenant_id=? and id=? and status='DRAFT'",
-        now, actorId, "CR-" + returnId, note(input), now, tenant, returnId);
-    audit(tenant, agreementId, "RETURN_EXECUTED",
-        "执行" + ("RETURN_TO_SUPPLIER".equals(disposition) ? "未售退回供应商（不产生应付）" : "期末转我方采购（产生应付）")
-            + "，共 " + head.get("total_quantity", BigDecimal.class).toPlainString() + " 件", actorId);
+        now,
+        actorId,
+        "CR-" + returnId,
+        note(input),
+        now,
+        tenant,
+        returnId);
+    audit(
+        tenant,
+        agreementId,
+        "RETURN_EXECUTED",
+        "执行"
+            + ("RETURN_TO_SUPPLIER".equals(disposition) ? "未售退回供应商（不产生应付）" : "期末转我方采购（产生应付）")
+            + "，共 "
+            + head.get("total_quantity", BigDecimal.class).toPlainString()
+            + " 件",
+        actorId);
     return returnDetail(returnId).returnOrder();
   }
 
@@ -764,7 +925,8 @@ public class ConsignmentService {
   public ConsignmentReturn cancelReturn(UUID returnId, ConsignmentNoteInput input, UUID actorId) {
     var tenant = tenant();
     var head =
-        sql.fetchOne("select * from consignment_return where tenant_id=? and id=?", tenant, returnId);
+        sql.fetchOne(
+            "select * from consignment_return where tenant_id=? and id=?", tenant, returnId);
     if (head == null) {
       throw notFound("退货/清理单", returnId);
     }
@@ -772,9 +934,17 @@ public class ConsignmentService {
         "update consignment_return set status='CANCELLED', cancelled_at=?::timestamptz,"
             + " note=coalesce(nullif(?,''),note), updated_at=?::timestamptz"
             + " where tenant_id=? and id=? and status='DRAFT'",
-        OffsetDateTime.now(), note(input), OffsetDateTime.now(), tenant, returnId);
-    audit(tenant, head.get("agreement_id", UUID.class), "RETURN_CANCELLED",
-        "作废退货/清理单（草稿未动数量）：" + note(input), actorId);
+        OffsetDateTime.now(),
+        note(input),
+        OffsetDateTime.now(),
+        tenant,
+        returnId);
+    audit(
+        tenant,
+        head.get("agreement_id", UUID.class),
+        "RETURN_CANCELLED",
+        "作废退货/清理单（草稿未动数量）：" + note(input),
+        actorId);
     return returnDetail(returnId).returnOrder();
   }
 
@@ -801,19 +971,27 @@ public class ConsignmentService {
             .get(0, Long.class);
     var rows =
         sql.fetch(
-            RETURN_COLUMNS + " from " + RETURN_FROM + sqlWhere
+            RETURN_COLUMNS
+                + " from "
+                + RETURN_FROM
+                + sqlWhere
                 + " order by r.created_at desc, r.id limit ? offset ?",
             append(binds, limit, (long) offset).toArray());
     return new ConsignmentReturnPage(
-        rows.stream().map(ConsignmentService::returnOrder).toList(), total, Math.max(0, pageNo), limit);
+        rows.stream().map(ConsignmentService::returnOrder).toList(),
+        total,
+        Math.max(0, pageNo),
+        limit);
   }
 
   /** 退货/清理单详情 = 头部 + 全部明细。 */
   public ConsignmentReturnDetail returnDetail(UUID returnId) {
     var tenant = tenant();
     var head =
-        sql.fetchOne(RETURN_COLUMNS + " from " + RETURN_FROM + " where r.tenant_id=? and r.id=?",
-            tenant, returnId);
+        sql.fetchOne(
+            RETURN_COLUMNS + " from " + RETURN_FROM + " where r.tenant_id=? and r.id=?",
+            tenant,
+            returnId);
     if (head == null) {
       throw notFound("退货/清理单", returnId);
     }
@@ -825,7 +1003,8 @@ public class ConsignmentService {
                 + " join consignment_agreement_line l on l.tenant_id = rl.tenant_id and l.id = rl.agreement_line_id"
                 + " join sku_ref k on k.tenant_id = l.tenant_id and k.id = l.sku_id"
                 + " where rl.tenant_id = ? and rl.return_id = ? order by rl.id",
-            tenant, returnId);
+            tenant,
+            returnId);
     return new ConsignmentReturnDetail(
         returnOrder(head),
         lines.stream()
@@ -845,8 +1024,8 @@ public class ConsignmentService {
   /**
    * 按协议的结算周期算出**当前默认结算区间**。
    *
-   * <p>它是真算出来的（WEEKLY 取周一至周日、SEMI_MONTHLY 按上下半月、MONTHLY 按自然月），
-   * 不是写死的字符串。ON_DEMAND 没有固定周期，给出今天到明天的一日窗口作为可编辑起点。
+   * <p>它是真算出来的（WEEKLY 取周一至周日、SEMI_MONTHLY 按上下半月、MONTHLY 按自然月）， 不是写死的字符串。ON_DEMAND
+   * 没有固定周期，给出今天到明天的一日窗口作为可编辑起点。
    */
   public SettlementWindow settlementWindow(UUID agreementId) {
     var tenant = tenant();
@@ -876,8 +1055,13 @@ public class ConsignmentService {
       default -> end = today.plusDays(1);
     }
     LocalDate todayValue = today;
-    return new SettlementWindow(agreementId, cycle, label(ConsignmentSettlementCycle.values(), cycle),
-        start, end, todayValue);
+    return new SettlementWindow(
+        agreementId,
+        cycle,
+        label(ConsignmentSettlementCycle.values(), cycle),
+        start,
+        end,
+        todayValue);
   }
 
   /** 审计时间线（append-only）。 */
@@ -885,10 +1069,13 @@ public class ConsignmentService {
     var tenant = tenant();
     requireHead(tenant, agreementId);
     int n = Math.min(MAX_AUDIT_ROWS, Math.max(1, limit == null || limit <= 0 ? 200 : limit));
-    return sql.fetch(
+    return sql
+        .fetch(
             "select id, event_type, detail, actor_user_id, occurred_at from consignment_audit"
                 + " where tenant_id = ? and agreement_id = ? order by occurred_at desc, id desc limit ?",
-            tenant, agreementId, n)
+            tenant,
+            agreementId,
+            n)
         .stream()
         .map(
             r ->
@@ -906,8 +1093,10 @@ public class ConsignmentService {
   private ConsignmentAgreementDetail detail(UUID agreementId) {
     var tenant = tenant();
     var head =
-        sql.fetchOne(AGREEMENT_COLUMNS + " from " + AGREEMENT_FROM + " where a.tenant_id=? and a.id=?",
-            tenant, agreementId);
+        sql.fetchOne(
+            AGREEMENT_COLUMNS + " from " + AGREEMENT_FROM + " where a.tenant_id=? and a.id=?",
+            tenant,
+            agreementId);
     if (head == null) {
       throw notFound("寄售协议", agreementId);
     }
@@ -929,7 +1118,8 @@ public class ConsignmentService {
                 + "     where sl.tenant_id = l.tenant_id and sl.agreement_line_id = l.id"
                 + "       and s2.status = 'CONFIRMED') st on true"
                 + " where l.tenant_id = ? and l.agreement_id = ? order by k.code, l.id",
-            tenant, agreementId);
+            tenant,
+            agreementId);
     return new ConsignmentAgreementDetail(
         agreement(head),
         lines.stream().map(ConsignmentService::line).toList(),
@@ -953,11 +1143,15 @@ public class ConsignmentService {
       sql.execute(
           "insert into consignment_agreement_line(id,tenant_id,agreement_id,sku_id,warehouse_id,"
               + "consigned_quantity,settlement_price) values(?,?,?,?,?,?,?)",
-          UUID.randomUUID(), tenant, agreementId, line.skuId(), line.warehouseId(), qty,
+          UUID.randomUUID(),
+          tenant,
+          agreementId,
+          line.skuId(),
+          line.warehouseId(),
+          qty,
           line.settlementPrice());
     } catch (org.springframework.dao.DataAccessException e) {
-      throw conflict("该协议下这个 SKU 在这个仓库已有一行（同一 SKU + 仓库唯一）。"
-          + "两行会让「这个 SKU 还剩多少」出现第二个答案。");
+      throw conflict("该协议下这个 SKU 在这个仓库已有一行（同一 SKU + 仓库唯一）。" + "两行会让「这个 SKU 还剩多少」出现第二个答案。");
     }
   }
 
@@ -968,12 +1162,19 @@ public class ConsignmentService {
         "with t as (select ?::timestamptz as at) "
             + "insert into consignment_audit(id,tenant_id,agreement_id,event_type,detail,actor_user_id,occurred_at)"
             + " select ?,?,?,?,?,?,t.at from t",
-        OffsetDateTime.now(), UUID.randomUUID(), tenant, agreementId, event, detail, actorId);
+        OffsetDateTime.now(),
+        UUID.randomUUID(),
+        tenant,
+        agreementId,
+        event,
+        detail,
+        actorId);
   }
 
   private org.jooq.Record requireHead(UUID tenant, UUID agreementId) {
     var head =
-        sql.fetchOne("select * from consignment_agreement where tenant_id=? and id=?", tenant, agreementId);
+        sql.fetchOne(
+            "select * from consignment_agreement where tenant_id=? and id=?", tenant, agreementId);
     if (head == null) {
       throw notFound("寄售协议", agreementId);
     }
@@ -982,8 +1183,10 @@ public class ConsignmentService {
 
   private UUID agreementIdOf(UUID tenant, UUID settlementId) {
     var row =
-        sql.fetchOne("select agreement_id from consignment_settlement where tenant_id=? and id=?",
-            tenant, settlementId);
+        sql.fetchOne(
+            "select agreement_id from consignment_settlement where tenant_id=? and id=?",
+            tenant,
+            settlementId);
     if (row == null) {
       throw notFound("结算触发单", settlementId);
     }
@@ -998,8 +1201,11 @@ public class ConsignmentService {
           + " left join consignment_settlement st on st.tenant_id = sl.tenant_id and st.id = sl.settlement_id";
 
   private ConsignmentSale sale(UUID tenant, UUID saleId) {
-    return sql.fetch(SALE_COLUMNS + " from" + SALE_FROM + " where s.tenant_id = ? and s.id = ?",
-            tenant, saleId)
+    return sql
+        .fetch(
+            SALE_COLUMNS + " from" + SALE_FROM + " where s.tenant_id = ? and s.id = ?",
+            tenant,
+            saleId)
         .stream()
         .findFirst()
         .map(r -> saleRecord(r))
@@ -1209,13 +1415,11 @@ public class ConsignmentService {
   // ============================================================ 工具
 
   private UUID tenant() {
-    return sql.fetchOne("select current_setting('app.current_tenant',true)::uuid as t").get("t", UUID.class);
+    return sql.fetchOne("select current_setting('app.current_tenant',true)::uuid as t")
+        .get("t", UUID.class);
   }
 
-  /**
-   * 单号 = 前缀-当天日期-六位序号。序号与日期分两步取，不在一条 SQL 里拼：
-   * 纯文本语句里的 {@code ::text} 这类表达式 jOOQ 解析器吃不准，拆开就没有歧义。
-   */
+  /** 单号 = 前缀-当天日期-六位序号。序号与日期分两步取，不在一条 SQL 里拼： 纯文本语句里的 {@code ::text} 这类表达式 jOOQ 解析器吃不准，拆开就没有歧义。 */
   private String nextCode(String prefix) {
     long seq;
     if ("CG".equals(prefix)) {
@@ -1306,8 +1510,7 @@ public class ConsignmentService {
   private static String requireCurrency(String value) {
     String v = notBlank(value) ? value.trim().toUpperCase(Locale.ROOT) : "";
     if (!v.matches("^[A-Z]{3}$")) {
-      throw bad("币种必须是三位大写字母（如 USD / CNY），收到：" + value
-          + "。结算价没有币种就是一个无意义的数字。");
+      throw bad("币种必须是三位大写字母（如 USD / CNY），收到：" + value + "。结算价没有币种就是一个无意义的数字。");
     }
     return v;
   }

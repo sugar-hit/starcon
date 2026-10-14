@@ -149,10 +149,7 @@ export function GoodsReceiptWorkspace() {
   const rows = data?.rows ?? [];
 
   const sourceOptions = caps?.sources ?? [];
-  const availableSources = useMemo(
-    () => sourceOptions.filter((s) => s.available),
-    [sourceOptions],
-  );
+  const availableSources = useMemo(() => sourceOptions.filter((s) => s.available), [sourceOptions]);
   const unavailableSources = useMemo(
     () => sourceOptions.filter((s) => !s.available),
     [sourceOptions],
@@ -166,10 +163,12 @@ export function GoodsReceiptWorkspace() {
         actions={
           <>
             <Button variant="ghost" onClick={() => void load()} disabled={loading}>
-              <RefreshCw className={loading ? 'animate-spin' : ''} />刷新
+              <RefreshCw className={loading ? 'animate-spin' : ''} />
+              刷新
             </Button>
             <Button onClick={() => setCreating(true)} disabled={availableSources.length === 0}>
-              <Plus />新建收货单
+              <Plus />
+              新建收货单
             </Button>
           </>
         }
@@ -179,7 +178,9 @@ export function GoodsReceiptWorkspace() {
         <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
           <TriangleAlert className="mt-0.5 size-4 shrink-0" />
           <div>
-            <p className="font-medium">差异的「处理流程」尚未交付（归属 {caps.discrepancyOwnerModule}）</p>
+            <p className="font-medium">
+              差异的「处理流程」尚未交付（归属 {caps.discrepancyOwnerModule}）
+            </p>
             <p className="text-muted-foreground">{caps.discrepancyNote}</p>
           </div>
         </div>
@@ -286,13 +287,13 @@ export function GoodsReceiptWorkspace() {
 
       {loading && !data ? (
         <SectionCard title="收货单列表">
-          <p className="text-sm text-muted-foreground">正在加载收货单…</p>
+          <p className="text-muted-foreground text-sm">正在加载收货单…</p>
         </SectionCard>
       ) : error ? (
         <SectionCard title="收货单列表">
           <div className="flex flex-col items-start gap-2">
-            <TriangleAlert className="size-5 text-destructive" />
-            <p className="text-sm text-destructive">{error}</p>
+            <TriangleAlert className="text-destructive size-5" />
+            <p className="text-destructive text-sm">{error}</p>
             <Button variant="ghost" onClick={() => void load()}>
               重试
             </Button>
@@ -310,7 +311,7 @@ export function GoodsReceiptWorkspace() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-muted-foreground">
+                <tr className="text-muted-foreground border-b text-left">
                   <th className="p-2">收货单号</th>
                   <th className="p-2">来源</th>
                   <th className="p-2">收货仓</th>
@@ -330,20 +331,23 @@ export function GoodsReceiptWorkspace() {
                   return (
                     <tr key={r.id} className="border-b last:border-0">
                       <td className="p-2">
-                        <button className="underline-offset-2 hover:underline" onClick={() => setDetailId(r.id)}>
+                        <button
+                          className="underline-offset-2 hover:underline"
+                          onClick={() => setDetailId(r.id)}
+                        >
                           {r.receiptCode}
                         </button>
-                        <div className="text-xs text-muted-foreground">{moment(r.updatedAt)}</div>
+                        <div className="text-muted-foreground text-xs">{moment(r.updatedAt)}</div>
                       </td>
                       <td className="p-2">
                         {r.sourceTypeLabel}
                         {r.sourceRefCode ? (
-                          <div className="text-xs text-muted-foreground">{r.sourceRefCode}</div>
+                          <div className="text-muted-foreground text-xs">{r.sourceRefCode}</div>
                         ) : null}
                       </td>
                       <td className="p-2">
                         {r.warehouseCode}
-                        <div className="text-xs text-muted-foreground">{r.warehouseName}</div>
+                        <div className="text-muted-foreground text-xs">{r.warehouseName}</div>
                       </td>
                       <td className="p-2">{r.statusLabel}</td>
                       <td className="p-2 text-right">{fmt(r.expectedQuantity)}</td>
@@ -369,7 +373,8 @@ export function GoodsReceiptWorkspace() {
                           </Button>
                           {actions.includes('receive') && (
                             <Button variant="ghost" onClick={() => setReceiving(r)}>
-                              <PackagePlus />实收
+                              <PackagePlus />
+                              实收
                             </Button>
                           )}
                           {actions.includes('close') && (
@@ -385,7 +390,7 @@ export function GoodsReceiptWorkspace() {
               </tbody>
             </table>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mt-3 text-xs">
             还差 = 预期 − 实收 − 拒收，货还在路上，**不是差异**；拒收量不入库、不写分录。
           </p>
         </SectionCard>
@@ -397,11 +402,11 @@ export function GoodsReceiptWorkspace() {
             {availableSources.map((s) => (
               <p key={s.value} className="text-sm">
                 <span className="font-medium">{sourceCaption(s)}</span>
-                <span className="ml-2 text-muted-foreground">{s.note}</span>
+                <span className="text-muted-foreground ml-2">{s.note}</span>
               </p>
             ))}
             {unavailableSources.map((s) => (
-              <p key={s.value} className="text-sm text-muted-foreground">
+              <p key={s.value} className="text-muted-foreground text-sm">
                 <span>{sourceCaption(s)}</span>
                 <span className="ml-2">{s.note}</span>
               </p>
@@ -450,7 +455,11 @@ export function GoodsReceiptWorkspace() {
       )}
 
       {detailId && (
-        <DetailDialog receiptId={detailId} onClose={() => setDetailId(null)} onChanged={() => void load()} />
+        <DetailDialog
+          receiptId={detailId}
+          onClose={() => setDetailId(null)}
+          onChanged={() => void load()}
+        />
       )}
     </div>
   );
@@ -515,9 +524,7 @@ function CreateDialog(props: {
       <ModalContent>
         <ModalHeader>
           <ModalTitle>新建收货单（草稿）</ModalTitle>
-          <ModalDescription>
-            草稿只是意图，不动库存 —— 库存要等第一次实收才变化。
-          </ModalDescription>
+          <ModalDescription>草稿只是意图，不动库存 —— 库存要等第一次实收才变化。</ModalDescription>
         </ModalHeader>
         <div className="grid gap-3 md:grid-cols-2">
           <label className="flex flex-col gap-1 text-sm">
@@ -533,7 +540,7 @@ function CreateDialog(props: {
                 </option>
               ))}
             </select>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               {available.find((s) => s.value === sourceType)?.note}
             </span>
           </label>
@@ -611,7 +618,7 @@ function CreateDialog(props: {
                 </option>
               ))}
             </select>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               破损与待检货挂到待检 / 残次，不会直接变成可售。
             </span>
           </label>
@@ -649,7 +656,7 @@ function CreateDialog(props: {
             />
           </label>
         </div>
-        {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
+        {error && <p className="text-destructive mt-3 text-sm">{error}</p>}
         <ModalFooter>
           <Button variant="ghost" onClick={onClose}>
             取消
@@ -671,7 +678,9 @@ function ReceiveDialog(props: {
   onSaved: () => void;
 }) {
   const { receipt, onClose, onSaved } = props;
-  const [detail, setDetail] = useState<Awaited<ReturnType<typeof fetchGoodsReceiptDetail>> | null>(null);
+  const [detail, setDetail] = useState<Awaited<ReturnType<typeof fetchGoodsReceiptDetail>> | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [locationId, setLocationId] = useState('');
   const [waybillNo, setWaybillNo] = useState('');
@@ -737,7 +746,7 @@ function ReceiveDialog(props: {
           </ModalDescription>
         </ModalHeader>
         {!detail ? (
-          <p className="text-sm text-muted-foreground">正在加载明细…</p>
+          <p className="text-muted-foreground text-sm">正在加载明细…</p>
         ) : (
           <div className="flex flex-col gap-3">
             <div className="grid gap-3 md:grid-cols-3">
@@ -770,7 +779,7 @@ function ReceiveDialog(props: {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-muted-foreground">
+                  <tr className="text-muted-foreground border-b text-left">
                     <th className="p-2">明细</th>
                     <th className="p-2 text-right">还差</th>
                     <th className="p-2">本次实收</th>
@@ -787,9 +796,7 @@ function ReceiveDialog(props: {
                           className="w-24 rounded-md border px-2 py-1"
                           inputMode="decimal"
                           value={quantities[l.id] ?? ''}
-                          onChange={(e) =>
-                            setQuantities((q) => ({ ...q, [l.id]: e.target.value }))
-                          }
+                          onChange={(e) => setQuantities((q) => ({ ...q, [l.id]: e.target.value }))}
                         />
                       </td>
                       <td className="p-2">
@@ -807,7 +814,7 @@ function ReceiveDialog(props: {
             </div>
           </div>
         )}
-        {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
+        {error && <p className="text-destructive mt-3 text-sm">{error}</p>}
         <ModalFooter>
           <Button variant="ghost" onClick={onClose}>
             取消
@@ -821,7 +828,11 @@ function ReceiveDialog(props: {
   );
 }
 
-function CloseDialog(props: { receipt: GoodsReceiptRow; onClose: () => void; onSaved: () => void }) {
+function CloseDialog(props: {
+  receipt: GoodsReceiptRow;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
   const { receipt, onClose, onSaved } = props;
   const [reason, setReason] = useState('');
   const [notes, setNotes] = useState('');
@@ -869,7 +880,7 @@ function CloseDialog(props: { receipt: GoodsReceiptRow; onClose: () => void; onS
             />
           </label>
         </div>
-        {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
+        {error && <p className="text-destructive mt-3 text-sm">{error}</p>}
         <ModalFooter>
           <Button variant="ghost" onClick={onClose}>
             取消
@@ -885,10 +896,12 @@ function CloseDialog(props: { receipt: GoodsReceiptRow; onClose: () => void; onS
 
 function DetailDialog(props: { receiptId: string; onClose: () => void; onChanged: () => void }) {
   const { receiptId, onClose, onChanged } = props;
-  const [detail, setDetail] = useState<Awaited<ReturnType<typeof fetchGoodsReceiptDetail>> | null>(null);
-  const [movements, setMovements] = useState<
-    Awaited<ReturnType<typeof fetchGoodsReceiptMovements>> | null
-  >(null);
+  const [detail, setDetail] = useState<Awaited<ReturnType<typeof fetchGoodsReceiptDetail>> | null>(
+    null,
+  );
+  const [movements, setMovements] = useState<Awaited<
+    ReturnType<typeof fetchGoodsReceiptMovements>
+  > | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -915,12 +928,12 @@ function DetailDialog(props: { receiptId: string; onClose: () => void; onChanged
               : '加载中…'}
           </ModalDescription>
         </ModalHeader>
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p className="text-destructive text-sm">{error}</p>}
         {detail && (
           <div className="flex flex-col gap-4">
             <div className="rounded-md border p-3 text-sm">
               <p>{receiptQuantityText(detail.receipt).text}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{detail.conservationNote}</p>
+              <p className="text-muted-foreground mt-1 text-xs">{detail.conservationNote}</p>
             </div>
 
             <div>
@@ -937,7 +950,7 @@ function DetailDialog(props: { receiptId: string; onClose: () => void; onChanged
             <div>
               <h4 className="mb-2 text-sm font-medium">实收事件（逐笔留痕）</h4>
               {detail.events.length === 0 ? (
-                <p className="text-sm text-muted-foreground">还没有实收。</p>
+                <p className="text-muted-foreground text-sm">还没有实收。</p>
               ) : (
                 <ul className="flex flex-col gap-2 text-sm">
                   {detail.events.map((e) => (
@@ -947,7 +960,7 @@ function DetailDialog(props: { receiptId: string; onClose: () => void; onChanged
                         {moment(e.receivedAt)} · {e.locationCode} {e.locationName}
                         {e.waybillNo ? ` · ${e.waybillNo}` : ''}
                       </p>
-                      <ul className="mt-1 flex flex-col gap-0.5 text-xs text-muted-foreground">
+                      <ul className="text-muted-foreground mt-1 flex flex-col gap-0.5 text-xs">
                         {e.lines.map((l) => (
                           <li key={l.id}>
                             {l.skuCode} 实收 {fmt(l.receivedQuantity)} / 拒收{' '}
@@ -969,12 +982,14 @@ function DetailDialog(props: { receiptId: string; onClose: () => void; onChanged
             <div>
               <h4 className="mb-2 text-sm font-medium">差异记录（只记录事实）</h4>
               {detail.discrepancies.length === 0 ? (
-                <p className="text-sm text-muted-foreground">没有差异。</p>
+                <p className="text-muted-foreground text-sm">没有差异。</p>
               ) : (
                 <ul className="flex flex-col gap-1 text-sm">
                   {detail.discrepancies.map((d) => (
                     <li key={d.id}>
-                      <span className="font-medium">{receiptDiscrepancyLabels[d.discrepancyType]}</span>{' '}
+                      <span className="font-medium">
+                        {receiptDiscrepancyLabels[d.discrepancyType]}
+                      </span>{' '}
                       {fmt(d.quantity)}
                       {d.skuCode ? ` · ${d.skuCode}` : ''} · {moment(d.recordedAt)}
                       {d.reasonCode ? ` · ${d.reasonCode}` : ''}
@@ -988,7 +1003,7 @@ function DetailDialog(props: { receiptId: string; onClose: () => void; onChanged
             {movements && (
               <div>
                 <h4 className="mb-2 text-sm font-medium">库存分录（复用 7.1.2.1 台账）</h4>
-                <p className="mb-2 text-xs text-muted-foreground">{movements.attributionNote}</p>
+                <p className="text-muted-foreground mb-2 text-xs">{movements.attributionNote}</p>
                 <ul className="flex flex-col gap-1 text-sm">
                   {movements.movements.rows.map((m) => (
                     <li key={m.transactionId}>
@@ -1003,7 +1018,7 @@ function DetailDialog(props: { receiptId: string; onClose: () => void; onChanged
             <div>
               <h4 className="mb-2 text-sm font-medium">可执行动作</h4>
               {detail.transitions.length === 0 ? (
-                <p className="text-sm text-muted-foreground">已关闭是终态，不再接受任何动作。</p>
+                <p className="text-muted-foreground text-sm">已关闭是终态，不再接受任何动作。</p>
               ) : (
                 <p className="text-sm">
                   可转为：{detail.transitions.map((t) => receiptStatusLabels[t.to]).join('、')}
@@ -1014,12 +1029,15 @@ function DetailDialog(props: { receiptId: string; onClose: () => void; onChanged
         )}
         <ModalFooter>
           <Button variant="ghost" onClick={() => void load()}>
-            <RefreshCw />刷新
+            <RefreshCw />
+            刷新
           </Button>
-          <Button onClick={() => {
-            onChanged();
-            onClose();
-          }}>
+          <Button
+            onClick={() => {
+              onChanged();
+              onClose();
+            }}
+          >
             关闭
           </Button>
         </ModalFooter>

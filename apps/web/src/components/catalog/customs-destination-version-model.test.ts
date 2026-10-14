@@ -66,12 +66,9 @@ describe('validateDestinationHsCode', () => {
     expect(validateDestinationHsCode(raw)).toEqual([]);
   });
 
-  it.each(['85171', '85171230901', '8517A2', '851712 3090', '+851712'])(
-    '拒绝 %j',
-    (raw) => {
-      expect(validateDestinationHsCode(raw)).toHaveLength(1);
-    },
-  );
+  it.each(['85171', '85171230901', '8517A2', '851712 3090', '+851712'])('拒绝 %j', (raw) => {
+    expect(validateDestinationHsCode(raw)).toHaveLength(1);
+  });
 });
 
 describe('draftToPayload —— 规则 R1：留空 = 一直有效，发 null 而不是省略键', () => {

@@ -7,13 +7,11 @@ import java.util.Map;
 /**
  * 2.2.1.2 授权向导的平台 OAuth 协议模型。
  *
- * <p>按 AGENTS.md 的模块边界纪律，外部适配器放在 {@code com.starcon.channel.vendor} 下、
- * 每个 vendor 独立包、只暴露 {@link PlatformOAuthAdapter} 统一接口。这里的类型是那条接口
- * 的词汇表：端点与字段名来自配置表 {@code platform_oauth_profile}，行为差异在适配器里，
+ * <p>按 AGENTS.md 的模块边界纪律，外部适配器放在 {@code com.starcon.channel.vendor} 下、 每个 vendor 独立包、只暴露 {@link
+ * PlatformOAuthAdapter} 统一接口。这里的类型是那条接口 的词汇表：端点与字段名来自配置表 {@code platform_oauth_profile}，行为差异在适配器里，
  * service 只认这些结构，永远不认某个具体平台的字段名。
  *
- * <p>令牌明文只经由 {@link Authorization} 一条路径出适配器，且必须直接进密钥管理器；
- * 任何面向 API 的视图类型都不具备承载它的字段。
+ * <p>令牌明文只经由 {@link Authorization} 一条路径出适配器，且必须直接进密钥管理器； 任何面向 API 的视图类型都不具备承载它的字段。
  */
 public final class OAuthProtocol {
   private OAuthProtocol() {}
@@ -92,12 +90,10 @@ public final class OAuthProtocol {
   /**
    * 换令牌 + 读账号信息的一次性结果。
    *
-   * <p>刻意把两者合成一个返回值：令牌只在这一次调用里活着，调用方拿到后必须立刻写进密钥管理器。
-   * 如果拆成"换令牌结果"和"再读账号信息"两个调用，令牌就会横跨两次调用留在字段里，
+   * <p>刻意把两者合成一个返回值：令牌只在这一次调用里活着，调用方拿到后必须立刻写进密钥管理器。 如果拆成"换令牌结果"和"再读账号信息"两个调用，令牌就会横跨两次调用留在字段里，
    * 中间任何一次异常或日志输出都可能把它带出去。合成一次之后，令牌的存活期就等于这次方法调用。
    *
-   * <p>没有任何视图、审计事件或日志会读取 {@link #accessToken()} / {@link #refreshToken()}：
-   * 落库的是密钥管理器引用，不是它们。
+   * <p>没有任何视图、审计事件或日志会读取 {@link #accessToken()} / {@link #refreshToken()}： 落库的是密钥管理器引用，不是它们。
    */
   public record Authorization(
       String accessToken,
@@ -114,9 +110,8 @@ public final class OAuthProtocol {
   /**
    * 账号信息解析结果。
    *
-   * <p>{@code accountId} 是跨租户唯一的绑定主体：蓝图要求同一平台账号只能绑定一个租户，
-   * 判定就落在这个值上。{@code shops} 为空表示该平台授权粒度就是账号本身（例如 Temu 全托管），
-   * 向导会据此把账号直接当作一个店铺。
+   * <p>{@code accountId} 是跨租户唯一的绑定主体：蓝图要求同一平台账号只能绑定一个租户， 判定就落在这个值上。{@code shops}
+   * 为空表示该平台授权粒度就是账号本身（例如 Temu 全托管）， 向导会据此把账号直接当作一个店铺。
    */
   public record AccountPayload(String accountId, String accountName, List<PlatformShop> shops) {}
 

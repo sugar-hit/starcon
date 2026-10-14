@@ -89,9 +89,7 @@ export function PartyRoleProfileLedger({
     interfaceTypes: { code: string; label: string }[];
     serviceCapabilities: { code: string; label: string }[];
   }>({ levels: [], settlementMethods: [], interfaceTypes: [], serviceCapabilities: [] });
-  const [query, setQuery] = useState<RoleProfileListQuery>(
-    initialQuery ?? emptyProfileQuery(),
-  );
+  const [query, setQuery] = useState<RoleProfileListQuery>(initialQuery ?? emptyProfileQuery());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -165,8 +163,8 @@ export function PartyRoleProfileLedger({
             />
           </div>
 
-          {overview && (overview.riskyCustomerWithCreditCount > 0 ||
-            overview.termsWithoutCreditCount > 0) ? (
+          {overview &&
+          (overview.riskyCustomerWithCreditCount > 0 || overview.termsWithoutCreditCount > 0) ? (
             <div className="border-destructive/40 bg-destructive-soft text-destructive rounded-md border p-3 text-xs">
               <div className="flex items-center gap-2 font-medium">
                 <TriangleAlert className="h-4 w-4" />
@@ -194,7 +192,9 @@ export function PartyRoleProfileLedger({
               <select
                 className={control}
                 value={query.roleType}
-                onChange={(e) => patch({ roleType: e.target.value as RoleProfileListQuery['roleType'] })}
+                onChange={(e) =>
+                  patch({ roleType: e.target.value as RoleProfileListQuery['roleType'] })
+                }
               >
                 {ROLE_PROFILE_KINDS.map((item) => (
                   <option key={item.value} value={item.value}>
@@ -365,9 +365,7 @@ export function PartyRoleProfileLedger({
                         )}
                       </td>
                       <td className="py-2">
-                        {row.levelLabel ?? (
-                          <span className="text-muted-foreground">—</span>
-                        )}
+                        {row.levelLabel ?? <span className="text-muted-foreground">—</span>}
                       </td>
                       <td className="py-2">
                         {rowHeadline(row)}
@@ -387,7 +385,9 @@ export function PartyRoleProfileLedger({
                 </tbody>
               </table>
               <div className="text-muted-foreground flex items-center justify-between text-xs">
-                <span>共 {total} 条，第 {query.page + 1} / {pages} 页</span>
+                <span>
+                  共 {total} 条，第 {query.page + 1} / {pages} 页
+                </span>
                 <div className="flex gap-2">
                   <Button
                     size="sm"
@@ -577,9 +577,7 @@ function SlotShell({
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{kindLabel(roleType)}角色档案</span>
           <Badge
-            tone={
-              state === 'saved' ? 'success' : state === 'no-profile' ? 'warning' : 'neutral'
-            }
+            tone={state === 'saved' ? 'success' : state === 'no-profile' ? 'warning' : 'neutral'}
           >
             {text.label}
           </Badge>
@@ -698,12 +696,8 @@ function SupplierPanel({
         <div>账期：{profile.paymentTermsLabel}</div>
         <div>结算方式：{profile.settlementMethodLabel}</div>
         <div>合作等级：{profile.cooperationLevelLabel}</div>
-        <div>
-          最小起订量：{profile.moqLabel ?? '未设（采购单不按起订量校验）'}
-        </div>
-        {profile.note && (
-          <div className="sm:col-span-2">备注：{profile.note}</div>
-        )}
+        <div>最小起订量：{profile.moqLabel ?? '未设（采购单不按起订量校验）'}</div>
+        {profile.note && <div className="sm:col-span-2">备注：{profile.note}</div>}
       </dl>
       {editing && (
         <div className="mt-3 space-y-3">
@@ -1011,11 +1005,7 @@ function CarrierPanel({
                     key={option.code}
                     className="border-border flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-1 text-sm"
                   >
-                    <input
-                      type="checkbox"
-                      checked={active}
-                      onChange={() => toggle(option.code)}
-                    />
+                    <input type="checkbox" checked={active} onChange={() => toggle(option.code)} />
                     {option.label}
                   </label>
                 );

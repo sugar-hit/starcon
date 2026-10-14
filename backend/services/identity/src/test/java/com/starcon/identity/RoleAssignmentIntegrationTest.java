@@ -17,14 +17,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 /**
  * 17.3.2.1 角色分配。
  *
- * <p>本模块要证明的不是「能建一条分配」，而是蓝图那条加粗的硬约束真的成立：
- * <b>有角色必有范围</b>。所以最核心的两条用例都直接对数据库下手——
- * 一条证明缺范围的写入会被**库内延迟约束触发器**挡住（不是应用层 if 挡的），
- * 一条证明 scope_mode 不再有默认值（「忘了填」不再等于租户内全量）。
+ * <p>本模块要证明的不是「能建一条分配」，而是蓝图那条加粗的硬约束真的成立： <b>有角色必有范围</b>。所以最核心的两条用例都直接对数据库下手——
+ * 一条证明缺范围的写入会被**库内延迟约束触发器**挡住（不是应用层 if 挡的）， 一条证明 scope_mode 不再有默认值（「忘了填」不再等于租户内全量）。
  *
- * <p>其余用例钉住：范围对象确实落库且编码由服务端覆写、生效时间写回不偏时区、
- * 多条分配合并后的权限预览说得清合并方式、未生效的分配不产生任何权限，
- * 以及多租户隔离三断言。
+ * <p>其余用例钉住：范围对象确实落库且编码由服务端覆写、生效时间写回不偏时区、 多条分配合并后的权限预览说得清合并方式、未生效的分配不产生任何权限， 以及多租户隔离三断言。
  */
 class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
 
@@ -36,7 +32,8 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
     return request(token, "GET", "/identity/tenants/current", null, 200).get("tenantId").asText();
   }
 
-  private UUID role(String token, String code, String name, List<String> permissions) throws Exception {
+  private UUID role(String token, String code, String name, List<String> permissions)
+      throws Exception {
     return UUID.fromString(
         request(
                 token,
@@ -48,11 +45,17 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
   }
 
   /** 建一个带部门归属的成员，返回成员 id。初始分配给租户内全部范围，用于让成员能登录。 */
-  private UUID member(String token, String username, UUID departmentId, List<Map<String, String>> assignments)
+  private UUID member(
+      String token, String username, UUID departmentId, List<Map<String, String>> assignments)
       throws Exception {
     return UUID.fromString(
-        request(token, "POST", "/identity/members",
-            memberInput(username, departmentId == null ? null : departmentId.toString(), assignments), 200)
+        request(
+                token,
+                "POST",
+                "/identity/members",
+                memberInput(
+                    username, departmentId == null ? null : departmentId.toString(), assignments),
+                200)
             .asText());
   }
 
@@ -64,10 +67,14 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
         "POST",
         "/identity/children",
         Map.of(
-            "code", "RA_" + tag,
-            "name", "角色分配子租户",
-            "ownerUsername", username,
-            "ownerPassword", "test-member-password"),
+            "code",
+            "RA_" + tag,
+            "name",
+            "角色分配子租户",
+            "ownerUsername",
+            username,
+            "ownerPassword",
+            "test-member-password"),
         200);
     return username;
   }
@@ -95,7 +102,8 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
   }
 
   private List<JsonNode> assignmentsOf(String token, UUID membershipId) throws Exception {
-    var all = request(token, "GET", "/identity/role-assignments?membershipId=" + membershipId, null, 200);
+    var all =
+        request(token, "GET", "/identity/role-assignments?membershipId=" + membershipId, null, 200);
     var mine = new ArrayList<JsonNode>();
     for (JsonNode n : all) mine.add(n);
     return mine;
@@ -114,13 +122,10 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 缺范围的分配在**数据库层**被拒绝，不是被应用层挡下来的。
    *
-   * <p>这条必须绕开 HTTP 直接写表：只有这样才能证明挡它的是 V47 的延迟约束触发器。
-   * 如果实现把这条规则只写在 Java 里，那么任何一条绕过服务的写入（运维脚本、
-   * 另一个服务、未来某个后台任务）都能造出「有角色、无范围」的记录——而那正是蓝图
-   * 说的「实践中极易误配」。
+   * <p>这条必须绕开 HTTP 直接写表：只有这样才能证明挡它的是 V47 的延迟约束触发器。 如果实现把这条规则只写在 Java 里，那么任何一条绕过服务的写入（运维脚本、
+   * 另一个服务、未来某个后台任务）都能造出「有角色、无范围」的记录——而那正是蓝图 说的「实践中极易误配」。
    *
-   * <p>用的是 DEPARTMENT 模式（唯一必须带对象范围的一种）；ALL / SELF 本身
-   * 就是完整范围声明，不需要对象行。
+   * <p>用的是 DEPARTMENT 模式（唯一必须带对象范围的一种）；ALL / SELF 本身 就是完整范围声明，不需要对象行。
    */
   @Test
   void assignmentWithoutScopeIsRejectedByTheDatabase() throws Exception {
@@ -131,8 +136,7 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
     var tenantId = UUID.fromString(tenantOf(ownerToken));
     assertThatThrownBy(
             () ->
-                tx()
-                    .run(
+                tx().run(
                         tenantId,
                         () ->
                             sql.execute(
@@ -146,8 +150,11 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
 
     // 事务整体回滚：库里没有留下半条记录。
     assertThat(
-            tx()
-                .run(tenantId, () -> sql.fetch("select role_id from role_assignment where membership_id=?", memberId))
+            tx().run(
+                    tenantId,
+                    () ->
+                        sql.fetch(
+                            "select role_id from role_assignment where membership_id=?", memberId))
                 .isEmpty())
         .isTrue();
   }
@@ -155,8 +162,8 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * scope_mode 不再有默认值：「没写范围」不再等于租户内全量。
    *
-   * <p>V1 建表时给了 {@code DEFAULT 'ALL'}，于是任何省略范围列的 INSERT 都静默拿到全量权限。
-   * 这条断言钉住的是 V47 删掉这个默认值之后的行为：漏填直接失败。
+   * <p>V1 建表时给了 {@code DEFAULT 'ALL'}，于是任何省略范围列的 INSERT 都静默拿到全量权限。 这条断言钉住的是 V47
+   * 删掉这个默认值之后的行为：漏填直接失败。
    */
   @Test
   void scopeModeHasNoImplicitTenantWideDefault() throws Exception {
@@ -167,8 +174,7 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
 
     assertThatThrownBy(
             () ->
-                tx()
-                    .run(
+                tx().run(
                         tenantId,
                         () ->
                             sql.execute(
@@ -205,8 +211,7 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
     var tenantId = UUID.fromString(tenantOf(ownerToken));
     assertThatThrownBy(
             () ->
-                tx()
-                    .run(
+                tx().run(
                         tenantId,
                         () -> {
                           sql.execute(
@@ -237,9 +242,8 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 范围对象落库、编码由服务端覆写、生效时间写回不偏时区。
    *
-   * <p>生效时间必须断言**写回的值**，不能只断言「没抛异常」：jOOQ 对 VALUES 列表里的裸 {@code ?}
-   * 按 varchar 推断类型，{@code OffsetDateTime} 会被当字符串塞进去且不报错，
-   * 结果是时间偏掉一个时区偏移（典型 −28800s）。这里特意用 {@code +08:00} 的输入，
+   * <p>生效时间必须断言**写回的值**，不能只断言「没抛异常」：jOOQ 对 VALUES 列表里的裸 {@code ?} 按 varchar 推断类型，{@code
+   * OffsetDateTime} 会被当字符串塞进去且不报错， 结果是时间偏掉一个时区偏移（典型 −28800s）。这里特意用 {@code +08:00} 的输入，
    * 断言的是**瞬间**（Instant）而不是墙上时间——偏 8 小时的错误写法会被这条直接抓住。
    */
   @Test
@@ -253,7 +257,8 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
     // 断言的是瞬间（Instant）而不是墙上时间，正是为了抓住这类漂移。
     var from = OffsetDateTime.now(ZoneOffset.ofHours(8)).minusDays(1).withNano(0);
     var until = OffsetDateTime.now(ZoneOffset.ofHours(8)).plusDays(30).withNano(0);
-    var body = assignmentBody(roleId, "DEPARTMENT", List.of(scope("DEPARTMENT", deptId, "写错的名称")), from);
+    var body =
+        assignmentBody(roleId, "DEPARTMENT", List.of(scope("DEPARTMENT", deptId, "写错的名称")), from);
     body.put("effectiveUntil", until.toString());
     request(ownerToken, "POST", "/identity/members/" + memberId + "/role-assignments", body, 200);
 
@@ -274,8 +279,7 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
 
     // 库里的值同样按瞬间校验一遍：API 回显和实际落库必须一致，不能只在某一层看起来对。
     var stored =
-        tx()
-            .run(
+        tx().run(
                 UUID.fromString(tenantOf(ownerToken)),
                 () ->
                     sql.fetchOne(
@@ -307,9 +311,8 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 未生效 / 已过期的分配不产生任何权限。
    *
-   * <p>这是本模块最容易做成「假字段」的地方：如果生效时间只显示在页面上而不参与鉴权，
-   * 管理员会以为下周才生效的分配今天就已经在给权限了。所以这里从成员自己的会话断言：
-   * 未来生效的分配不出现在 grants 里，改成过去之后才出现。
+   * <p>这是本模块最容易做成「假字段」的地方：如果生效时间只显示在页面上而不参与鉴权， 管理员会以为下周才生效的分配今天就已经在给权限了。所以这里从成员自己的会话断言： 未来生效的分配不出现在
+   * grants 里，改成过去之后才出现。
    */
   @Test
   void futureAndExpiredAssignmentsGrantNothing() throws Exception {
@@ -362,7 +365,12 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(session.get("permissions").toString()).doesNotContain("identity.assignment.read");
 
     JsonNode merge =
-        request(ownerToken, "GET", "/identity/members/" + memberId + "/effective-permissions", null, 200);
+        request(
+            ownerToken,
+            "GET",
+            "/identity/members/" + memberId + "/effective-permissions",
+            null,
+            200);
     assertThat(merge.get("permissions")).isEmpty();
     assertThat(merge.get("inactive").get(0).get("reason").asText()).isEqualTo("EXPIRED");
   }
@@ -375,8 +383,7 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
   @Test
   void revokeRemovesPermissionsButKeepsTheRecord() throws Exception {
     String ownerToken = login(), tag = suffix();
-    UUID roleId =
-        role(ownerToken, "RA_RV_" + tag, "撤销测试角色", List.of("identity.assignment.read"));
+    UUID roleId = role(ownerToken, "RA_RV_" + tag, "撤销测试角色", List.of("identity.assignment.read"));
     UUID memberId = member(ownerToken, "ra-revoke-" + tag, null, List.of());
     String username = "ra-revoke-" + tag;
     request(
@@ -385,7 +392,10 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
         "/identity/members/" + memberId + "/role-assignments",
         assignmentBody(roleId, "ALL", List.of(), OffsetDateTime.now().minusDays(1)),
         200);
-    assertThat(request(loginUser(username), "GET", "/auth/session", null, 200).get("permissions").toString())
+    assertThat(
+            request(loginUser(username), "GET", "/auth/session", null, 200)
+                .get("permissions")
+                .toString())
         .contains("identity.assignment.read");
 
     request(
@@ -400,7 +410,10 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(row.get("effectiveStatus").asText()).isEqualTo("REVOKED");
     assertThat(row.get("revokedAt").isNull()).isFalse();
     assertThat(row.get("revokedBy").isNull()).isFalse();
-    assertThat(request(loginUser(username), "GET", "/auth/session", null, 200).get("permissions").toString())
+    assertThat(
+            request(loginUser(username), "GET", "/auth/session", null, 200)
+                .get("permissions")
+                .toString())
         .doesNotContain("identity.assignment.read");
 
     // 撤销是终态，不允许再撤销一次。
@@ -422,8 +435,7 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
    * <p>三条规则各钉一条断言：SINGLE（只有一条分配带这个权限）、UNION（两个角色都带，
    * 范围对象去重合并）、ABSORBED_BY_TENANT_SCOPE（其中一条是租户内全部，整体按全部生效）。
    *
-   * <p>刻意不测交集：并集才是「同时负责店铺 A 和仓库 B」的正确答案，
-   * 取交集会让这个成员什么都不剩。
+   * <p>刻意不测交集：并集才是「同时负责店铺 A 和仓库 B」的正确答案， 取交集会让这个成员什么都不剩。
    */
   @Test
   void mergedPreviewUnionsPermissionsAndScopes() throws Exception {
@@ -440,27 +452,44 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
                 .asText());
     UUID readerId = role(ownerToken, "RA_R1_" + tag, "合并角色一", List.of("catalog.sku.read"));
     UUID writerId =
-        role(
-            ownerToken,
-            "RA_R2_" + tag,
-            "合并角色二",
-            List.of("catalog.sku.read", "catalog.spu.read"));
-    UUID ownerRoleId =
-        role(ownerToken, "RA_R3_" + tag, "合并角色三", List.of("catalog.sku.read"));
+        role(ownerToken, "RA_R2_" + tag, "合并角色二", List.of("catalog.sku.read", "catalog.spu.read"));
+    UUID ownerRoleId = role(ownerToken, "RA_R3_" + tag, "合并角色三", List.of("catalog.sku.read"));
     UUID memberId = member(ownerToken, "ra-merge-" + tag, deptId, List.of());
     var now = OffsetDateTime.now();
 
-    request(ownerToken, "POST", "/identity/members/" + memberId + "/role-assignments",
-        assignmentBody(readerId, "DEPARTMENT", List.of(scope("DEPARTMENT", deptId, "x")), now), 200);
-    request(ownerToken, "POST", "/identity/members/" + memberId + "/role-assignments",
-        assignmentBody(writerId, "DEPARTMENT",
-            List.of(scope("LEGAL_ENTITY", entityId, "x"), scope("WAREHOUSE", UUID.randomUUID(), "US-WH-1")), now), 200);
+    request(
+        ownerToken,
+        "POST",
+        "/identity/members/" + memberId + "/role-assignments",
+        assignmentBody(readerId, "DEPARTMENT", List.of(scope("DEPARTMENT", deptId, "x")), now),
+        200);
+    request(
+        ownerToken,
+        "POST",
+        "/identity/members/" + memberId + "/role-assignments",
+        assignmentBody(
+            writerId,
+            "DEPARTMENT",
+            List.of(
+                scope("LEGAL_ENTITY", entityId, "x"),
+                scope("WAREHOUSE", UUID.randomUUID(), "US-WH-1")),
+            now),
+        200);
     // 第三条是租户内全部：按规则它吸收其余来源。
-    request(ownerToken, "POST", "/identity/members/" + memberId + "/role-assignments",
-        assignmentBody(ownerRoleId, "ALL", List.of(), now), 200);
+    request(
+        ownerToken,
+        "POST",
+        "/identity/members/" + memberId + "/role-assignments",
+        assignmentBody(ownerRoleId, "ALL", List.of(), now),
+        200);
 
     JsonNode merge =
-        request(ownerToken, "GET", "/identity/members/" + memberId + "/effective-permissions", null, 200);
+        request(
+            ownerToken,
+            "GET",
+            "/identity/members/" + memberId + "/effective-permissions",
+            null,
+            200);
     assertThat(merge.get("assignmentCount").asInt()).isEqualTo(3);
     assertThat(merge.get("effectiveCount").asInt()).isEqualTo(3);
     assertThat(merge.get("mergeRule").asText()).contains("并集");
@@ -501,13 +530,26 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
     UUID memberId = member(ownerToken, "ra-dedupe-" + tag, deptId, List.of());
     var now = OffsetDateTime.now();
 
-    request(ownerToken, "POST", "/identity/members/" + memberId + "/role-assignments",
-        assignmentBody(a, "DEPARTMENT", List.of(scope("DEPARTMENT", deptId, "x")), now), 200);
-    request(ownerToken, "POST", "/identity/members/" + memberId + "/role-assignments",
-        assignmentBody(b, "DEPARTMENT", List.of(scope("DEPARTMENT", deptId, "y")), now), 200);
+    request(
+        ownerToken,
+        "POST",
+        "/identity/members/" + memberId + "/role-assignments",
+        assignmentBody(a, "DEPARTMENT", List.of(scope("DEPARTMENT", deptId, "x")), now),
+        200);
+    request(
+        ownerToken,
+        "POST",
+        "/identity/members/" + memberId + "/role-assignments",
+        assignmentBody(b, "DEPARTMENT", List.of(scope("DEPARTMENT", deptId, "y")), now),
+        200);
 
     JsonNode merge =
-        request(ownerToken, "GET", "/identity/members/" + memberId + "/effective-permissions", null, 200);
+        request(
+            ownerToken,
+            "GET",
+            "/identity/members/" + memberId + "/effective-permissions",
+            null,
+            200);
     JsonNode sku = merge.get("permissions").get(0);
     assertThat(sku.get("permissionCode").asText()).isEqualTo("catalog.sku.read");
     assertThat(sku.get("mergeRule").asText()).isEqualTo("UNION");
@@ -526,11 +568,21 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
 
     UUID otherEntity =
         UUID.fromString(
-            request(loginUser(childTenant(ownerToken, tag)), "POST", "/identity/legal-entities",
-                legalEntityInput("RX_" + tag, "USD"), 200).asText());
+            request(
+                    loginUser(childTenant(ownerToken, tag)),
+                    "POST",
+                    "/identity/legal-entities",
+                    legalEntityInput("RX_" + tag, "USD"),
+                    200)
+                .asText());
 
-    request(ownerToken, "POST", "/identity/members/" + memberId + "/role-assignments",
-        assignmentBody(roleId, "DEPARTMENT", List.of(scope("LEGAL_ENTITY", otherEntity, "别人的法人")), now), 400);
+    request(
+        ownerToken,
+        "POST",
+        "/identity/members/" + memberId + "/role-assignments",
+        assignmentBody(
+            roleId, "DEPARTMENT", List.of(scope("LEGAL_ENTITY", otherEntity, "别人的法人")), now),
+        400);
   }
 
   // ------------------------------------------------------------------
@@ -556,8 +608,12 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(assignmentsOf(memberToken, memberId).get(0).get("roleCode").asText())
         .isEqualTo("RA_OW1_" + tag);
     // 写路径是所有者专属，与既有管理端点同口径。
-    request(memberToken, "POST", "/identity/members/" + memberId + "/role-assignments",
-        assignmentBody(readerId, "ALL", List.of(), OffsetDateTime.now()), 403);
+    request(
+        memberToken,
+        "POST",
+        "/identity/members/" + memberId + "/role-assignments",
+        assignmentBody(readerId, "ALL", List.of(), OffsetDateTime.now()),
+        403);
 
     // 完全没有该页面权限码的成员，连列表都拿不到（403 而不是空列表）。
     UUID plainId = role(ownerToken, "RA_OW2_" + tag, "无关角色", List.of("catalog.sku.read"));
@@ -572,14 +628,18 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
   void scopeOptionsCoverOnlyTenantOwnedTypes() throws Exception {
     String ownerToken = login(), tag = suffix();
     UUID deptId = createDepartment(ownerToken, "RA_OP_" + tag, "候选部门", null);
-    request(ownerToken, "POST", "/identity/legal-entities", legalEntityInput("ROE_" + tag, "USD"), 200);
+    request(
+        ownerToken, "POST", "/identity/legal-entities", legalEntityInput("ROE_" + tag, "USD"), 200);
 
     JsonNode options = request(ownerToken, "GET", "/identity/role-assignment-scopes", null, 200);
     var types = new ArrayList<String>();
     for (JsonNode o : options) types.add(o.get("scopeType").asText());
     assertThat(types).contains("LEGAL_ENTITY", "DEPARTMENT");
     assertThat(types).doesNotContain("SHOP", "WAREHOUSE");
-    assertThat(options.toString()).contains("ROE_" + tag).contains("RA_OP_" + tag).contains(deptId.toString());
+    assertThat(options.toString())
+        .contains("ROE_" + tag)
+        .contains("RA_OP_" + tag)
+        .contains(deptId.toString());
   }
 
   // ------------------------------------------------------------------
@@ -589,8 +649,7 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 两租户互不可见 + 伪造 tenant header 无效 + 连接池归还后不串租户。
    *
-   * <p>三条压在一个用例里，因为它们是同一件事的三面：分配表按 tenant_id 隔离，
-   * 租户来自已认证成员关系而不是请求头。底座把连接池压到 1，父 → 子 → 父 三次请求
+   * <p>三条压在一个用例里，因为它们是同一件事的三面：分配表按 tenant_id 隔离， 租户来自已认证成员关系而不是请求头。底座把连接池压到 1，父 → 子 → 父 三次请求
    * 必然复用同一条物理连接，父的分配行如果泄漏到连接上，子那一次就会看到它。
    *
    * <p>{@link IdentityIntegrationTestBase#request} 每次都带随机 {@code X-Tenant-Id}，
@@ -602,17 +661,28 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
     UUID deptId = createDepartment(ownerToken, "RA_TN_" + tag, "隔离测试部门", null);
     UUID roleId = role(ownerToken, "RA_TN1_" + tag, "隔离测试角色", List.of("catalog.sku.read"));
     UUID memberId = member(ownerToken, "ra-isolation-" + tag, deptId, List.of());
-    request(ownerToken, "POST", "/identity/members/" + memberId + "/role-assignments",
-        assignmentBody(roleId, "DEPARTMENT", List.of(scope("DEPARTMENT", deptId, "x")),
-            OffsetDateTime.now()), 200);
+    request(
+        ownerToken,
+        "POST",
+        "/identity/members/" + memberId + "/role-assignments",
+        assignmentBody(
+            roleId, "DEPARTMENT", List.of(scope("DEPARTMENT", deptId, "x")), OffsetDateTime.now()),
+        200);
 
     String childToken = loginUser(childTenant(ownerToken, tag));
     UUID childDept = createDepartment(childToken, "RA_TC_" + tag, "子租户部门", null);
     UUID childRole = role(childToken, "RA_TC1_" + tag, "子租户角色", List.of("catalog.sku.read"));
     UUID childMember = member(childToken, "ra-child-member-" + tag, childDept, List.of());
-    request(childToken, "POST", "/identity/members/" + childMember + "/role-assignments",
-        assignmentBody(childRole, "DEPARTMENT", List.of(scope("DEPARTMENT", childDept, "x")),
-            OffsetDateTime.now()), 200);
+    request(
+        childToken,
+        "POST",
+        "/identity/members/" + childMember + "/role-assignments",
+        assignmentBody(
+            childRole,
+            "DEPARTMENT",
+            List.of(scope("DEPARTMENT", childDept, "x")),
+            OffsetDateTime.now()),
+        200);
 
     // 父看得到自己那一条。
     assertThat(assignmentsOf(ownerToken, memberId)).hasSize(1);
@@ -626,21 +696,33 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
 
     // 运行时角色绕不过 RLS：不带租户上下文直查最多只能看到当前租户的行。
     var asParent =
-        tx().run(UUID.fromString(tenantOf(ownerToken)),
-            () -> sql.fetch("select membership_id from role_assignment"))
-            .stream().map(r -> r.get("membership_id", UUID.class)).toList();
+        tx()
+            .run(
+                UUID.fromString(tenantOf(ownerToken)),
+                () -> sql.fetch("select membership_id from role_assignment"))
+            .stream()
+            .map(r -> r.get("membership_id", UUID.class))
+            .toList();
     var asChild =
-        tx().run(UUID.fromString(tenantOf(childToken)),
-            () -> sql.fetch("select membership_id from role_assignment"))
-            .stream().map(r -> r.get("membership_id", UUID.class)).toList();
+        tx()
+            .run(
+                UUID.fromString(tenantOf(childToken)),
+                () -> sql.fetch("select membership_id from role_assignment"))
+            .stream()
+            .map(r -> r.get("membership_id", UUID.class))
+            .toList();
     assertThat(asParent).contains(memberId).doesNotContain(childMember);
     assertThat(asChild).contains(childMember).doesNotContain(memberId);
 
     // 范围表同样按租户隔离。
     var scopesAsParent =
-        tx().run(UUID.fromString(tenantOf(ownerToken)),
-            () -> sql.fetch("select membership_id from role_assignment_scope"))
-            .stream().map(r -> r.get("membership_id", UUID.class)).toList();
+        tx()
+            .run(
+                UUID.fromString(tenantOf(ownerToken)),
+                () -> sql.fetch("select membership_id from role_assignment_scope"))
+            .stream()
+            .map(r -> r.get("membership_id", UUID.class))
+            .toList();
     assertThat(scopesAsParent).contains(memberId).doesNotContain(childMember);
   }
 
@@ -651,9 +733,18 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
     String childToken = loginUser(childTenant(ownerToken, tag));
     UUID childMember = member(childToken, "ra-hidden-" + tag, null, List.of());
     request(ownerToken, "GET", "/identity/role-assignments?membershipId=" + childMember, null, 200);
-    request(ownerToken, "GET", "/identity/members/" + childMember + "/effective-permissions", null, 404);
-    request(ownerToken, "POST", "/identity/members/" + childMember + "/role-assignments",
-        assignmentBody(UUID.randomUUID(), "ALL", List.of(), OffsetDateTime.now()), 404);
+    request(
+        ownerToken,
+        "GET",
+        "/identity/members/" + childMember + "/effective-permissions",
+        null,
+        404);
+    request(
+        ownerToken,
+        "POST",
+        "/identity/members/" + childMember + "/role-assignments",
+        assignmentBody(UUID.randomUUID(), "ALL", List.of(), OffsetDateTime.now()),
+        404);
   }
 
   // ------------------------------------------------------------------
@@ -673,17 +764,28 @@ class RoleAssignmentIntegrationTest extends IdentityIntegrationTestBase {
     UUID memberId = member(ownerToken, "ra-audit-" + tag, deptId, List.of());
     var now = OffsetDateTime.now();
 
-    request(ownerToken, "POST", "/identity/members/" + memberId + "/role-assignments",
-        assignmentBody(roleId, "DEPARTMENT", List.of(scope("DEPARTMENT", deptId, "x")), now), 200);
-    request(ownerToken, "POST", "/identity/members/" + memberId + "/role-assignments/" + roleId + "/revoke",
-        null, 200);
+    request(
+        ownerToken,
+        "POST",
+        "/identity/members/" + memberId + "/role-assignments",
+        assignmentBody(roleId, "DEPARTMENT", List.of(scope("DEPARTMENT", deptId, "x")), now),
+        200);
+    request(
+        ownerToken,
+        "POST",
+        "/identity/members/" + memberId + "/role-assignments/" + roleId + "/revoke",
+        null,
+        200);
 
     var changes =
-        tx().run(UUID.fromString(tenantOf(ownerToken)), () ->
-                sql.fetch(
-                    "select action,changes from identity_audit where resource_type='identity.assignment'"
-                        + " and resource_id=? order by occurred_at",
-                    memberId))
+        tx()
+            .run(
+                UUID.fromString(tenantOf(ownerToken)),
+                () ->
+                    sql.fetch(
+                        "select action,changes from identity_audit where resource_type='identity.assignment'"
+                            + " and resource_id=? order by occurred_at",
+                        memberId))
             .stream()
             .map(r -> r.get("action", String.class) + " " + r.get("changes", String.class))
             .toList();

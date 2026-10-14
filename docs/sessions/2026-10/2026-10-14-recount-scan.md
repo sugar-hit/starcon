@@ -79,15 +79,18 @@ open-box、scans、settle、complete、escalate、exceptions/{id}/resolve、canc
 ## 文件清单
 
 **迁移**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V117__warehouse_recount_scan.sql`
 
 **后端**
+
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/RecountModels.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/RecountScanService.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/RecountScanController.java`
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/RecountScanIntegrationTest.java`
 
 **前端**
+
 - `apps/web/src/app/warehouse/recount-scans/page.tsx`
 - `apps/web/src/components/warehouse/recount-scan-model.ts`
 - `apps/web/src/components/warehouse/recount-scan-model.test.ts`
@@ -96,6 +99,7 @@ open-box、scans、settle、complete、escalate、exceptions/{id}/resolve、canc
 - `apps/web/src/app/api/warehouse/[...path]/route.test.ts`（追加 5 例）
 
 **共用生成物 / 台账**
+
 - `packages/api-contracts`（由 codegen 重新生成，禁手改）
 - `docs/product/capability-blueprint/module-progress.md`（只改 8.3.3.1 那一行的「状态」「证据」两格）
 

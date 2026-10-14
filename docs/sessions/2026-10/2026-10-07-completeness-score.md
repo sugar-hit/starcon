@@ -66,6 +66,7 @@
 ## 文件清单
 
 **新增**
+
 - `backend/services/catalog/src/main/resources/db/migration/V37__completeness_score.sql`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/CompletenessScoreModels.java`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/CompletenessScoreRules.java`
@@ -78,6 +79,7 @@
 - `apps/web/src/app/products/completeness/page.tsx`
 
 **修改**（codegen 产物与共享文件，只碰自己那部分）
+
 - `packages/api-contracts/src/catalog.ts` / `catalog.openapi.json`（+19 DTO / 13 路径，纯新增）
 - `apps/web/src/lib/api-proxy.ts`（加一条完整顶层分支）
 - `apps/web/src/app/api/catalog/[...path]/route.test.ts`（+1 例）

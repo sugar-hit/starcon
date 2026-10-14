@@ -18,16 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
  * 8.3.3.2 打包与称重入口。
  *
  * <p>命名空间 {@code /warehouse/packing-orders}。<b>刻意不挂在 {@code outbound-orders} 之下</b>：
- * 出库单是履约单据（8.3.1.x），打包是现场作业工单 —— 一张出库单可以先打包失败退回复核、
- * 再重打包，每次是一张独立的打包单，挂���出库单底下会让契约看起来像「一张单只装一次」
- * （与 8.3.3.1 复核单同一理由）。也不挂在 {@code recount-scans} 之下：打包单的上游是
- * 一张<b>已通过</b>的复核单，而复核可以有多轮。
+ * 出库单是履约单据（8.3.1.x），打包是现场作业工单 —— 一张出库单可以先打包失败退回复核、 再重打包，每次是一张独立的打包单，挂���出库单底下会让契约看起来像「一张单只装一次」 （与
+ * 8.3.3.1 复核单同一理由）。也不挂在 {@code recount-scans} 之下：打包单的上游是 一张<b>已通过</b>的复核单，而复核可以有多轮。
  *
  * <p>十四个形状，刻意逐个列出、不做通配：
  *
  * <ul>
  *   <li>{@code capabilities} 能力与边界声明（含「体积重归 10 物流」「3.7.2 属 catalog 未接入」两条口径）
- *   <li>{@code POST /materials}、{@code GET /materials}、{@code GET /materials/{id}}、{@code POST /materials/{id}/retire}
+ *   <li>{@code POST /materials}、{@code GET /materials}、{@code GET /materials/{id}}、{@code POST
+ *       /materials/{id}/retire}
  *   <li>{@code POST /} 开打包单（接 <b>已通过</b>的复核单 + 冻结基线）
  *   <li>{@code GET /} 列表（真分页 / 真筛选 / 排序白名单 / 汇总）
  *   <li>{@code GET /{id}} 详情（单头 + 包裹 + 明细 + 基线对齐 + 时间线 + 完成判据）
@@ -41,13 +40,11 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>{@code POST /{id}/cancel} 取消（<b>不动库存</b>）
  * </ul>
  *
- * <p>刻意<b>没有</b> PUT / DELETE：包裹与明细项是事实（V121 的守卫会直接拒已结束的打包单
- * 再改），打包流水是 append-only。要更正就取消重开一张。
+ * <p>刻意<b>没有</b> PUT / DELETE：包裹与明细项是事实（V121 的守卫会直接拒已结束的打包单 再改），打包流水是 append-only。要更正就取消重开一张。
  *
- * <p>权限码<b>复用</b> {@code warehouse.inventory.read} / {@code warehouse.inventory.update}，
- * 不新起 {@code warehouse.packing.*}：identity 只注册了 {@code warehouse.inventory} 与
- * {@code warehouse.facilities} 两个页面资源的权限码，用一个<b>没有被注册</b>的码会让
- * 连 OWNER 都 403（8.1.2.1 车道踩过这个坑并在台账里记了原因）。
+ * <p>权限码<b>复用</b> {@code warehouse.inventory.read} / {@code warehouse.inventory.update}， 不新起 {@code
+ * warehouse.packing.*}：identity 只注册了 {@code warehouse.inventory} 与 {@code warehouse.facilities}
+ * 两个页面资源的权限码，用一个<b>没有被注册</b>的码会让 连 OWNER 都 403（8.1.2.1 车道踩过这个坑并在台账里记了原因）。
  */
 @RestController
 @RequestMapping("/warehouse/packing-orders")
@@ -67,10 +64,7 @@ public class PackingController {
     return access.run(actor, "warehouse." + permission, () -> work.apply(actor));
   }
 
-  /**
-   * 能力声明：实测重量体积的产出范围、包裹必须含明细项、包材目录的三条守卫、
-   * 体积重归 10 物流、3.7.2 物理属性属 catalog 未接入，以及未交付的 8.3.4.1。
-   */
+  /** 能力声明：实测重量体积的产出范围、包裹必须含明细项、包材目录的三条守卫、 体积重归 10 物流、3.7.2 物理属性属 catalog 未接入，以及未交付的 8.3.4.1。 */
   @GetMapping("/capabilities")
   public PackingCapabilities capabilities(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
@@ -96,7 +90,9 @@ public class PackingController {
       @RequestParam(required = false) String keyword,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "50") int size) {
-    return call(auth, "inventory.read",
+    return call(
+        auth,
+        "inventory.read",
         a -> packing.materials(warehouseId, role, type, status, keyword, page, size));
   }
 
@@ -114,15 +110,13 @@ public class PackingController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable String id,
       @Valid @RequestBody PackingMaterialRetireInput input) {
-    return call(auth, "inventory.update",
-        a -> packing.retireMaterial(id, input, a.userId()));
+    return call(auth, "inventory.update", a -> packing.retireMaterial(id, input, a.userId()));
   }
 
   /**
    * 开一张打包单：接一张<b>复核通过</b>的复核单，把复核基线冻结成本单的基线。
    *
-   * <p>基线由触发器从复核单读数覆盖，调用方写的两个数一律不作数 —— 「按哪一版基线装的」
-   * 是这份凭据的一半。
+   * <p>基线由触发器从复核单读数覆盖，调用方写的两个数一律不作数 —— 「按哪一版基线装的」 是这份凭据的一半。
    */
   @PostMapping
   public PackingCreated open(
@@ -144,9 +138,20 @@ public class PackingController {
       @RequestParam(required = false, defaultValue = "STARTED_AT") String sort,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "50") int size) {
-    return call(auth, "inventory.read",
-        a -> packing.page(warehouseId, outboundOrderId, recountSessionId, status, packerUserId,
-            keyword, sort, page, size));
+    return call(
+        auth,
+        "inventory.read",
+        a ->
+            packing.page(
+                warehouseId,
+                outboundOrderId,
+                recountSessionId,
+                status,
+                packerUserId,
+                keyword,
+                sort,
+                page,
+                size));
   }
 
   /** 详情：包裹 + 明细项 + 基线对齐 + 时间线 + 完成判据 + 边界声明。 */
@@ -177,8 +182,7 @@ public class PackingController {
   /**
    * 装一件明细：<b>必须指回一条复核基线行</b>。
    *
-   * <p>蓝图那句「包裹必须含明细项（哪些 SKU、多少件），只有重量和运单号无法追溯与对账」
-   * 在这里落地：没有来源行的明细就是凭空装进去的东西。
+   * <p>蓝图那句「包裹必须含明细项（哪些 SKU、多少件），只有重量和运单号无法追溯与对账」 在这里落地：没有来源行的明细就是凭空装进去的东西。
    */
   @PostMapping("/{id}/parcels/{parcelId}/items")
   public ParcelItemRow addItem(
@@ -200,8 +204,7 @@ public class PackingController {
       @PathVariable String id,
       @PathVariable String parcelId,
       @Valid @RequestBody ParcelMeasureInput input) {
-    return call(auth, "inventory.update",
-        a -> packing.measure(id, parcelId, input, a.userId()));
+    return call(auth, "inventory.update", a -> packing.measure(id, parcelId, input, a.userId()));
   }
 
   /** 记面单打印（只引用 8.3.4.2 的打印任务，不在本模块渲染 ZPL）。 */
@@ -211,13 +214,12 @@ public class PackingController {
       @PathVariable String id,
       @PathVariable String parcelId,
       @Valid @RequestBody ParcelLabelInput input) {
-    return call(auth, "inventory.update",
-        a -> packing.recordLabel(id, parcelId, input, a.userId()));
+    return call(
+        auth, "inventory.update", a -> packing.recordLabel(id, parcelId, input, a.userId()));
   }
 
   /**
-   * 打包完成：五个前提（至少一个包裹、每箱都有明细、都称过重量过尺寸、
-   * 每行基线实装恰好等于应发、有打包人）在 DB 层同样拒一遍。
+   * 打包完成：五个前提（至少一个包裹、每箱都有明细、都称过重量过尺寸、 每行基线实装恰好等于应发、有打包人）在 DB 层同样拒一遍。
    *
    * <p>通过时把出库单推到「待发货」交给 8.3.4.1，<b>从不碰已发货</b>。
    */
@@ -226,9 +228,12 @@ public class PackingController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable String id,
       @RequestBody(required = false) PackingCompleteInput input) {
-    return call(auth, "inventory.update",
-        a -> packing.complete(id, input == null ? new PackingCompleteInput(null, null) : input,
-            a.userId()));
+    return call(
+        auth,
+        "inventory.update",
+        a ->
+            packing.complete(
+                id, input == null ? new PackingCompleteInput(null, null) : input, a.userId()));
   }
 
   /** 打包失败（打包时发现缺件/破损）：出库单退回「待复核」。 */

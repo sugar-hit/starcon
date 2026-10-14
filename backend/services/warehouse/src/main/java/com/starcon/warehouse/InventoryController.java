@@ -27,11 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 7.1.1.1 库存总览。
  *
- * <p>命名空间 {@code /warehouse}，与 catalog 的 {@code /catalog}、channel 的
- * {@code /channel} 同一套约定：每个服务暴露自己的前缀，浏览器只经 /api/warehouse 代理访问。
+ * <p>命名空间 {@code /warehouse}，与 catalog 的 {@code /catalog}、channel 的 {@code /channel}
+ * 同一套约定：每个服务暴露自己的前缀，浏览器只经 /api/warehouse 代理访问。
  *
- * <p>权限码前缀 {@code warehouse.}：总览读用 {@code warehouse.inventory.read}，
- * 阈值维护用 {@code warehouse.inventory.update}（写入超储线是经营决策，不是读权限）。
+ * <p>权限码前缀 {@code warehouse.}：总览读用 {@code warehouse.inventory.read}， 阈值维护用 {@code
+ * warehouse.inventory.update}（写入超储线是经营决策，不是读权限）。
  */
 @RestController
 @RequestMapping("/warehouse")
@@ -56,7 +56,7 @@ public class InventoryController {
       InventoryLedgerService ledger,
       InventoryReconciliationService reconciliation,
       SellablePolicyService sellablePolicies,
-InventoryDistributionService distributionService,
+      InventoryDistributionService distributionService,
       StocktakeService stocktakes) {
     this.access = access;
     this.overview = overview;
@@ -70,10 +70,7 @@ InventoryDistributionService distributionService,
     this.stocktakes = stocktakes;
   }
 
-  /**
-   * 统一入口：先向 identity 确认身份与权限（租户**不**来自任何客户端头），
-   * 再在一个事务里绑定 RLS 租户上下文执行查询。
-   */
+  /** 统一入口：先向 identity 确认身份与权限（租户**不**来自任何客户端头）， 再在一个事务里绑定 RLS 租户上下文执行查询。 */
   private <T> T call(String bearer, String permission, Function<AccessService.Access, T> work) {
     var actor = access.require(bearer, "warehouse." + permission);
     return access.run(actor, "warehouse." + permission, () -> work.apply(actor));
@@ -122,8 +119,8 @@ InventoryDistributionService distributionService,
   /**
    * 7.1.1.2 库存明细：bucket 级的最细粒度行 + 与余额的核对结果。
    *
-   * <p>一行 = 法人货权 × SKU × 仓库 × 库位 × 批次 × 质量状态，正是蓝图定义的最小事实单位。
-   * 读权限与总览同为 {@code warehouse.inventory.read}：明细不写任何数据，与总览同源同权。
+   * <p>一行 = 法人货权 × SKU × 仓库 × 库位 × 批次 × 质量状态，正是蓝图定义的最小事实单位。 读权限与总览同为 {@code
+   * warehouse.inventory.read}：明细不写任何数据，与总览同源同权。
    */
   @GetMapping("/inventory/buckets")
   public InventoryBucketDetail buckets(
@@ -168,16 +165,14 @@ InventoryDistributionService distributionService,
   /**
    * 7.1.2.1 库存流水台账：流水列表 + 期间净变动汇总 + 分录下钻入口。
    *
-   * <p>**只读端点**：蓝图要求「流水只追加不修改，错误用反向分录纠正」，所以本模块没有任何
-   * POST/PUT/DELETE 落在流水与分录上（那两张表在 V1 里已被 append-only 触发器与
-   * REVOKE UPDATE,DELETE 双重锁死）。
+   * <p>**只读端点**：蓝图要求「流水只追加不修改，错误用反向分录纠正」，所以本模块没有任何 POST/PUT/DELETE 落在流水与分录上（那两张表在 V1 里已被
+   * append-only 触发器与 REVOKE UPDATE,DELETE 双重锁死）。
    *
-   * <p>读权限沿用 {@code warehouse.inventory.read}：台账与总览/明细同源同权，
-   * 台账比明细更敏感（能看出谁在什么时候动了多少货），但**没有额外的读权限** ——
-   * 多设一个权限码只会让"能看到库存却看不到流水"变成一个没人记得开的开关。
+   * <p>读权限沿用 {@code warehouse.inventory.read}：台账与总览/明细同源同权， 台账比明细更敏感（能看出谁在什么时候动了多少货），但**没有额外的读权限**
+   * —— 多设一个权限码只会让"能看到库存却看不到流水"变成一个没人记得开的开关。
    *
-   * <p>时间参数按 ISO-8601 带偏移量解析（{@code 2026-10-01T00:00:00+08:00}），
-   * 与 {@code timestamptz} 列的存储口径一致；格式不对直接 400，不按服务器本地时区猜。
+   * <p>时间参数按 ISO-8601 带偏移量解析（{@code 2026-10-01T00:00:00+08:00}）， 与 {@code timestamptz}
+   * 列的存储口径一致；格式不对直接 400，不按服务器本地时区猜。
    */
   @GetMapping("/inventory/ledger")
   public InventoryLedgerPage ledger(
@@ -236,13 +231,11 @@ InventoryDistributionService distributionService,
   /**
    * 执行一次账实核对。
    *
-   * <p>用 POST 而不是 GET：核对会**落一份不可变的结论**（run + findings），是写操作而不是查询。
-   * 这也决定了它的权限码是 {@code warehouse.inventory.update} 而不是 read ——
-   * 权限码要如实反映动作，哪怕这次动作并不改动任何库存数量。把「写审计记录」挂在 read 上，
-   * 就等于声明 read 权限包含写操作，那道闸门等于没有。
+   * <p>用 POST 而不是 GET：核对会**落一份不可变的结论**（run + findings），是写操作而不是查询。 这也决定了它的权限码是 {@code
+   * warehouse.inventory.update} 而不是 read —— 权限码要如实反映动作，哪怕这次动作并不改动任何库存数量。把「写审计记录」挂在 read 上， 就等于声明
+   * read 权限包含写操作，那道闸门等于没有。
    *
-   * <p>幂等性刻意**不**做：同一区间核两次会得到两条记录。核对结论是时点事实，
-   * 「昨天核过什么」和「刚才核过什么」是两条不同的记录才对，去重反而会让人以为看到了旧的。
+   * <p>幂等性刻意**不**做：同一区间核两次会得到两条记录。核对结论是时点事实， 「昨天核过什么」和「刚才核过什么」是两条不同的记录才对，去重反而会让人以为看到了旧的。
    *
    * <p>时间参数按 ISO-8601 带偏移量解析，与台账端点同一套规则。
    */
@@ -253,7 +246,10 @@ InventoryDistributionService distributionService,
     return call(
         auth,
         "inventory.update",
-        a -> reconciliation.run(request == null ? new ReconciliationRequest(null, null, null, null, null) : request, a.userId()));
+        a ->
+            reconciliation.run(
+                request == null ? new ReconciliationRequest(null, null, null, null, null) : request,
+                a.userId()));
   }
 
   /** 核对批次列表（真分页）。status 可选：CONSISTENT / DISCREPANT。 */
@@ -276,7 +272,10 @@ InventoryDistributionService distributionService,
         "inventory.read",
         a ->
             new ReconciliationResult(
-                reconciliation.runOf(runId), List.of(), List.of(), reconciliation.suspectWindows(runId)));
+                reconciliation.runOf(runId),
+                List.of(),
+                List.of(),
+                reconciliation.suspectWindows(runId)));
   }
 
   /**
@@ -298,8 +297,7 @@ InventoryDistributionService distributionService,
   /**
    * 解析 ISO-8601 时间（必须带偏移量或 Z）。
    *
-   * <p>不接受不带偏移的裸时间串：那样"2026-10-01T00:00:00"会被按运行环境的本地时区猜，
-   * 同一份请求在开发机与 K8s 里会筛出不同区间，台账的期间汇总就没法复现了。
+   * <p>不接受不带偏移的裸时间串：那样"2026-10-01T00:00:00"会被按运行环境的本地时区猜， 同一份请求在开发机与 K8s 里会筛出不同区间，台账的期间汇总就没法复现了。
    */
   static OffsetDateTime moment(String value) {
     if (value == null || value.isBlank()) {
@@ -316,13 +314,11 @@ InventoryDistributionService distributionService,
   /**
    * 数据范围是否为「仅本人」。
    *
-   * <p>蓝图把「用户数据范围」列为台账的输入之一，所以它必须真的生效，而不是只挂在页面上。
-   * 取值规则与 {@code AccessService.require} 同一套授权：命中的授权里只要有一条 ALL 就按 ALL，
-   * 有一条 DEPARTMENT 就按 DEPARTMENT（库存没有部门维度，DEPARTMENT 退化为本租户全量，
-   * 这个退化由 {@code dataScopeNote} 在响应里如实说明），否则按 SELF 收窄到本人操作过的业务。
+   * <p>蓝图把「用户数据范围」列为台账的输入之一，所以它必须真的生效，而不是只挂在页面上。 取值规则与 {@code AccessService.require}
+   * 同一套授权：命中的授权里只要有一条 ALL 就按 ALL， 有一条 DEPARTMENT 就按 DEPARTMENT（库存没有部门维度，DEPARTMENT 退化为本租户全量， 这个退化由
+   * {@code dataScopeNote} 在响应里如实说明），否则按 SELF 收窄到本人操作过的业务。
    *
-   * <p>注意 actorId 与 selfOnly 都来自**已认证身份**，不接受任何请求参数传入 ——
-   * 否则"只看我自己的流水"会变成一个能越权的开关。
+   * <p>注意 actorId 与 selfOnly 都来自**已认证身份**，不接受任何请求参数传入 —— 否则"只看我自己的流水"会变成一个能越权的开关。
    */
   static boolean selfOnly(AccessService.Access a, String permission) {
     var read = permission.substring(0, permission.lastIndexOf('.')) + ".read";
@@ -346,12 +342,10 @@ InventoryDistributionService distributionService,
   /**
    * 批量可用量查询（3.5.2.2 BOM 展开消费）。
    *
-   * <p>用 POST 而不是 GET：请求体是一组 SKU，展开树最坏 500 个 UUID，
-   * 放 URL 里会撞长度限制，也会把一份清单塞进访问日志。
+   * <p>用 POST 而不是 GET：请求体是一组 SKU，展开树最坏 500 个 UUID， 放 URL 里会撞长度限制，也会把一份清单塞进访问日志。
    *
-   * <p>租户不来自请求体也不来自任何客户端头：{@link #call} 先向 identity 确认
-   * 已认证成员关系与权限，再在一个事务里绑定 {@code app.current_tenant}，
-   * 由 RLS 在数据库层强制隔离。catalog 侧必须透传调用者的 Authorization 头 ——
+   * <p>租户不来自请求体也不来自任何客户端头：{@link #call} 先向 identity 确认 已认证成员关系与权限，再在一个事务里绑定 {@code
+   * app.current_tenant}， 由 RLS 在数据库层强制隔离。catalog 侧必须透传调用者的 Authorization 头 ——
    * 丢了它这里就无从解析租户（这是跨服务调用丢掉租户上下文的直接后果）。
    */
   @PostMapping("/inventory/availability")
@@ -373,8 +367,8 @@ InventoryDistributionService distributionService,
    *
    * <p>读权限沿用 {@code warehouse.inventory.read}：矩阵是纯聚合视图，与总览/明细同源同权。
    *
-   * <p>{@code skuId} 与 {@code spuId} 互斥且必居其一 —— 蓝图输入是「SKU 或 SPU」，
-   * 两者都不给等于要求一次拉出全租户所有 SKU 的全仓分布，那既不是矩阵也不是分页。
+   * <p>{@code skuId} 与 {@code spuId} 互斥且必居其一 —— 蓝图输入是「SKU 或 SPU」， 两者都不给等于要求一次拉出全租户所有 SKU
+   * 的全仓分布，那既不是矩阵也不是分页。
    */
   @GetMapping("/inventory/distribution")
   public MultiWarehouseDistribution distribution(
@@ -386,18 +380,19 @@ InventoryDistributionService distributionService,
     return call(
         auth,
         "inventory.read",
-        a -> distributionService.distribution(new DistributionQuery(skuId, spuId, legalEntityId, lookbackDays)));
+        a ->
+            distributionService.distribution(
+                new DistributionQuery(skuId, spuId, legalEntityId, lookbackDays)));
   }
 
   /**
    * 记录一条平台仓（FBA）库存观测。
    *
-   * <p>用 POST 且权限为 {@code warehouse.inventory.update}：它**写**一条观测行，
-   * 与读权限分开。挂成 GET + read 就等于声明 read 权限能改数据，那道闸门等于没有。
+   * <p>用 POST 且权限为 {@code warehouse.inventory.update}：它**写**一条观测行， 与读权限分开。挂成 GET + read 就等于声明 read
+   * 权限能改数据，那道闸门等于没有。
    *
-   * <p>{@code collectedAt} 按 ISO-8601 带偏移量解析，与台账端点同一套规则；
-   * 绑定时用 {@code OffsetDateTime} 直传（见 V55 与服务的注释：{@code Timestamp.valueOf}
-   * 会按 JVM 默认时区静默偏 8 小时）。
+   * <p>{@code collectedAt} 按 ISO-8601 带偏移量解析，与台账端点同一套规则； 绑定时用 {@code OffsetDateTime} 直传（见 V55
+   * 与服务的注释：{@code Timestamp.valueOf} 会按 JVM 默认时区静默偏 8 小时）。
    */
   @PostMapping("/inventory/platform-observations")
   public PlatformObservationSaved recordPlatformObservation(
@@ -409,8 +404,8 @@ InventoryDistributionService distributionService,
   /**
    * SPU 下拉（矩阵的「按 SPU 看」入口）。
    *
-   * <p>只列出本租户 {@code sku_ref} 上登记过 spu_id 的 SPU。没有登记的 SKU 不会出现在这里，
-   * 缺口由矩阵响应里的 unregisteredSpuCount 如实报出，不在下拉里假装"只有这些 SKU"。
+   * <p>只列出本租户 {@code sku_ref} 上登记过 spu_id 的 SPU。没有登记的 SKU 不会出现在这里， 缺口由矩阵响应里的 unregisteredSpuCount
+   * 如实报出，不在下拉里假装"只有这些 SKU"。
    */
   @GetMapping("/inventory/distribution/spus")
   public List<DistributionSpuRef> distributionSpus(
@@ -507,11 +502,10 @@ InventoryDistributionService distributionService,
   /**
    * 7.2.2.1 可售量口径：口径分档列表（真分页）。
    *
-   * <p>{@code effectiveOnly=true} 只看此刻仍在生效的档；服务端用 {@code now()} 判定而不是
-   * 接受调用方传时刻 —— 「看未来某一刻谁生效」在这里没有业务含义，却会变成一个能试错的入口。
+   * <p>{@code effectiveOnly=true} 只看此刻仍在生效的档；服务端用 {@code now()} 判定而不是 接受调用方传时刻 ——
+   * 「看未来某一刻谁生效」在这里没有业务含义，却会变成一个能试错的入口。
    *
-   * <p>读权限沿用 {@code warehouse.inventory.read}：读口径不改任何数，
-   * 与总览/明细同源同权。
+   * <p>读权限沿用 {@code warehouse.inventory.read}：读口径不改任何数， 与总览/明细同源同权。
    */
   @GetMapping("/inventory/sellable-policies")
   public SellablePolicyPage sellablePolicies(
@@ -535,9 +529,8 @@ InventoryDistributionService distributionService,
   /**
    * 解析某一时刻真正生效的口径（分档生效语义，与 17.5.1.1 业务参数同一套约定）。
    *
-   * <p>{@code at} 缺省取当前时刻。返回里的 {@code usedFallback} 与 {@code note} 如实说明
-   * 用的是指定档还是回退到的兜底档 —— 没有配置时返回 {@code policy=null}，调用方据此拒绝
-   * 回写平台，而不是回写 0（立刻断货）或回写满（超卖）。
+   * <p>{@code at} 缺省取当前时刻。返回里的 {@code usedFallback} 与 {@code note} 如实说明 用的是指定档还是回退到的兜底档 —— 没有配置时返回
+   * {@code policy=null}，调用方据此拒绝 回写平台，而不是回写 0（立刻断货）或回写满（超卖）。
    */
   @GetMapping("/inventory/sellable-policies/effective")
   public SellablePolicyEffective sellableEffective(
@@ -579,8 +572,8 @@ InventoryDistributionService distributionService,
   /**
    * 新建一档口径。
    *
-   * <p>权限码是 {@code warehouse.inventory.update} 而不是 read：缓冲比例与超卖容忍是经营决策，
-   * 配错了直接超卖 —— 把「改防超卖的最后一道防线」挂在读权限上，那道闸门等于没有。
+   * <p>权限码是 {@code warehouse.inventory.update} 而不是 read：缓冲比例与超卖容忍是经营决策， 配错了直接超卖 ——
+   * 把「改防超卖的最后一道防线」挂在读权限上，那道闸门等于没有。
    */
   @PostMapping("/inventory/sellable-policies")
   public SellablePolicySaved createSellablePolicy(
@@ -592,8 +585,7 @@ InventoryDistributionService distributionService,
   /**
    * 换版：收口当前在效的那一档，再开新档。
    *
-   * <p>刻意不给「改这一档」的 PUT —— 口径内容写定后不可改（V56 触发器在 DB 层挡住），
-   * 改口径只能通过收口 + 新开，历史那一档因此永远是「当时真正生效的防线」的凭据。
+   * <p>刻意不给「改这一档」的 PUT —— 口径内容写定后不可改（V56 触发器在 DB 层挡住）， 改口径只能通过收口 + 新开，历史那一档因此永远是「当时真正生效的防线」的凭据。
    */
   @PostMapping("/inventory/sellable-policies/{id}/versions")
   public SellablePolicySaved supersedeSellablePolicy(
@@ -606,8 +598,8 @@ InventoryDistributionService distributionService,
   /**
    * 作废一档（收口它的生效区间）。
    *
-   * <p>用 POST 而不是 DELETE：作废是审计事件，档位行必须永久保留（V54 台账的同一条纪律）。
-   * 整个口径路径上**没有** DELETE 端点 —— 想知道"能不能物理删掉一条防超卖配置"，答案是不能。
+   * <p>用 POST 而不是 DELETE：作废是审计事件，档位行必须永久保留（V54 台账的同一条纪律）。 整个口径路径上**没有** DELETE 端点 ——
+   * 想知道"能不能物理删掉一条防超卖配置"，答案是不能。
    */
   @PostMapping("/inventory/sellable-policies/{id}/retire")
   public SellablePolicySaved retireSellablePolicy(
@@ -620,8 +612,8 @@ InventoryDistributionService distributionService,
   /**
    * 可售量计算：按生效口径算出每个 SKU 的平台可售数与池余量。
    *
-   * <p>用 POST 而不是 GET：请求体是一组 SKU（与 {@code /inventory/availability} 同一理由，
-   * 列表放 URL 里会撞长度限制）。7.1.1.3 与 04 回写消费的就是这个。
+   * <p>用 POST 而不是 GET：请求体是一组 SKU（与 {@code /inventory/availability} 同一理由， 列表放 URL 里会撞长度限制）。7.1.1.3 与
+   * 04 回写消费的就是这个。
    */
   @PostMapping("/inventory/sellable-policies/calculation")
   public SellableQuantityResult sellableCalculation(
@@ -645,15 +637,14 @@ InventoryDistributionService distributionService,
       @RequestParam(required = false) String keyword,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "20") int size) {
-    return call(auth, "inventory.read", a -> stocktakes.page(status, scopeType, keyword, page, size));
+    return call(
+        auth, "inventory.read", a -> stocktakes.page(status, scopeType, keyword, page, size));
   }
 
   /**
    * 盘点范围维度接入情况（仓库 / 库位 / 类目 / ABC 分类）。
    *
-   * <p>前端据此**禁用**不可用的范围选项，而不是让用户填完收 422。
-   * ABC 分类在这里被如实报成「库里没有这个字段」—— 界面必须能对用户讲清楚，
-   * 而不是让一个选项凭空消失。
+   * <p>前端据此**禁用**不可用的范围选项，而不是让用户填完收 422。 ABC 分类在这里被如实报成「库里没有这个字段」—— 界面必须能对用户讲清楚， 而不是让一个选项凭空消失。
    */
   @GetMapping("/inventory/stocktakes/capabilities")
   public List<StocktakeScopeCapability> stocktakeCapabilities(
@@ -673,11 +664,9 @@ InventoryDistributionService distributionService,
    * 发起盘点：冻结时点快照 + 生成盘点任务。
    *
    * <p>权限码是 {@code warehouse.inventory.update} 而不是 read：它把范围内的账面数**复制成行**
-   * 冻结下来（一种写库存事实的动作），并生成一堆要人去现场执行的任务。
-   * 把「冻结账面」挂在读权限上，那道闸门等于没有。
+   * 冻结下来（一种写库存事实的动作），并生成一堆要人去现场执行的任务。 把「冻结账面」挂在读权限上，那道闸门等于没有。
    *
-   * <p>刻意**没有** {@code frozenAt} 请求参数：冻结时刻就是发起的那一刻。
-   * 允许调用方指定时刻等于允许「盘三天前的账」，而账面数与三天前那一刻的库存无从对齐。
+   * <p>刻意**没有** {@code frozenAt} 请求参数：冻结时刻就是发起的那一刻。 允许调用方指定时刻等于允许「盘三天前的账」，而账面数与三天前那一刻的库存无从对齐。
    */
   @PostMapping("/inventory/stocktakes")
   public StocktakeSaved createStocktake(
@@ -689,9 +678,8 @@ InventoryDistributionService distributionService,
   /**
    * 盘点明细（三列：账面 / 实盘 / 差异）。
    *
-   * <p>{@code filter} 四个互斥口径：ALL / PENDING（未录入）/ MATCH（账实相符）/ GAIN（盘盈）/
-   * LOSS（盘亏）。筛选与展示走的是同一个 {@code variance} 列，所以界面上算的差异与库里存的
-   * 差异永远是同一个数。
+   * <p>{@code filter} 四个互斥口径：ALL / PENDING（未录入）/ MATCH（账实相符）/ GAIN（盘盈）/ LOSS（盘亏）。筛选与展示走的是同一个 {@code
+   * variance} 列，所以界面上算的差异与库里存的 差异永远是同一个数。
    */
   @GetMapping("/inventory/stocktakes/{id}/lines")
   public StocktakeLinePage stocktakeLines(
@@ -707,11 +695,9 @@ InventoryDistributionService distributionService,
   /**
    * 录入实盘数（或撤销录入：{@code countedQty} 传 null）。
    *
-   * <p>权限码是 update：它写盘点明细。**但它不直接改库存余额** —— 差异要走 7.4.2.2 生成
-   * 调整单再经 7.4.1.2 审批（蓝图红线：「差异不直接改余额」）。
+   * <p>权限码是 update：它写盘点明细。**但它不直接改库存余额** —— 差异要走 7.4.2.2 生成 调整单再经 7.4.1.2 审批（蓝图红线：「差异不直接改余额」）。
    *
-   * <p>录完这一行之后盘点单状态会**重算**（而不是往前推一格），因此复盘、撤销录入都能
-   * 自然落回正确的状态，不需要额外分支。
+   * <p>录完这一行之后盘点单状态会**重算**（而不是往前推一格），因此复盘、撤销录入都能 自然落回正确的状态，不需要额外分支。
    */
   @PostMapping("/inventory/stocktakes/{id}/lines/{lineId}/count")
   public StocktakeLine countStocktakeLine(
@@ -725,8 +711,7 @@ InventoryDistributionService distributionService,
   /**
    * 盘点任务列表（按库位或按 SKU）。
    *
-   * <p>任务状态与三个进度计数全部**由明细行派生**，表里没有对应列 —— 另存一份就要在每次
-   * 录入后同步它，而漏同步一次就会出现「任务显示已完成但还有行没盘」。
+   * <p>任务状态与三个进度计数全部**由明细行派生**，表里没有对应列 —— 另存一份就要在每次 录入后同步它，而漏同步一次就会出现「任务显示已完成但还有行没盘」。
    *
    * <p>{@code onlyOpen=true} 时未盘完的任务排在最前：派工时先看谁还没干完。
    */
@@ -741,9 +726,8 @@ InventoryDistributionService distributionService,
   /**
    * 派工：把一个盘点任务指给某个已认证用户（传 null 即取消派工）。
    *
-   * <p>本服务无法校验目标用户是否真是本租户成员 —— identity 才是成员关系的所有者，
-   * 跨服务不建 FK 也不查对方的表（与 7.2.2.1 的 reference_id 同一理由）。
-   * 代价：派错人只影响派工，不会越权读写别人的盘点单（读写仍由 RLS 按租户强制）。
+   * <p>本服务无法校验目标用户是否真是本租户成员 —— identity 才是成员关系的所有者， 跨服务不建 FK 也不查对方的表（与 7.2.2.1 的 reference_id
+   * 同一理由）。 代价：派错人只影响派工，不会越权读写别人的盘点单（读写仍由 RLS 按租户强制）。
    */
   @PostMapping("/inventory/stocktakes/{id}/tasks/{taskId}/assign")
   public StocktakeTask assignStocktakeTask(

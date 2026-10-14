@@ -19,24 +19,19 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 8.4.1.1 组装单：实物套装组装的仓库侧单据与库存动作。
  *
- * <p>蓝图 08 卷 8.4.1.1 加粗的那句是本类的全部理由：
- * 「按 BOM 领用组件、消耗组件库存、产生成品 SKU 库存，**同一事务完成**。」
- * 所以 {@link #issue} 标注 {@code @Transactional}，组件出库与成品入库要么都成、
- * 要么都回滚 —— 不允许出现「组件扣了成品没进」或反之。
+ * <p>蓝图 08 卷 8.4.1.1 加粗的那句是本类的全部理由： 「按 BOM 领用组件、消耗组件库存、产生成品 SKU 库存，**同一事务完成**。」 所以 {@link #issue}
+ * 标注 {@code @Transactional}，组件出库与成品入库要么都成、 要么都回滚 —— 不允许出现「组件扣了成品没进」或反之。
  *
- * <p><b>与 6.4.1.1 加工单（ProcessingOrderService）的关系</b>：那是 trade 单据的一次库存消费，
- * 仓库侧**不建单据**；组装单是 warehouse <b>自己拥有</b>的现场作业单据（业务可以不等加工单，
- * 直接按成品 SKU + BOM 版本发起）。两者因此各有各的单据模型，但库存动作的纪律完全一致：
- * 显式 SQL、同一个本地事务、先出料后入货。
+ * <p><b>与 6.4.1.1 加工单（ProcessingOrderService）的关系</b>：那是 trade 单据的一次库存消费， 仓库侧**不建单据**；组装单是 warehouse
+ * <b>自己拥有</b>的现场作业单据（业务可以不等加工单， 直接按成品 SKU + BOM 版本发起）。两者因此各有各的单据模型，但库存动作的纪律完全一致： 显式
+ * SQL、同一个本地事务、先出料后入货。
  *
- * <p><b>跨服务边界</b>：BOM 在 catalog 3.5.2、加工单在 trade 6.4.1.1，都不是本服务的表。
- * 本服务**不 join、不建外键**，而是把组装要用的组件明细在自己的
- * {@code assembly_order_component} 上落成冻结快照（单位用量 / 损耗率 / 应领量），
- * 并用 {@code bomId / bomVersionId / bomComponentId} 作引用键追溯。
+ * <p><b>跨服务边界</b>：BOM 在 catalog 3.5.2、加工单在 trade 6.4.1.1，都不是本服务的表。 本服务**不
+ * join、不建外键**，而是把组装要用的组件明细在自己的 {@code assembly_order_component} 上落成冻结快照（单位用量 / 损耗率 / 应领量）， 并用
+ * {@code bomId / bomVersionId / bomComponentId} 作引用键追溯。
  *
- * <p><b>虚拟套装</b>（蓝图点名「虚拟套装走不到这里」）：虚拟套装是 catalog 的 {@code bundle}，
- * 它**不占 SKU 行**（V25 原文：「bundle 没有任何 sku 外键 —— 虚拟组合不占 SKU 行」），
- * 所以填不出一个落在 {@code sku_ref} 里的成品 SKU —— 结构上进不来，不需要额外 if。
+ * <p><b>虚拟套装</b>（蓝图点名「虚拟套装走不到这里」）：虚拟套装是 catalog 的 {@code bundle}， 它**不占 SKU 行**（V25 原文：「bundle 没有任何
+ * sku 外键 —— 虚拟组合不占 SKU 行」）， 所以填不出一个落在 {@code sku_ref} 里的成品 SKU —— 结构上进不来，不需要额外 if。
  */
 @Service
 public class AssemblyOrderService {
@@ -64,8 +59,7 @@ public class AssemblyOrderService {
   /**
    * 能力声明：跨服务边界、虚拟套装边界与上下游可用性。
    *
-   * <p>存在的理由与既有 warehouse 模块一致：把「哪些输入真有依据」显式报出来，
-   * 而不是让调用方从 404 或空数组里猜。
+   * <p>存在的理由与既有 warehouse 模块一致：把「哪些输入真有依据」显式报出来， 而不是让调用方从 404 或空数组里猜。
    */
   public AssemblyCapabilities capabilities() {
     return new AssemblyCapabilities(
@@ -81,23 +75,33 @@ public class AssemblyOrderService {
             + "虚拟套装不持有库存，出库时由 09 订单直接展开组件扣减（蓝图 8.4.1.1 关系段加粗句）。",
         List.of(
             new AssemblyCapabilities.UpstreamModule(
-                "3.5.2", "BOM 版本管理与展开", "catalog", true,
-                "按 bomId / bomVersionId 引用键追溯；组件明细由调用方按规则 R7 的结果冻结传入，"
-                    + "本服务不重算、不取整、不跨库回查 BOM。"),
+                "3.5.2",
+                "BOM 版本管理与展开",
+                "catalog",
+                true,
+                "按 bomId / bomVersionId 引用键追溯；组件明细由调用方按规则 R7 的结果冻结传入，" + "本服务不重算、不取整、不跨库回查 BOM。"),
             new AssemblyCapabilities.UpstreamModule(
-                "6.4.1.1", "加工单", "trade", true,
+                "6.4.1.1",
+                "加工单",
+                "trade",
+                true,
                 "可选上游：sourceSystem=TRADE_PROCESSING_ORDER 时用 referenceId 作追溯引用键"
                     + "（跨服务无外键）。也支持 sourceSystem=DIRECT 由仓库现场直接发起组装。")),
         List.of(
             new AssemblyCapabilities.DownstreamModule(
-                "7", "库存", "warehouse", true,
+                "7",
+                "库存",
+                "warehouse",
+                true,
                 "组件出库与成品入库复用 V1 既有 inventory_transaction / inventory_entry，"
                     + "本服务是这两张表在这条路径上的唯一写入者。"),
             new AssemblyCapabilities.DownstreamModule(
-                "8.4.2.1", "拆解单", "warehouse", false,
-                "同组兄弟模块未开发：成品回拆组件（消耗成品库存、产生组件库存）尚无单据模型。"),
+                "8.4.2.1", "拆解单", "warehouse", false, "同组兄弟模块未开发：成品回拆组件（消耗成品库存、产生组件库存）尚无单据模型。"),
             new AssemblyCapabilities.DownstreamModule(
-                "8.4.1.1 现场作业", "拣货 / 复核 / 上架", "warehouse", false,
+                "8.4.1.1 现场作业",
+                "拣货 / 复核 / 上架",
+                "warehouse",
+                false,
                 "组装单只到「组件出库 + 成品入库」为止；现场任务流未建模。")),
         "I1：状态 COMPLETED 时，组件出库**分录**之和 = 按 BOM 展开的应领量之和；"
             + "I2：状态 COMPLETED 时，成品入库量 = 组装数量。"
@@ -114,9 +118,8 @@ public class AssemblyOrderService {
   /**
    * 建组装单（DRAFT）。
    *
-   * <p>建单只落单据与组件快照，**不动库存**：库存动作在 {@link #issue} 里。
-   * 两者分开是为了让「先备料、后组装」这类现场节奏成立，也为了让一笔没执行的组装单
-   * 可以被 {@link #cancel} 作废而不留任何账。
+   * <p>建单只落单据与组件快照，**不动库存**：库存动作在 {@link #issue} 里。 两者分开是为了让「先备料、后组装」这类现场节奏成立，也为了让一笔没执行的组装单 可以被
+   * {@link #cancel} 作废而不留任何账。
    */
   @Transactional
   public AssemblyOrderCreated create(AssemblyOrderCreateInput input, UUID actorId) {
@@ -150,8 +153,7 @@ public class AssemblyOrderService {
     for (AssemblyComponentInput c : components) {
       if (!seen.add(c.skuId())) {
         throw bad(
-            "组件 SKU " + c.skuId() + " 在组装单里出现了两次：同一组件只能有一行，"
-                + "两行时「这个组件要几件」无法回答，账上也会出现两条同向分录");
+            "组件 SKU " + c.skuId() + " 在组装单里出现了两次：同一组件只能有一行，" + "两行时「这个组件要几件」无法回答，账上也会出现两条同向分录");
       }
       requireSku(c.skuId(), "组件 SKU");
       stockExact(qty(c.requiredQuantity(), "组件应领量"), "组件 " + c.skuId() + " 的应领量");
@@ -246,13 +248,11 @@ public class AssemblyOrderService {
   /**
    * 执行组装：组件出库 + 成品入库，**一个本地事务**。
    *
-   * <p>顺序刻意是「先出料、后入货」：任何一个组件不足就抛异常回滚，此时成品**还没有**入账，
-   * 账上不会出现「凭空多出来的成品」。反过来先入货再出料的话，出料失败时货已入库，
+   * <p>顺序刻意是「先出料、后入货」：任何一个组件不足就抛异常回滚，此时成品**还没有**入账， 账上不会出现「凭空多出来的成品」。反过来先入货再出料的话，出料失败时货已入库，
    * 账上凭空多出成品。
    *
-   * <p>幂等锚点：{@code UNIQUE(tenant_id,ref_type,ref_id)}。同一张组装单重复投递会撞唯一约束，
-   * 而先被 {@code select ... for update} 锁住的那次已经把状态推进到 COMPLETED，
-   * 重复请求在这里就被挡成 409。
+   * <p>幂等锚点：{@code UNIQUE(tenant_id,ref_type,ref_id)}。同一张组装单重复投递会撞唯一约束， 而先被 {@code select ... for
+   * update} 锁住的那次已经把状态推进到 COMPLETED， 重复请求在这里就被挡成 409。
    */
   @Transactional
   public AssemblyOrderIssued issue(UUID orderId, AssemblyOrderIssueInput input, UUID actorId) {
@@ -293,8 +293,7 @@ public class AssemblyOrderService {
     UUID lotId = order.get("outbound_lot_id", UUID.class);
     for (Record line : lines) {
       UUID skuId = line.get("sku_id", UUID.class);
-      BigDecimal want =
-          stockExact(decimal(line, "required_quantity"), "组件应领量");
+      BigDecimal want = stockExact(decimal(line, "required_quantity"), "组件应领量");
       UUID balance = balanceId(skuId, warehouseId, legalEntityId, qualityId);
       postOutbound(balance, locationId, lotId, want, transactionId, at);
       // 实发量落回明细：V103 的行级 CHECK 会核对它「要么 0、要么恰好等于应领量」，
@@ -302,7 +301,11 @@ public class AssemblyOrderService {
       sql.execute(
           "update assembly_order_component set issued_quantity=?,balance_id=?,location_id=?,"
               + "lot_id=?,updated_at=now() where id=?",
-          want, balance, locationId, lotId, line.get("id", UUID.class));
+          want,
+          balance,
+          locationId,
+          lotId,
+          line.get("id", UUID.class));
       issued.add(
           new AssemblyComponentIssued(
               skuId,
@@ -315,8 +318,12 @@ public class AssemblyOrderService {
     }
 
     // ---- 第二步：成品入库（正向分录）。与上面的出库同属这一个事务。
-    UUID productBalance = balanceId(productSkuId, warehouseId, legalEntityId,
-        order.get("inbound_quality_status_id", UUID.class));
+    UUID productBalance =
+        balanceId(
+            productSkuId,
+            warehouseId,
+            legalEntityId,
+            order.get("inbound_quality_status_id", UUID.class));
     postInbound(
         productBalance,
         order.get("inbound_location_id", UUID.class),
@@ -351,8 +358,11 @@ public class AssemblyOrderService {
         issued,
         entries,
         entries.size(),
-        "组件出库与成品入库已在 warehouse 的同一个本地事务内完成（分录 " + transactionId
-            + "，ref_type=" + REF_TYPE + "）：任一环节失败都会整体回滚，"
+        "组件出库与成品入库已在 warehouse 的同一个本地事务内完成（分录 "
+            + transactionId
+            + "，ref_type="
+            + REF_TYPE
+            + "）：任一环节失败都会整体回滚，"
             + "不会出现「组件扣了成品没进」或反之。"
             + "不变量已在数据库层核对：组件出库分录之和 = 按 BOM 展开的应领量之和（I1）、"
             + "成品入库量 = 组装数量（I2）。");
@@ -363,8 +373,7 @@ public class AssemblyOrderService {
   /**
    * 取消组装单（只有 DRAFT 可取消）。
    *
-   * <p>取消**不动库存**：草稿本来就没发过料。要取消已完成的组装单是另一回事 ——
-   * 那需要把已出的料退回、已入的货取出，是 8.4.2.1 拆解单的职责，不在本模块。
+   * <p>取消**不动库存**：草稿本来就没发过料。要取消已完成的组装单是另一回事 —— 那需要把已出的料退回、已入的货取出，是 8.4.2.1 拆解单的职责，不在本模块。
    */
   @Transactional
   public AssemblyOrderRow cancel(UUID orderId, AssemblyOrderCancelInput input, UUID actorId) {
@@ -372,7 +381,10 @@ public class AssemblyOrderService {
     sql.execute(
         "update assembly_order set status='CANCELLED',cancelled_at=?::timestamptz,cancelled_by=?,"
             + "cancel_reason=?,version=version+1,updated_at=now() where id=?",
-        OffsetDateTime.now(), actorId, nz(input.reason()), orderId);
+        OffsetDateTime.now(),
+        actorId,
+        nz(input.reason()),
+        orderId);
     return detail(orderId).order();
   }
 
@@ -381,9 +393,8 @@ public class AssemblyOrderService {
   /**
    * 组装单列表（真分页 + 真筛选 + 排序白名单 + 汇总）。
    *
-   * <p>汇总与件数用**标量子查询**而不是 join 展开：明细 join 上来会让「单头一行 × N 条组件」
-   * 相乘，于是 {@code sum(assembly_quantity)} 被放大 N 倍 —— 聚合数字对不上是这类页面最常见的
-   * bug，而且静态检查全绿（与 WarehouseDetailService 同一纪律）。
+   * <p>汇总与件数用**标量子查询**而不是 join 展开：明细 join 上来会让「单头一行 × N 条组件」 相乘，于是 {@code sum(assembly_quantity)}
+   * 被放大 N 倍 —— 聚合数字对不上是这类页面最常见的 bug，而且静态检查全绿（与 WarehouseDetailService 同一纪律）。
    */
   public AssemblyOrderPage page(
       String status,
@@ -422,8 +433,7 @@ public class AssemblyOrderService {
     if (sourceSystem != null && !sourceSystem.isBlank()) {
       String source = sourceSystem.trim().toUpperCase();
       if (!SOURCES.contains(source)) {
-        throw new IllegalArgumentException(
-            "不支持的来源：" + sourceSystem + "（可选 " + SOURCES + "）");
+        throw new IllegalArgumentException("不支持的来源：" + sourceSystem + "（可选 " + SOURCES + "）");
       }
       where.append(" and source_system = ?");
       binds.add(source);
@@ -452,7 +462,8 @@ public class AssemblyOrderService {
                 + " count(*) filter (where status='DRAFT') as draft_count,"
                 + " count(*) filter (where status='COMPLETED') as completed_count,"
                 + " count(*) filter (where status='CANCELLED') as cancelled_count"
-                + " from assembly_order where true" + clause,
+                + " from assembly_order where true"
+                + clause,
             binds.toArray());
 
     List<AssemblyOrderRow> items =
@@ -465,7 +476,9 @@ public class AssemblyOrderService {
                     + " (select count(*) from assembly_order_component c"
                     + "   where c.tenant_id = assembly_order.tenant_id and c.order_id = assembly_order.id)"
                     + " as component_count"
-                    + " from assembly_order where true" + clause + orderBy(sortKey)
+                    + " from assembly_order where true"
+                    + clause
+                    + orderBy(sortKey)
                     + " limit ? offset ?",
                 append(binds, safeSize, safePage * safeSize).toArray())
             .map(this::row);
@@ -534,8 +547,7 @@ public class AssemblyOrderService {
    * 出库：减余额 + 同步减库位明细（V2 守恒触发器要求两处同动）。
    *
    * <p>先查库位上的实际在手量并给出可读报错：V1 / V2 的 {@code CHECK(available>=0)} 确实会挡住
-   * 扣成负数，但那条报错只说「违反检查约束」，完全不指到是哪批货、在哪个库位、差多少 ——
-   * 而组装领料失败正是「组件不够」这个业务事实。
+   * 扣成负数，但那条报错只说「违反检查约束」，完全不指到是哪批货、在哪个库位、差多少 —— 而组装领料失败正是「组件不够」这个业务事实。
    */
   private void postOutbound(
       UUID balanceId,
@@ -549,17 +561,20 @@ public class AssemblyOrderService {
         sql.fetchOne(
             "select id,on_hand,reserved from stock_bucket where balance_id=? and location_id=?"
                 + " and lot_id is not distinct from ?",
-            balanceId, locationId, lotId);
+            balanceId,
+            locationId,
+            lotId);
     if (bucket == null) {
-      throw bad(
-          "出库失败：库位上没有这个组件的库存行。组装领料必须从真实存在的库位发出，"
-              + "不能凭空扣一个 SKU 的库存");
+      throw bad("出库失败：库位上没有这个组件的库存行。组装领料必须从真实存在的库位发出，" + "不能凭空扣一个 SKU 的库存");
     }
     BigDecimal onHand = stock(decimal(bucket, "on_hand"));
     BigDecimal reserved = stock(decimal(bucket, "reserved"));
     if (onHand.compareTo(qty) < 0) {
       throw bad(
-          "出库失败：库位上只有 " + onHand + "，本次组装要发 " + qty
+          "出库失败：库位上只有 "
+              + onHand
+              + "，本次组装要发 "
+              + qty
               + (reserved.signum() > 0 ? "（其中 " + reserved + " 已被销售预占）" : "")
               + "。组件不足会让组装做不完 —— 请先补料或调整本单的组装数量");
     }
@@ -567,32 +582,47 @@ public class AssemblyOrderService {
         "update stock_bucket set on_hand=on_hand-?,"
             + " last_movement_at=greatest(?::timestamptz,last_movement_at"
             + " + interval '1 microsecond') where id=?",
-        qty, at, bucket.get("id", UUID.class));
+        qty,
+        at,
+        bucket.get("id", UUID.class));
     sql.execute(
         "update inventory_balance set on_hand=on_hand-?,version=version+1,updated_at=now()"
             + " where id=?",
-        qty, balanceId);
+        qty,
+        balanceId);
     sql.execute(
         "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
             + "reserved_delta) values(?,?,?,?,?,0)",
-        UUID.randomUUID(), currentTenant(), transactionId, balanceId, qty.negate());
+        UUID.randomUUID(),
+        currentTenant(),
+        transactionId,
+        balanceId,
+        qty.negate());
   }
 
   /** 入库：加余额 + 同步加库位明细（V2 守恒触发器要求两处同动）。 */
   private void postInbound(
-      UUID balanceId, UUID locationId, UUID lotId, BigDecimal qty, UUID transactionId,
+      UUID balanceId,
+      UUID locationId,
+      UUID lotId,
+      BigDecimal qty,
+      UUID transactionId,
       OffsetDateTime at) {
     Record existing =
         sql.fetchOne(
             "select id from stock_bucket where balance_id=? and location_id=?"
                 + " and lot_id is not distinct from ?",
-            balanceId, locationId, lotId);
+            balanceId,
+            locationId,
+            lotId);
     if (existing != null) {
       sql.execute(
           "update stock_bucket set on_hand=on_hand+?,"
               + " last_movement_at=greatest(?::timestamptz,last_movement_at"
               + " + interval '1 microsecond') where id=?",
-          qty, at, existing.get("id", UUID.class));
+          qty,
+          at,
+          existing.get("id", UUID.class));
     } else {
       Record bal = sql.fetchOne("select * from inventory_balance where id=?", balanceId);
       sql.execute(
@@ -614,11 +644,16 @@ public class AssemblyOrderService {
     sql.execute(
         "update inventory_balance set on_hand=on_hand+?,version=version+1,updated_at=now()"
             + " where id=?",
-        qty, balanceId);
+        qty,
+        balanceId);
     sql.execute(
         "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
             + "reserved_delta) values(?,?,?,?,?,0)",
-        UUID.randomUUID(), currentTenant(), transactionId, balanceId, qty);
+        UUID.randomUUID(),
+        currentTenant(),
+        transactionId,
+        balanceId,
+        qty);
   }
 
   private List<AssemblyOrderEntry> entriesOf(UUID transactionId) {
@@ -651,7 +686,10 @@ public class AssemblyOrderService {
     if (!"DRAFT".equals(status)) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "组装单 " + order.get("order_code", String.class) + " 当前是 " + status
+          "组装单 "
+              + order.get("order_code", String.class)
+              + " 当前是 "
+              + status
               + "，只有草稿可以执行或取消：已完成组装单的组件已经出库、成品已经入库，"
               + "重复执行会重复扣料重复入货");
     }
@@ -660,8 +698,7 @@ public class AssemblyOrderService {
 
   private void requireWarehouse(UUID warehouseId) {
     if (sql.fetchOne("select 1 from warehouse where id = ?", warehouseId) == null) {
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "仓库 " + warehouseId + " 不存在或无权使用");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "仓库 " + warehouseId + " 不存在或无权使用");
     }
   }
 
@@ -678,7 +715,10 @@ public class AssemblyOrderService {
     if (row == null) {
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND,
-          label + " " + skuId + " 没有在本服务登记（sku_ref）：库存分录要落到真实存在的 SKU 上。"
+          label
+              + " "
+              + skuId
+              + " 没有在本服务登记（sku_ref）：库存分录要落到真实存在的 SKU 上。"
               + "如果它是虚拟套装，那本来就该走 09 订单展开扣组件，而不是组装单"
               + "（虚拟套装不占 SKU 行、也不持有库存）");
     }
@@ -698,10 +738,7 @@ public class AssemblyOrderService {
               "select id from inventory_quality_status where role = 'SELLABLE' and enabled"
                   + " order by code limit 1");
       if (row == null) {
-        throw bad(
-            "本租户没有启用的可售质量状态，无法确定「"
-                + label
-                + "。请先在质量状态字典里启用一个 role=SELLABLE 的状态");
+        throw bad("本租户没有启用的可售质量状态，无法确定「" + label + "。请先在质量状态字典里启用一个 role=SELLABLE 的状态");
       }
       return row.get("id", UUID.class);
     }
@@ -722,7 +759,8 @@ public class AssemblyOrderService {
     if (sql.fetchOne(
             "select 1 from warehouse_location where id = ? and warehouse_id = ?"
                 + " and status = 'ACTIVE'",
-            locationId, warehouseId)
+            locationId,
+            warehouseId)
         == null) {
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND, label + " " + locationId + " 不存在、不属于该仓或已停用");
@@ -735,7 +773,10 @@ public class AssemblyOrderService {
         sql.fetchOne(
             "select id from inventory_balance where sku_id=? and warehouse_id=?"
                 + " and legal_entity_id=? and quality_status_id=?",
-            skuId, warehouseId, legalEntityId, qualityStatusId);
+            skuId,
+            warehouseId,
+            legalEntityId,
+            qualityStatusId);
     if (found != null) {
       return found.get("id", UUID.class);
     }
@@ -743,7 +784,12 @@ public class AssemblyOrderService {
     sql.execute(
         "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
             + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,0,0)",
-        id, currentTenant(), skuId, warehouseId, legalEntityId, qualityStatusId);
+        id,
+        currentTenant(),
+        skuId,
+        warehouseId,
+        legalEntityId,
+        qualityStatusId);
     return id;
   }
 
@@ -817,9 +863,8 @@ public class AssemblyOrderService {
   /**
    * 当前 RLS 租户。由 backend/libraries/tenancy 在事务内设置，客户端头改不动它。
    *
-   * <p>表达式里的 nullif 不是洁癖：事务局部的 set_config 提交之后，PostgreSQL 会把自定义
-   * GUC <b>复位成空串</b>而不是「回到未设置」，直接 cast 会报 uuid 语法错
-   * （与 warehouse V1 / trade V92 同一句写法）。
+   * <p>表达式里的 nullif 不是洁癖：事务局部的 set_config 提交之后，PostgreSQL 会把自定义 GUC <b>复位成空串</b>而不是「回到未设置」，直接 cast
+   * 会报 uuid 语法错 （与 warehouse V1 / trade V92 同一句写法）。
    */
   private UUID currentTenant() {
     return sql.fetchOne("select nullif(current_setting('app.current_tenant',true),'')::uuid")
@@ -859,8 +904,7 @@ public class AssemblyOrderService {
   /**
    * 要真正过账的量必须能被<b>库存刻度（4 位小数）精确表示</b>，否则显式拒绝。
    *
-   * <p>为什么不静默取整：向下取整等于凭空吞掉材料（账上少领、实体多丢），向上取整等于凭空
-   * 多领材料。两种都破坏账实相符，而且都恰好能让「组件出库 = 应领量」这条不变量**看起来成立**
+   * <p>为什么不静默取整：向下取整等于凭空吞掉材料（账上少领、实体多丢），向上取整等于凭空 多领材料。两种都破坏账实相符，而且都恰好能让「组件出库 = 应领量」这条不变量**看起来成立**
    * —— 那才是最糟的：数字对上了，物料对不上。所以宁可拒绝并说清楚是哪一行。
    */
   private static BigDecimal stockExact(BigDecimal value, String label) {
@@ -868,7 +912,10 @@ public class AssemblyOrderService {
       return value.setScale(STOCK_SCALE, RoundingMode.UNNECESSARY);
     } catch (ArithmeticException e) {
       throw bad(
-          label + " " + value + " 有超过 4 位小数，无法在库存刻度上精确表示："
+          label
+              + " "
+              + value
+              + " 有超过 4 位小数，无法在库存刻度上精确表示："
               + "向下取整等于凭空吞掉材料、向上取整等于凭空多领，两种都会让"
               + "「组件出库 = 应领量」这条不变量看起来成立而物料对不上。"
               + "请调整组装数量或 BOM 的用量，让结果能被 4 位小数精确表示");

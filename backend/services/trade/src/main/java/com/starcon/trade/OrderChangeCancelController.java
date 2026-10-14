@@ -19,20 +19,17 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 9.1.1.3 订单变更与取消。端点 13 个，前缀 {@code /trade/sales-orders/change}。
  *
- * <p><b>为什么前缀是 {@code /change} 而不是裸 {@code /{id}}</b>（照 9.1.1.2 同一纪律）：
- * {@code GET /trade/sales-orders/{id}} 已被 9.1.2.2 的手工订单详情占用，
- * 在同一个 {@code @RequestMapping("/trade/sales-orders")} 下再加一个
- * {@code @GetMapping("/{id}")} 会让 Spring 在<b>启动时</b>抛 ambiguous mapping，
- * 整个 trade 服务起不来。已有的 {@code /list}（9.1.1.1）与 {@code /detail}（9.1.1.2）
- * 都是同一纪律的产物，本模块取第三个并列子资源 {@code /change}。
+ * <p><b>为什么前缀是 {@code /change} 而不是裸 {@code /{id}}</b>（照 9.1.1.2 同一纪律）： {@code GET
+ * /trade/sales-orders/{id}} 已被 9.1.2.2 的手工订单详情占用， 在同一个
+ * {@code @RequestMapping("/trade/sales-orders")} 下再加一个 {@code @GetMapping("/{id}")} 会让 Spring
+ * 在<b>启动时</b>抛 ambiguous mapping， 整个 trade 服务起不来。已有的 {@code /list}（9.1.1.1）与 {@code
+ * /detail}（9.1.1.2） 都是同一纪律的产物，本模块取第三个并列子资源 {@code /change}。
  *
- * <p>权限码用 {@code trade.order-change.*}（read / create / update）。
- * 刻意<b>没有</b> delete：变更与取消的证据链是「申请 + 回执 + 事件」，
- * 删掉一条就等于让复盘可以对不上的账。V119 也 REVOKE 了事件表的 UPDATE/DELETE。
+ * <p>权限码用 {@code trade.order-change.*}（read / create / update）。 刻意<b>没有</b> delete：变更与取消的证据链是「申请 +
+ * 回执 + 事件」， 删掉一条就等于让复盘可以对不上的账。V119 也 REVOKE 了事件表的 UPDATE/DELETE。
  *
- * <p>租户<b>不</b>来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 FORCE RLS 在数据库层强制隔离。
- * 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
+ * <p>租户<b>不</b>来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code
+ * app.current_tenant}，由 FORCE RLS 在数据库层强制隔离。 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
  *
  * <p><b>跨租户与不存在返回同一个 404</b>（8.3.1.2 已确立的约定）。
  */
@@ -61,9 +58,8 @@ public class OrderChangeCancelController {
   /**
    * 本模块哪些能力有数据、哪些还没接上。
    *
-   * <p>与 9.1.1.1 的 {@code /list/capabilities}（列表页筛选边界）、
-   * 9.1.1.2 的 {@code /detail/capabilities}（详情页分区边界）三者分开：
-   * 并排读才不会把「本模块能改什么」当成「订单详情里有什么」。
+   * <p>与 9.1.1.1 的 {@code /list/capabilities}（列表页筛选边界）、 9.1.1.2 的 {@code
+   * /detail/capabilities}（详情页分区边界）三者分开： 并排读才不会把「本模块能改什么」当成「订单详情里有什么」。
    */
   @GetMapping("/capabilities")
   public OrderChangeCancelCapabilities capabilities(
@@ -88,7 +84,8 @@ public class OrderChangeCancelController {
         "read",
         actor ->
             changes.pageRules(
-                new OrderChangeCancelRuleQuery(platformCode, shopCode, changeKind, allowed, page, size)));
+                new OrderChangeCancelRuleQuery(
+                    platformCode, shopCode, changeKind, allowed, page, size)));
   }
 
   @PostMapping("/platform-rules")
@@ -112,8 +109,7 @@ public class OrderChangeCancelController {
   /**
    * 录入履约投影（预留 / 拣货 / 已发）。
    *
-   * <p>9.3.3.1 履约请求与 8 出库发货事件落地后要调的授权入口。
-   * 现在没有上游调用方，所以也接受 {@code TENANT_MAINTAINED} 人工登记 ——
+   * <p>9.3.3.1 履约请求与 8 出库发货事件落地后要调的授权入口。 现在没有上游调用方，所以也接受 {@code TENANT_MAINTAINED} 人工登记 ——
    * 让「已发货不可取消」这条硬规则在 9.3.3.1 交付前就已经是真的、可测的。
    */
   @PostMapping("/fulfillment-progress")
@@ -158,15 +154,15 @@ public class OrderChangeCancelController {
 
   @GetMapping("/requests/{id}")
   public OrderChangeCancelChangeDetail request(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "read", actor -> changes.changeDetail(id));
   }
 
   /**
    * 推进变更状态。
    *
-   * <p>平台规则要求平台确认时，{@code CONFIRMED} 会先核对回写任务是否已被平台接受
-   * —— 本模块不替平台做这个决定。
+   * <p>平台规则要求平台确认时，{@code CONFIRMED} 会先核对回写任务是否已被平台接受 —— 本模块不替平台做这个决定。
    */
   @PostMapping("/requests/{id}/status")
   public OrderChangeCancelChangeRow advanceRequest(
@@ -189,13 +185,12 @@ public class OrderChangeCancelController {
     return call(
         auth,
         "read",
-        actor -> changes.pageCancellations(new OrderChangeCancelQuery(orderId, orderNo, status, null, page, size)));
+        actor ->
+            changes.pageCancellations(
+                new OrderChangeCancelQuery(orderId, orderNo, status, null, page, size)));
   }
 
-  /**
-   * 建取消请求。同步下达仓库停止作业与释放占用任务 ——
-   * 蓝图要求「先确认仓库停止作业并释放占用」，任务必须在申请时就存在。
-   */
+  /** 建取消请求。同步下达仓库停止作业与释放占用任务 —— 蓝图要求「先确认仓库停止作业并释放占用」，任务必须在申请时就存在。 */
   @PostMapping("/cancellations")
   public OrderChangeCancelCancellationRow createCancellation(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -206,7 +201,8 @@ public class OrderChangeCancelController {
   /** 取消详情：逐行可取消量 + 仓库任务 + 平台回写 + 「还差什么才能确认」的阻塞项。 */
   @GetMapping("/cancellations/{id}")
   public OrderChangeCancelCancellationDetail cancellation(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "read", actor -> changes.cancellationDetail(id));
   }
 
@@ -224,7 +220,8 @@ public class OrderChangeCancelController {
   /** 仓库任务清单 —— 蓝图输出里的「仓库停止作业及释放结果」。 */
   @GetMapping("/cancellations/{id}/warehouse-tasks")
   public List<OrderChangeCancelHoldTaskRow> warehouseTasks(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "read", actor -> changes.holdTasks(id));
   }
 
@@ -243,13 +240,15 @@ public class OrderChangeCancelController {
 
   @GetMapping("/cancellations/{id}/writeback-tasks")
   public List<OrderChangeCancelWritebackRow> cancellationWritebacks(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "read", actor -> changes.writebacks(id, true));
   }
 
   @GetMapping("/requests/{id}/writeback-tasks")
   public List<OrderChangeCancelWritebackRow> changeWritebacks(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     return call(auth, "read", actor -> changes.writebacks(id, false));
   }
 
@@ -259,6 +258,7 @@ public class OrderChangeCancelController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID taskId,
       @Valid @RequestBody OrderChangeCancelWritebackInput input) {
-    return call(auth, "update", actor -> changes.updateWriteback(taskId, input, actor.membershipId()));
+    return call(
+        auth, "update", actor -> changes.updateWriteback(taskId, input, actor.membershipId()));
   }
 }

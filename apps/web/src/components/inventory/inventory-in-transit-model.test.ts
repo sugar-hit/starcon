@@ -133,9 +133,9 @@ describe('在途库存前端模型', () => {
     });
 
     it('有 ETA 且未逾期时显示「未逾期」', () => {
-      expect(overdueHoursText({ expectedArriveAt: '2026-10-05T08:00:00Z', overdueHours: null })).toBe(
-        '未逾期',
-      );
+      expect(
+        overdueHoursText({ expectedArriveAt: '2026-10-05T08:00:00Z', overdueHours: null }),
+      ).toBe('未逾期');
       expect(overdueHoursText({ expectedArriveAt: '2026-10-05T08:00:00Z', overdueHours: -3 })).toBe(
         '未逾期',
       );
@@ -143,7 +143,9 @@ describe('在途库存前端模型', () => {
 
     it('逾期小时数按天拆开显示', () => {
       expect(overdueHoursText({ expectedArriveAt: 'x', overdueHours: 5 })).toBe('逾期 5 小时');
-      expect(overdueHoursText({ expectedArriveAt: 'x', overdueHours: 30 })).toBe('逾期 1 天 6 小时');
+      expect(overdueHoursText({ expectedArriveAt: 'x', overdueHours: 30 })).toBe(
+        '逾期 1 天 6 小时',
+      );
     });
   });
 
@@ -178,7 +180,9 @@ describe('在途库存前端模型', () => {
     });
 
     it('调拨腿不许在这里登记', () => {
-      const blockers = registerBlockers(validRegister({ transitKind: 'TRANSFER', toWarehouseId: '' }));
+      const blockers = registerBlockers(
+        validRegister({ transitKind: 'TRANSFER', toWarehouseId: '' }),
+      );
       expect(blockers.join()).toContain('7.5.1.1');
     });
 
@@ -195,7 +199,10 @@ describe('在途库存前端模型', () => {
 
     it('ETA 不能早于发出时间', () => {
       const blockers = registerBlockers(
-        validRegister({ shippedAt: '2026-10-05T08:00:00Z', expectedArriveAt: '2026-10-01T08:00:00Z' }),
+        validRegister({
+          shippedAt: '2026-10-05T08:00:00Z',
+          expectedArriveAt: '2026-10-01T08:00:00Z',
+        }),
       );
       expect(blockers.join()).toContain('不能早于发出时间');
     });
@@ -204,7 +211,10 @@ describe('在途库存前端模型', () => {
       // 后端只挡 eta < shippedAt，不挡 eta < now。
       expect(
         registerBlockers(
-          validRegister({ shippedAt: '2020-01-01T00:00:00Z', expectedArriveAt: '2020-01-05T00:00:00Z' }),
+          validRegister({
+            shippedAt: '2020-01-01T00:00:00Z',
+            expectedArriveAt: '2020-01-05T00:00:00Z',
+          }),
         ),
       ).toEqual([]);
     });
@@ -223,9 +233,7 @@ describe('在途库存前端模型', () => {
     });
 
     it('头程 / 采购必须有我方收货仓（缺了没有入库落点）', () => {
-      const blockers = registerBlockers(
-        validRegister({ toWarehouseId: '', toWarehouseName: '' }),
-      );
+      const blockers = registerBlockers(validRegister({ toWarehouseId: '', toWarehouseName: '' }));
       expect(blockers.join()).toContain('我方收货仓');
     });
 
@@ -248,7 +256,11 @@ describe('在途库存前端模型', () => {
     it('空的可选字段不出现在请求体里（发空串会被 Jackson 解析成 UUID/时间失败）', () => {
       // 先填上再删掉：验证「键整个不存在」，而不是「键存在但值是 undefined」。
       const filled = buildRegisterPayload(
-        validRegister({ lotId: 'lot-1', expectedArriveAt: '2026-10-05T08:00:00Z', trackingNo: 'TN-1' }),
+        validRegister({
+          lotId: 'lot-1',
+          expectedArriveAt: '2026-10-05T08:00:00Z',
+          trackingNo: 'TN-1',
+        }),
       );
       expect('lotId' in filled).toBe(true);
       const { lotId, expectedArriveAt, trackingNo, ...payload } = filled;
@@ -312,15 +324,13 @@ describe('在途库存前端模型', () => {
     });
 
     it('FBA 到货不需要库位', () => {
-      expect(
-        arriveBlockers({ ...base, transitKind: 'FBA_OUTBOUND', quantity: 10 }),
-      ).toEqual([]);
+      expect(arriveBlockers({ ...base, transitKind: 'FBA_OUTBOUND', quantity: 10 })).toEqual([]);
     });
 
     it('差异原因必填，不自动抹平', () => {
-      expect(discrepancyBlockers({ outstandingQuantity: 40, quantity: 5, reason: '' }).join()).toContain(
-        '原因必填',
-      );
+      expect(
+        discrepancyBlockers({ outstandingQuantity: 40, quantity: 5, reason: '' }).join(),
+      ).toContain('原因必填');
     });
 
     it('差异量不能超过未达余量', () => {
@@ -330,9 +340,9 @@ describe('在途库存前端模型', () => {
     });
 
     it('合法差异没有拦路项', () => {
-      expect(
-        discrepancyBlockers({ outstandingQuantity: 40, quantity: 5, reason: 'LOST' }),
-      ).toEqual([]);
+      expect(discrepancyBlockers({ outstandingQuantity: 40, quantity: 5, reason: 'LOST' })).toEqual(
+        [],
+      );
     });
   });
 
@@ -385,22 +395,40 @@ describe('在途库存前端模型', () => {
 
     it('起点不在本租户时不显示 undefined', () => {
       expect(
-        routeText({ fromWarehouseCode: '', fromWarehouseName: '', toWarehouseCode: 'US-W', toWarehouseName: '美国仓' }),
+        routeText({
+          fromWarehouseCode: '',
+          fromWarehouseName: '',
+          toWarehouseCode: 'US-W',
+          toWarehouseName: '美国仓',
+        }),
       ).toBe('（外部起点） → US-W 美国仓');
     });
 
     it('两端都没有时给破折号', () => {
-      expect(routeText({ fromWarehouseCode: '', fromWarehouseName: '', toWarehouseCode: '', toWarehouseName: '' })).toBe(
-        '—',
-      );
+      expect(
+        routeText({
+          fromWarehouseCode: '',
+          fromWarehouseName: '',
+          toWarehouseCode: '',
+          toWarehouseName: '',
+        }),
+      ).toBe('—');
     });
 
     it('调拨腿指回调拨单，其他腿指回来源单据', () => {
       expect(
-        transferRefText({ transferOrderCode: 'TR-1', sourceSystem: 'INVENTORY', sourceReference: 'X' }),
+        transferRefText({
+          transferOrderCode: 'TR-1',
+          sourceSystem: 'INVENTORY',
+          sourceReference: 'X',
+        }),
       ).toBe('调拨单 TR-1');
       expect(
-        transferRefText({ transferOrderCode: null, sourceSystem: 'LOGISTICS', sourceReference: 'SH-1' }),
+        transferRefText({
+          transferOrderCode: null,
+          sourceSystem: 'LOGISTICS',
+          sourceReference: 'SH-1',
+        }),
       ).toBe('LOGISTICS · SH-1');
     });
 

@@ -17,8 +17,8 @@ import java.util.UUID;
  *   <li>输出：在途库存清单 + 到达预警（逾期未达）。
  * </ul>
  *
- * <p>DTO 一律带 {@code InTransit} 前缀：四个服务的 schema 被 codegen 拍平进同一命名空间，
- * 重名会被**静默覆盖且没有任何警告**（AGENTS.md 契约纪律）。
+ * <p>DTO 一律带 {@code InTransit} 前缀：四个服务的 schema 被 codegen 拍平进同一命名空间， 重名会被**静默覆盖且没有任何警告**（AGENTS.md
+ * 契约纪律）。
  *
  * <p>数字口径（界面上每一列都对应其中一条，不做二次加工）：
  *
@@ -26,14 +26,13 @@ import java.util.UUID;
  *   <li>{@code outstandingQuantity} 仍在途的余量 —— 缺口计算要扣的就是它。
  *   <li>{@code settledQuantity} 已了结 = 已到达 + 已确认短少。
  *   <li>{@code declaredQuantity} = {@code settledQuantity + outstandingQuantity}，即这一腿当初发了多少。
- *   <li>{@code overdueHours} 由 {@code expected_arrive_at} 与「此刻」相减算出来，
- *       **不是**人工标记的字段：ETA 和当前时刻都是库里的真实值，所以预警是算出来的。
+ *   <li>{@code overdueHours} 由 {@code expected_arrive_at} 与「此刻」相减算出来， **不是**人工标记的字段：ETA
+ *       和当前时刻都是库里的真实值，所以预警是算出来的。
  * </ul>
  *
- * <p>调拨腿（{@code transit_kind='TRANSFER'}）由 7.5.1.1 写入，{@code settledQuantity} 恒为 0：
- * 7.5.1.1 的分次收货把到达量拆成独立的 RECEIVED 兄弟行，所以「仍在途的那一行」
- * 天然就是未达余量，到达权威在调拨单的已实收列（详情接口会带出来）。
- * 这个口径差异随每行 {@code attribution} 返回，界面上必须显示，不靠人猜。
+ * <p>调拨腿（{@code transit_kind='TRANSFER'}）由 7.5.1.1 写入，{@code settledQuantity} 恒为 0： 7.5.1.1
+ * 的分次收货把到达量拆成独立的 RECEIVED 兄弟行，所以「仍在途的那一行」 天然就是未达余量，到达权威在调拨单的已实收列（详情接口会带出来）。 这个口径差异随每行 {@code
+ * attribution} 返回，界面上必须显示，不靠人猜。
  */
 public final class InventoryInTransitModels {
   private InventoryInTransitModels() {}
@@ -65,8 +64,7 @@ public final class InventoryInTransitModels {
           return k;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的在途类型：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的在途类型：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -109,8 +107,7 @@ public final class InventoryInTransitModels {
   /**
    * 逾期判定档位。
    *
-   * <p>档位是**算出来的**分桶：{@code overdueHours}（ETA 与此刻的差）落在哪一档就是哪一档，
-   * 没有任何人工可写的标记列 —— 改了 ETA，档位立刻跟着变。
+   * <p>档位是**算出来的**分桶：{@code overdueHours}（ETA 与此刻的差）落在哪一档就是哪一档， 没有任何人工可写的标记列 —— 改了 ETA，档位立刻跟着变。
    */
   public enum InTransitOverdueLevel {
     /** 未到 ETA（含没有 ETA 的行）：不算逾期。 */
@@ -139,10 +136,10 @@ public final class InventoryInTransitModels {
     /**
      * 由「未达余量 + ETA + 此刻」算出档位。
      *
-     * <p>已了结的腿（{@code outstanding=0}）永远落在 {@link #ON_TIME}：货都到了还报逾期，
-     * 是把已解决的问题当成待办。
+     * <p>已了结的腿（{@code outstanding=0}）永远落在 {@link #ON_TIME}：货都到了还报逾期， 是把已解决的问题当成待办。
      */
-    public static InTransitOverdueLevel of(BigDecimal outstanding, OffsetDateTime eta, OffsetDateTime now) {
+    public static InTransitOverdueLevel of(
+        BigDecimal outstanding, OffsetDateTime eta, OffsetDateTime now) {
       if (outstanding == null || outstanding.signum() <= 0) {
         return ON_TIME;
       }
@@ -244,9 +241,14 @@ public final class InventoryInTransitModels {
    * <p>{@code summary} 是**全量**汇总（不受分页影响）；下拉词表随响应一起给，界面不用再拉一次。
    */
   public record InTransitPage(
-      InTransitSummary summary, List<InTransitRow> rows, List<InTransitOption> kindOptions,
-      List<InTransitOption> overdueOptions, List<InTransitWarehouseOption> warehouseOptions,
-      long total, int page, int size) {}
+      InTransitSummary summary,
+      List<InTransitRow> rows,
+      List<InTransitOption> kindOptions,
+      List<InTransitOption> overdueOptions,
+      List<InTransitWarehouseOption> warehouseOptions,
+      long total,
+      int page,
+      int size) {}
 
   /** 类型/逾期档位下拉项（带各档在途腿数，界面直接显示「有多少条要处理」）。 */
   public record InTransitOption(String value, String label, long legCount) {}
@@ -267,7 +269,8 @@ public final class InventoryInTransitModels {
       String notes) {}
 
   /** 在途腿详情：行 + 该腿的完整到达/差异时间线。 */
-  public record InTransitDetail(InTransitRow leg, List<InTransitEventRow> events, String metricNote) {}
+  public record InTransitDetail(
+      InTransitRow leg, List<InTransitEventRow> events, String metricNote) {}
 
   /** 到达预警清单。{@code generatedAt} 是这次计算的时刻，预警随时间自动变，不落任何标记列。 */
   public record InTransitAlerts(
@@ -280,9 +283,8 @@ public final class InventoryInTransitModels {
   /**
    * 补货可扣在途净额（6.2.1.1 的直接输入）。
    *
-   * <p>按「目的仓 × SKU」聚合的在途量 —— 缺口计算扣掉它才不会重复补货
-   * （蓝图关系段：「在途漏算会导致重复补货」）。这个端点刻意**不含**任何补货算法：
-   * 需求预测与下单属 6.2.1.1，本模块只负责把在途这个数按它要的形状交出去。
+   * <p>按「目的仓 × SKU」聚合的在途量 —— 缺口计算扣掉它才不会重复补货 （蓝图关系段：「在途漏算会导致重复补货」）。这个端点刻意**不含**任何补货算法： 需求预测与下单属
+   * 6.2.1.1，本模块只负责把在途这个数按它要的形状交出去。
    */
   public record InTransitNettingRow(
       UUID toWarehouseId,
@@ -297,21 +299,21 @@ public final class InventoryInTransitModels {
       @Schema(nullable = true) OffsetDateTime latestExpectedArriveAt) {}
 
   public record InTransitNettingPage(
-      long total, BigDecimal totalOutstandingQuantity, List<InTransitNettingRow> rows, String usageNote) {}
+      long total,
+      BigDecimal totalOutstandingQuantity,
+      List<InTransitNettingRow> rows,
+      String usageNote) {}
 
   /**
    * 登记外部在途腿（头程发运 / 采购发运 / FBA 发货运单事件）。
    *
-   * <p>{@code sourceSystem} + {@code sourceReference} 是跨服务定位键兼幂等锚点：
-   * 上游重复投递同一条发运事件不会双记在途。调拨腿（{@code transitKind=TRANSFER}）
-   * 不在这里登记 —— 它由 7.5.1.1 调拨单发出时产生。
+   * <p>{@code sourceSystem} + {@code sourceReference} 是跨服务定位键兼幂等锚点： 上游重复投递同一条发运事件不会双记在途。调拨腿（{@code
+   * transitKind=TRANSFER}） 不在这里登记 —— 它由 7.5.1.1 调拨单发出时产生。
    *
-   * <p>刻意**没有**备注字段：登记动作是对上游发运事件的镜像，备注的权威在对方系统，
-   * 这里存一份就成了第二份说法。靠 {@code sourceReference} 指回原文即可。
+   * <p>刻意**没有**备注字段：登记动作是对上游发运事件的镜像，备注的权威在对方系统， 这里存一份就成了第二份说法。靠 {@code sourceReference} 指回原文即可。
    *
-   * <p>{@code shippedAt} 与 {@code expectedArriveAt} 的关系是硬约束：ETA 不能早于发出时刻。
-   * 但 ETA **可以**早于「此刻」—— 那正是一条逾期在途（补录 10 天前发出、2 天前该到的批次），
-   * 逾期预警要有数据可算，就不能把它挡在门外。
+   * <p>{@code shippedAt} 与 {@code expectedArriveAt} 的关系是硬约束：ETA 不能早于发出时刻。 但 ETA **可以**早于「此刻」——
+   * 那正是一条逾期在途（补录 10 天前发出、2 天前该到的批次）， 逾期预警要有数据可算，就不能把它挡在门外。
    */
   public record InTransitRegisterRequest(
       String transitKind,
@@ -342,7 +344,11 @@ public final class InventoryInTransitModels {
 
   /** 差异登记请求：把到达不了的部分如实记为短少，在途归零。差异原因必填。 */
   public record InTransitDiscrepancyRequest(
-      Long expectedVersion, OffsetDateTime occurredAt, BigDecimal quantity, String reason, String notes) {}
+      Long expectedVersion,
+      OffsetDateTime occurredAt,
+      BigDecimal quantity,
+      String reason,
+      String notes) {}
 
   /** 写动作后的回读结果（响应是「库里真实存了什么」）。 */
   public record InTransitSaved(

@@ -5,10 +5,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/**
- * 3.1.2.3 内部编码展开规则的纯函数单测。不碰数据库——"展开成什么样、是否越界"
- * 必须在规则保存时就能判定，不能等批量生成 500 个 SKU 之后才发现。
- */
+/** 3.1.2.3 内部编码展开规则的纯函数单测。不碰数据库——"展开成什么样、是否越界" 必须在规则保存时就能判定，不能等批量生成 500 个 SKU 之后才发现。 */
 class SkuCodePatternTest {
 
   @Test

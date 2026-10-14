@@ -23,12 +23,12 @@
 
 ## 已决策清单
 
-| 编号 | 标题 | 状态 |
-|---|---|---|
-| [0001](0001-monorepo-and-modular-monolith.md) | Monorepo + Modular Monolith 起步 | 单体决策被 0004 取代；保留 Monorepo |
-| [0002](0002-multi-tenancy-strategy.md) | 多租户：Shared Schema + RLS | Accepted |
-| [0003](0003-backend-runtime-kotlin-spring-boot.md) | 后端运行时 Kotlin + Spring Boot 3 | 被 0004 取代 |
-| [0004](0004-java-spring-boot-microservices.md) | Java + Spring Boot 微服务 | Accepted |
+| 编号                                               | 标题                              | 状态                                |
+| -------------------------------------------------- | --------------------------------- | ----------------------------------- |
+| [0001](0001-monorepo-and-modular-monolith.md)      | Monorepo + Modular Monolith 起步  | 单体决策被 0004 取代；保留 Monorepo |
+| [0002](0002-multi-tenancy-strategy.md)             | 多租户：Shared Schema + RLS       | Accepted                            |
+| [0003](0003-backend-runtime-kotlin-spring-boot.md) | 后端运行时 Kotlin + Spring Boot 3 | 被 0004 取代                        |
+| [0004](0004-java-spring-boot-microservices.md)     | Java + Spring Boot 微服务         | Accepted                            |
 
 | [0005](0005-tenant-hierarchy-and-page-rbac.md) | 子租户层级与页面操作权限 | Proposed（需求明确，默认策略待评审） |
 

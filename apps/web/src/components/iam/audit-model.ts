@@ -1,4 +1,8 @@
-import type { AuditDetail, AuditPage, AuditView } from '../../../../../packages/api-contracts/src/index';
+import type {
+  AuditDetail,
+  AuditPage,
+  AuditView,
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from '../../lib/api';
 
 /**
@@ -124,7 +128,8 @@ export function changedFields(detail: AuditDetail) {
     .map((field) => {
       const from = before ? before[field] : null;
       const to = after ? after[field] : null;
-      const changed = before === null || after === null || JSON.stringify(from) !== JSON.stringify(to);
+      const changed =
+        before === null || after === null || JSON.stringify(from) !== JSON.stringify(to);
       return { field, from: render(from), to: render(to), changed };
     })
     .filter((row) => row.changed);

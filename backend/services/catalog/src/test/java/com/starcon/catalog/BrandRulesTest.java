@@ -9,12 +9,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * 3.3.2.1 的纯规则单测：编码 / 名称 / 授权状态 / Logo / locale 的规范化与校验，
- * 凭证有效期判定，以及蓝图点名的**阻止刊登判定**四分支。
+ * 3.3.2.1 的纯规则单测：编码 / 名称 / 授权状态 / Logo / locale 的规范化与校验， 凭证有效期判定，以及蓝图点名的**阻止刊登判定**四分支。
  *
- * <p>离线可穷举，所以阻止刊登的每一条路径都在这里穷举一遍——
- * 那条规则是本模块唯一会让「已经排好的货发不出去」的判定，
- * 它必须比集成测试更好读地铺开全部组合。
+ * <p>离线可穷举，所以阻止刊登的每一条路径都在这里穷举一遍—— 那条规则是本模块唯一会让「已经排好的货发不出去」的判定， 它必须比集成测试更好读地铺开全部组合。
  */
 class BrandRulesTest {
 
@@ -65,11 +62,15 @@ class BrandRulesTest {
     assertThat(namesProblem(null)).isNull();
     assertThat(namesProblem(List.of())).isNull();
     // zh-CN 与 zh-cn 规范化后是同一个语言：不允许两条各存一份。
-    assertThat(namesProblem(List.of(new BrandNameInput("zh-CN", "甲"), new BrandNameInput("zh-cn", "乙"))))
+    assertThat(
+            namesProblem(
+                List.of(new BrandNameInput("zh-CN", "甲"), new BrandNameInput("zh-cn", "乙"))))
         .contains("同一个语言只能有一个品牌名");
-    assertThat(namesProblem(java.util.stream.IntStream.range(0, 21)
-            .mapToObj(i -> new BrandNameInput("l" + i, "名字" + i))
-            .toList()))
+    assertThat(
+            namesProblem(
+                java.util.stream.IntStream.range(0, 21)
+                    .mapToObj(i -> new BrandNameInput("l" + i, "名字" + i))
+                    .toList()))
         .contains("最多配置 20 个语言名");
   }
 
@@ -119,8 +120,14 @@ class BrandRulesTest {
     assertThat(publishBlock(inputs(true, "OWNED", asOf, List.of()))).isNull();
     assertThat(publishBlock(inputs(true, "AGENCY", asOf, List.of()))).isNull();
     // 给了反而过期的凭证也不影响：自有/代理本身已是「有授权」的状态。
-    assertThat(publishBlock(inputs(true, "OWNED", asOf,
-        List.of(credential(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1)))))).isNull();
+    assertThat(
+            publishBlock(
+                inputs(
+                    true,
+                    "OWNED",
+                    asOf,
+                    List.of(credential(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1))))))
+        .isNull();
   }
 
   @Test
@@ -128,8 +135,13 @@ class BrandRulesTest {
     LocalDate asOf = LocalDate.of(2026, 6, 1);
     assertThat(publishBlock(inputs(false, "OWNED", asOf, List.of())))
         .isEqualTo(BLOCK_BRAND_DISABLED);
-    assertThat(publishBlock(inputs(false, "LICENSED", asOf,
-        List.of(credential(LocalDate.of(2026, 1, 1), LocalDate.of(2027, 1, 1))))))
+    assertThat(
+            publishBlock(
+                inputs(
+                    false,
+                    "LICENSED",
+                    asOf,
+                    List.of(credential(LocalDate.of(2026, 1, 1), LocalDate.of(2027, 1, 1))))))
         .isEqualTo(BLOCK_BRAND_DISABLED);
     // 停用的品牌优先于凭证判断：即使凭证有效也不许刊登。
   }
@@ -139,36 +151,67 @@ class BrandRulesTest {
     LocalDate asOf = LocalDate.of(2026, 6, 1);
     assertThat(publishBlock(inputs(true, "LICENSED", asOf, List.of())))
         .isEqualTo(BLOCK_LICENSE_MISSING);
-    assertThat(publishBlock(inputs(true, "LICENSED", asOf,
-        List.of(credential(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31)))))).isNull();
+    assertThat(
+            publishBlock(
+                inputs(
+                    true,
+                    "LICENSED",
+                    asOf,
+                    List.of(credential(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31))))))
+        .isNull();
     // 续签场景：旧凭证已过期 + 新凭证有效 → 放行（旧行留在库里供回溯）。
-    assertThat(publishBlock(inputs(true, "LICENSED", asOf,
-        List.of(
-            credential(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1)),
-            credential(LocalDate.of(2026, 3, 1), null))))).isNull();
+    assertThat(
+            publishBlock(
+                inputs(
+                    true,
+                    "LICENSED",
+                    asOf,
+                    List.of(
+                        credential(LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1)),
+                        credential(LocalDate.of(2026, 3, 1), null)))))
+        .isNull();
   }
 
   @Test
   void licensedBrandDistinguishesNotYetEffectiveFromExpired() {
     LocalDate asOf = LocalDate.of(2026, 6, 1);
-    assertThat(publishBlock(inputs(true, "LICENSED", asOf,
-        List.of(credential(LocalDate.of(2026, 7, 1), LocalDate.of(2027, 1, 1))))))
+    assertThat(
+            publishBlock(
+                inputs(
+                    true,
+                    "LICENSED",
+                    asOf,
+                    List.of(credential(LocalDate.of(2026, 7, 1), LocalDate.of(2027, 1, 1))))))
         .isEqualTo(BLOCK_LICENSE_NOT_YET_EFFECTIVE);
-    assertThat(publishBlock(inputs(true, "LICENSED", asOf,
-        List.of(credential(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))))))
+    assertThat(
+            publishBlock(
+                inputs(
+                    true,
+                    "LICENSED",
+                    asOf,
+                    List.of(credential(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31))))))
         .isEqualTo(BLOCK_LICENSE_EXPIRED);
     // 「一张已过期 + 一张还没到」按未生效处理：等一等就能刊登，续约动作要等它真的过期。
-    assertThat(publishBlock(inputs(true, "LICENSED", asOf,
-        List.of(
-            credential(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31)),
-            credential(LocalDate.of(2026, 7, 1), null)))))
+    assertThat(
+            publishBlock(
+                inputs(
+                    true,
+                    "LICENSED",
+                    asOf,
+                    List.of(
+                        credential(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31)),
+                        credential(LocalDate.of(2026, 7, 1), null)))))
         .isEqualTo(BLOCK_LICENSE_NOT_YET_EFFECTIVE);
     // 被撤销的凭证不参与判定：撤销了就等于没有。
-    assertThat(publishBlock(inputs(true, "LICENSED", asOf,
-        List.of(new BrandRules.Credential(false, LocalDate.of(2026, 1, 1), null)))))
+    assertThat(
+            publishBlock(
+                inputs(
+                    true,
+                    "LICENSED",
+                    asOf,
+                    List.of(new BrandRules.Credential(false, LocalDate.of(2026, 1, 1), null)))))
         .isEqualTo(BLOCK_LICENSE_EXPIRED);
-    assertThat(publishBlock(inputs(true, "LICENSED", asOf, null)))
-        .isEqualTo(BLOCK_LICENSE_MISSING);
+    assertThat(publishBlock(inputs(true, "LICENSED", asOf, null))).isEqualTo(BLOCK_LICENSE_MISSING);
   }
 
   @Test

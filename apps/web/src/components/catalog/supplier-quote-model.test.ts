@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { SupplierQuote, SupplierQuotePriceTier } from '../../../../../packages/api-contracts/src/index';
+import type {
+  SupplierQuote,
+  SupplierQuotePriceTier,
+} from '../../../../../packages/api-contracts/src/index';
 import {
   applicableTierIndex,
   emptyQuoteForm,

@@ -109,7 +109,9 @@ export function ApprovalRuleWorkspace() {
       const detailsMap: Record<string, ApprovalRuleSetDetailView> = {};
       for (const s of setList) {
         try {
-          detailsMap[s.id] = await api<ApprovalRuleSetDetailView>(`identity/approval-rules/${s.id}`);
+          detailsMap[s.id] = await api<ApprovalRuleSetDetailView>(
+            `identity/approval-rules/${s.id}`,
+          );
         } catch {
           // 单条读失败不该让整页不可用：这一条先缺着，其余照常显示。
         }
@@ -126,24 +128,23 @@ export function ApprovalRuleWorkspace() {
     void load();
   }, [load]);
 
-  const loadPolicy = useCallback(
-    async (documentTypeCode: string) => {
-      if (!documentTypeCode) return;
-      try {
-        const policy = await api<ApprovalEffectivePolicyView>(
-          `identity/approval-rules/effective-policy?documentTypeCode=${encodeURIComponent(documentTypeCode)}`,
-        );
-        setPolicies((prev) => ({ ...prev, [documentTypeCode]: policy }));
-      } catch (e) {
-        setError(e instanceof ApiError ? e.message : '生效策略读取失败');
-      }
-    },
-    [],
-  );
+  const loadPolicy = useCallback(async (documentTypeCode: string) => {
+    if (!documentTypeCode) return;
+    try {
+      const policy = await api<ApprovalEffectivePolicyView>(
+        `identity/approval-rules/effective-policy?documentTypeCode=${encodeURIComponent(documentTypeCode)}`,
+      );
+      setPolicies((prev) => ({ ...prev, [documentTypeCode]: policy }));
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : '生效策略读取失败');
+    }
+  }, []);
 
   const openReport = useCallback(async (id: string) => {
     try {
-      const report = await api<ApprovalRuleValidationView>(`identity/approval-rules/${id}/validation`);
+      const report = await api<ApprovalRuleValidationView>(
+        `identity/approval-rules/${id}/validation`,
+      );
       setReports((prev) => ({ ...prev, [id]: report }));
     } catch (e) {
       setError(e instanceof ApiError ? e.message : '体检失败');
@@ -211,7 +212,11 @@ export function ApprovalRuleWorkspace() {
       };
       if (probe.currencyCode.trim()) body.currencyCode = probe.currencyCode.trim().toUpperCase();
       if (probe.amount.trim()) body.amount = probe.amount.trim();
-      const result = await api<ApprovalEvaluationView>('identity/approval-rules/evaluate', 'POST', body);
+      const result = await api<ApprovalEvaluationView>(
+        'identity/approval-rules/evaluate',
+        'POST',
+        body,
+      );
       setEvaluation(result);
     } catch (e) {
       setEvaluation(null);
@@ -262,7 +267,13 @@ export function ApprovalRuleWorkspace() {
           </p>
         )}
         <div className="flex flex-wrap gap-2">
-          <Button onClick={() => void load()} variant="outline" size="sm" disabled={busy} aria-label="刷新">
+          <Button
+            onClick={() => void load()}
+            variant="outline"
+            size="sm"
+            disabled={busy}
+            aria-label="刷新"
+          >
             <RefreshCw className="h-4 w-4" /> 刷新
           </Button>
           {writable && (
@@ -345,7 +356,12 @@ export function ApprovalRuleWorkspace() {
             </label>
           ))}
         </div>
-        <Button size="sm" variant="outline" disabled={probing || !probe.documentTypeCode} onClick={() => void runProbe()}>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={probing || !probe.documentTypeCode}
+          onClick={() => void runProbe()}
+        >
           {probing ? '试算中…' : '试算这次提交'}
         </Button>
         {evaluation && <EvaluationPanel result={evaluation} />}
@@ -366,13 +382,16 @@ export function ApprovalRuleWorkspace() {
               <article key={s.id} className="bg-card space-y-3 rounded-lg border p-6">
                 <div className="flex flex-wrap items-center gap-3">
                   <h4 className="font-semibold">{s.ruleSetName}</h4>
-                  <Badge tone={RULE_SET_STATUS_TONES[s.status]}>{RULE_SET_STATUS_LABELS[s.status]}</Badge>
+                  <Badge tone={RULE_SET_STATUS_TONES[s.status]}>
+                    {RULE_SET_STATUS_LABELS[s.status]}
+                  </Badge>
                   <Badge tone={DECISION_TONES[s.defaultAction]}>
                     {DEFAULT_ACTION_LABELS[s.defaultAction] ?? s.defaultAction}
                   </Badge>
                 </div>
                 <p className="text-muted-foreground text-sm">
-                  {ruleSetSummary(s)} · 生效策略：{DEFAULT_ACTION_LABELS[s.defaultAction] ?? s.defaultAction}
+                  {ruleSetSummary(s)} · 生效策略：
+                  {DEFAULT_ACTION_LABELS[s.defaultAction] ?? s.defaultAction}
                 </p>
                 {!detail && <p className="text-muted-foreground text-sm">正在读取规则…</p>}
                 {detail && rules.length === 0 && (
@@ -381,16 +400,23 @@ export function ApprovalRuleWorkspace() {
                 {detail && (
                   <div className="space-y-2">
                     {rules.map((r) => (
-                      <div key={r.id} className="border-border flex flex-wrap items-center gap-2 border-b pb-2 text-sm last:border-0">
+                      <div
+                        key={r.id}
+                        className="border-border flex flex-wrap items-center gap-2 border-b pb-2 text-sm last:border-0"
+                      >
                         <span className="text-muted-foreground">#{r.priority}</span>
                         <span className="font-medium">{r.ruleName}</span>
-                        <Badge tone={DECISION_TONES[r.decision]}>{DECISION_LABELS[r.decision] ?? r.decision}</Badge>
+                        <Badge tone={DECISION_TONES[r.decision]}>
+                          {DECISION_LABELS[r.decision] ?? r.decision}
+                        </Badge>
                         {r.status !== 'ACTIVE' && <Badge tone="warning">已停用</Badge>}
                         <span className="text-muted-foreground">{conditionSummary(r)}</span>
                         {r.decision === 'SUBMIT_FOR_APPROVAL' && (
                           <span className="text-muted-foreground">
                             → {r.targetFlowName ?? r.targetFlowId}
-                            {!r.targetFlowActive && <span className="text-destructive">（该流程已非生效）</span>}
+                            {!r.targetFlowActive && (
+                              <span className="text-destructive">（该流程已非生效）</span>
+                            )}
                           </span>
                         )}
                       </div>
@@ -446,11 +472,15 @@ export function ApprovalRuleWorkspace() {
                   <ul className="space-y-1 text-sm">
                     {report.findings.map((f, i) => (
                       <li key={`${f.code}-${i}`}>
-                        <Badge tone={SEVERITY_TONES[f.severity]}>{SEVERITY_LABELS[f.severity]}</Badge>{' '}
+                        <Badge tone={SEVERITY_TONES[f.severity]}>
+                          {SEVERITY_LABELS[f.severity]}
+                        </Badge>{' '}
                         {f.message}
                       </li>
                     ))}
-                    {report.findings.length === 0 && <li className="text-muted-foreground">没有发现问题。</li>}
+                    {report.findings.length === 0 && (
+                      <li className="text-muted-foreground">没有发现问题。</li>
+                    )}
                   </ul>
                 )}
               </article>
@@ -502,7 +532,9 @@ export function ApprovalRuleWorkspace() {
                   value={draft.ruleSetName}
                   onChange={(e) =>
                     setEditing((prev) =>
-                      prev ? { ...prev, draft: { ...prev.draft, ruleSetName: e.target.value } } : prev,
+                      prev
+                        ? { ...prev, draft: { ...prev.draft, ruleSetName: e.target.value } }
+                        : prev,
                     )
                   }
                 />
@@ -533,7 +565,9 @@ export function ApprovalRuleWorkspace() {
                   value={draft.defaultAction}
                   onChange={(e) =>
                     setEditing((prev) =>
-                      prev ? { ...prev, draft: { ...prev.draft, defaultAction: e.target.value } } : prev,
+                      prev
+                        ? { ...prev, draft: { ...prev.draft, defaultAction: e.target.value } }
+                        : prev,
                     )
                   }
                 >
@@ -596,8 +630,9 @@ export function ApprovalRuleWorkspace() {
                             rules: [
                               ...prev.draft.rules,
                               emptyRule(
-                                activeFlows.find((f) => f.documentTypeCode === prev.draft.documentTypeCode)?.id ??
-                                  null,
+                                activeFlows.find(
+                                  (f) => f.documentTypeCode === prev.draft.documentTypeCode,
+                                )?.id ?? null,
                               ),
                             ],
                           },
@@ -670,14 +705,16 @@ function RuleEditor({
 }) {
   const set = <K extends keyof RuleDraft>(key: K, value: RuleDraft[K]) =>
     onChange({ ...rule, [key]: value });
-  const candidateFlows = flows.filter(
-    (f) => f.status === 'ACTIVE' || f.id === rule.targetFlowId,
-  );
+  const candidateFlows = flows.filter((f) => f.status === 'ACTIVE' || f.id === rule.targetFlowId);
   return (
     <div className="border-border space-y-3 rounded-md border p-4">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Field label="规则名称">
-          <input className={control} value={rule.ruleName} onChange={(e) => set('ruleName', e.target.value)} />
+          <input
+            className={control}
+            value={rule.ruleName}
+            onChange={(e) => set('ruleName', e.target.value)}
+          />
         </Field>
         <Field label="优先级" hint="越小越先判定，同序会被拒">
           <input
@@ -753,16 +790,10 @@ function RuleEditor({
             <select
               className={control}
               value={rule[g.field]}
-              onChange={(e) =>
-                set(g.field, e.target.value as RuleDraft[typeof g.field])
-              }
+              onChange={(e) => set(g.field, e.target.value as RuleDraft[typeof g.field])}
             >
               {DIMENSION_MODES.map((m) => (
-                <option
-                  key={m}
-                  value={m}
-                  disabled={m === 'REQUIRED' && rule.decision === 'EXEMPT'}
-                >
+                <option key={m} value={m} disabled={m === 'REQUIRED' && rule.decision === 'EXEMPT'}>
                   {DIMENSION_LABELS[m]}
                 </option>
               ))}
@@ -773,7 +804,13 @@ function RuleEditor({
       <div className="flex items-center gap-2">
         <span className="text-muted-foreground text-sm">{conditionSummary(rule)}</span>
         {onRemove && (
-          <Button size="sm" variant="outline" className="ml-auto" onClick={onRemove} aria-label="删除该规则">
+          <Button
+            size="sm"
+            variant="outline"
+            className="ml-auto"
+            onClick={onRemove}
+            aria-label="删除该规则"
+          >
             <Trash2 className="h-4 w-4" /> 移除
           </Button>
         )}
@@ -792,9 +829,11 @@ function EffectivePolicyPanel({ policy }: { policy: ApprovalEffectivePolicyView 
   return (
     <div className="space-y-2 text-sm">
       <p>
-        受管控 · 生效规则集「{policy.activeRuleSetName}」· {DEFAULT_ACTION_LABELS[policy.defaultAction ?? ''] ??
-          policy.defaultAction}
-        {policy.activeFlowName ? ` · 送审批流程「${policy.activeFlowName}」` : ' · 尚无生效审批流，送审无处可送'}
+        受管控 · 生效规则集「{policy.activeRuleSetName}」·{' '}
+        {DEFAULT_ACTION_LABELS[policy.defaultAction ?? ''] ?? policy.defaultAction}
+        {policy.activeFlowName
+          ? ` · 送审批流程「${policy.activeFlowName}」`
+          : ' · 尚无生效审批流，送审无处可送'}
       </p>
       {policy.exemptionCeilings.length === 0 ? (
         <p className="text-muted-foreground">当前没有生效中的免审额度。</p>
@@ -802,8 +841,14 @@ function EffectivePolicyPanel({ policy }: { policy: ApprovalEffectivePolicyView 
         <ul className="space-y-1">
           {policy.exemptionCeilings.map((c) => (
             <li key={c.ruleId}>
-              <Badge tone="success">免审</Badge> {c.ruleName} · {c.currencyCode} {c.maxAmount} 以内 ·{' '}
-              {conditionSummary({ ...c, amountCurrencyCode: null, amountMinAmount: null, amountMaxAmount: null })}
+              <Badge tone="success">免审</Badge> {c.ruleName} · {c.currencyCode} {c.maxAmount} 以内
+              ·{' '}
+              {conditionSummary({
+                ...c,
+                amountCurrencyCode: null,
+                amountMinAmount: null,
+                amountMaxAmount: null,
+              })}
             </li>
           ))}
         </ul>
@@ -816,11 +861,18 @@ function EvaluationPanel({ result }: { result: ApprovalEvaluationView }) {
   return (
     <div className="border-border space-y-1 rounded-md border p-3 text-sm">
       <p>
-        <Badge tone={DECISION_TONES[result.decision]}>{DECISION_LABELS[result.decision] ?? result.decision}</Badge>{' '}
+        <Badge tone={DECISION_TONES[result.decision]}>
+          {DECISION_LABELS[result.decision] ?? result.decision}
+        </Badge>{' '}
         {result.reason}
       </p>
       <p className="text-muted-foreground">
-        判定来源：{result.source === 'RULE' ? `命中规则「${result.matchedRuleName}」（优先级 #${result.matchedPriority}）` : result.source === 'DEFAULT' ? '没有规则命中，走生效策略' : '该单据类型未配置生效规则，默认放行'}
+        判定来源：
+        {result.source === 'RULE'
+          ? `命中规则「${result.matchedRuleName}」（优先级 #${result.matchedPriority}）`
+          : result.source === 'DEFAULT'
+            ? '没有规则命中，走生效策略'
+            : '该单据类型未配置生效规则，默认放行'}
       </p>
       {result.exemptionCeilingAmount !== null && (
         <p className="text-muted-foreground">

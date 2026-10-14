@@ -23,7 +23,7 @@
      级联时父行已不在，同事务内可观察，这样 V18 的删素材路径保持原样可用。
    - `refuse_media_process_recipe_delete`：被任务引用的配方只能停用不能删
      （删配方会级联删比例档，而档是历史产物的口径来源——产物表存的是 label 文本）。
-   另有 `CHECK(to_version > from_version)` 把「产物不可能是原图自己」钉进数据。
+     另有 `CHECK(to_version > from_version)` 把「产物不可能是原图自己」钉进数据。
 
 2. **多比例版本 = 每个比例档各产出一个新版本，而不是一个资产拆成多个。**
    蓝图写「生成多比例版本（如主图 1:1 + 缩略图）」，落在 `media_process_recipe_ratio`
@@ -122,9 +122,11 @@ channel 服务的平台表在别的库。建一个指向别库不存在表的列
 ## 涉及文件
 
 **迁移（catalog 服务）**
+
 - `backend/services/catalog/src/main/resources/db/migration/V19__image_processing.sql`
 
 **后端**
+
 - `backend/services/catalog/src/main/java/com/starcon/catalog/ImageProcessRules.java`（纯规则层）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/ImageProcessor.java`（像素加工引擎）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/ImageProcessService.java`（配方 / 任务 / 进度）
@@ -133,11 +135,13 @@ channel 服务的平台表在别的库。建一个指向别库不存在表的列
 - `backend/services/catalog/src/main/java/com/starcon/catalog/CatalogModels.java`（13 个 DTO）
 
 **测试**
+
 - `backend/services/catalog/src/test/java/com/starcon/catalog/ImageProcessingIntegrationTest.java`（12 例）
 - `backend/services/catalog/src/test/java/com/starcon/catalog/ImageProcessorTest.java`（9 例）
 - `backend/services/catalog/src/test/java/com/starcon/catalog/ImageProcessRulesTest.java`（10 例）
 
 **前端**
+
 - `apps/web/src/components/catalog/image-process-workspace.tsx`
 - `apps/web/src/components/catalog/image-process-model.ts`
 - `apps/web/src/components/catalog/image-process-model.test.ts`（20 例）
@@ -146,6 +150,7 @@ channel 服务的平台表在别的库。建一个指向别库不存在表的列
 - `packages/api-contracts/src/catalog.ts` + `catalog.openapi.json`（codegen 产物，未手改）
 
 **台账与会话**
+
 - `docs/product/capability-blueprint/module-progress.md`（仅 3.4.1.2 那一行）
 - `docs/sessions/2026-10/2026-10-07-image-processing.md`
 

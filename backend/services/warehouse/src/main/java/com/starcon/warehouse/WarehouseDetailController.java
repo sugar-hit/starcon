@@ -17,28 +17,26 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 8.1.1.2 仓库详情 —— 仓库的控制塔。
  *
- * <p>蓝图：「单仓库全景：基础信息与地址、库位结构、库存分布、作业统计、关联的自发货/中转/
- * FBA 备货策略、作业人员与设备。」「详情页是仓库的控制塔，作业入口与库存入口都在这里。」
+ * <p>蓝图：「单仓库全景：基础信息与地址、库位结构、库存分布、作业统计、关联的自发货/中转/ FBA 备货策略、作业人员与设备。」「详情页是仓库的控制塔，作业入口与库存入口都在这里。」
  *
  * <p>四个端点分工：
  *
  * <ul>
- *   <li>{@code GET /warehouse/facilities/{id}} —— 全景（基础信息 + 地址 + 库存分布 +
- *       库位结构 + 作业统计 + 三条备货策略 + 人员与设备 + 入口清单），一次取全，页面不用打七次请求
+ *   <li>{@code GET /warehouse/facilities/{id}} —— 全景（基础信息 + 地址 + 库存分布 + 库位结构 + 作业统计 + 三条备货策略 +
+ *       人员与设备 + 入口清单），一次取全，页面不用打七次请求
  *   <li>{@code GET /warehouse/facilities/{id}/locations} —— 库位清单（真分页 + 排序白名单），
  *       独立成端点是因为它是**唯一会增长的列表**：库位可以上百上千，塞进全景里会让控制塔首屏变慢
  *   <li>{@code GET /warehouse/facilities/{id}/entrypoints} —— 入口清单单独可取，
  *       因为入口的接入状态与仓库数据无关（它只取决于哪些模块已交付）
- *   <li>{@code PUT /warehouse/facilities/{id}} —— 改基础信息与地址（8.1.1.1 明确把「改仓库属性」
- *       留给本模块，见 identity V69 文件头）
+ *   <li>{@code PUT /warehouse/facilities/{id}} —— 改基础信息与地址（8.1.1.1 明确把「改仓库属性」 留给本模块，见 identity V69
+ *       文件头）
  * </ul>
  *
- * <p>权限码 {@code warehouse.facilities.read} / {@code warehouse.facilities.update}
- * （identity V69 + V77）。<b>刻意不注册 delete</b>：仓库不是可物理删除的主数据，
- * 停用与归档才是出口，且本服务没有对应的 DELETE 端点 —— 没有端点的权限码不注册。
+ * <p>权限码 {@code warehouse.facilities.read} / {@code warehouse.facilities.update} （identity V69 +
+ * V77）。<b>刻意不注册 delete</b>：仓库不是可物理删除的主数据， 停用与归档才是出口，且本服务没有对应的 DELETE 端点 —— 没有端点的权限码不注册。
  *
- * <p>端点独立成 {@code WarehouseDetailController} 而不是并进 {@code WarehouseFacilityController}：
- * 8.1.1.1 与 8.1.1.3 是并行车道，各改各的才不会撞（与 8.1.1.1 文件头同一理由）。
+ * <p>端点独立成 {@code WarehouseDetailController} 而不是并进 {@code WarehouseFacilityController}： 8.1.1.1 与
+ * 8.1.1.3 是并行车道，各改各的才不会撞（与 8.1.1.1 文件头同一理由）。
  */
 @RestController
 public class WarehouseDetailController {
@@ -51,10 +49,7 @@ public class WarehouseDetailController {
     this.details = details;
   }
 
-  /**
-   * 统一入口：先向 identity 确认身份与权限（租户**不**来自任何客户端头），
-   * 再在一个事务里绑定 RLS 租户上下文执行查询。
-   */
+  /** 统一入口：先向 identity 确认身份与权限（租户**不**来自任何客户端头）， 再在一个事务里绑定 RLS 租户上下文执行查询。 */
   private <T> T call(String bearer, String permission, Function<AccessService.Access, T> work) {
     var actor = access.require(bearer, "warehouse." + permission);
     return access.run(actor, "warehouse." + permission, () -> work.apply(actor));
@@ -63,8 +58,7 @@ public class WarehouseDetailController {
   /**
    * 单仓库全景。
    *
-   * <p>仓库不存在与不属于本租户都返回 404 —— 两者可观测结果必须相同，
-   * 否则「猜 id」就成了探测别的租户有没有仓库的侧信道。
+   * <p>仓库不存在与不属于本租户都返回 404 —— 两者可观测结果必须相同， 否则「猜 id」就成了探测别的租户有没有仓库的侧信道。
    */
   @GetMapping("/warehouse/facilities/{id}")
   public WarehouseDetail detail(
@@ -97,9 +91,7 @@ public class WarehouseDetailController {
   /**
    * 各子模块入口。
    *
-   * <p>蓝图把「各子模块入口」写进本模块的输出，所以它是端点而不是页内常量：
-   * 其它模块（库存页、作业页）可以直接取这份清单来渲染自己那一段的入口，
-   * 而不必各写一份自己的「未交付」列表。
+   * <p>蓝图把「各子模块入口」写进本模块的输出，所以它是端点而不是页内常量： 其它模块（库存页、作业页）可以直接取这份清单来渲染自己那一段的入口， 而不必各写一份自己的「未交付」列表。
    */
   @GetMapping("/warehouse/facilities/{id}/entrypoints")
   public List<DetailEntryPoint> entryPoints(
@@ -119,9 +111,8 @@ public class WarehouseDetailController {
   /**
    * 改仓库基础信息与地址。
    *
-   * <p>入参**不含**编码、仓库类型、货权法人与默认发货仓标记：它们分别是仓库标识、
-   * 记账口径与财务前提，改动会让已落库数据失去指向（逐条理由见
-   * {@link WarehouseUpdateInput} 的注释）。
+   * <p>入参**不含**编码、仓库类型、货权法人与默认发货仓标记：它们分别是仓库标识、 记账口径与财务前提，改动会让已落库数据失去指向（逐条理由见 {@link
+   * WarehouseUpdateInput} 的注释）。
    *
    * <p>{@code status} 可改到 ARCHIVED，但归档是终态：归档后不能再改任何字段。
    */

@@ -8,11 +8,9 @@ import org.junit.jupiter.api.Test;
 /**
  * 3.4.3.1 多语言内容的纯规则层单元测试。
  *
- * <p>这些是**不依赖数据库**的边界：语言标签规范化、三态与正文的一致性、
- * 状态流转合法性、占位符拒绝、容量上限、驳回理由必填。
+ * <p>这些是**不依赖数据库**的边界：语言标签规范化、三态与正文的一致性、 状态流转合法性、占位符拒绝、容量上限、驳回理由必填。
  *
- * <p>刻意写成不碰 Spring 容器：规则层要是能单测，就不要为了测它去起一个
- * Testcontainers（那会让「改一个 if 的成本」高到没人愿意再碰）。
+ * <p>刻意写成不碰 Spring 容器：规则层要是能单测，就不要为了测它去起一个 Testcontainers（那会让「改一个 if 的成本」高到没人愿意再碰）。
  */
 class TranslationRulesTest {
 
@@ -78,7 +76,8 @@ class TranslationRulesTest {
   void pendingRequiresEmptyText() {
     assertThat(TranslationRules.translationTextProblem("PENDING", "", "")).isNull();
     assertThat(TranslationRules.translationTextProblem("PENDING", "Kaffee", ""))
-        .contains("待翻").contains("已翻");
+        .contains("待翻")
+        .contains("已翻");
   }
 
   @Test
@@ -86,7 +85,8 @@ class TranslationRulesTest {
     assertThat(TranslationRules.translationTextProblem("REVIEWED", "Kaffee", "")).isNull();
     // 描述有内容但名称为空：空名称进不了刊登，标成已校对是自欺。
     assertThat(TranslationRules.translationTextProblem("REVIEWED", "", "Beschreibung"))
-        .contains("已校对").contains("名称");
+        .contains("已校对")
+        .contains("名称");
   }
 
   @Test
@@ -103,17 +103,22 @@ class TranslationRulesTest {
     String problem = TranslationRules.statusTransitionProblem("PENDING", "REVIEWED", "", "");
     assertThat(problem).contains("已翻");
     // 先填译文再标校对是合法的。
-    assertThat(TranslationRules.statusTransitionProblem("TRANSLATED", "REVIEWED", "Kaffee", "")).isNull();
+    assertThat(TranslationRules.statusTransitionProblem("TRANSLATED", "REVIEWED", "Kaffee", ""))
+        .isNull();
   }
 
   @Test
   void textBearingEntryCannotRegressToPending() {
     // 正文不会因为改状态就消失；静默退回待翻会让内容从刊登可取范围里消失。
-    assertThat(TranslationRules.statusTransitionProblem("REVIEWED", "PENDING", "Kaffee", "Beschreibung"))
+    assertThat(
+            TranslationRules.statusTransitionProblem(
+                "REVIEWED", "PENDING", "Kaffee", "Beschreibung"))
         .contains("待翻");
     // 同状态重写（改正文不改状态）是正常编辑，放行。
-    assertThat(TranslationRules.statusTransitionProblem("TRANSLATED", "TRANSLATED", "Kaffee2", "")).isNull();
-    assertThat(TranslationRules.statusTransitionProblem("REVIEWED", "TRANSLATED", "Kaffee", "")).isNull();
+    assertThat(TranslationRules.statusTransitionProblem("TRANSLATED", "TRANSLATED", "Kaffee2", ""))
+        .isNull();
+    assertThat(TranslationRules.statusTransitionProblem("REVIEWED", "TRANSLATED", "Kaffee", ""))
+        .isNull();
   }
 
   @Test
@@ -136,7 +141,8 @@ class TranslationRulesTest {
   void vocabulariesMatchTheMigrationChecks() {
     assertThat(TranslationRules.STATUSES).containsExactly("PENDING", "TRANSLATED", "REVIEWED");
     assertThat(TranslationRules.ORIGINS).containsExactly("MANUAL", "AI", "IMPORTED");
-    assertThat(TranslationRules.SUGGESTION_STATUSES).containsExactly("PENDING", "ADOPTED", "REJECTED");
+    assertThat(TranslationRules.SUGGESTION_STATUSES)
+        .containsExactly("PENDING", "ADOPTED", "REJECTED");
     assertThat(TranslationRules.BATCH_ACTIONS)
         .containsExactly("CREATE_PENDING", "ADOPT_SUGGESTIONS", "MARK_REVIEWED");
     assertThat(TranslationRules.BATCH_OUTCOMES).containsExactly("SUCCEEDED", "SKIPPED", "REJECTED");

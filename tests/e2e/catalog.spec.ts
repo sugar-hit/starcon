@@ -24,7 +24,7 @@ test('商品中心：SPU、公共属性、SKU 覆写、真实持久化与移动�
   const request = async (path: string, method = 'GET', data?: unknown) => {
     const response = await page.request.fetch(`/api/catalog/${path}`, {
       method,
-      headers: { Origin: 'http://localhost:3000' },
+      headers: { Origin: new URL(page.url()).origin },
       ...(data === undefined ? {} : { data }),
     });
     expect(response.ok(), `${method} ${path}`).toBeTruthy();

@@ -19,12 +19,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.1.2.2 SKU 详情：分区聚合、属性有效值解析、编辑入口乐观锁、未接入投影的处置，
- * 以及租户隔离三断言。真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
+ * 3.1.2.2 SKU 详情：分区聚合、属性有效值解析、编辑入口乐观锁、未接入投影的处置， 以及租户隔离三断言。真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
  * <p>连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  */
@@ -163,12 +161,7 @@ class SkuDetailIntegrationTest {
    * 详情页的有效值就是从这三张表解析出来的，不存在任何冗余的"有效值"列。
    */
   record Fixture(
-      UUID spuId,
-      UUID skuId,
-      UUID colorId,
-      UUID capacityId,
-      UUID materialId,
-      UUID warrantyId) {}
+      UUID spuId, UUID skuId, UUID colorId, UUID capacityId, UUID materialId, UUID warrantyId) {}
 
   Fixture fixture(String prefix) {
     UUID p =
@@ -186,30 +179,70 @@ class SkuDetailIntegrationTest {
         createAttribute(
             p,
             new AttributeInput(
-                "COLOR", "颜色", "OPTION", "SKU_ONLY", false, true, true, "", "规格",
-                List.of("黑色", "白色"), List.of(), 0));
+                "COLOR",
+                "颜色",
+                "OPTION",
+                "SKU_ONLY",
+                false,
+                true,
+                true,
+                "",
+                "规格",
+                List.of("黑色", "白色"),
+                List.of(),
+                0));
     // COMMON_LOCKED：只能继承公共值，SKU 侧不允许覆写。
     UUID material =
         createAttribute(
             p,
             new AttributeInput(
-                "MATERIAL", "材质", "TEXT", "COMMON_LOCKED", false, false, false, "", "基本参数",
-                List.of(), List.of(), 0));
+                "MATERIAL",
+                "材质",
+                "TEXT",
+                "COMMON_LOCKED",
+                false,
+                false,
+                false,
+                "",
+                "基本参数",
+                List.of(),
+                List.of(),
+                0));
     // COMMON_DEFAULT：公共值为默认，SKU 可覆写也可清空。
     UUID warranty =
         createAttribute(
             p,
             new AttributeInput(
-                "WARRANTY", "质保", "TEXT", "COMMON_DEFAULT", false, false, false, "", "基本参数",
-                List.of(), List.of(), 0));
+                "WARRANTY",
+                "质保",
+                "TEXT",
+                "COMMON_DEFAULT",
+                false,
+                false,
+                false,
+                "",
+                "基本参数",
+                List.of(),
+                List.of(),
+                0));
     // SKU_ONLY 但非必填、也不是规格轴：SKU 不填就是未赋值，
     // 用来验证"未赋值"不会被误显示成继承。
     UUID capacity =
         createAttribute(
             p,
             new AttributeInput(
-                "CAPACITY", "容量", "OPTION", "SKU_ONLY", false, false, false, "GB", "技术参数",
-                List.of("128", "256"), List.of(), 0));
+                "CAPACITY",
+                "容量",
+                "OPTION",
+                "SKU_ONLY",
+                false,
+                false,
+                false,
+                "GB",
+                "技术参数",
+                List.of("128", "256"),
+                List.of(),
+                0));
 
     UUID sku =
         call(
@@ -373,8 +406,18 @@ class SkuDetailIntegrationTest {
         createAttribute(
             p,
             new AttributeInput(
-                "MODEL", "型号", "TEXT", "COMMON_DEFAULT", false, true, false, "", "基本参数",
-                List.of(), List.of(), 0));
+                "MODEL",
+                "型号",
+                "TEXT",
+                "COMMON_DEFAULT",
+                false,
+                true,
+                false,
+                "",
+                "基本参数",
+                List.of(),
+                List.of(),
+                0));
     UUID sku =
         call(
             actor,
@@ -385,7 +428,12 @@ class SkuDetailIntegrationTest {
                     p,
                     null,
                     new SkuInput(
-                        "COMPLETE-1", "草稿 SKU", "6900000010", "件", "DRAFT", List.of(),
+                        "COMPLETE-1",
+                        "草稿 SKU",
+                        "6900000010",
+                        "件",
+                        "DRAFT",
+                        List.of(),
                         detail(p).product().version())));
 
     var d = call(actor, "catalog.sku.read", () -> detail.detail(actor, sku));
@@ -414,8 +462,18 @@ class SkuDetailIntegrationTest {
         createAttribute(
             p,
             new AttributeInput(
-                "COLOR", "颜色", "OPTION", "SKU_ONLY", false, true, true, "", "规格",
-                List.of("黑色"), List.of(), 0));
+                "COLOR",
+                "颜色",
+                "OPTION",
+                "SKU_ONLY",
+                false,
+                true,
+                true,
+                "",
+                "规格",
+                List.of("黑色"),
+                List.of(),
+                0));
     assertThatThrownBy(
             () ->
                 call(
@@ -427,7 +485,12 @@ class SkuDetailIntegrationTest {
                             p,
                             null,
                             new SkuInput(
-                                "REQ-ACTIVE-1", "缺规格", "6900000020", "件", "ACTIVE", List.of(),
+                                "REQ-ACTIVE-1",
+                                "缺规格",
+                                "6900000020",
+                                "件",
+                                "ACTIVE",
+                                List.of(),
                                 detail(p).product().version()))))
         .hasMessageContaining("请填写必填属性")
         .hasMessageContaining("颜色");
@@ -447,10 +510,11 @@ class SkuDetailIntegrationTest {
     assertThat(d.attributeSummary().inherited()).isEqualTo(1); // MATERIAL
     assertThat(d.attributeSummary().variantAxes()).isEqualTo(1);
     assertThat(d.attributeSummary().total())
-        .isEqualTo(d.attributeSummary().overridden()
-            + d.attributeSummary().cleared()
-            + d.attributeSummary().inherited()
-            + d.attributeSummary().unset());
+        .isEqualTo(
+            d.attributeSummary().overridden()
+                + d.attributeSummary().cleared()
+                + d.attributeSummary().inherited()
+                + d.attributeSummary().unset());
   }
 
   @Test
@@ -492,11 +556,7 @@ class SkuDetailIntegrationTest {
     assertThat(d.sources())
         .extracting(SkuDetailSource::code)
         .containsExactlyInAnyOrder(
-            "INVENTORY_DISTRIBUTION",
-            "COST",
-            "SALE_PRICE",
-            "LISTINGS",
-            "DOCUMENT_REFERENCES");
+            "INVENTORY_DISTRIBUTION", "COST", "SALE_PRICE", "LISTINGS", "DOCUMENT_REFERENCES");
     for (var s : d.sources()) {
       assertThat(s.available()).as(s.code()).isFalse();
       assertThat(s.note()).contains("上游投影未接入");
@@ -511,10 +571,7 @@ class SkuDetailIntegrationTest {
     var f = fixture("SELLER");
     var d = call(actor, "catalog.sku.read", () -> detail.detail(actor, f.skuId()));
     var listing =
-        d.sources().stream()
-            .filter(s -> s.code().equals("LISTINGS"))
-            .findFirst()
-            .orElseThrow();
+        d.sources().stream().filter(s -> s.code().equals("LISTINGS")).findFirst().orElseThrow();
     assertThat(listing.available()).isFalse();
     assertThat(listing.owner()).isEqualTo("04 刊登");
     assertThat(d.barcode().identifierNote()).contains("04 刊登");
@@ -535,9 +592,7 @@ class SkuDetailIntegrationTest {
             "catalog.sku.update",
             () ->
                 detail.update(
-                    actor,
-                    f.skuId(),
-                    input(before.version(), "箱", 200, 150, 100, 250, 300)));
+                    actor, f.skuId(), input(before.version(), "箱", 200, 150, 100, 250, 300)));
     assertThat(saved.packagingChanged()).isTrue();
     var after = call(actor, "catalog.sku.read", () -> detail.detail(actor, f.skuId()));
     assertThat(after.packaging().lengthMm()).isEqualByComparingTo("200");
@@ -551,7 +606,9 @@ class SkuDetailIntegrationTest {
         call(
             actor,
             "catalog.sku.update",
-            () -> detail.update(actor, f.skuId(), input(after.version(), "箱", 200, null, null, null, null)));
+            () ->
+                detail.update(
+                    actor, f.skuId(), input(after.version(), "箱", 200, null, null, null, null)));
     var partialView = call(actor, "catalog.sku.read", () -> detail.detail(actor, f.skuId()));
     assertThat(partialView.packaging().lengthMm()).isEqualByComparingTo("200");
     assertThat(partialView.packaging().volumeCm3()).isNull();
@@ -562,7 +619,9 @@ class SkuDetailIntegrationTest {
         call(
             actor,
             "catalog.sku.update",
-            () -> detail.update(actor, f.skuId(), input(partial.version(), "", null, null, null, null, null)));
+            () ->
+                detail.update(
+                    actor, f.skuId(), input(partial.version(), "", null, null, null, null, null)));
     assertThat(cleared.packagingChanged()).isTrue();
     var clearedView = call(actor, "catalog.sku.read", () -> detail.detail(actor, f.skuId()));
     assertThat(clearedView.packaging()).isNull();
@@ -587,8 +646,7 @@ class SkuDetailIntegrationTest {
                     actor,
                     "catalog.sku.update",
                     () ->
-                        detail.update(
-                            actor, f.skuId(), input(d.version(), "箱", -1, 10, 10, 1, 2))))
+                        detail.update(actor, f.skuId(), input(d.version(), "箱", -1, 10, 10, 1, 2))))
         .hasMessageContaining("长不能为负数");
   }
 
@@ -601,11 +659,15 @@ class SkuDetailIntegrationTest {
           sql.execute(
               "insert into sku_unit_conversion(id,tenant_id,sku_id,unit_code,role,quantity_per_base,effective_from,effective_to)"
                   + " values(?::uuid,?::uuid,?::uuid,'箱','PURCHASE',10,'2018-01-01','2023-12-31')",
-              UUID.randomUUID(), a, f.skuId());
+              UUID.randomUUID(),
+              a,
+              f.skuId());
           sql.execute(
               "insert into sku_unit_conversion(id,tenant_id,sku_id,unit_code,role,quantity_per_base,effective_from,effective_to)"
                   + " values(?::uuid,?::uuid,?::uuid,'箱','PURCHASE',12,'2024-01-01',null)",
-              UUID.randomUUID(), a, f.skuId());
+              UUID.randomUUID(),
+              a,
+              f.skuId());
           return null;
         });
     var d = call(actor, "catalog.sku.read", () -> detail.detail(actor, f.skuId()));
@@ -627,7 +689,9 @@ class SkuDetailIntegrationTest {
           sql.execute(
               "insert into sku_unit_conversion(id,tenant_id,sku_id,unit_code,role,quantity_per_base,effective_from,effective_to)"
                   + " values(?::uuid,?::uuid,?::uuid,'箱','PURCHASE',12,'2024-01-01',null)",
-              UUID.randomUUID(), a, f.skuId());
+              UUID.randomUUID(),
+              a,
+              f.skuId());
           return null;
         });
     assertThatThrownBy(
@@ -638,7 +702,9 @@ class SkuDetailIntegrationTest {
                       sql.execute(
                           "insert into sku_unit_conversion(id,tenant_id,sku_id,unit_code,role,quantity_per_base,effective_from,effective_to)"
                               + " values(?::uuid,?::uuid,?::uuid,'箱','PURCHASE',10,'2023-06-01',null)",
-                          UUID.randomUUID(), a, f.skuId());
+                          UUID.randomUUID(),
+                          a,
+                          f.skuId());
                       return null;
                     }))
         .hasMessageContaining("生效区间与已有版本重叠");
@@ -659,7 +725,16 @@ class SkuDetailIntegrationTest {
                     actor,
                     f.skuId(),
                     new SkuDetailInput(
-                        "改名后的 SKU", "6900000001", "箱", "", null, null, null, null, null, before.version())));
+                        "改名后的 SKU",
+                        "6900000001",
+                        "箱",
+                        "",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        before.version())));
     assertThat(saved.version()).isEqualTo(before.version() + 1);
     var after = call(actor, "catalog.sku.read", () -> detail.detail(actor, f.skuId()));
     assertThat(after.name()).isEqualTo("改名后的 SKU");
@@ -668,7 +743,12 @@ class SkuDetailIntegrationTest {
     assertThat(after.version()).isEqualTo(before.version() + 1);
     // 下游事件已发布（04 刊登可能要同步 listing 文案）。
     assertThat(
-            tx(a, () -> sql.fetch("select * from outbox_event where aggregate_id=? and event_type='SkuProfileSaved'", f.skuId())))
+            tx(
+                a,
+                () ->
+                    sql.fetch(
+                        "select * from outbox_event where aggregate_id=? and event_type='SkuProfileSaved'",
+                        f.skuId())))
         .isNotEmpty();
   }
 
@@ -691,7 +771,16 @@ class SkuDetailIntegrationTest {
                             actor,
                             f.skuId(),
                             new SkuDetailInput(
-                                "并发写入", "6900000002", "件", "", null, null, null, null, null, before.version()))))
+                                "并发写入",
+                                "6900000002",
+                                "件",
+                                "",
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                before.version()))))
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
         .satisfies(
             e ->
@@ -705,13 +794,7 @@ class SkuDetailIntegrationTest {
   }
 
   SkuDetailInput input(
-      long version,
-      String type,
-      Number l,
-      Number w,
-      Number h,
-      Number net,
-      Number gross) {
+      long version, String type, Number l, Number w, Number h, Number net, Number gross) {
     return new SkuDetailInput(
         "SKU 详情测试商品-1",
         "69" + Math.abs(type.hashCode() % 100000000),
@@ -745,7 +828,16 @@ class SkuDetailIntegrationTest {
               actor,
               "assets",
               null,
-              new RecordInput(f.spuId(), "主图", "产品白底图", "https://cdn.example.com/a.png", "DRAFT", "zh-CN", "US", null, 0));
+              new RecordInput(
+                  f.spuId(),
+                  "主图",
+                  "产品白底图",
+                  "https://cdn.example.com/a.png",
+                  "DRAFT",
+                  "zh-CN",
+                  "US",
+                  null,
+                  0));
           return null;
         });
     var d = call(actor, "catalog.sku.read", () -> detail.detail(actor, f.skuId()));
@@ -767,7 +859,16 @@ class SkuDetailIntegrationTest {
               actor,
               "assets",
               null,
-              new RecordInput(f.spuId(), "细节图", "", "https://cdn.example.com/b.png", "DRAFT", "zh-CN", "US", null, 0));
+              new RecordInput(
+                  f.spuId(),
+                  "细节图",
+                  "",
+                  "https://cdn.example.com/b.png",
+                  "DRAFT",
+                  "zh-CN",
+                  "US",
+                  null,
+                  0));
           return null;
         });
     var reader = actors.get("Bearer reader");
@@ -803,7 +904,10 @@ class SkuDetailIntegrationTest {
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
         .satisfies(
             e ->
-                assertThat(((org.springframework.web.server.ResponseStatusException) e).getStatusCode().value())
+                assertThat(
+                        ((org.springframework.web.server.ResponseStatusException) e)
+                            .getStatusCode()
+                            .value())
                     .isEqualTo(404));
     // 拿自己的 ID 去查对方租户的 SPU，同样不可见。
     assertThatThrownBy(() -> tx(b, () -> detail.detail(actor(b), theirs)))
@@ -845,8 +949,7 @@ class SkuDetailIntegrationTest {
                 .header("Authorization", "Bearer tenant-b")
                 .header("X-Tenant-Id", a)
                 .contentType("application/json")
-                .content(
-                    "{\"name\":\"伪造\",\"barcode\":\"1\",\"baseUnit\":\"件\",\"version\":0}"))
+                .content("{\"name\":\"伪造\",\"barcode\":\"1\",\"baseUnit\":\"件\",\"version\":0}"))
         .andExpect(status().isNotFound());
     assertThat(tx(a, () -> version(mine.skuId()))).isEqualTo(beforeVersion);
 
@@ -871,7 +974,8 @@ class SkuDetailIntegrationTest {
                 + " and relname in ('sku_package','sku_unit_conversion')"
                 + " and (not relrowsecurity or not relforcerowsecurity)");
     assertThat(weak).isEmpty();
-    var role = sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
+    var role =
+        sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
     assertThat(role.get("rolsuper", Boolean.class)).isFalse();
     assertThat(role.get("rolbypassrls", Boolean.class)).isFalse();
     for (String table : List.of("sku_package", "sku_unit_conversion")) {
@@ -882,7 +986,8 @@ class SkuDetailIntegrationTest {
       assertThat(column.get("is_nullable", String.class)).as(table).isEqualTo("NO");
     }
     // 数量与金额列必须是 NUMERIC，绝不能是浮点。
-    for (String column : List.of("length_mm", "net_weight_g", "gross_weight_g", "quantity_per_base")) {
+    for (String column :
+        List.of("length_mm", "net_weight_g", "gross_weight_g", "quantity_per_base")) {
       var type =
           sql.fetchOne(
               "select data_type,numeric_precision,numeric_scale from information_schema.columns"
@@ -903,8 +1008,7 @@ class SkuDetailIntegrationTest {
     commonValue(f.spuId(), f.warrantyId(), "一年");
 
     var response =
-        http.perform(
-                get("/catalog/skus/" + f.skuId()).header("Authorization", "Bearer tenant-a"))
+        http.perform(get("/catalog/skus/" + f.skuId()).header("Authorization", "Bearer tenant-a"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value("HTTP-1"))
             .andExpect(jsonPath("$.version").exists())
@@ -916,8 +1020,9 @@ class SkuDetailIntegrationTest {
             .andExpect(jsonPath("$.mediaLimitation").exists())
             .andReturn();
     long version =
-        ((Number) com.jayway.jsonpath.JsonPath.read(
-                response.getResponse().getContentAsString(), "$.version"))
+        ((Number)
+                com.jayway.jsonpath.JsonPath.read(
+                    response.getResponse().getContentAsString(), "$.version"))
             .longValue();
 
     // 编辑入口走 version 乐观锁。
@@ -933,8 +1038,7 @@ class SkuDetailIntegrationTest {
                         + "}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.packagingChanged").value(true));
-    http.perform(
-            get("/catalog/skus/" + f.skuId()).header("Authorization", "Bearer tenant-a"))
+    http.perform(get("/catalog/skus/" + f.skuId()).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.name").value("HTTP 改名"))
         .andExpect(jsonPath("$.packaging.packagingType").value("彩盒"))
@@ -978,7 +1082,9 @@ class SkuDetailIntegrationTest {
         "catalog.sku.update",
         () ->
             new SkuListService(sql, new UnwiredSkuProjectionPort(), access)
-                .batch(actor, new SkuBatchInput("STOP_SELLING", ids, "INACTIVE", "供应商停供", null, false)));
+                .batch(
+                    actor,
+                    new SkuBatchInput("STOP_SELLING", ids, "INACTIVE", "供应商停供", null, false)));
     var d = call(actor, "catalog.sku.read", () -> detail.detail(actor, f.skuId()));
     assertThat(d.statusHistory()).isNotEmpty();
     var change = d.statusHistory().getFirst();
@@ -1001,11 +1107,15 @@ class SkuDetailIntegrationTest {
               sql.execute(
                   "insert into sku_unit_conversion(id,tenant_id,sku_id,unit_code,role,quantity_per_base,effective_from,effective_to)"
                       + " values(?::uuid,?::uuid,?::uuid,'箱','PURCHASE',10,'2018-01-01','2023-12-31')",
-                  UUID.randomUUID(), a, f.skuId());
+                  UUID.randomUUID(),
+                  a,
+                  f.skuId());
               sql.execute(
                   "insert into sku_unit_conversion(id,tenant_id,sku_id,unit_code,role,quantity_per_base,effective_from,effective_to)"
                       + " values(?::uuid,?::uuid,?::uuid,'箱','PURCHASE',12,'2024-01-01',null)",
-                  UUID.randomUUID(), a, f.skuId());
+                  UUID.randomUUID(),
+                  a,
+                  f.skuId());
               return null;
             });
     assertThat(rows).isNull();

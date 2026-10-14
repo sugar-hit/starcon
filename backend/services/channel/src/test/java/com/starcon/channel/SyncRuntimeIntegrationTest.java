@@ -10,7 +10,6 @@ import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import org.jooq.DSLContext;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,8 +39,8 @@ class SyncRuntimeIntegrationTest {
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
 
   /**
-   * 权限集与 identity 迁移注册的权限码一致：registry/connection/shop/sync/operation 的 CRUD，
-   * 外加 sync.trigger 与 sync.complete —— 后两者是 02.4 特有的细分动作。
+   * 权限集与 identity 迁移注册的权限码一致：registry/connection/shop/sync/operation 的 CRUD， 外加 sync.trigger 与
+   * sync.complete —— 后两者是 02.4 特有的细分动作。
    */
   static final List<String> allPermissions =
       java.util.stream.Stream.of("registry", "connection", "shop", "sync", "operation")
@@ -51,7 +50,8 @@ class SyncRuntimeIntegrationTest {
                       java.util.stream.Stream.of("read", "create", "update", "delete")
                           .map(op -> "channel." + p + "." + op),
                       p.equals("sync")
-                          ? java.util.stream.Stream.of("channel.sync.trigger", "channel.sync.complete")
+                          ? java.util.stream.Stream.of(
+                              "channel.sync.trigger", "channel.sync.complete")
                           : java.util.stream.Stream.empty()))
           .distinct()
           .toList();
@@ -74,12 +74,15 @@ class SyncRuntimeIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
-        s.execute("do $$ begin if not exists(select 1 from pg_roles where rolname='starcon_app')"
-            + " then create role starcon_app nologin; end if; end $$");
-        s.execute("do $$ begin if not exists(select 1 from pg_roles where rolname='channel_app')"
-            + " then create role channel_app login password 'test-only' nosuperuser nobypassrls; end if; end $$");
+        s.execute(
+            "do $$ begin if not exists(select 1 from pg_roles where rolname='starcon_app')"
+                + " then create role starcon_app nologin; end if; end $$");
+        s.execute(
+            "do $$ begin if not exists(select 1 from pg_roles where rolname='channel_app')"
+                + " then create role channel_app login password 'test-only' nosuperuser nobypassrls; end if; end $$");
         s.execute("alter role channel_app login password 'test-only' nosuperuser nobypassrls");
       }
       identity = HttpServer.create(new InetSocketAddress(0), 0);
@@ -174,8 +177,7 @@ class SyncRuntimeIntegrationTest {
         who,
         "channel.sync.create",
         () ->
-            sync.registerCursor(
-                who, new SyncCursorInput(connectionId, null, resource, "default")));
+            sync.registerCursor(who, new SyncCursorInput(connectionId, null, resource, "default")));
   }
 
   // ------------------------------------------------------------------
@@ -196,8 +198,7 @@ class SyncRuntimeIntegrationTest {
   void duplicateCursorRegistrationIsRejectedSoResumePointDoesNotSplit() {
     UUID conn = connection(actorA);
     cursor(actorA, conn, "ORDER");
-    assertThatThrownBy(() -> cursor(actorA, conn, "ORDER"))
-        .hasMessageContaining("已存在");
+    assertThatThrownBy(() -> cursor(actorA, conn, "ORDER")).hasMessageContaining("已存在");
   }
 
   // ------------------------------------------------------------------
@@ -239,7 +240,12 @@ class SyncRuntimeIntegrationTest {
               new SyncRunResult("FAILED", 10, 0, 0, "2026-01-09T00:00:00Z", 900),
               List.of(
                   new SyncFailureInput(
-                      "AMZ-ORDER-1", "ORDER", FailureReason.NETWORK_ERROR, "timeout", "abc123", "e")));
+                      "AMZ-ORDER-1",
+                      "ORDER",
+                      FailureReason.NETWORK_ERROR,
+                      "timeout",
+                      "abc123",
+                      "e")));
           return null;
         });
     SyncCursorView after = as(actorA, "channel.sync.read", () -> sync.cursor(c));
@@ -259,8 +265,7 @@ class SyncRuntimeIntegrationTest {
           actorA,
           "channel.sync.complete",
           () -> {
-            sync.completeRun(
-                actorA, run, new SyncRunResult("FAILED", 1, 0, 0, "", 10), List.of());
+            sync.completeRun(actorA, run, new SyncRunResult("FAILED", 1, 0, 0, "", 10), List.of());
             return null;
           });
     }
@@ -319,7 +324,12 @@ class SyncRuntimeIntegrationTest {
               new SyncRunResult("FAILED", 1, 0, 0, "", 10),
               List.of(
                   new SyncFailureInput(
-                      externalKey, "ORDER", FailureReason.FIELD_PARSE_FAILED, "bad field", "d1", "e")));
+                      externalKey,
+                      "ORDER",
+                      FailureReason.FIELD_PARSE_FAILED,
+                      "bad field",
+                      "d1",
+                      "e")));
           return null;
         });
     UUID run2 = as(actorA, "channel.sync.trigger", () -> sync.triggerRun(actorA, c, "REPLAY"));
@@ -333,14 +343,23 @@ class SyncRuntimeIntegrationTest {
               new SyncRunResult("FAILED", 1, 0, 0, "", 10),
               List.of(
                   new SyncFailureInput(
-                      externalKey, "ORDER", FailureReason.FIELD_PARSE_FAILED, "still bad", "d1", "e")));
+                      externalKey,
+                      "ORDER",
+                      FailureReason.FIELD_PARSE_FAILED,
+                      "still bad",
+                      "d1",
+                      "e")));
           return null;
         });
     // 铁律：同一游标下同一 external_key 只有一条失败记录，重放不产生第二条
     List<SyncFailureView> open = as(actorA, "channel.sync.read", () -> sync.failures(a, null, 50));
     assertThat(open.stream().filter(f -> f.externalKey().equals(externalKey))).hasSize(1);
-    assertThat(open.stream().filter(f -> f.externalKey().equals(externalKey)).findFirst().orElseThrow()
-            .attempts())
+    assertThat(
+            open.stream()
+                .filter(f -> f.externalKey().equals(externalKey))
+                .findFirst()
+                .orElseThrow()
+                .attempts())
         .isEqualTo(2);
   }
 
@@ -364,19 +383,25 @@ class SyncRuntimeIntegrationTest {
                   new SyncFailureInput("K-3", "ORDER", FailureReason.MAPPING_MISSING, "", "", "")));
           return null;
         });
-    List<SyncFailureSummary> summary = as(actorA, "channel.sync.read", () -> sync.failureSummary(a));
+    List<SyncFailureSummary> summary =
+        as(actorA, "channel.sync.read", () -> sync.failureSummary(a));
     // 只看本用例引入的三条：容器被本类所有测试共享，全局分布里还有别的用例的记录
     assertThat(summary.stream().filter(s -> s.reason().equals("AUTHORIZATION_EXPIRED")).count())
         .isEqualTo(1);
-    assertThat(summary.stream().filter(s -> s.reason().equals("MAPPING_MISSING")).findFirst().orElseThrow()
-            .total())
+    assertThat(
+            summary.stream()
+                .filter(s -> s.reason().equals("MAPPING_MISSING"))
+                .findFirst()
+                .orElseThrow()
+                .total())
         .isEqualTo(2);
     // "授权失效"是唯一会导致持续漏单的原因，排序必须让它可见而不是淹没在长尾里
-    assertThat(summary.stream()
-            .filter(s -> s.reason().equals("AUTHORIZATION_EXPIRED"))
-            .findFirst()
-            .orElseThrow()
-            .total())
+    assertThat(
+            summary.stream()
+                .filter(s -> s.reason().equals("AUTHORIZATION_EXPIRED"))
+                .findFirst()
+                .orElseThrow()
+                .total())
         .isPositive();
   }
 
@@ -393,7 +418,8 @@ class SyncRuntimeIntegrationTest {
               actorA,
               run,
               new SyncRunResult("FAILED", 1, 0, 0, "", 10),
-              List.of(new SyncFailureInput("K-9", "ORDER", FailureReason.RATE_LIMITED, "", "", "")));
+              List.of(
+                  new SyncFailureInput("K-9", "ORDER", FailureReason.RATE_LIMITED, "", "", "")));
           return null;
         });
     SyncFailureView failure =
@@ -401,11 +427,9 @@ class SyncRuntimeIntegrationTest {
             .filter(f -> f.externalKey().equals("K-9"))
             .findFirst()
             .orElseThrow();
-    UUID replayRun =
-        as(actorA, "channel.sync.trigger", () -> sync.replay(actorA, failure.id()));
+    UUID replayRun = as(actorA, "channel.sync.trigger", () -> sync.replay(actorA, failure.id()));
     // 重放运行未成功前，失败记录仍保持 OPEN
-    as(actorA, "channel.sync.read", () -> sync.failures(a, null, 50))
-        .stream()
+    as(actorA, "channel.sync.read", () -> sync.failures(a, null, 50)).stream()
         .filter(f -> f.externalKey().equals("K-9"))
         .forEach(f -> assertThat(f.status()).isEqualTo("OPEN"));
     as(
@@ -433,7 +457,10 @@ class SyncRuntimeIntegrationTest {
         "channel.sync.complete",
         () -> {
           sync.completeRun(
-              actorA, run, new SyncRunResult("SUCCEEDED", 5, 5, 0, "2026-02-01T00:00:00Z", 5), List.of());
+              actorA,
+              run,
+              new SyncRunResult("SUCCEEDED", 5, 5, 0, "2026-02-01T00:00:00Z", 5),
+              List.of());
           return null;
         });
     as(
@@ -479,7 +506,8 @@ class SyncRuntimeIntegrationTest {
           sync.setCursorPaused(actorA, c, false);
           return null;
         });
-    assertThat(as(actorA, "channel.sync.trigger", () -> sync.triggerRun(actorA, c, "MANUAL"))).isNotNull();
+    assertThat(as(actorA, "channel.sync.trigger", () -> sync.triggerRun(actorA, c, "MANUAL")))
+        .isNotNull();
   }
 
   // ------------------------------------------------------------------
@@ -497,7 +525,8 @@ class SyncRuntimeIntegrationTest {
             () ->
                 sync.enqueueOperation(
                     actorA,
-                    new PlatformOperationInput(s, null, OperationKind.UPDATE_STOCK, key, "{\"qty\":5}")));
+                    new PlatformOperationInput(
+                        s, null, OperationKind.UPDATE_STOCK, key, "{\"qty\":5}")));
     UUID second =
         as(
             actorA,
@@ -505,7 +534,8 @@ class SyncRuntimeIntegrationTest {
             () ->
                 sync.enqueueOperation(
                     actorA,
-                    new PlatformOperationInput(s, null, OperationKind.UPDATE_STOCK, key, "{\"qty\":5}")));
+                    new PlatformOperationInput(
+                        s, null, OperationKind.UPDATE_STOCK, key, "{\"qty\":5}")));
     // 铁律：同一幂等键不会产生第二条回写，上游重发是安全的
     assertThat(second).isEqualTo(first);
     // 断言只数自己的键：容器被本类所有测试共享，列表里还有别的用例留下的记录
@@ -550,11 +580,12 @@ class SyncRuntimeIntegrationTest {
           sync.verifyOperation(actorA, op, Verification.CONFIRMED_NOT_APPLIED);
           return null;
         });
-    assertThat(as(actorA, "channel.operation.read", () -> sync.operations(a, null, 50)).stream()
-            .filter(o -> o.id().equals(op))
-            .findFirst()
-            .orElseThrow()
-            .status())
+    assertThat(
+            as(actorA, "channel.operation.read", () -> sync.operations(a, null, 50)).stream()
+                .filter(o -> o.id().equals(op))
+                .findFirst()
+                .orElseThrow()
+                .status())
         .isEqualTo("FAILED");
   }
 
@@ -639,7 +670,9 @@ class SyncRuntimeIntegrationTest {
               actorA,
               run,
               new SyncRunResult("FAILED", 1, 0, 0, "", 5),
-              List.of(new SyncFailureInput("LEAK-1", "ORDER", FailureReason.NETWORK_ERROR, "", "", "")));
+              List.of(
+                  new SyncFailureInput(
+                      "LEAK-1", "ORDER", FailureReason.NETWORK_ERROR, "", "", "")));
           return null;
         });
     assertThat(as(actorA, "channel.sync.read", () -> sync.failures(a, null, 50))).isNotEmpty();
@@ -659,9 +692,10 @@ class SyncRuntimeIntegrationTest {
             sync.enqueueOperation(
                 actorA,
                 new PlatformOperationInput(s, null, OperationKind.UPDATE_STOCK, key, "{}")));
-    http.perform(get("/channel/platform-operations")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/channel/platform-operations")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(0));
   }

@@ -22,32 +22,27 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 10.5.1.1 报关单管理。
  *
- * <p>蓝图：「管理报关单：按发货单生成申报资料（报关单、装箱单、发票），提交报关行/IOR，
- * 接收放行、退单、改单结果」。输入是「发货明细；3.7.1.1 HS 编码与申报要素；货值与汇率快照；
+ * <p>蓝图：「管理报关单：按发货单生成申报资料（报关单、装箱单、发票），提交报关行/IOR， 接收放行、退单、改单结果」。输入是「发货明细；3.7.1.1 HS 编码与申报要素；货值与汇率快照；
  * 贸易方式与收发货人信息」。
  *
  * <p>六条实现纪律：
  *
  * <ol>
- *   <li><b>人工复核闸在 DB 层，不只靠服务层 if</b>：DB 触发器 {@code customs_1_state} 钉死
- *       「{@code status → SUBMITTED} 时旧状态必须已经是 REVIEWED 且 reviewed_at/reviewed_by 都非空」。
- *       绕过服务层直接 UPDATE 状态同样被挡。服务层这一层是为了把「先复核」讲成人话，
- *       而不是唯一的防线。
- *   <li><b>复核退回后必须重新走复核</b>：{@code REJECTED → SUBMITTED} 不在状态机转换表里，
- *       改完要先回到待复核再走一遍 —— 这正是「罚款由卖家承担」的推论：改完的数据没人看过就不该再出去。
- *   <li><b>货值与汇率是快照</b>：汇率、精度刻度、汇率日期、折算本位币金额一起落库，
- *       DB 延迟约束钉死 {@code declaration_value_base = 明细货值合计 × exchange_rate}。
- *       海关事后复核时要能回答「当时按哪个汇率申报的」，所以运行时**不**去取当前汇率。
- *   <li><b>三单据按版本链保存，改单不覆盖旧版本</b>：被退单时要能举证「上一版报的是什么」，
- *       所以 {@code status} 允许 SUPERSEDED。content 是生成那一刻的快照，读取时不再重算 ——
- *       否则明细一改，历史单据就跟着变了。
- *   <li><b>未交付依赖显式声明，不建假上游</b>：3.7.1.1 HS 编码字典被 product_compliance 服务缺失阻塞，
- *       本模块<b>不建</b>任何 HS 编码字典表（建了就是假的上游，且会成为双 writer）；
- *       {@code hsCode} 接受自由码并带 {@code hsCodeSource}/{@code hsCodeVerified} 如实标记，
- *       申报要素留成可后补的 jsonb 结构。外部报关行接口同样未交付，回执由人工回填并
- *       以 {@code source_system='MANUAL_ENTRY'} 如实标注录入方式。
- *   <li><b>多租户不可省</b>：所有 SQL 走 RLS，租户由 backend/libraries/tenancy 在事务内设置，
- *       客户端伪造 {@code X-Tenant-Id} 进不来也改不动它。
+ *   <li><b>人工复核闸在 DB 层，不只靠服务层 if</b>：DB 触发器 {@code customs_1_state} 钉死 「{@code status → SUBMITTED}
+ *       时旧状态必须已经是 REVIEWED 且 reviewed_at/reviewed_by 都非空」。 绕过服务层直接 UPDATE
+ *       状态同样被挡。服务层这一层是为了把「先复核」讲成人话， 而不是唯一的防线。
+ *   <li><b>复核退回后必须重新走复核</b>：{@code REJECTED → SUBMITTED} 不在状态机转换表里， 改完要先回到待复核再走一遍 ——
+ *       这正是「罚款由卖家承担」的推论：改完的数据没人看过就不该再出去。
+ *   <li><b>货值与汇率是快照</b>：汇率、精度刻度、汇率日期、折算本位币金额一起落库， DB 延迟约束钉死 {@code declaration_value_base = 明细货值合计
+ *       × exchange_rate}。 海关事后复核时要能回答「当时按哪个汇率申报的」，所以运行时**不**去取当前汇率。
+ *   <li><b>三单据按版本链保存，改单不覆盖旧版本</b>：被退单时要能举证「上一版报的是什么」， 所以 {@code status} 允许 SUPERSEDED。content
+ *       是生成那一刻的快照，读取时不再重算 —— 否则明细一改，历史单据就跟着变了。
+ *   <li><b>未交付依赖显式声明，不建假上游</b>：3.7.1.1 HS 编码字典被 product_compliance 服务缺失阻塞， 本模块<b>不建</b>任何 HS
+ *       编码字典表（建了就是假的上游，且会成为双 writer）； {@code hsCode} 接受自由码并带 {@code hsCodeSource}/{@code
+ *       hsCodeVerified} 如实标记， 申报要素留成可后补的 jsonb 结构。外部报关行接口同样未交付，回执由人工回填并 以 {@code
+ *       source_system='MANUAL_ENTRY'} 如实标注录入方式。
+ *   <li><b>多租户不可省</b>：所有 SQL 走 RLS，租户由 backend/libraries/tenancy 在事务内设置， 客户端伪造 {@code X-Tenant-Id}
+ *       进不来也改不动它。
  * </ol>
  *
  * <p>状态机只有一处真相：{@link DeclarationStatus#allowedNext}。
@@ -75,13 +70,11 @@ public class CustomsDeclarationService {
   // ================================================================ 能力
 
   /**
-   * 报关能力清单：贸易方式、运输方式、状态机、单据类型、申报要素状态、
-   * **未交付依赖逐条声明**与四条必须讲清的口径。
+   * 报关能力清单：贸易方式、运输方式、状态机、单据类型、申报要素状态、 **未交付依赖逐条声明**与四条必须讲清的口径。
    *
-   * <p>本车道对集成头实际查证的结论：3.7.1.1（HS 编码与申报要素）被 product_compliance
-   * 服务缺失阻塞，未交付；外部报关行/IOR 接口在本项目里没有可调用的系统与凭证，未交付。
-   * 两者都显式 {@code available=false} + 原因 + {@code ownerModule} + {@code href}，
-   * <b>不建占位表、不返回空集冒充成功</b>。
+   * <p>本车道对集成头实际查证的结论：3.7.1.1（HS 编码与申报要素）被 product_compliance 服务缺失阻塞，未交付；外部报关行/IOR
+   * 接口在本项目里没有可调用的系统与凭证，未交付。 两者都显式 {@code available=false} + 原因 + {@code ownerModule} + {@code
+   * href}， <b>不建占位表、不返回空集冒充成功</b>。
    */
   public CustomsCapabilities capabilities() {
     List<CustomsDimension> dependencies =
@@ -111,8 +104,7 @@ public class CustomsDeclarationService {
                 false,
                 "10.5.1.3",
                 "/logistics/tariffs",
-                "下游 10.5.1.3 关税未交付：本模块只承载申报资料与汇率快照，"
-                    + "不计算关税、不做税费试算。"));
+                "下游 10.5.1.3 关税未交付：本模块只承载申报资料与汇率快照，" + "不计算关税、不做税费试算。"));
 
     return new CustomsCapabilities(
         dependencies,
@@ -214,7 +206,8 @@ public class CustomsDeclarationService {
   public CustomsDeclarationPage page(CustomsQuery query) {
     int page = Math.max(0, query.page());
     int size = Math.min(MAX_PAGE_SIZE, Math.max(1, query.size()));
-    String sort = query.sort() == null || !SORTS.contains(query.sort()) ? "UPDATED_AT" : query.sort();
+    String sort =
+        query.sort() == null || !SORTS.contains(query.sort()) ? "UPDATED_AT" : query.sort();
 
     List<Object> args = new ArrayList<>();
     String where = where(query, args);
@@ -241,7 +234,9 @@ public class CustomsDeclarationService {
         summary,
         rows.stream().map(this::row).toList(),
         statusOptions(),
-        java.util.Arrays.stream(TradeMode.values()).map(m -> new CustomsTradeModeOption(m.name(), m.label())).toList(),
+        java.util.Arrays.stream(TradeMode.values())
+            .map(m -> new CustomsTradeModeOption(m.name(), m.label()))
+            .toList(),
         java.util.Arrays.stream(DeclarationTransportMode.values())
             .map(m -> new CustomsTransportModeOption(m.name(), m.label()))
             .toList(),
@@ -355,14 +350,13 @@ public class CustomsDeclarationService {
         results(id),
         events(id),
         allowed,
-        "来源是 10.4.1.1 头程发运单（迁移 V80，同服务，复合外键保证「引用的那张发运单真的存在"
-            + "且与本租户一致」）。一票货只允许一张报关单，所以本单的发运单是唯一的。",
-        "人工复核是硬闸：只有「已复核」才能提交报关行。复核不通过退回草稿后，"
-            + "改完必须重新走一次复核才能再次提交。");
+        "来源是 10.4.1.1 头程发运单（迁移 V80，同服务，复合外键保证「引用的那张发运单真的存在" + "且与本租户一致」）。一票货只允许一张报关单，所以本单的发运单是唯一的。",
+        "人工复核是硬闸：只有「已复核」才能提交报关行。复核不通过退回草稿后，" + "改完必须重新走一次复核才能再次提交。");
   }
 
   public List<CustomsLineRow> lines(UUID declarationId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select * from customs_declaration_line where declaration_id=?"
                 + " order by line_no, id",
             declarationId)
@@ -373,7 +367,8 @@ public class CustomsDeclarationService {
 
   /** 三单据（含被改版取代的历史版本）—— 退单时要举证「上一版报的是什么」靠的就是它。 */
   public List<CustomsDocumentRow> documents(UUID declarationId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select * from customs_document where declaration_id=?"
                 + " order by document_type, document_version desc",
             declarationId)
@@ -383,7 +378,8 @@ public class CustomsDeclarationService {
   }
 
   public List<CustomsSubmissionRow> submissions(UUID declarationId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select * from customs_submission where declaration_id=? order by submitted_at desc, id",
             declarationId)
         .stream()
@@ -393,7 +389,8 @@ public class CustomsDeclarationService {
 
   /** 海关结果回执：放行 / 退单 / 改单逐条留痕，按时间倒序（最近一次在最前）。 */
   public List<CustomsResultRow> results(UUID declarationId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select * from customs_result where declaration_id=? order by result_at desc, id",
             declarationId)
         .stream()
@@ -402,7 +399,8 @@ public class CustomsDeclarationService {
   }
 
   public List<CustomsEventRow> events(UUID declarationId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select * from customs_declaration_event where declaration_id=?"
                 + " order by occurred_at desc, id",
             declarationId)
@@ -439,8 +437,7 @@ public class CustomsDeclarationService {
             tenantId,
             request.sourceShipmentId());
     if (shipment == null) {
-      throw new IllegalArgumentException(
-          "来源头程发运单不存在或无权访问：" + request.sourceShipmentId());
+      throw new IllegalArgumentException("来源头程发运单不存在或无权访问：" + request.sourceShipmentId());
     }
     if ("CANCELLED".equals(shipment.get("status", String.class))) {
       throw new IllegalArgumentException("来源头程发运单已取消，不能对它报关");
@@ -450,8 +447,7 @@ public class CustomsDeclarationService {
     }
 
     TradeMode tradeMode = TradeMode.parse(request.tradeMode());
-    DeclarationTransportMode mode =
-        DeclarationTransportMode.parse(request.transportMode());
+    DeclarationTransportMode mode = DeclarationTransportMode.parse(request.transportMode());
     String currency = money(request.declarationCurrency(), "申报币种");
     String base = moneyOrDefault(request.baseCurrency(), "CNY", "本位币种");
     BigDecimal rate = positive(request.exchangeRate(), "汇率");
@@ -545,9 +541,7 @@ public class CustomsDeclarationService {
         && current != DeclarationStatus.PENDING_REVIEW
         && current != DeclarationStatus.REJECTED) {
       throw new IllegalArgumentException(
-          "报关单处于「"
-              + current.label()
-              + "」状态，不允许改单：要让改动被看到，请先撤回复核或等海关退单后退回草稿再改");
+          "报关单处于「" + current.label() + "」状态，不允许改单：要让改动被看到，请先撤回复核或等海关退单后退回草稿再改");
     }
     if (request.expectedVersion() != null
         && request.expectedVersion() != head.get("version", Long.class)) {
@@ -639,8 +633,7 @@ public class CustomsDeclarationService {
   /**
    * 人工复核通过：待复核 → 已复核。
    *
-   * <p>DB 触发器 {@code customs_2_review_completeness} 会逐行检查申报资料齐备性，
-   * 缺哪几项会一次全报出来（而不是让运营反复提交试错）。
+   * <p>DB 触发器 {@code customs_2_review_completeness} 会逐行检查申报资料齐备性， 缺哪几项会一次全报出来（而不是让运营反复提交试错）。
    */
   @Transactional
   public CustomsSaved review(UUID id, CustomsReviewRequest request) {
@@ -685,8 +678,7 @@ public class CustomsDeclarationService {
   /**
    * 生成三单据之一：按类型递增版本链，旧版本置为 SUPERSEDED（**不覆盖**）。
    *
-   * <p>content 是<b>生成那一刻的单据内容快照</b>：申报资料必须可复现，不能读取时按当前明细
-   * 重新拼一遍 —— 那样明细一改，历史单据就跟着变了，被退单时无法举证当时提交的内容。
+   * <p>content 是<b>生成那一刻的单据内容快照</b>：申报资料必须可复现，不能读取时按当前明细 重新拼一遍 —— 那样明细一改，历史单据就跟着变了，被退单时无法举证当时提交的内容。
    */
   @Transactional
   public CustomsSaved generateDocument(UUID id, CustomsGenerateDocumentRequest request) {
@@ -701,10 +693,7 @@ public class CustomsDeclarationService {
         || current == DeclarationStatus.PENDING_REVIEW
         || current == DeclarationStatus.REJECTED) {
       throw new IllegalArgumentException(
-          "报关单还处于「"
-              + current.label()
-              + "」状态，不允许生成正式单据：三单据是提交报关行时递交的申报资料，"
-              + "必须先完成人工复核");
+          "报关单还处于「" + current.label() + "」状态，不允许生成正式单据：三单据是提交报关行时递交的申报资料，" + "必须先完成人工复核");
     }
 
     UUID tenantId = head.get("tenant_id", UUID.class);
@@ -755,10 +744,7 @@ public class CustomsDeclarationService {
         declarationCode + ":" + type.name() + ":v" + nextVersion);
 
     recordEvent(id, "DOCUMENT_GENERATED", status, status, "", type.label() + " v" + nextVersion);
-    return saved(
-        id,
-        type.label() + " v" + nextVersion
-            + " 已生成（草稿）。定稿后才能随报关单一起提交报关行。");
+    return saved(id, type.label() + " v" + nextVersion + " 已生成（草稿）。定稿后才能随报关单一起提交报关行。");
   }
 
   /** 定稿单据：定稿后才允许提交报关行（DB 层提交前会校验三份最新版本都是 FINAL）。 */
@@ -773,16 +759,13 @@ public class CustomsDeclarationService {
         "update customs_document set status='FINAL',issued_at=now(),updated_at=now()"
             + " where id=? and status<>'SUPERSEDED'",
         documentId);
-    return saved(
-        doc.get("declaration_id", UUID.class),
-        "单据已定稿。报关单 / 装箱单 / 商业发票三份都定稿后即可提交报关行。");
+    return saved(doc.get("declaration_id", UUID.class), "单据已定稿。报关单 / 装箱单 / 商业发票三份都定稿后即可提交报关行。");
   }
 
   /**
    * 提交报关行：已复核 → 已提交。
    *
-   * <p>这是本模块风险最高的动作，所以有三道闸（DB 层已钉死，服务层先讲成人话）：
-   * 必须先完成人工复核、三单据齐备且最新版本都已定稿、商业发票币种与单头申报币种一致。
+   * <p>这是本模块风险最高的动作，所以有三道闸（DB 层已钉死，服务层先讲成人话）： 必须先完成人工复核、三单据齐备且最新版本都已定稿、商业发票币种与单头申报币种一致。
    */
   @Transactional
   public CustomsSaved submit(UUID id, CustomsSubmitRequest request) {
@@ -791,18 +774,18 @@ public class CustomsDeclarationService {
     if (current != DeclarationStatus.REVIEWED) {
       throw new IllegalArgumentException(
           current == DeclarationStatus.DRAFT
-              ? "提交报关行前必须人工复核：当前状态是「草稿」。报关数据错误导致的扣货与罚款由卖家承担，"
-                  + "所以必须先走复核"
-              : "提交报关行前必须人工复核：当前状态是「"
-                  + current.label()
-                  + "」，只允许「已复核」提交。");
+              ? "提交报关行前必须人工复核：当前状态是「草稿」。报关数据错误导致的扣货与罚款由卖家承担，" + "所以必须先走复核"
+              : "提交报关行前必须人工复核：当前状态是「" + current.label() + "」，只允许「已复核」提交。");
     }
     CustomsSubmissionResult result =
         request == null || request.submissionResult() == null
             ? CustomsSubmissionResult.ACCEPTED
             : CustomsSubmissionResult.parse(request.submissionResult());
     String reference =
-        fit(requireText(request == null ? null : request.submissionReference(), "提交回执号"), 64, "提交回执号");
+        fit(
+            requireText(request == null ? null : request.submissionReference(), "提交回执号"),
+            64,
+            "提交回执号");
 
     int round = Math.max(1, head.get("review_round", Integer.class));
     OffsetDateTime now = OffsetDateTime.now();
@@ -818,8 +801,12 @@ public class CustomsDeclarationService {
         id,
         round,
         reference,
-        fit(request.brokerName() == null ? head.get("broker_name", String.class) : request.brokerName(),
-            200, "报关行名称"),
+        fit(
+            request.brokerName() == null
+                ? head.get("broker_name", String.class)
+                : request.brokerName(),
+            200,
+            "报关行名称"),
         result.name(),
         now,
         currentActor(),
@@ -842,8 +829,8 @@ public class CustomsDeclarationService {
   /**
    * 登记海关结果：放行 / 退单 / 改单。
    *
-   * <p>三种结果都落 {@code customs_result} 审计（谁、何时、原结果、新结果、原因），
-   * 且必须挂在**已经提交过**的那一轮上 —— 否则会出现「没提交过却有海关回执」这种不可能的记录。
+   * <p>三种结果都落 {@code customs_result} 审计（谁、何时、原结果、新结果、原因）， 且必须挂在**已经提交过**的那一轮上 ——
+   * 否则会出现「没提交过却有海关回执」这种不可能的记录。
    */
   @Transactional
   public CustomsSaved recordResult(UUID id, CustomsResultRequest request) {
@@ -859,8 +846,7 @@ public class CustomsDeclarationService {
     if (current != DeclarationStatus.SUBMITTED
         && current != DeclarationStatus.AMENDED
         && !(type == CustomsResultType.AMENDED && current == DeclarationStatus.CLEARED)) {
-      throw new IllegalArgumentException(
-          "当前状态「" + current.label() + "」不处于已提交，不能登记海关回执");
+      throw new IllegalArgumentException("当前状态「" + current.label() + "」不处于已提交，不能登记海关回执");
     }
 
     Record submission =
@@ -923,11 +909,9 @@ public class CustomsDeclarationService {
           reason,
           amendmentCount(id),
           id);
-      recordEvent(id, "CUSTOMS_REJECTED", from, "CUSTOMS_REJECTED", reason, request.resultReference());
-      return saved(
-          id,
-          "已登记海关退单。请按退单原因改单或退回草稿重改 —— 退单原因没看就先把内容改了"
-              + "是真实且常见的操作事故。");
+      recordEvent(
+          id, "CUSTOMS_REJECTED", from, "CUSTOMS_REJECTED", reason, request.resultReference());
+      return saved(id, "已登记海关退单。请按退单原因改单或退回草稿重改 —— 退单原因没看就先把内容改了" + "是真实且常见的操作事故。");
     }
 
     // 改单：状态退回草稿，改完必须重新走复核才能再次提交
@@ -938,8 +922,7 @@ public class CustomsDeclarationService {
         at,
         id);
     recordEvent(id, "AMENDED", from, "DRAFT", reason, request.resultReference());
-    return saved(
-        id, "已登记海关改单并退回草稿。改完必须重新走人工复核才能再次提交报关行。");
+    return saved(id, "已登记海关改单并退回草稿。改完必须重新走人工复核才能再次提交报关行。");
   }
 
   /** 改单：已提交 / 已改单 / 已放行 → 已改单。必须给原因。 */
@@ -993,48 +976,52 @@ public class CustomsDeclarationService {
               + String.join("、", allowedFrom.stream().map(s -> s.label()).toList()));
     }
     if (!DeclarationStatus.allowedNext(from).contains(to)) {
-      throw new IllegalArgumentException(
-          "不允许的状态跳转：「" + from.label() + "」→「" + to.label() + "」");
+      throw new IllegalArgumentException("不允许的状态跳转：「" + from.label() + "」→「" + to.label() + "」");
     }
 
     OffsetDateTime now = OffsetDateTime.now();
     switch (to) {
-      case REVIEWED -> sql.execute(
-          "update customs_declaration set status='REVIEWED',review_round=review_round+1,"
-              + "reviewed_at=?::timestamptz,reviewed_by=?,review_notes=?,"
-              + "version=version+1,updated_at=now() where id=?",
-          now,
-          currentActor(),
-          fit(notes, 2000, "复核意见"),
-          id);
-      // 复核退回同样**走完过一轮复核**：有人真的看过这张单才退得回去。
-      // 不记轮次就会在库里留下「轮次 0 却已复核」的自相矛盾凭据，
-      // 而罚款追责时要被问的正是「这张单到底谁看过」。
-      case REJECTED -> sql.execute(
-          "update customs_declaration set status='REJECTED',review_round=review_round+1,"
-              + "reviewed_at=?::timestamptz,reviewed_by=?,review_notes=?,"
-              + "version=version+1,updated_at=now() where id=?",
-          now,
-          currentActor(),
-          fit(notes, 2000, "复核意见"),
-          id);
-      case CANCELLED -> sql.execute(
-          "update customs_declaration set status='CANCELLED',cancelled_at=?::timestamptz,"
-              + "cancelled_by=?,cancel_reason=?,version=version+1,updated_at=now() where id=?",
-          now,
-          currentActor(),
-          fit(reason, 200, "取消原因"),
-          id);
-      case AMENDED -> sql.execute(
-          "update customs_declaration set status='AMENDED',amendment_count=?,"
-              + "last_amended_at=?::timestamptz,version=version+1,updated_at=now() where id=?",
-          amendmentCount(id),
-          now,
-          id);
-      default -> sql.execute(
-          "update customs_declaration set status=?,version=version+1,updated_at=now() where id=?",
-          to.name(),
-          id);
+      case REVIEWED ->
+          sql.execute(
+              "update customs_declaration set status='REVIEWED',review_round=review_round+1,"
+                  + "reviewed_at=?::timestamptz,reviewed_by=?,review_notes=?,"
+                  + "version=version+1,updated_at=now() where id=?",
+              now,
+              currentActor(),
+              fit(notes, 2000, "复核意见"),
+              id);
+        // 复核退回同样**走完过一轮复核**：有人真的看过这张单才退得回去。
+        // 不记轮次就会在库里留下「轮次 0 却已复核」的自相矛盾凭据，
+        // 而罚款追责时要被问的正是「这张单到底谁看过」。
+      case REJECTED ->
+          sql.execute(
+              "update customs_declaration set status='REJECTED',review_round=review_round+1,"
+                  + "reviewed_at=?::timestamptz,reviewed_by=?,review_notes=?,"
+                  + "version=version+1,updated_at=now() where id=?",
+              now,
+              currentActor(),
+              fit(notes, 2000, "复核意见"),
+              id);
+      case CANCELLED ->
+          sql.execute(
+              "update customs_declaration set status='CANCELLED',cancelled_at=?::timestamptz,"
+                  + "cancelled_by=?,cancel_reason=?,version=version+1,updated_at=now() where id=?",
+              now,
+              currentActor(),
+              fit(reason, 200, "取消原因"),
+              id);
+      case AMENDED ->
+          sql.execute(
+              "update customs_declaration set status='AMENDED',amendment_count=?,"
+                  + "last_amended_at=?::timestamptz,version=version+1,updated_at=now() where id=?",
+              amendmentCount(id),
+              now,
+              id);
+      default ->
+          sql.execute(
+              "update customs_declaration set status=?,version=version+1,updated_at=now() where id=?",
+              to.name(),
+              id);
     }
     recordEvent(id, eventKind, from.name(), to.name(), reason, notes);
     return saved(id, message);
@@ -1051,8 +1038,7 @@ public class CustomsDeclarationService {
     for (CustomsLineRequest line : requests) {
       lineNo++;
       if (line.sourceLineId() == null) {
-        throw new IllegalArgumentException(
-            "第 " + lineNo + " 行必须给出 sourceLineId：申报的这一行必须来自那张头程发运单");
+        throw new IllegalArgumentException("第 " + lineNo + " 行必须给出 sourceLineId：申报的这一行必须来自那张头程发运单");
       }
       Record src =
           sql.fetchOne(
@@ -1066,7 +1052,9 @@ public class CustomsDeclarationService {
       BigDecimal quantity = positive(line.quantity(), "申报数量");
       String uom = line.uom() == null || line.uom().isBlank() ? "PCS" : line.uom().trim();
       BigDecimal declaredValue =
-          line.declaredValue() == null ? BigDecimal.ZERO : nonNegative(line.declaredValue(), "申报货值");
+          line.declaredValue() == null
+              ? BigDecimal.ZERO
+              : nonNegative(line.declaredValue(), "申报货值");
       DeclarationElementStatus elementStatus =
           line.declarationElementStatus() == null
               ? DeclarationElementStatus.MANUAL_PENDING
@@ -1109,12 +1097,8 @@ public class CustomsDeclarationService {
               ? BigDecimal.ZERO
               : nonNegative(line.declaredUnitValue(), "申报单价"),
           declaredValue,
-          line.grossWeightKg() == null
-              ? BigDecimal.ZERO
-              : nonNegative(line.grossWeightKg(), "毛重"),
-          line.netWeightKg() == null
-              ? BigDecimal.ZERO
-              : nonNegative(line.netWeightKg(), "净重"),
+          line.grossWeightKg() == null ? BigDecimal.ZERO : nonNegative(line.grossWeightKg(), "毛重"),
+          line.netWeightKg() == null ? BigDecimal.ZERO : nonNegative(line.netWeightKg(), "净重"),
           line.volumeCbm() == null ? BigDecimal.ZERO : nonNegative(line.volumeCbm(), "体积"),
           line.packageCount() == null ? 0 : line.packageCount());
     }
@@ -1131,7 +1115,8 @@ public class CustomsDeclarationService {
   /** 三单据各自的口径：报关单/发票按申报货值，装箱单按箱数与体积。 */
   private BigDecimal value(List<CustomsLineRow> lines, CustomsDocumentType type, Record head) {
     if (type == CustomsDocumentType.PACKING_LIST) {
-      return BigDecimal.valueOf(lines.stream().mapToInt(l -> l.packageCount() == null ? 0 : l.packageCount()).sum());
+      return BigDecimal.valueOf(
+          lines.stream().mapToInt(l -> l.packageCount() == null ? 0 : l.packageCount()).sum());
     }
     return lines.stream()
         .map(l -> l.declaredValue() == null ? BigDecimal.ZERO : l.declaredValue())
@@ -1141,8 +1126,7 @@ public class CustomsDeclarationService {
   /**
    * 单据内容快照。**在这里固化**而不是读取时重算 —— 申报资料必须可复现、可举证。
    *
-   * <p>刻意不写死申报要素的键名：申报要素随类目与目的国变化，写死等于把上游字典抄成第二份
-   * 且必然漂移，所以这里把 3.7.1.1 回填进来的 jsonb 原样带进单据。
+   * <p>刻意不写死申报要素的键名：申报要素随类目与目的国变化，写死等于把上游字典抄成第二份 且必然漂移，所以这里把 3.7.1.1 回填进来的 jsonb 原样带进单据。
    */
   private Map<String, Object> content(
       CustomsDocumentType type,
@@ -1160,7 +1144,8 @@ public class CustomsDeclarationService {
     content.put("consigneeCountryCode", head.get("consignee_country_code", String.class));
     content.put("iorName", head.get("ior_name", String.class));
     content.put("destinationCountryCode", head.get("destination_country_code", String.class));
-    content.put("destinationCustomsDistrict", head.get("destination_customs_district", String.class));
+    content.put(
+        "destinationCustomsDistrict", head.get("destination_customs_district", String.class));
     content.put("transportMode", head.get("transport_mode", String.class));
     content.put("billOfLadingNo", head.get("bill_of_lading_no", String.class));
     content.put("currency", currency);
@@ -1351,7 +1336,12 @@ public class CustomsDeclarationService {
   }
 
   private void recordEvent(
-      UUID declarationId, String kind, String fromStatus, String toStatus, String reason, String notes) {
+      UUID declarationId,
+      String kind,
+      String fromStatus,
+      String toStatus,
+      String reason,
+      String notes) {
     sql.execute(
         "insert into customs_declaration_event(id,tenant_id,declaration_id,kind,occurred_at,"
             + "from_status,to_status,actor_id,reason,notes)"
@@ -1382,9 +1372,7 @@ public class CustomsDeclarationService {
   }
 
   private String skuCode(UUID skuId, UUID tenantId) {
-    Record r =
-        sql.fetchOne(
-            "select code from sku_ref where tenant_id=? and id=?", tenantId, skuId);
+    Record r = sql.fetchOne("select code from sku_ref where tenant_id=? and id=?", tenantId, skuId);
     return r == null ? "" : r.get(0, String.class);
   }
 
@@ -1418,8 +1406,7 @@ public class CustomsDeclarationService {
       case CLEARED -> "CLEARED";
       case AMENDED -> "AMENDED";
       default ->
-          throw new IllegalArgumentException(
-              "状态「" + status.label() + "」还没有对应的海关回执口径，不能登记回执");
+          throw new IllegalArgumentException("状态「" + status.label() + "」还没有对应的海关回执口径，不能登记回执");
     };
   }
 

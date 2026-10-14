@@ -54,22 +54,22 @@
 
 ### 三层验证
 
-| 层 | 谁跑 | 跑什么 |
-| --- | --- | --- |
-| **L0 编译闸** | worker，在自己 worktree | `pnpm typecheck` + 后端 `compile` |
-| **L1 模块闸** | worker，在自己 worktree | **只跑自己那一个服务**的后端测试 + 自己模块的前端测试 |
-| **L2 批次闸** | **你，在集成头上** | **全量**：mvnw verify + typecheck/lint/test + Next build + sync --check |
+| 层            | 谁跑                    | 跑什么                                                                  |
+| ------------- | ----------------------- | ----------------------------------------------------------------------- |
+| **L0 编译闸** | worker，在自己 worktree | `pnpm typecheck` + 后端 `compile`                                       |
+| **L1 模块闸** | worker，在自己 worktree | **只跑自己那一个服务**的后端测试 + 自己模块的前端测试                   |
+| **L2 批次闸** | **你，在集成头上**      | **全量**：mvnw verify + typecheck/lint/test + Next build + sync --check |
 
 L0/L1 归因精确；L2 抓跨车道互相破坏。
 
 ### 数字对比
 
-| 指标 | 旧模式（10-08） | 组批模式（现在） |
-| --- | --- | --- |
-| 每轮车道数 | 1 | **4** |
-| 每轮全量验证次数 | 1 | **1**（不变） |
-| 单轮功能产出 | 1 个 | **最多 4 个** |
-| 发热峰值 | 1 次全量 | **1 次全量（不变）** |
+| 指标             | 旧模式（10-08） | 组批模式（现在）     |
+| ---------------- | --------------- | -------------------- |
+| 每轮车道数       | 1               | **4**                |
+| 每轮全量验证次数 | 1               | **1**（不变）        |
+| 单轮功能产出     | 1 个            | **最多 4 个**        |
+| 发热峰值         | 1 次全量        | **1 次全量（不变）** |
 
 **每批的测试执行量不变，产出翻 4 倍。** 这是能安全把 lanes 提到 4 的全部原因。
 
@@ -180,6 +180,7 @@ pmset -g therm
 ```bash
 cd /Users/tommy/Project/starcon && node tools/module-progress/sync.mjs
 ```
+
 **以它的输出为准汇报数字，不要自己数。**
 
 ### ⏱️ 第 1.5 步：批次节流闸（同步台账之后**立刻**做）
@@ -213,6 +214,7 @@ echo "距上批 $ELAPSED 分钟"
 ```bash
 node tools/module-progress/lane.mjs gate acquire
 ```
+
 （仅在判定 GO 且 `gate status` 显示空闲时）
 
 ### 第 3 步：回收已落地的车道
@@ -229,6 +231,7 @@ node tools/module-progress/lane.mjs gc
 在汇报里点名冲突文件。
 
 并入后核对台账完整性：
+
 ```bash
 grep -cE '^\| [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ ' docs/product/capability-blueprint/module-progress.md  # 须恒为 465
 grep -oE '^\| [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ ' docs/product/capability-blueprint/module-progress.md | sort | uniq -d   # 须为空
@@ -261,11 +264,13 @@ node tools/module-progress/lane.mjs plan --lanes "$LANES"
 #### 5.1 静态预检（先于 L2，几秒）
 
 对本批新迁移跑「已知互相破坏形状」检查：
+
 ```bash
 grep -rn 'ADD COLUMN' backend/services/*/src/main/resources/db/migration/ | grep -v 'DEFAULT'
 grep -rn 'SET NOT NULL' backend/services/*/src/main/resources/db/migration/
 grep -rn 'ADD CONSTRAINT.*CHECK' backend/services/*/src/main/resources/db/migration/
 ```
+
 命中①无 DEFAULT，或②SET NOT NULL 且目标表无 BEFORE INSERT 触发器兜底 ⇒ **必然违约，当场点名修掉**。
 
 #### 5.2 L2 批量验证（全量，集成头上跑一次）
@@ -280,6 +285,7 @@ node tools/module-progress/sync.mjs --check
 ⚠️ 这是本轮**唯一的发热高峰**。`NEXT_TELEMETRY_DISABLED=1` 必须加，否则 Next 构建静默挂起。
 
 **L2 红了的处置**：
+
 1. **不 push**，不在集成头上继续改
 2. `git bisect` 在本批 merge commit 上二分定位（4 条车道最多 2 次全量验证）
 3. 二分找不到 = 跨车道互相破坏，按 5.1 静态排查
@@ -298,6 +304,7 @@ node tools/module-progress/sync.mjs --check
 **这个功能做什么**：一到两句说清用户视角能完成什么事
 
 **技术落地**：
+
 - 迁移：`<V版本号__文件名.sql>` — 建了哪些表/列/索引，RLS 怎么设的
 - 端点：`<METHOD /path>` × N 个，各自负责什么
 - 页面：`<路由>` — 筛选维度、操作、错误态/空态/加载态

@@ -20,19 +20,15 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 跨服务访问守卫（trade 服务第一条业务端点随 9.3.2.2 引入）。
  *
- * <p>租户**绝不**来自客户端头：identity 依据已认证用户的成员关系解析出租户与权限，
- * 本服务再开一个事务，绑定 {@code app.current_tenant} 供 RLS 强制隔离，
- * 然后才执行查询。伪造的 {@code X-Tenant-Id} 头改不动这个设置。
+ * <p>租户**绝不**来自客户端头：identity 依据已认证用户的成员关系解析出租户与权限， 本服务再开一个事务，绑定 {@code app.current_tenant} 供 RLS
+ * 强制隔离， 然后才执行查询。伪造的 {@code X-Tenant-Id} 头改不动这个设置。
  *
- * <p>与 identity / catalog / channel / warehouse **完全同构**（逐字照抄同一实现），
- * 差别只有权限码前缀：{@code trade.}。刻意不在 trade 重写一份「简化版」守卫 ——
- * 租户解析一旦出现第二个实现，「哪些端点信任头」就会变成需要逐个审计的问题。
+ * <p>与 identity / catalog / channel / warehouse **完全同构**（逐字照抄同一实现）， 差别只有权限码前缀：{@code trade.}。刻意不在
+ * trade 重写一份「简化版」守卫 —— 租户解析一旦出现第二个实现，「哪些端点信任头」就会变成需要逐个审计的问题。
  *
  * <p>与 {@link TradeTenancyConfiguration} 里那个 Bean 的关系：那个 Bean 是给
- * 引导期测试与非端点用途（未来定时任务、事件消费）用的；控制器这条路径沿用
- * 其它四个服务的写法，在构造函数里自建一个 {@link TenantTransactions}。
- * 两处绑定的语义**完全一致**（同一个类、同一个 transaction-local GUC），
- * 不存在「第二条绑定路径」的分叉。
+ * 引导期测试与非端点用途（未来定时任务、事件消费）用的；控制器这条路径沿用 其它四个服务的写法，在构造函数里自建一个 {@link TenantTransactions}。
+ * 两处绑定的语义**完全一致**（同一个类、同一个 transaction-local GUC）， 不存在「第二条绑定路径」的分叉。
  */
 @Service
 public class AccessService {
@@ -93,8 +89,7 @@ public class AccessService {
   /**
    * 校验会话并解析出可信租户。
    *
-   * <p>沿用其它四个服务的判据：权限码必须在某个 grant 里命中，
-   * 且同一 grant 里必须同时有该动作与对应资源的 {@code .read}，
+   * <p>沿用其它四个服务的判据：权限码必须在某个 grant 里命中， 且同一 grant 里必须同时有该动作与对应资源的 {@code .read}，
    * 否则「能写不能读」这种组合会被静默放行。
    */
   public Access require(String bearer, String permission) {

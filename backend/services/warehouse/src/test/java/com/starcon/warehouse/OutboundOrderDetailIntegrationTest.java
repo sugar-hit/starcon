@@ -28,26 +28,20 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 8.3.1.2 出库单详情：单头 + 明细行 + 已拣/已发口径 + 拣货交接 + 作业时间线 + 四段不可得能力
- * + 作业操作入口，以及租户隔离三断言。
+ * 8.3.1.2 出库单详情：单头 + 明细行 + 已拣/已发口径 + 拣货交接 + 作业时间线 + 四段不可得能力 + 作业操作入口，以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p><b>本测试要钉死的是四件最容易糊过去的事</b>：
  *
  * <ol>
- *   <li><b>已拣量是 null 而不是 0。</b> 8.3.2.1 未交付 → 没有 picking_task 可查。
- *       {@link #已拣量交付前是null而不是0()} 直接断言逐行为 null —— 填 0 会让作业员
- *       以为一件都没拣，那是假数字，比不显示更危险。
- *   <li><b>已发量只在 SHIPPED 时是真数。</b> SHIPPED 是终态且 DB 层冻结、明细行不可改，
- *       所以「已发量 = 计划件数」成立；未到已发货的状态必须是 null，{@link #未到已发货时已发量为空()}
- *       逐状态验一遍，钉死「绝不按拣货进度推算发货进度」。
- *   <li><b>作业操作入口与 8.3.1.1 共用同一个转换矩阵。</b>
- *       {@link #操作入口与8_3_1_1转换矩阵没有分叉()} 逐状态比对详情返回的 actions 与
+ *   <li><b>已拣量是 null 而不是 0。</b> 8.3.2.1 未交付 → 没有 picking_task 可查。 {@link #已拣量交付前是null而不是0()}
+ *       直接断言逐行为 null —— 填 0 会让作业员 以为一件都没拣，那是假数字，比不显示更危险。
+ *   <li><b>已发量只在 SHIPPED 时是真数。</b> SHIPPED 是终态且 DB 层冻结、明细行不可改， 所以「已发量 = 计划件数」成立；未到已发货的状态必须是
+ *       null，{@link #未到已发货时已发量为空()} 逐状态验一遍，钉死「绝不按拣货进度推算发货进度」。
+ *   <li><b>作业操作入口与 8.3.1.1 共用同一个转换矩阵。</b> {@link #操作入口与8_3_1_1转换矩阵没有分叉()} 逐状态比对详情返回的 actions 与
  *       {@code OutboundOrderStatus.transitionsFrom()}，防止详情页另写一份状态机。
- *   <li><b>四段拿不到的数据必须显式 available=false。</b>
- *       {@link #拿不到的四段显式available为false()} 钉住它们既不返回空集冒充成功，
+ *   <li><b>四段拿不到的数据必须显式 available=false。</b> {@link #拿不到的四段显式available为false()} 钉住它们既不返回空集冒充成功，
  *       也不给出编造的 ownerModule / href。
  * </ol>
  */
@@ -61,11 +55,15 @@ class OutboundOrderDetailIntegrationTest {
   static final Map<String, AccessService.Access> actors = new ConcurrentHashMap<>();
   static final List<String> allPermissions =
       Stream.of("inventory")
-          .flatMap(p -> Stream.of("read", "create", "update", "delete").map(op -> "warehouse." + p + "." + op))
+          .flatMap(
+              p ->
+                  Stream.of("read", "create", "update", "delete")
+                      .map(op -> "warehouse." + p + "." + op))
           .toList();
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-warehouse-outbound-detail-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-warehouse-outbound-detail-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
@@ -86,7 +84,8 @@ class OutboundOrderDetailIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -101,7 +100,8 @@ class OutboundOrderDetailIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -109,7 +109,9 @@ class OutboundOrderDetailIntegrationTest {
           });
       actors.put("Bearer tenant-a", actor(user, a, List.of(grant("ALL", allPermissions))));
       actors.put("Bearer tenant-b", actor(user, b, List.of(grant("ALL", allPermissions))));
-      actors.put("Bearer no-read", actor(user, a, List.of(grant("ALL", List.of("warehouse.inventory.update")))));
+      actors.put(
+          "Bearer no-read",
+          actor(user, a, List.of(grant("ALL", List.of("warehouse.inventory.update")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -172,22 +174,45 @@ class OutboundOrderDetailIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                skuOne(tenant), tenant, "SKU-1", "商品一");
+                skuOne(tenant),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 3), tenant, "SKU-2", "商品二");
+                idFor(tenant, 3),
+                tenant,
+                "SKU-2",
+                "商品二");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                whOne(tenant), tenant, "WH-ONE", "一仓", "CN", "Asia/Shanghai");
+                whOne(tenant),
+                tenant,
+                "WH-ONE",
+                "一仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-TWO", "二仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 5),
+                tenant,
+                "WH-TWO",
+                "二仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 6),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             return null;
           });
     }
@@ -203,10 +228,7 @@ class OutboundOrderDetailIntegrationTest {
     return access.run(actorFor(tenant), "warehouse.inventory.update", work);
   }
 
-  /**
-   * 建一张销售来源的出库单。{@code skuQty} 交替落在 SKU-1 / SKU-2 上，
-   * 元素个数就是明细行数。
-   */
+  /** 建一张销售来源的出库单。{@code skuQty} 交替落在 SKU-1 / SKU-2 上， 元素个数就是明细行数。 */
   OutboundOrderSummary create(UUID tenant, String ref, String... skuQty) {
     var lines = new java.util.ArrayList<OutboundOrderLineInput>();
     for (int i = 0; i < skuQty.length; i++) {
@@ -218,7 +240,8 @@ class OutboundOrderDetailIntegrationTest {
         tenant,
         () ->
             orders.create(
-                new OutboundOrderCreateInput("SALES", null, ref, whOne(tenant), "", "", lines), user));
+                new OutboundOrderCreateInput("SALES", null, ref, whOne(tenant), "", "", lines),
+                user));
   }
 
   OutboundOrderDetail detailOf(UUID tenant, UUID orderId) {
@@ -282,11 +305,7 @@ class OutboundOrderDetailIntegrationTest {
   @Test
   void 已拣量交付前是null而不是0() {
     var created = create(a, "SO-PICKED", "2", "4");
-    run(
-        a,
-        () ->
-            orders.requestPicking(
-                List.of(created.id()), "拣货交接说明", user));
+    run(a, () -> orders.requestPicking(List.of(created.id()), "拣货交接说明", user));
     var d = detailOf(a, created.id());
 
     // 逐行已拣量必须是 null：8.3.2.1 未交付，没有 picking_task 可查。
@@ -295,7 +314,11 @@ class OutboundOrderDetailIntegrationTest {
       assertThat(line.pickedQuantity()).as("已拣量必须是 null 而不是 0").isNull();
     }
     // 数量口径显式标注不可得，并给出归属模块与原因。
-    var picked = d.quantities().stream().filter(q -> q.quantity().equals("PICKED")).findFirst().orElseThrow();
+    var picked =
+        d.quantities().stream()
+            .filter(q -> q.quantity().equals("PICKED"))
+            .findFirst()
+            .orElseThrow();
     assertThat(picked.available()).isFalse();
     assertThat(picked.value()).isNull();
     assertThat(picked.ownerModule()).isEqualTo("8.3.2.1");
@@ -330,7 +353,11 @@ class OutboundOrderDetailIntegrationTest {
       assertThat(line.shippedQuantity()).as("未到已发货时已发量必须为空").isNull();
       assertThat(line.pickedQuantity()).isNull();
     }
-    var shipped = d.quantities().stream().filter(q -> q.quantity().equals("SHIPPED")).findFirst().orElseThrow();
+    var shipped =
+        d.quantities().stream()
+            .filter(q -> q.quantity().equals("SHIPPED"))
+            .findFirst()
+            .orElseThrow();
     assertThat(shipped.available()).isFalse();
     assertThat(shipped.value()).isNull();
     assertThat(shipped.ownerModule()).isEqualTo("8.3.4.1");
@@ -364,7 +391,11 @@ class OutboundOrderDetailIntegrationTest {
       assertThat(line.shippedQuantity()).isNotNull();
       assertThat(line.shippedQuantity()).isEqualByComparingTo(line.plannedQuantity());
     }
-    var shipped = d.quantities().stream().filter(q -> q.quantity().equals("SHIPPED")).findFirst().orElseThrow();
+    var shipped =
+        d.quantities().stream()
+            .filter(q -> q.quantity().equals("SHIPPED"))
+            .findFirst()
+            .orElseThrow();
     assertThat(shipped.available()).isTrue();
     assertThat(shipped.value()).isEqualByComparingTo("5.500000");
   }
@@ -377,7 +408,9 @@ class OutboundOrderDetailIntegrationTest {
     // 逐状态比对：详情返回的 actions 必须与 OutboundOrderStatus.transitionsFrom() 完全一致。
     // 防止详情页另写一份状态机（那是并行开发最容易发生的分叉）。
     OutboundOrderStatus status = OutboundOrderStatus.PENDING_PICKING;
-    String[] path = {"PICKING", "PENDING_RECHECK", "PENDING_PACKING", "PENDING_SHIPMENT", "SHIPPED"};
+    String[] path = {
+      "PICKING", "PENDING_RECHECK", "PENDING_PACKING", "PENDING_SHIPMENT", "SHIPPED"
+    };
     for (var step : path) {
       if (status == OutboundOrderStatus.PENDING_SHIPMENT) {
         run(
@@ -416,11 +449,16 @@ class OutboundOrderDetailIntegrationTest {
     var targets = d.actions().stream().map(x -> x.toStatus()).toList();
     assertThat(targets).containsExactly("PENDING_PACKING", "PICKING", "CANCELLED");
     // 复核不通过退回拣货要写原因（这条边最容易在详情页被漏掉提示）。
-    var back = d.actions().stream().filter(x -> x.toStatus().equals("PICKING")).findFirst().orElseThrow();
+    var back =
+        d.actions().stream().filter(x -> x.toStatus().equals("PICKING")).findFirst().orElseThrow();
     assertThat(back.reasonRequired()).isTrue();
     assertThat(back.ownerModule()).contains("8.3.2.1");
     // 复核通过去打包不要求写原因。
-    var forward = d.actions().stream().filter(x -> x.toStatus().equals("PENDING_PACKING")).findFirst().orElseThrow();
+    var forward =
+        d.actions().stream()
+            .filter(x -> x.toStatus().equals("PENDING_PACKING"))
+            .findFirst()
+            .orElseThrow();
     assertThat(forward.reasonRequired()).isFalse();
     assertThat(forward.ownerModule()).contains("8.3.3.2");
   }
@@ -517,7 +555,11 @@ class OutboundOrderDetailIntegrationTest {
     var caps = details.capabilities();
     assertThat(caps.sections()).hasSize(4);
     assertThat(caps.quantityPolicies()).hasSize(2);
-    var picked = caps.quantityPolicies().stream().filter(q -> q.quantity().equals("PICKED")).findFirst().orElseThrow();
+    var picked =
+        caps.quantityPolicies().stream()
+            .filter(q -> q.quantity().equals("PICKED"))
+            .findFirst()
+            .orElseThrow();
     assertThat(picked.available()).isFalse();
     assertThat(picked.ownerModule()).isEqualTo("8.3.2.1");
     assertThat(caps.pickedQuantityNote()).contains("8.3.2.1");
@@ -576,8 +618,9 @@ class OutboundOrderDetailIntegrationTest {
   @Test
   void 详情端点返回真实数据() throws Exception {
     var created = create(a, "SO-HTTP", "2");
-    http.perform(get("/warehouse/inventory/outbound-orders/{id}", created.id())
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/outbound-orders/{id}", created.id())
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(created.id().toString()))
         .andExpect(jsonPath("$.sourceExternalRef").value("SO-HTTP"))
@@ -588,23 +631,26 @@ class OutboundOrderDetailIntegrationTest {
   @Test
   void 跨租户访问详情返回404() throws Exception {
     var a1 = create(a, "SO-HTTP-CROSS", "1");
-    http.perform(get("/warehouse/inventory/outbound-orders/{id}", a1.id())
-            .header("Authorization", "Bearer tenant-b"))
+    http.perform(
+            get("/warehouse/inventory/outbound-orders/{id}", a1.id())
+                .header("Authorization", "Bearer tenant-b"))
         .andExpect(status().isNotFound());
   }
 
   @Test
   void 无读权限被拒() throws Exception {
     var created = create(a, "SO-HTTP-NOPERM", "1");
-    http.perform(get("/warehouse/inventory/outbound-orders/{id}", created.id())
-            .header("Authorization", "Bearer no-read"))
+    http.perform(
+            get("/warehouse/inventory/outbound-orders/{id}", created.id())
+                .header("Authorization", "Bearer no-read"))
         .andExpect(status().is4xxClientError());
   }
 
   @Test
   void 详情能力端点可访问() throws Exception {
-    http.perform(get("/warehouse/inventory/outbound-orders/detail-capabilities")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/outbound-orders/detail-capabilities")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.quantityPolicies.length()").value(2));
   }
@@ -629,15 +675,17 @@ class OutboundOrderDetailIntegrationTest {
   void 断言二_伪造租户头无效() throws Exception {
     var a1 = create(a, "SO-FORGED", "1");
     // 身份是 B，请求里伪造 X-Tenant-Id 指向 A：B 看到的仍然是 B 的（404，A 的单对它不可见）。
-    http.perform(get("/warehouse/inventory/outbound-orders/{id}", a1.id())
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/outbound-orders/{id}", a1.id())
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
     // 伪造头也不能让 B 读到 A 的明细行数。
     var bOrder = create(b, "SO-FORGED-B", "1");
-    http.perform(get("/warehouse/inventory/outbound-orders/{id}", bOrder.id())
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/outbound-orders/{id}", bOrder.id())
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.sourceExternalRef").value("SO-FORGED-B"))
         .andExpect(jsonPath("$.skuLineCount").value(1));
@@ -658,7 +706,11 @@ class OutboundOrderDetailIntegrationTest {
     }
     // 本模块新建的四张表（本车道只读、未新建表）逐张确认 FORCE RLS 仍在位。
     for (var table :
-        List.of("outbound_order", "outbound_order_line", "outbound_pick_request", "outbound_order_event")) {
+        List.of(
+            "outbound_order",
+            "outbound_order_line",
+            "outbound_pick_request",
+            "outbound_order_event")) {
       assertThat(
               sql.fetchOne("select relforcerowsecurity from pg_class where relname = ?", table)
                   .get("relforcerowsecurity", Boolean.class))

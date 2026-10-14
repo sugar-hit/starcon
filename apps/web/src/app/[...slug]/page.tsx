@@ -14,8 +14,9 @@ import { Button, EmptyState, TaskWorkspace, findTaskPage } from '@starcon/ui';
  *   /logistics /warehouse /inventory
  *   /api/[...]         (API 路由)
  */
-export default function TaskPage({ params }: { params: { slug: string[] } }) {
-  const page = findTaskPage('/' + params.slug.join('/'));
+export default async function TaskPage({ params }: { params: Promise<{ slug: string[] }> }) {
+  const resolvedParams = await params;
+  const page = findTaskPage('/' + resolvedParams.slug.join('/'));
   if (page) return <TaskWorkspace page={page} />;
   return (
     <EmptyState

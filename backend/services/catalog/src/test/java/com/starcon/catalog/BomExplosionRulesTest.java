@@ -12,10 +12,8 @@ import org.junit.jupiter.api.Test;
  *
  * <p>不碰数据库、时钟与 HTTP：给定同样的输入永远返回同样的结论。
  *
- * <p><b>跨模块口径一致性</b>是本文件最重要的一类断言：
- * 展开的需求量必须与 3.5.2.1 的单层需求量<b>逐位相同</b>。
- * 「同一句公式写两份，迟早有一份被改松」—— 而那处偏差只在跨模块比对里才暴露，
- * 所以这里把它钉成回归断言。
+ * <p><b>跨模块口径一致性</b>是本文件最重要的一类断言： 展开的需求量必须与 3.5.2.1 的单层需求量<b>逐位相同</b>。 「同一句公式写两份，迟早有一份被改松」——
+ * 而那处偏差只在跨模块比对里才暴露， 所以这里把它钉成回归断言。
  */
 class BomExplosionRulesTest {
 
@@ -48,10 +46,11 @@ class BomExplosionRulesTest {
   @Test
   void 需求量与3_5_2_1的单层公式逐位相同() {
     // R7：单位用量 × 产量 × (1 + 损耗率/100)，保留 6 位小数 HALF_UP，不取整。
-    var cases = List.of(
-        new String[] {"2", "5", "10"}, new String[] {"0.5", "0", "3"},
-        new String[] {"1", "50", "3"}, new String[] {"0.125", "12.5", "7"},
-        new String[] {"3", "0", "100"}, new String[] {"0.000001", "100", "1"});
+    var cases =
+        List.of(
+            new String[] {"2", "5", "10"}, new String[] {"0.5", "0", "3"},
+            new String[] {"1", "50", "3"}, new String[] {"0.125", "12.5", "7"},
+            new String[] {"3", "0", "100"}, new String[] {"0.000001", "100", "1"});
     for (String[] c : cases) {
       var unit = new BigDecimal(c[0]);
       var scrap = new BigDecimal(c[1]);
@@ -65,28 +64,34 @@ class BomExplosionRulesTest {
   @Test
   void 损耗率是百分数不是比率() {
     // 5 表示 5%：1 × 10 × 1.05 = 10.5。若按比率读成 0.05，会得到 10.4（少算 1%）。
-    assertThat(BomExplosionRules.requiredQuantity(new BigDecimal("10"), BigDecimal.ONE,
-            new BigDecimal("5")))
+    assertThat(
+            BomExplosionRules.requiredQuantity(
+                new BigDecimal("10"), BigDecimal.ONE, new BigDecimal("5")))
         .isEqualByComparingTo("10.500000");
     // 反面：有人存比率（把「5%」写成 0.05）时，同一条公式把它读成 0.05% ——
     // 得到 10.005 而不是 10.5，**少领 1% 的料且不报错**。这就是 R6 必须存百分数的原因。
-    assertThat(BomExplosionRules.requiredQuantity(
-            new BigDecimal("10"), new BigDecimal("1"), new BigDecimal("0.05")))
+    assertThat(
+            BomExplosionRules.requiredQuantity(
+                new BigDecimal("10"), new BigDecimal("1"), new BigDecimal("0.05")))
         .isEqualByComparingTo("10.005000");
     // 零损耗 = 原值，不引入浮点误差。
-    assertThat(BomExplosionRules.requiredQuantity(new BigDecimal("3"), BigDecimal.ZERO, BigDecimal.ZERO))
+    assertThat(
+            BomExplosionRules.requiredQuantity(
+                new BigDecimal("3"), BigDecimal.ZERO, BigDecimal.ZERO))
         .isEqualByComparingTo("0E-6");
   }
 
   @Test
   void 需求量不取整() {
     // 0.5 米 × 3 个 × 1.10 = 1.65；取整成 1 或 2 都是在下游拿到单据之前替它做了决定。
-    assertThat(BomExplosionRules.requiredQuantity(
-            new BigDecimal("3"), new BigDecimal("0.5"), new BigDecimal("10")))
+    assertThat(
+            BomExplosionRules.requiredQuantity(
+                new BigDecimal("3"), new BigDecimal("0.5"), new BigDecimal("10")))
         .isEqualByComparingTo("1.650000");
     // 0.333333 × 1 × 1 = 0.333333：不能被悄悄取整成 0。
-    assertThat(BomExplosionRules.requiredQuantity(
-            new BigDecimal("0.333333"), BigDecimal.ONE, BigDecimal.ZERO))
+    assertThat(
+            BomExplosionRules.requiredQuantity(
+                new BigDecimal("0.333333"), BigDecimal.ONE, BigDecimal.ZERO))
         .isEqualByComparingTo("0.333333");
   }
 
@@ -94,13 +99,16 @@ class BomExplosionRulesTest {
 
   @Test
   void 缺口等于需求量减可用减在途且下限截零() {
-    assertThat(BomExplosionRules.gap(new BigDecimal("20"), new BigDecimal("4"), new BigDecimal("1")))
+    assertThat(
+            BomExplosionRules.gap(new BigDecimal("20"), new BigDecimal("4"), new BigDecimal("1")))
         .isEqualByComparingTo("15.000000");
     // 在途可抵扣：货权已归本租户（已经买了只是没到），抵扣它是为了不重复下单。
-    assertThat(BomExplosionRules.gap(new BigDecimal("20"), new BigDecimal("4"), new BigDecimal("16")))
+    assertThat(
+            BomExplosionRules.gap(new BigDecimal("20"), new BigDecimal("4"), new BigDecimal("16")))
         .isEqualByComparingTo("0.000000");
     // 余量不为负：负数表达「多出来多少」，对采购决策无用。
-    assertThat(BomExplosionRules.gap(new BigDecimal("20"), new BigDecimal("30"), new BigDecimal("5")))
+    assertThat(
+            BomExplosionRules.gap(new BigDecimal("20"), new BigDecimal("30"), new BigDecimal("5")))
         .isEqualByComparingTo("0.000000");
     assertThat(BomExplosionRules.gap(BigDecimal.ZERO, new BigDecimal("30"), BigDecimal.ZERO))
         .isEqualByComparingTo("0.000000");
@@ -108,20 +116,33 @@ class BomExplosionRulesTest {
 
   @Test
   void 余量只在库存超过需求时非零() {
-    assertThat(BomExplosionRules.surplus(new BigDecimal("20"), new BigDecimal("30"), new BigDecimal("5")))
+    assertThat(
+            BomExplosionRules.surplus(
+                new BigDecimal("20"), new BigDecimal("30"), new BigDecimal("5")))
         .isEqualByComparingTo("15.000000");
-    assertThat(BomExplosionRules.surplus(new BigDecimal("20"), new BigDecimal("4"), new BigDecimal("1")))
+    assertThat(
+            BomExplosionRules.surplus(
+                new BigDecimal("20"), new BigDecimal("4"), new BigDecimal("1")))
         .isEqualByComparingTo("0.000000");
     // 恰好覆盖时余量为 0（不多不少）。
-    assertThat(BomExplosionRules.surplus(new BigDecimal("20"), new BigDecimal("10"), new BigDecimal("10")))
+    assertThat(
+            BomExplosionRules.surplus(
+                new BigDecimal("20"), new BigDecimal("10"), new BigDecimal("10")))
         .isEqualByComparingTo("0.000000");
   }
 
   @Test
   void 覆盖判定用可用加在途() {
-    assertThat(BomExplosionRules.covered(new BigDecimal("10"), new BigDecimal("6"), new BigDecimal("4"))).isTrue();
-    assertThat(BomExplosionRules.covered(new BigDecimal("10"), new BigDecimal("6"), new BigDecimal("3"))).isFalse();
-    assertThat(BomExplosionRules.covered(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO)).isTrue();
+    assertThat(
+            BomExplosionRules.covered(
+                new BigDecimal("10"), new BigDecimal("6"), new BigDecimal("4")))
+        .isTrue();
+    assertThat(
+            BomExplosionRules.covered(
+                new BigDecimal("10"), new BigDecimal("6"), new BigDecimal("3")))
+        .isFalse();
+    assertThat(BomExplosionRules.covered(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO))
+        .isTrue();
   }
 
   @Test
@@ -151,10 +172,12 @@ class BomExplosionRulesTest {
 
   @Test
   void 编码相同时用id兜底保证顺序唯一() {
-    var one = new BomExplosionRules.BomCandidate(
-        UUID.fromString("00000000-0000-0000-0000-000000000001"), "BOM-X");
-    var two = new BomExplosionRules.BomCandidate(
-        UUID.fromString("00000000-0000-0000-0000-000000000002"), "BOM-X");
+    var one =
+        new BomExplosionRules.BomCandidate(
+            UUID.fromString("00000000-0000-0000-0000-000000000001"), "BOM-X");
+    var two =
+        new BomExplosionRules.BomCandidate(
+            UUID.fromString("00000000-0000-0000-0000-000000000002"), "BOM-X");
     // 同一 SKU 被两个同编码 BOM 声明时，仍然必须选出**同一个**（而不是取决于输入顺序）。
     assertThat(BomExplosionRules.pickSubBom(List.of(two, one)).orElseThrow().getKey().id())
         .isEqualTo(one.id());

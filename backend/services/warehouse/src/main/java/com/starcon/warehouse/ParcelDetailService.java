@@ -20,39 +20,29 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 10.2.2.1 包裹详情：把一屏之内该看到的东西聚到一处。
  *
- * <p>蓝图原话：「单包裹视图：包裹内 SKU 与数量（parcel_item）、订单行对应关系、重量体积、
- * 面单、轨迹、交运信息。」输出：「包裹详情 + 操作入口。」
+ * <p>蓝图原话：「单包裹视图：包裹内 SKU 与数量（parcel_item）、订单行对应关系、重量体积、 面单、轨迹、交运信息。」输出：「包裹详情 + 操作入口。」
  *
  * <p><b>本模块落在 warehouse，不是 channel</b>：蓝图卷 10 写「主责服务 = channel + trade +
- * warehouse」，那三个字说的是<b>谁提供物流能力</b>，不是「单包裹视图落在哪个服务」。
- * {@code parcel} / {@code parcel_item} 由上游 8.3.3.2 打包与称重（warehouse，V121）拥有，
- * AGENTS.md 明令禁止跨服务直读对方的表 / 跨库 FK / 视图 —— 所以「表所有者的读模型」
- * 只能长在表所有者自己的服务里。轨迹与交运信息在本服务<b>不存在</b>，
- * 由 {@link ParcelDetailUnavailable} 如实标注归属模块，不返回空列表冒充。
+ * warehouse」，那三个字说的是<b>谁提供物流能力</b>，不是「单包裹视图落在哪个服务」。 {@code parcel} / {@code parcel_item} 由上游
+ * 8.3.3.2 打包与称重（warehouse，V121）拥有， AGENTS.md 明令禁止跨服务直读对方的表 / 跨库 FK / 视图 —— 所以「表所有者的读模型」
+ * 只能长在表所有者自己的服务里。轨迹与交运信息在本服务<b>不存在</b>， 由 {@link ParcelDetailUnavailable} 如实标注归属模块，不返回空列表冒充。
  *
- * <p><b>本模块只读不改</b>：除了 V125 自己那张
- * {@code parcel_item_sales_order_line}（由上游对齐作业写入），本服务对
- * {@code parcel} / {@code parcel_item} 一个字节都不写 —— 包裹是 8.3.3.2 的凭据。
+ * <p><b>本模块只读不改</b>：除了 V125 自己那张 {@code parcel_item_sales_order_line}（由上游对齐作业写入），本服务对 {@code
+ * parcel} / {@code parcel_item} 一个字节都不写 —— 包裹是 8.3.3.2 的凭据。
  *
- * <p><b>蓝图点名的那句要求怎么落地</b>：「parcel_item 与订单行的对应关系是成本归集到行的
- * 基础，缺了就只能算到订单级。」{@code parcel_item} 原本只有
- * {@code outbound_line_id}（指向<b>出库单行</b>，warehouse 自己的计划快照）；而 12 财务
- * 要把运费摊到的那一行是 <b>trade 的销售订单行</b>。V125 补的就是这一环，
- * 并带 <b>归集分母</b>（本箱分给这一行的件数）与 <b>匹配口径</b>（强/弱关联）——
- * 分母错一分运费就错一分，所以分母由 V125 的触发器钉死等于明细项实装件数。
+ * <p><b>蓝图点名的那句要求怎么落地</b>：「parcel_item 与订单行的对应关系是成本归集到行的 基础，缺了就只能算到订单级。」{@code parcel_item} 原本只有
+ * {@code outbound_line_id}（指向<b>出库单行</b>，warehouse 自己的计划快照）；而 12 财务 要把运费摊到的那一行是 <b>trade
+ * 的销售订单行</b>。V125 补的就是这一环， 并带 <b>归集分母</b>（本箱分给这一行的件数）与 <b>匹配口径</b>（强/弱关联）—— 分母错一分运费就错一分，所以分母由 V125
+ * 的触发器钉死等于明细项实装件数。
  *
- * <p><b>恒等式是本类最要紧的不变量</b>：
- * {@code matchedQuantity + unmatchedQuantity == totalQuantity}。
- * 归集到行还是归到订单级完全取决于有没有这条等式；本类读回后断言它，
- * 对不上宁可 500 也不返回一个自相矛盾的归集结论。
+ * <p><b>恒等式是本类最要紧的不变量</b>： {@code matchedQuantity + unmatchedQuantity == totalQuantity}。
+ * 归集到行还是归到订单级完全取决于有没有这条等式；本类读回后断言它， 对不上宁可 500 也不返回一个自相矛盾的归集结论。
  *
- * <p><b>时间绑定纪律</b>：本类<b>不写</b>任何时间列（只读视图），故无
- * {@code ?::timestamptz} 的绑定问题；读 timestamptz 列统一走 {@link #moment}，它对驱动
- * 返回的三种类型（OffsetDateTime / Instant / Timestamp）都收口。
+ * <p><b>时间绑定纪律</b>：本类<b>不写</b>任何时间列（只读视图），故无 {@code ?::timestamptz} 的绑定问题；读 timestamptz 列统一走 {@link
+ * #moment}，它对驱动 返回的三种类型（OffsetDateTime / Instant / Timestamp）都收口。
  *
- * <p><b>多租户</b>：每条 SQL 都带 {@code tenant_id = ?} 显式条件（RLS 之外的第一道闸），
- * 租户由 {@code app.current_tenant} 取 —— 它由 AccessService 在事务内从
- * <b>已认证身份的成员关系</b>设置，客户端的 {@code X-Tenant-Id} 头进不来也改不动它。
+ * <p><b>多租户</b>：每条 SQL 都带 {@code tenant_id = ?} 显式条件（RLS 之外的第一道闸）， 租户由 {@code app.current_tenant} 取
+ * —— 它由 AccessService 在事务内从 <b>已认证身份的成员关系</b>设置，客户端的 {@code X-Tenant-Id} 头进不来也改不动它。
  */
 @Service
 public class ParcelDetailService {
@@ -71,24 +61,16 @@ public class ParcelDetailService {
   /**
    * 包裹详情。
    *
-   * <p>一次调用返回整屏：单头（含实测重量体积）+ 明细项（含销售订单行关联）+ 面单 +
-   * 成本归集基线 + 操作入口 + 三段不可得能力。
+   * <p>一次调用返回整屏：单头（含实测重量体积）+ 明细项（含销售订单行关联）+ 面单 + 成本归集基线 + 操作入口 + 三段不可得能力。
    *
-   * <p>单头查不到时 404 —— <b>跨租户与不存在返回同一个结果</b>，这是有意的：
-   * 让 A 租户拿 B 租户的 id 探测存在性，本身就是一个信息泄露面。
+   * <p>单头查不到时 404 —— <b>跨租户与不存在返回同一个结果</b>，这是有意的： 让 A 租户拿 B 租户的 id 探测存在性，本身就是一个信息泄露面。
    */
   public ParcelDetail detail(UUID parcelId) {
     var head = header(parcelId);
     var items = items(parcelId, head);
     var allocation = costAllocation(items, "SALES".equals(head.outboundSourceType()));
     return new ParcelDetail(
-        head,
-        items,
-        label(parcelId),
-        allocation,
-        actions(head),
-        unavailable(head),
-        notes());
+        head, items, label(parcelId), allocation, actions(head), unavailable(head), notes());
   }
 
   // ------------------------------------------------------------ 单头
@@ -96,8 +78,7 @@ public class ParcelDetailService {
   /**
    * 包裹头 + 所属打包单 + 出库单 + 包材 + 仓库。
    *
-   * <p>实测三件（尺寸 / 毛重 / 体积）全部原样透传，<b>不派生体积重</b>：
-   * 除数（6000/5000/…）是承运商渠道口径，归 10 物流（V121 §1.5 同一条理由）。
+   * <p>实测三件（尺寸 / 毛重 / 体积）全部原样透传，<b>不派生体积重</b>： 除数（6000/5000/…）是承运商渠道口径，归 10 物流（V121 §1.5 同一条理由）。
    */
   private ParcelDetailHeader header(UUID parcelId) {
     var r =
@@ -121,8 +102,7 @@ public class ParcelDetailService {
             tenant(),
             parcelId);
     if (r == null) {
-      throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, "包裹不存在或不属于当前租户：" + parcelId);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "包裹不存在或不属于当前租户：" + parcelId);
     }
 
     var source = OutboundSourceType.valueOf(r.get("source_type", String.class));
@@ -174,14 +154,15 @@ public class ParcelDetailService {
    *
    * <p>按 item_no 升序 —— 打包与对账都按它排序，人心里的顺序也是这个。
    *
-   * <p>每条明细项带它自己的销售订单行列表；非 SALES 来源的出库单在 trade 侧没有销售订单行，
-   * 那时是<b>空数组 + 明确说明</b>，而不是 null、更不是编一个 uuid 填上去。
+   * <p>每条明细项带它自己的销售订单行列表；非 SALES 来源的出库单在 trade 侧没有销售订单行， 那时是<b>空数组 + 明确说明</b>，而不是 null、更不是编一个 uuid
+   * 填上去。
    */
   private List<ParcelDetailItem> items(UUID parcelId, ParcelDetailHeader header) {
     boolean salesSource = "SALES".equals(header.outboundSourceType());
     var links = linksByItem(parcelId);
 
-    return sql.fetch(
+    return sql
+        .fetch(
             "select pi.id,pi.item_no,pi.sku_id,pi.sku_code,pi.sku_name,pi.quantity,"
                 + "pi.serial_id,pi.serial_number,pi.recount_line_id,pi.outbound_line_id,"
                 + "pi.declaration_source,pi.hs_code,pi.declared_item_name,"
@@ -258,8 +239,7 @@ public class ParcelDetailService {
   /**
    * 订单行缺失时的说明。
    *
-   * <p>非 SALES 来源是一句实话（调拨出库本来就没有销售订单行）；
-   * SALES 来源却没关联上则是<b>真缺口</b>，必须说出来 —— 那正是蓝图说的
+   * <p>非 SALES 来源是一句实话（调拨出库本来就没有销售订单行）； SALES 来源却没关联上则是<b>真缺口</b>，必须说出来 —— 那正是蓝图说的
    * 「缺了就只能算到订单级」的成因，界面上不能装作没事。
    */
   private static String orderLineNote(List<ParcelItemSalesOrderLine> mine, boolean salesSource) {
@@ -267,11 +247,9 @@ public class ParcelDetailService {
       return "已关联到 " + mine.size() + " 条销售订单行，可按行归集运费。";
     }
     if (!salesSource) {
-      return "本包裹所属出库单**不是销售来源**，trade 侧没有对应的销售订单行 —— "
-          + "调拨/采购退货/加工出库本来就不该有，也就不该硬造一个关联。";
+      return "本包裹所属出库单**不是销售来源**，trade 侧没有对应的销售订单行 —— " + "调拨/采购退货/加工出库本来就不该有，也就不该硬造一个关联。";
     }
-    return "**这一条还没有关联到销售订单行。**蓝图要求「parcel_item 与订单行的对应关系"
-        + "是成本归集到行的基础」：没有它，这一箱的运费只能归到订单级，算不到行。";
+    return "**这一条还没有关联到销售订单行。**蓝图要求「parcel_item 与订单行的对应关系" + "是成本归集到行的基础」：没有它，这一箱的运费只能归到订单级，算不到行。";
   }
 
   // ------------------------------------------------------------ 面单
@@ -279,11 +257,9 @@ public class ParcelDetailService {
   /**
    * 面单（8.3.4.2 已交付的 print_job / print_target，同服务真实表）。
    *
-   * <p>经 parcel.label_print_job_id 关联；<b>刻意不自己渲染 ZPL</b>（V121 §1.2 同一条理由：
-   * 自造一份渲染内容会出现两份「印的是什么」）。
+   * <p>经 parcel.label_print_job_id 关联；<b>刻意不自己渲染 ZPL</b>（V121 §1.2 同一条理由： 自造一份渲染内容会出现两份「印的是什么」）。
    *
-   * <p>没记过打印时 available=false —— 那是事实（这一箱还没印），不是能力缺失，
-   * 所以 note 说清「去 8.3.4.2 的打包作业页记打印」而不是报「不可用」。
+   * <p>没记过打印时 available=false —— 那是事实（这一箱还没印），不是能力缺失， 所以 note 说清「去 8.3.4.2 的打包作业页记打印」而不是报「不可用」。
    */
   private ParcelDetailLabel label(UUID parcelId) {
     var r =
@@ -307,8 +283,22 @@ public class ParcelDetailService {
     UUID jobId = r == null ? null : r.get("label_print_job_id", UUID.class);
     if (jobId == null) {
       return new ParcelDetailLabel(
-          false, null, null, null, null, null, null, null, null, null, null, null, null, null,
-          null, null,
+          false,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
           count == null ? 0 : count,
           null,
           "这一箱**还没有记过面单打印**。面单内容与打印次数的权威是 8.3.4.2 已交付的 "
@@ -334,8 +324,7 @@ public class ParcelDetailService {
         moment(r, "last_printed_at"),
         count == null ? 0 : count,
         moment(r, "label_printed_at"),
-        "面单来自 8.3.4.2 的打印任务与打印目标，本模块只读不写。"
-            + "运单号与承运渠道的权威在 10 物流（尚未交付），这里显示的是打印时冻结的那一份。");
+        "面单来自 8.3.4.2 的打印任务与打印目标，本模块只读不写。" + "运单号与承运渠道的权威在 10 物流（尚未交付），这里显示的是打印时冻结的那一份。");
   }
 
   private static String printStatusLabel(String status) {
@@ -356,8 +345,7 @@ public class ParcelDetailService {
   /**
    * 成本归集基线（下游 12 财务）。
    *
-   * <p>蓝图那句「缺了就只能算到订单级」在这里变成一个可判定的布尔：
-   * <b>所有明细项都关联上了销售订单行 → 归集到行；有一条没关联上 → 只能归到订单级</b>，
+   * <p>蓝图那句「缺了就只能算到订单级」在这里变成一个可判定的布尔： <b>所有明细项都关联上了销售订单行 → 归集到行；有一条没关联上 → 只能归到订单级</b>，
    * 并把没关联上的那几条逐条列出来（能追到具体是哪几件货），而不是静默按订单摊。
    *
    * <p>{@code matchedQuantity + unmatchedQuantity} 必须等于 {@code totalQuantity}：
@@ -397,10 +385,7 @@ public class ParcelDetailService {
       }
     }
 
-    BigDecimal total =
-        items.stream()
-            .map(ParcelDetailItem::quantity)
-            .reduce(ZERO, BigDecimal::add);
+    BigDecimal total = items.stream().map(ParcelDetailItem::quantity).reduce(ZERO, BigDecimal::add);
 
     // 恒等式断言：宁可 500 也不返回一个自己都说不圆的归集结论。
     if (matched.add(unmatchedQty).compareTo(total) != 0) {
@@ -422,7 +407,9 @@ public class ParcelDetailService {
         toLine ? "LINE" : "ORDER",
         toLine
             ? null
-            : "有 " + unmatched.size() + " 条明细项没有销售订单行关联，运费**只能归到订单级**。"
+            : "有 "
+                + unmatched.size()
+                + " 条明细项没有销售订单行关联，运费**只能归到订单级**。"
                 + "这是蓝图点名的失败模式（「缺了就只能算到订单级」），已逐条列出未关联的明细项。",
         unmatched,
         "**归集口径**：分母是本箱分给该销售订单行的件数（V125 的触发器钉死等于明细项"
@@ -435,8 +422,7 @@ public class ParcelDetailService {
   /**
    * 详情页操作入口。
    *
-   * <p>本模块是<b>只读视图</b>，所以入口全部指向真正做这件事的作业模块：
-   * 详情页给跳转与前置条件，不在这里开写操作。
+   * <p>本模块是<b>只读视图</b>，所以入口全部指向真正做这件事的作业模块： 详情页给跳转与前置条件，不在这里开写操作。
    */
   private List<ParcelDetailAction> actions(ParcelDetailHeader header) {
     boolean measured = header.measured();
@@ -448,8 +434,7 @@ public class ParcelDetailService {
             "/warehouse/packing-orders",
             "8.3.3.2 打包与称重",
             "无",
-            "包裹与明细项是 8.3.3.2 的凭据：要改包装、补明细或重新称重，都在那张作业单上"
-                + "按它的状态机走（本视图不提供任何写入口）。"));
+            "包裹与明细项是 8.3.3.2 的凭据：要改包装、补明细或重新称重，都在那张作业单上" + "按它的状态机走（本视图不提供任何写入口）。"));
     out.add(
         new ParcelDetailAction(
             "REMEASURE",
@@ -459,8 +444,7 @@ public class ParcelDetailService {
             "打包单状态必须是「进行中」（OPEN）",
             measured
                 ? "已实测（毛重 / 净重 / 体积齐全）。重称仍要走 8.3.3.2 的实测入口。"
-                : "**尚未称重**：10 物流按渠道除数算费要的就是实测重量与体积，"
-                    + "未量的箱子进不了运费计算。"));
+                : "**尚未称重**：10 物流按渠道除数算费要的就是实测重量与体积，" + "未量的箱子进不了运费计算。"));
     out.add(
         new ParcelDetailAction(
             "QUERY_TRACKING",
@@ -477,8 +461,7 @@ public class ParcelDetailService {
             "/warehouse/outbound",
             "8.3.4.1 发货交接",
             "打包单已判完成（出库单待发货）",
-            "交运信息归 8.3.4.1，**本服务没有交运实体**。打包完成只是把包裹交给它"
-                + "（V121 的同一纪律：打包完成 ≠ 已发货）。"));
+            "交运信息归 8.3.4.1，**本服务没有交运实体**。打包完成只是把包裹交给它" + "（V121 的同一纪律：打包完成 ≠ 已发货）。"));
     out.add(
         new ParcelDetailAction(
             "ALLOCATE_FREIGHT",
@@ -486,8 +469,7 @@ public class ParcelDetailService {
             null,
             "12 财务",
             "本包裹每一条明细项都已关联销售订单行",
-            "归集依据就是本响应的 costAllocation 段：分母（件数）、实测重量与实测体积。"
-                + "金额由 12 财务算，本模块不产生金额。"));
+            "归集依据就是本响应的 costAllocation 段：分母（件数）、实测重量与实测体积。" + "金额由 12 财务算，本模块不产生金额。"));
     return out;
   }
 
@@ -496,8 +478,7 @@ public class ParcelDetailService {
   /**
    * 三段本服务<b>真读不到</b>的数据，逐段说明归谁。
    *
-   * <p>轨迹与交运信息刻意返回 {@code available=false} 而不是空列表 ——
-   * 空列表在界面上与「这一票确实没有轨迹」一模一样。
+   * <p>轨迹与交运信息刻意返回 {@code available=false} 而不是空列表 —— 空列表在界面上与「这一票确实没有轨迹」一模一样。
    */
   private List<ParcelDetailUnavailable> unavailable(ParcelDetailHeader header) {
     return List.of(
@@ -535,11 +516,7 @@ public class ParcelDetailService {
                 + "（以及本箱的归集分母），除数与金额都不在这里算 —— "
                 + "在这里乘一个除数就是替渠道定价。"),
         new ParcelDetailUnavailable(
-            "异常件处理",
-            false,
-            "10.3.1.2",
-            null,
-            "**异常件归 10.3.1.2，尚未交付。**本模块只呈现事实，不判定异常。"),
+            "异常件处理", false, "10.3.1.2", null, "**异常件归 10.3.1.2，尚未交付。**本模块只呈现事实，不判定异常。"),
         new ParcelDetailUnavailable(
             "申报信息",
             false,
@@ -558,11 +535,9 @@ public class ParcelDetailService {
         "**本模块是只读视图。**包裹与明细项是 8.3.3.2 的凭据，本模块一个字节都不改写；"
             + "它只新增一张 parcel_item_sales_order_line（V125）承载「明细项 → 销售订单行」"
             + "这条蓝图点名的关联。",
-        "**实测口径**：重量一律克、体积一律立方米、尺寸一律厘米，全部 NUMERIC，无浮点。"
-            + "未称重的值是 null 而不是 0 —— 0 会被读成「量出来是 0」。",
+        "**实测口径**：重量一律克、体积一律立方米、尺寸一律厘米，全部 NUMERIC，无浮点。" + "未称重的值是 null 而不是 0 —— 0 会被读成「量出来是 0」。",
         "**体积重不在本服务算**：除数是承运商渠道口径，归 10 物流。",
-        "**跨租户与不存在返回同一个 404**：让 A 租户拿 B 租户的 id 探测存在性，"
-            + "本身就是一个信息泄露面。");
+        "**跨租户与不存在返回同一个 404**：让 A 租户拿 B 租户的 id 探测存在性，" + "本身就是一个信息泄露面。");
   }
 
   // ============================================================ 能力声明
@@ -570,8 +545,7 @@ public class ParcelDetailService {
   /**
    * 详情页能力声明：六段内容的可用性 + 归集口径 + 必须写在界面上的说明。
    *
-   * <p>前端据此渲染「未接入」的灰块与提示，而不是把六段都画成空的详情表 ——
-   * 空的详情表会被读成「这一票没有明细/没有轨迹」，而真相是「这段能力还没接入」。
+   * <p>前端据此渲染「未接入」的灰块与提示，而不是把六段都画成空的详情表 —— 空的详情表会被读成「这一票没有明细/没有轨迹」，而真相是「这段能力还没接入」。
    */
   public ParcelDetailCapabilities capabilities() {
     return new ParcelDetailCapabilities(
@@ -595,7 +569,8 @@ public class ParcelDetailService {
   // ============================================================ 内部
 
   private UUID tenant() {
-    return sql.fetchOne("select current_setting('app.current_tenant',true)::uuid as t").get("t", UUID.class);
+    return sql.fetchOne("select current_setting('app.current_tenant',true)::uuid as t")
+        .get("t", UUID.class);
   }
 
   /** numeric(19,6) 口径：统一 scale，避免同一列里混着 "2.5" 与 "2.500000"。 */
@@ -606,9 +581,8 @@ public class ParcelDetailService {
   /**
    * 重量 / 尺寸列的 scale。
    *
-   * <p>V121 §3 的口径：重量 numeric(19,3)（克，三位小数 = 毫克级余量）、
-   * 外形 numeric(14,3)（厘米）、体积 numeric(19,6)（立方米）。这里按列各自的 scale 收口，
-   * 不用统一的 6 位 —— 把毫米级读数补成 6 位小数是伪造精度。
+   * <p>V121 §3 的口径：重量 numeric(19,3)（克，三位小数 = 毫克级余量）、 外形 numeric(14,3)（厘米）、体积
+   * numeric(19,6)（立方米）。这里按列各自的 scale 收口， 不用统一的 6 位 —— 把毫米级读数补成 6 位小数是伪造精度。
    */
   private static BigDecimal weight(Record r, String field, int digits) {
     BigDecimal v = r.get(field, BigDecimal.class);
@@ -618,9 +592,9 @@ public class ParcelDetailService {
   /**
    * 读 timestamptz 列。
    *
-   * <p>驱动返回的类型可能是 {@link OffsetDateTime}、{@link java.time.Instant} 或
-   * {@link java.sql.Timestamp}，直接 get(field, OffsetDateTime.class) 会在拿到 Instant 时抛
-   * ClassCastException（与 7.1.2.2 / 8.3.1.1 / 8.3.3.2 同一处收口）。
+   * <p>驱动返回的类型可能是 {@link OffsetDateTime}、{@link java.time.Instant} 或 {@link java.sql.Timestamp}，直接
+   * get(field, OffsetDateTime.class) 会在拿到 Instant 时抛 ClassCastException（与 7.1.2.2 / 8.3.1.1 /
+   * 8.3.3.2 同一处收口）。
    */
   private static OffsetDateTime moment(Record r, String field) {
     Object value = r.get(field);

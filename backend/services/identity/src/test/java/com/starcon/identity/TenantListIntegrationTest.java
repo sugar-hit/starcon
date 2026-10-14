@@ -16,9 +16,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 /**
  * 17.1.1.1 租户列表。
  *
- * <p>本模块是全系统唯一允许的跨租户列表查询路径，所以这里的重点不是「功能能用」，
- * 而是证明这个列表**只能是自己的成员关系租户**：没有成员关系的租户一条都不该出现，
- * 伪造 {@code X-Tenant-Id} 也不能把范围撑大，管理员同样看不到自己管不到的平台租户。
+ * <p>本模块是全系统唯一允许的跨租户列表查询路径，所以这里的重点不是「功能能用」， 而是证明这个列表**只能是自己的成员关系租户**：没有成员关系的租户一条都不该出现， 伪造 {@code
+ * X-Tenant-Id} 也不能把范围撑大，管理员同样看不到自己管不到的平台租户。
  */
 class TenantListIntegrationTest extends IdentityIntegrationTestBase {
 
@@ -50,8 +49,7 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 建一个普通角色并返回它的 id。
    *
-   * <p>不能用 OWNER：既有规则禁止把 OWNER 直接授予成员（必须走转移所有者操作），
-   * 所以普通成员一律配一个自定义角色。
+   * <p>不能用 OWNER：既有规则禁止把 OWNER 直接授予成员（必须走转移所有者操作）， 所以普通成员一律配一个自定义角色。
    */
   private UUID roleId(String token, String tag) throws Exception {
     return UUID.fromString(
@@ -88,7 +86,13 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
             "",
             "POST",
             "/auth/login",
-            Map.of("username", username, "password", "test-member-password", "membershipId", membershipId),
+            Map.of(
+                "username",
+                username,
+                "password",
+                "test-member-password",
+                "membershipId",
+                membershipId),
             200)
         .get("token")
         .asText();
@@ -111,8 +115,7 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 列表只返回有成员关系的租户，并且角色来自真实分配。
    *
-   * <p>注意本地所有者只属于一个租户，但它在自己租户下能创建子租户——子租户对它是**没有
-   * 成员关系**的，所以它必须看不到子租户。这条最容易做漏：列表一旦不小心从 tenant 表起查，
+   * <p>注意本地所有者只属于一个租户，但它在自己租户下能创建子租户——子租户对它是**没有 成员关系**的，所以它必须看不到子租户。这条最容易做漏：列表一旦不小心从 tenant 表起查，
    * 子租户就会混进来，而「父租户看得见子租户」恰好是用户最自然的预期。
    */
   @Test
@@ -144,8 +147,8 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 伪造 tenant header 不能扩大可见范围。
    *
-   * <p>{@code request()} 本来就每次都带一个随机 {@code X-Tenant-Id}，这里再显式指定成
-   * 「一个真实存在但与我无关的租户」，确认连真实 id 也换不来任何东西。
+   * <p>{@code request()} 本来就每次都带一个随机 {@code X-Tenant-Id}，这里再显式指定成 「一个真实存在但与我无关的租户」，确认连真实 id
+   * 也换不来任何东西。
    */
   @Test
   void forgedTenantHeaderCannotWidenTheList() throws Exception {
@@ -173,7 +176,8 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
     String ownerToken = login(), tag = suffix(), code = "TLR_" + tag;
     String foreign = currentTenantId(loginUser(childTenant(ownerToken, tag, code)));
 
-    for (String path : List.of("/identity/tenants/" + foreign, "/identity/tenants/current/" + foreign)) {
+    for (String path :
+        List.of("/identity/tenants/" + foreign, "/identity/tenants/current/" + foreign)) {
       var response =
           http.perform(
                   org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(path)
@@ -188,8 +192,7 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 失去全部成员关系的用户拿不到任何租户。
    *
-   * <p>这是「仅返回有成员关系的租户」的下界：列表不能退化成「空数组 + 200」，
-   * 那会被界面渲染成「你还没有租户」。成员被删除后现存令牌直接失效。
+   * <p>这是「仅返回有成员关系的租户」的下界：列表不能退化成「空数组 + 200」， 那会被界面渲染成「你还没有租户」。成员被删除后现存令牌直接失效。
    */
   @Test
   void userWithoutMembershipSeesNoTenant() throws Exception {
@@ -198,7 +201,8 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
         ownerToken,
         "POST",
         "/identity/members",
-        memberInput(username, null, List.of(Map.of("roleId", roleId(ownerToken, tag), "scopeMode", "ALL"))),
+        memberInput(
+            username, null, List.of(Map.of("roleId", roleId(ownerToken, tag), "scopeMode", "ALL"))),
         200);
     String orphanToken = loginUser(username);
     assertThat(request(orphanToken, "GET", "/identity/tenants", null, 200)).hasSize(1);
@@ -218,8 +222,8 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 最后登录是真实写入的 timestamptz，且能原样读回。
    *
-   * <p>这里断言的是**值**而不是「没抛异常」：用 {@code Timestamp.valueOf(LocalDateTime)} 绑
-   * timestamptz 会在 Asia/Shanghai 下静默偏 −28800 秒，落在下界断言之外。
+   * <p>这里断言的是**值**而不是「没抛异常」：用 {@code Timestamp.valueOf(LocalDateTime)} 绑 timestamptz 会在
+   * Asia/Shanghai 下静默偏 −28800 秒，落在下界断言之外。
    */
   @Test
   void lastLoginIsARealTimestampWrittenAndReadBack() throws Exception {
@@ -239,8 +243,7 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
     UUID tenantId = UUID.fromString(listed.get(0).get("tenantId").asText());
     UUID membershipId = UUID.fromString(listed.get(0).get("membershipId").asText());
     OffsetDateTime stored =
-        tx()
-            .run(
+        tx().run(
                 tenantId,
                 () ->
                     sql.fetchOne("select last_login_at from membership where id=?", membershipId)
@@ -253,8 +256,7 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 切换租户也要算一次「进入」。
    *
-   * <p>同一个账号在两个租户都有成员身份：切到 B 之后 B 的最后登录被刷新，而**没有切换的**
-   * A 的时间戳必须原样不动——否则「最后登录」就答不出「我上次进的是哪个租户」。
+   * <p>同一个账号在两个租户都有成员身份：切到 B 之后 B 的最后登录被刷新，而**没有切换的** A 的时间戳必须原样不动——否则「最后登录」就答不出「我上次进的是哪个租户」。
    */
   @Test
   void switchingTenantStampsOnlyTheNewlyEnteredTenant() throws Exception {
@@ -309,7 +311,8 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
         ownerToken,
         "POST",
         "/identity/members",
-        memberInput(member, null, List.of(Map.of("roleId", roleId(ownerToken, tag), "scopeMode", "ALL"))),
+        memberInput(
+            member, null, List.of(Map.of("roleId", roleId(ownerToken, tag), "scopeMode", "ALL"))),
         200);
     String memberToken = loginUser(member);
 
@@ -322,7 +325,11 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(readOnly.get("parentTenantId").isNull()).isTrue();
 
     request(
-        memberToken, "PUT", "/identity/tenants/current", Map.of("name", "越权改名", "status", "ACTIVE"), 403);
+        memberToken,
+        "PUT",
+        "/identity/tenants/current",
+        Map.of("name", "越权改名", "status", "ACTIVE"),
+        403);
 
     request(
         ownerToken,
@@ -334,20 +341,33 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(after.get("name").asText()).isEqualTo("本地开发租户 改名");
     assertThat(after.get("managed").asBoolean()).isTrue();
     assertThat(after.get("code").asText()).as("code 不可改").isEqualTo("LOCAL");
-    assertThat(request(ownerToken, "GET", "/identity/tenants", null, 200).get(0).get("name").asText())
+    assertThat(
+            request(ownerToken, "GET", "/identity/tenants", null, 200).get(0).get("name").asText())
         .isEqualTo("本地开发租户 改名");
 
     // 改名进审计：事后要能答出当时叫什么。列表只给摘要，变更前后值在详情里。
-    var entries = request(ownerToken, "GET", "/identity/audit?resourceType=tenant.profile", null, 200);
+    var entries =
+        request(ownerToken, "GET", "/identity/audit?resourceType=tenant.profile", null, 200);
     JsonNode entry = entries.get("items").get(0);
     assertThat(entry.get("action").asText()).isEqualTo("TenantProfileUpdated");
     assertThat(entry.get("resourceLabel").asText()).isEqualTo("LOCAL");
-    var detail = request(ownerToken, "GET", "/identity/audit/" + entry.get("id").asText(), null, 200);
+    var detail =
+        request(ownerToken, "GET", "/identity/audit/" + entry.get("id").asText(), null, 200);
     assertThat(detail.toString()).contains("本地开发租户 改名").contains("本地开发租户");
 
     // 校验是真实的，不是装饰。
-    request(ownerToken, "PUT", "/identity/tenants/current", Map.of("name", "  ", "status", "ACTIVE"), 400);
-    request(ownerToken, "PUT", "/identity/tenants/current", Map.of("name", "ok", "status", "GONE"), 400);
+    request(
+        ownerToken,
+        "PUT",
+        "/identity/tenants/current",
+        Map.of("name", "  ", "status", "ACTIVE"),
+        400);
+    request(
+        ownerToken,
+        "PUT",
+        "/identity/tenants/current",
+        Map.of("name", "ok", "status", "GONE"),
+        400);
   }
 
   /** 停用后该租户不再出现在可切换集合里（对它自己而言等于退出）。 */
@@ -374,8 +394,7 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
   /**
    * 租户隔离三断言（两租户互不可见 / 伪造头无效 / 连接归还后不串租户）。
    *
-   * <p>连接池在基类里被压到 1，所以每个请求必然复用同一条物理连接——租户设置如果泄漏到连接上，
-   * 第二个租户就会读到第一个租户的数据。
+   * <p>连接池在基类里被压到 1，所以每个请求必然复用同一条物理连接——租户设置如果泄漏到连接上， 第二个租户就会读到第一个租户的数据。
    */
   @Test
   void tenantIsolationHoldsAcrossConnectionReuse() throws Exception {
@@ -393,7 +412,8 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
 
     // 直连表：RLS 下每个租户只看得到自己的 membership 行，池只有一条连接。
     var parentRows =
-        tx().run(parentId, () -> sql.fetch("select id from membership").getValues("id", UUID.class));
+        tx().run(
+                parentId, () -> sql.fetch("select id from membership").getValues("id", UUID.class));
     var childRows =
         tx().run(childId, () -> sql.fetch("select id from membership").getValues("id", UUID.class));
     assertThat(parentRows).isNotEmpty().doesNotContainAnyElementsOf(childRows);
@@ -405,7 +425,8 @@ class TenantListIntegrationTest extends IdentityIntegrationTestBase {
   /** 本租户的表仍然是 FORCE RLS，运行时角色不能绕过。 */
   @Test
   void runtimeRoleCannotBypassTenantIsolation() {
-    var runtime = sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
+    var runtime =
+        sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
     assertThat(runtime.get("rolsuper", Boolean.class)).isFalse();
     assertThat(runtime.get("rolbypassrls", Boolean.class)).isFalse();
     assertThat(

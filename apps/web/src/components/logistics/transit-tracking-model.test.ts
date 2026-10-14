@@ -90,9 +90,7 @@ describe('查询串', () => {
         customsStatus: ['HELD'],
         delayLevel: ['CRITICAL'],
       }),
-    ).toBe(
-      '?status=TRACKING&stage=IN_CUSTOMS&customsStatus=HELD&delayLevel=CRITICAL',
-    );
+    ).toBe('?status=TRACKING&stage=IN_CUSTOMS&customsStatus=HELD&delayLevel=CRITICAL');
   });
 
   it('单值筛选落全部标量参数，delayedOnly 落 true 而不是字符串', () => {
@@ -156,7 +154,12 @@ describe('真实调用点（从模型文件反向抽取）', () => {
       'GET',
       '/api/warehouse/warehouse/transit-trackings/t-1',
     ],
-    ['建跟踪', () => createTransitTracking(createBody), 'POST', '/api/warehouse/warehouse/transit-trackings'],
+    [
+      '建跟踪',
+      () => createTransitTracking(createBody),
+      'POST',
+      '/api/warehouse/warehouse/transit-trackings',
+    ],
     [
       '登记节点',
       () => recordTransitTrackingEvent('t-1', eventBody('NOTE')),
@@ -333,9 +336,7 @@ describe('可执行动作：终态不给动作，清关未放行不给收货确�
 
 describe('外部来源必须留单号', () => {
   it('外部来源带单号，人工不显示单号', () => {
-    expect(sourceCaption({ sourceSystem: 'FORWARDER', referenceId: 'FF-1' })).toBe(
-      '货代 · FF-1',
-    );
+    expect(sourceCaption({ sourceSystem: 'FORWARDER', referenceId: 'FF-1' })).toBe('货代 · FF-1');
     expect(sourceCaption({ sourceSystem: 'CARRIER', referenceId: null })).toBe('船司/航空公司');
     expect(sourceCaption({ sourceSystem: 'MANUAL', referenceId: null })).toBe('人工登记');
   });

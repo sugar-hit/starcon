@@ -25,37 +25,30 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 7.2.1.3 释放与过期。
  *
- * <p>蓝图：「处理预占的释放（订单取消、支付超时、拆单减少）与过期回收，提供手动释放入口与
- * 批量过期清理，释放时同步恢复可用量。」输出「预占终态记录 + 余额恢复分录」。
+ * <p>蓝图：「处理预占的释放（订单取消、支付超时、拆单减少）与过期回收，提供手动释放入口与 批量过期清理，释放时同步恢复可用量。」输出「预占终态记录 + 余额恢复分录」。
  *
  * <p><b>八条实现纪律</b>：
  *
  * <ol>
- *   <li><b>承诺后不自动过期</b>（蓝图红线）。批量清理的候选谓词只含 {@code status='HELD'}，
- *       且**预占名下只要还有一条 COMMITTED 分配就整笔跳过** —— 不只是跳过那条分配。
- *       只跳过分配而仍让预占进终态，会造出「预占已结束但有货还占着、且再也放不掉」的死状态：
- *       预占进终态后不能再挂新分配，而那条 COMMITTED 分配的货会一直占着可用量。
- *   <li><b>恢复量与释放量是两个数</b>。{@code restoredQuantity} 是真的还回可用池的量
- *       （各分配剩余量之和），{@code releasedDemandQuantity} 是预占口径上放弃的量。
- *       需求 12、只圈到 10 的货整笔释放时两者是 10 与 12；合并成一个数会让可用量凭空多 2，
+ *   <li><b>承诺后不自动过期</b>（蓝图红线）。批量清理的候选谓词只含 {@code status='HELD'}， 且**预占名下只要还有一条 COMMITTED 分配就整笔跳过**
+ *       —— 不只是跳过那条分配。 只跳过分配而仍让预占进终态，会造出「预占已结束但有货还占着、且再也放不掉」的死状态： 预占进终态后不能再挂新分配，而那条 COMMITTED
+ *       分配的货会一直占着可用量。
+ *   <li><b>恢复量与释放量是两个数</b>。{@code restoredQuantity} 是真的还回可用池的量 （各分配剩余量之和），{@code
+ *       releasedDemandQuantity} 是预占口径上放弃的量。 需求 12、只圈到 10 的货整笔释放时两者是 10 与 12；合并成一个数会让可用量凭空多 2，
  *       而「可用量只准有一个来源」是本卷硬约束。
- *   <li><b>不写 inventory_entry</b>，也不碰 inventory_balance / stock_bucket 的 reserved。
- *       7.2.1.2 登记分配时同样不写（那才是 reserved 变大的时刻）；本模块单方面写账本，
- *       会与余额侧对不上。可用量口径由 7.1.1.3 裁决 —— 本模块表达的是「退出占额集合 + 记凭据」。
- *   <li><b>时间一律带偏移量</b>：{@code ?::timestamptz} 绑定。用
- *       {@code Timestamp.valueOf(LocalDateTime)} 会静默偏 −28800s。
- *   <li><b>写操作优先采信调用方给的发生时刻</b>。订单取消发生在上游，用服务端当前时间
- *       会把「什么时候取消的」换成「本服务什么时候知道的」。
- *   <li><b>更新一律带状态谓词并检查影响行数</b>。终态不可复活由 V102 / V107 的触发器兜底，
- *       但「更新 0 行却回执成功」是调用方最没法排查的一种假成功。
- *   <li><b>批量清理是一事务、全成功或全回滚</b>。半途失败留下「处理了 37 条然后失败」的中间态时，
- *       事后无法判断哪 37 条是真的终结了。
- *   <li><b>重放不是错误</b>。上游事件是至少投递一次，同键同参回放既有凭据、已进同种终态也回放，
- *       返回 {@code replayed=true}。把重放当错误会让上游的重试变成故障源。
+ *   <li><b>不写 inventory_entry</b>，也不碰 inventory_balance / stock_bucket 的 reserved。 7.2.1.2
+ *       登记分配时同样不写（那才是 reserved 变大的时刻）；本模块单方面写账本， 会与余额侧对不上。可用量口径由 7.1.1.3 裁决 —— 本模块表达的是「退出占额集合 +
+ *       记凭据」。
+ *   <li><b>时间一律带偏移量</b>：{@code ?::timestamptz} 绑定。用 {@code Timestamp.valueOf(LocalDateTime)} 会静默偏
+ *       −28800s。
+ *   <li><b>写操作优先采信调用方给的发生时刻</b>。订单取消发生在上游，用服务端当前时间 会把「什么时候取消的」换成「本服务什么时候知道的」。
+ *   <li><b>更新一律带状态谓词并检查影响行数</b>。终态不可复活由 V102 / V107 的触发器兜底， 但「更新 0 行却回执成功」是调用方最没法排查的一种假成功。
+ *   <li><b>批量清理是一事务、全成功或全回滚</b>。半途失败留下「处理了 37 条然后失败」的中间态时， 事后无法判断哪 37 条是真的终结了。
+ *   <li><b>重放不是错误</b>。上游事件是至少投递一次，同键同参回放既有凭据、已进同种终态也回放， 返回 {@code
+ *       replayed=true}。把重放当错误会让上游的重试变成故障源。
  * </ol>
  *
- * <p>租户来自已认证成员关系（控制器传入），不接受任何客户端租户参数；RLS 在数据库层强制隔离，
- * 服务层的 {@code tenant_id} 谓词是第二道防线。
+ * <p>租户来自已认证成员关系（控制器传入），不接受任何客户端租户参数；RLS 在数据库层强制隔离， 服务层的 {@code tenant_id} 谓词是第二道防线。
  */
 @Service
 public class ReservationReleaseService {
@@ -67,7 +60,8 @@ public class ReservationReleaseService {
   static final int MAX_RUN_LIMIT = 1000;
 
   /** 排序键白名单：排序键来自 query string，只允许这四个。 */
-  static final List<String> SORTS = List.of("EXPIRES_AT", "OVERDUE", "RESTORABLE", "RESERVATION_NO");
+  static final List<String> SORTS =
+      List.of("EXPIRES_AT", "OVERDUE", "RESTORABLE", "RESERVATION_NO");
 
   private static final String TENANT = "current_setting('app.current_tenant', true)::uuid";
 
@@ -88,8 +82,7 @@ public class ReservationReleaseService {
           + "可用量口径属 7.1.1.3，本模块不重复计算。";
 
   private static final String TIMEZONE_NOTE =
-      "时间一律带时区偏移：库里是 timestamptz，界面按浏览器本地时区显示，"
-          + "服务端不做二次时区转换（转换两次就会把偏移量算错 8 小时）";
+      "时间一律带时区偏移：库里是 timestamptz，界面按浏览器本地时区显示，" + "服务端不做二次时区转换（转换两次就会把偏移量算错 8 小时）";
 
   private final DSLContext sql;
   private final Clock clock;
@@ -107,13 +100,13 @@ public class ReservationReleaseService {
    *
    * <p>筛选：来源类型、关键字（预占单号 / 上游单号 / SKU 编码 / SKU 名称 / 备注）、排序、真分页。
    *
-   * <p>{@code evaluatedAt} 把判定时刻**逐字返回**：页面上必须写清「这份清单按哪个时刻算的」，
-   * 否则用户会把预演结果当成实时状态。
+   * <p>{@code evaluatedAt} 把判定时刻**逐字返回**：页面上必须写清「这份清单按哪个时刻算的」， 否则用户会把预演结果当成实时状态。
    */
   public ReservationReleaseCandidatePage candidates(UUID tenantId, ReservationReleaseQuery q) {
     int size = Math.min(MAX_PAGE_SIZE, Math.max(1, q.size() == null ? 20 : q.size()));
     int page = Math.max(0, q.page() == null ? 0 : q.page());
-    OffsetDateTime evaluatedAt = q.evaluatedAt() == null ? now() : q.evaluatedAt().truncatedTo(ChronoUnit.MILLIS);
+    OffsetDateTime evaluatedAt =
+        q.evaluatedAt() == null ? now() : q.evaluatedAt().truncatedTo(ChronoUnit.MILLIS);
 
     var where = new ArrayList<String>();
     var binds = new ArrayList<Object>();
@@ -129,8 +122,9 @@ public class ReservationReleaseService {
       binds.add(q.sourceType().toUpperCase(Locale.ROOT).trim());
     }
     if (q.keyword() != null && !q.keyword().isBlank()) {
-      where.add("(r.reservation_no ilike ? or r.source_ref_code ilike ?"
-          + " or r.note ilike ? or sk.code ilike ? or sk.name ilike ?)");
+      where.add(
+          "(r.reservation_no ilike ? or r.source_ref_code ilike ?"
+              + " or r.note ilike ? or sk.code ilike ? or sk.name ilike ?)");
       String like = "%" + q.keyword().trim() + "%";
       for (int i = 0; i < 5; i++) binds.add(like);
     }
@@ -160,8 +154,7 @@ public class ReservationReleaseService {
   /**
    * 候选行查询。
    *
-   * <p>行与行之间**不做 join 展开**：可还回量用标量子查询算。一个子查询比一次
-   * {@code left join + group by} 便宜得多，而且计数不会被分配行数放大 ——
+   * <p>行与行之间**不做 join 展开**：可还回量用标量子查询算。一个子查询比一次 {@code left join + group by} 便宜得多，而且计数不会被分配行数放大 ——
    * 7.2.1.1 的状态汇总已经因为同一个原因踩过一次。
    */
   private static final String CANDIDATE_SELECT =
@@ -178,20 +171,16 @@ public class ReservationReleaseService {
         left join legal_entity_ref le on le.tenant_id=r.tenant_id and le.id=r.legal_entity_id
         left join sku_ref sk on sk.tenant_id=r.tenant_id and sk.id=r.sku_id
        where r.tenant_id = %s and r.id = ?
-      """.formatted(TENANT);
+      """
+          .formatted(TENANT);
 
-  private ReservationReleaseCandidateRow candidateRow(UUID reservationId, OffsetDateTime evaluatedAt) {
-    var r =
-        sql.fetchOne(
-            CANDIDATE_SELECT,
-            reservationId);
+  private ReservationReleaseCandidateRow candidateRow(
+      UUID reservationId, OffsetDateTime evaluatedAt) {
+    var r = sql.fetchOne(CANDIDATE_SELECT, reservationId);
     if (r == null) throw notFound(reservationId);
 
     OffsetDateTime expiresAt = r.get("expires_at", OffsetDateTime.class);
-    long overdueSeconds =
-        Math.max(
-            0L,
-            Duration.between(expiresAt, evaluatedAt).getSeconds());
+    long overdueSeconds = Math.max(0L, Duration.between(expiresAt, evaluatedAt).getSeconds());
 
     return new ReservationReleaseCandidateRow(
         reservationId,
@@ -237,12 +226,14 @@ public class ReservationReleaseService {
              where a.tenant_id = %s and a.reservation_id = ?
                and a.status not in ('RELEASED','EXPIRED')
              order by a.allocated_at, a.id
-            """.formatted(TENANT),
+            """
+                .formatted(TENANT),
             reservationId)
         .map(
             r -> {
-              var status = ReservationAllocationModels.ReservationAllocationStatus.valueOf(
-                  r.get("status", String.class));
+              var status =
+                  ReservationAllocationModels.ReservationAllocationStatus.valueOf(
+                      r.get("status", String.class));
               return new ReservationReleaseAllocationLine(
                   r.get("id", UUID.class),
                   status.name(),
@@ -265,8 +256,7 @@ public class ReservationReleaseService {
    * 候选汇总。**不受分页与筛选影响**。
    *
    * <p>{@code mixedCommitmentSkippedCount} 是「已超时但因为还有承诺在身而不会被自动回收」的条数。
-   * 它必须被显式报出来：这些预占在列表上看起来和普通候选一模一样，不报的话运营永远发现不了
-   * 「为什么这批货一直占着」。
+   * 它必须被显式报出来：这些预占在列表上看起来和普通候选一模一样，不报的话运营永远发现不了 「为什么这批货一直占着」。
    */
   private ReservationReleaseSummary summary(OffsetDateTime evaluatedAt) {
     var r =
@@ -295,17 +285,21 @@ public class ReservationReleaseService {
                                                      and a.status='COMMITTED')) as mixed_committed
               from inventory_reservation r
              where r.tenant_id = %s
-            """.formatted(TENANT, TENANT, TENANT),
-            evaluatedAt, evaluatedAt, evaluatedAt);
+            """
+                .formatted(TENANT, TENANT, TENANT),
+            evaluatedAt,
+            evaluatedAt,
+            evaluatedAt);
 
     Map<String, Long> modeCounts = new LinkedHashMap<>();
     modeCounts.put(ReservationReleaseMode.RELEASE.name(), 0L);
     modeCounts.put(ReservationReleaseMode.EXPIRE.name(), 0L);
     for (var one :
         sql.fetch(
-                "select mode, count(*) as n from reservation_release_record where tenant_id = " + TENANT
-                    + " group by mode",
-                new Object[0])) {
+            "select mode, count(*) as n from reservation_release_record where tenant_id = "
+                + TENANT
+                + " group by mode",
+            new Object[0])) {
       modeCounts.put(one.get("mode", String.class), one.get("n", Long.class));
     }
 
@@ -327,7 +321,7 @@ public class ReservationReleaseService {
     if (!SORTS.contains(key)) throw new IllegalArgumentException("不支持的排序键：" + sort);
     // 一律以 r.id 收尾：排序键相同时必须有确定次序，否则同一页两次请求可能给出不同顺序。
     return switch (key) {
-      // 最久没被处理的排前面：清理队列天然按「先到期先回收」。
+        // 最久没被处理的排前面：清理队列天然按「先到期先回收」。
       case "OVERDUE" -> " order by r.expires_at, r.id";
       case "RESTORABLE" -> " order by restorable desc, r.id";
       case "RESERVATION_NO" -> " order by r.reservation_no, r.id";
@@ -343,19 +337,15 @@ public class ReservationReleaseService {
    * <p>三条入口纪律：
    *
    * <ol>
-   *   <li><b>终态重放</b>：预占已是 RELEASED 时直接回放既有凭据（200，{@code replayed=true}）；
-   *       已是 EXPIRED / CONSUMED 时 409 —— 那是另一种结束方式，重复执行会改变历史叙述。
-   *   <li><b>来源词表</b>：EXPIRY_SWEEP 只能由批量清理产生，人工入口给了它就会让
-   *       「等太久」与「被取消」在统计上分不开。
-   *   <li><b>不承诺释放不存在的货</b>：数量超过该分配剩余量 → 409，而不是截断。
-   *       静默截断会让调用方以为整笔都放掉了。
+   *   <li><b>终态重放</b>：预占已是 RELEASED 时直接回放既有凭据（200，{@code replayed=true}）； 已是 EXPIRED / CONSUMED 时
+   *       409 —— 那是另一种结束方式，重复执行会改变历史叙述。
+   *   <li><b>来源词表</b>：EXPIRY_SWEEP 只能由批量清理产生，人工入口给了它就会让 「等太久」与「被取消」在统计上分不开。
+   *   <li><b>不承诺释放不存在的货</b>：数量超过该分配剩余量 → 409，而不是截断。 静默截断会让调用方以为整笔都放掉了。
    * </ol>
    *
-   * <p><b>加锁顺序与 7.2.1.2 相反这件事必须钉住</b>：本方法先取分配锁、后取预占锁，
-   * 与 {@code ReservationAllocationService} 的「先分配后预占」一致。反过来（先预占后分配）
-   * 会与它构成死锁环：一条事务持分配等预占、另一条持预占等分配。PostgreSQL 能检测并中止其中一条，
-   * 但对调用方来说那是「随机 500」，排查成本极高。所以这里的预占**先无锁读一遍**做快速判定，
-   * 真正的行锁在分配锁之后补上。
+   * <p><b>加锁顺序与 7.2.1.2 相反这件事必须钉住</b>：本方法先取分配锁、后取预占锁， 与 {@code ReservationAllocationService}
+   * 的「先分配后预占」一致。反过来（先预占后分配） 会与它构成死锁环：一条事务持分配等预占、另一条持预占等分配。PostgreSQL 能检测并中止其中一条， 但对调用方来说那是「随机
+   * 500」，排查成本极高。所以这里的预占**先无锁读一遍**做快速判定， 真正的行锁在分配锁之后补上。
    */
   public ReservationReleaseOutcome release(
       UUID tenantId, UUID reservationId, UUID actorId, ReservationReleaseInput input) {
@@ -374,7 +364,9 @@ public class ReservationReleaseService {
       var prior =
           sql.fetchOne(
               "select id, request_fingerprint, reservation_id from reservation_release_record"
-                  + " where tenant_id = " + TENANT + " and idempotency_key = ?",
+                  + " where tenant_id = "
+                  + TENANT
+                  + " and idempotency_key = ?",
               key);
       if (prior != null) {
         if (!fingerprint.equals(prior.get("request_fingerprint", String.class))) {
@@ -444,15 +436,8 @@ public class ReservationReleaseService {
         effect.entryId(),
         false,
         effect.terminal()
-            ? "已释放 "
-                + effect.restored()
-                + "，还回可用池；预占终结于 "
-                + effect.statusAfter()
-            : "已释放 "
-                + effect.restored()
-                + "，还回可用池；预占仍在 "
-                + effect.statusAfter()
-                + " 继续占额");
+            ? "已释放 " + effect.restored() + "，还回可用池；预占终结于 " + effect.statusAfter()
+            : "已释放 " + effect.restored() + "，还回可用池；预占仍在 " + effect.statusAfter() + " 继续占额");
   }
 
   /**
@@ -466,8 +451,8 @@ public class ReservationReleaseService {
    *   <li>给分配清单 → 逐条按各自的量（批次级调整）
    * </ul>
    *
-   * <p>锁顺序按 {@code allocated_at, id} 固定：并发两次释放锁的是同一批行、同一个次序，
-   * 死锁因此不可能发生，而死锁在这里的表现是「随机 500」而不是一条可解释的报错。
+   * <p>锁顺序按 {@code allocated_at, id} 固定：并发两次释放锁的是同一批行、同一个次序， 死锁因此不可能发生，而死锁在这里的表现是「随机
+   * 500」而不是一条可解释的报错。
    */
   private List<Plan> plans(UUID reservationId, ReservationReleaseInput in) {
     var open =
@@ -479,7 +464,8 @@ public class ReservationReleaseService {
              where tenant_id = %s and reservation_id = ? and status not in ('RELEASED','EXPIRED')
              order by allocated_at, id
              for update
-            """.formatted(TENANT),
+            """
+                .formatted(TENANT),
             reservationId);
 
     if (in.allocations() != null && !in.allocations().isEmpty()) {
@@ -516,15 +502,22 @@ public class ReservationReleaseService {
       for (UUID askedId : asked.keySet()) {
         boolean found = plans.stream().anyMatch(p -> p.allocationId().equals(askedId));
         if (!found) {
-          var one = sql.fetchOne(
-              "select status from reservation_allocation where tenant_id = " + TENANT
-                  + " and reservation_id=? and id=?",
-              reservationId, askedId);
+          var one =
+              sql.fetchOne(
+                  "select status from reservation_allocation where tenant_id = "
+                      + TENANT
+                      + " and reservation_id=? and id=?",
+                  reservationId,
+                  askedId);
           if (one == null) throw notFoundAllocation(askedId);
           throw new ResponseStatusException(
               HttpStatus.CONFLICT,
-              "分配 " + askedId + " 当前是 " + ReservationAllocationModels
-                      .ReservationAllocationStatus.valueOf(one.get("status", String.class)).label()
+              "分配 "
+                  + askedId
+                  + " 当前是 "
+                  + ReservationAllocationModels.ReservationAllocationStatus.valueOf(
+                          one.get("status", String.class))
+                      .label()
                   + "，已不在可释放之列");
         }
       }
@@ -545,10 +538,7 @@ public class ReservationReleaseService {
         if (remaining.compareTo(BigDecimal.ZERO) <= 0) continue;
         all.add(
             new Plan(
-                row.get("id", UUID.class),
-                row.get("status", String.class),
-                remaining,
-                remaining));
+                row.get("id", UUID.class), row.get("status", String.class), remaining, remaining));
       }
       return all;
     }
@@ -569,8 +559,7 @@ public class ReservationReleaseService {
       BigDecimal available = target.subtract(left);
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "请求释放 " + target + "，但这些分配上只剩 " + available + " 可释放："
-              + "超出部分从未圈到 bucket，没有库存可还");
+          "请求释放 " + target + "，但这些分配上只剩 " + available + " 可释放：" + "超出部分从未圈到 bucket，没有库存可还");
     }
     return fifo;
   }
@@ -580,24 +569,20 @@ public class ReservationReleaseService {
   /**
    * 批量过期清理。**显式端点 + 服务层幂等，不引入常驻定时器**。
    *
-   * <p>调用方是调度器（cron / 任务平台）或人工。整批一个事务：候选判定、逐条终结、
-   * 流水与凭据写入、运行凭据落库全在其中。V112 的外键是 DEFERRABLE 的，所以逐条释放时
+   * <p>调用方是调度器（cron / 任务平台）或人工。整批一个事务：候选判定、逐条终结、 流水与凭据写入、运行凭据落库全在其中。V112 的外键是 DEFERRABLE 的，所以逐条释放时
    * 可以先引用运行 id、末尾再写运行凭据。
    *
    * <p>幂等有两层：
    *
    * <ul>
    *   <li>带幂等键 → 命中既有运行凭据直接回放（连扫描都不做）
-   *   <li>不带键 → 第二次跑扫不到候选（已终态），天然无副作用；会多出一条「处理 0 条」的凭据，
-   *       所以推荐调度器显式传键
+   *   <li>不带键 → 第二次跑扫不到候选（已终态），天然无副作用；会多出一条「处理 0 条」的凭据， 所以推荐调度器显式传键
    * </ul>
    */
   public ReservationReleaseRunRow expireRun(
       UUID tenantId, UUID actorId, ReservationReleaseRunRequest request) {
     ReservationReleaseRunRequest req =
-        request == null
-            ? new ReservationReleaseRunRequest(null, null, null, null, null)
-            : request;
+        request == null ? new ReservationReleaseRunRequest(null, null, null, null, null) : request;
     boolean dryRun = req.dryRun() != null && req.dryRun();
     OffsetDateTime evaluatedAt =
         req.evaluatedAt() == null ? now() : req.evaluatedAt().truncatedTo(ChronoUnit.MILLIS);
@@ -610,7 +595,8 @@ public class ReservationReleaseService {
     if (key != null) {
       var prior =
           sql.fetchOne(
-              "select id from reservation_expiry_run where tenant_id = " + TENANT
+              "select id from reservation_expiry_run where tenant_id = "
+                  + TENANT
                   + " and idempotency_key = ?",
               key);
       // 命中即回放，**不比较参数**：调度器重投时最常见的形态就是「按当前时刻重算」，而
@@ -621,7 +607,8 @@ public class ReservationReleaseService {
     long candidateCount =
         sql.fetchOne(
                 "select count(*) from inventory_reservation"
-                    + " where tenant_id = " + TENANT
+                    + " where tenant_id = "
+                    + TENANT
                     + " and status='HELD' and expires_at is not null and expires_at <= ?::timestamptz",
                 evaluatedAt)
             .get(0, Long.class);
@@ -634,10 +621,12 @@ public class ReservationReleaseService {
       var ids =
           sql.fetch(
                   "select id from inventory_reservation"
-                      + " where tenant_id = " + TENANT
+                      + " where tenant_id = "
+                      + TENANT
                       + " and status='HELD' and expires_at is not null and expires_at <= ?::timestamptz"
                       + " order by expires_at, id limit ?",
-                  evaluatedAt, limit)
+                  evaluatedAt,
+                  limit)
               .map(r -> r.get("id", UUID.class));
 
       for (UUID id : ids) {
@@ -646,11 +635,12 @@ public class ReservationReleaseService {
         // 不会与它的写路径构成死锁环。
         var parent =
             sql.fetchOne(
-                    "select id, reservation_no, status, requested_quantity, consumed_quantity,"
-                        + " allocated_quantity, released_quantity, remaining, sku_id"
-                        + " from inventory_reservation where tenant_id = " + TENANT
-                        + " and id = ? and status='HELD' for update skip locked",
-                    id);
+                "select id, reservation_no, status, requested_quantity, consumed_quantity,"
+                    + " allocated_quantity, released_quantity, remaining, sku_id"
+                    + " from inventory_reservation where tenant_id = "
+                    + TENANT
+                    + " and id = ? and status='HELD' for update skip locked",
+                id);
         if (parent == null) {
           skipped++;
           continue;
@@ -660,7 +650,8 @@ public class ReservationReleaseService {
         // 会永远占着可用量且再也放不掉。
         long committed =
             sql.fetchOne(
-                    "select count(*) from reservation_allocation where tenant_id = " + TENANT
+                    "select count(*) from reservation_allocation where tenant_id = "
+                        + TENANT
                         + " and reservation_id = ? and status='COMMITTED'",
                     id)
                 .get(0, Long.class);
@@ -679,7 +670,8 @@ public class ReservationReleaseService {
                  where tenant_id = %s and reservation_id = ? and status not in ('RELEASED','EXPIRED')
                  order by allocated_at, id
                  for update
-                """.formatted(TENANT),
+                """
+                    .formatted(TENANT),
                 id);
         for (var row : open) {
           BigDecimal remaining = row.get("remaining", BigDecimal.class);
@@ -747,9 +739,8 @@ public class ReservationReleaseService {
    * <ol>
    *   <li>V107 的分录守卫要求分配**此刻**的状态恰等于分录的 to_status，所以分录只能写在分配落库之后；
    *   <li>V112 的释放凭据守卫要求预占**此刻**的状态等于凭据的 status_after，所以凭据只能写在预占落库之后；
-   *   <li>预占的 {@code released_quantity} 与 {@code allocated_quantity} 各有各的维护者：
-   *       后者由 V107 的回写触发器按「非终态分配之和」重算，本模块**不碰**；
-   *       前者归本模块，按「已释放量」累加。
+   *   <li>预占的 {@code released_quantity} 与 {@code allocated_quantity} 各有各的维护者： 后者由 V107
+   *       的回写触发器按「非终态分配之和」重算，本模块**不碰**； 前者归本模块，按「已释放量」累加。
    * </ol>
    *
    * @param finalizeRequested 是否终结整笔预占。仍有未终结分配时强制为 false 并在服务层已拒
@@ -789,7 +780,9 @@ public class ReservationReleaseService {
               + " released_quantity=released_quantity+?::numeric"
               + (allocationTerminal ? ", settled_at=?::timestamptz" : "")
               + " where id=? and tenant_id=? and status=?"
-              + (allocationTerminal ? " and released_quantity+?::numeric >= allocated_quantity" : "");
+              + (allocationTerminal
+                  ? " and released_quantity+?::numeric >= allocated_quantity"
+                  : "");
       int updated =
           allocationTerminal
               ? sql.execute(
@@ -811,7 +804,10 @@ public class ReservationReleaseService {
       if (updated != 1) {
         throw new ResponseStatusException(
             HttpStatus.CONFLICT,
-            "分配 " + plan.allocationId() + " 在释放过程中被其他事务改动（影响行数 " + updated
+            "分配 "
+                + plan.allocationId()
+                + " 在释放过程中被其他事务改动（影响行数 "
+                + updated
                 + "）：并发释放由行锁串行化，出现这一行说明有裸 SQL 绕过了服务层");
       }
 
@@ -841,7 +837,8 @@ public class ReservationReleaseService {
     // 是否终结整笔：还有未终结分配就**不能**说这笔结束了。
     long stillOpen =
         sql.fetchOne(
-                "select count(*) from reservation_allocation where tenant_id = " + TENANT
+                "select count(*) from reservation_allocation where tenant_id = "
+                    + TENANT
                     + " and reservation_id = ? and status not in ('RELEASED','EXPIRED')",
                 reservationId)
             .get(0, Long.class);
@@ -849,8 +846,7 @@ public class ReservationReleaseService {
     if (finalizeRequested && !terminal) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "仍有 " + stillOpen + " 条分配在占额，不能终结整笔预占："
-              + "预占进终态后不能再挂新分配，剩下的货会再也放不掉");
+          "仍有 " + stillOpen + " 条分配在占额，不能终结整笔预占：" + "预占进终态后不能再挂新分配，剩下的货会再也放不掉");
     }
 
     String statusAfter = terminal ? terminalTarget : statusBefore;
@@ -865,8 +861,7 @@ public class ReservationReleaseService {
               .subtract(parent.get("consumed_quantity", BigDecimal.class))
               .setScale(6, RoundingMode.HALF_UP);
       if (releasedDemand.compareTo(BigDecimal.ZERO) <= 0) {
-        throw new ResponseStatusException(
-            HttpStatus.CONFLICT, "预占 " + reservationId + " 没有剩余量可释放");
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "预占 " + reservationId + " 没有剩余量可释放");
       }
       int parentUpdated =
           sql.execute(
@@ -883,8 +878,7 @@ public class ReservationReleaseService {
       if (parentUpdated != 1) {
         throw new ResponseStatusException(
             HttpStatus.CONFLICT,
-            "预占 " + reservationId + " 在释放过程中被其他事务改动（影响行数 " + parentUpdated
-                + "）：并发释放由行锁串行化");
+            "预占 " + reservationId + " 在释放过程中被其他事务改动（影响行数 " + parentUpdated + "）：并发释放由行锁串行化");
       }
       // 预占级分录只在**预占本身进终态**时写，理由同上（没迁移就不写分录）。
       // 它记的是**需求侧放弃的量**，分配级分录记的是**库存侧还回的量**；
@@ -937,10 +931,12 @@ public class ReservationReleaseService {
             key,
             fingerprint);
 
-    return new Effect(terminal, statusAfter, restored, releasedDemand, touched, recordId, lastEntryId);
+    return new Effect(
+        terminal, statusAfter, restored, releasedDemand, touched, recordId, lastEntryId);
   }
 
-  private record Plan(UUID allocationId, String status, BigDecimal quantity, BigDecimal remaining) {}
+  private record Plan(
+      UUID allocationId, String status, BigDecimal quantity, BigDecimal remaining) {}
 
   private record Effect(
       boolean terminal,
@@ -956,9 +952,8 @@ public class ReservationReleaseService {
   /**
    * 补写 / 调整 / 清空过期时刻。
    *
-   * <p>7.2.1.1 的登记入参注释逐字写着「不传则该预占不参与超时筛选（可稍后由 7.2.1.3 补）」——
-   * 补的就是这个时刻。所以本端点**只对 HELD 开放**：COMMITTED 的预占留着过期时刻没有意义
-   * （它永不参与自动回收），却会让人以为它还在等着被清掉。
+   * <p>7.2.1.1 的登记入参注释逐字写着「不传则该预占不参与超时筛选（可稍后由 7.2.1.3 补）」—— 补的就是这个时刻。所以本端点**只对 HELD 开放**：COMMITTED
+   * 的预占留着过期时刻没有意义 （它永不参与自动回收），却会让人以为它还在等着被清掉。
    */
   public ReservationReleaseExpiryOutcome setExpiry(
       UUID tenantId, UUID reservationId, ReservationReleaseExpiryInput input) {
@@ -971,8 +966,7 @@ public class ReservationReleaseService {
     if (status != ReservationModels.ReservationStatus.HELD) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "预占当前是 " + status.label() + "，只有预占中（HELD）的预占才有过期时刻："
-              + "已承诺的预占永不自动过期，留着过期时刻只会误导");
+          "预占当前是 " + status.label() + "，只有预占中（HELD）的预占才有过期时刻：" + "已承诺的预占永不自动过期，留着过期时刻只会误导");
     }
     if (input == null || (input.expiresAt() == null && !Boolean.TRUE.equals(input.clear()))) {
       throw new IllegalArgumentException("请提供新的 expiresAt，或传 clear=true 清空过期时刻");
@@ -986,7 +980,9 @@ public class ReservationReleaseService {
         sql.execute(
             "update inventory_reservation set expires_at=?::timestamptz"
                 + " where id=? and tenant_id=? and status='HELD'",
-            expiresAt, reservationId, tenantId);
+            expiresAt,
+            reservationId,
+            tenantId);
     if (updated != 1) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT, "预占 " + reservationId + " 在写入过期时刻时已被改动（影响行数 " + updated + "）");
@@ -996,11 +992,15 @@ public class ReservationReleaseService {
     // 而 timestamptz 的时区归一化正是最容易悄悄错 8 小时的地方。
     var back =
         sql.fetchOne(
-            "select expires_at from inventory_reservation where tenant_id = " + TENANT + " and id = ?",
+            "select expires_at from inventory_reservation where tenant_id = "
+                + TENANT
+                + " and id = ?",
             reservationId);
     OffsetDateTime stored = back.get("expires_at", OffsetDateTime.class);
     Long overdueSeconds =
-        stored == null || !stored.isBefore(now()) ? null : Duration.between(stored, now()).getSeconds();
+        stored == null || !stored.isBefore(now())
+            ? null
+            : Duration.between(stored, now()).getSeconds();
 
     return new ReservationReleaseExpiryOutcome(
         reservationId,
@@ -1025,9 +1025,11 @@ public class ReservationReleaseService {
             .get(0, Long.class);
     var rows =
         sql.fetch(
-                "select id from reservation_expiry_run where tenant_id = " + TENANT
+                "select id from reservation_expiry_run where tenant_id = "
+                    + TENANT
                     + " order by created_at desc, id limit ? offset ?",
-                limit, offset)
+                limit,
+                offset)
             .map(r -> runRow(r.get("id", UUID.class), false));
     return new ReservationReleaseRunPage(
         rows,
@@ -1042,7 +1044,8 @@ public class ReservationReleaseService {
     var run = runRow(runId, false);
     var records =
         sql.fetch(
-                "select id from reservation_release_record where tenant_id = " + TENANT
+                "select id from reservation_release_record where tenant_id = "
+                    + TENANT
                     + " and expiry_run_id = ? order by occurred_at, id",
                 runId)
             .map(r -> recordRow(r.get("id", UUID.class)));
@@ -1053,10 +1056,10 @@ public class ReservationReleaseService {
   /**
    * 释放凭据列表。
    *
-   * <p>两个过滤条件给二选一地用：按预占查（明细页的「这个预占被释放过几次」），
-   * 或按运行查（运行详情）。都不传则给租户全量。
+   * <p>两个过滤条件给二选一地用：按预占查（明细页的「这个预占被释放过几次」）， 或按运行查（运行详情）。都不传则给租户全量。
    */
-  public ReservationReleaseRecordPage records(UUID tenantId, UUID reservationId, int page, int size) {
+  public ReservationReleaseRecordPage records(
+      UUID tenantId, UUID reservationId, int page, int size) {
     int limit = Math.min(MAX_PAGE_SIZE, Math.max(1, size));
     int offset = Math.max(0, page) * limit;
     var where = new StringBuilder(" where tenant_id = " + TENANT);
@@ -1070,7 +1073,8 @@ public class ReservationReleaseService {
             .get(0, Long.class);
     var rows =
         sql.fetch(
-                "select id from reservation_release_record" + where
+                "select id from reservation_release_record"
+                    + where
                     + " order by occurred_at desc, id limit ? offset ?",
                 bindsToArray(binds, limit, offset))
             .map(r -> recordRow(r.get("id", UUID.class)));
@@ -1083,7 +1087,9 @@ public class ReservationReleaseService {
             "select id, dry_run, evaluated_at, limit_count, candidate_count, processed_count,"
                 + " skipped_count, release_count, restored_quantity, released_demand_quantity,"
                 + " status, actor_id, reason, idempotency_key, created_at, completed_at"
-                + " from reservation_expiry_run where tenant_id = " + TENANT + " and id = ?",
+                + " from reservation_expiry_run where tenant_id = "
+                + TENANT
+                + " and id = ?",
             runId);
     if (r == null) throw notFoundRun(runId);
     return new ReservationReleaseRunRow(
@@ -1116,7 +1122,9 @@ public class ReservationReleaseService {
                 + " from reservation_release_record rr"
                 + " left join inventory_reservation r"
                 + " on r.tenant_id=rr.tenant_id and r.id=rr.reservation_id"
-                + " where rr.tenant_id = " + TENANT + " and rr.id = ?",
+                + " where rr.tenant_id = "
+                + TENANT
+                + " and rr.id = ?",
             recordId);
     if (r == null) throw notFoundRecord(recordId);
     var mode = ReservationReleaseMode.valueOf(r.get("mode", String.class));
@@ -1158,10 +1166,7 @@ public class ReservationReleaseService {
     for (ReservationReleaseTriggerSource t : ReservationReleaseTriggerSource.values()) {
       triggers.add(
           new ReservationReleaseOption(
-              t.name(),
-              t.label(),
-              t.sweepOnly(),
-              t.sweepOnly() ? "仅批量过期清理可用，手动入口不接受" : null));
+              t.name(), t.label(), t.sweepOnly(), t.sweepOnly() ? "仅批量过期清理可用，手动入口不接受" : null));
     }
     return new ReservationReleaseOptions(
         modes,
@@ -1177,12 +1182,10 @@ public class ReservationReleaseService {
   }
 
   /**
-   * 链路各环节的接入情况。复用 7.2.1.1 的 {@code ReservationCapability}
-   * （同一条预占链路的能力声明只能有一种表示）。
+   * 链路各环节的接入情况。复用 7.2.1.1 的 {@code ReservationCapability} （同一条预占链路的能力声明只能有一种表示）。
    *
-   * <p>「可用量重算」这一维度**如实报 {@code available=false}** 并写明归属 7.1.1.3：
-   * 本模块把预占退出占额集合并记账，可用量的**口径**由 7.1.1.3 裁决。
-   * 把它报成 true 会等于宣称本模块算出了可用量，而那正是本卷禁止的「两个地方各算一次」。
+   * <p>「可用量重算」这一维度**如实报 {@code available=false}** 并写明归属 7.1.1.3： 本模块把预占退出占额集合并记账，可用量的**口径**由
+   * 7.1.1.3 裁决。 把它报成 true 会等于宣称本模块算出了可用量，而那正是本卷禁止的「两个地方各算一次」。
    */
   public List<ReservationModels.ReservationCapability> capabilities() {
     return List.of(
@@ -1304,14 +1307,16 @@ public class ReservationReleaseService {
   /**
    * 无锁读预占：先判存在性与终态，快速失败路径不必拿行锁。
    *
-   * <p>刻意与 {@link #lockOpenReservation} 分开：无锁读用来给出「已终结 / 可重放」这类
-   * 可解释的 409 与重放，而**行锁必须在分配锁之后**拿（见 {@link #release} 的加锁顺序说明）。
+   * <p>刻意与 {@link #lockOpenReservation} 分开：无锁读用来给出「已终结 / 可重放」这类 可解释的 409 与重放，而**行锁必须在分配锁之后**拿（见
+   * {@link #release} 的加锁顺序说明）。
    */
   private org.jooq.Record peekReservation(UUID reservationId) {
     var one =
         sql.fetchOne(
             "select id, reservation_no, status, requested_quantity, consumed_quantity"
-                + " from inventory_reservation where tenant_id = " + TENANT + " and id = ?",
+                + " from inventory_reservation where tenant_id = "
+                + TENANT
+                + " and id = ?",
             reservationId);
     if (one == null) throw notFound(reservationId);
     return one;
@@ -1323,14 +1328,19 @@ public class ReservationReleaseService {
         sql.fetchOne(
             "select id, reservation_no, status, requested_quantity, allocated_quantity,"
                 + " consumed_quantity, released_quantity, remaining, sku_id"
-                + " from inventory_reservation where tenant_id = " + TENANT + " and id=? for update",
+                + " from inventory_reservation where tenant_id = "
+                + TENANT
+                + " and id=? for update",
             reservationId);
     if (one == null) throw notFound(reservationId);
     var status = ReservationModels.ReservationStatus.valueOf(one.get("status", String.class));
     if (isTerminal(status)) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "预占 " + one.get("reservation_no", String.class) + " 已终结于 " + status.label()
+          "预占 "
+              + one.get("reservation_no", String.class)
+              + " 已终结于 "
+              + status.label()
               + "，不能再释放（它在本服务处理期间被并发出库消耗了）");
     }
     return one;
@@ -1362,12 +1372,12 @@ public class ReservationReleaseService {
   private UUID latestRecordId(UUID reservationId) {
     var one =
         sql.fetchOne(
-            "select id from reservation_release_record where tenant_id = " + TENANT
+            "select id from reservation_release_record where tenant_id = "
+                + TENANT
                 + " and reservation_id = ? order by created_at desc, id desc limit 1",
             reservationId);
     if (one == null) {
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "预占已是已释放终态，但找不到对应的释放凭据：数据不自洽，请人工核查");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "预占已是已释放终态，但找不到对应的释放凭据：数据不自洽，请人工核查");
     }
     return one.get("id", UUID.class);
   }
@@ -1384,8 +1394,7 @@ public class ReservationReleaseService {
     }
     // 超时回收只能由批量清理产生：人工把它写进凭据，两个运营口径就再也分不开了。
     if (value.sweepOnly()) {
-      throw new IllegalArgumentException(
-          "EXPIRY_SWEEP 只能由批量过期清理产生，手动释放请用 MANUAL 或对应业务事件来源");
+      throw new IllegalArgumentException("EXPIRY_SWEEP 只能由批量过期清理产生，手动释放请用 MANUAL 或对应业务事件来源");
     }
     return value;
   }
@@ -1393,8 +1402,7 @@ public class ReservationReleaseService {
   /**
    * 请求指纹：同一个幂等键必须对应同一组参数，否则重放与「改写历史意图」无法区分。
    *
-   * <p>只取**语义参数**（释放粒度、数量、来源、是否终结），不取 occurredAt ——
-   * 事件重投时上游常带同一个时刻，但也不保证；把它算进去会让一次无害的重投被误判成冲突。
+   * <p>只取**语义参数**（释放粒度、数量、来源、是否终结），不取 occurredAt —— 事件重投时上游常带同一个时刻，但也不保证；把它算进去会让一次无害的重投被误判成冲突。
    */
   private static String fingerprint(ReservationReleaseInput in) {
     StringBuilder sb = new StringBuilder();
@@ -1403,10 +1411,14 @@ public class ReservationReleaseService {
         sb.append(one.allocationId()).append(':').append(one.quantity()).append(';');
       }
     }
-    sb.append("|q=").append(in.quantity())
-        .append("|src=").append(in.triggerSource())
-        .append("|fin=").append(in.finalizeReservation())
-        .append("|reason=").append(in.reason());
+    sb.append("|q=")
+        .append(in.quantity())
+        .append("|src=")
+        .append(in.triggerSource())
+        .append("|fin=")
+        .append(in.finalizeReservation())
+        .append("|reason=")
+        .append(in.reason());
     try {
       MessageDigest md = MessageDigest.getInstance("SHA-256");
       return HexFormat.of().formatHex(md.digest(sb.toString().getBytes(StandardCharsets.UTF_8)));
@@ -1435,18 +1447,15 @@ public class ReservationReleaseService {
   }
 
   private static ResponseStatusException nothingToRelease() {
-    return new ResponseStatusException(
-        HttpStatus.CONFLICT, "这几条分配都已终结，没有可释放的量（货早就还回可用池了）");
+    return new ResponseStatusException(HttpStatus.CONFLICT, "这几条分配都已终结，没有可释放的量（货早就还回可用池了）");
   }
 
   private static ResponseStatusException notFound(UUID reservationId) {
-    return new ResponseStatusException(
-        HttpStatus.NOT_FOUND, "预占 " + reservationId + " 不存在或无权查看");
+    return new ResponseStatusException(HttpStatus.NOT_FOUND, "预占 " + reservationId + " 不存在或无权查看");
   }
 
   private static ResponseStatusException notFoundAllocation(UUID allocationId) {
-    return new ResponseStatusException(
-        HttpStatus.NOT_FOUND, "分配 " + allocationId + " 不存在或无权操作");
+    return new ResponseStatusException(HttpStatus.NOT_FOUND, "分配 " + allocationId + " 不存在或无权操作");
   }
 
   private static ResponseStatusException notFoundRun(UUID runId) {
@@ -1454,8 +1463,7 @@ public class ReservationReleaseService {
   }
 
   private static ResponseStatusException notFoundRecord(UUID recordId) {
-    return new ResponseStatusException(
-        HttpStatus.NOT_FOUND, "释放凭据 " + recordId + " 不存在或无权查看");
+    return new ResponseStatusException(HttpStatus.NOT_FOUND, "释放凭据 " + recordId + " 不存在或无权查看");
   }
 
   private OffsetDateTime now() {

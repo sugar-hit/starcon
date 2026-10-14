@@ -42,11 +42,13 @@
 ## 文件清单
 
 **后端**
+
 - `backend/services/identity/src/main/resources/db/migration/V48__business_parameter.sql`（新增）
 - `backend/services/identity/src/main/java/com/starcon/identity/BusinessParameterController.java`（新增）
 - `backend/services/identity/src/test/java/com/starcon/identity/BusinessParameterIntegrationTest.java`（新增，15 项）
 
 **前端**
+
 - `apps/web/src/app/org/business-parameters/page.tsx`（新增）
 - `apps/web/src/components/iam/business-parameter-workspace.tsx`（新增）
 - `apps/web/src/components/iam/business-parameter-model.ts` + `.test.ts`（新增，24 项）
@@ -55,6 +57,7 @@
 - `packages/ui/src/lib/task-pages.ts`（`/org/business-parameters` 标记 implemented 并入账户菜单顺序）
 
 **契约与台账（codegen 产物，未手改）**
+
 - `packages/api-contracts/src/catalog.ts`（+8 个 DTO）
 - `packages/api-contracts/src/identity.openapi.json`（+7 路径 +8 schema）
 - `docs/product/capability-blueprint/module-progress.md`（17.5.1.1 一行）

@@ -20,20 +20,17 @@ import org.springframework.web.bind.annotation.RestController;
  * 7.8.1.2 优先级与保底。
  *
  * <p>蓝图：「在分摊冲突时按优先级裁决，并为高价值店铺设置保底可用量与安全垫，防止低优先级店铺长期断货影响其店铺
- * 绩效与平台考核。输入：店铺优先级；保底数量/比例；当前销售与绩效。输出：分摊结果（含被压低店铺的提示）；
- * 保底生效记录。」
+ * 绩效与平台考核。输入：店铺优先级；保底数量/比例；当前销售与绩效。输出：分摊结果（含被压低店铺的提示）； 保底生效记录。」
  *
- * <p>命名空间 {@code /warehouse/inventory/allocation-priority}，权限码复用
- * {@code warehouse.inventory.read} / {@code warehouse.inventory.update} —— 与 7.8.1.1 同一套。
- * 刻意**不**新造权限码：保底是分摊算法的一部分，看保底与看分摊是同一份配置的事实，
+ * <p>命名空间 {@code /warehouse/inventory/allocation-priority}，权限码复用 {@code warehouse.inventory.read} /
+ * {@code warehouse.inventory.update} —— 与 7.8.1.1 同一套。 刻意**不**新造权限码：保底是分摊算法的一部分，看保底与看分摊是同一份配置的事实，
  * 拆成两个权限码只会让人以为存在「能改分摊但改不了保底」这种中间状态。
  *
- * <p>刻意独立成 {@code AllocationPriorityController} 而不是并进 {@code AllocationPolicyController}：
- * 那是 7.8.1.1 那条车道的文件，各车道并行时各改各的才不会撞（同 7.4.2.2 的做法）。
+ * <p>刻意独立成 {@code AllocationPriorityController} 而不是并进 {@code AllocationPolicyController}： 那是
+ * 7.8.1.1 那条车道的文件，各车道并行时各改各的才不会撞（同 7.4.2.2 的做法）。
  *
- * <p><b>整个路径上没有 DELETE 端点，而且这不是遗漏</b>：保底档与生效记录都是事实。
- * 改保底走「收口旧档 + 开新档」、作废走 {@code /retire}，生效记录 append-only
- * （V76 的 REVOKE DELETE 与不可变触发器会在权限层和数据库层各挡一次）。
+ * <p><b>整个路径上没有 DELETE 端点，而且这不是遗漏</b>：保底档与生效记录都是事实。 改保底走「收口旧档 + 开新档」、作废走 {@code /retire}，生效记录
+ * append-only （V76 的 REVOKE DELETE 与不可变触发器会在权限层和数据库层各挡一次）。
  */
 @RestController
 @RequestMapping("/warehouse")
@@ -47,10 +44,7 @@ public class AllocationPriorityController {
     this.floors = floors;
   }
 
-  /**
-   * 统一入口：先向 identity 确认身份与权限（租户**不**来自任何客户端头），
-   * 再在一个事务里绑定 RLS 租户上下文执行查询（与 7.8.1.1 同一个 call）。
-   */
+  /** 统一入口：先向 identity 确认身份与权限（租户**不**来自任何客户端头）， 再在一个事务里绑定 RLS 租户上下文执行查询（与 7.8.1.1 同一个 call）。 */
   private <T> T call(String bearer, String permission, Function<AccessService.Access, T> work) {
     var actor = access.require(bearer, "warehouse." + permission);
     return access.run(actor, "warehouse." + permission, () -> work.apply(actor));
@@ -58,10 +52,7 @@ public class AllocationPriorityController {
 
   // ------------------------------------------------------------ 能力
 
-  /**
-   * 保底能力：两种保底口径、四种「被压低」原因，以及四条必须如实讲清楚的说明
-   * （绩效依据为何不可用、可用量为何必须由调用方传入、保底池与另两个「缓冲」的区别、下游交接）。
-   */
+  /** 保底能力：两种保底口径、四种「被压低」原因，以及四条必须如实讲清楚的说明 （绩效依据为何不可用、可用量为何必须由调用方传入、保底池与另两个「缓冲」的区别、下游交接）。 */
   @GetMapping("/inventory/allocation-priority/capabilities")
   public PriorityCapabilities capabilities(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
@@ -83,7 +74,8 @@ public class AllocationPriorityController {
     return call(
         auth,
         "inventory.read",
-        a -> floors.page(new FloorQuery(policyId, referenceId, effectiveOnly, keyword, page, size)));
+        a ->
+            floors.page(new FloorQuery(policyId, referenceId, effectiveOnly, keyword, page, size)));
   }
 
   /** 保底详情。跨租户在 RLS 下查不到 → 404，不泄露存在性。 */
@@ -110,8 +102,7 @@ public class AllocationPriorityController {
   /**
    * 换版：收口当前在效的那一档，再开新档。
    *
-   * <p>刻意不给「改这一档」的 PUT —— 保底内容写定后不可改（V76 触发器在 DB 层挡住），
-   * 改保底只能通过收口 + 新开，历史那一档因此永远是「当时真正承诺过什么」的凭据。
+   * <p>刻意不给「改这一档」的 PUT —— 保底内容写定后不可改（V76 触发器在 DB 层挡住）， 改保底只能通过收口 + 新开，历史那一档因此永远是「当时真正承诺过什么」的凭据。
    */
   @PostMapping("/inventory/allocation-priority/floors/{id}/versions")
   public AllocationFloorSaved supersede(
@@ -143,8 +134,7 @@ public class AllocationPriorityController {
   /**
    * 带保底的分摊并落库。
    *
-   * <p>与 {@code /calculation} 刻意分成两个端点而不是靠一个 {@code persist} 布尔切换：
-   * 「看一眼」和「写一笔事实」的风险等级不同，权限也不同。
+   * <p>与 {@code /calculation} 刻意分成两个端点而不是靠一个 {@code persist} 布尔切换： 「看一眼」和「写一笔事实」的风险等级不同，权限也不同。
    */
   @PostMapping("/inventory/allocation-priority/runs")
   public List<PriorityAllocationResult> run(
@@ -159,8 +149,7 @@ public class AllocationPriorityController {
    * 保底生效记录列表（真分页）。
    *
    * <p>{@code shortfallOnly} 与 {@code suppressedOnly} 是**两个不同的病**，刻意分成两个参数而不是一个
-   * 「异常」开关：前者是「承诺了但没兑现」（该补货/该调保底），后者是「没轮到你而货被别人拿走了」
-   * （该调优先级/该调保底）。蓝图那句「『没货卖』和『没分到货』是两种问题」就落在这两个参数上。
+   * 「异常」开关：前者是「承诺了但没兑现」（该补货/该调保底），后者是「没轮到你而货被别人拿走了」 （该调优先级/该调保底）。蓝图那句「『没货卖』和『没分到货』是两种问题」就落在这两个参数上。
    */
   @GetMapping("/inventory/allocation-priority/resolutions")
   public ResolutionPage resolutions(
@@ -187,7 +176,9 @@ public class AllocationPriorityController {
     } catch (RuntimeException e) {
       throw new org.springframework.web.server.ResponseStatusException(
           org.springframework.http.HttpStatus.BAD_REQUEST,
-          "时刻格式非法：" + raw + "（应为 ISO-8601 带偏移，例如 2026-10-07T10:00:00+08:00）。"
+          "时刻格式非法："
+              + raw
+              + "（应为 ISO-8601 带偏移，例如 2026-10-07T10:00:00+08:00）。"
               + "悄悄改成当前时刻会让「这一档当时保不保得住」这个问题得到一个假的答案。");
     }
   }

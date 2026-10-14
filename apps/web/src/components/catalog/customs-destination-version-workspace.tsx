@@ -13,16 +13,7 @@ import {
   ModalHeader,
   ModalTitle,
 } from '@starcon/ui';
-import {
-  ArrowLeft,
-  Info,
-  Plus,
-  RefreshCw,
-  Save,
-  Send,
-  Trash2,
-  TriangleAlert,
-} from 'lucide-react';
+import { ArrowLeft, Info, Plus, RefreshCw, Save, Send, Trash2, TriangleAlert } from 'lucide-react';
 import type {
   DestinationVersionProfile,
   EffectiveDestinationVersion,
@@ -195,10 +186,7 @@ export function CustomsDestinationVersionWorkspace({ skuId }: { skuId: string })
       setResolved(null);
     } catch (e) {
       setActionError(
-        errorText(
-          e,
-          '发布失败：可能与已发布版本的生效区间重叠，或已被他人处理过。请刷新后重试。',
-        ),
+        errorText(e, '发布失败：可能与已发布版本的生效区间重叠，或已被他人处理过。请刷新后重试。'),
       );
       setConfirmPublish(false);
     } finally {
@@ -238,15 +226,15 @@ export function CustomsDestinationVersionWorkspace({ skuId }: { skuId: string })
   const base = panel?.base;
   const hasBase = Boolean(base?.attributeId);
   /** 正在编辑的那一行（新建时为 null）。发布按钮只对「已存在的草稿」出现。 */
-  const editing = editingId ? (panel?.versions.find((item) => item.id === editingId) ?? null) : null;
+  const editing = editingId
+    ? (panel?.versions.find((item) => item.id === editingId) ?? null)
+    : null;
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-h-20 text-primary font-semibold tracking-tight">
-            目的地报关版本
-          </h1>
+          <h1 className="text-h-20 text-primary font-semibold tracking-tight">目的地报关版本</h1>
           <p className="text-muted-foreground text-copy-13 mt-1">
             {panel
               ? `${panel.skuCode} · ${panel.skuName}（所属 ${panel.spuCode}）`
@@ -268,9 +256,10 @@ export function CustomsDestinationVersionWorkspace({ skuId }: { skuId: string })
       </div>
 
       <p className="border-warning-soft bg-warning-soft/30 text-warning rounded-md border px-3 py-2 text-xs">
-        不同目的地必须用不同版本，不能用一套申报资料打通全球 —— 同一份资料申报到欧盟会因归类不符被退单，
-        申报到美国会因 FCC 要求缺失被扣货，而扣货与罚款由卖家承担。
-        所以本页面<b>不接受「不限目的地」</b>，也不会在某个目的地缺资料时退回基础属性。
+        不同目的地必须用不同版本，不能用一套申报资料打通全球 ——
+        同一份资料申报到欧盟会因归类不符被退单， 申报到美国会因 FCC
+        要求缺失被扣货，而扣货与罚款由卖家承担。 所以本页面<b>不接受「不限目的地」</b>
+        ，也不会在某个目的地缺资料时退回基础属性。
       </p>
 
       {/* 目的地选择器：这是本页的主轴。切目的地 = 切一整套申报口径。 */}
@@ -341,8 +330,8 @@ export function CustomsDestinationVersionWorkspace({ skuId }: { skuId: string })
                   <Metric label="法定计量单位" value={base?.statutoryUnitCode ?? '—'} />
                 </div>
                 <p className="text-muted-foreground text-xs">
-                  法定计量单位与申报要素<b>只能来自基础属性</b>，目的地版本不覆盖也不复制
-                  —— 复制一份就是第二个事实来源，而两个来源不一致时「按哪份申报」没人能回答。
+                  法定计量单位与申报要素<b>只能来自基础属性</b>，目的地版本不覆盖也不复制 ——
+                  复制一份就是第二个事实来源，而两个来源不一致时「按哪份申报」没人能回答。
                 </p>
                 {base && !base.baseApproved && (
                   <p className="text-warning text-xs">
@@ -354,8 +343,8 @@ export function CustomsDestinationVersionWorkspace({ skuId }: { skuId: string })
               <p className="border-warning-soft bg-warning-soft/40 rounded-md border px-3 py-2 text-sm">
                 <span className="text-warning font-medium">这个 SKU 还没有基础报关属性</span>
                 <span className="text-muted-foreground mt-1 block text-xs">
-                  目的地版本是「相对基础属性的差异」，没有基础属性就说不上差异相对什么。
-                  请先在「HS 编码与申报要素」里维护并保存。
+                  目的地版本是「相对基础属性的差异」，没有基础属性就说不上差异相对什么。 请先在「HS
+                  编码与申报要素」里维护并保存。
                 </span>
               </p>
             )}
@@ -480,7 +469,10 @@ export function CustomsDestinationVersionWorkspace({ skuId }: { skuId: string })
                       onChange={(e) => patch({ versionNo: e.target.value })}
                     />
                   </Field>
-                  <Field label="该目的地承认优惠" hint="与基础的「有资格」是两件事，两者都满足才享惠">
+                  <Field
+                    label="该目的地承认优惠"
+                    hint="与基础的「有资格」是两件事，两者都满足才享惠"
+                  >
                     <label className="flex items-center gap-2 py-2 text-sm">
                       <input
                         type="checkbox"
@@ -493,7 +485,10 @@ export function CustomsDestinationVersionWorkspace({ skuId }: { skuId: string })
                   </Field>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Field label="目的地税号" hint="留空 = 沿用基础 HS 编码；非空必须是 6–10 位纯数字">
+                  <Field
+                    label="目的地税号"
+                    hint="留空 = 沿用基础 HS 编码；非空必须是 6–10 位纯数字"
+                  >
                     <input
                       className={control}
                       value={draft.destinationHsCode}
@@ -536,15 +531,12 @@ export function CustomsDestinationVersionWorkspace({ skuId }: { skuId: string })
                 <div>
                   <p className="text-muted-foreground text-xs">
                     认证要求（{draft.requirements.length} 项，强制{' '}
-                    {draft.requirements.filter((item) => item.required).length} 项）——
-                    CE / FCC / RoHS / UKCA / 危包证等。保存时按完整清单替换。
+                    {draft.requirements.filter((item) => item.required).length} 项）—— CE / FCC /
+                    RoHS / UKCA / 危包证等。保存时按完整清单替换。
                   </p>
                   <div className="mt-2 space-y-2">
                     {draft.requirements.map((item, index) => (
-                      <div
-                        key={index}
-                        className="grid gap-2 sm:grid-cols-[8rem_1fr_auto_2rem]"
-                      >
+                      <div key={index} className="grid gap-2 sm:grid-cols-[8rem_1fr_auto_2rem]">
                         <input
                           className={control}
                           value={item.requirementCode}
@@ -578,7 +570,7 @@ export function CustomsDestinationVersionWorkspace({ skuId }: { skuId: string })
                         </label>
                         <button
                           type="button"
-                          className="text-muted-foreground hover:text-destructive hover:bg-destructive-soft/40 self-center rounded-md border p-2 transition-colors duration-base ease-out-expo disabled:opacity-50"
+                          className="text-muted-foreground hover:text-destructive hover:bg-destructive-soft/40 duration-base ease-out-expo self-center rounded-md border p-2 transition-colors disabled:opacity-50"
                           disabled={!editable}
                           aria-label={`删除第 ${index + 1} 条认证要求`}
                           onClick={() =>
@@ -680,8 +672,8 @@ export function CustomsDestinationVersionWorkspace({ skuId }: { skuId: string })
                   )}
                   {!canPublishIt && canWrite && (
                     <span className="text-muted-foreground text-xs">
-                      你可以编辑目的地版本，但发布需要另外的 `catalog.compliance.publish`
-                      权限 —— 能填不等于有权把它发布成下游要用的那一份。
+                      你可以编辑目的地版本，但发布需要另外的 `catalog.compliance.publish` 权限 ——
+                      能填不等于有权把它发布成下游要用的那一份。
                     </span>
                   )}
                 </div>
@@ -725,10 +717,7 @@ export function CustomsDestinationVersionWorkspace({ skuId }: { skuId: string })
                   <Metric label="版本号" value={`v${effective.versionNo}`} />
                   <Metric label="判定时刻" value={effective.effectiveAt} />
                   <Metric label="目的地税号" value={effective.destinationHsCode || '沿用基础'} />
-                  <Metric
-                    label="认证要求"
-                    value={`${effective.requirements.length} 项`}
-                  />
+                  <Metric label="认证要求" value={`${effective.requirements.length} 项`} />
                 </dl>
               )}
 

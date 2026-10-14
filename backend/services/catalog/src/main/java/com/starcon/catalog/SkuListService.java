@@ -3,7 +3,6 @@ package com.starcon.catalog;
 import static com.starcon.catalog.CatalogModels.*;
 
 import com.starcon.tenancy.Ids;
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.function.Consumer;
@@ -17,8 +16,8 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.1.2.1 SKU 列表：分页、多维筛选、批量操作与导出。
  *
- * <p>分页是**真分页**：LIMIT/OFFSET 下推到 PostgreSQL，排序键末尾恒定追加 {@code id} 作为
- * 决胜列，保证翻页时同一批结果不会因为 updated_at 相同而错位或重复。绝不在内存里全量捞出再切片。
+ * <p>分页是**真分页**：LIMIT/OFFSET 下推到 PostgreSQL，排序键末尾恒定追加 {@code id} 作为 决胜列，保证翻页时同一批结果不会因为 updated_at
+ * 相同而错位或重复。绝不在内存里全量捞出再切片。
  *
  * <p>跨服务字段（库存 / 成本 / 售价 / 在售平台）一律经 {@link SkuProjectionPort} 读取，
  * 未接入时如实标成未接入；依赖它们的筛选条件被显式拒绝，而不是返回空列表假装"都没有缺货"。
@@ -71,7 +70,8 @@ public class SkuListService {
                             : f.ownerNote()))
             .toList();
     return new SkuListCapabilities(
-        fields, List.of("spuId", "category", "statuses", "keyword", "barcode", "spec", "sort", "page"));
+        fields,
+        List.of("spuId", "category", "statuses", "keyword", "barcode", "spec", "sort", "page"));
   }
 
   // ------------------------------------------------------------ 列表
@@ -86,7 +86,8 @@ public class SkuListService {
     conditions(query, where, binds);
     String sqlWhere = where.isEmpty() ? "" : " where " + String.join(" and ", where);
 
-    long total = sql.fetchOne("select count(*)" + FROM + sqlWhere, binds.toArray()).get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*)" + FROM + sqlWhere, binds.toArray()).get(0, Long.class);
 
     // 决胜列 id 恒定追加：updated_at 相同的行也不会在翻页边界上错位。
     var rows =
@@ -125,7 +126,8 @@ public class SkuListService {
       for (String s : statuses)
         CatalogService.check(
             Set.of("DRAFT", "ACTIVE", "INACTIVE", "ARCHIVED").contains(s), "无效状态：" + s);
-      where.add("s.status in (" + String.join(",", Collections.nCopies(statuses.size(), "?")) + ")");
+      where.add(
+          "s.status in (" + String.join(",", Collections.nCopies(statuses.size(), "?")) + ")");
       binds.addAll(statuses);
     }
     if (q.keyword() != null && !q.keyword().isBlank()) {
@@ -150,7 +152,10 @@ public class SkuListService {
   /** 排序白名单 + 恒定决胜列。输入只能挑列，改不了 SQL 结构。 */
   private String order(SkuListQuery q) {
     String sort = q.sort() == null ? "updated_at" : q.sort().trim().toLowerCase(Locale.ROOT);
-    boolean desc = q.order() == null || q.order().trim().isBlank() || "desc".equalsIgnoreCase(q.order().trim());
+    boolean desc =
+        q.order() == null
+            || q.order().trim().isBlank()
+            || "desc".equalsIgnoreCase(q.order().trim());
     var column =
         switch (sort) {
           case "code" -> "s.code";
@@ -171,8 +176,7 @@ public class SkuListService {
   /**
    * 依赖未接入投影的筛选条件在这里被显式拒绝。
    *
-   * <p>静默忽略这些条件会得到"看起来筛过了、其实没筛"的结果列表——用户以为在按缺货筛选，
-   * 看到的却是全量数据，比直接报错危险得多。
+   * <p>静默忽略这些条件会得到"看起来筛过了、其实没筛"的结果列表——用户以为在按缺货筛选， 看到的却是全量数据，比直接报错危险得多。
    */
   void requireProjections(SkuListQuery q) {
     var missing = new ArrayList<SkuField>();
@@ -186,7 +190,9 @@ public class SkuListService {
       throw new ResponseStatusException(
           HttpStatus.UNPROCESSABLE_ENTITY,
           "以下筛选条件依赖尚未接入的上游投影，无法求值："
-              + unavailable.stream().map(f -> f.label() + "（" + f.ownerNote() + "）").collect(Collectors.joining("；"))
+              + unavailable.stream()
+                  .map(f -> f.label() + "（" + f.ownerNote() + "）")
+                  .collect(Collectors.joining("；"))
               + "。请先接入对应服务的投影，或改用其他条件。");
   }
 
@@ -215,8 +221,7 @@ public class SkuListService {
   /**
    * 从规格轴解析展示值，而不是读某个冗余字符串列。
    *
-   * <p>取 attribute_definition.variant_axis 为真的轴，解析该 SKU 在每个轴上 SET 的取值；
-   * 规格轴按 V1 约束必填单选，所以每个轴最多一个值。
+   * <p>取 attribute_definition.variant_axis 为真的轴，解析该 SKU 在每个轴上 SET 的取值； 规格轴按 V1 约束必填单选，所以每个轴最多一个值。
    */
   private List<SkuSpec> specs(UUID skuId) {
     return sql.fetch(
@@ -253,11 +258,9 @@ public class SkuListService {
   /**
    * 批量停售 / 批量改状态。
    *
-   * <p>{@code dryRun=true} 只算影响范围不落状态变更（预览），否则逐个 SKU 走与单条编辑
-   * 相同的不变量：已启用/已停用/已归档的 SKU 不能回到草稿。
+   * <p>{@code dryRun=true} 只算影响范围不落状态变更（预览），否则逐个 SKU 走与单条编辑 相同的不变量：已启用/已停用/已归档的 SKU 不能回到草稿。
    *
-   * <p>批量分配与批量生成刊登依赖 04 刊登（未开发），这里显式拒绝并指明归属服务，
-   * 不做假实现——返回一个"成功但什么都没做"的任务比报错更糟。
+   * <p>批量分配与批量生成刊登依赖 04 刊登（未开发），这里显式拒绝并指明归属服务， 不做假实现——返回一个"成功但什么都没做"的任务比报错更糟。
    */
   public SkuBatchResult batch(AccessService.Access actor, SkuBatchInput input) {
     if (Set.of("ASSIGN", "GENERATE_LISTING").contains(input.action()))
@@ -446,12 +449,11 @@ public class SkuListService {
   /**
    * 导出 CSV：与列表共用同一套条件，所以导出的就是当前查到的那些行，不是另一个数据源。
    *
-   * <p>分批读取 + 逐批写出：每批只把 {@value #EXPORT_CHUNK} 行读进 JVM，立刻交给 emit 写进响应流，
-   * 因此峰值内存与结果集大小无关。上限 {@value #MAX_EXPORT_ROWS} 行，超限明确报错让操作人
-   * 收窄条件，而不是悄悄截断。
+   * <p>分批读取 + 逐批写出：每批只把 {@value #EXPORT_CHUNK} 行读进 JVM，立刻交给 emit 写进响应流， 因此峰值内存与结果集大小无关。上限 {@value
+   * #MAX_EXPORT_ROWS} 行，超限明确报错让操作人 收窄条件，而不是悄悄截断。
    *
-   * <p>每批各自开一个租户事务：租户上下文是事务级设置（{@code app.current_tenant}），
-   * 流式响应的工作线程拿不到 controller 那个事务的连接，所以按批重新绑定而不是共用一个长事务。
+   * <p>每批各自开一个租户事务：租户上下文是事务级设置（{@code app.current_tenant}）， 流式响应的工作线程拿不到 controller
+   * 那个事务的连接，所以按批重新绑定而不是共用一个长事务。
    */
   public void streamCsv(AccessService.Access actor, SkuListQuery query, Consumer<String> emit) {
     requireProjections(query);
@@ -461,10 +463,14 @@ public class SkuListService {
     String sqlWhere = where.isEmpty() ? "" : " where " + String.join(" and ", where);
 
     long total =
-        access.run(actor, "catalog.sku.read", () -> sql.fetchOne("select count(*)" + FROM + sqlWhere, binds.toArray()).get(0, Long.class));
+        access.run(
+            actor,
+            "catalog.sku.read",
+            () ->
+                sql.fetchOne("select count(*)" + FROM + sqlWhere, binds.toArray())
+                    .get(0, Long.class));
     CatalogService.check(
-        total <= MAX_EXPORT_ROWS,
-        "命中 " + total + " 行，超过单次导出上限 " + MAX_EXPORT_ROWS + " 行，请收窄筛选条件");
+        total <= MAX_EXPORT_ROWS, "命中 " + total + " 行，超过单次导出上限 " + MAX_EXPORT_ROWS + " 行，请收窄筛选条件");
 
     // BOM 让 Excel 正确识别 UTF-8 中文表头。
     emit.accept(
@@ -472,23 +478,8 @@ public class SkuListService {
             + String.join(
                 ",",
                 List.of(
-                    "SKU编码",
-                    "SKU名称",
-                    "所属SPU编码",
-                    "所属SPU名称",
-                    "分类",
-                    "条码",
-                    "基础单位",
-                    "状态",
-                    "规格",
-                    "在仓数量",
-                    "在途数量",
-                    "可售数量",
-                    "单位成本",
-                    "采购价",
-                    "售价",
-                    "在售平台",
-                    "更新时间"))
+                    "SKU编码", "SKU名称", "所属SPU编码", "所属SPU名称", "分类", "条码", "基础单位", "状态", "规格", "在仓数量",
+                    "在途数量", "可售数量", "单位成本", "采购价", "售价", "在售平台", "更新时间"))
             + "\n");
 
     String order = order(query);
@@ -524,7 +515,10 @@ public class SkuListService {
         line.add(r.get("barcode", String.class));
         line.add(r.get("base_unit", String.class));
         line.add(r.get("status", String.class));
-        line.add(specs(id).stream().map(s -> s.axis() + "=" + s.value()).collect(Collectors.joining(" / ")));
+        line.add(
+            specs(id).stream()
+                .map(s -> s.axis() + "=" + s.value())
+                .collect(Collectors.joining(" / ")));
         for (var c : cells) line.add(c.available() ? value(c) : "未接入");
         line.add(r.get("updated_at", OffsetDateTime.class).toInstant().toString());
         sb.append(String.join(",", line.stream().map(SkuListService::csv).toList())).append('\n');

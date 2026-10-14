@@ -20,13 +20,10 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>三条纪律贯穿本类：
  *
  * <ol>
- *   <li><b>编码唯一性是命门</b>。展开出来的编码在写入前逐条查重，冲突的行进拒绝清单并带原因，
- *       而不是让 DB 唯一索引抛一个 500。批量操作里"改了一部分、剩下一部分被拒"是正常结果，
- *       拒绝清单就是交付物。
- *   <li><b>不覆盖手工编码</b>。规则只负责「尚无编码」的 SKU；已存在的编码要么跳过，
- *       要么由操作人显式走手工输入改写。批量补齐把手工编码当既有事实，不当垃圾。
- *   <li><b>本模块不碰 seller_sku</b>。店铺的 seller_sku 是平台侧属性，映射由 04 刊登维护，
- *       混进内部编码会让"内部唯一"这条约束被平台编号污染。
+ *   <li><b>编码唯一性是命门</b>。展开出来的编码在写入前逐条查重，冲突的行进拒绝清单并带原因， 而不是让 DB 唯一索引抛一个
+ *       500。批量操作里"改了一部分、剩下一部分被拒"是正常结果， 拒绝清单就是交付物。
+ *   <li><b>不覆盖手工编码</b>。规则只负责「尚无编码」的 SKU；已存在的编码要么跳过， 要么由操作人显式走手工输入改写。批量补齐把手工编码当既有事实，不当垃圾。
+ *   <li><b>本模块不碰 seller_sku</b>。店铺的 seller_sku 是平台侧属性，映射由 04 刊登维护， 混进内部编码会让"内部唯一"这条约束被平台编号污染。
  * </ol>
  *
  * <p>序号分配用 {@code sku_code_rule_seq} 一行的原子自增完成（{@code ON CONFLICT DO UPDATE ...
@@ -55,12 +52,12 @@ public class SkuCodeService {
   /** 规则列表。停用的规则也在列里——否则运营会以为规则凭空消失了。 */
   public List<SkuCodeRule> rules() {
     var counters =
-        sql.fetch("select rule_id,next_value from sku_code_rule_seq")
-            .stream()
+        sql.fetch("select rule_id,next_value from sku_code_rule_seq").stream()
             .collect(
                 java.util.stream.Collectors.toMap(
                     r -> r.get("rule_id", UUID.class), r -> r.get("next_value", Long.class)));
-    return sql.fetch(
+    return sql
+        .fetch(
             "select r.id,r.code,r.name,r.description,r.scope,r.prefix,r.suffix,r.seq_width,"
                 + "r.start_from,r.enabled,r.version,r.updated_at,r.spu_id,p.code as spu_code"
                 + " from sku_code_rule r"
@@ -102,8 +99,7 @@ public class SkuCodeService {
   /**
    * 新建或更新编码规则（id 为空即新建）。
    *
-   * <p>前后缀的字符集与展开长度都在**保存时**校验：等批量生成 500 个 SKU 才发现编码超长，
-   * 那时已经写进去多少无从追溯。
+   * <p>前后缀的字符集与展开长度都在**保存时**校验：等批量生成 500 个 SKU 才发现编码超长， 那时已经写进去多少无从追溯。
    */
   public SkuCodeRuleSaved saveRule(AccessService.Access actor, UUID id, SkuCodeRuleInput input) {
     String code = CatalogService.code(input.code());
@@ -113,7 +109,8 @@ public class SkuCodeService {
     UUID spuId = input.spuId();
     if ("SPU".equals(scope)) {
       CatalogService.check(spuId != null, "限定商品族的规则必须指定 SPU");
-      if (sql.fetchOne("select id from spu where id=?", spuId) == null) throw CatalogService.missing();
+      if (sql.fetchOne("select id from spu where id=?", spuId) == null)
+        throw CatalogService.missing();
     } else spuId = null;
     CatalogService.check(input.seqWidth() >= 1 && input.seqWidth() <= 12, "序号宽度需在 1~12 之间");
     CatalogService.check(input.startFrom() >= 1, "起始序号必须大于等于 1");
@@ -125,7 +122,8 @@ public class SkuCodeService {
 
     if (id == null) {
       CatalogService.check(
-          sql.fetchOne("select id from sku_code_rule where code=?", code) == null, "编码规则已存在：" + code);
+          sql.fetchOne("select id from sku_code_rule where code=?", code) == null,
+          "编码规则已存在：" + code);
       CatalogService.check(scopeFree(spuId, null), scopeConflict(spuId));
       UUID newId = Ids.next();
       try {
@@ -182,8 +180,7 @@ public class SkuCodeService {
     } catch (DataAccessException e) {
       throw conflict("编码规则已存在或适用范围被占用，请刷新后重试");
     }
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "编码规则已被他人修改，请刷新后重试");
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "编码规则已被他人修改，请刷新后重试");
     long version =
         sql.fetchOne("select version from sku_code_rule where id=?", id).get("version", Long.class);
     sql.execute(
@@ -215,8 +212,8 @@ public class SkuCodeService {
   /**
    * 概览：编码覆盖率、条码 scheme 分布、最近批次。
    *
-   * <p>{@code uncodedSkus} 数的是"没有编码的 SKU"。内部编码存在 sku.code 上，
-   * 所以空串即未编码——这是唯一一处"空"有业务含义的地方，页面上必须与"编码为 0"区分开。
+   * <p>{@code uncodedSkus} 数的是"没有编码的 SKU"。内部编码存在 sku.code 上， 所以空串即未编码——这是唯一一处"空"有业务含义的地方，页面上必须与"编码为
+   * 0"区分开。
    */
   public SkuCodeOverview overview() {
     var totals =
@@ -231,7 +228,8 @@ public class SkuCodeService {
             "select count(*) as all_rules,count(*) filter (where enabled) as enabled_rules"
                 + " from sku_code_rule");
     var schemeCounts =
-        sql.fetch(
+        sql
+            .fetch(
                 "select scheme,count(*) as n from sku_identifier group by scheme order by count(*) desc,scheme")
             .map(
                 r ->
@@ -243,9 +241,11 @@ public class SkuCodeService {
             .toList();
     long identifierCount = schemeCounts.stream().mapToLong(SkuIdentifierSchemeCount::count).sum();
     var recent =
-        sql.fetch(
+        sql
+            .fetch(
                 "select id,action,status,requested_count,applied_count,skipped_count,created_at"
-                    + " from sku_code_batch order by created_at desc,id desc limit " + RECENT_BATCHES)
+                    + " from sku_code_batch order by created_at desc,id desc limit "
+                    + RECENT_BATCHES)
             .map(
                 r ->
                     new SkuCodeBatchSummary(
@@ -267,8 +267,7 @@ public class SkuCodeService {
         rules.get("enabled_rules", Long.class),
         schemeCounts,
         recent,
-        "店铺的 seller_sku 是平台侧属性，由 04 刊登维护与映射，不属于内部编码，也不会出现在这里。"
-            + "外部商品条码（EAN/UPC/GTIN）才是本模块管理的对象。");
+        "店铺的 seller_sku 是平台侧属性，由 04 刊登维护与映射，不属于内部编码，也不会出现在这里。" + "外部商品条码（EAN/UPC/GTIN）才是本模块管理的对象。");
   }
 
   private int rejected(UUID batchId) {
@@ -311,7 +310,8 @@ public class SkuCodeService {
   }
 
   private List<SkuIdentifier> identifiers(UUID skuId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select id,scheme,value,is_primary,source,occurred_at,created_at from sku_identifier"
                 + " where sku_id=? order by scheme,is_primary desc,created_at desc,id desc",
             skuId)
@@ -331,7 +331,8 @@ public class SkuCodeService {
   }
 
   private List<SkuCodeAssignment> assignments(UUID skuId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select a.id,a.from_code,a.to_code,a.source,a.actor_id,a.occurred_at,a.created_at,r.code as rule_code"
                 + " from sku_code_assignment a"
                 + " left join sku_code_rule r on r.tenant_id=a.tenant_id and r.id=a.rule_id"
@@ -368,8 +369,7 @@ public class SkuCodeService {
   /**
    * 手工设置内部编码（覆盖现有编码）。
    *
-   * <p>这是唯一允许覆盖既有编码的路径：批量补齐与规则生成都只填「尚无编码」的 SKU。
-   * 覆盖会留痕（from_code → to_code）并发布事件，下游 04 刊登据此同步平台编码。
+   * <p>这是唯一允许覆盖既有编码的路径：批量补齐与规则生成都只填「尚无编码」的 SKU。 覆盖会留痕（from_code → to_code）并发布事件，下游 04 刊登据此同步平台编码。
    */
   public SkuCodeSaved setCode(AccessService.Access actor, UUID skuId, SkuCodeInput input) {
     var row = sql.fetchOne("select version,code from sku where id=?", skuId);
@@ -378,8 +378,7 @@ public class SkuCodeService {
     String before = row.get("code", String.class);
     if (!code.equals(before)) {
       var clash = sql.fetchOne("select id from sku where code=?", code);
-      CatalogService.check(
-          clash == null, "编码 " + code + " 已被其他 SKU 使用，内部编码在租户内必须唯一");
+      CatalogService.check(clash == null, "编码 " + code + " 已被其他 SKU 使用，内部编码在租户内必须唯一");
     }
     int updated =
         sql.execute(
@@ -387,8 +386,7 @@ public class SkuCodeService {
             code,
             skuId,
             input.version());
-    if (updated != 1)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "SKU 已被他人修改，请刷新后重试");
+    if (updated != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "SKU 已被他人修改，请刷新后重试");
     if (!code.equals(before))
       sql.execute(
           "insert into sku_code_assignment(id,tenant_id,sku_id,from_code,to_code,source,actor_id,occurred_at)"
@@ -400,7 +398,8 @@ public class SkuCodeService {
           code,
           actor.userId(),
           utcNow());
-    long version = sql.fetchOne("select version from sku where id=?", skuId).get("version", Long.class);
+    long version =
+        sql.fetchOne("select version from sku where id=?", skuId).get("version", Long.class);
     sql.execute(
         "insert into audit_event(id,tenant_id,actor_id,resource_id,action) values(?,?,?,?,?)",
         Ids.next(),
@@ -416,23 +415,31 @@ public class SkuCodeService {
   /**
    * 录入一个外部条码（手工或扫码）。
    *
-   * <p>scheme+value 全租户唯一：这条唯一性是 08 拣货扫码能唯一确定一个 SKU 的前提。
-   * 单条录入的冲突直接 409 并说明冲突方是谁；批量导入里的同样冲突进拒绝清单。
+   * <p>scheme+value 全租户唯一：这条唯一性是 08 拣货扫码能唯一确定一个 SKU 的前提。 单条录入的冲突直接 409 并说明冲突方是谁；批量导入里的同样冲突进拒绝清单。
    */
   public SkuIdentifierSaved addIdentifier(
       AccessService.Access actor, UUID skuId, SkuIdentifierInput input) {
-    if (sql.fetchOne("select id from sku where id=?", skuId) == null) throw CatalogService.missing();
+    if (sql.fetchOne("select id from sku where id=?", skuId) == null)
+      throw CatalogService.missing();
     String problem = BarcodeScheme.problem(input.scheme(), input.value());
     if (problem != null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, problem);
     String scheme = BarcodeScheme.normalize(input.scheme());
     String value = input.value().trim();
-    String source = input.source() == null || input.source().isBlank() ? "MANUAL" : input.source().trim().toUpperCase(Locale.ROOT);
+    String source =
+        input.source() == null || input.source().isBlank()
+            ? "MANUAL"
+            : input.source().trim().toUpperCase(Locale.ROOT);
     CatalogService.check(Set.of("MANUAL", "SCAN").contains(source), "条码来源只能是 MANUAL 或 SCAN");
 
-    var clash = sql.fetchOne("select sku_id from sku_identifier where scheme=? and value=?", scheme, value);
+    var clash =
+        sql.fetchOne("select sku_id from sku_identifier where scheme=? and value=?", scheme, value);
     if (clash != null)
       throw conflict(
-          "条码 " + value + "（" + BarcodeScheme.label(scheme) + "）已被另一个 SKU 使用；"
+          "条码 "
+              + value
+              + "（"
+              + BarcodeScheme.label(scheme)
+              + "）已被另一个 SKU 使用；"
               + "同一 scheme 下条码值全租户唯一，这是拣货扫码能唯一定位 SKU 的前提");
 
     if (input.isPrimary())
@@ -472,8 +479,7 @@ public class SkuCodeService {
   /** 删除一个条码。删掉主条码时 sku.barcode 由触发器清空。 */
   public void deleteIdentifier(AccessService.Access actor, UUID skuId, UUID identifierId) {
     var row =
-        sql.fetchOne(
-            "select id from sku_identifier where id=? and sku_id=?", identifierId, skuId);
+        sql.fetchOne("select id from sku_identifier where id=? and sku_id=?", identifierId, skuId);
     if (row == null) throw CatalogService.missing();
     sql.execute("delete from sku_identifier where id=?", identifierId);
     sql.execute(
@@ -490,15 +496,15 @@ public class SkuCodeService {
   /**
    * 按规则自动生成（GENERATE）或批量补齐（BACKFILL）内部编码。
    *
-   * <p>GENERATE 处理操作人显式提交的 skuIds，只填**空编码**、绝不覆盖既有编码；
-   * BACKFILL 由规则适用范围扫出**尚未按本规则赋码**的 SKU 批量规范化（允许覆盖旧编码，
-   * 但逐行留 from_code，且必须预览先行）。两者共用序号分配、查重、留痕与事件。
+   * <p>GENERATE 处理操作人显式提交的 skuIds，只填**空编码**、绝不覆盖既有编码； BACKFILL 由规则适用范围扫出**尚未按本规则赋码**的 SKU
+   * 批量规范化（允许覆盖旧编码， 但逐行留 from_code，且必须预览先行）。两者共用序号分配、查重、留痕与事件。
    *
    * <p>「已有编码」在 GENERATE 里是 SKIPPED 而非 REJECTED——不是错误，只是这一行不属于它该动的范围。
    */
   public SkuCodeBatchResult batch(AccessService.Access actor, SkuCodeBatchInput input) {
     String action = input.action().trim().toUpperCase(Locale.ROOT);
-    CatalogService.check(Set.of("GENERATE", "BACKFILL").contains(action), "批量动作只能是 GENERATE 或 BACKFILL");
+    CatalogService.check(
+        Set.of("GENERATE", "BACKFILL").contains(action), "批量动作只能是 GENERATE 或 BACKFILL");
     var ruleRow =
         sql.fetchOne(
             "select id,code,scope,spu_id,prefix,suffix,seq_width,start_from,enabled from sku_code_rule where id=?",
@@ -520,8 +526,7 @@ public class SkuCodeService {
     // 但拒绝/跳过的原因必须照常回给操作人，所以响应里仍带原始 ID，落库时置空。
     var persistIds = new ArrayList<UUID>();
     if ("GENERATE".equals(action)) {
-      CatalogService.check(
-          input.skuIds() != null && !input.skuIds().isEmpty(), "请先选择要生成编码的 SKU");
+      CatalogService.check(input.skuIds() != null && !input.skuIds().isEmpty(), "请先选择要生成编码的 SKU");
       CatalogService.check(
           new HashSet<>(input.skuIds()).size() == input.skuIds().size(), "SKU 不能重复提交");
       for (UUID id : input.skuIds()) {
@@ -545,8 +550,7 @@ public class SkuCodeService {
                 id,
                 "",
                 "SKIPPED",
-                ruleSpu != null ? "记录不存在、没有访问权限，或不属于本规则适用的商品族"
-                                : "记录不存在或没有访问权限",
+                ruleSpu != null ? "记录不存在、没有访问权限，或不属于本规则适用的商品族" : "记录不存在或没有访问权限",
                 null,
                 null));
         persistIds.add(null);
@@ -567,8 +571,11 @@ public class SkuCodeService {
                   + "   where a.sku_id=s.id order by a.created_at desc,a.id desc limit 1) la on true"
                   + " where (la.rule_id is null or la.rule_id<>?)"
                   + (ruleSpu != null ? " and s.spu_id=?" : "")
-                  + " order by s.created_at,s.id limit " + MAX_BACKFILL_SCAN,
-              ruleSpu == null ? new Object[] {input.ruleId()} : new Object[] {input.ruleId(), ruleSpu});
+                  + " order by s.created_at,s.id limit "
+                  + MAX_BACKFILL_SCAN,
+              ruleSpu == null
+                  ? new Object[] {input.ruleId()}
+                  : new Object[] {input.ruleId(), ruleSpu});
       candidates.addAll(rows);
       CatalogService.check(
           candidates.size() < MAX_BACKFILL_SCAN,
@@ -579,7 +586,13 @@ public class SkuCodeService {
     int rowNo = 0;
     int matched = 0;
     // 先规划全部行再落库：号段一次分配，不因中途拒绝而漏号。
-    long[] block = allocate(ruleRow.get("id", UUID.class), actor, ruleRow.get("start_from", Long.class), candidates.size(), input.dryRun());
+    long[] block =
+        allocate(
+            ruleRow.get("id", UUID.class),
+            actor,
+            ruleRow.get("start_from", Long.class),
+            candidates.size(),
+            input.dryRun());
     long sequence = block[0];
     for (var row : candidates) {
       rowNo++;
@@ -591,7 +604,15 @@ public class SkuCodeService {
       if ("GENERATE".equals(action) && hasCode) {
         // GENERATE 只填空编码：已有编码（含手工与旧规则）一律跳过，
         // 要重编号请显式走 BACKFILL 或逐条手工输入。
-        items.add(new SkuCodeBatchItem(rowNo, skuId, before, "SKIPPED", "已有编码 " + before + "，规则不覆盖手工编码；如需重编号请用批量补齐", before, null));
+        items.add(
+            new SkuCodeBatchItem(
+                rowNo,
+                skuId,
+                before,
+                "SKIPPED",
+                "已有编码 " + before + "，规则不覆盖手工编码；如需重编号请用批量补齐",
+                before,
+                null));
         continue;
       }
       String code = SkuCodePattern.render(prefix, sequence++, width, suffix);
@@ -607,7 +628,9 @@ public class SkuCodeService {
                 rowNo, skuId, null, "REJECTED", "编码 " + code + " 已被其他 SKU 使用", before, code));
         continue;
       }
-      items.add(new SkuCodeBatchItem(rowNo, skuId, null, "APPLIED", "按规则 " + ruleCode + " 生成", before, code));
+      items.add(
+          new SkuCodeBatchItem(
+              rowNo, skuId, null, "APPLIED", "按规则 " + ruleCode + " 生成", before, code));
     }
 
     int requested = "GENERATE".equals(action) ? input.skuIds().size() : matched;
@@ -731,18 +754,17 @@ public class SkuCodeService {
   /**
    * 原子分配 {@code count} 个连续序号，返回号段起点。
    *
-   * <p>{@code next_value} 的语义是「下一个尚未发出的序号」。一次发号 count 个之后
-   * next_value 前进 count，于是刚发出去的那段是 {@code [next_value - count, next_value - 1]}，
-   * 起点就是 {@code next_value - count}。
+   * <p>{@code next_value} 的语义是「下一个尚未发出的序号」。一次发号 count 个之后 next_value 前进 count，于是刚发出去的那段是 {@code
+   * [next_value - count, next_value - 1]}， 起点就是 {@code next_value - count}。
    *
-   * <p>首次分配走 INSERT 分支写入 {@code start_from + count}，与后续的 UPDATE 分支语义一致：
-   * 规则 start_from=1 的第一次发号拿到 1，而不是 2。
+   * <p>首次分配走 INSERT 分支写入 {@code start_from + count}，与后续的 UPDATE 分支语义一致： 规则 start_from=1 的第一次发号拿到
+   * 1，而不是 2。
    *
-   * <p>{@code ON CONFLICT DO UPDATE ... RETURNING} 在一条语句里完成「读—加—写」，
-   * 并发的两批生成不会拿到同一段号——这正是不能用「先查 next_value 再 update」的原因。
-   * 预览（dryRun）只读不写，不消耗号段。
+   * <p>{@code ON CONFLICT DO UPDATE ... RETURNING} 在一条语句里完成「读—加—写」， 并发的两批生成不会拿到同一段号——这正是不能用「先查
+   * next_value 再 update」的原因。 预览（dryRun）只读不写，不消耗号段。
    */
-  private long[] allocate(UUID ruleId, AccessService.Access actor, long startFrom, int count, boolean dryRun) {
+  private long[] allocate(
+      UUID ruleId, AccessService.Access actor, long startFrom, int count, boolean dryRun) {
     if (count <= 0) return new long[] {startFrom};
     if (dryRun) {
       var row = sql.fetchOne("select next_value from sku_code_rule_seq where rule_id=?", ruleId);
@@ -765,10 +787,14 @@ public class SkuCodeService {
 
   /** 读回一个批次的完整明细（含拒绝清单），供前端事后追查。 */
   public SkuCodeBatchResult batchResult(UUID batchId) {
-    var head = sql.fetchOne("select id,action,status,requested_count,matched_count,applied_count,skipped_count from sku_code_batch where id=?", batchId);
+    var head =
+        sql.fetchOne(
+            "select id,action,status,requested_count,matched_count,applied_count,skipped_count from sku_code_batch where id=?",
+            batchId);
     if (head == null) throw CatalogService.missing();
     var ruleCodes =
-        sql.fetch(
+        sql
+            .fetch(
                 "select distinct r.code from sku_code_assignment a join sku_code_rule r"
                     + " on r.tenant_id=a.tenant_id and r.id=a.rule_id where a.batch_id=?",
                 batchId)
@@ -776,7 +802,8 @@ public class SkuCodeService {
             .map(r -> r.get("code", String.class))
             .toList();
     var items =
-        sql.fetch(
+        sql
+            .fetch(
                 "select i.row_no,i.sku_id,s.code as sku_code,i.outcome,i.reason,i.code_before,i.code_after"
                     + " from sku_code_batch_item i left join sku s on s.tenant_id=i.tenant_id and s.id=i.sku_id"
                     + " where i.batch_id=? order by i.row_no",
@@ -812,9 +839,8 @@ public class SkuCodeService {
   /**
    * 条码批量导入，逐行给出接受/拒绝结果。
    *
-   * <p>拒绝原因分类（对应「唯一性冲突」这条输入）：
-   * SKU 不可见、scheme 不支持、条码格式/校验位错、**已被其他 SKU 占用**、
-   * 同批次内重复、该 SKU 同 scheme 已有主条码。每一条都带可执行的中文原因。
+   * <p>拒绝原因分类（对应「唯一性冲突」这条输入）： SKU 不可见、scheme 不支持、条码格式/校验位错、**已被其他 SKU 占用**、 同批次内重复、该 SKU 同 scheme
+   * 已有主条码。每一条都带可执行的中文原因。
    *
    * <p>逐行独立处理，不因一行失败而回滚整批——这是"冲突拒绝清单"这条交付物的意义。
    */
@@ -841,26 +867,34 @@ public class SkuCodeService {
       // 条码格式就错时连 SKU 都不用查：这一行必然被拒，没必要碰库。
       String problem = BarcodeScheme.problem(scheme, value);
       if (problem != null) {
-        items.add(new SkuIdentifierImportItem(rowNo, row.skuId(), scheme, value, "REJECTED", problem));
+        items.add(
+            new SkuIdentifierImportItem(rowNo, row.skuId(), scheme, value, "REJECTED", problem));
         persistIds.add(null);
         continue;
       }
       // SKU 可见性缓存：同一批里重复查同一行会放大到 N+1。
       boolean exists =
           visibleSkus.computeIfAbsent(
-              row.skuId(),
-              id -> sql.fetchOne("select id from sku where id=?", id) != null);
+              row.skuId(), id -> sql.fetchOne("select id from sku where id=?", id) != null);
       if (!exists) {
-        items.add(new SkuIdentifierImportItem(rowNo, row.skuId(), scheme, value, "REJECTED", "记录不存在或没有访问权限"));
+        items.add(
+            new SkuIdentifierImportItem(
+                rowNo, row.skuId(), scheme, value, "REJECTED", "记录不存在或没有访问权限"));
         continue;
       }
       if (!seen.add(scheme + " " + value)) {
-        items.add(new SkuIdentifierImportItem(rowNo, row.skuId(), scheme, value, "REJECTED", "本批次内该 scheme+条码值重复"));
+        items.add(
+            new SkuIdentifierImportItem(
+                rowNo, row.skuId(), scheme, value, "REJECTED", "本批次内该 scheme+条码值重复"));
         continue;
       }
-      var clash = sql.fetchOne("select sku_id from sku_identifier where scheme=? and value=?", scheme, value);
+      var clash =
+          sql.fetchOne(
+              "select sku_id from sku_identifier where scheme=? and value=?", scheme, value);
       if (clash != null) {
-        items.add(new SkuIdentifierImportItem(rowNo, row.skuId(), scheme, value, "REJECTED", "条码 " + value + " 已被其他 SKU 使用"));
+        items.add(
+            new SkuIdentifierImportItem(
+                rowNo, row.skuId(), scheme, value, "REJECTED", "条码 " + value + " 已被其他 SKU 使用"));
         continue;
       }
       if (row.isPrimary()) {
@@ -872,8 +906,15 @@ public class SkuCodeService {
         if (primary != null) {
           items.add(
               new SkuIdentifierImportItem(
-                  rowNo, row.skuId(), scheme, value, "REJECTED",
-                  "该 SKU 的 " + BarcodeScheme.label(scheme) + " 已有主条码 " + primary.get("value", String.class)
+                  rowNo,
+                  row.skuId(),
+                  scheme,
+                  value,
+                  "REJECTED",
+                  "该 SKU 的 "
+                      + BarcodeScheme.label(scheme)
+                      + " 已有主条码 "
+                      + primary.get("value", String.class)
                       + "；如需替换请先删除原主条码"));
           continue;
         }
@@ -897,7 +938,10 @@ public class SkuCodeService {
         applied++;
       } catch (DataAccessException e) {
         // 并发写入兜底：唯一索引挡住后这一行改判为拒绝，其余行继续。
-        items.set(items.size() - 1, new SkuIdentifierImportItem(rowNo, row.skuId(), scheme, value, "REJECTED", "条码 " + value + " 已被并发占用"));
+        items.set(
+            items.size() - 1,
+            new SkuIdentifierImportItem(
+                rowNo, row.skuId(), scheme, value, "REJECTED", "条码 " + value + " 已被并发占用"));
         applied--;
       }
     }
@@ -940,7 +984,8 @@ public class SkuCodeService {
         actor.userId(),
         batchId,
         "SkuIdentifierImported");
-    return new SkuIdentifierImportResult(batchId, input.dryRun(), items.size(), applied, rejected, items);
+    return new SkuIdentifierImportResult(
+        batchId, input.dryRun(), items.size(), applied, rejected, items);
   }
 
   // ============================================================ 工具

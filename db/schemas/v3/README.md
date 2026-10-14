@@ -12,14 +12,14 @@
 
 复检功能蓝图本身**没有发现问题**（树/详情一致、四项字段完整、编号无重复、编码无损）。但把蓝图与**已实施的迁移**对照后，发现 6 个真实缺陷——它们不是蓝图的问题，是**已落地代码与蓝图之间的差距**：
 
-| # | 问题 | 证据 | 影响 | 处置 |
-|---|---|---|---|---|
-| **D1** | `product_compliance`、`product_asset` 是 `LIKE product_research INCLUDING ALL` 的**同构复制** | `catalog V1:77-80` | 三张表列结构完全相同（title/notes/reference/locale…）。合规表**装不了 HS 编码、认证编号、有效期**；素材表**装不了文件键、尺寸、格式、引用计数**。蓝图 3.7 与 3.4 需求无法落库 | V3 拆为独立表，见 §4.2 |
-| **D2** | 缺 `inbox_message` | 全仓 grep 0 命中 | 蓝图 02.6.1.2「重复 webhook 不产生重复订单」的物理基础不存在 | V3 纳入技术表模板，见 §4.1 |
-| **D3** | 缺 `idempotency_request` | 全仓 grep 0 命中 | 蓝图 02.5.1.1 要求回写任务带幂等键，无处落地 | 同上 |
-| **D4** | `spu.brand` / `spu.category` 是自由文本 `varchar` | `catalog V1:3` | 品牌/分类无法成为实体，**防侵权、品牌授权状态、类目属性要求**（蓝图 3.3.1.2 / 16.4.2.1）都无从实现 | V3 增 `brand` / `category` 树表，spu 改引用；兼容期保留旧列 |
-| **D5** | `department` 是平表无层级 | `identity V3:1-3` | 蓝图 17.2.1.1 要求部门树 + 防环 + 负责人 | V3 增 `parent_id` + 环检测触发器 |
-| **D6** | `role_assignment.scope_mode` 只有 ALL/DEPARTMENT/SELF，且只按 `owner_id`/`department_id` 过滤 | `catalog V3` 的 `catalog_scope()` | 蓝图 17.3.2.2 要求**按法人/店铺/仓库/部门四维**限定数据范围。当前模型无法表达"只能看 A 法人 + C 仓库" | V3 增 `role_assignment_scope` 多维范围表 |
+| #      | 问题                                                                                          | 证据                              | 影响                                                                                                                                                                          | 处置                                                        |
+| ------ | --------------------------------------------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| **D1** | `product_compliance`、`product_asset` 是 `LIKE product_research INCLUDING ALL` 的**同构复制** | `catalog V1:77-80`                | 三张表列结构完全相同（title/notes/reference/locale…）。合规表**装不了 HS 编码、认证编号、有效期**；素材表**装不了文件键、尺寸、格式、引用计数**。蓝图 3.7 与 3.4 需求无法落库 | V3 拆为独立表，见 §4.2                                      |
+| **D2** | 缺 `inbox_message`                                                                            | 全仓 grep 0 命中                  | 蓝图 02.6.1.2「重复 webhook 不产生重复订单」的物理基础不存在                                                                                                                  | V3 纳入技术表模板，见 §4.1                                  |
+| **D3** | 缺 `idempotency_request`                                                                      | 全仓 grep 0 命中                  | 蓝图 02.5.1.1 要求回写任务带幂等键，无处落地                                                                                                                                  | 同上                                                        |
+| **D4** | `spu.brand` / `spu.category` 是自由文本 `varchar`                                             | `catalog V1:3`                    | 品牌/分类无法成为实体，**防侵权、品牌授权状态、类目属性要求**（蓝图 3.3.1.2 / 16.4.2.1）都无从实现                                                                            | V3 增 `brand` / `category` 树表，spu 改引用；兼容期保留旧列 |
+| **D5** | `department` 是平表无层级                                                                     | `identity V3:1-3`                 | 蓝图 17.2.1.1 要求部门树 + 防环 + 负责人                                                                                                                                      | V3 增 `parent_id` + 环检测触发器                            |
+| **D6** | `role_assignment.scope_mode` 只有 ALL/DEPARTMENT/SELF，且只按 `owner_id`/`department_id` 过滤 | `catalog V3` 的 `catalog_scope()` | 蓝图 17.3.2.2 要求**按法人/店铺/仓库/部门四维**限定数据范围。当前模型无法表达"只能看 A 法人 + C 仓库"                                                                         | V3 增 `role_assignment_scope` 多维范围表                    |
 
 **D2/D3/D4/D5/D6 属"已实施但要演进"，处理方式见 §7 迁移演进；D1 需拆表，必须在新表落地后再迁数据。**
 
@@ -31,11 +31,11 @@
 
 ### 1.1 主键与标识
 
-| 规则 | 规范 | 依据 |
-|---|---|---|
-| 主键 | `id uuid PRIMARY KEY`，**UUIDv7 由应用生成**（库不生成），时间有序利于 B-tree | 现有迁移 `id uuid PRIMARY KEY` |
-| 编码 | 业务可读编码单列（如 `code`），**是标识不是外键** | 实体目录 §5 |
-| 业务 ID | 不使用自增整型对外暴露 | AGENTS.md |
+| 规则    | 规范                                                                          | 依据                           |
+| ------- | ----------------------------------------------------------------------------- | ------------------------------ |
+| 主键    | `id uuid PRIMARY KEY`，**UUIDv7 由应用生成**（库不生成），时间有序利于 B-tree | 现有迁移 `id uuid PRIMARY KEY` |
+| 编码    | 业务可读编码单列（如 `code`），**是标识不是外键**                             | 实体目录 §5                    |
+| 业务 ID | 不使用自增整型对外暴露                                                        | AGENTS.md                      |
 
 ### 1.2 多租户与外键（最重要的一组）
 
@@ -68,24 +68,24 @@ CREATE POLICY isolation ON x
 
 ### 1.4 数值类型与精度（禁止浮点）
 
-| 语义 | 类型 | 说明 |
-|---|---|---|
-| 金额 | `numeric(19,4)` | `BigDecimal`，禁 float/double |
-| 单价、汇率 | `numeric(19,8)` | 汇率要 8 位才够 |
-| 数量 | `numeric(19,6)` | 单位换算后落基础单位 |
-| 比例/权重 | `numeric(9,6)` | 分摊比例 |
-| 业务计数 | `bigint` | 版本号、配额 |
+| 语义       | 类型            | 说明                          |
+| ---------- | --------------- | ----------------------------- |
+| 金额       | `numeric(19,4)` | `BigDecimal`，禁 float/double |
+| 单价、汇率 | `numeric(19,8)` | 汇率要 8 位才够               |
+| 数量       | `numeric(19,6)` | 单位换算后落基础单位          |
+| 比例/权重  | `numeric(9,6)`  | 分摊比例                      |
+| 业务计数   | `bigint`        | 版本号、配额                  |
 
 **每张含金额的表必须显式带 `currency char(3)`**，不允许"默认本币"隐式约定。
 
 ### 1.5 时间
 
-| 语义 | 类型 | 说明 |
-|---|---|---|
-| 事件发生时间 | `timestamptz` | 库存流水、事件、审计 |
-| 业务日期 | `date` | 记账日、发货日、结算周期 |
-| 时区 | `text` IANA（如 `America/Los_Angeles`） | 店铺/仓库时区，**不用 varchar(3) 缩写** |
-| 业务时区 | `text` IANA | "需要解释业务日"的场景单独存 |
+| 语义         | 类型                                    | 说明                                    |
+| ------------ | --------------------------------------- | --------------------------------------- |
+| 事件发生时间 | `timestamptz`                           | 库存流水、事件、审计                    |
+| 业务日期     | `date`                                  | 记账日、发货日、结算周期                |
+| 时区         | `text` IANA（如 `America/Los_Angeles`） | 店铺/仓库时区，**不用 varchar(3) 缩写** |
+| 业务时区     | `text` IANA                             | "需要解释业务日"的场景单独存            |
 
 **禁止用 `created_at` 代替业务时间**（实体目录 §3.9）。一张单据可能同时有 `placed_at`（平台下单）、`received_at`（入库）、`posted_on`（记账日）、`created_at`（系统写入）。
 
@@ -148,33 +148,33 @@ JSONB **只用于**：事件载荷、外部平台扩展字段、脱敏快照。
 
 ### 2.1 identity（治理）— 部分已实施
 
-| 表 | 状态 | 蓝图 |
-|---|---|---|
-| `tenant` `tenant_closure` `app_user` `membership` `department` | 已实施 | 17.1 / 17.2 |
-| `role` `permission` `page_resource` `role_permission` `role_assignment` | 已实施 | 17.3 |
-| `auth_session` | 已实施 | — |
-| `legal_entity` `accounting_book` | 待建 | 17.1.2 / 12.5.1 |
-| `role_assignment_scope` | 待建（修 D6） | 17.3.2.2 |
-| `org_unit`（部门层级，D5 演进） | 演进 `department` | 17.2.1.1 |
-| `approval_flow` `approval_instance` `approval_step` | 待建 | 17.4 |
-| `number_rule` | 待建 | 17.5.1.2 |
-| `audit_event` | 演进（加变更前后值） | 17.5.3.1 |
+| 表                                                                      | 状态                 | 蓝图            |
+| ----------------------------------------------------------------------- | -------------------- | --------------- |
+| `tenant` `tenant_closure` `app_user` `membership` `department`          | 已实施               | 17.1 / 17.2     |
+| `role` `permission` `page_resource` `role_permission` `role_assignment` | 已实施               | 17.3            |
+| `auth_session`                                                          | 已实施               | —               |
+| `legal_entity` `accounting_book`                                        | 待建                 | 17.1.2 / 12.5.1 |
+| `role_assignment_scope`                                                 | 待建（修 D6）        | 17.3.2.2        |
+| `org_unit`（部门层级，D5 演进）                                         | 演进 `department`    | 17.2.1.1        |
+| `approval_flow` `approval_instance` `approval_step`                     | 待建                 | 17.4            |
+| `number_rule`                                                           | 待建                 | 17.5.1.2        |
+| `audit_event`                                                           | 演进（加变更前后值） | 17.5.3.1        |
 
 ### 2.2 catalog（商品与价目）
 
-| 表 | 状态 | 蓝图 |
-|---|---|---|
-| `spu` `sku` `attribute_definition` `attribute_option` `attribute_value` `attribute_value_item` | 已实施 | 03.1 / 03.2 |
-| `brand` `category` `spu_category_link`（修 D4） | 待建 | 03.3 |
-| `unit_of_measure` `sku_uom_conversion` `sku_packaging` | 待建 | 03.1.2.4 / 03.3.3 |
-| `spu_media` `sku_media` `file_object` | 待建（修 D1） | 03.4.1 |
-| `spu_translation` `sku_translation` `copy_template` | 待建 | 03.4.3 / 03.4.2 |
-| `product_compliance` `sku_customs_profile`（拆表，修 D1） | 待建 | 03.7 |
-| `bundle_version` `bundle_component` `bom_version` `bom_line` | 待建 | 03.5 |
-| `party` `supplier_profile` `customer_profile` `carrier_profile` `supplier_offer` | 待建 | 03.6 |
-| `price_list` `price_list_item` | 待建 | 05.1 |
-| `sku_identifier` | 待建 | 03.1.2.3 |
-| `sku_merge_log`（3.9.1.2） | 待建 | 03.9 |
+| 表                                                                                             | 状态          | 蓝图              |
+| ---------------------------------------------------------------------------------------------- | ------------- | ----------------- |
+| `spu` `sku` `attribute_definition` `attribute_option` `attribute_value` `attribute_value_item` | 已实施        | 03.1 / 03.2       |
+| `brand` `category` `spu_category_link`（修 D4）                                                | 待建          | 03.3              |
+| `unit_of_measure` `sku_uom_conversion` `sku_packaging`                                         | 待建          | 03.1.2.4 / 03.3.3 |
+| `spu_media` `sku_media` `file_object`                                                          | 待建（修 D1） | 03.4.1            |
+| `spu_translation` `sku_translation` `copy_template`                                            | 待建          | 03.4.3 / 03.4.2   |
+| `product_compliance` `sku_customs_profile`（拆表，修 D1）                                      | 待建          | 03.7              |
+| `bundle_version` `bundle_component` `bom_version` `bom_line`                                   | 待建          | 03.5              |
+| `party` `supplier_profile` `customer_profile` `carrier_profile` `supplier_offer`               | 待建          | 03.6              |
+| `price_list` `price_list_item`                                                                 | 待建          | 05.1              |
+| `sku_identifier`                                                                               | 待建          | 03.1.2.3          |
+| `sku_merge_log`（3.9.1.2）                                                                     | 待建          | 03.9              |
 
 ### 2.3 channel（平台与店铺）
 
@@ -206,14 +206,14 @@ JSONB **只用于**：事件载荷、外部平台扩展字段、脱敏快照。
 
 ## 3. 落地顺序（与 v2 的 D0–D7 对齐）
 
-| 批次 | 内容 | 为什么先做 |
-|---|---|---|
-| **V4** | 技术表模板（`inbox` `idempotency`）+ 修 D5/D6 | 所有服务都要用，越早越省返工 |
-| **V5** | warehouse 库存账本（本文 `02-*.sql`） | 约束最密集，错了后面全错；D3 阶段就要跑 |
-| **V6** | trade 订单与采购售后 | 手工单闭环的前提 |
-| **V7** | channel 平台接入 | 打通真实流量 |
-| **V8** | finance 结算对账与成本 | 利润的地基 |
-| **V9** | catalog 扩展（修 D1/D4）+ trade 剩余 | 依赖前面的稳定模型 |
+| 批次   | 内容                                          | 为什么先做                              |
+| ------ | --------------------------------------------- | --------------------------------------- |
+| **V4** | 技术表模板（`inbox` `idempotency`）+ 修 D5/D6 | 所有服务都要用，越早越省返工            |
+| **V5** | warehouse 库存账本（本文 `02-*.sql`）         | 约束最密集，错了后面全错；D3 阶段就要跑 |
+| **V6** | trade 订单与采购售后                          | 手工单闭环的前提                        |
+| **V7** | channel 平台接入                              | 打通真实流量                            |
+| **V8** | finance 结算对账与成本                        | 利润的地基                              |
+| **V9** | catalog 扩展（修 D1/D4）+ trade 剩余          | 依赖前面的稳定模型                      |
 
 ---
 
@@ -221,15 +221,16 @@ JSONB **只用于**：事件载荷、外部平台扩展字段、脱敏快照。
 
 ### 4.1 跨服务技术表（`01-technical-core.sql`）
 
-| 表 | 作用 | 关键约束 |
-|---|---|---|
-| `inbox_message` | 消费去重 | `UNIQUE(tenant_id, consumer, event_id)`，**与业务结果同事务写入** |
-| `idempotency_request` | 主动操作幂等 | `UNIQUE(tenant_id, scope, key)` + `request_hash`（防同 key 不同参） |
-| `outbox_event` | 可靠发事件 | 业务与事件同事务；relay 投递 |
-| `audit_event` | 审计 | append-only；`actor_id` + 资源 + 脱敏变更 |
-| `reference_projection` | 跨服务只读副本 | 具名投影，不建万能跨库实体表 |
+| 表                     | 作用           | 关键约束                                                            |
+| ---------------------- | -------------- | ------------------------------------------------------------------- |
+| `inbox_message`        | 消费去重       | `UNIQUE(tenant_id, consumer, event_id)`，**与业务结果同事务写入**   |
+| `idempotency_request`  | 主动操作幂等   | `UNIQUE(tenant_id, scope, key)` + `request_hash`（防同 key 不同参） |
+| `outbox_event`         | 可靠发事件     | 业务与事件同事务；relay 投递                                        |
+| `audit_event`          | 审计           | append-only；`actor_id` + 资源 + 脱敏变更                           |
+| `reference_projection` | 跨服务只读副本 | 具名投影，不建万能跨库实体表                                        |
 
 **三条铁律**（实体目录 §6）：
+
 1. `inbox` 标记消费**必须与业务结果同事务**，不能"先标已消费再写业务"
 2. 幂等表**不能成为业务事实**，清理它不能让业务长期唯一约束失效
 3. `outbox` 既是 append-only 又要更新投递字段 → **投递状态用独立列更新，不改 payload**；或用 `published_at` + `attempts` 而非改事件本体
@@ -245,17 +246,17 @@ JSONB **只用于**：事件载荷、外部平台扩展字段、脱敏快照。
 
 蓝图 07 的硬约束在 PG 里的落法：
 
-| 蓝图约束 | 物理实现 |
-|---|---|
+| 蓝图约束                         | 物理实现                                                                                             |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `available = on_hand − reserved` | `stock_bucket.available` **生成列**（`GENERATED ALWAYS AS (on_hand - reserved) STORED`），不可能算错 |
-| 不允许负库存 | `CHECK (on_hand >= 0 AND reserved >= 0 AND reserved <= on_hand)` |
-| 不可售质量状态禁止销售预占 | 触发器：质量状态 ∈ 不可售集合时 `reserved` 必须为 0 |
-| 预占终态不可复活 | 触发器：`reservation_allocation.status` 终态后拒绝回到 held |
-| 流水 append-only | `REVOKE UPDATE,DELETE` + 触发器 |
-| bucket 内部转移数量合计为零 | 事务级校验函数：同一 `inventory_transaction` 内按 bucket 分组求和为 0 |
-| 预占先于扣减、防超卖 | 条件更新 `WHERE version = :expected`，`reserved + :qty <= on_hand` |
-| 货主维度（7.7 新增） | `stock_bucket` 含 `stock_owner_id`，**不与 `tenant_id` 混用** |
-| 多平台分摊（7.8 新增） | `stock_allocation_rule`（策略）+ `stock_allocation_result`（结果快照） |
+| 不允许负库存                     | `CHECK (on_hand >= 0 AND reserved >= 0 AND reserved <= on_hand)`                                     |
+| 不可售质量状态禁止销售预占       | 触发器：质量状态 ∈ 不可售集合时 `reserved` 必须为 0                                                  |
+| 预占终态不可复活                 | 触发器：`reservation_allocation.status` 终态后拒绝回到 held                                          |
+| 流水 append-only                 | `REVOKE UPDATE,DELETE` + 触发器                                                                      |
+| bucket 内部转移数量合计为零      | 事务级校验函数：同一 `inventory_transaction` 内按 bucket 分组求和为 0                                |
+| 预占先于扣减、防超卖             | 条件更新 `WHERE version = :expected`，`reserved + :qty <= on_hand`                                   |
+| 货主维度（7.7 新增）             | `stock_bucket` 含 `stock_owner_id`，**不与 `tenant_id` 混用**                                        |
+| 多平台分摊（7.8 新增）           | `stock_allocation_rule`（策略）+ `stock_allocation_result`（结果快照）                               |
 
 ---
 
@@ -284,6 +285,7 @@ docker exec -i $PG psql -U starcon_migrator -d starcon_schema_check -v ON_ERROR_
 冒烟覆盖：① `available` 生成列 = `on_hand - reserved`　② 拒绝负库存　③ 拒绝 `reserved > on_hand`　④ 拒绝不可售质量状态被预留　⑤ 预占终态不可复活　⑥ 流水 append-only 拒绝 UPDATE　⑦ 内部转移 bucket 净额不为零被拒（延迟约束）　⑧ 补反向分录后放行　⑨⑩ **RLS 以运行账号验证**跨租户读 0 行 / 本租户读 1 行。
 
 > **两个必须记住的坑（都是本次实测踩到的）**：
+>
 > 1. **RLS 必须用运行账号测**。`starcon_migrator` 是超级用户，超级用户绕过 RLS（即使 `FORCE`），用它测会得到假阳性通过。
 > 2. **复合外键要求被引用表有 `UNIQUE(tenant_id, id)`**。漏一个就报 `no unique constraint matching given keys`。本轮补了 6 张表。
 

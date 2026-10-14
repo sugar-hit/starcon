@@ -94,7 +94,9 @@ it('模型源码里真实存在的每个调用点都被放行', async () => {
   const sites = realCallSites();
   expect(sites.length, '模型源码里一个调用点都没抽到 —— 断言本身失效了').toBeGreaterThan(0);
   for (const path of sites) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（白名单漏登记 = 浏览器里静默 404）`).toBe(200);
   }
   // 抽到的路径必须**真的**覆盖本模块的形状，否则「只放行了一条」也算通过。
@@ -118,7 +120,9 @@ it('写动作的 POST 形状被放行，且真的转发到 8084', async () => {
     `warehouse/assembly-orders/${ID}/issue`,
     `warehouse/assembly-orders/${ID}/cancel`,
   ]) {
-    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    const response = await POST(request(path, 'POST'), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `POST ${path} 未被放行`).toBe(200);
   }
   expect(fetcher).toHaveBeenCalledWith(
@@ -142,11 +146,16 @@ it('PUT / DELETE 不由代理拦：路径在白名单内就会被转发，方法
 
   for (const path of [`warehouse/assembly-orders/${ID}`, 'warehouse/assembly-orders']) {
     expect(
-      (await PUT(request(path, 'PUT'), { params: { path: path.split('/') } })).status,
+      (await PUT(request(path, 'PUT'), { params: Promise.resolve({ path: path.split('/') }) }))
+        .status,
       `PUT ${path} 应转发给后端`,
     ).toBe(200);
     expect(
-      (await DELETE(request(path, 'DELETE'), { params: { path: path.split('/') } })).status,
+      (
+        await DELETE(request(path, 'DELETE'), {
+          params: Promise.resolve({ path: path.split('/') }),
+        })
+      ).status,
       `DELETE ${path} 应转发给后端`,
     ).toBe(200);
   }
@@ -182,7 +191,9 @@ it('未交付 / 不该存在的形状仍然被拒，且「多一层后缀」也�
     'warehouse/assembly-order',
     'warehouse/assembly-order/{id}/issue',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
@@ -207,7 +218,9 @@ it('不误伤本车道之前已放行的仓库分支（求并，不是二选一�
     'warehouse/goods-receipt-discrepancies/capabilities',
     'warehouse/trade-documents/capabilities',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `已交付模块的 ${path} 被本车道误伤 —— 白名单必须求并`).toBe(200);
   }
 });
@@ -223,7 +236,7 @@ it('跨源写请求被 403 拒绝，不转发', async () => {
       headers: { origin: 'http://evil.example', cookie: 'starcon_session=x' },
       body: '{}',
     }),
-    { params: { path: path.split('/') } },
+    { params: Promise.resolve({ path: path.split('/') }) },
   );
   expect(response.status).toBe(403);
   expect(fetcher).not.toHaveBeenCalled();

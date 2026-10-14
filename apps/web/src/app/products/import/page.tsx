@@ -33,11 +33,11 @@ export default function ImportPage() {
         <h1 className="text-copy-20 font-semibold">导入向导</h1>
         <p className="text-muted-foreground text-copy-13">
           批量导入商品主数据：<strong>商品 SPU / SKU / 属性值 / 包装档案 / 条码</strong>五类。
-          五个环节依次是<strong>下载模板 → 上传文件 → 字段映射 → 预校验 → 执行</strong>。
-          导入是<strong>异步任务</strong>，大文件不阻塞页面；提交后本页持续轮询真实进度。
+          五个环节依次是<strong>下载模板 → 上传文件 → 字段映射 → 预校验 → 执行</strong>。 导入是
+          <strong>异步任务</strong>，大文件不阻塞页面；提交后本页持续轮询真实进度。
           <strong>同一租户同时只允许一个同类导入任务</strong>，避免并发覆盖（由数据库约束裁决）。
-          <strong>校验失败的行不落库</strong> —— 不允许「尽力导入」产生半截数据。
-          当前<strong>只支持 CSV</strong>（UTF-8 / GBK 自动识别），不支持 .xlsx。
+          <strong>校验失败的行不落库</strong> —— 不允许「尽力导入」产生半截数据。 当前
+          <strong>只支持 CSV</strong>（UTF-8 / GBK 自动识别），不支持 .xlsx。
         </p>
       </header>
 

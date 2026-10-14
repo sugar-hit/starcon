@@ -16,20 +16,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 /**
- * 3.4.2.2 描述与卖点库：内容模板（详情描述 / 使用说明 / 注意事项 / 卖点段落）、
- * 多语言译文、卖点短语库、批量填充与段落引用。
+ * 3.4.2.2 描述与卖点库：内容模板（详情描述 / 使用说明 / 注意事项 / 卖点段落）、 多语言译文、卖点短语库、批量填充与段落引用。
  *
  * <p>路由挂在 {@code /catalog/descriptions} 之下，与 {@code /catalog/titles}（3.4.2.1）
- * 并列：两者是**两条独立的资产线**——标题有平台硬字符上限、核心矛盾是重复铺货；
- * 描述是长文本、核心矛盾是「变量缺失必须报告」。合进一个路由会让两套约束互相干扰。
- * 台账里的 {@code /products/content} 是**前端页面路径**（同一个页面上两个工作区）。
+ * 并列：两者是**两条独立的资产线**——标题有平台硬字符上限、核心矛盾是重复铺货； 描述是长文本、核心矛盾是「变量缺失必须报告」。合进一个路由会让两套约束互相干扰。 台账里的 {@code
+ * /products/content} 是**前端页面路径**（同一个页面上两个工作区）。
  *
- * <p>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}：描述是挂在 SKU 上的
- * 商品文案、上游是 3.1.1.1 的 SPU/SKU，所以复用已有词表而不是新造
- * （新词表要改 identity 服务的迁移，属于另一个服务的写入所有权）。
+ * <p>权限沿用 {@code catalog.spu.read} / {@code catalog.spu.update}：描述是挂在 SKU 上的 商品文案、上游是 3.1.1.1 的
+ * SPU/SKU，所以复用已有词表而不是新造 （新词表要改 identity 服务的迁移，属于另一个服务的写入所有权）。
  *
- * <p><b>填充接口是同步的「已完成」语义</b>，与 3.4.1.2 的异步「已受理」不同：
- * 这里的成本只与 SKU 数成正比（每个 SKU 一次字符串替换），几百个 SKU 是几十毫秒。
+ * <p><b>填充接口是同步的「已完成」语义</b>，与 3.4.1.2 的异步「已受理」不同： 这里的成本只与 SKU 数成正比（每个 SKU 一次字符串替换），几百个 SKU 是几十毫秒。
  */
 @RestController
 @RequestMapping("/catalog/descriptions")
@@ -95,10 +91,7 @@ public class DescriptionController {
     return call(auth, "spu.update", a -> descriptions.saveTemplate(a, id, input));
   }
 
-  /**
-   * 删除模板。仍被填充批次引用时返回 400 并说明被引用几次——
-   * 要清理请改用停用（停用后不能再用它新建批次，历史段落与译文照常可读）。
-   */
+  /** 删除模板。仍被填充批次引用时返回 400 并说明被引用几次—— 要清理请改用停用（停用后不能再用它新建批次，历史段落与译文照常可读）。 */
   @DeleteMapping("/templates/{id}")
   public Map<String, Boolean> deleteTemplate(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -135,8 +128,7 @@ public class DescriptionController {
   /**
    * 译文完整度：这几种语言里哪些能直接填。
    *
-   * <p>用 query 传语言列表（不是请求体）：这是纯只读的 GET 查询，
-   * 且语言列表短（最多 10 种）。
+   * <p>用 query 传语言列表（不是请求体）：这是纯只读的 GET 查询， 且语言列表短（最多 10 种）。
    */
   @GetMapping("/templates/{id}/translation-coverage")
   public ContentTranslationCoverage translationCoverage(
@@ -152,8 +144,7 @@ public class DescriptionController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID templateId,
       @Valid @RequestBody ContentTranslationInput input) {
-    return call(
-        auth, "spu.update", a -> descriptions.saveTranslation(a, templateId, null, input));
+    return call(auth, "spu.update", a -> descriptions.saveTranslation(a, templateId, null, input));
   }
 
   @PutMapping("/templates/{templateId}/translations/{translationId}")
@@ -195,7 +186,8 @@ public class DescriptionController {
     return call(
         auth,
         "spu.read",
-        a -> descriptions.phrases(new ContentPhraseQuery(keyword, phraseType, enabled, page, size)));
+        a ->
+            descriptions.phrases(new ContentPhraseQuery(keyword, phraseType, enabled, page, size)));
   }
 
   @PostMapping("/phrases")
@@ -242,9 +234,7 @@ public class DescriptionController {
   /**
    * 批量填充描述（同步，返回即已完成）。
    *
-   * <p>缺译文在提交时整批拒绝（不悄悄退回源语言正文）；
-   * 商品字段为空与短语池为空**不拒**——它们逐 SKU 报告，正文照样产出，
-   * 只是段落标成「缺变量」且占位符被剥掉。
+   * <p>缺译文在提交时整批拒绝（不悄悄退回源语言正文）； 商品字段为空与短语池为空**不拒**——它们逐 SKU 报告，正文照样产出， 只是段落标成「缺变量」且占位符被剥掉。
    */
   @PostMapping("/renders")
   public ContentRender render(
@@ -317,8 +307,7 @@ public class DescriptionController {
   /**
    * 导出段落 CSV（供 04 刊登与 15 客服取用）。
    *
-   * <p>StreamingResponseBody 分批写出，峰值内存与结果集大小无关。
-   * 走 GET + query 而不是 POST：导出结果与当前筛选完全一致。
+   * <p>StreamingResponseBody 分批写出，峰值内存与结果集大小无关。 走 GET + query 而不是 POST：导出结果与当前筛选完全一致。
    */
   @GetMapping(value = "/sections/export", produces = "text/csv")
   public ResponseEntity<StreamingResponseBody> exportSections(
@@ -328,8 +317,7 @@ public class DescriptionController {
       @RequestParam(required = false) String contentType,
       @RequestParam(required = false) String status) {
     var actor = access.require(auth, "catalog.spu.read");
-    var query =
-        new ContentSectionQuery(skuId, locale, contentType, status, null, null, 0, 0);
+    var query = new ContentSectionQuery(skuId, locale, contentType, status, null, null, 0, 0);
     // 先在租户事务里校验筛选条件，别等到已经开始写流才失败。
     access.run(
         actor,

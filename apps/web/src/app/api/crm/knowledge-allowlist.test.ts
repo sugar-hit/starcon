@@ -96,7 +96,9 @@ it('模型源码里真实存在的每个调用点都被放行', async () => {
   const sites = realCallSites();
   expect(sites.length, '模型源码里一个调用点都没抽到 —— 断言本身失效了').toBeGreaterThan(0);
   for (const path of sites) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（白名单漏登记 = 浏览器里静默 404）`).toBe(200);
   }
   // 抽到的路径必须**真的**覆盖本模块的形状，否则「只放行了一条」也算通过。
@@ -129,7 +131,7 @@ it('review-due 被放行（查询串由模型拼在路径后面，代理只对�
   const req = new NextRequest(url, {
     headers: { cookie: 'starcon_session=private-session' },
   });
-  const response = await GET(req, { params: { path: path.split('/') } });
+  const response = await GET(req, { params: Promise.resolve({ path: path.split('/') }) });
   expect(response.status, 'review-due 未放行').toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining('/crm/knowledge/review-due?platformCode=AMAZON'),
@@ -148,7 +150,9 @@ it('写动作的 POST 形状被放行，且真的转发到 8086', async () => {
     `crm/knowledge/versions/${ID}/close`,
     `crm/knowledge/versions/${ID}/references`,
   ]) {
-    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    const response = await POST(request(path, 'POST'), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `POST ${path} 未被放行`).toBe(200);
   }
   expect(fetcher).toHaveBeenCalledWith(
@@ -182,7 +186,9 @@ it('未交付 / 不该存在的形状仍然被拒 —— 放行不该存在的�
     'crm/knowledge/entry',
     'crm/knowledge/scope',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
@@ -215,7 +221,9 @@ it('不误伤其余服务已放行的分支（求并，不是二选一）', asyn
     const req = new NextRequest(`http://localhost:3000/api/${path}`, {
       headers: { cookie: 'starcon_session=x' },
     });
-    const response = await proxy(req, { params: { path: path.split('/') } } as never);
+    const response = await proxy(req, {
+      params: Promise.resolve({ path: path.split('/') }),
+    } as never);
     expect(response.status, `${service} 的 ${path} 被本车道误伤 —— 白名单必须求并`).not.toBe(404);
   }
 });
@@ -231,7 +239,7 @@ it('跨源写请求被 403 拒绝，不转发', async () => {
       headers: { origin: 'http://evil.example', cookie: 'starcon_session=x' },
       body: '{}',
     }),
-    { params: { path: path.split('/') } },
+    { params: Promise.resolve({ path: path.split('/') }) },
   );
   expect(response.status).toBe(403);
   expect(fetcher).not.toHaveBeenCalled();

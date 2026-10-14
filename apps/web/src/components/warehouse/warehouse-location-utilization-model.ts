@@ -91,7 +91,8 @@ function query(filters: UtilizationFilters): string {
   if (filters.grade !== '') parts.set('grade', filters.grade);
   if (filters.type !== '') parts.set('type', filters.type);
   if (filters.keyword.trim() !== '') parts.set('keyword', filters.keyword.trim());
-  if (filters.minUtilization.trim() !== '') parts.set('minUtilization', filters.minUtilization.trim());
+  if (filters.minUtilization.trim() !== '')
+    parts.set('minUtilization', filters.minUtilization.trim());
   if (filters.pickableOnly) parts.set('pickableOnly', 'true');
   return parts.toString();
 }

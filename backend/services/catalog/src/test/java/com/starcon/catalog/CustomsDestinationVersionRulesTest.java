@@ -7,14 +7,10 @@ import java.time.Instant;
 import org.junit.jupiter.api.*;
 
 /**
- * 3.7.1.2 纯规则单测：目的国归一（含<b>拒绝通配</b>）、目的地税号格式、
- * 认证码归一、生效区间判定（半开区间），以及<b>覆盖 vs 继承的合成</b>。
+ * 3.7.1.2 纯规则单测：目的国归一（含<b>拒绝通配</b>）、目的地税号格式、 认证码归一、生效区间判定（半开区间），以及<b>覆盖 vs 继承的合成</b>。
  *
- * <p>这些判定决定的是「这批货发到德国该报哪个税号」，代价出现在
- * <b>真实的清关退单、扣货与罚款</b>上（V85：扣货与罚款由卖家承担），
- * 而判定发生在录入那一刻 —— 所以必须能不碰数据库逐条穷举。
- * 集成测试（{@code CustomsDestinationVersionIntegrationTest}）只证明这些规则
- * 真的被用上了，证明不了规则本身对不对。
+ * <p>这些判定决定的是「这批货发到德国该报哪个税号」，代价出现在 <b>真实的清关退单、扣货与罚款</b>上（V85：扣货与罚款由卖家承担）， 而判定发生在录入那一刻 ——
+ * 所以必须能不碰数据库逐条穷举。 集成测试（{@code CustomsDestinationVersionIntegrationTest}）只证明这些规则 真的被用上了，证明不了规则本身对不对。
  */
 class CustomsDestinationVersionRulesTest {
   static final Instant T10 = Instant.parse("2026-03-01T10:00:00Z");
@@ -258,8 +254,7 @@ class CustomsDestinationVersionRulesTest {
 
   @Test
   void 享惠要基础有资格且目的地承认两者都满足() {
-    var both = merge(
-        new MergeInput("851712", "手机", "PCE", "CN", true, "RCEP", "", "", true));
+    var both = merge(new MergeInput("851712", "手机", "PCE", "CN", true, "RCEP", "", "", true));
     assertThat(both.preferentialOriginEligible()).isTrue();
     assertThat(both.preferentialApplicable()).isTrue();
     assertThat(both.preferentialGranted()).isTrue();

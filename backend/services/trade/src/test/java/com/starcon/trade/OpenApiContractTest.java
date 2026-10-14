@@ -17,10 +17,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 /**
  * 导出真实的 SpringDoc 契约，不碰数据库也不开监听端口。
  *
- * <p>与 identity / catalog / channel / warehouse 四个服务的同名测试逐字同构；
- * trade 的卷 09 此前没有任何端点，因此也没有这份契约导出，
- * {@code tools/codegen/catalog-contracts.py} 的服务清单里也就没有 trade。
- * 9.3.2.2 是 trade 的第一条业务端点，随它一起补上。
+ * <p>与 identity / catalog / channel / warehouse 四个服务的同名测试逐字同构； trade 的卷 09 此前没有任何端点，因此也没有这份契约导出，
+ * {@code tools/codegen/catalog-contracts.py} 的服务清单里也就没有 trade。 9.3.2.2 是 trade 的第一条业务端点，随它一起补上。
  */
 @SpringBootTest(
     properties = {

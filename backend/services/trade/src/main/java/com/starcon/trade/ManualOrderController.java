@@ -18,24 +18,19 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 9.1.2.2 手工订单。
  *
- * <p><b>命名空间是 {@code /trade/sales-orders}，刻意不是 {@code /trade/orders}。</b>
- * 蓝图 09 卷的前端入口是 {@code /orders}，浏览器只经 /api/trade 代理访问；后端路径按
- * <b>服务</b>命名空间走，与 9.3.2.2（前端 /orders、后端 /trade/fulfillment/routing）、
- * 6.4.1.1（前端 /purchase/processing、后端 /trade/processing）同一纪律。
+ * <p><b>命名空间是 {@code /trade/sales-orders}，刻意不是 {@code /trade/orders}。</b> 蓝图 09 卷的前端入口是 {@code
+ * /orders}，浏览器只经 /api/trade 代理访问；后端路径按 <b>服务</b>命名空间走，与 9.3.2.2（前端 /orders、后端
+ * /trade/fulfillment/routing）、 6.4.1.1（前端 /purchase/processing、后端 /trade/processing）同一纪律。
  *
- * <p>为什么不是 {@code /trade/orders}：该路径已被
- * {@code TradeTenancyIntegrationTest} 的断言 2 <b>显式预留</b>给另一条车道 ——
- * 它断言「GET 与 POST /trade/orders 都必须 404」，并注明第一条 9.x 端点车道落地后
- * 那条断言要升级成「带合法会话 + 伪造 X-Tenant-Id → 仍只看到会话租户的行」。
- * 本车道占了它会让一条<b>已通过的测试</b>变红，而那个测试文件属于别的模块，不在本车道修改范围。
+ * <p>为什么不是 {@code /trade/orders}：该路径已被 {@code TradeTenancyIntegrationTest} 的断言 2 <b>显式预留</b>给另一条车道
+ * —— 它断言「GET 与 POST /trade/orders 都必须 404」，并注明第一条 9.x 端点车道落地后 那条断言要升级成「带合法会话 + 伪造 X-Tenant-Id →
+ * 仍只看到会话租户的行」。 本车道占了它会让一条<b>已通过的测试</b>变红，而那个测试文件属于别的模块，不在本车道修改范围。
  *
- * <p>权限码用 {@code trade.orders.read} / {@code trade.orders.create} /
- * {@code trade.orders.update}：提交一张订单等于让审单与仓库按它工作，
- * 不是读权限能带过去的动作。
+ * <p>权限码用 {@code trade.orders.read} / {@code trade.orders.create} / {@code
+ * trade.orders.update}：提交一张订单等于让审单与仓库按它工作， 不是读权限能带过去的动作。
  *
- * <p>租户<b>不</b>来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
- * 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
+ * <p>租户<b>不</b>来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code
+ * app.current_tenant}，由 RLS 在数据库层强制隔离。 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
  */
 @RestController
 @RequestMapping("/trade/sales-orders")
@@ -60,8 +55,7 @@ public class ManualOrderController {
   /**
    * 本模块的能力与上下游可用性。
    *
-   * <p>把「价格来源有没有」「下游审单有没有接上」显式报出来，而不是让调用方
-   * 从 404 或空数组里去猜哪一环没通。
+   * <p>把「价格来源有没有」「下游审单有没有接上」显式报出来，而不是让调用方 从 404 或空数组里去猜哪一环没通。
    */
   @GetMapping("/capabilities")
   public SalesOrderCapabilities capabilities(
@@ -104,10 +98,9 @@ public class ManualOrderController {
   /**
    * 创建手工销售订单（来源固定 MANUAL，调用方不能选来源）。
    *
-   * <p>刻意<b>不接受</b> orderSource 入参：让客户端能选来源等于开了一条「手工录入通道写平台单」
-   * 的后门，而外部订单号的唯一约束是<b>按来源维度</b>的（V99 的
-   * {@code UNIQUE(tenant_id, order_source, external_order_no)}），来源被伪造就会撞掉平台单的
-   * 唯一性 —— 更糟的是这张「平台单」根本没有平台履约链路可走。
+   * <p>刻意<b>不接受</b> orderSource 入参：让客户端能选来源等于开了一条「手工录入通道写平台单」 的后门，而外部订单号的唯一约束是<b>按来源维度</b>的（V99 的
+   * {@code UNIQUE(tenant_id, order_source, external_order_no)}），来源被伪造就会撞掉平台单的 唯一性 ——
+   * 更糟的是这张「平台单」根本没有平台履约链路可走。
    */
   @PostMapping
   public SalesOrderSaved create(

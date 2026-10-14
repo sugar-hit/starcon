@@ -18,31 +18,26 @@ import java.util.UUID;
  * <p>蓝图 08 卷 8.4.2.1 的输入 / 输出逐条对应到这里：
  *
  * <ul>
- *   <li>输入「成品 SKU 与数量」→ {@link DisassemblyOrderCreateInput#productSkuId()} 与
- *       {@code disassemblyQuantity}；<b>上游来源</b>由 {@code sourceSystem + referenceId} 显式表达
- *       （8.4.1.1 组装单引用键 / 11 售后退件引用键 / 仓库现场直接发起）。<br>
- *   <li>输入「拆解去向（可用/待检/残次）」→ {@link DisassemblyComponentInput#destinationQualityStatusId()}
- *       与 {@link DisassemblyComponentInput#destinationLocationId()}，<b>逐行必填、没有默认值</b>。<br>
- *   <li>输出「拆解单 + 反向库存分录」→ {@link DisassemblyOrderCreated}（单据）、
- *       {@link DisassemblyOrderExecuted}（成品出库 + 组件入库分录），挂同一个
- *       {@code inventoryTransactionId}。</li>
+ *   <li>输入「成品 SKU 与数量」→ {@link DisassemblyOrderCreateInput#productSkuId()} 与 {@code
+ *       disassemblyQuantity}；<b>上游来源</b>由 {@code sourceSystem + referenceId} 显式表达 （8.4.1.1 组装单引用键 /
+ *       11 售后退件引用键 / 仓库现场直接发起）。<br>
+ *   <li>输入「拆解去向（可用/待检/残次）」→ {@link DisassemblyComponentInput#destinationQualityStatusId()} 与 {@link
+ *       DisassemblyComponentInput#destinationLocationId()}，<b>逐行必填、没有默认值</b>。<br>
+ *   <li>输出「拆解单 + 反向库存分录」→ {@link DisassemblyOrderCreated}（单据）、 {@link
+ *       DisassemblyOrderExecuted}（成品出库 + 组件入库分录），挂同一个 {@code inventoryTransactionId}。
  * </ul>
  *
- * <p><b>蓝图加粗句的落点</b>：「拆解结果的组件质量状态由接收方决定，<b>不能默认全部回可售</b>。」
- * 这条在本文件里表现为 {@code destinationQualityStatusId} <b>不带任何「不填就替你选」的兜底</b>，
- * 且刻意<b>不</b>放在单头上做整单默认 —— 同一张单里「面料回可售、螺丝回残次」是常态，
- * 单头一个默认值会把这个常态压平。
+ * <p><b>蓝图加粗句的落点</b>：「拆解结果的组件质量状态由接收方决定，<b>不能默认全部回可售</b>。」 这条在本文件里表现为 {@code
+ * destinationQualityStatusId} <b>不带任何「不填就替你选」的兜底</b>， 且刻意<b>不</b>放在单头上做整单默认 ——
+ * 同一张单里「面料回可售、螺丝回残次」是常态， 单头一个默认值会把这个常态压平。
  *
- * <p><b>命名空间纪律</b>：本模块全部 record 带 {@code Disassembly} 前缀。Spring 的 springdoc 用
- * record 的<b>简单类名</b>做 OpenAPI {@code components.schemas} 的键，重名会被<b>静默覆盖</b> ——
- * 上一批车道就因为声明了与既有 {@code DutyTaxModels.ScopeOption} 同名的 record，
- * 悄悄改掉了别的模块的契约形状，而全量单测全绿。所以这里的每个类型名都带模块前缀，
- * 也刻意不叫 {@code UpstreamModule} / {@code DownstreamModule}（8.4.1.1 已占用那两个名字，
- * 嵌套 record 在 schema 里同样按简单名平铺）。
+ * <p><b>命名空间纪律</b>：本模块全部 record 带 {@code Disassembly} 前缀。Spring 的 springdoc 用 record 的<b>简单类名</b>做
+ * OpenAPI {@code components.schemas} 的键，重名会被<b>静默覆盖</b> —— 上一批车道就因为声明了与既有 {@code
+ * DutyTaxModels.ScopeOption} 同名的 record， 悄悄改掉了别的模块的契约形状，而全量单测全绿。所以这里的每个类型名都带模块前缀， 也刻意不叫 {@code
+ * UpstreamModule} / {@code DownstreamModule}（8.4.1.1 已占用那两个名字， 嵌套 record 在 schema 里同样按简单名平铺）。
  *
- * <p><b>数量刻度</b>：列都是 {@code NUMERIC(19,6)}，但<b>库存余额是 {@code NUMERIC(19,4)}</b>。
- * 本模块<b>不允许取整换通过</b> —— 向下取整等于凭空吞掉组件，向上取整等于凭空多产组件，
- * 两种都恰好能让不变量「看起来成立」而物料对不上。所以凡是要真正过账的量必须能被 4 位小数
+ * <p><b>数量刻度</b>：列都是 {@code NUMERIC(19,6)}，但<b>库存余额是 {@code NUMERIC(19,4)}</b>。 本模块<b>不允许取整换通过</b>
+ * —— 向下取整等于凭空吞掉组件，向上取整等于凭空多产组件， 两种都恰好能让不变量「看起来成立」而物料对不上。所以凡是要真正过账的量必须能被 4 位小数
  * 精确表示，否则服务层显式拒绝并指出是哪一行。
  */
 public final class DisassemblyOrderModels {
@@ -70,31 +65,22 @@ public final class DisassemblyOrderModels {
   /**
    * 一条组件回收明细（BOM 的一行在拆解单上的反向冻结快照 + 这一行的入库去向）。
    *
-   * <p>刻意与 8.4.1.1 的 {@code AssemblyComponentInput} <b>分开声明</b>：两者形状不同
-   * （这里是 {@code recoveryRate} + {@code destination*}，那边是 {@code scrapRate} + 必填的成品入库），
-   * 共用一个名字只会在 OpenAPI 里互相覆盖。
+   * <p>刻意与 8.4.1.1 的 {@code AssemblyComponentInput} <b>分开声明</b>：两者形状不同 （这里是 {@code recoveryRate} +
+   * {@code destination*}，那边是 {@code scrapRate} + 必填的成品入库）， 共用一个名字只会在 OpenAPI 里互相覆盖。
    */
   public record DisassemblyComponentInput(
       @NotNull UUID skuId,
       @Schema(nullable = true, description = "catalog 3.5.2 bom_component 的逻辑 ID，仅作追溯")
           UUID bomComponentId,
-      @Schema(
-              description =
-                  "按「单位用量 × 拆解数量 × 回收率/100」冻结的应回量（6 位小数 HALF_UP）。"
-                      + "本服务原样落库，不重算、不取整")
+      @Schema(description = "按「单位用量 × 拆解数量 × 回收率/100」冻结的应回量（6 位小数 HALF_UP）。" + "本服务原样落库，不重算、不取整")
           @NotNull
           @Positive
           @Digits(integer = 13, fraction = 6)
           BigDecimal expectedQuantity,
-      @Schema(
-              nullable = true,
-              description = "单位用量快照（每 1 个成品能拆出多少），可空：只作追溯展示，不参与任何判定")
+      @Schema(nullable = true, description = "单位用量快照（每 1 个成品能拆出多少），可空：只作追溯展示，不参与任何判定")
           @DecimalMax(value = "1000000000000", inclusive = false)
           BigDecimal unitQuantity,
-      @Schema(
-              nullable = true,
-              description =
-                  "回收率快照（百分数，95 = 95%）。退件拆解与样品回收的实际损耗，默认 100（无损）")
+      @Schema(nullable = true, description = "回收率快照（百分数，95 = 95%）。退件拆解与样品回收的实际损耗，默认 100（无损）")
           @DecimalMax(value = "100")
           BigDecimal recoveryRate,
       @Schema(
@@ -104,8 +90,7 @@ public final class DisassemblyOrderModels {
                       + "SELLABLE(可用) / PENDING_INSPECTION(待检) / DEFECTIVE(残次)")
           @NotNull
           UUID destinationQualityStatusId,
-      @Schema(description = "组件入库库位（逐行：良品区 / 待检区 / 残次区可以分开）") @NotNull
-          UUID destinationLocationId,
+      @Schema(description = "组件入库库位（逐行：良品区 / 待检区 / 残次区可以分开）") @NotNull UUID destinationLocationId,
       @Schema(nullable = true) UUID destinationLotId,
       @Schema(nullable = true) @Size(max = 64) String role,
       @Schema(nullable = true) @Size(max = 200) String note) {}
@@ -113,18 +98,14 @@ public final class DisassemblyOrderModels {
   /**
    * 建拆解单请求。
    *
-   * <p>BOM 在 catalog、售后退件单在 11 售后，都不是本服务的表。所以本请求带的是
-   * <b>引用键 + 冻结的组件明细</b>，不是「帮我按 BOM 反推一下」—— 那要求 warehouse
-   * 跨服务读 catalog 的表，AGENTS.md 明令禁止。
+   * <p>BOM 在 catalog、售后退件单在 11 售后，都不是本服务的表。所以本请求带的是 <b>引用键 + 冻结的组件明细</b>，不是「帮我按 BOM 反推一下」—— 那要求
+   * warehouse 跨服务读 catalog 的表，AGENTS.md 明令禁止。
    */
   public record DisassemblyOrderCreateInput(
-      @Schema(description = "被拆的成品 SKU（必须是本服务 sku_ref 里登记过的真实 SKU）")
-          @NotNull
-          UUID productSkuId,
+      @Schema(description = "被拆的成品 SKU（必须是本服务 sku_ref 里登记过的真实 SKU）") @NotNull UUID productSkuId,
       @Schema(description = "catalog 3.5.2 的 BOM 逻辑 ID（引用键，无外键）") @NotNull UUID bomId,
       @NotNull @Size(max = 64) String bomCode,
-      @Schema(description = "catalog 3.5.2 的 BOM 版本逻辑 ID（引用键，无外键）") @NotNull
-          UUID bomVersionId,
+      @Schema(description = "catalog 3.5.2 的 BOM 版本逻辑 ID（引用键，无外键）") @NotNull UUID bomVersionId,
       @NotNull @Size(max = 32) String bomVersionNo,
       @Schema(
               description =
@@ -132,8 +113,7 @@ public final class DisassemblyOrderModels {
                       + "DIRECT = 仓库现场直接发起（样品回收等）")
           @NotNull
           String sourceSystem,
-      @Schema(nullable = true, description = "上游单据引用键；sourceSystem=DIRECT 时必须为空")
-          UUID referenceId,
+      @Schema(nullable = true, description = "上游单据引用键；sourceSystem=DIRECT 时必须为空") UUID referenceId,
       @Schema(nullable = true) @Size(max = 64) String referenceNo,
       @NotNull UUID warehouseId,
       @NotNull UUID legalEntityId,
@@ -142,8 +122,7 @@ public final class DisassemblyOrderModels {
           @Positive
           @Digits(integer = 13, fraction = 6)
           BigDecimal disassemblyQuantity,
-      @Schema(description = "成品出库库位；必填（库存的最小事实单位含库位）") @NotNull
-          UUID outboundLocationId,
+      @Schema(description = "成品出库库位；必填（库存的最小事实单位含库位）") @NotNull UUID outboundLocationId,
       @Schema(nullable = true) UUID outboundQualityStatusId,
       @Schema(nullable = true) UUID outboundLotId,
       @Schema(nullable = true) @Size(max = 2000) String notes,
@@ -196,19 +175,16 @@ public final class DisassemblyOrderModels {
 
   /** 取消拆解单请求（只有 DRAFT 可取消；取消不动库存）。 */
   public record DisassemblyOrderCancelInput(
-      @Schema(description = "取消理由（必填：取消一张拆解单必须能解释为什么）")
-          @NotNull
-          @Size(min = 1, max = 200)
+      @Schema(description = "取消理由（必填：取消一张拆解单必须能解释为什么）") @NotNull @Size(min = 1, max = 200)
           String reason) {}
 
   /**
    * 一档去向的分布（列表页的汇总口径）。
    *
-   * <p>单独一条查询算出来，<b>不 join 进分页查询</b>：join 进来会让「单头一行 × N 条组件」
-   * 相乘，于是合计被放大 N 倍 —— 而这类页面最常见的 bug 恰恰是数字对不上且静态检查全绿。
+   * <p>单独一条查询算出来，<b>不 join 进分页查询</b>：join 进来会让「单头一行 × N 条组件」 相乘，于是合计被放大 N 倍 —— 而这类页面最常见的 bug
+   * 恰恰是数字对不上且静态检查全绿。
    *
-   * <p>它的存在理由是蓝图加粗句：拆解去向必须**看得见**。看不到去向分布，
-   * 「不能默认全部回可售」就只是一句写在文档里的话。
+   * <p>它的存在理由是蓝图加粗句：拆解去向必须**看得见**。看不到去向分布， 「不能默认全部回可售」就只是一句写在文档里的话。
    */
   public record DisassemblyDestinationStat(
       String qualityStatusId,
@@ -298,9 +274,9 @@ public final class DisassemblyOrderModels {
   /**
    * 能力声明：把跨服务边界、去向必填这条硬约束与未交付下游如实报出来。
    *
-   * <p>嵌套的上下游类型刻意叫 {@code DisassemblyUpstreamModule} / {@code DisassemblyDownstreamModule}：
-   * 嵌套 record 在 OpenAPI schema 里同样按<b>简单类名平铺</b>，而
-   * {@code UpstreamModule} / {@code DownstreamModule} 已被 8.4.1.1 占用。
+   * <p>嵌套的上下游类型刻意叫 {@code DisassemblyUpstreamModule} / {@code DisassemblyDownstreamModule}： 嵌套
+   * record 在 OpenAPI schema 里同样按<b>简单类名平铺</b>，而 {@code UpstreamModule} / {@code DownstreamModule}
+   * 已被 8.4.1.1 占用。
    */
   public record DisassemblyCapabilities(
       String refType,

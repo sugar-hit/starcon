@@ -2,7 +2,6 @@ package com.starcon.catalog;
 
 import static com.starcon.catalog.CatalogModels.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -11,7 +10,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,25 +20,22 @@ import java.util.Locale;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 import org.jooq.DSLContext;
-import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.4.1.2 图片处理：配方、六项加工能力、异步任务与进度、「原图始终保留」的 DB 层证明、
- * 以及租户隔离三断言。
+ * 3.4.1.2 图片处理：配方、六项加工能力、异步任务与进度、「原图始终保留」的 DB 层证明、 以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS + 真实文件系统存储 + 真实线程池：
- * 处理任务真的在线程里把像素算完、真的写出对象与新版本行。
- * 没有任何内存替身——用内存 Map 存产物的话，「原图是否保留」与「产物是否落盘」都验不出来。
+ * <p>真实 PostgreSQL 16 + 强制 RLS + 真实文件系统存储 + 真实线程池： 处理任务真的在线程里把像素算完、真的写出对象与新版本行。 没有任何内存替身——用内存 Map
+ * 存产物的话，「原图是否保留」与「产物是否落盘」都验不出来。
  *
  * <p>连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  */
@@ -57,8 +52,13 @@ class ImageProcessingIntegrationTest {
   static AccessService.Access actor(
       UUID uid, UUID tenant, UUID dept, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), dept,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        dept,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -68,7 +68,8 @@ class ImageProcessingIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role catalog_app login password 'test-only' nosuperuser nobypassrls");
@@ -91,7 +92,8 @@ class ImageProcessingIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -100,7 +102,8 @@ class ImageProcessingIntegrationTest {
       actors.put("Bearer tenant-a", actor(user, a, null, List.of(grant("ALL", allPermissions()))));
       actors.put("Bearer tenant-b", actor(user, b, null, List.of(grant("ALL", allPermissions()))));
       actors.put(
-          "Bearer reader", actor(user, a, null, List.of(grant("ALL", List.of("catalog.assets.read")))));
+          "Bearer reader",
+          actor(user, a, null, List.of(grant("ALL", List.of("catalog.assets.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -110,8 +113,10 @@ class ImageProcessingIntegrationTest {
   /** 与 3.4.1.1 同口径：assets + spu（V3 的 data_scope 策略在 spu 上是 RESTRICTIVE）。 */
   static List<String> allPermissions() {
     return java.util.stream.Stream.of("assets", "spu", "sku", "attribute")
-        .flatMap(p -> java.util.stream.Stream.of("read", "create", "update", "delete")
-            .map(op -> "catalog." + p + "." + op))
+        .flatMap(
+            p ->
+                java.util.stream.Stream.of("read", "create", "update", "delete")
+                    .map(op -> "catalog." + p + "." + op))
         .toList();
   }
 
@@ -159,22 +164,28 @@ class ImageProcessingIntegrationTest {
   }
 
   void writeVoid(AccessService.Access who, Runnable work) {
-    access.run(who, "catalog.assets.update", () -> { work.run(); return null; });
+    access.run(
+        who,
+        "catalog.assets.update",
+        () -> {
+          work.run();
+          return null;
+        });
   }
 
   // ------------------------------------------------------------ 夹具
 
   String unique(String hint) {
-    return hint + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
+    return hint
+        + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
   }
 
   /**
    * 造一张「浅色背景 + 居中色块」的 PNG：去背景与白底的典型素材。
    *
    * <p>右下角画一个 {@code tint} 大小的点：3.4.1.1 的同内容复用会让**字节完全相同**的
-   * 第二次上传返回既有素材（UNIQUE(tenant_id,content_sha256)），于是「上传 4 张不同的图」
-   * 实际只得到 1 个素材、后面 3 个条目撞重复键。加一个随 tint 变的点，
-   * 每张图的字节就都不一样，去重不会误伤。
+   * 第二次上传返回既有素材（UNIQUE(tenant_id,content_sha256)），于是「上传 4 张不同的图」 实际只得到 1 个素材、后面 3 个条目撞重复键。加一个随 tint
+   * 变的点， 每张图的字节就都不一样，去重不会误伤。
    */
   byte[] photo(int w, int h, Color background, Color subject, int tint) throws Exception {
     var image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
@@ -212,22 +223,48 @@ class ImageProcessingIntegrationTest {
   }
 
   UUID upload(AccessService.Access who, String name, byte[] content) {
-    return write(who, () -> media.upload(who, file(name + ".png", content),
-        new MediaUpload(name, "IMAGE", "GALLERY", "", null, List.of(), true))).id();
+    return write(
+            who,
+            () ->
+                media.upload(
+                    who,
+                    file(name + ".png", content),
+                    new MediaUpload(name, "IMAGE", "GALLERY", "", null, List.of(), true)))
+        .id();
   }
 
   /** 建一个配方（默认带两个比例档：主图 1:1 与缩略图）。 */
-  MediaProcessRecipeSaved recipe(AccessService.Access who, String code, MediaProcessRecipeInput input) {
+  MediaProcessRecipeSaved recipe(
+      AccessService.Access who, String code, MediaProcessRecipeInput input) {
     return write(who, () -> processing.saveRecipe(who, null, input));
   }
 
   static MediaProcessRecipeInput recipeInput(
-      String code, String format, boolean removeBg, boolean whiteBg,
-      Integer w, Integer h, List<MediaProcessRatioInput> ratios) {
+      String code,
+      String format,
+      boolean removeBg,
+      boolean whiteBg,
+      Integer w,
+      Integer h,
+      List<MediaProcessRatioInput> ratios) {
     return new MediaProcessRecipeInput(
-        code, code, "测试配方", "AMAZON", format, removeBg, 12, whiteBg,
+        code,
+        code,
+        "测试配方",
+        "AMAZON",
+        format,
+        removeBg,
+        12,
+        whiteBg,
         ratios == null || ratios.isEmpty() ? "" : "TEST-SHOP",
-        "BOTTOM_RIGHT", 85, w, h, "FIT", ratios, true, 0);
+        "BOTTOM_RIGHT",
+        85,
+        w,
+        h,
+        "FIT",
+        ratios,
+        true,
+        0);
   }
 
   /** 主图 1:1 + 缩略图：蓝图点名的「生成多比例版本」。 */
@@ -240,11 +277,8 @@ class ImageProcessingIntegrationTest {
   /**
    * 同步驱动任务跑到终态。
    *
-   * <p>刻意**先** {@code runJobNow} 再等终态，而不是假设「同步驱动 = 我自己跑完的」：
-   * {@code submit} 已经把任务扔进了线程池（这正是异步要求的落点），
-   * 所以两种执行者都可能真的在干活。等终态让断言与「谁跑的」无关——
-   * 否则测试会在「线程池先跑完」时通过、在「同步驱动先跑完」时也通过，
-   * 但两种情况测的其实是同一条代码路径。
+   * <p>刻意**先** {@code runJobNow} 再等终态，而不是假设「同步驱动 = 我自己跑完的」： {@code submit} 已经把任务扔进了线程池（这正是异步要求的落点），
+   * 所以两种执行者都可能真的在干活。等终态让断言与「谁跑的」无关—— 否则测试会在「线程池先跑完」时通过、在「同步驱动先跑完」时也通过， 但两种情况测的其实是同一条代码路径。
    */
   void drain(UUID jobId, AccessService.Access who) {
     executor.runJobNow(jobId, who.tenantId());
@@ -296,8 +330,7 @@ class ImageProcessingIntegrationTest {
   @Test
   void recipeStoresEveryProcessingCapabilityAndValidatesCombinations() {
     String code = unique("RC");
-    var saved = recipe(actor, code,
-        recipeInput(code, "png", true, true, 800, 800, mainAndThumb()));
+    var saved = recipe(actor, code, recipeInput(code, "png", true, true, 800, 800, mainAndThumb()));
     assertThat(saved.ratioCount()).isEqualTo(2);
 
     var row = tx(actor, () -> processing.recipe(saved.id()));
@@ -314,65 +347,93 @@ class ImageProcessingIntegrationTest {
     assertThat(row.cropMode()).isEqualTo("FIT");
     // 用 containsExactlyInAnyOrder 而不是 containsExactly：档位顺序由 sort_no 决定，
     // 这里要断言的是「两档都在且宽高对」，而不是去赌 UUID 的生成顺序。
-    assertThat(row.ratios()).extracting(MediaProcessRatio::label)
+    assertThat(row.ratios())
+        .extracting(MediaProcessRatio::label)
         .containsExactlyInAnyOrder("MAIN", "THUMBNAIL");
     // 比 intValue 而不是 BigDecimal：列是 numeric(19,6)，读回来带 6 位小数
     // （120.000000），直接比 BigDecimal 会因为 scale 不同而判不等。
-    assertThat(row.ratios()).extracting(r -> r.widthPx().intValue())
+    assertThat(row.ratios())
+        .extracting(r -> r.widthPx().intValue())
         .containsExactlyInAnyOrder(120, 40);
 
     // 去背景 + 不支持透明的格式 → 可读原因（V19 的 CHECK 也会兜住）。
     String bad = unique("RC");
-    assertThatThrownBy(() -> recipe(actor, bad,
-        recipeInput(bad, "jpeg", true, false, null, null, List.of())))
+    assertThatThrownBy(
+            () -> recipe(actor, bad, recipeInput(bad, "jpeg", true, false, null, null, List.of())))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("白底").contains("png"));
 
     // 只给一个目标尺寸。
-    assertThatThrownBy(() -> recipe(actor, bad,
-        recipeInput(bad, "png", false, false, 100, null, List.of())))
+    assertThatThrownBy(
+            () -> recipe(actor, bad, recipeInput(bad, "png", false, false, 100, null, List.of())))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("同时给宽和高"));
 
     // 比例档标签重复。
-    assertThatThrownBy(() -> recipe(actor, bad,
-        recipeInput(bad, "png", false, false, null, null, List.of(
-            new MediaProcessRatioInput("MAIN", 10, 10, "FIT"),
-            new MediaProcessRatioInput("main", 20, 20, "FIT")))))
+    assertThatThrownBy(
+            () ->
+                recipe(
+                    actor,
+                    bad,
+                    recipeInput(
+                        bad,
+                        "png",
+                        false,
+                        false,
+                        null,
+                        null,
+                        List.of(
+                            new MediaProcessRatioInput("MAIN", 10, 10, "FIT"),
+                            new MediaProcessRatioInput("main", 20, 20, "FIT")))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("MAIN"));
 
     // WEBP 目标格式。
-    assertThatThrownBy(() -> recipe(actor, bad,
-        recipeInput(bad, "webp", false, false, null, null, List.of())))
+    assertThatThrownBy(
+            () -> recipe(actor, bad, recipeInput(bad, "webp", false, false, null, null, List.of())))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("ImageIO"));
 
     // 编码重复。
-    assertThatThrownBy(() -> recipe(actor, code,
-        recipeInput(code, "png", false, false, null, null, List.of())))
+    assertThatThrownBy(
+            () ->
+                recipe(actor, code, recipeInput(code, "png", false, false, null, null, List.of())))
         .isInstanceOf(ResponseStatusException.class);
   }
 
   @Test
   void recipeCannotBeDeletedOnceReferencedByAJobButCanBeDisabled() throws Exception {
     String code = unique("RC");
-    var saved = recipe(actor, code, recipeInput(code, "png", false, false, null, null, mainAndThumb()));
-    UUID asset = upload(actor, unique("被引用的素材"), photo(60, 60, new Color(250, 250, 250), new Color(20, 20, 20)));
-    var job = write(actor, () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), List.of(asset))));
+    var saved =
+        recipe(actor, code, recipeInput(code, "png", false, false, null, null, mainAndThumb()));
+    UUID asset =
+        upload(
+            actor,
+            unique("被引用的素材"),
+            photo(60, 60, new Color(250, 250, 250), new Color(20, 20, 20)));
+    var job =
+        write(
+            actor,
+            () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), List.of(asset))));
     drain(job.id(), actor);
 
     // 被任务引用时不可删（V19 的 refuse_media_process_recipe_delete 兜底）。
     long version = tx(actor, () -> processing.recipe(saved.id())).version();
-    assertThatThrownBy(() -> writeVoid(actor, () -> processing.deleteRecipe(actor, saved.id(), version)))
+    assertThatThrownBy(
+            () -> writeVoid(actor, () -> processing.deleteRecipe(actor, saved.id(), version)))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("停用"));
 
     // 停用后不能再用它新建任务，但历史任务与产物照常可读。
     writeVoid(actor, () -> processing.setRecipeEnabled(actor, saved.id(), false));
     UUID other = upload(actor, unique("停用后提交"), photo(30, 30, Color.WHITE, Color.BLACK));
-    assertThatThrownBy(() -> write(actor, () ->
-        processing.submit(actor, new MediaProcessJobInput(saved.id(), List.of(other)))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        processing.submit(
+                            actor, new MediaProcessJobInput(saved.id(), List.of(other)))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(e -> assertThat(e.getMessage()).contains("停用"));
     assertThat(tx(actor, () -> processing.detail(job.id())).items()).hasSize(1);
@@ -389,9 +450,11 @@ class ImageProcessingIntegrationTest {
     assertThat(before.currentVersion()).isEqualTo(1);
 
     String code = unique("RC");
-    var saved = recipe(actor, code,
-        recipeInput(code, "png", true, true, 150, 150, mainAndThumb()));
-    var job = write(actor, () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), List.of(asset))));
+    var saved = recipe(actor, code, recipeInput(code, "png", true, true, 150, 150, mainAndThumb()));
+    var job =
+        write(
+            actor,
+            () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), List.of(asset))));
     assertThat(job.status()).isEqualTo("PENDING");
     drain(job.id(), actor);
 
@@ -404,7 +467,8 @@ class ImageProcessingIntegrationTest {
     assertThat(item.producedCount()).isEqualTo(2);
 
     // 多比例：两档各一行产物，尺寸真的按档裁了。
-    assertThat(item.outputs()).extracting(MediaProcessOutput::ratioLabel)
+    assertThat(item.outputs())
+        .extracting(MediaProcessOutput::ratioLabel)
         .containsExactly("MAIN", "THUMBNAIL");
     var main = item.outputs().get(0);
     var thumb = item.outputs().get(1);
@@ -433,15 +497,25 @@ class ImageProcessingIntegrationTest {
     }
 
     // 水印：产物图与「同尺寸但没水印」的图字节不同，且水印区域有变亮像素。
-    BufferedImage produced = ImageProcessor.decode(Files.readAllBytes(storageRoot.resolve(main.storageKey())));
+    BufferedImage produced =
+        ImageProcessor.decode(Files.readAllBytes(storageRoot.resolve(main.storageKey())));
     assertThat(brightPixelInRegion(produced, 60, 90, 119, 119)).isTrue();
 
     // 格式转换到 jpeg 走另一条路径（不含 alpha 的色彩模型）。
     String jpegCode = unique("RC");
-    var jpegRecipe = recipe(actor, jpegCode,
-        recipeInput(jpegCode, "jpeg", false, true, 100, 100, List.of()));
-    UUID jpegAsset = upload(actor, unique("转 JPEG"), photo(300, 200, new Color(250, 250, 250), new Color(10, 80, 10)));
-    var jpegJob = write(actor, () -> processing.submit(actor, new MediaProcessJobInput(jpegRecipe.id(), List.of(jpegAsset))));
+    var jpegRecipe =
+        recipe(actor, jpegCode, recipeInput(jpegCode, "jpeg", false, true, 100, 100, List.of()));
+    UUID jpegAsset =
+        upload(
+            actor,
+            unique("转 JPEG"),
+            photo(300, 200, new Color(250, 250, 250), new Color(10, 80, 10)));
+    var jpegJob =
+        write(
+            actor,
+            () ->
+                processing.submit(
+                    actor, new MediaProcessJobInput(jpegRecipe.id(), List.of(jpegAsset))));
     drain(jpegJob.id(), actor);
     var jpegItem = tx(actor, () -> processing.detail(jpegJob.id())).items().get(0);
     assertThat(jpegItem.status()).isEqualTo("SUCCEEDED");
@@ -460,33 +534,82 @@ class ImageProcessingIntegrationTest {
   void cropModesFitKeepsPictureAndCropFillFillsTheFrame() throws Exception {
     // 一张 200×100 的图，两个配方分别用 FIT 与 CROP_FILL 裁到 100×100。
     String fitCode = unique("FIT");
-    var fit = recipe(actor, fitCode,
-        new MediaProcessRecipeInput(fitCode, fitCode, "", "AMAZON", "png",
-            false, 12, false, "", "BOTTOM_RIGHT", 30, 100, 100, "FIT",
-            List.of(new MediaProcessRatioInput("MAIN", 100, 100, "FIT")), true, 0));
-    UUID asset = upload(actor, unique("裁剪方式"), photo(200, 100, new Color(250, 250, 250), new Color(10, 10, 200)));
+    var fit =
+        recipe(
+            actor,
+            fitCode,
+            new MediaProcessRecipeInput(
+                fitCode,
+                fitCode,
+                "",
+                "AMAZON",
+                "png",
+                false,
+                12,
+                false,
+                "",
+                "BOTTOM_RIGHT",
+                30,
+                100,
+                100,
+                "FIT",
+                List.of(new MediaProcessRatioInput("MAIN", 100, 100, "FIT")),
+                true,
+                0));
+    UUID asset =
+        upload(
+            actor,
+            unique("裁剪方式"),
+            photo(200, 100, new Color(250, 250, 250), new Color(10, 10, 200)));
 
-    var fitJob = write(actor, () -> processing.submit(actor, new MediaProcessJobInput(fit.id(), List.of(asset))));
+    var fitJob =
+        write(
+            actor,
+            () -> processing.submit(actor, new MediaProcessJobInput(fit.id(), List.of(asset))));
     drain(fitJob.id(), actor);
     var fitOut = tx(actor, () -> processing.detail(fitJob.id())).items().get(0).outputs().get(0);
     // FIT：上下补白边，所以图的上边缘是纯白。
-    BufferedImage fitImage = ImageProcessor.decode(Files.readAllBytes(storageRoot.resolve(fitOut.storageKey())));
+    BufferedImage fitImage =
+        ImageProcessor.decode(Files.readAllBytes(storageRoot.resolve(fitOut.storageKey())));
     assertThat(fitImage.getHeight()).isEqualTo(100);
     assertThat(fitImage.getRGB(50, 2) & 0xFFFFFF).isEqualTo(0xFFFFFF);
 
     String fillCode = unique("FILL");
-    var fill = recipe(actor, fillCode,
-        new MediaProcessRecipeInput(fillCode, fillCode, "", "AMAZON", "png",
-            false, 12, false, "", "BOTTOM_RIGHT", 30, null, null, "FIT",
-            List.of(new MediaProcessRatioInput("MAIN", 100, 100, "CROP_FILL")), true, 0));
-    var fillJob = write(actor, () -> processing.submit(actor, new MediaProcessJobInput(fill.id(), List.of(asset))));
+    var fill =
+        recipe(
+            actor,
+            fillCode,
+            new MediaProcessRecipeInput(
+                fillCode,
+                fillCode,
+                "",
+                "AMAZON",
+                "png",
+                false,
+                12,
+                false,
+                "",
+                "BOTTOM_RIGHT",
+                30,
+                null,
+                null,
+                "FIT",
+                List.of(new MediaProcessRatioInput("MAIN", 100, 100, "CROP_FILL")),
+                true,
+                0));
+    var fillJob =
+        write(
+            actor,
+            () -> processing.submit(actor, new MediaProcessJobInput(fill.id(), List.of(asset))));
     drain(fillJob.id(), actor);
     var fillOut = tx(actor, () -> processing.detail(fillJob.id())).items().get(0).outputs().get(0);
-    BufferedImage fillImage = ImageProcessor.decode(Files.readAllBytes(storageRoot.resolve(fillOut.storageKey())));
+    BufferedImage fillImage =
+        ImageProcessor.decode(Files.readAllBytes(storageRoot.resolve(fillOut.storageKey())));
     // CROP_FILL：填满，画面中央就是主体（不是白边）。
     assertThat(fillImage.getWidth()).isEqualTo(100);
     assertThat(fillImage.getHeight()).isEqualTo(100);
-    assertThat(fillImage.getRGB(50, 50) & 0xFFFFFF).isEqualTo(new Color(10, 10, 200).getRGB() & 0xFFFFFF);
+    assertThat(fillImage.getRGB(50, 50) & 0xFFFFFF)
+        .isEqualTo(new Color(10, 10, 200).getRGB() & 0xFFFFFF);
   }
 
   // ------------------------------------------------------------ 原图始终保留
@@ -504,7 +627,10 @@ class ImageProcessingIntegrationTest {
 
     String code = unique("RC");
     var saved = recipe(actor, code, recipeInput(code, "png", false, true, 90, 90, mainAndThumb()));
-    var job = write(actor, () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), List.of(asset))));
+    var job =
+        write(
+            actor,
+            () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), List.of(asset))));
     drain(job.id(), actor);
     assertThat(tx(actor, () -> processing.detail(job.id())).job().status()).isEqualTo("SUCCEEDED");
 
@@ -516,7 +642,8 @@ class ImageProcessingIntegrationTest {
     // 版本历史里 v1 原图**还在**，而且它的对象字节一个都没变。
     var versions = tx(actor, () -> media.versions(asset));
     assertThat(versions.size()).isEqualTo(1 + 2);
-    var v1 = versions.stream().filter(v -> v.versionNo() == beforeVersion).findFirst().orElseThrow();
+    var v1 =
+        versions.stream().filter(v -> v.versionNo() == beforeVersion).findFirst().orElseThrow();
     assertThat(v1.storageKey()).isEqualTo(beforeKey);
     assertThat(v1.contentSha256()).isEqualTo(beforeSha);
     assertThat(v1.byteSize()).isEqualTo(before.byteSize());
@@ -525,7 +652,8 @@ class ImageProcessingIntegrationTest {
     assertThat(MediaRules.sha256(Files.readAllBytes(beforeObject))).isEqualTo(beforeSha);
 
     // 产物的 from/to 版本号：新版本严格大于来源版本（V19 的 CHECK 也强制这一点）。
-    for (MediaProcessOutput out : tx(actor, () -> processing.detail(job.id())).items().get(0).outputs()) {
+    for (MediaProcessOutput out :
+        tx(actor, () -> processing.detail(job.id())).items().get(0).outputs()) {
       assertThat(out.fromVersion()).isEqualTo(beforeVersion);
       assertThat(out.toVersion()).isGreaterThan(out.fromVersion());
       assertThat(out.storageKey()).isNotEqualTo(beforeKey);
@@ -540,20 +668,47 @@ class ImageProcessingIntegrationTest {
     int v1 = before.currentVersion();
 
     String code = unique("RC");
-    var saved = recipe(actor, code, recipeInput(code, "png", false, true, 60, 60, List.of(
-        new MediaProcessRatioInput("MAIN", 60, 60, "FIT"))));
-    var job = write(actor, () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), List.of(asset))));
+    var saved =
+        recipe(
+            actor,
+            code,
+            recipeInput(
+                code,
+                "png",
+                false,
+                true,
+                60,
+                60,
+                List.of(new MediaProcessRatioInput("MAIN", 60, 60, "FIT"))));
+    var job =
+        write(
+            actor,
+            () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), List.of(asset))));
     drain(job.id(), actor);
 
     // 1) 版本行不可改：连改 note 都不行（BEFORE UPDATE 触发器）。
-    assertThatThrownBy(() -> writeVoid(actor, () ->
-        sql.execute("update media_asset_version set note='篡改' where asset_id=? and version_no=?", asset, v1)))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "update media_asset_version set note='篡改' where asset_id=? and version_no=?",
+                            asset,
+                            v1)))
         .isInstanceOf(org.springframework.dao.DataAccessException.class)
         .satisfies(e -> assertThat(rootMessageOf(e)).contains("不可修改").contains("原图始终保留"));
 
     // 2) 被处理记录引用过的来源版本不可被单独删除（父素材还在 → 撞删除保护）。
-    assertThatThrownBy(() -> writeVoid(actor, () ->
-        sql.execute("delete from media_asset_version where asset_id=? and version_no=?", asset, v1)))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "delete from media_asset_version where asset_id=? and version_no=?",
+                            asset,
+                            v1)))
         .isInstanceOf(org.springframework.dao.DataAccessException.class)
         .satisfies(e -> assertThat(rootMessageOf(e)).contains("不可删除").contains("原图始终保留"));
 
@@ -566,8 +721,13 @@ class ImageProcessingIntegrationTest {
     // 3) 没被处理引用过的版本可以删（守卫不做一刀切拦截）。
     UUID plain = upload(actor, unique("未被处理的素材"), photo(40, 40, Color.WHITE, Color.BLACK));
     int plainV1 = tx(actor, () -> media.detail(plain)).asset().currentVersion();
-    writeVoid(actor, () -> sql.execute(
-        "delete from media_asset_version where asset_id=? and version_no=?", plain, plainV1));
+    writeVoid(
+        actor,
+        () ->
+            sql.execute(
+                "delete from media_asset_version where asset_id=? and version_no=?",
+                plain,
+                plainV1));
     assertThat(tx(actor, () -> media.versions(plain))).isEmpty();
   }
 
@@ -578,15 +738,19 @@ class ImageProcessingIntegrationTest {
     String mark = unique("ASYNC");
     List<UUID> assets = new ArrayList<>();
     for (int i = 0; i < 4; i++)
-      assets.add(upload(actor, mark + "-" + i,
-          photo(120, 120, new Color(250, 250, 250), new Color(10 * i + 20, 40, 90), i)));
+      assets.add(
+          upload(
+              actor,
+              mark + "-" + i,
+              photo(120, 120, new Color(250, 250, 250), new Color(10 * i + 20, 40, 90), i)));
 
     String code = unique("RC");
     var saved = recipe(actor, code, recipeInput(code, "png", true, true, 100, 100, mainAndThumb()));
 
     // 提交只写元数据就返回（长批量不阻塞页面的落点）。
     long before = System.nanoTime();
-    var job = write(actor, () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), assets)));
+    var job =
+        write(actor, () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), assets)));
     long elapsedMs = (System.nanoTime() - before) / 1_000_000;
 
     assertThat(job.status()).isEqualTo("PENDING");
@@ -629,22 +793,32 @@ class ImageProcessingIntegrationTest {
     // 列表与概览能看到这次任务。
     var page = tx(actor, () -> processing.listJobs(new MediaProcessJobQuery(mark, null, 0, 200)));
     assertThat(page.items()).extracting(MediaProcessJobRow::id).contains(job.id());
-    var filtered = tx(actor, () -> processing.listJobs(new MediaProcessJobQuery(null, "SUCCEEDED", 0, 200)));
+    var filtered =
+        tx(actor, () -> processing.listJobs(new MediaProcessJobQuery(null, "SUCCEEDED", 0, 200)));
     assertThat(filtered.items()).extracting(MediaProcessJobRow::id).contains(job.id());
-    var wrongStatus = tx(actor, () -> processing.listJobs(new MediaProcessJobQuery(null, "FAILED", 0, 200)));
+    var wrongStatus =
+        tx(actor, () -> processing.listJobs(new MediaProcessJobQuery(null, "FAILED", 0, 200)));
     assertThat(wrongStatus.items()).extracting(MediaProcessJobRow::id).doesNotContain(job.id());
     // 关键词能搜到素材名（运营记得的是「那批图」，不是任务 id）。
-    var byAssetName = tx(actor, () -> processing.listJobs(new MediaProcessJobQuery(mark + "-2", null, 0, 200)));
+    var byAssetName =
+        tx(actor, () -> processing.listJobs(new MediaProcessJobQuery(mark + "-2", null, 0, 200)));
     assertThat(byAssetName.items()).extracting(MediaProcessJobRow::id).contains(job.id());
     assertThat(tx(actor, () -> processing.overview()).outputCount()).isGreaterThan(0);
   }
 
   @Test
   void asyncExecutorRunsTheJobOnAWorkerThreadWithoutBlockingTheCaller() throws Exception {
-    UUID asset = upload(actor, unique("真异步"), photo(150, 150, new Color(250, 250, 250), new Color(120, 40, 10)));
+    UUID asset =
+        upload(
+            actor,
+            unique("真异步"),
+            photo(150, 150, new Color(250, 250, 250), new Color(120, 40, 10)));
     String code = unique("RC");
     var saved = recipe(actor, code, recipeInput(code, "png", false, true, 80, 80, mainAndThumb()));
-    var job = write(actor, () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), List.of(asset))));
+    var job =
+        write(
+            actor,
+            () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), List.of(asset))));
 
     // 走真正的线程池（不是测试里的同步驱动）：入队后立刻返回，
     // 调用线程名与工作线程名不同 —— 这才是「异步任务」而不是「换个地方同步跑」。
@@ -669,11 +843,16 @@ class ImageProcessingIntegrationTest {
     // 40 个素材 × 2 个比例档足够让取消落在批处理中途（这正是长批量的用法）。
     List<UUID> assets = new ArrayList<>();
     for (int i = 0; i < 40; i++)
-      assets.add(upload(actor, unique("取消"),
-          photo(240, 240, new Color(250, 250, 250), new Color(20, 90, 40), i)));
+      assets.add(
+          upload(
+              actor,
+              unique("取消"),
+              photo(240, 240, new Color(250, 250, 250), new Color(20, 90, 40), i)));
     String code = unique("RC");
-    var saved = recipe(actor, code, recipeInput(code, "png", false, true, 120, 120, mainAndThumb()));
-    var job = write(actor, () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), assets)));
+    var saved =
+        recipe(actor, code, recipeInput(code, "png", false, true, 120, 120, mainAndThumb()));
+    var job =
+        write(actor, () -> processing.submit(actor, new MediaProcessJobInput(saved.id(), assets)));
 
     // 取消请求不阻塞：只置标志位，立刻返回。
     var cancelled = write(actor, () -> processing.cancel(actor, job.id()));
@@ -689,22 +868,27 @@ class ImageProcessingIntegrationTest {
 
     // 取消的真正契约：**没有条目被落在中间态**。已经开始的那一张会做完
     // （像素处理没有「做一半」的中间态），剩下的都落成 CANCELLED。
-    assertThat(cancelledItems).allSatisfy(item ->
-        assertThat(item.status()).isIn("SUCCEEDED", "CANCELLED"));
+    assertThat(cancelledItems)
+        .allSatisfy(item -> assertThat(item.status()).isIn("SUCCEEDED", "CANCELLED"));
     // 计数与条目对得上：成功 + 取消 = 总数。
     long succeeded = cancelledItems.stream().filter(i -> "SUCCEEDED".equals(i.status())).count();
-    long cancelledCount = cancelledItems.stream().filter(i -> "CANCELLED".equals(i.status())).count();
+    long cancelledCount =
+        cancelledItems.stream().filter(i -> "CANCELLED".equals(i.status())).count();
     assertThat(succeeded + cancelledCount).isEqualTo(40);
     // 确实取消掉了一部分（否则这个用例没测到取消）。
     assertThat(cancelledCount).as("被取消的条目数").isGreaterThan(0);
     // 被取消的条目没有产物，且给了可执行的原因。
-    cancelledItems.stream().filter(i -> "CANCELLED".equals(i.status())).forEach(item -> {
-      assertThat(item.outputs()).isEmpty();
-      assertThat(item.error()).contains("取消");
-    });
+    cancelledItems.stream()
+        .filter(i -> "CANCELLED".equals(i.status()))
+        .forEach(
+            item -> {
+              assertThat(item.outputs()).isEmpty();
+              assertThat(item.error()).contains("取消");
+            });
     // 已完成的条目产物是真的（取消不会回滚已写入的版本）。
-    cancelledItems.stream().filter(i -> "SUCCEEDED".equals(i.status())).forEach(item ->
-        assertThat(item.outputs()).hasSize(2));
+    cancelledItems.stream()
+        .filter(i -> "SUCCEEDED".equals(i.status()))
+        .forEach(item -> assertThat(item.outputs()).hasSize(2));
 
     // 取消后不能再取消（终态不可变）。
     assertThatThrownBy(() -> write(actor, () -> processing.cancel(actor, job.id())))
@@ -714,16 +898,30 @@ class ImageProcessingIntegrationTest {
   @Test
   void partialFailureKeepsFailuresVisibleWithoutRollingBackTheBatch() throws Exception {
     String mark = unique("部分失败");
-    UUID good = upload(actor, mark + "-好图", photo(120, 90, new Color(250, 250, 250), new Color(20, 60, 90)));
+    UUID good =
+        upload(
+            actor, mark + "-好图", photo(120, 90, new Color(250, 250, 250), new Color(20, 60, 90)));
     String code = unique("RC");
-    var saved = recipe(actor, code, recipeInput(code, "png", false, true, 60, 60, List.of(
-        new MediaProcessRatioInput("MAIN", 60, 60, "FIT"))));
+    var saved =
+        recipe(
+            actor,
+            code,
+            recipeInput(
+                code,
+                "png",
+                false,
+                true,
+                60,
+                60,
+                List.of(new MediaProcessRatioInput("MAIN", 60, 60, "FIT"))));
 
     // 第二个素材先把对象删掉，制造一个**真实的**失败：元数据说有、存储里已经没了
     // （正是 3.4.1.1 失效检测报 MISSING 的那种状态）。
     // 不用「插一条指向不存在键的条目」那种绕路做法：那是自己造出来的假故障，
     // 而且会和提交后立刻起跑的工作线程赛跑（条目可能在插入前就已经被处理完了）。
-    UUID ghost = upload(actor, mark + "-坏图", photo(120, 90, new Color(252, 252, 252), new Color(5, 5, 200), 9));
+    UUID ghost =
+        upload(
+            actor, mark + "-坏图", photo(120, 90, new Color(252, 252, 252), new Color(5, 5, 200), 9));
     String ghostKey = tx(actor, () -> media.detail(ghost)).asset().storageKey();
     try {
       java.nio.file.Files.delete(storageRoot.resolve(ghostKey));
@@ -733,8 +931,12 @@ class ImageProcessingIntegrationTest {
     // 失效检测确认它确实坏了（MISSING），再拿它去处理。
     assertThat(tx(actor, () -> media.verify(ghost)).integrityStatus()).isEqualTo("MISSING");
 
-    var job = write(actor, () -> processing.submit(actor,
-        new MediaProcessJobInput(saved.id(), List.of(good, ghost))));
+    var job =
+        write(
+            actor,
+            () ->
+                processing.submit(
+                    actor, new MediaProcessJobInput(saved.id(), List.of(good, ghost))));
 
     drain(job.id(), actor);
     var detail = tx(actor, () -> processing.detail(job.id()));
@@ -742,10 +944,15 @@ class ImageProcessingIntegrationTest {
     assertThat(detail.job().succeededCount()).isEqualTo(1);
     assertThat(detail.job().failedCount()).isEqualTo(1);
 
-    var failed = detail.items().stream().filter(i -> "FAILED".equals(i.status())).findFirst().orElseThrow();
+    var failed =
+        detail.items().stream().filter(i -> "FAILED".equals(i.status())).findFirst().orElseThrow();
     // 失败原因是可执行的中文（能看出是存储键没了、该去做什么），不是异常类名。
     assertThat(failed.error()).contains("读取原图失败").contains("完整性校验");
-    var ok = detail.items().stream().filter(i -> "SUCCEEDED".equals(i.status())).findFirst().orElseThrow();
+    var ok =
+        detail.items().stream()
+            .filter(i -> "SUCCEEDED".equals(i.status()))
+            .findFirst()
+            .orElseThrow();
     assertThat(ok.outputs()).hasSize(1);
     // 好图真的被处理了（整批没有因为一个失败而回滚）。
     assertThat(tx(actor, () -> media.detail(good)).asset().currentVersion()).isEqualTo(2);
@@ -757,13 +964,26 @@ class ImageProcessingIntegrationTest {
   void tenantIsolationHoldsAcrossReadWriteAndPoolReuse() throws Exception {
     String mark = unique("ISO");
     String codeA = unique("ISOA");
-    var recipeA = recipe(actor, codeA, recipeInput(codeA, "png", true, true, 80, 80, mainAndThumb()));
-    UUID mine = upload(actor, mark + "-A 租户", photo(120, 120, new Color(250, 250, 250), new Color(10, 80, 20)));
+    var recipeA =
+        recipe(actor, codeA, recipeInput(codeA, "png", true, true, 80, 80, mainAndThumb()));
+    UUID mine =
+        upload(
+            actor,
+            mark + "-A 租户",
+            photo(120, 120, new Color(250, 250, 250), new Color(10, 80, 20)));
 
     String codeB = unique("ISOB");
     var recipeB = recipe(actorB, codeB, recipeInput(codeB, "png", false, false, 60, 60, List.of()));
-    UUID theirs = upload(actorB, mark + "-B 租户", photo(90, 90, new Color(250, 250, 250), new Color(120, 10, 10)));
-    var jobB = write(actorB, () -> processing.submit(actorB, new MediaProcessJobInput(recipeB.id(), List.of(theirs))));
+    UUID theirs =
+        upload(
+            actorB,
+            mark + "-B 租户",
+            photo(90, 90, new Color(250, 250, 250), new Color(120, 10, 10)));
+    var jobB =
+        write(
+            actorB,
+            () ->
+                processing.submit(actorB, new MediaProcessJobInput(recipeB.id(), List.of(theirs))));
     drain(jobB.id(), actorB);
 
     // 1) 两租户互不可见
@@ -776,7 +996,10 @@ class ImageProcessingIntegrationTest {
         .isInstanceOf(ResponseStatusException.class);
     // 自己提交的任务当然看得到（下面 jobA 建好后再断言「B 看不到 A 的」）。
     // A 租户的任务里看不到 B 租户的素材。
-    var jobA = write(actor, () -> processing.submit(actor, new MediaProcessJobInput(recipeA.id(), List.of(mine))));
+    var jobA =
+        write(
+            actor,
+            () -> processing.submit(actor, new MediaProcessJobInput(recipeA.id(), List.of(mine))));
     drain(jobA.id(), actor);
     // B 租户不能读 A 租户的任务详情（哪怕手里有它的 id）。
     assertThatThrownBy(() -> tx(actorB, () -> processing.detail(jobA.id())))
@@ -784,46 +1007,78 @@ class ImageProcessingIntegrationTest {
     assertThatThrownBy(() -> tx(actor, () -> processing.detail(jobB.id())))
         .isInstanceOf(ResponseStatusException.class);
     var detailA = tx(actor, () -> processing.detail(jobA.id()));
-    assertThat(detailA.items()).extracting(MediaProcessJobItem::assetId).contains(mine).doesNotContain(theirs);
-    assertThat(tx(actor, () -> processing.listJobs(new MediaProcessJobQuery(mark, null, 0, 200))).items())
-        .extracting(MediaProcessJobRow::id).contains(jobA.id()).doesNotContain(jobB.id());
-    assertThat(tx(actorB, () -> processing.listJobs(new MediaProcessJobQuery(mark, null, 0, 200))).items())
-        .extracting(MediaProcessJobRow::id).contains(jobB.id()).doesNotContain(jobA.id());
+    assertThat(detailA.items())
+        .extracting(MediaProcessJobItem::assetId)
+        .contains(mine)
+        .doesNotContain(theirs);
+    assertThat(
+            tx(actor, () -> processing.listJobs(new MediaProcessJobQuery(mark, null, 0, 200)))
+                .items())
+        .extracting(MediaProcessJobRow::id)
+        .contains(jobA.id())
+        .doesNotContain(jobB.id());
+    assertThat(
+            tx(actorB, () -> processing.listJobs(new MediaProcessJobQuery(mark, null, 0, 200)))
+                .items())
+        .extracting(MediaProcessJobRow::id)
+        .contains(jobB.id())
+        .doesNotContain(jobA.id());
     // 素材处理历史也不串。
-    assertThat(tx(actor, () -> processing.historyOfAsset(mine))).extracting(MediaProcessJobRow::id).contains(jobA.id());
+    assertThat(tx(actor, () -> processing.historyOfAsset(mine)))
+        .extracting(MediaProcessJobRow::id)
+        .contains(jobA.id());
     assertThat(tx(actor, () -> processing.historyOfAsset(theirs))).isEmpty();
     // B 租户不能拿自己的配方处理 A 租户的素材。
-    assertThatThrownBy(() -> write(actorB, () ->
-        processing.submit(actorB, new MediaProcessJobInput(recipeB.id(), List.of(mine)))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actorB,
+                    () ->
+                        processing.submit(
+                            actorB, new MediaProcessJobInput(recipeB.id(), List.of(mine)))))
         .isInstanceOf(ResponseStatusException.class);
     // B 租户不能取消 A 租户的任务。
     assertThatThrownBy(() -> write(actorB, () -> processing.cancel(actorB, jobA.id())))
         .isInstanceOf(ResponseStatusException.class);
     // B 租户不能删 A 租户的配方。
     long versionA = tx(actor, () -> processing.recipe(recipeA.id())).version();
-    assertThatThrownBy(() -> writeVoid(actorB, () -> processing.deleteRecipe(actorB, recipeA.id(), versionA)))
+    assertThatThrownBy(
+            () -> writeVoid(actorB, () -> processing.deleteRecipe(actorB, recipeA.id(), versionA)))
         .isInstanceOf(ResponseStatusException.class);
     assertThat(recipeCodes(actor)).contains(codeA);
 
     // 2) 伪造 tenant header 无效：租户只来自已认证的成员关系
-    http.perform(get("/catalog/media/processing/jobs/" + jobA.id())
-            .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
+    http.perform(
+            get("/catalog/media/processing/jobs/" + jobA.id())
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
     var submitted =
-        http.perform(post("/catalog/media/processing/jobs")
-                .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a)
-                .contentType("application/json")
-                .content("{\"recipeId\":\"" + recipeB.id() + "\",\"assetIds\":[\"" + theirs + "\"]}"))
+        http.perform(
+                post("/catalog/media/processing/jobs")
+                    .header("Authorization", "Bearer tenant-b")
+                    .header("X-Tenant-Id", a)
+                    .contentType("application/json")
+                    .content(
+                        "{\"recipeId\":\""
+                            + recipeB.id()
+                            + "\",\"assetIds\":[\""
+                            + theirs
+                            + "\"]}"))
             .andExpect(status().isOk())
-            .andReturn().getResponse().getContentAsString();
-    String forgedJobId = new com.fasterxml.jackson.databind.ObjectMapper().readTree(submitted).get("id").asText();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    String forgedJobId =
+        new com.fasterxml.jackson.databind.ObjectMapper().readTree(submitted).get("id").asText();
     UUID forgedJob = UUID.fromString(forgedJobId);
     // 伪造头写入的任务进的是 B 租户（凭据说的那个）。
     assertThat(itemsOf(actorB, forgedJob)).isNotEmpty();
     // A 租户用同一个 id 查不到它：任务按租户隔离，不是按 id 全局可见。
     assertThatThrownBy(() -> tx(actor, () -> processing.detail(forgedJob)))
         .isInstanceOf(ResponseStatusException.class);
-    var mineJobs = tx(actor, () -> processing.listJobs(new MediaProcessJobQuery(null, "PENDING", 0, 200)));
+    var mineJobs =
+        tx(actor, () -> processing.listJobs(new MediaProcessJobQuery(null, "PENDING", 0, 200)));
     assertThat(jobIds(mineJobs)).doesNotContain(forgedJob);
 
     // 3) 连接池归还后不串租户（单连接反复交替）
@@ -846,47 +1101,75 @@ class ImageProcessingIntegrationTest {
   void httpEndpointsExposeTheRealWorkflow() throws Exception {
     String code = unique("HTTP");
     var created =
-        http.perform(post("/catalog/media/processing/recipes")
-                .header("Authorization", "Bearer tenant-a")
-                .contentType("application/json")
-                .content("{\"code\":\"" + code + "\",\"name\":\"" + code + "\",\"note\":\"端到端\","
-                    + "\"targetPlatform\":\"AMAZON\",\"targetFormat\":\"png\",\"removeBackground\":true,"
-                    + "\"backgroundTolerance\":12,\"whiteBackground\":true,\"watermarkText\":\"SHOP\","
-                    + "\"watermarkPosition\":\"BOTTOM_RIGHT\",\"watermarkOpacity\":85,"
-                    + "\"targetWidthPx\":80,\"targetHeightPx\":80,\"cropMode\":\"FIT\","
-                    + "\"ratios\":[{\"label\":\"MAIN\",\"widthPx\":80,\"heightPx\":80,\"cropMode\":\"CROP_FILL\"}],"
-                    + "\"enabled\":true,\"version\":0}"))
+        http.perform(
+                post("/catalog/media/processing/recipes")
+                    .header("Authorization", "Bearer tenant-a")
+                    .contentType("application/json")
+                    .content(
+                        "{\"code\":\""
+                            + code
+                            + "\",\"name\":\""
+                            + code
+                            + "\",\"note\":\"端到端\","
+                            + "\"targetPlatform\":\"AMAZON\",\"targetFormat\":\"png\",\"removeBackground\":true,"
+                            + "\"backgroundTolerance\":12,\"whiteBackground\":true,\"watermarkText\":\"SHOP\","
+                            + "\"watermarkPosition\":\"BOTTOM_RIGHT\",\"watermarkOpacity\":85,"
+                            + "\"targetWidthPx\":80,\"targetHeightPx\":80,\"cropMode\":\"FIT\","
+                            + "\"ratios\":[{\"label\":\"MAIN\",\"widthPx\":80,\"heightPx\":80,\"cropMode\":\"CROP_FILL\"}],"
+                            + "\"enabled\":true,\"version\":0}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.ratioCount").value(1))
-            .andReturn().getResponse().getContentAsString();
-    String recipeId = new com.fasterxml.jackson.databind.ObjectMapper().readTree(created).get("id").asText();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    String recipeId =
+        new com.fasterxml.jackson.databind.ObjectMapper().readTree(created).get("id").asText();
 
     byte[] content = photo(140, 100, new Color(248, 248, 248), new Color(200, 40, 40));
     var upload =
-        http.perform(multipart("/catalog/media").file(file("工作流主图.png", content))
-                .file(new MockMultipartFile("meta", "", "application/json",
-                    ("{\"name\":\"" + code + "-素材\",\"mediaType\":\"IMAGE\",\"purpose\":\"PRIMARY\","
-                        + "\"tagCodes\":[],\"enabled\":true}").getBytes(java.nio.charset.StandardCharsets.UTF_8)))
-                .header("Authorization", "Bearer tenant-a"))
+        http.perform(
+                multipart("/catalog/media")
+                    .file(file("工作流主图.png", content))
+                    .file(
+                        new MockMultipartFile(
+                            "meta",
+                            "",
+                            "application/json",
+                            ("{\"name\":\""
+                                    + code
+                                    + "-素材\",\"mediaType\":\"IMAGE\",\"purpose\":\"PRIMARY\","
+                                    + "\"tagCodes\":[],\"enabled\":true}")
+                                .getBytes(java.nio.charset.StandardCharsets.UTF_8)))
+                    .header("Authorization", "Bearer tenant-a"))
             .andExpect(status().isOk())
-            .andReturn().getResponse().getContentAsString();
-    String assetId = new com.fasterxml.jackson.databind.ObjectMapper().readTree(upload).get("id").asText();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    String assetId =
+        new com.fasterxml.jackson.databind.ObjectMapper().readTree(upload).get("id").asText();
 
     // 提交（异步受理语义）。
     var submitted =
-        http.perform(post("/catalog/media/processing/jobs")
-                .header("Authorization", "Bearer tenant-a")
-                .contentType("application/json")
-                .content("{\"recipeId\":\"" + recipeId + "\",\"assetIds\":[\"" + assetId + "\"]}"))
+        http.perform(
+                post("/catalog/media/processing/jobs")
+                    .header("Authorization", "Bearer tenant-a")
+                    .contentType("application/json")
+                    .content(
+                        "{\"recipeId\":\"" + recipeId + "\",\"assetIds\":[\"" + assetId + "\"]}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("PENDING"))
             .andExpect(jsonPath("$.assetCount").value(1))
-            .andReturn().getResponse().getContentAsString();
-    String jobId = new com.fasterxml.jackson.databind.ObjectMapper().readTree(submitted).get("id").asText();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    String jobId =
+        new com.fasterxml.jackson.databind.ObjectMapper().readTree(submitted).get("id").asText();
     executor.runJobNow(UUID.fromString(jobId), a);
     awaitTerminal(UUID.fromString(jobId));
 
-    http.perform(get("/catalog/media/processing/jobs/" + jobId).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/media/processing/jobs/" + jobId)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.job.status").value("SUCCEEDED"))
         .andExpect(jsonPath("$.job.statusLabel").value("全部成功"))
@@ -899,19 +1182,27 @@ class ImageProcessingIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.items").isArray())
         .andExpect(jsonPath("$.total").isNumber());
-    http.perform(get("/catalog/media/processing/jobs/" + jobId + "/items").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/media/processing/jobs/" + jobId + "/items")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].producedCount").value(1));
-    http.perform(get("/catalog/media/processing/recipes").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/media/processing/recipes").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray());
-    http.perform(get("/catalog/media/processing/recipes/" + recipeId).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/media/processing/recipes/" + recipeId)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.ratios[0].label").value("MAIN"));
-    http.perform(get("/catalog/media/processing/overview").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/media/processing/overview").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.outputCount").isNumber());
-    http.perform(get("/catalog/media/processing/assets/" + assetId + "/history").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/media/processing/assets/" + assetId + "/history")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].id").value(jobId));
 
@@ -919,17 +1210,23 @@ class ImageProcessingIntegrationTest {
     http.perform(get("/catalog/media/processing/jobs")).andExpect(status().isUnauthorized());
     http.perform(get("/catalog/media/processing/recipes").header("Authorization", "Bearer reader"))
         .andExpect(status().isOk());
-    http.perform(post("/catalog/media/processing/jobs").header("Authorization", "Bearer reader")
-            .contentType("application/json")
-            .content("{\"recipeId\":\"" + recipeId + "\",\"assetIds\":[\"" + assetId + "\"]}"))
+    http.perform(
+            post("/catalog/media/processing/jobs")
+                .header("Authorization", "Bearer reader")
+                .contentType("application/json")
+                .content("{\"recipeId\":\"" + recipeId + "\",\"assetIds\":[\"" + assetId + "\"]}"))
         .andExpect(status().isForbidden());
-    http.perform(delete("/catalog/media/processing/recipes/" + recipeId + "?version=0")
-            .header("Authorization", "Bearer reader"))
+    http.perform(
+            delete("/catalog/media/processing/recipes/" + recipeId + "?version=0")
+                .header("Authorization", "Bearer reader"))
         .andExpect(status().isForbidden());
     // 非法配方是 400 不是 500。
-    http.perform(post("/catalog/media/processing/recipes").header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"code\":\"BAD\",\"name\":\"坏配方\",\"targetFormat\":\"webp\",\"enabled\":true,\"version\":0}"))
+    http.perform(
+            post("/catalog/media/processing/recipes")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    "{\"code\":\"BAD\",\"name\":\"坏配方\",\"targetFormat\":\"webp\",\"enabled\":true,\"version\":0}"))
         .andExpect(status().isBadRequest());
   }
 
@@ -939,7 +1236,8 @@ class ImageProcessingIntegrationTest {
     for (int y = y0; y <= Math.min(y1, image.getHeight() - 1); y++)
       for (int x = x0; x <= Math.min(x1, image.getWidth() - 1); x++) {
         int rgb = image.getRGB(x, y) & 0xFFFFFF;
-        int lum = (((rgb >> 16) & 0xFF) * 299 + ((rgb >> 8) & 0xFF) * 587 + (rgb & 0xFF) * 114) / 1000;
+        int lum =
+            (((rgb >> 16) & 0xFF) * 299 + ((rgb >> 8) & 0xFF) * 587 + (rgb & 0xFF) * 114) / 1000;
         if (lum >= 150) return true;
       }
     return false;

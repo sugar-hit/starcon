@@ -10,15 +10,16 @@
 
 只动字号，不动间距（高度）。
 
-| 元素 | v5 (缩高度) | v6 (缩字号) |
-|---|---|---|
-| PageHeader h1 | h-14 (14px) font-semibold | **copy-13 (13px) font-semibold** |
-| PageHeader description | copy-13 | **copy-12 (12px)** |
-| PageHeader 高度 | h-10 (40px) | **h-12 (48px)** ← 回退 |
-| Segmented (md) label | label-14 (14px) | **label-13 (13px)** |
-| Segmented (sm) label | label-13 (13px) | **label-12 (12px)** |
+| 元素                   | v5 (缩高度)               | v6 (缩字号)                      |
+| ---------------------- | ------------------------- | -------------------------------- |
+| PageHeader h1          | h-14 (14px) font-semibold | **copy-13 (13px) font-semibold** |
+| PageHeader description | copy-13                   | **copy-12 (12px)**               |
+| PageHeader 高度        | h-10 (40px)               | **h-12 (48px)** ← 回退           |
+| Segmented (md) label   | label-14 (14px)           | **label-13 (13px)**              |
+| Segmented (sm) label   | label-13 (13px)           | **label-12 (12px)**              |
 
 现在三个位置字号统一：
+
 - 顶部 Segmented: **13px** (label-13, font-medium)
 - 左侧 Nav item: **13px** (copy-13, font-normal)
 - PageHeader h1: **13px** (copy-13, font-semibold)
@@ -28,6 +29,7 @@
 ## 视觉对比
 
 v5 vs v6:
+
 - v5 PageHeader h1 14px / 高度 40px（看着还是大）
 - v6 PageHeader h1 13px / 高度 48px（字号小 + 间距适度）
 

@@ -12,6 +12,11 @@ import { CustomsAttributeWorkspace } from '@/components/catalog/customs-attribut
  * <p>与 3.7.2.1 的差别在审核：这一页带审核状态机与审核动作，
  * 所以它必须是独立工作区（不能只在详情页里只读展示）。
  */
-export default function CustomsAttributePage({ params }: { params: { id: string } }) {
-  return <CustomsAttributeWorkspace skuId={params.id} />;
+export default async function CustomsAttributePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = await params;
+  return <CustomsAttributeWorkspace skuId={resolvedParams.id} />;
 }

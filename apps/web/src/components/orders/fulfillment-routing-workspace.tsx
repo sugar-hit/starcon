@@ -80,9 +80,9 @@ export function FulfillmentRoutingWorkspace() {
   const [requestedQty, setRequestedQty] = useState('1');
   const [platformAvailable, setPlatformAvailable] = useState('');
   const [policy, setPolicy] = useState('PLATFORM_FIRST');
-  const [evaluation, setEvaluation] = useState<Awaited<
-    ReturnType<typeof evaluateRouting>
-  > | null>(null);
+  const [evaluation, setEvaluation] = useState<Awaited<ReturnType<typeof evaluateRouting>> | null>(
+    null,
+  );
   const [evaluating, setEvaluating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [actionError, setActionError] = useState('');
@@ -294,13 +294,11 @@ export function FulfillmentRoutingWorkspace() {
                     <td className="py-2 pr-3">{timeText(row.expiresAt)}</td>
                     <td className="py-2 pr-3">{row.sourceReference || '—'}</td>
                     <td className="py-2">
-                      {mcfUsable(row) ? (
-                        '可以'
-                      ) : row.status === 'AUTHORIZED' ? (
-                        '需先续期'
-                      ) : (
-                        '需先核验'
-                      )}
+                      {mcfUsable(row)
+                        ? '可以'
+                        : row.status === 'AUTHORIZED'
+                          ? '需先续期'
+                          : '需先核验'}
                     </td>
                   </tr>
                 ))}
@@ -322,7 +320,11 @@ export function FulfillmentRoutingWorkspace() {
       >
         <div className="grid gap-3 md:grid-cols-5">
           <FormField id="fr-order-ref" label="订单号">
-            <Input value={orderRef} onChange={(e) => setOrderRef(e.target.value)} placeholder="SO-1001" />
+            <Input
+              value={orderRef}
+              onChange={(e) => setOrderRef(e.target.value)}
+              placeholder="SO-1001"
+            />
           </FormField>
           <FormField id="fr-sku-ref" label="SKU 编号">
             <Input value={skuRef} onChange={(e) => setSkuRef(e.target.value)} placeholder="SKU-1" />
@@ -342,7 +344,7 @@ export function FulfillmentRoutingWorkspace() {
               placeholder="留空读快照"
             />
           </FormField>
-          <label className="flex flex-col gap-1 text-copy-12">
+          <label className="text-copy-12 flex flex-col gap-1">
             <span className="text-muted-foreground">决策策略</span>
             <select
               id="fr-policy"
@@ -466,12 +468,23 @@ export function FulfillmentRoutingWorkspace() {
       </SectionCard>
 
       {/* 4. 决策列表 */}
-      <SectionCard title="履约路径决策" description="决策是举证凭据，不能改写；确认与作废走专门的动作。">
+      <SectionCard
+        title="履约路径决策"
+        description="决策是举证凭据，不能改写；确认与作废走专门的动作。"
+      >
         <div className="flex flex-wrap items-end gap-2">
           <FormField id="fr-keyword" label="关键字（订单号 / SKU / 说明）">
-            <Input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="SO-1001" />
+            <Input
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="SO-1001"
+            />
           </FormField>
-          <Button type="button" variant="secondary" onClick={() => setAppliedKeyword(keyword.trim())}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setAppliedKeyword(keyword.trim())}
+          >
             <Filter className="mr-2 h-4 w-4" />
             筛选
           </Button>
@@ -519,11 +532,7 @@ export function FulfillmentRoutingWorkspace() {
                         详情
                       </Button>
                       {canAdvance(row.status) ? (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => void confirm(row.id)}
-                        >
+                        <Button type="button" variant="ghost" onClick={() => void confirm(row.id)}>
                           <ShieldCheck className="mr-2 h-4 w-4" />
                           确认
                         </Button>
@@ -538,10 +547,7 @@ export function FulfillmentRoutingWorkspace() {
       </SectionCard>
 
       {detail ? (
-        <SectionCard
-          title={`决策详情 · ${detail.decision.orderRef}`}
-          description={detail.note}
-        >
+        <SectionCard title={`决策详情 · ${detail.decision.orderRef}`} description={detail.note}>
           <Notice tone="info" title={detail.decision.reason}>
             候选行是决策当时的库存与成本快照，事后不会被回算。
           </Notice>
@@ -569,7 +575,7 @@ export function FulfillmentRoutingWorkspace() {
               </tbody>
             </table>
           </div>
-          <h3 className="mt-4 mb-2 text-sm font-medium">事件时间线</h3>
+          <h3 className="mb-2 mt-4 text-sm font-medium">事件时间线</h3>
           <ul className="space-y-1 text-sm">
             {detail.events.map((e) => (
               <li key={e.id} className="text-muted-foreground">

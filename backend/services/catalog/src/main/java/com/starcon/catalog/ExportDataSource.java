@@ -10,23 +10,19 @@ import org.jooq.Record;
 /**
  * 3.8.2.1 导出的**数据源注册式扩展点**。
  *
- * <p>蓝图的上游是「3.1.1.1 / 3.1.2.1 / 3.6.2 等列表页」——一个**开集**：
- * 今天交付了 SPU、SKU 与联系人三个来源，明天 3.6.2.1 报价列表并入还要再接一个。
- * 所以「导出」在本模块里不是一张宽表加一个查询，而是：
+ * <p>蓝图的上游是「3.1.1.1 / 3.1.2.1 / 3.6.2 等列表页」——一个**开集**： 今天交付了 SPU、SKU 与联系人三个来源，明天 3.6.2.1
+ * 报价列表并入还要再接一个。 所以「导出」在本模块里不是一张宽表加一个查询，而是：
  *
  * <ul>
- *   <li>{@link ExportDataSource}：一个数据源自带**字段白名单、排序白名单、筛选词表、
- *       以及 count / stream 两条查询**；</li>
- *   <li>{@link ExportDataSources}：把容器里所有实现收集成 {@code key → 数据源} 的注册表。</li>
+ *   <li>{@link ExportDataSource}：一个数据源自带**字段白名单、排序白名单、筛选词表、 以及 count / stream 两条查询**；
+ *   <li>{@link ExportDataSources}：把容器里所有实现收集成 {@code key → 数据源} 的注册表。
  * </ul>
  *
  * <p>加一个数据源 = 新增一个 {@code @Component} 实现 + 在注入的 List 里自动出现，
- * <b>不需要改迁移、不需要改服务层、不需要改前端</b>：字段选择器、排序还原、
- * 授权校验、异步执行、有效期与审计全部由 {@link ExportJobService} 按注册表统一处理。
+ * <b>不需要改迁移、不需要改服务层、不需要改前端</b>：字段选择器、排序还原、 授权校验、异步执行、有效期与审计全部由 {@link ExportJobService} 按注册表统一处理。
  *
- * <p>字段与排序都是**闭集白名单**：{@link ExportColumn#key()} 与 {@link ExportSort#key()}
- * 会被直接拼进 SQL 的 SELECT / ORDER BY，所以它们只能是代码里写死的常量字面量，
- * 客户端传进来的字符串只用于**查表命中**，命中不了就走 422，绝不拼进 SQL。
+ * <p>字段与排序都是**闭集白名单**：{@link ExportColumn#key()} 与 {@link ExportSort#key()} 会被直接拼进 SQL 的 SELECT /
+ * ORDER BY，所以它们只能是代码里写死的常量字面量， 客户端传进来的字符串只用于**查表命中**，命中不了就走 422，绝不拼进 SQL。
  */
 public interface ExportDataSource {
   /** 数据源键：{@code SPU} / {@code SKU} / {@code CONTACT}。同时也是迁移里 export_job.source_key 的取值。 */
@@ -44,8 +40,7 @@ public interface ExportDataSource {
   /**
    * 该数据源是否已接通。
    *
-   * <p>为 false 时仍会被注册表收录并出现在能力声明里（附说明），但服务层拒绝执行。
-   * 「尚未交付」要变成一句可读的原因，而不是让用户点下去撞 404。
+   * <p>为 false 时仍会被注册表收录并出现在能力声明里（附说明），但服务层拒绝执行。 「尚未交付」要变成一句可读的原因，而不是让用户点下去撞 404。
    */
   default boolean available() {
     return true;
@@ -91,8 +86,7 @@ public interface ExportDataSource {
   /**
    * 分批读取导出行。
    *
-   * <p>{@code offset} 由调用方递增；实现只负责取这一批并交给 {@code sink}。
-   * 排序必须与 {@link #orderBy} 一致，否则批次之间会错位或重复。
+   * <p>{@code offset} 由调用方递增；实现只负责取这一批并交给 {@code sink}。 排序必须与 {@link #orderBy} 一致，否则批次之间会错位或重复。
    */
   void stream(
       ExportFilterInput spec,
@@ -106,8 +100,7 @@ public interface ExportDataSource {
   /**
    * ORDER BY 子句（含别名与恒定决胜列，保证分批之间稳定）。
    *
-   * <p>{@code desc} 是**调用方还原列表页排序**的结果（列表页默认 desc，列头点了变 asc）。
-   * 它必须一路传到这里：丢了它，「按价格升序排完序导出来是降序」就发生了，
+   * <p>{@code desc} 是**调用方还原列表页排序**的结果（列表页默认 desc，列头点了变 asc）。 它必须一路传到这里：丢了它，「按价格升序排完序导出来是降序」就发生了，
    * 而那份文件看上去完全正常，只是顺序错了 —— 用户往往要靠这个顺序做取舍。
    */
   String orderBy(ExportSort sort, boolean desc);

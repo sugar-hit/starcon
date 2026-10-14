@@ -1,8 +1,8 @@
 package com.starcon.catalog;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.Duration;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -56,8 +56,8 @@ public final class ZombieCandidateRules {
   /**
    * 一次引用观测。
    *
-   * <p>{@code value} 与 {@code observedAt} 允许为 null 表示**没有观测** —— 那是快照表里
-   * 缺行的情形（Z1），与"观测到 0"必须能在类型上区分开。
+   * <p>{@code value} 与 {@code observedAt} 允许为 null 表示**没有观测** —— 那是快照表里 缺行的情形（Z1），与"观测到
+   * 0"必须能在类型上区分开。
    */
   public record Observation(BigDecimal value, OffsetDateTime observedAt) {
     static Observation missing() {
@@ -72,11 +72,10 @@ public final class ZombieCandidateRules {
   /**
    * 单个维度的判定明细。界面逐条渲染"凭什么"用的就是它。
    *
-   * <p>三个可空列都标了 {@code @Schema(nullable = true)}，否则生成的 TS 类型会说它们非空 ——
-   * 那样前端就会开始相信「未观测的维度取值是 0」，而那正是本模块最要避免的错误（规则 Z1）。
+   * <p>三个可空列都标了 {@code @Schema(nullable = true)}，否则生成的 TS 类型会说它们非空 —— 那样前端就会开始相信「未观测的维度取值是
+   * 0」，而那正是本模块最要避免的错误（规则 Z1）。
    *
-   * <p>{@code metric} 为 null 表示这一行不是某个引用维度，而是「状态」「维护期」这类
-   * 前提条件的判定（见 {@link #evaluate} 里的两处）。
+   * <p>{@code metric} 为 null 表示这一行不是某个引用维度，而是「状态」「维护期」这类 前提条件的判定（见 {@link #evaluate} 里的两处）。
    */
   public record ZombieDimensionStatus(
       @Schema(nullable = true) ZombieMetric metric,
@@ -109,17 +108,15 @@ public final class ZombieCandidateRules {
    * <ol>
    *   <li>Z6：主体不是活跃状态 → {@link ZombieVerdict#NOT_ZOMBIE}（结论确定，与引用维度无关）。
    *   <li>Z2：还在维护期内 → {@link ZombieVerdict#NOT_ZOMBIE}。这一步**必须在未知之前** ——
-   *       一条上周刚改过的主数据不需要任何引用统计就能确定它不是僵尸，
-   *       先报"无法判定"会让界面上刚维护完的那批 SKU 全部变灰。
-   *   <li>任一启用维度被观测到且**非零** → {@link ZombieVerdict#NOT_ZOMBIE}，立即返回。
-   *       同样先于未知：已经观测到"有 3 个订单"的主数据，它的其它维度有没有观测
-   *       根本不影响结论，先报"无法判定"会让界面把一个确凿无疑的非僵尸标成灰的。
+   *       一条上周刚改过的主数据不需要任何引用统计就能确定它不是僵尸， 先报"无法判定"会让界面上刚维护完的那批 SKU 全部变灰。
+   *   <li>任一启用维度被观测到且**非零** → {@link ZombieVerdict#NOT_ZOMBIE}，立即返回。 同样先于未知：已经观测到"有 3
+   *       个订单"的主数据，它的其它维度有没有观测 根本不影响结论，先报"无法判定"会让界面把一个确凿无疑的非僵尸标成灰的。
    *   <li>任一启用维度**缺观测或过期** → {@link ZombieVerdict#INCOMPLETE}。
    *   <li>全部启用维度都是已观测到的零 → {@link ZombieVerdict#CANDIDATE}。
    * </ol>
    *
-   * @param lastMaintainedAt 主体最后一次维护时刻（{@code sku.updated_at} / {@code party.updated_at}）；
-   *     null 视为"从未维护"（按 updated_at 取不到只有一种情况：直连 SQL 绕过服务层写的行）
+   * @param lastMaintainedAt 主体最后一次维护时刻（{@code sku.updated_at} / {@code party.updated_at}）； null
+   *     视为"从未维护"（按 updated_at 取不到只有一种情况：直连 SQL 绕过服务层写的行）
    */
   public static Evaluation evaluate(
       Config rule,
@@ -188,8 +185,7 @@ public final class ZombieCandidateRules {
                     : "规则未启用该维度，且上游尚未推送观测"));
         continue;
       }
-      var observation =
-          observations.getOrDefault(metric, Observation.missing());
+      var observation = observations.getOrDefault(metric, Observation.missing());
       if (!observation.present()) {
         unknown = true;
         dimensions.add(
@@ -240,11 +236,13 @@ public final class ZombieCandidateRules {
 
     // 违反优先于未知（见本方法 javadoc 的顺序说明）。
     if (violated) {
-      return new Evaluation(ZombieVerdict.NOT_ZOMBIE, List.copyOf(dimensions), List.copyOf(reasons));
+      return new Evaluation(
+          ZombieVerdict.NOT_ZOMBIE, List.copyOf(dimensions), List.copyOf(reasons));
     }
     if (unknown) {
       reasons.add("启用的引用维度缺少有效的上游观测，无法判定");
-      return new Evaluation(ZombieVerdict.INCOMPLETE, List.copyOf(dimensions), List.copyOf(reasons));
+      return new Evaluation(
+          ZombieVerdict.INCOMPLETE, List.copyOf(dimensions), List.copyOf(reasons));
     }
 
     reasons.add(
@@ -260,8 +258,7 @@ public final class ZombieCandidateRules {
   /**
    * 批量停用前的准入判定（规则 Z4）。
    *
-   * <p>返回的 {@code blocked} 逐条给出原因，服务层据此 409。**刻意整批拒收而不是跳过**：
-   * "跳过"会让运营以为这一批都处理完了，而被跳过的那几条不会有人回来处理。
+   * <p>返回的 {@code blocked} 逐条给出原因，服务层据此 409。**刻意整批拒收而不是跳过**： "跳过"会让运营以为这一批都处理完了，而被跳过的那几条不会有人回来处理。
    */
   public record BatchEntry(String code, String name, ZombieVerdict verdict) {}
 
@@ -298,8 +295,7 @@ public final class ZombieCandidateRules {
   /**
    * 快照是否已过期（规则 Z7）。
    *
-   * <p>过期判 UNKNOWN 而不是沿用旧值：沿用意味着"三个月前没人引用它"被当成
-   * "现在也没人引用它"。
+   * <p>过期判 UNKNOWN 而不是沿用旧值：沿用意味着"三个月前没人引用它"被当成 "现在也没人引用它"。
    */
   public static boolean isStale(OffsetDateTime observedAt, OffsetDateTime now, int staleDays) {
     if (observedAt == null) return true;

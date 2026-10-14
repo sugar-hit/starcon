@@ -12,8 +12,7 @@ import org.junit.jupiter.api.Test;
 /**
  * 3.1.3.2 组合纯规则：签名、批次内重复定位、缺轴判定、矩阵展开与规模上限。
  *
- * <p>与前端 {@code combination-model.ts} 同口径。这一层刻意不碰数据库：
- * "签名怎么拼、重复怎么定位、缺哪条轴"是纯计算，可以在这里穷举完，
+ * <p>与前端 {@code combination-model.ts} 同口径。这一层刻意不碰数据库： "签名怎么拼、重复怎么定位、缺哪条轴"是纯计算，可以在这里穷举完，
  * 不必为了验证一个字符串顺序去起一次真实 PostgreSQL。
  */
 class CombinationRulesTest {
@@ -40,7 +39,8 @@ class CombinationRulesTest {
     // 这里的断言就是"Java 与 PG 不会分叉"的证据。
     var signature =
         CombinationRules.signature(
-            List.of(new Part("A0", "x"), new Part("Z9", "y"), new Part("A_", "z"), new Part("-A", "w")),
+            List.of(
+                new Part("A0", "x"), new Part("Z9", "y"), new Part("A_", "z"), new Part("-A", "w")),
             Set.of());
     assertThat(signature.signature()).isEqualTo("-A=w|A0=x|A_=z|Z9=y");
   }
@@ -74,8 +74,7 @@ class CombinationRulesTest {
     var codes = CombinationRules.duplicateAxisCodes(List.of("COLOR", "SIZE", "COLOR", "SIZE"));
     assertThat(codes).containsExactly("COLOR", "SIZE");
     var signature =
-        CombinationRules.signature(
-            List.of(new Part("COLOR", "红"), new Part("COLOR", "蓝")), codes);
+        CombinationRules.signature(List.of(new Part("COLOR", "红"), new Part("COLOR", "蓝")), codes);
     // 同一条轴在一个组合里取两个值，连"是不是一个组合"都谈不上，因此不给签名。
     assertThat(signature.signature()).isNull();
     assertThat(signature.problem()).contains("COLOR");
@@ -107,11 +106,11 @@ class CombinationRulesTest {
   void matrixIsTheCartesianProductOfEnabledOptions() {
     var expanded =
         CombinationRules.expand(
-            List.of(List.of("红", "蓝"), List.of("S", "M", "L")), CombinationRules.MAX_DRAFT_COMBINATIONS);
+            List.of(List.of("红", "蓝"), List.of("S", "M", "L")),
+            CombinationRules.MAX_DRAFT_COMBINATIONS);
     assertThat(expanded).hasSize(6);
     assertThat(expanded).contains(List.of("红", "S"), List.of("蓝", "L"));
-    assertThat(
-            CombinationRules.matrixSize(List.of(List.of("红", "蓝"), List.of("S", "M", "L"))))
+    assertThat(CombinationRules.matrixSize(List.of(List.of("红", "蓝"), List.of("S", "M", "L"))))
         .isEqualTo(6);
   }
 
@@ -124,7 +123,8 @@ class CombinationRulesTest {
                 List.of(List.of("红"), List.of()), CombinationRules.MAX_DRAFT_COMBINATIONS))
         .isEmpty();
     assertThat(CombinationRules.matrixSize(List.of(List.of("红"), List.of()))).isZero();
-    assertThat(CombinationRules.expand(List.of(), CombinationRules.MAX_DRAFT_COMBINATIONS)).isEmpty();
+    assertThat(CombinationRules.expand(List.of(), CombinationRules.MAX_DRAFT_COMBINATIONS))
+        .isEmpty();
     assertThat(CombinationRules.matrixSize(List.of())).isZero();
   }
 
@@ -135,7 +135,9 @@ class CombinationRulesTest {
     var options = new ArrayList<String>();
     for (int i = 0; i < 61; i++) options.add("V" + i);
     assertThatThrownBy(
-            () -> CombinationRules.expand(List.of(options, options), CombinationRules.MAX_DRAFT_COMBINATIONS))
+            () ->
+                CombinationRules.expand(
+                    List.of(options, options), CombinationRules.MAX_DRAFT_COMBINATIONS))
         .isInstanceOf(CombinationRules.MatrixTooLarge.class)
         .satisfies(
             e -> {

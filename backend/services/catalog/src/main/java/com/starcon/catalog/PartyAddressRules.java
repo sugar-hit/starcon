@@ -10,22 +10,19 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * 3.6.3.1 地址的纯规则：国家 / 必填列校验、用途词表与约束、默认标记规则、
- * 内容变更判定（版本链何时追加）、软删除前置条件、选中阻断判定。
+ * 3.6.3.1 地址的纯规则：国家 / 必填列校验、用途词表与约束、默认标记规则、 内容变更判定（版本链何时追加）、软删除前置条件、选中阻断判定。
  *
  * <p>与 {@link PartyRules} 同一条纪律，两条都写在这里：
  *
  * <ol>
- *   <li><b>能在保存前判定的，就不要留到下游才炸</b>。一个「收件人是谁都没填」的联系人
- *       不会在保存时报错，它会在 06 采购问交期、10 物流约提货、11 售后约退货三处
+ *   <li><b>能在保存前判定的，就不要留到下游才炸</b>。一个「收件人是谁都没填」的联系人 不会在保存时报错，它会在 06 采购问交期、10 物流约提货、11 售后约退货三处
  *       各自用不同的方式暴露 —— 而那时已经有单子挂在它上面了。
- *   <li><b>判定只有一处实现</b>。规则 A1~A6 在
- *       {@code V31__party_addresses_contacts.sql} 第九节有同样的文字，
- *       服务层这里与前端 {@code party-contact-model.ts} 是它的两份实现，改一处必须同步三处。
+ *   <li><b>判定只有一处实现</b>。规则 A1~A6 在 {@code V31__party_addresses_contacts.sql} 第九节有同样的文字， 服务层这里与前端
+ *       {@code party-contact-model.ts} 是它的两份实现，改一处必须同步三处。
  * </ol>
  *
- * <p>类名不叫 {@code PartyAddress}：那是被静态导入的 DTO record（{@link CatalogModels}），
- * 两者在同一批文件里会直接撞名，编译期才炸。与 {@link PartyRules} 同一个理由。
+ * <p>类名不叫 {@code PartyAddress}：那是被静态导入的 DTO record（{@link CatalogModels}）， 两者在同一批文件里会直接撞名，编译期才炸。与
+ * {@link PartyRules} 同一个理由。
  *
  * <p>本类不碰数据库，可以在离线单测里穷举。
  */
@@ -66,10 +63,8 @@ public final class PartyAddressRules {
   /**
    * 地址用途词表：收货 / 发货 / 提货。
    *
-   * <p>与 {@code V31} 第三节的 CHECK 逐字一致，也与前端 {@code ADDRESS_USAGES} 一致。
-   * 三个值刻意不合并：{@code SHIP_FROM}（06 采购的发货地址）与 {@code PICKUP}
-   * （10 物流的提货地址）在多数场景是同一个物理地点，但在单据上各自带理由，
-   * 而且「每个用途各有一个默认」要能在数据上落成部分唯一索引。
+   * <p>与 {@code V31} 第三节的 CHECK 逐字一致，也与前端 {@code ADDRESS_USAGES} 一致。 三个值刻意不合并：{@code SHIP_FROM}（06
+   * 采购的发货地址）与 {@code PICKUP} （10 物流的提货地址）在多数场景是同一个物理地点，但在单据上各自带理由， 而且「每个用途各有一个默认」要能在数据上落成部分唯一索引。
    */
   public static final Set<String> USAGES = Set.of("SHIP_TO", "SHIP_FROM", "PICKUP");
 
@@ -115,10 +110,7 @@ public final class PartyAddressRules {
     return optionalProblem(value, MAX_DISTRICT_LENGTH, "区 / 县");
   }
 
-  /**
-   * 邮编校验。<b>可空</b>（规则 A1）：相当多国家没有邮编体系（HK / AE / 部分非洲国家），
-   * 把它设成必填会逼运营编一个假邮编，而假邮编会让面单打印失败。
-   */
+  /** 邮编校验。<b>可空</b>（规则 A1）：相当多国家没有邮编体系（HK / AE / 部分非洲国家）， 把它设成必填会逼运营编一个假邮编，而假邮编会让面单打印失败。 */
   public static String postalCodeProblem(String value) {
     return optionalProblem(value, MAX_POSTAL_CODE_LENGTH, "邮编");
   }
@@ -141,16 +133,14 @@ public final class PartyAddressRules {
 
   public static String changeNoteProblem(String value) {
     String note = normalizeText(value);
-    if (note.length() > MAX_CHANGE_NOTE_LENGTH)
-      return "变更说明最多 " + MAX_CHANGE_NOTE_LENGTH + " 个字符";
+    if (note.length() > MAX_CHANGE_NOTE_LENGTH) return "变更说明最多 " + MAX_CHANGE_NOTE_LENGTH + " 个字符";
     return null;
   }
 
   /**
    * 可空列的校验：要么不填，要么填了非空白且不超长。
    *
-   * <p>「填了但全是空格」要拒：那是脏数据（DB 里出现一个看起来像有值、实际是空串的邮编），
-   * 与 V27 对 email / phone 的同一口径。
+   * <p>「填了但全是空格」要拒：那是脏数据（DB 里出现一个看起来像有值、实际是空串的邮编）， 与 V27 对 email / phone 的同一口径。
    */
   private static String optionalProblem(String value, int max, String label) {
     if (value == null) return null;
@@ -163,8 +153,7 @@ public final class PartyAddressRules {
   /**
    * 一个地址请求的整体校验。
    *
-   * <p>返回<b>第一条</b>可执行的原因（不是全部）：表单一次只该红一处，
-   * 而一次给七条会让运营不知道先改哪个。
+   * <p>返回<b>第一条</b>可执行的原因（不是全部）：表单一次只该红一处， 而一次给七条会让运营不知道先改哪个。
    */
   public static String addressProblem(
       String countryCode,
@@ -193,21 +182,18 @@ public final class PartyAddressRules {
   public static String usageProblem(String value) {
     String usage = normalizeUsage(value);
     if (usage.isEmpty()) return "地址用途不能为空";
-    if (!USAGES.contains(usage))
-      return "地址用途只能是收货（SHIP_TO）、发货（SHIP_FROM）或提货（PICKUP）";
+    if (!USAGES.contains(usage)) return "地址用途只能是收货（SHIP_TO）、发货（SHIP_FROM）或提货（PICKUP）";
     return null;
   }
 
   /**
    * 用途清单的整体校验：词表 + 同一用途不重复（规则 A2）。
    *
-   * <p>{@code null} 元素按「删掉这一条」处理（契约里数组元素带 {@code | null}，
-   * 与 {@code PartyRules.rolesProblem} 同一约定）。
+   * <p>{@code null} 元素按「删掉这一条」处理（契约里数组元素带 {@code | null}， 与 {@code PartyRules.rolesProblem} 同一约定）。
    */
   public static String usagesProblem(List<CatalogModels.PartyAddressUsageInput> usages) {
     if (usages == null || usages.isEmpty()) return null;
-    if (usages.size() > MAX_USAGES)
-      return "一条地址最多承担 " + MAX_USAGES + " 个用途（收货 / 发货 / 提货）";
+    if (usages.size() > MAX_USAGES) return "一条地址最多承担 " + MAX_USAGES + " 个用途（收货 / 发货 / 提货）";
     Set<String> seen = new LinkedHashSet<>();
     for (CatalogModels.PartyAddressUsageInput usage : usages) {
       if (usage == null) continue;
@@ -222,25 +208,27 @@ public final class PartyAddressRules {
   /**
    * 新增地址 / 联系人时的**主体状态**前置（规则 A5）。
    *
-   * <p>与 V27 的 P6 同源同理由：拉黑是「不与这个对手方做生意」，
-   * 给这样的对手方新增提货地址与对接人正是要拦的动作；而停用状态**允许**维护 ——
+   * <p>与 V27 的 P6 同源同理由：拉黑是「不与这个对手方做生意」， 给这样的对手方新增提货地址与对接人正是要拦的动作；而停用状态**允许**维护 ——
    * 「先建主体、停用状态下把地址与联系人补齐、再启用」是正常业务流。
    *
    * @param action 「新增地址」还是「新增联系人」，只影响文案
    */
   public static String createUnderPartyProblem(String partyStatus, String action) {
-    if (!"BLACKLISTED".equals(normalizeText(partyStatus)))
-      return null;
-    return "该往来单位在拉黑名单里，不能再" + action + "：请先解除拉黑"
-        + "（停用状态可以正常维护地址与联系人 —— 那是「先建主体、补齐资料、再启用」的正常流程）";
+    if (!"BLACKLISTED".equals(normalizeText(partyStatus))) return null;
+    return "该往来单位在拉黑名单里，不能再" + action + "：请先解除拉黑" + "（停用状态可以正常维护地址与联系人 —— 那是「先建主体、补齐资料、再启用」的正常流程）";
   }
 
   /** 删除前置：这条地址还是某个用途的默认（规则 A4）。{@code defaultUsages} 是默认用途名列表。 */
   public static String deleteProblem(List<String> defaultUsages) {
     if (defaultUsages == null || defaultUsages.isEmpty()) return null;
     String named =
-        defaultUsages.stream().map(PartyAddressRules::usageLabel).reduce((a, b) -> a + "、" + b).orElse("");
-    return "这条地址还是" + named + "的默认地址，请先把默认改到别的地址再删除："
+        defaultUsages.stream()
+            .map(PartyAddressRules::usageLabel)
+            .reduce((a, b) -> a + "、" + b)
+            .orElse("");
+    return "这条地址还是"
+        + named
+        + "的默认地址，请先把默认改到别的地址再删除："
         + "直接删掉的后果是「这个供应商没有提货地址了」，而 10 物流的单子上已经填好了原地址";
   }
 
@@ -276,10 +264,8 @@ public final class PartyAddressRules {
   /**
    * 是否要追加一条版本行（规则 A3）。
    *
-   * <p>内容一字未改就**不**追加：否则版本列表里全是无法区分的行，
-   * 而它要回答的问题是「这个地址被改过几次、每次改成什么样」。
-   * 只改用途 / 只改默认标记也走这条路径判定为 false —— 那是标签变化，不是地址变化，
-   * 快照要冻结的是印在面单上的那个地址（V31 第四节）。
+   * <p>内容一字未改就**不**追加：否则版本列表里全是无法区分的行， 而它要回答的问题是「这个地址被改过几次、每次改成什么样」。 只改用途 / 只改默认标记也走这条路径判定为 false
+   * —— 那是标签变化，不是地址变化， 快照要冻结的是印在面单上的那个地址（V31 第四节）。
    */
   public static boolean appendsVersion(String storedFingerprint, String submittedFingerprint) {
     return !storedFingerprint.equals(submittedFingerprint);
@@ -305,13 +291,10 @@ public final class PartyAddressRules {
   /**
    * 判定一条地址当前能否被下游单据选中（规则 A6）。
    *
-   * <p>这是本模块交给 06 采购（发货 / 收货地址）与 10 物流（提货地址）的那份口径，
-   * 与 {@link PartyRules#usableBlock} 同一纪律：<b>唯一实现</b>，
-   * 列表行、详情、默认地址、候选四个出口都调它。前端只把 {@code code} 翻成要显示的话，
-   * 不在浏览器里再判一次。
+   * <p>这是本模块交给 06 采购（发货 / 收货地址）与 10 物流（提货地址）的那份口径， 与 {@link PartyRules#usableBlock}
+   * 同一纪律：<b>唯一实现</b>， 列表行、详情、默认地址、候选四个出口都调它。前端只把 {@code code} 翻成要显示的话， 不在浏览器里再判一次。
    *
-   * <p>判定顺序即优先级：先地址已删除、再主体已删除、再拉黑、再停用。
-   * 对一个已删除的主体报「已停用」是误导。
+   * <p>判定顺序即优先级：先地址已删除、再主体已删除、再拉黑、再停用。 对一个已删除的主体报「已停用」是误导。
    *
    * @return null 表示可选；否则是原因码
    */
@@ -364,7 +347,8 @@ public final class PartyAddressRules {
   /** 用途的固定展示顺序（收货 → 发货 → 提货）。前端徽章与下拉都用它，顺序才稳定。 */
   public static List<String> orderedUsages(List<String> usages) {
     List<String> present = new ArrayList<>();
-    for (String usage : USAGE_ORDER) if (normalizeUsage(usage) != null && contains(usages, usage)) present.add(usage);
+    for (String usage : USAGE_ORDER)
+      if (normalizeUsage(usage) != null && contains(usages, usage)) present.add(usage);
     return present;
   }
 
@@ -380,17 +364,14 @@ public final class PartyAddressRules {
     if (usages == null || usages.isEmpty()) return "未标用途";
     List<String> parts = new ArrayList<>();
     for (String usage : orderedUsages(usages))
-      parts.add(
-          contains(defaultUsages, usage) ? usageLabel(usage) + "（默认）" : usageLabel(usage));
+      parts.add(contains(defaultUsages, usage) ? usageLabel(usage) + "（默认）" : usageLabel(usage));
     return String.join(" · ", parts);
   }
 
   /**
    * 拼一条单行地址（面单 / 列表 / 候选下拉都用它）。
    *
-   * <p>由服务端拼而不是前端拼：各家地址的顺序不一样（美式「城市, 州 邮编」、
-   * 大陆式「省市区街道」），浏览器里拼出来的结果与 10 物流打印出来的对不上
-   * 是最难查的一类问题。
+   * <p>由服务端拼而不是前端拼：各家地址的顺序不一样（美式「城市, 州 邮编」、 大陆式「省市区街道」），浏览器里拼出来的结果与 10 物流打印出来的对不上 是最难查的一类问题。
    */
   public static String oneLine(
       String streetLine1,
@@ -409,7 +390,8 @@ public final class PartyAddressRules {
     addIfPresent(parts, postalCode);
     // 国家**总是**追加（V31 里 country_code NOT NULL）：面单与报关都要它，
     // 而漏掉它的症状是「寄得到、报不了关」。
-    if (countryCode != null && !countryCode.trim().isEmpty()) parts.add(normalizeCountry(countryCode));
+    if (countryCode != null && !countryCode.trim().isEmpty())
+      parts.add(normalizeCountry(countryCode));
     return String.join(" ", parts);
   }
 

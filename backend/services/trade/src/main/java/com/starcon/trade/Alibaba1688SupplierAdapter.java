@@ -15,24 +15,21 @@ import org.springframework.web.client.RestClientResponseException;
 /**
  * 供应商下单 · <b>1688 开放平台</b>实现（默认<b>未接线</b>）。
  *
- * <p>蓝图职责句点名「向 1688 等供应商代发平台下单」，所以这个 vendor 的适配器
- * 真实存在、报文结构也按 1688 开放平台的代发下单形状写；但它
+ * <p>蓝图职责句点名「向 1688 等供应商代发平台下单」，所以这个 vendor 的适配器 真实存在、报文结构也按 1688 开放平台的代发下单形状写；但它
  * <b>默认未接线</b>，原因是仓库里没有它的接入信息：
  *
  * <ul>
- *   <li>没有登记 base_url（不同部署/不同区域的开放平台网关地址不同）；</li>
- *   <li>没有凭证引用 —— 1688 开放平台要 appKey/appSecret + 商家授权 accessToken，
- *       这些必须来自 secret manager（AGENTS.md 安全条：任何 secret 不入仓库）；</li>
- *   <li>没有做过一次真实联调，因此**不能声称它可用</b>。</li>
+ *   <li>没有登记 base_url（不同部署/不同区域的开放平台网关地址不同）；
+ *   <li>没有凭证引用 —— 1688 开放平台要 appKey/appSecret + 商家授权 accessToken， 这些必须来自 secret manager（AGENTS.md
+ *       安全条：任何 secret 不入仓库）；
+ *   <li>没有做过一次真实联调，因此**不能声称它可用</b>。
  * </ul>
  *
- * <p>因此未登记时 {@link #place} 抛 {@link SupplierOrderException}（503），
- * 服务层据此把这张代发单置为 FAILED 并落一条 ORDER_FAILED 告警。
- * 它<b>绝不</b>在未接线时返回一个编造的 supplierOrderNo —— 那会让界面显示
+ * <p>因此未登记时 {@link #place} 抛 {@link SupplierOrderException}（503）， 服务层据此把这张代发单置为 FAILED 并落一条
+ * ORDER_FAILED 告警。 它<b>绝不</b>在未接线时返回一个编造的 supplierOrderNo —— 那会让界面显示
  * 「供应商已接单」而供应商那边根本没有这张单，是本模块最危险的一种假数据。
  *
- * <p>接上之后要改的只有 {@link #postToSupplier} 里的报文与鉴权，
- * 服务层与统一接口一个字都不用动 —— 这正是「每个 vendor 独立包」的意义。
+ * <p>接上之后要改的只有 {@link #postToSupplier} 里的报文与鉴权， 服务层与统一接口一个字都不用动 —— 这正是「每个 vendor 独立包」的意义。
  */
 @Service
 public class Alibaba1688SupplierAdapter implements SupplierOrderGateway {
@@ -89,28 +86,33 @@ public class Alibaba1688SupplierAdapter implements SupplierOrderGateway {
     }
     // 报文按 1688 代发下单的形状组装；鉴权头由 credential_ref 指向的
     // secret 在运行期注入（本仓不持有明文凭证，因此这里只传引用名）。
-    Map<String, Object> payload = Map.of(
-        "orderNo", request.orderNo(),
-        "supplierCode", request.supplierCode(),
-        "currency", request.currencyCode(),
-        "receiver", Map.of(
-            "name", request.recipient().name(),
-            "phone", request.recipient().phone(),
-            "country", request.recipient().countryCode(),
-            "province", request.recipient().province(),
-            "city", request.recipient().city(),
-            "district", request.recipient().district(),
-            "address", request.recipient().addressLine1(),
-            "address2", request.recipient().addressLine2(),
-            "postcode", request.recipient().postcode()),
-        "items", request.lines().stream()
-            .map(l -> Map.of(
-                "skuRef", l.skuRef(),
-                "name", l.skuName(),
-                "spec", l.specSnapshot(),
-                "quantity", l.quantity().toPlainString(),
-                "supplierSkuRef", l.supplierSkuRef()))
-            .toList());
+    Map<String, Object> payload =
+        Map.of(
+            "orderNo", request.orderNo(),
+            "supplierCode", request.supplierCode(),
+            "currency", request.currencyCode(),
+            "receiver",
+                Map.of(
+                    "name", request.recipient().name(),
+                    "phone", request.recipient().phone(),
+                    "country", request.recipient().countryCode(),
+                    "province", request.recipient().province(),
+                    "city", request.recipient().city(),
+                    "district", request.recipient().district(),
+                    "address", request.recipient().addressLine1(),
+                    "address2", request.recipient().addressLine2(),
+                    "postcode", request.recipient().postcode()),
+            "items",
+                request.lines().stream()
+                    .map(
+                        l ->
+                            Map.of(
+                                "skuRef", l.skuRef(),
+                                "name", l.skuName(),
+                                "spec", l.specSnapshot(),
+                                "quantity", l.quantity().toPlainString(),
+                                "supplierSkuRef", l.supplierSkuRef()))
+                    .toList());
     try {
       SupplierAckBody body =
           client
@@ -121,9 +123,7 @@ public class Alibaba1688SupplierAdapter implements SupplierOrderGateway {
               .retrieve()
               .body(SupplierAckBody.class);
       if (body == null || body.supplierOrderNo() == null || body.supplierOrderNo().isBlank()) {
-        throw new SupplierOrderException(
-            "1688 开放平台没有返回供应商单号：这单是否真的下出去了无法确认，"
-                + "本模块不会用空值当作已接单");
+        throw new SupplierOrderException("1688 开放平台没有返回供应商单号：这单是否真的下出去了无法确认，" + "本模块不会用空值当作已接单");
       }
       if (body.outOfStock() != null && body.outOfStock()) {
         // 蓝图点名的「无货」：显式抛出，服务层落 NO_STOCK 告警。
@@ -161,8 +161,9 @@ public class Alibaba1688SupplierAdapter implements SupplierOrderGateway {
             "select base_url,credential_ref,status,wired"
                 + " from fulfillment_dropship_supplier_endpoint"
                 + " where vendor_code = 'ALIBABA_1688' and status = 'ACTIVE' and wired");
-    return row == null ? null : new Endpoint(row.get("base_url", String.class),
-        row.get("credential_ref", String.class));
+    return row == null
+        ? null
+        : new Endpoint(row.get("base_url", String.class), row.get("credential_ref", String.class));
   }
 
   private record Endpoint(String baseUrl, String credentialRef) {}

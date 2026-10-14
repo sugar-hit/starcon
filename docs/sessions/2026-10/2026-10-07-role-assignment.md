@@ -49,6 +49,7 @@
 ## 文件清单
 
 新增：
+
 - `backend/services/identity/src/main/resources/db/migration/V47__member_role_assignment.sql`
 - `backend/services/identity/src/main/java/com/starcon/identity/RoleAssignmentController.java`
 - `backend/services/identity/src/test/java/com/starcon/identity/RoleAssignmentIntegrationTest.java`（15 条）
@@ -57,6 +58,7 @@
 - `apps/web/src/app/org/role-assignments/page.tsx`
 
 修改：
+
 - `AdministrationController.assignments()`：显式列名 + timestamptz cast + DEPARTMENT 范围行落库
 - `AdministrationController.transfer()`：owner 转移的 upsert 改显式列名并复位撤销列
 - `LocalBootstrap`：本地租户初始 OWNER 分配改显式列名

@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 /**
  * 3.1.2.3 外部条码 scheme 与校验位的纯函数单测。
  *
- * <p>条码写错的代价出现在**拣货现场**（08 扫不出来、扫错货），而校验发生在导入那一刻。
- * 所以校验必须便宜、可穷举、可单测——这里把 GS1 mod-10 的每种 scheme 都钉一遍。
+ * <p>条码写错的代价出现在**拣货现场**（08 扫不出来、扫错货），而校验发生在导入那一刻。 所以校验必须便宜、可穷举、可单测——这里把 GS1 mod-10 的每种 scheme 都钉一遍。
  */
 class BarcodeSchemeTest {
 
@@ -30,8 +29,7 @@ class BarcodeSchemeTest {
   @Test
   void rejectsWrongLengthWrongCharsetAndWrongCheckDigit() {
     // 位数不对
-    assertThat(BarcodeScheme.problem("EAN13", "400638133393"))
-        .contains("13 位").contains("12 位");
+    assertThat(BarcodeScheme.problem("EAN13", "400638133393")).contains("13 位").contains("12 位");
     assertThat(BarcodeScheme.problem("UPCA", "0360002914")).contains("12 位");
     // 含非数字
     assertThat(BarcodeScheme.problem("EAN13", "40063813339X1")).contains("只能由数字组成");

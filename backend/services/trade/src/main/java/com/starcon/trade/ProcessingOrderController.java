@@ -18,16 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 6.4.1.1 加工单。
  *
- * <p>命名空间 {@code /trade/processing}：卷 06 的前端入口是 {@code /purchase/processing}，
- * 浏览器只经 /api/trade 代理访问；后端路径按**服务**命名空间走，与 9.3.2.2
- * （前端 /orders、后端 /trade/fulfillment/routing）同一纪律。
+ * <p>命名空间 {@code /trade/processing}：卷 06 的前端入口是 {@code /purchase/processing}， 浏览器只经 /api/trade
+ * 代理访问；后端路径按**服务**命名空间走，与 9.3.2.2 （前端 /orders、后端 /trade/fulfillment/routing）同一纪律。
  *
  * <p>权限码用 {@code trade.processing.read} / {@code trade.processing.update}：
  * 下达一张加工单等于让仓库按它领料、让工厂按它备料，不是读权限能带过去的动作。
  *
- * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
- * 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
+ * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code app.current_tenant}，由
+ * RLS 在数据库层强制隔离。 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
  */
 @RestController
 @RequestMapping("/trade/processing")
@@ -52,8 +50,7 @@ public class ProcessingOrderController {
   /**
    * 本模块的能力与上下游可用性。
    *
-   * <p>存在的理由与 9.3.2.2 一致：把「哪些输入真有依据」「库存动作归哪个服务」
-   * 「哪些下游还没交付」显式报出来，而不是让调用方从 404 或空数组里去猜。
+   * <p>存在的理由与 9.3.2.2 一致：把「哪些输入真有依据」「库存动作归哪个服务」 「哪些下游还没交付」显式报出来，而不是让调用方从 404 或空数组里去猜。
    */
   @GetMapping("/capabilities")
   public ProcessingCapabilities capabilities(
@@ -108,8 +105,8 @@ public class ProcessingOrderController {
   /**
    * 按 BOM 版本试算组件需求量（只读，不落库）。
    *
-   * <p>口径来自 catalog 3.5.2.1 的规则 R7（单位用量 × 产量 × (1 + 损耗率/100)，
-   * 6 位小数 HALF_UP，损耗率是<b>百分数</b>），本服务不重算、不取整。
+   * <p>口径来自 catalog 3.5.2.1 的规则 R7（单位用量 × 产量 × (1 + 损耗率/100)， 6 位小数
+   * HALF_UP，损耗率是<b>百分数</b>），本服务不重算、不取整。
    */
   @PostMapping("/requirements")
   public RequirementPreview previewRequirement(
@@ -151,8 +148,7 @@ public class ProcessingOrderController {
   /**
    * 新建加工单（草稿）。
    *
-   * <p>组件领用记录在创建时就按 catalog 的 R7 算好并冻结：冻结必须发生在
-   * 「这一版 BOM 还说得清是谁」的时刻，草稿与下达之间 BOM 可能已接替新版本。
+   * <p>组件领用记录在创建时就按 catalog 的 R7 算好并冻结：冻结必须发生在 「这一版 BOM 还说得清是谁」的时刻，草稿与下达之间 BOM 可能已接替新版本。
    */
   @PostMapping("/orders")
   public ProcessingOrderSaved createOrder(
@@ -171,7 +167,8 @@ public class ProcessingOrderController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID orderId,
       @Valid @RequestBody ProcessingStatusInput input) {
-    return call(auth, "processing.update", a -> processing.advanceStatus(orderId, input, a.userId()));
+    return call(
+        auth, "processing.update", a -> processing.advanceStatus(orderId, input, a.userId()));
   }
 
   /** 进度登记（不改生命周期，只记「推进到哪、报了多少」）。 */
@@ -180,21 +177,22 @@ public class ProcessingOrderController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID orderId,
       @Valid @RequestBody ProcessingProgressInput input) {
-    return call(auth, "processing.update", a -> processing.registerProgress(orderId, input, a.userId()));
+    return call(
+        auth, "processing.update", a -> processing.registerProgress(orderId, input, a.userId()));
   }
 
   /**
    * 登记组件领用进度。
    *
-   * <p>记的是「已领了多少」，<b>不改库存</b> —— 组件出库与成品入库由 warehouse
-   * 在它自己的一个本地事务里完成（蓝图硬要求）。
+   * <p>记的是「已领了多少」，<b>不改库存</b> —— 组件出库与成品入库由 warehouse 在它自己的一个本地事务里完成（蓝图硬要求）。
    */
   @PostMapping("/orders/{orderId}/components/issue")
   public ProcessingOrderSaved issueComponent(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID orderId,
       @Valid @RequestBody IssueInput input) {
-    return call(auth, "processing.update", a -> processing.issueComponent(orderId, input, a.userId()));
+    return call(
+        auth, "processing.update", a -> processing.issueComponent(orderId, input, a.userId()));
   }
 
   // 裸路径 /trade/processing **刻意不放行**到 api-proxy：后端没有「一条不存在的

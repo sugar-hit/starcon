@@ -22,28 +22,25 @@ import org.junit.jupiter.api.Test;
  * <p>蓝图对本模块点名的东西逐条对应到断言上：
  *
  * <ol>
- *   <li><b>金额区间、跨法人、跨部门、新供应商、高风险商品五类触发条件</b>——每一条都要能真的配出来，
- *       并通过 {@code /evaluate} 试算证明「命中的是它、没命中别的」。
+ *   <li><b>金额区间、跨法人、跨部门、新供应商、高风险商品五类触发条件</b>——每一条都要能真的配出来， 并通过 {@code /evaluate} 试算证明「命中的是它、没命中别的」。
  *   <li><b>免审要设上限金额</b>——免审没有上限必须 400；上限为 0 也必须 400。
- *   <li><b>免审不得被用来绕过大额管控</b>——免审规则把任一高风险条件标成 REQUIRED 必须 400
- *       （这是绕过大额管控的第二种走法，光卡上限金额不够）。
+ *   <li><b>免审不得被用来绕过大额管控</b>——免审规则把任一高风险条件标成 REQUIRED 必须 400 （这是绕过大额管控的第二种走法，光卡上限金额不够）。
  *   <li><b>先命中先生效</b>——priority 唯一、按 priority 升序判定；一条都没命中时走规则集的生效策略。
- *   <li><b>输出「规则集 + 生效策略」</b>——{@code /effective-policy} 回答「这个单据类型现在受不受管控、
- *       有哪些免审额度」；没配就是 {@code controlled=false}，即默认放行。
+ *   <li><b>输出「规则集 + 生效策略」</b>——{@code /effective-policy} 回答「这个单据类型现在受不受管控、 有哪些免审额度」；没配就是 {@code
+ *       controlled=false}，即默认放行。
  * </ol>
  *
  * <p>另外实跑：金额 BigDecimal 与时间 {@code timestamptz} 的<b>写回值</b>断言、版本随保存 +1、
- * 规则指向别的单据类型的流程必须拒、结构体检、审计留痕，以及多租户三断言
- * （两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户）。
+ * 规则指向别的单据类型的流程必须拒、结构体检、审计留痕，以及多租户三断言 （两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户）。
  *
- * <p>本模块刻意<b>不</b>覆盖：发起审批、审批实例、待办列表 —— 那是 17.4.2.1 的运行时。
- * {@code /evaluate} 只对已保存配置做只读试算，不产生任何审批实例。
+ * <p>本模块刻意<b>不</b>覆盖：发起审批、审批实例、待办列表 —— 那是 17.4.2.1 的运行时。 {@code /evaluate} 只对已保存配置做只读试算，不产生任何审批实例。
  */
 class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
 
   @BeforeEach
   void resetModule() throws Exception {
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
         var s = c.createStatement()) {
       // 本模块的用例要为每个单据类型准备一条「生效」流程，而 approval_flow 上有
       // UNIQUE(tenant_id, document_type_code) WHERE status='ACTIVE' —— 不清就会撞唯一索引。
@@ -61,8 +58,7 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
   private String tag;
 
   /**
-   * 一个用例里可能要给多个单据类型各建一条流程，角色编码必须逐次唯一，
-   * 否则第二次 POST /identity/roles 会撞 UNIQUE(tenant_id, code) 得到 409。
+   * 一个用例里可能要给多个单据类型各建一条流程，角色编码必须逐次唯一， 否则第二次 POST /identity/roles 会撞 UNIQUE(tenant_id, code) 得到 409。
    * role 的 code 允许 {@code [A-Z][A-Z0-9_-]{0,63}}，追加序号后仍合法。
    */
   private int roleSeq;
@@ -70,17 +66,27 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
   private UUID roleId(String token, String code) throws Exception {
     String unique = code + "-" + (roleSeq++);
     return UUID.fromString(
-        request(token, "POST", "/identity/roles",
-            Map.of("code", unique, "name", "审批角色 " + unique, "status", "ACTIVE",
-                "permissions", List.of("identity.approval_flow.read")),
-            200).asText());
+        request(
+                token,
+                "POST",
+                "/identity/roles",
+                Map.of(
+                    "code",
+                    unique,
+                    "name",
+                    "审批角色 " + unique,
+                    "status",
+                    "ACTIVE",
+                    "permissions",
+                    List.of("identity.approval_flow.read")),
+                200)
+            .asText());
   }
 
   /**
    * 先在 17.4.1.1 注册一条<b>生效</b>审批流。
    *
-   * <p>本模块的送审规则必须指向一条已存在的生效流程，所以每个需要送审的用例都得先有它 ——
-   * 这正是「先注册流程、再配规则」这条写入顺序约束的体现。
+   * <p>本模块的送审规则必须指向一条已存在的生效流程，所以每个需要送审的用例都得先有它 —— 这正是「先注册流程、再配规则」这条写入顺序约束的体现。
    */
   private UUID activeFlow(String token, String documentType, String name) throws Exception {
     var role = roleId(token, "AR" + tag);
@@ -146,14 +152,21 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     return s;
   }
 
-  private UUID createSet(String token, String documentType, String name, String defaultAction, List<?> rules)
+  private UUID createSet(
+      String token, String documentType, String name, String defaultAction, List<?> rules)
       throws Exception {
     return UUID.fromString(
-        request(token, "POST", "/identity/approval-rules",
-            ruleSet(documentType, name, "ACTIVE", defaultAction, rules), 200).asText());
+        request(
+                token,
+                "POST",
+                "/identity/approval-rules",
+                ruleSet(documentType, name, "ACTIVE", defaultAction, rules),
+                200)
+            .asText());
   }
 
-  private JsonNode evaluate(String token, String documentType, String currency, String amount, Map<String, Object> flags)
+  private JsonNode evaluate(
+      String token, String documentType, String currency, String amount, Map<String, Object> flags)
       throws Exception {
     var body = new LinkedHashMap<String, Object>();
     body.put("documentTypeCode", documentType);
@@ -168,8 +181,7 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
   }
 
   private JsonNode ruleNamed(JsonNode rules, String name) {
-    for (JsonNode r : rules)
-      if (name.equals(r.get("ruleName").asText())) return r;
+    for (JsonNode r : rules) if (name.equals(r.get("ruleName").asText())) return r;
     return null;
   }
 
@@ -195,24 +207,42 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     byAmount.put("amountCurrencyCode", "USD");
     byAmount.put("amountMinAmount", new BigDecimal("5000"));
 
-    UUID id = createSet(token, "PURCHASE_ORDER", "采购触发规则 " + tag, "SUBMIT_FOR_APPROVAL",
-        List.of(byCrossEntity, byCrossDept, byNewVendor, byRisk, byAmount));
+    UUID id =
+        createSet(
+            token,
+            "PURCHASE_ORDER",
+            "采购触发规则 " + tag,
+            "SUBMIT_FOR_APPROVAL",
+            List.of(byCrossEntity, byCrossDept, byNewVendor, byRisk, byAmount));
 
     var rules = detail(token, id).get("rules");
     assertThat(rules).hasSize(5);
     // 三态写回：填了 REQUIRED 的那维是 REQUIRED，其余保持 ANY（不约束），不被压成 false。
-    assertThat(ruleNamed(rules, "跨法人必审 " + tag).get("crossLegalEntity").asText()).isEqualTo("REQUIRED");
+    assertThat(ruleNamed(rules, "跨法人必审 " + tag).get("crossLegalEntity").asText())
+        .isEqualTo("REQUIRED");
     assertThat(ruleNamed(rules, "跨法人必审 " + tag).get("crossDepartment").asText()).isEqualTo("ANY");
     assertThat(ruleNamed(rules, "大额必审 " + tag).get("amountCurrencyCode").asText()).isEqualTo("USD");
 
     // 每条条件都真的能命中，且只命中它自己那件事。
-    assertThat(evaluate(token, "PURCHASE_ORDER", "USD", "100", Map.of("crossLegalEntity", true)).get("matchedRuleName").asText())
+    assertThat(
+            evaluate(token, "PURCHASE_ORDER", "USD", "100", Map.of("crossLegalEntity", true))
+                .get("matchedRuleName")
+                .asText())
         .isEqualTo("跨法人必审 " + tag);
-    assertThat(evaluate(token, "PURCHASE_ORDER", "USD", "100", Map.of("crossDepartment", true)).get("matchedRuleName").asText())
+    assertThat(
+            evaluate(token, "PURCHASE_ORDER", "USD", "100", Map.of("crossDepartment", true))
+                .get("matchedRuleName")
+                .asText())
         .isEqualTo("跨部门必审 " + tag);
-    assertThat(evaluate(token, "PURCHASE_ORDER", "USD", "100", Map.of("newVendor", true)).get("matchedRuleName").asText())
+    assertThat(
+            evaluate(token, "PURCHASE_ORDER", "USD", "100", Map.of("newVendor", true))
+                .get("matchedRuleName")
+                .asText())
         .isEqualTo("新供应商必审 " + tag);
-    assertThat(evaluate(token, "PURCHASE_ORDER", "USD", "100", Map.of("highRiskProduct", true)).get("matchedRuleName").asText())
+    assertThat(
+            evaluate(token, "PURCHASE_ORDER", "USD", "100", Map.of("highRiskProduct", true))
+                .get("matchedRuleName")
+                .asText())
         .isEqualTo("高风险商品必审 " + tag);
     var big = evaluate(token, "PURCHASE_ORDER", "USD", "8000", Map.of());
     assertThat(big.get("matchedRuleName").asText()).isEqualTo("大额必审 " + tag);
@@ -239,14 +269,19 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     var any = rule("任何情况都送审 " + tag, 2, flow);
     any.put("crossLegalEntity", "ANY");
 
-    createSet(token, "STOCK_ADJUSTMENT", "三态规则 " + tag, "SUBMIT_FOR_APPROVAL", List.of(forbid, any));
+    createSet(
+        token, "STOCK_ADJUSTMENT", "三态规则 " + tag, "SUBMIT_FOR_APPROVAL", List.of(forbid, any));
 
-    assertThat(evaluate(token, "STOCK_ADJUSTMENT", "USD", "50", Map.of("crossLegalEntity", false))
-            .get("matchedRuleName").asText())
+    assertThat(
+            evaluate(token, "STOCK_ADJUSTMENT", "USD", "50", Map.of("crossLegalEntity", false))
+                .get("matchedRuleName")
+                .asText())
         .isEqualTo("仅不跨法人时送审 " + tag);
     // 跨法人的提交跳过 FORBIDDEN 那条，落到 ANY 那条 —— 证明 FORBIDDEN 真的是「要求不成立」。
-    assertThat(evaluate(token, "STOCK_ADJUSTMENT", "USD", "50", Map.of("crossLegalEntity", true))
-            .get("matchedRuleName").asText())
+    assertThat(
+            evaluate(token, "STOCK_ADJUSTMENT", "USD", "50", Map.of("crossLegalEntity", true))
+                .get("matchedRuleName")
+                .asText())
         .isEqualTo("任何情况都送审 " + tag);
   }
 
@@ -262,21 +297,42 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
 
     var noCeiling = exempt("无上限免审 " + tag, 1, "USD", null);
     noCeiling.remove("amountMaxAmount");
-    request(token, "POST", "/identity/approval-rules",
-        ruleSet("REFUND", "无上限规则集 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "REFUND",
+            "无上限规则集 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(noCeiling, rule("大额送审 " + tag, 2, flow))),
         400);
 
     var zeroCeiling = exempt("零额度免审 " + tag, 1, "USD", "0");
-    request(token, "POST", "/identity/approval-rules",
-        ruleSet("REFUND", "零额度规则集 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "REFUND",
+            "零额度规则集 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(zeroCeiling, rule("兜底送审 " + tag, 2, flow))),
         400);
 
     // 上限为负同样被拒。
     var negative = exempt("负额度免审 " + tag, 1, "USD", "-5");
-    request(token, "POST", "/identity/approval-rules",
-        ruleSet("REFUND", "负额度规则集 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "REFUND",
+            "负额度规则集 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(negative, rule("兜底送审2 " + tag, 2, flow))),
         400);
 
@@ -293,11 +349,19 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     var fallback = rule("兜底送审 " + tag, 9, flow);
 
     // 免审规则把四个高风险条件之一标成 REQUIRED，就是「小额免审顺手免掉跨法人大额」的写法，必须拒。
-    for (var dimension : List.of("crossLegalEntity", "crossDepartment", "newVendor", "highRiskProduct")) {
+    for (var dimension :
+        List.of("crossLegalEntity", "crossDepartment", "newVendor", "highRiskProduct")) {
       var r = exempt("危险免审 " + tag, 1, "USD", "1000");
       r.put(dimension, "REQUIRED");
-      request(token, "POST", "/identity/approval-rules",
-          ruleSet("VENDOR_ONBOARD", "危险免审规则集 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+      request(
+          token,
+          "POST",
+          "/identity/approval-rules",
+          ruleSet(
+              "VENDOR_ONBOARD",
+              "危险免审规则集 " + tag,
+              "ACTIVE",
+              "SUBMIT_FOR_APPROVAL",
               List.of(r, fallback)),
           400);
     }
@@ -305,14 +369,22 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     var narrowed = exempt("不跨法人才免审 " + tag, 1, "USD", "1000");
     narrowed.put("crossLegalEntity", "FORBIDDEN");
     narrowed.put("newVendor", "FORBIDDEN");
-    UUID id = createSet(token, "VENDOR_ONBOARD", "收窄免审规则集 " + tag, "SUBMIT_FOR_APPROVAL",
-        List.of(narrowed, fallback));
+    UUID id =
+        createSet(
+            token,
+            "VENDOR_ONBOARD",
+            "收窄免审规则集 " + tag,
+            "SUBMIT_FOR_APPROVAL",
+            List.of(narrowed, fallback));
     var rules = detail(token, id).get("rules");
-    assertThat(ruleNamed(rules, "不跨法人才免审 " + tag).get("crossLegalEntity").asText()).isEqualTo("FORBIDDEN");
+    assertThat(ruleNamed(rules, "不跨法人才免审 " + tag).get("crossLegalEntity").asText())
+        .isEqualTo("FORBIDDEN");
     assertThat(ruleNamed(rules, "不跨法人才免审 " + tag).get("newVendor").asText()).isEqualTo("FORBIDDEN");
     // 跨法门的提交不得享受这条免审，落到兜底送审。
-    assertThat(evaluate(token, "VENDOR_ONBOARD", "USD", "800", Map.of("crossLegalEntity", true))
-            .get("matchedRuleName").asText())
+    assertThat(
+            evaluate(token, "VENDOR_ONBOARD", "USD", "800", Map.of("crossLegalEntity", true))
+                .get("matchedRuleName")
+                .asText())
         .isEqualTo("兜底送审 " + tag);
   }
 
@@ -328,13 +400,15 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     big.put("amountCurrencyCode", "USD");
     big.put("amountMinAmount", new BigDecimal("500"));
 
-    createSet(token, "STOCK_TRANSFER", "免审分界规则集 " + tag, "SUBMIT_FOR_APPROVAL", List.of(small, big));
+    createSet(
+        token, "STOCK_TRANSFER", "免审分界规则集 " + tag, "SUBMIT_FOR_APPROVAL", List.of(small, big));
 
     // 上限是闭区间外的边界：500 免审，500.000001 起送审（半开区间 [0,500) 与 [500,…)）。
     var under = evaluate(token, "STOCK_TRANSFER", "USD", "499.999999", Map.of());
     assertThat(under.get("decision").asText()).isEqualTo("EXEMPT");
     assertThat(under.get("matchedRuleName").asText()).isEqualTo("小额免审 " + tag);
-    assertThat(under.get("exemptionCeilingAmount").decimalValue()).isEqualByComparingTo("500.000000");
+    assertThat(under.get("exemptionCeilingAmount").decimalValue())
+        .isEqualByComparingTo("500.000000");
     assertThat(under.get("exemptionCeilingCurrency").asText()).isEqualTo("USD");
 
     var over = evaluate(token, "STOCK_TRANSFER", "USD", "500", Map.of());
@@ -359,36 +433,67 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     // 免审规则带 targetFlowId：语义自相矛盾（免审就是不走审批），400。
     var exemptWithFlow = exempt("免审却指向流程 " + tag, 1, "USD", "500");
     exemptWithFlow.put("targetFlowId", flow);
-    request(token, "POST", "/identity/approval-rules",
-        ruleSet("PRICE_CHANGE", "免审带流程 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "PRICE_CHANGE",
+            "免审带流程 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(exemptWithFlow, rule("兜底 " + tag, 2, flow))),
         400);
 
     // 送审规则不指向流程：400。
     var submitNoFlow = rule("送审无流程 " + tag, 1, null);
     submitNoFlow.remove("targetFlowId");
-    request(token, "POST", "/identity/approval-rules",
-        ruleSet("PRICE_CHANGE", "送审无流程 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
-            List.of(submitNoFlow)),
+    request(
+        token,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "PRICE_CHANGE", "送审无流程 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL", List.of(submitNoFlow)),
         400);
 
     // 指向不存在的流程：400。
-    request(token, "POST", "/identity/approval-rules",
-        ruleSet("PRICE_CHANGE", "悬空流程 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "PRICE_CHANGE",
+            "悬空流程 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(rule("悬空 " + tag, 1, UUID.randomUUID()))),
         400);
 
     // 指向**别的单据类型**的生效流程：400（跨单据类型送审是笔糊涂账）。
     UUID otherFlow = activeFlow(token, "CREDIT_NOTE", "贷项审批流 " + tag);
-    request(token, "POST", "/identity/approval-rules",
-        ruleSet("PRICE_CHANGE", "跨单据类型 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "PRICE_CHANGE",
+            "跨单据类型 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(rule("跨类型 " + tag, 1, otherFlow))),
         400);
 
     // 指向草稿状态的流程：400（送审必须有可走的流程）。
     UUID draftFlow = draftFlow(token, "WRITE_OFF", "核销草稿流 " + tag);
-    request(token, "POST", "/identity/approval-rules",
-        ruleSet("PRICE_CHANGE", "指向草稿流程 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "PRICE_CHANGE",
+            "指向草稿流程 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(rule("指向草稿 " + tag, 1, draftFlow))),
         400);
   }
@@ -419,15 +524,32 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     var token = login();
     tag = suffix();
     // MEMBER_OFFBOARD 在出厂码表里，但本租户没为它注册任何流程。
-    request(token, "POST", "/identity/approval-rules",
-        ruleSet("MEMBER_OFFBOARD", "无流程规则集 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "MEMBER_OFFBOARD",
+            "无流程规则集 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(exempt("免审 " + tag, 1, "USD", "500"))),
         400);
     // 设为草稿则允许存下来：草稿不参与管控，顺序上可以先存后配流程。
-    UUID id = UUID.fromString(request(token, "POST", "/identity/approval-rules",
-        ruleSet("MEMBER_OFFBOARD", "草稿规则集 " + tag, "DRAFT", "SUBMIT_FOR_APPROVAL",
-            List.of(exempt("免审 " + tag, 1, "USD", "500"))),
-        200).asText());
+    UUID id =
+        UUID.fromString(
+            request(
+                    token,
+                    "POST",
+                    "/identity/approval-rules",
+                    ruleSet(
+                        "MEMBER_OFFBOARD",
+                        "草稿规则集 " + tag,
+                        "DRAFT",
+                        "SUBMIT_FOR_APPROVAL",
+                        List.of(exempt("免审 " + tag, 1, "USD", "500"))),
+                    200)
+                .asText());
     assertThat(detail(token, id).get("ruleSet").get("status").asText()).isEqualTo("DRAFT");
   }
 
@@ -442,13 +564,24 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID flow = activeFlow(token, "DATA_EXPORT", "导出审批流 " + tag);
 
     // 默认免审 + 存在送审规则 = 静默放行漏洞，配置期就拒。
-    request(token, "POST", "/identity/approval-rules",
-        ruleSet("DATA_EXPORT", "默认免审 " + tag, "ACTIVE", "EXEMPT",
+    request(
+        token,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "DATA_EXPORT",
+            "默认免审 " + tag,
+            "ACTIVE",
+            "EXEMPT",
             List.of(rule("导出必审 " + tag, 1, flow))),
         400);
 
     // 默认免审 + 纯免审规则集是自洽的，允许。
-    createSet(token, "DATA_EXPORT", "整体免审 " + tag, "EXEMPT",
+    createSet(
+        token,
+        "DATA_EXPORT",
+        "整体免审 " + tag,
+        "EXEMPT",
         List.of(exempt("小额免审 " + tag, 1, "USD", "1000")));
     var fallback = evaluate(token, "DATA_EXPORT", "USD", "5000", Map.of());
     assertThat(fallback.get("source").asText()).isEqualTo("DEFAULT");
@@ -462,21 +595,40 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     tag = suffix();
     UUID flow = activeFlow(token, "PURCHASE_PAYMENT", "付款审批流 " + tag);
 
-    UUID id = createSet(token, "PURCHASE_PAYMENT", "付款规则 " + tag, "SUBMIT_FOR_APPROVAL",
-        List.of(exempt("小额免审 " + tag, 1, "USD", "300"), rule("其余送审 " + tag, 2, flow)));
+    UUID id =
+        createSet(
+            token,
+            "PURCHASE_PAYMENT",
+            "付款规则 " + tag,
+            "SUBMIT_FOR_APPROVAL",
+            List.of(exempt("小额免审 " + tag, 1, "USD", "300"), rule("其余送审 " + tag, 2, flow)));
     assertThat(detail(token, id).get("ruleSet").get("submitCount").asInt()).isEqualTo(1);
     assertThat(detail(token, id).get("ruleSet").get("exemptionCount").asInt()).isEqualTo(1);
     assertThat(detail(token, id).get("ruleSet").get("ruleCount").asInt()).isEqualTo(2);
 
     // 同一单据类型再来一条生效规则集：409。
-    request(token, "POST", "/identity/approval-rules",
-        ruleSet("PURCHASE_PAYMENT", "重复生效 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "PURCHASE_PAYMENT",
+            "重复生效 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(rule("重复 " + tag, 1, flow))),
         409);
 
     // 建后不可改单据类型：400。
-    request(token, "PUT", "/identity/approval-rules/" + id,
-        ruleSet("REFUND", "改单据类型 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "PUT",
+        "/identity/approval-rules/" + id,
+        ruleSet(
+            "REFUND",
+            "改单据类型 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(rule("改名 " + tag, 1, flow))),
         400);
   }
@@ -486,12 +638,26 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     var token = login();
     tag = suffix();
     UUID flow = activeFlow(token, "STOCK_ADJUSTMENT", "调整审批流2 " + tag);
-    request(token, "POST", "/identity/approval-rules",
-        ruleSet("STOCK_ADJUSTMENT", "同序规则 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "STOCK_ADJUSTMENT",
+            "同序规则 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(rule("甲 " + tag, 1, flow), rule("乙 " + tag, 1, flow))),
         400);
-    request(token, "POST", "/identity/approval-rules",
-        ruleSet("STOCK_ADJUSTMENT", "重名规则 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "STOCK_ADJUSTMENT",
+            "重名规则 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(rule("同名 " + tag, 1, flow), rule("同名 " + tag, 2, flow))),
         400);
   }
@@ -503,8 +669,13 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     UUID flow = activeFlow(token, "PURCHASE_ORDER", "采购审批流3 " + tag);
 
     // 没配规则集的出厂单据类型：默认放行，这是蓝图那句「未注册的变更类操作默认可直接执行」。
-    var uncontrolled = request(token, "GET",
-        "/identity/approval-rules/effective-policy?documentTypeCode=ROLE_GRANT", null, 200);
+    var uncontrolled =
+        request(
+            token,
+            "GET",
+            "/identity/approval-rules/effective-policy?documentTypeCode=ROLE_GRANT",
+            null,
+            200);
     assertThat(uncontrolled.get("controlled").asBoolean()).isFalse();
     assertThat(uncontrolled.get("activeRuleSetId").isNull()).isTrue();
     assertThat(evaluate(token, "ROLE_GRANT", "USD", "1", Map.of()).get("source").asText())
@@ -512,12 +683,20 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
 
     var usdExempt = exempt("美元小额免审 " + tag, 1, "USD", "500");
     usdExempt.put("crossLegalEntity", "FORBIDDEN");
-    createSet(token, "PURCHASE_ORDER", "采购规则 " + tag, "SUBMIT_FOR_APPROVAL",
-        List.of(usdExempt, exempt("欧元小额免审 " + tag, 2, "EUR", "400"),
-            rule("其余送审 " + tag, 3, flow)));
+    createSet(
+        token,
+        "PURCHASE_ORDER",
+        "采购规则 " + tag,
+        "SUBMIT_FOR_APPROVAL",
+        List.of(usdExempt, exempt("欧元小额免审 " + tag, 2, "EUR", "400"), rule("其余送审 " + tag, 3, flow)));
 
-    var policy = request(token, "GET",
-        "/identity/approval-rules/effective-policy?documentTypeCode=PURCHASE_ORDER", null, 200);
+    var policy =
+        request(
+            token,
+            "GET",
+            "/identity/approval-rules/effective-policy?documentTypeCode=PURCHASE_ORDER",
+            null,
+            200);
     assertThat(policy.get("controlled").asBoolean()).isTrue();
     assertThat(policy.get("documentTypeName").asText()).isEqualTo("采购订单");
     assertThat(policy.get("activeFlowId").asText()).isEqualTo(flow.toString());
@@ -540,14 +719,23 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
 
     var disabled = exempt("停用的免审 " + tag, 1, "USD", "500");
     disabled.put("status", "DISABLED");
-    createSet(token, "STOCK_TRANSFER", "含停用规则 " + tag, "SUBMIT_FOR_APPROVAL",
+    createSet(
+        token,
+        "STOCK_TRANSFER",
+        "含停用规则 " + tag,
+        "SUBMIT_FOR_APPROVAL",
         List.of(disabled, rule("兜底送审 " + tag, 2, flow)));
 
     var result = evaluate(token, "STOCK_TRANSFER", "USD", "100", Map.of());
     assertThat(result.get("matchedRuleName").asText()).isEqualTo("兜底送审 " + tag);
     // 停用规则不出现在生效策略的免审额度里 —— 停用等于这条额度当前不存在。
-    var policy = request(token, "GET",
-        "/identity/approval-rules/effective-policy?documentTypeCode=STOCK_TRANSFER", null, 200);
+    var policy =
+        request(
+            token,
+            "GET",
+            "/identity/approval-rules/effective-policy?documentTypeCode=STOCK_TRANSFER",
+            null,
+            200);
     assertThat(policy.get("exemptionCeilings")).isEmpty();
   }
 
@@ -557,8 +745,13 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     tag = suffix();
     UUID flow = activeFlow(token, "REFUND", "退款审批流 " + tag);
 
-    UUID id = createSet(token, "REFUND", "待删规则集 " + tag, "SUBMIT_FOR_APPROVAL",
-        List.of(exempt("小额免审 " + tag, 1, "USD", "300"), rule("其余送审 " + tag, 2, flow)));
+    UUID id =
+        createSet(
+            token,
+            "REFUND",
+            "待删规则集 " + tag,
+            "SUBMIT_FOR_APPROVAL",
+            List.of(exempt("小额免审 " + tag, 1, "USD", "300"), rule("其余送审 " + tag, 2, flow)));
     assertThat(detail(token, id).get("ruleSet").get("ruleCount").asInt()).isEqualTo(2);
 
     // 规则引用的流程不允许被静默删掉：那会让管控无声地掉回默认放行（RESTRICT）。
@@ -566,17 +759,26 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
 
     request(token, "DELETE", "/identity/approval-rules/" + id, null, 200);
     request(token, "GET", "/identity/approval-rules/" + id, null, 404);
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
         var s = c.createStatement();
-        var rs = s.executeQuery(
-            "select count(*) from approval_trigger_rule where rule_set_id='" + id + "'")) {
+        var rs =
+            s.executeQuery(
+                "select count(*) from approval_trigger_rule where rule_set_id='" + id + "'")) {
       rs.next();
       assertThat(rs.getInt(1)).isZero();
     }
     // 规则集没了之后该单据类型回到默认放行。
-    assertThat(request(token, "GET",
-        "/identity/approval-rules/effective-policy?documentTypeCode=REFUND", null, 200)
-        .get("controlled").asBoolean()).isFalse();
+    assertThat(
+            request(
+                    token,
+                    "GET",
+                    "/identity/approval-rules/effective-policy?documentTypeCode=REFUND",
+                    null,
+                    200)
+                .get("controlled")
+                .asBoolean())
+        .isFalse();
   }
 
   // ------------------------------------------------------------------
@@ -591,34 +793,58 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     var before = OffsetDateTime.now(ZoneOffset.UTC).minusSeconds(2);
 
     var exemptRule = exempt("小额免审 " + tag, 1, "USD", "1000.500000");
-    UUID id = UUID.fromString(request(token, "POST", "/identity/approval-rules",
-        ruleSet("CREDIT_NOTE", "贷项规则 " + tag, "DRAFT", "SUBMIT_FOR_APPROVAL",
-            List.of(exemptRule, rule("其余送审 " + tag, 2, flow))),
-        200).asText());
+    UUID id =
+        UUID.fromString(
+            request(
+                    token,
+                    "POST",
+                    "/identity/approval-rules",
+                    ruleSet(
+                        "CREDIT_NOTE",
+                        "贷项规则 " + tag,
+                        "DRAFT",
+                        "SUBMIT_FOR_APPROVAL",
+                        List.of(exemptRule, rule("其余送审 " + tag, 2, flow))),
+                    200)
+                .asText());
 
     var created = detail(token, id).get("ruleSet");
     assertThat(created.get("version").asLong()).isZero();
     assertThat(created.get("status").asText()).isEqualTo("DRAFT");
     // timestamptz 写回值必须落在请求前后的两个墙钟之间：用 LocalDateTime 绑会静默偏 -28800 秒。
     assertThat(OffsetDateTime.parse(created.get("createdAt").asText()))
-        .isAfter(before).isBefore(OffsetDateTime.now(ZoneOffset.UTC).plusSeconds(5));
+        .isAfter(before)
+        .isBefore(OffsetDateTime.now(ZoneOffset.UTC).plusSeconds(5));
 
     // 金额按 numeric(19,6) 原样写回，不做浮点也不截断小数位。
     var stored = ruleNamed(detail(token, id).get("rules"), "小额免审 " + tag);
     assertThat(stored.get("amountMaxAmount").decimalValue()).isEqualByComparingTo("1000.500000");
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
         var s = c.createStatement();
-        var rs = s.executeQuery(
-            "select amount_max_amount,amount_currency_code from approval_trigger_rule"
-                + " where tenant_id=(select tenant_id from approval_rule_set where id='"
-                + id + "') and rule_name='" + "小额免审 " + tag + "'")) {
+        var rs =
+            s.executeQuery(
+                "select amount_max_amount,amount_currency_code from approval_trigger_rule"
+                    + " where tenant_id=(select tenant_id from approval_rule_set where id='"
+                    + id
+                    + "') and rule_name='"
+                    + "小额免审 "
+                    + tag
+                    + "'")) {
       assertThat(rs.next()).isTrue();
       assertThat(rs.getBigDecimal(1)).isEqualByComparingTo("1000.500000");
       assertThat(rs.getString(2)).isEqualTo("USD");
     }
 
-    request(token, "PUT", "/identity/approval-rules/" + id,
-        ruleSet("CREDIT_NOTE", "贷项规则改 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "PUT",
+        "/identity/approval-rules/" + id,
+        ruleSet(
+            "CREDIT_NOTE",
+            "贷项规则改 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(exempt("小额免审 " + tag, 1, "USD", "1000.500000"), rule("其余送审 " + tag, 2, flow))),
         200);
     var updated = detail(token, id).get("ruleSet");
@@ -632,31 +858,59 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     var token = login();
     tag = suffix();
     // 草稿规则集：可以没有生效流程，体检应给 INFO 而不是替配置页做决定。
-    UUID draft = UUID.fromString(request(token, "POST", "/identity/approval-rules",
-        ruleSet("MEMBER_OFFBOARD", "草稿体检 " + tag, "DRAFT", "SUBMIT_FOR_APPROVAL",
-            List.of(exempt("免审 " + tag, 1, "USD", "500"))),
-        200).asText());
-    var draftReport = request(token, "GET", "/identity/approval-rules/" + draft + "/validation", null, 200);
+    UUID draft =
+        UUID.fromString(
+            request(
+                    token,
+                    "POST",
+                    "/identity/approval-rules",
+                    ruleSet(
+                        "MEMBER_OFFBOARD",
+                        "草稿体检 " + tag,
+                        "DRAFT",
+                        "SUBMIT_FOR_APPROVAL",
+                        List.of(exempt("免审 " + tag, 1, "USD", "500"))),
+                    200)
+                .asText());
+    var draftReport =
+        request(token, "GET", "/identity/approval-rules/" + draft + "/validation", null, 200);
     assertThat(draftReport.get("errorCount").asInt()).isZero();
 
     // 生效规则集 + 生效流程，然后把流程停用：规则指向的流程不再是生效状态，必须被查出来。
     UUID flow = activeFlow(token, "REFUND", "退款审批流 " + tag);
-    UUID id = createSet(token, "REFUND", "体检规则集 " + tag, "SUBMIT_FOR_APPROVAL",
-        List.of(rule("送审 " + tag, 1, flow)));
-    request(token, "PUT", "/identity/approval-flows/" + flow,
-        flow("REFUND", "退款审批流 " + tag, "DISABLED"), 200);
+    UUID id =
+        createSet(
+            token,
+            "REFUND",
+            "体检规则集 " + tag,
+            "SUBMIT_FOR_APPROVAL",
+            List.of(rule("送审 " + tag, 1, flow)));
+    request(
+        token,
+        "PUT",
+        "/identity/approval-flows/" + flow,
+        flow("REFUND", "退款审批流 " + tag, "DISABLED"),
+        200);
 
     var report = request(token, "GET", "/identity/approval-rules/" + id + "/validation", null, 200);
     assertThat(report.get("errorCount").asInt()).isPositive();
     assertThat(report.toString()).contains("TARGET_FLOW_INACTIVE");
     // 停用后该规则集不能再被激活：写入时会先拒。
-    request(token, "PUT", "/identity/approval-rules/" + id,
-        ruleSet("REFUND", "体检规则集 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
+    request(
+        token,
+        "PUT",
+        "/identity/approval-rules/" + id,
+        ruleSet(
+            "REFUND",
+            "体检规则集 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
             List.of(rule("送审 " + tag, 1, flow))),
         400);
   }
 
-  private Map<String, Object> flow(String documentType, String name, String status) throws Exception {
+  private Map<String, Object> flow(String documentType, String name, String status)
+      throws Exception {
     var token = login();
     var role = roleId(token, "FIX" + tag);
     var node = new LinkedHashMap<String, Object>();
@@ -683,10 +937,16 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     var token = login();
     tag = suffix();
     UUID flow = activeFlow(token, "DATA_EXPORT", "导出审批流 " + tag);
-    UUID id = createSet(token, "DATA_EXPORT", "审计规则集 " + tag, "SUBMIT_FOR_APPROVAL",
-        List.of(rule("导出送审 " + tag, 1, flow)));
+    UUID id =
+        createSet(
+            token,
+            "DATA_EXPORT",
+            "审计规则集 " + tag,
+            "SUBMIT_FOR_APPROVAL",
+            List.of(rule("导出送审 " + tag, 1, flow)));
     assertThat(request(token, "GET", "/identity/audit", null, 200).toString())
-        .contains("ApprovalRuleSetCreated").contains("审计规则集 " + tag);
+        .contains("ApprovalRuleSetCreated")
+        .contains("审计规则集 " + tag);
     request(token, "DELETE", "/identity/approval-rules/" + id, null, 200);
     assertThat(request(token, "GET", "/identity/audit", null, 200).toString())
         .contains("ApprovalRuleSetDeleted");
@@ -698,8 +958,8 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     http.perform(get("/identity/approval-rules/effective-policy?documentTypeCode=REFUND"))
         .andExpect(status().isUnauthorized());
     http.perform(
-            org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                .post("/identity/approval-rules/evaluate")
+            org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                    "/identity/approval-rules/evaluate")
                 .contentType("application/json")
                 .content("{\"documentTypeCode\":\"REFUND\"}"))
         .andExpect(status().isUnauthorized());
@@ -715,18 +975,39 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     tag = suffix();
 
     UUID parentFlow = activeFlow(parent, "PURCHASE_ORDER", "父租户审批流 " + tag);
-    UUID parentSet = createSet(parent, "PURCHASE_ORDER", "父租户规则集 " + tag, "SUBMIT_FOR_APPROVAL",
-        List.of(exempt("父租户免审 " + tag, 1, "USD", "500"), rule("父租户送审 " + tag, 2, parentFlow)));
+    UUID parentSet =
+        createSet(
+            parent,
+            "PURCHASE_ORDER",
+            "父租户规则集 " + tag,
+            "SUBMIT_FOR_APPROVAL",
+            List.of(exempt("父租户免审 " + tag, 1, "USD", "500"), rule("父租户送审 " + tag, 2, parentFlow)));
 
     // 子租户：一套完全独立的流程与规则集
     String childUser = "apr-child-" + tag.toLowerCase();
-    request(parent, "POST", "/identity/children",
-        Map.of("code", "APR" + tag, "name", "审批规则子租户",
-            "ownerUsername", childUser, "ownerPassword", "test-member-password"), 200);
+    request(
+        parent,
+        "POST",
+        "/identity/children",
+        Map.of(
+            "code",
+            "APR" + tag,
+            "name",
+            "审批规则子租户",
+            "ownerUsername",
+            childUser,
+            "ownerPassword",
+            "test-member-password"),
+        200);
     String child = loginUser(childUser);
     UUID childFlow = activeFlow(child, "PURCHASE_ORDER", "子租户审批流 " + tag);
-    UUID childSet = createSet(child, "PURCHASE_ORDER", "子租户规则集 " + tag, "SUBMIT_FOR_APPROVAL",
-        List.of(exempt("子租户免审 " + tag, 1, "USD", "300"), rule("子租户送审 " + tag, 2, childFlow)));
+    UUID childSet =
+        createSet(
+            child,
+            "PURCHASE_ORDER",
+            "子租户规则集 " + tag,
+            "SUBMIT_FOR_APPROVAL",
+            List.of(exempt("子租户免审 " + tag, 1, "USD", "300"), rule("子租户送审 " + tag, 2, childFlow)));
 
     // 断言一：两租户互不可见
     var parentView = request(parent, "GET", "/identity/approval-rules", null, 200).toString();
@@ -735,13 +1016,29 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(childView).contains("子租户规则集 " + tag).doesNotContain("父租户规则集 " + tag);
 
     // 生效策略与试算各自只认本租户的额度：父租户 400 免审、子租户 500 不免审。
-    assertThat(request(parent, "GET",
-        "/identity/approval-rules/effective-policy?documentTypeCode=PURCHASE_ORDER", null, 200)
-        .get("exemptionCeilings").get(0).get("maxAmount").decimalValue())
+    assertThat(
+            request(
+                    parent,
+                    "GET",
+                    "/identity/approval-rules/effective-policy?documentTypeCode=PURCHASE_ORDER",
+                    null,
+                    200)
+                .get("exemptionCeilings")
+                .get(0)
+                .get("maxAmount")
+                .decimalValue())
         .isEqualByComparingTo("500.000000");
-    assertThat(request(child, "GET",
-        "/identity/approval-rules/effective-policy?documentTypeCode=PURCHASE_ORDER", null, 200)
-        .get("exemptionCeilings").get(0).get("maxAmount").decimalValue())
+    assertThat(
+            request(
+                    child,
+                    "GET",
+                    "/identity/approval-rules/effective-policy?documentTypeCode=PURCHASE_ORDER",
+                    null,
+                    200)
+                .get("exemptionCeilings")
+                .get(0)
+                .get("maxAmount")
+                .decimalValue())
         .isEqualByComparingTo("300.000000");
     assertThat(evaluate(child, "PURCHASE_ORDER", "USD", "400", Map.of()).get("decision").asText())
         .isEqualTo("SUBMIT_FOR_APPROVAL");
@@ -750,32 +1047,55 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
 
     // 拿子租户的 id 去父租户读 / 改 / 删 / 体检一律 404
     request(parent, "GET", "/identity/approval-rules/" + childSet, null, 404);
-    request(parent, "PUT", "/identity/approval-rules/" + childSet,
-        ruleSet("PURCHASE_ORDER", "父租户越权改名 " + tag, "ACTIVE", "SUBMIT_FOR_APPROVAL",
-            List.of(rule("越权 " + tag, 1, parentFlow))), 404);
+    request(
+        parent,
+        "PUT",
+        "/identity/approval-rules/" + childSet,
+        ruleSet(
+            "PURCHASE_ORDER",
+            "父租户越权改名 " + tag,
+            "ACTIVE",
+            "SUBMIT_FOR_APPROVAL",
+            List.of(rule("越权 " + tag, 1, parentFlow))),
+        404);
     request(parent, "DELETE", "/identity/approval-rules/" + childSet, null, 404);
     request(parent, "GET", "/identity/approval-rules/" + childSet + "/validation", null, 404);
 
     // 父租户也配不出引用子租户流程的规则：那条流程在本租户不可见。
-    request(parent, "POST", "/identity/approval-rules",
-        ruleSet("PURCHASE_ORDER", "引用子租户流程 " + tag, "DRAFT", "SUBMIT_FOR_APPROVAL",
+    request(
+        parent,
+        "POST",
+        "/identity/approval-rules",
+        ruleSet(
+            "PURCHASE_ORDER",
+            "引用子租户流程 " + tag,
+            "DRAFT",
+            "SUBMIT_FOR_APPROVAL",
             List.of(rule("引用 " + tag, 1, childFlow))),
         400);
 
     // 断言二：伪造 tenant header 无效。request() 每次都带随机 X-Tenant-Id。
     String forged = UUID.randomUUID().toString();
-    var forgedView = http.perform(
-            get("/identity/approval-rules")
-                .header("Authorization", "Bearer " + parent)
-                .header("X-Tenant-Id", forged))
-        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    var forgedView =
+        http.perform(
+                get("/identity/approval-rules")
+                    .header("Authorization", "Bearer " + parent)
+                    .header("X-Tenant-Id", forged))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
     assertThat(forgedView).contains("父租户规则集 " + tag).doesNotContain("子租户规则集 " + tag);
     // 伪造成子租户的真实租户 id（调用方本来就是它的所有者）：结果仍然不变。
-    var forgedChild = http.perform(
-            get("/identity/approval-rules")
-                .header("Authorization", "Bearer " + parent)
-                .header("X-Tenant-Id", tenantOf(child)))
-        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    var forgedChild =
+        http.perform(
+                get("/identity/approval-rules")
+                    .header("Authorization", "Bearer " + parent)
+                    .header("X-Tenant-Id", tenantOf(child)))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
     assertThat(forgedChild).contains("父租户规则集 " + tag).doesNotContain("子租户规则集 " + tag);
     http.perform(get("/identity/approval-rules")).andExpect(status().isUnauthorized());
 
@@ -788,10 +1108,13 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
       assertThat(c).as("第 %s 轮子租户不得看到父租户规则集", i).doesNotContain("父租户规则集 " + tag);
       assertThat(c).contains("子租户规则集 " + tag);
       // 试算也必须跟着租户走：同一个金额在两个租户下结论不同。
-      assertThat(evaluate(parent, "PURCHASE_ORDER", "USD", "400", Map.of()).get("decision").asText())
-          .as("第 %s 轮父租户 400 应免审", i).isEqualTo("EXEMPT");
+      assertThat(
+              evaluate(parent, "PURCHASE_ORDER", "USD", "400", Map.of()).get("decision").asText())
+          .as("第 %s 轮父租户 400 应免审", i)
+          .isEqualTo("EXEMPT");
       assertThat(evaluate(child, "PURCHASE_ORDER", "USD", "400", Map.of()).get("decision").asText())
-          .as("第 %s 轮子租户 400 应送审", i).isEqualTo("SUBMIT_FOR_APPROVAL");
+          .as("第 %s 轮子租户 400 应送审", i)
+          .isEqualTo("SUBMIT_FOR_APPROVAL");
     }
 
     // 事务外（无租户上下文）直查应当为空
@@ -800,7 +1123,8 @@ class ApprovalRuleIntegrationTest extends IdentityIntegrationTestBase {
     // 两张表都必须是 FORCE RLS，否则表 owner 连接会绕过隔离。
     for (var table : List.of("approval_rule_set", "approval_trigger_rule")) {
       assertThat(
-              sql.fetchOne("select relforcerowsecurity as forced from pg_class where relname=?", table)
+              sql.fetchOne(
+                      "select relforcerowsecurity as forced from pg_class where relname=?", table)
                   .get("forced", Boolean.class))
           .as("%s 必须 FORCE RLS", table)
           .isTrue();

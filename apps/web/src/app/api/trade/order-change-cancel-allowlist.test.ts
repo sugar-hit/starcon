@@ -19,7 +19,9 @@ import { GET, POST } from './[...path]/route';
  */
 
 const SOURCE = readFileSync(
-  fileURLToPath(new URL('../../../components/orders/order-change-cancel-model.ts', import.meta.url)),
+  fileURLToPath(
+    new URL('../../../components/orders/order-change-cancel-model.ts', import.meta.url),
+  ),
   'utf8',
 );
 
@@ -70,7 +72,9 @@ it('模型源码里真实存在的每个调用点都被放行', async () => {
   const sites = realCallSites();
   expect(sites.length, '模型源码里一个调用点都没抽到 —— 断言本身失效了').toBeGreaterThan(0);
   for (const path of sites) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（白名单漏登记 = 浏览器里静默 404）`).toBe(200);
   }
   // 抽到的路径必须**真的**覆盖本模块的形状，否则「只放行了一支」也算通过。
@@ -100,7 +104,9 @@ it('建单与推进状态的 POST 形状被放行，且真的转发到 8085', as
     `trade/sales-orders/change/cancellations/${ID}/warehouse-tasks/${ID}/status`,
     `trade/sales-orders/change/writeback-tasks/${ID}/status`,
   ]) {
-    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    const response = await POST(request(path, 'POST'), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `POST ${path} 未被放行`).toBe(200);
   }
   expect(fetcher).toHaveBeenCalledWith(
@@ -128,7 +134,9 @@ it('未交付的形状仍然被拒 —— 放行不该存在的路径比 404 更
     `trade/sales-orders/change/cancellations/not-a-uuid`,
     `trade/sales-orders/change/requests/not-a-uuid`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
@@ -142,7 +150,7 @@ it('裸路径 sales-orders/change 被拒：既不转发，也不冒充成上游�
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const path = 'trade/sales-orders/change';
-  const response = await GET(request(path), { params: { path: path.split('/') } });
+  const response = await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) });
   expect(response.status, '裸路径不应被白名单放行').toBe(404);
   expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
 });
@@ -176,7 +184,9 @@ it('兄弟车道已交付的形状未被本车道挤掉或污染', async () => {
     'trade/processing/orders',
     `trade/processing/orders/${ID}/status`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `已交付车道的 ${path} 被本车道挤掉了`).toBe(200);
   }
   // change 的形状不得从别组漏过去（它是 sales-orders 下独立的一支）。
@@ -185,7 +195,9 @@ it('兄弟车道已交付的形状未被本车道挤掉或污染', async () => {
     `trade/sales-orders/detail/change/${ID}`,
     'trade/fulfillment/routing/change',
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不属于 change 组`).toBe(404);
   }
 });
@@ -194,7 +206,7 @@ it('trade 出口真的转发到 8085（不是白名单放行后自己 404/503）
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const path = 'trade/sales-orders/change/cancellations';
-  const response = await GET(request(path), { params: { path: path.split('/') } });
+  const response = await GET(request(path), { params: Promise.resolve({ path: path.split('/') }) });
   expect(response.status).toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8085/trade/sales-orders/change/cancellations'),

@@ -19,9 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 3.8.2.1 导出的端点。
  *
- * <p>路由挂在 {@code /catalog/export-*} 之下，与 3.1.2.1 的 {@code /catalog/skus}、
- * 3.8.1.1 的 {@code /catalog/import-*} **并列**：导出不是某一个列表页的功能，
- * 它服务的是「所有列表页按当前条件导出」，所以它有自己的资源前缀与自己的记录页。
+ * <p>路由挂在 {@code /catalog/export-*} 之下，与 3.1.2.1 的 {@code /catalog/skus}、 3.8.1.1 的 {@code
+ * /catalog/import-*} **并列**：导出不是某一个列表页的功能， 它服务的是「所有列表页按当前条件导出」，所以它有自己的资源前缀与自己的记录页。
  *
  * <pre>
  *   能力声明   GET  /catalog/export-sources
@@ -32,16 +31,14 @@ import org.springframework.web.bind.annotation.RestController;
  *   作废       POST /catalog/export-jobs/{id}/cancel
  * </pre>
  *
- * <p><b>POST 返回「已受理」而不是「已完成」</b>：蓝图写死大文件异步导出。
- * 前端**绝不能**在 POST 返回后显示「导出完成」—— 记录上的 rowCount 与文件是
+ * <p><b>POST 返回「已受理」而不是「已完成」</b>：蓝图写死大文件异步导出。 前端**绝不能**在 POST 返回后显示「导出完成」—— 记录上的 rowCount 与文件是
  * 同一次执行写出来的，不是这次响应的承诺，要轮询记录详情才拿得到。
  *
- * <p><b>租户只来自已认证成员关系</b>：本控制器没有任何一个参数是 tenantId，
- * 一律取 {@code AccessService.Access.tenantId()}。客户端传 {@code X-Tenant-Id} 不会被读。
+ * <p><b>租户只来自已认证成员关系</b>：本控制器没有任何一个参数是 tenantId， 一律取 {@code AccessService.Access.tenantId()}。客户端传
+ * {@code X-Tenant-Id} 不会被读。
  *
- * <p><b>权限按数据源各自的读权限判</b>：导出的就是列表数据，所以用列表页的权限词
- * （{@code catalog.spu.read} / {@code catalog.sku.read}），不新造一套「导出权限」。
- * 不给数据源权限的人，连它的导出记录都读不到。
+ * <p><b>权限按数据源各自的读权限判</b>：导出的就是列表数据，所以用列表页的权限词 （{@code catalog.spu.read} / {@code
+ * catalog.sku.read}），不新造一套「导出权限」。 不给数据源权限的人，连它的导出记录都读不到。
  */
 @RestController
 @RequestMapping("/catalog")
@@ -62,8 +59,7 @@ public class ExportController {
   /**
    * 可导出数据源与它们的字段 / 排序 / 筛选词表。
    *
-   * <p>用 {@code catalog.spu.read} 取：导出服务的是整个商品域的主数据列表，
-   * 字段选择器要列出全部数据源，而逐数据源的权限在发起与下载时才判。
+   * <p>用 {@code catalog.spu.read} 取：导出服务的是整个商品域的主数据列表， 字段选择器要列出全部数据源，而逐数据源的权限在发起与下载时才判。
    */
   @GetMapping("/export-sources")
   public ExportSourcePage sources(
@@ -100,9 +96,8 @@ public class ExportController {
   /**
    * 下载导出文件（CSV）。
    *
-   * <p>用<b>普通链接下载</b>而不是 {@code api()}：它是 CSV 而非 JSON，与
-   * 3.1.2.1 的 {@code /catalog/skus/export}、3.8.1.1 的模板下载同一处理方式。
-   * 租户上下文由 Authorization 头解析，下载链接本身不带也不接受任何租户参数。
+   * <p>用<b>普通链接下载</b>而不是 {@code api()}：它是 CSV 而非 JSON，与 3.1.2.1 的 {@code
+   * /catalog/skus/export}、3.8.1.1 的模板下载同一处理方式。 租户上下文由 Authorization 头解析，下载链接本身不带也不接受任何租户参数。
    *
    * <p>有效期由服务端判：过期回 410 Gone 并清理文件，不靠前端禁用按钮。
    */
@@ -114,9 +109,7 @@ public class ExportController {
     var file = access.run(actor, "catalog.spu.read", () -> jobs.file(actor, id));
     return ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_TYPE, "text/csv; charset=UTF-8")
-        .header(
-            HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=\"" + file.fileName() + "\"")
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.fileName() + "\"")
         .body(file.content());
   }
 

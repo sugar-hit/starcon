@@ -119,46 +119,43 @@ export function LedgerBookWorkspace() {
    * 「把 409 吞成空态」。allSettled 让两件事各自结算：分组要么有数据要么有错误，
    * 默认账簿要么是那一本要么是"去设置"的引导。
    */
-  const loadBooks = useCallback(
-    async (id: string) => {
-      setGroupsError('');
-      setDefaultBook(null);
-      setDefaultMissing(false);
-      setDefaultMissingReason('');
-      if (!id) {
-        setGroups(null);
-        return;
-      }
-      const [groupResult, defaultResult] = await Promise.allSettled([
-        api<LedgerBookGroups>(`identity/legal-entities/${id}/ledger-books`),
-        api<DefaultBookView>(`identity/legal-entities/${id}/default-book`),
-      ]);
-      if (groupResult.status === 'fulfilled') {
-        setGroups(groupResult.value);
+  const loadBooks = useCallback(async (id: string) => {
+    setGroupsError('');
+    setDefaultBook(null);
+    setDefaultMissing(false);
+    setDefaultMissingReason('');
+    if (!id) {
+      setGroups(null);
+      return;
+    }
+    const [groupResult, defaultResult] = await Promise.allSettled([
+      api<LedgerBookGroups>(`identity/legal-entities/${id}/ledger-books`),
+      api<DefaultBookView>(`identity/legal-entities/${id}/default-book`),
+    ]);
+    if (groupResult.status === 'fulfilled') {
+      setGroups(groupResult.value);
+    } else {
+      setGroups(null);
+      setGroupsError(
+        groupResult.reason instanceof Error ? groupResult.reason.message : '账簿加载失败，请重试',
+      );
+    }
+    if (defaultResult.status === 'fulfilled') {
+      setDefaultBook(defaultResult.value);
+    } else {
+      const reason = defaultResult.reason;
+      if (reason instanceof ApiError && reason.status === 409) {
+        setDefaultMissing(true);
+        setDefaultMissingReason(reason.message);
       } else {
-        setGroups(null);
+        setDefaultMissing(false);
         setGroupsError(
-          groupResult.reason instanceof Error ? groupResult.reason.message : '账簿加载失败，请重试',
+          (current) =>
+            current || (reason instanceof Error ? reason.message : '默认账簿加载失败，请重试'),
         );
       }
-      if (defaultResult.status === 'fulfilled') {
-        setDefaultBook(defaultResult.value);
-      } else {
-        const reason = defaultResult.reason;
-        if (reason instanceof ApiError && reason.status === 409) {
-          setDefaultMissing(true);
-          setDefaultMissingReason(reason.message);
-        } else {
-          setDefaultMissing(false);
-          setGroupsError((current) =>
-            current ||
-            (reason instanceof Error ? reason.message : '默认账簿加载失败，请重试'),
-          );
-        }
-      }
-    },
-    [],
-  );
+    }
+  }, []);
 
   useEffect(() => {
     void loadEntities();
@@ -192,7 +189,9 @@ export function LedgerBookWorkspace() {
       return;
     }
     try {
-      setAssignments(await api<FactAssignmentView[]>(`identity/accounting-books/${id}/fact-assignments`));
+      setAssignments(
+        await api<FactAssignmentView[]>(`identity/accounting-books/${id}/fact-assignments`),
+      );
     } catch (e) {
       setAssignments([]);
       setAssignmentsError(e instanceof Error ? e.message : '归属清单加载失败，请重试');
@@ -471,16 +470,16 @@ export function LedgerBookWorkspace() {
                               </div>
                               <div>
                                 <dt className="inline">科目体系来源：</dt>
-                                <dd className="inline">{chartOfAccountsSourceLabel(b.chartOfAccountsSource)}</dd>
+                                <dd className="inline">
+                                  {chartOfAccountsSourceLabel(b.chartOfAccountsSource)}
+                                </dd>
                               </div>
                               <div>
                                 <dt className="inline">状态：</dt>
                                 <dd className="inline">{bookStatusLabel(b.status)}</dd>
                               </div>
                             </dl>
-                            {blocked && (
-                              <p className="text-copy-12 text-warning mt-2">{blocked}</p>
-                            )}
+                            {blocked && <p className="text-copy-12 text-warning mt-2">{blocked}</p>}
                           </div>
                           <div className="flex items-center gap-2">
                             <Button size="sm" variant="ghost" onClick={() => setBookId(b.id)}>
@@ -605,7 +604,10 @@ function FactAssignmentPanel({
       ) : (
         <ul className="space-y-2">
           {assignments.map((a) => (
-            <li key={a.id} className="bg-card flex flex-wrap items-start justify-between gap-3 rounded-md border p-3">
+            <li
+              key={a.id}
+              className="bg-card flex flex-wrap items-start justify-between gap-3 rounded-md border p-3"
+            >
               <dl className="text-copy-12 text-muted-foreground grid gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
                   <dt className="inline">业务事实：</dt>
@@ -625,12 +627,7 @@ function FactAssignmentPanel({
                 </div>
               </dl>
               {mayRelease && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={busy}
-                  onClick={() => void onRelease(a)}
-                >
+                <Button size="sm" variant="ghost" disabled={busy} onClick={() => void onRelease(a)}>
                   <Trash2 className="h-4 w-4" />
                   解除归属
                 </Button>
@@ -640,12 +637,7 @@ function FactAssignmentPanel({
         </ul>
       )}
       {assigning && (
-        <FactAssignmentForm
-          book={book}
-          busy={busy}
-          onCancel={onClose}
-          onSubmit={onAssign}
-        />
+        <FactAssignmentForm book={book} busy={busy} onCancel={onClose} onSubmit={onAssign} />
       )}
     </section>
   );
@@ -684,7 +676,9 @@ function FactAssignmentForm({
             className={inputClass}
             aria-invalid={sourceError !== null}
           />
-          {sourceError && <span className="text-destructive text-copy-12 mt-1 block">{sourceError}</span>}
+          {sourceError && (
+            <span className="text-destructive text-copy-12 mt-1 block">{sourceError}</span>
+          )}
         </Field>
         <Field label="业务事实 ID" hint="UUID，跨账簿全局唯一">
           <input
@@ -703,7 +697,9 @@ function FactAssignmentForm({
             className={inputClass}
             aria-invalid={moneyError !== null}
           />
-          {moneyError && <span className="text-destructive text-copy-12 mt-1 block">{moneyError}</span>}
+          {moneyError && (
+            <span className="text-destructive text-copy-12 mt-1 block">{moneyError}</span>
+          )}
         </Field>
         <Field label="记账币种" hint={`留空则按本位币 ${book.baseCurrency} 记账`}>
           <input

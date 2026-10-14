@@ -18,8 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 8.4.2.1 拆解单入口（成品拆解回组件）。
  *
  * <p>命名空间 {@code /warehouse/disassembly-orders}。<b>刻意不是 {@code assembly-orders} 的子路径</b>：
- * 「组装」与「拆解」是两个可分别统计的模块（这个月组装多少件、拆解多少件），挂在同一支下
- * 会让它们在契约与路由上混成一团，也让「月结时哪些单据动过库存」这个问题有两个答案。
+ * 「组装」与「拆解」是两个可分别统计的模块（这个月组装多少件、拆解多少件），挂在同一支下 会让它们在契约与路由上混成一团，也让「月结时哪些单据动过库存」这个问题有两个答案。
  *
  * <p>六个形状，刻意逐个列出、不做通配：
  *
@@ -32,9 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>{@code POST /{id}/cancel} 取消草稿（<b>不动库存</b>）
  * </ul>
  *
- * <p>刻意<b>没有</b>任何 PUT / DELETE，与 8.4.1.1 同一纪律：组件明细是「建单时按 BOM 反推冻结的
- * 快照 + 逐行确定的去向」，改它等于改账的输入；要改就作废重开一张。「把已完成的拆解单删掉」
- * 更是不可能 —— 成品已经出库、组件已经入库，V108 的终态守卫会直接拒绝。
+ * <p>刻意<b>没有</b>任何 PUT / DELETE，与 8.4.1.1 同一纪律：组件明细是「建单时按 BOM 反推冻结的 快照 +
+ * 逐行确定的去向」，改它等于改账的输入；要改就作废重开一张。「把已完成的拆解单删掉」 更是不可能 —— 成品已经出库、组件已经入库，V108 的终态守卫会直接拒绝。
  *
  * <p>权限码用 {@code warehouse.disassembly.read} / {@code warehouse.disassembly.update}：
  * 执行拆解会真的扣掉成品库存并增加组件库存，不是读权限能带过去的。
@@ -46,8 +44,7 @@ public class DisassemblyOrderController {
   private final AccessService access;
   private final DisassemblyOrderService disassembly;
 
-  public DisassemblyOrderController(AccessService access,
-      DisassemblyOrderService disassembly) {
+  public DisassemblyOrderController(AccessService access, DisassemblyOrderService disassembly) {
     this.access = access;
     this.disassembly = disassembly;
   }
@@ -61,8 +58,7 @@ public class DisassemblyOrderController {
   /**
    * 能力声明：跨服务边界、<b>去向必填没有默认值</b>这条约束与上下游可用性。
    *
-   * <p>存在的理由与既有 warehouse 模块一致：把「哪些输入真有依据」「哪条不能填默认值」
-   * 显式报出来，而不是让调用方从 400 或空数组里猜。
+   * <p>存在的理由与既有 warehouse 模块一致：把「哪些输入真有依据」「哪条不能填默认值」 显式报出来，而不是让调用方从 400 或空数组里猜。
    */
   @GetMapping("/capabilities")
   public DisassemblyCapabilities capabilities(
@@ -73,8 +69,8 @@ public class DisassemblyOrderController {
   /**
    * 建拆解单（草稿，<b>不动库存</b>）。
    *
-   * <p>组件应回量由调用方按「单位用量 × 拆解数量 × 回收率/100」冻结传入 —— 本服务不跨库回查
-   * catalog，也不重算 BOM。每一行都必须显式给去向（可用/待检/残次），<b>没有默认值</b>。
+   * <p>组件应回量由调用方按「单位用量 × 拆解数量 × 回收率/100」冻结传入 —— 本服务不跨库回查 catalog，也不重算
+   * BOM。每一行都必须显式给去向（可用/待检/残次），<b>没有默认值</b>。
    */
   @PostMapping
   public DisassemblyOrderCreated create(
@@ -101,7 +97,14 @@ public class DisassemblyOrderController {
         "disassembly.read",
         a ->
             disassembly.page(
-                status, productSkuId, warehouseId, sourceSystem, referenceId, keyword, sort, page,
+                status,
+                productSkuId,
+                warehouseId,
+                sourceSystem,
+                referenceId,
+                keyword,
+                sort,
+                page,
                 size));
   }
 
@@ -116,11 +119,9 @@ public class DisassemblyOrderController {
   /**
    * 执行拆解：成品出库 + 组件入库，<b>一个本地事务</b>。
    *
-   * <p>任一环节失败（成品不足 / 库位不存在 / 已执行过）整体回滚，不会留下
-   * 「成品扣了组件没进」或反之的半截状态。同一张拆解单重复执行是 409。
+   * <p>任一环节失败（成品不足 / 库位不存在 / 已执行过）整体回滚，不会留下 「成品扣了组件没进」或反之的半截状态。同一张拆解单重复执行是 409。
    *
-   * <p>每个组件按<b>建单时确定</b>的去向入库 —— 去向不在执行这一步改，也不在事后改
-   * （V108 的明细守卫会拒）。
+   * <p>每个组件按<b>建单时确定</b>的去向入库 —— 去向不在执行这一步改，也不在事后改 （V108 的明细守卫会拒）。
    */
   @PostMapping("/{id}/execute")
   public DisassemblyOrderExecuted execute(

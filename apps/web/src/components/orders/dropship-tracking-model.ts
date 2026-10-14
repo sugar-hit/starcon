@@ -120,7 +120,9 @@ export function fetchDropshipTrackings(
   return api<DropshipTrackingPage>(`${base}/trackings${query(params)}`);
 }
 
-export function createDropshipTracking(input: DropshipTrackingInput): Promise<DropshipTrackingSaved> {
+export function createDropshipTracking(
+  input: DropshipTrackingInput,
+): Promise<DropshipTrackingSaved> {
   return api<DropshipTrackingSaved>(`${base}/trackings`, 'POST', input);
 }
 
@@ -163,7 +165,11 @@ export function dismissDropshipException(
   exceptionId: string,
   input: DropshipDismissInput,
 ): Promise<DropshipTrackingExceptionRow> {
-  return api<DropshipTrackingExceptionRow>(`${base}/exceptions/${exceptionId}/dismiss`, 'POST', input);
+  return api<DropshipTrackingExceptionRow>(
+    `${base}/exceptions/${exceptionId}/dismiss`,
+    'POST',
+    input,
+  );
 }
 
 export function changeDropshipDispositionStatus(
@@ -223,11 +229,7 @@ export const EXCEPTION_KINDS = [
 
 export const EXCEPTION_STATUSES = ['OPEN', 'ACKNOWLEDGED', 'DISPOSED', 'DISMISSED'] as const;
 
-export const DISPOSITION_ACTIONS = [
-  'URGE_SUPPLIER',
-  'SWITCH_TO_SELF',
-  'REQUEST_REFUND',
-] as const;
+export const DISPOSITION_ACTIONS = ['URGE_SUPPLIER', 'SWITCH_TO_SELF', 'REQUEST_REFUND'] as const;
 
 export const DISPOSITION_STATUSES = [
   'PENDING',
@@ -471,7 +473,12 @@ export function canDismiss(row: DropshipTrackingExceptionRow): boolean {
 }
 
 /** 退款必须给金额与币种，缺一不可（后端也会拒绝，前端先说清楚）。 */
-export function disposeFormError(action: string, amount: string, currency: string, note: string): string {
+export function disposeFormError(
+  action: string,
+  amount: string,
+  currency: string,
+  note: string,
+): string {
   if (!action) return '请选择处置动作';
   if (!note.trim()) return '处置必须写明依据：催什么、为什么改自营、退多少';
   if (action === 'REQUEST_REFUND') {
@@ -534,7 +541,10 @@ export function dimensionNote(
 }
 
 /** 下游是否真的接得住某一类动作（未交付就说未交付）。 */
-export function targetReady(capabilities: DropshipTrackingCapabilities | null, code: string): boolean {
+export function targetReady(
+  capabilities: DropshipTrackingCapabilities | null,
+  code: string,
+): boolean {
   return capabilities?.dimensions.find((d) => d.code === code)?.available ?? false;
 }
 

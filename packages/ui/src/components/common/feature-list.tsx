@@ -1,10 +1,5 @@
 import * as React from 'react';
-import {
-  CheckCircle2,
-  CircleDashed,
-  Hammer,
-  type LucideIcon,
-} from 'lucide-react';
+import { CheckCircle2, CircleDashed, Hammer, type LucideIcon } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { cn } from '../../lib/utils';
 import type { DomainFeature, FeatureStatus } from '../../lib/domain-spec';
@@ -47,26 +42,14 @@ export interface FeatureListProps {
 
 export function FeatureList({ features, className }: FeatureListProps) {
   if (!features.length) {
-    return (
-      <div className="text-copy-13 text-muted-foreground py-4 text-center">
-        暂未定义功能
-      </div>
-    );
+    return <div className="text-copy-13 text-muted-foreground py-4 text-center">暂未定义功能</div>;
   }
   return (
-    <ul
-      className={cn(
-        'grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3',
-        className,
-      )}
-    >
+    <ul className={cn('grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3', className)}>
       {features.map((f) => {
         const Icon = STATUS_ICON[f.status];
         return (
-          <li
-            key={f.name}
-            className="border-border bg-background rounded-lg border p-3.5"
-          >
+          <li key={f.name} className="border-border bg-background rounded-lg border p-3.5">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-2.5">
                 <div className="bg-muted text-muted-foreground mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md">

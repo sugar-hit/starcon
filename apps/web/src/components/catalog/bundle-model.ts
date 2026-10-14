@@ -78,13 +78,7 @@ export const MAX_COMPONENTS_PER_VERSION = 50;
 export const QUANTITY_SCALE = 6;
 
 /** 发布后不可变的字段清单（界面上要逐条说清，而不是笼统一句「不能改」）。 */
-export const FROZEN_FIELDS = [
-  '套装名称',
-  '版本号',
-  '生效起点',
-  '组件清单',
-  '备注',
-] as const;
+export const FROZEN_FIELDS = ['套装名称', '版本号', '生效起点', '组件清单', '备注'] as const;
 
 export function statusLabel(status: string): string {
   return VERSION_STATUSES.find((s) => s.value === status)?.label ?? status;
@@ -297,7 +291,10 @@ export async function fetchBundle(id: string): Promise<BundleDetail> {
 }
 
 /** 当前生效版本：这是 04 刊登与 09 订单取版本的形状。不传 at 就是查「此刻」。 */
-export async function fetchEffectiveVersion(bundleId: string, at?: string): Promise<BundleEffectiveView> {
+export async function fetchEffectiveVersion(
+  bundleId: string,
+  at?: string,
+): Promise<BundleEffectiveView> {
   const query = at ? `?at=${encodeURIComponent(at)}` : '';
   return api<BundleEffectiveView>(`catalog/bundles/${bundleId}/effective${query}`);
 }
@@ -316,11 +313,12 @@ export async function fetchVersion(id: string): Promise<BundleVersionDetail> {
   return api<BundleVersionDetail>(`catalog/versions/${id}`);
 }
 
-export async function saveBundle(
-  id: string | null,
-  input: BundleInput,
-): Promise<BundleRow> {
-  return api<BundleRow>(id ? `catalog/bundles/${id}` : 'catalog/bundles', id ? 'PUT' : 'POST', input);
+export async function saveBundle(id: string | null, input: BundleInput): Promise<BundleRow> {
+  return api<BundleRow>(
+    id ? `catalog/bundles/${id}` : 'catalog/bundles',
+    id ? 'PUT' : 'POST',
+    input,
+  );
 }
 
 export async function setBundleStatus(id: string, status: string): Promise<BundleRow> {
@@ -338,7 +336,10 @@ export async function createVersion(
   return api<BundleVersionRow>(`catalog/bundles/${bundleId}/versions`, 'POST', input);
 }
 
-export async function updateVersion(id: string, input: BundleVersionInput): Promise<BundleVersionRow> {
+export async function updateVersion(
+  id: string,
+  input: BundleVersionInput,
+): Promise<BundleVersionRow> {
   return api<BundleVersionRow>(`catalog/versions/${id}`, 'PUT', input);
 }
 
@@ -415,7 +416,9 @@ export function componentSummary(rows: BundleComponentRow[], total: number | nul
 }
 
 /** 套装列表行上「此刻生效」的展示。没生效时要说清是「没生效」而不是「没有版本」。 */
-export function effectiveLabel(row: Pick<BundleRow, 'effectiveVersionNo' | 'versionCount'>): string {
+export function effectiveLabel(
+  row: Pick<BundleRow, 'effectiveVersionNo' | 'versionCount'>,
+): string {
   if (row.effectiveVersionNo) return `此刻生效：${row.effectiveVersionNo}`;
   if (row.versionCount > 0)
     return '此刻没有生效版本（只有草稿，或已发布版本的区间都还没到）—— 这一刻不能卖它';

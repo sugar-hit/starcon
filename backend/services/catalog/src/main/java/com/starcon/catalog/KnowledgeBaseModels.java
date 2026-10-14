@@ -3,7 +3,6 @@ package com.starcon.catalog;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -13,14 +12,12 @@ import java.util.UUID;
 /**
  * 11.4.2.2 客服知识库与话术的请求与响应记录。
  *
- * <p><b>为什么单独成文件而不是并进 {@code CatalogModels}</b>：{@code CatalogModels} 是
- * 并行车道都会追加的公共文件，且它<b>不在</b> {@code merge-union} 驱动器的按键求并范围内
- * （驱动器只覆盖 {@code packages/api-contracts} 与台账）。本模块的记录放进公共文件会让
- * 多条车道在同一处各追加一段，行级三方合并必然冲突。模块自成一个文件则天然无交集，
- * 与 {@code CompletenessScoreModels} / {@code PhysicalSafetyModels} 同一做法。
+ * <p><b>为什么单独成文件而不是并进 {@code CatalogModels}</b>：{@code CatalogModels} 是 并行车道都会追加的公共文件，且它<b>不在</b>
+ * {@code merge-union} 驱动器的按键求并范围内 （驱动器只覆盖 {@code packages/api-contracts} 与台账）。本模块的记录放进公共文件会让
+ * 多条车道在同一处各追加一段，行级三方合并必然冲突。模块自成一个文件则天然无交集， 与 {@code CompletenessScoreModels} / {@code
+ * PhysicalSafetyModels} 同一做法。
  *
- * <p>蓝图 11.4.2.2：「维护客服知识库与回复模板：常见问题标准答法、平台政策说明、
- * 退换货话术、多语言版本；记录使用效果。」「输出：话术库 + 客服一键引用；命中率统计。」
+ * <p>蓝图 11.4.2.2：「维护客服知识库与回复模板：常见问题标准答法、平台政策说明、 退换货话术、多语言版本；记录使用效果。」「输出：话术库 + 客服一键引用；命中率统计。」
  */
 public final class KnowledgeBaseModels {
   private KnowledgeBaseModels() {}
@@ -44,8 +41,7 @@ public final class KnowledgeBaseModels {
   /**
    * 概览：库存量 + 命中率 + 待办量。
    *
-   * <p>{@code hitRate} 可为 {@code null}（规则 R4）：「一条话术都没有」与
-   * 「话术一条都没被用过」是两件不同的事，页面必须能区分，所以不返回 0 冒充。
+   * <p>{@code hitRate} 可为 {@code null}（规则 R4）：「一条话术都没有」与 「话术一条都没被用过」是两件不同的事，页面必须能区分，所以不返回 0 冒充。
    */
   public record KnowledgeBaseOverview(
       long entryTotal,
@@ -91,8 +87,7 @@ public final class KnowledgeBaseModels {
   /**
    * 单条话术详情：条目 + 译文 + 挂钩的规则版本 + 命中率 + 最近引用。
    *
-   * <p>{@code ruleBindings} 是蓝图硬要求「话术需与平台规则版本挂钩」的读出口：
-   * 详情页要能当场回答「这条话术依据哪几版平台政策」。
+   * <p>{@code ruleBindings} 是蓝图硬要求「话术需与平台规则版本挂钩」的读出口： 详情页要能当场回答「这条话术依据哪几版平台政策」。
    */
   public record KnowledgeEntryDetail(
       UUID id,
@@ -144,12 +139,10 @@ public final class KnowledgeBaseModels {
 
   /** 译文完整度：这些语言里哪些能直接发给买家。 */
   public record EntryTranslationCoverage(
-      String sourceLocale,
-      List<LocaleCoverage> locales,
-      long readyCount,
-      long totalCount) {}
+      String sourceLocale, List<LocaleCoverage> locales, long readyCount, long totalCount) {}
 
-  public record LocaleCoverage(String locale, boolean translated, boolean reviewed, boolean usable) {}
+  public record LocaleCoverage(
+      String locale, boolean translated, boolean reviewed, boolean usable) {}
 
   // ================================================================ 平台规则版本
 
@@ -190,8 +183,7 @@ public final class KnowledgeBaseModels {
   /**
    * 待复核任务一行 —— 蓝图「平台政策变化时能定位哪些话术需要更新」的读出口。
    *
-   * <p>{@code supersedingRuleLabel} 是<b>接替它的那一版</b>：没有这一列客服看到
-   * 「待复核」不知道该去比对哪一版，只能一条条翻规则历史。
+   * <p>{@code supersedingRuleLabel} 是<b>接替它的那一版</b>：没有这一列客服看到 「待复核」不知道该去比对哪一版，只能一条条翻规则历史。
    */
   public record ReviewTaskRow(
       UUID id,
@@ -241,8 +233,7 @@ public final class KnowledgeBaseModels {
   /**
    * 命中率排行：蓝图输出「命中率统计」的可查面。
    *
-   * <p>每行自带 {@code hitRate}（该条话术自己的命中引用比例）与全库的 {@code hitRate}
-   * 分位参照，供页面直接排序而不必在前端重算。
+   * <p>每行自带 {@code hitRate}（该条话术自己的命中引用比例）与全库的 {@code hitRate} 分位参照，供页面直接排序而不必在前端重算。
    */
   public record EntryHitRateRow(
       UUID entryId,
@@ -262,46 +253,38 @@ public final class KnowledgeBaseModels {
 
   public record KnowledgeEntryInput(
       @NotBlank(message = "话术编码不能为空") String code,
-
-      @NotBlank(message = "标题不能为空")
-          @Size(max = KnowledgeBaseRules.MAX_TITLE, message = "标题过长")
+      @NotBlank(message = "标题不能为空") @Size(max = KnowledgeBaseRules.MAX_TITLE, message = "标题过长")
           String title,
-
       @NotBlank(message = "话术类型不能为空") String entryType,
-
       @NotBlank(message = "标准答法正文不能为空") String body,
-
       @NotBlank(message = "源语言不能为空") String sourceLocale,
-      String triggerKeywords, @NotNull(message = "启用状态不能为空") Boolean enabled, Long version) {}
+      String triggerKeywords,
+      @NotNull(message = "启用状态不能为空") Boolean enabled,
+      Long version) {}
 
   public record EntryTranslationInput(
       @NotBlank(message = "语言不能为空") String locale,
-
-      @NotBlank(message = "标题不能为空")
-          @Size(max = KnowledgeBaseRules.MAX_TITLE, message = "标题过长")
+      @NotBlank(message = "标题不能为空") @Size(max = KnowledgeBaseRules.MAX_TITLE, message = "标题过长")
           String title,
-
       @NotBlank(message = "译文正文不能为空") String body,
-      String origin, String status, Long version) {}
+      String origin,
+      String status,
+      Long version) {}
 
   public record RuleVersionInput(
       @NotBlank(message = "平台不能为空") String platform,
-
       @NotBlank(message = "政策编码不能为空") String policyKey,
-
       @NotBlank(message = "版本标签不能为空") String versionLabel,
-
-      @NotBlank(message = "标题不能为空")
-          @Size(max = KnowledgeBaseRules.MAX_TITLE, message = "标题过长")
+      @NotBlank(message = "标题不能为空") @Size(max = KnowledgeBaseRules.MAX_TITLE, message = "标题过长")
           String title,
       String changeSummary,
-      @NotNull(message = "生效起点不能为空") OffsetDateTime effectiveFrom, OffsetDateTime effectiveTo) {}
+      @NotNull(message = "生效起点不能为空") OffsetDateTime effectiveFrom,
+      OffsetDateTime effectiveTo) {}
 
   public record RuleBindingInput(@NotNull(message = "规则版本不能为空") UUID ruleVersionId, String note) {}
 
   public record ReviewTaskUpdateInput(
-      @NotBlank(message = "复核状态不能为空")
-          @Schema(description = "PENDING / REVIEWING / DONE")
+      @NotBlank(message = "复核状态不能为空") @Schema(description = "PENDING / REVIEWING / DONE")
           String reviewStatus,
       String note) {}
 
@@ -309,7 +292,9 @@ public final class KnowledgeBaseModels {
       @NotBlank(message = "引用结果不能为空")
           @Schema(description = "RESOLVED / PARTIAL / UNRESOLVED / ABANDONED / REJECTED")
           String outcome,
-      UUID entryTranslationId, String conversationRef, String note) {}
+      UUID entryTranslationId,
+      String conversationRef,
+      String note) {}
 
   /** 计数器：创建类操作返回的最小回执（与 V21 的 ContentTemplateSaved 同一形状）。 */
   public record KnowledgeSaved(UUID id, long version) {}

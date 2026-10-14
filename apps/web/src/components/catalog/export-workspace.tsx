@@ -95,7 +95,12 @@ export function ExportWorkspace() {
     setLoading(true);
     setListError(null);
     try {
-      const result = await fetchJobs({ sourceKey: null, status: null, page: target, size: PAGE_SIZE });
+      const result = await fetchJobs({
+        sourceKey: null,
+        status: null,
+        page: target,
+        size: PAGE_SIZE,
+      });
       setRows(result.items);
       setTotal(result.total);
       setPage(result.page);
@@ -205,19 +210,22 @@ export function ExportWorkspace() {
       </div>
 
       {error && (
-        <div className="border-danger/40 bg-danger/5 text-danger flex items-start gap-2 rounded-lg border px-4 py-3 text-copy-13">
+        <div className="border-danger/40 bg-danger/5 text-danger text-copy-13 flex items-start gap-2 rounded-lg border px-4 py-3">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
       {notice && (
-        <div className="border-ok/40 bg-ok/5 text-ok flex items-start gap-2 rounded-lg border px-4 py-3 text-copy-13">
+        <div className="border-ok/40 bg-ok/5 text-ok text-copy-13 flex items-start gap-2 rounded-lg border px-4 py-3">
           <Check className="mt-0.5 size-4 shrink-0" />
           <span>{notice}</span>
         </div>
       )}
 
-      <SectionCard title="发起导出" description="按列表页当前的筛选条件导出结果数据：选数据源 → 勾字段 → 填条件 → 选排序。">
+      <SectionCard
+        title="发起导出"
+        description="按列表页当前的筛选条件导出结果数据：选数据源 → 勾字段 → 填条件 → 选排序。"
+      >
         <div className="space-y-5">
           <Field label="数据源">
             <select
@@ -237,14 +245,15 @@ export function ExportWorkspace() {
           {source && (
             <>
               <p className="text-muted-foreground text-copy-12">
-                导出结果与「{source.upstreamModule}」同一份数据，上限 {source.maxRows.toLocaleString()} 行，
-                下载有效期 {source.downloadTtlHours} 小时。{TTL_HINT}
+                导出结果与「{source.upstreamModule}」同一份数据，上限{' '}
+                {source.maxRows.toLocaleString()} 行， 下载有效期 {source.downloadTtlHours} 小时。
+                {TTL_HINT}
               </p>
 
               <div className="space-y-2">
                 <div className="text-copy-13 font-medium">
                   选择字段
-                  <span className="text-muted-foreground ml-2 text-copy-12">
+                  <span className="text-muted-foreground text-copy-12 ml-2">
                     已选 {fields.length} / {source.fields.length}（按数据源定义的列顺序输出）
                   </span>
                 </div>
@@ -252,7 +261,7 @@ export function ExportWorkspace() {
                   {source.fields.map((f) => (
                     <label
                       key={f.key}
-                      className="hover:bg-muted/60 flex items-start gap-2 rounded-md border px-3 py-2 text-copy-13"
+                      className="hover:bg-muted/60 text-copy-13 flex items-start gap-2 rounded-md border px-3 py-2"
                     >
                       <input
                         type="checkbox"
@@ -267,7 +276,7 @@ export function ExportWorkspace() {
                       <span className="min-w-0">
                         <span className="block">{f.label}</span>
                         {f.pii && (
-                          <span className="text-danger flex items-center gap-1 text-copy-12">
+                          <span className="text-danger text-copy-12 flex items-center gap-1">
                             <ShieldAlert className="size-3" />
                             敏感字段 · 需授权
                           </span>
@@ -285,7 +294,7 @@ export function ExportWorkspace() {
               />
 
               {unavailableFilters(source).length > 0 && (
-                <details className="text-muted-foreground border-control-border rounded-md border px-3 py-2 text-copy-12">
+                <details className="text-muted-foreground border-control-border text-copy-12 rounded-md border px-3 py-2">
                   <summary className="cursor-pointer">
                     有 {unavailableFilters(source).length} 个列表页筛选条件当前无法用于导出
                   </summary>
@@ -338,7 +347,11 @@ export function ExportWorkspace() {
 
               <div className="flex items-center gap-2">
                 <Button onClick={() => void submit()} disabled={submitting}>
-                  {submitting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+                  {submitting ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Download className="size-4" />
+                  )}
                   发起导出
                 </Button>
                 <span className="text-muted-foreground text-copy-12">
@@ -348,7 +361,7 @@ export function ExportWorkspace() {
             </>
           )}
 
-          <p className="text-muted-foreground border-control-border border-t pt-3 text-copy-12">
+          <p className="text-muted-foreground border-control-border text-copy-12 border-t pt-3">
             {QUOTE_BOUNDARY_HINT}
           </p>
         </div>
@@ -365,12 +378,12 @@ export function ExportWorkspace() {
         }
       >
         {loading && rows.length === 0 ? (
-          <div className="text-muted-foreground flex items-center justify-center gap-2 py-10 text-copy-13">
+          <div className="text-muted-foreground text-copy-13 flex items-center justify-center gap-2 py-10">
             <Loader2 className="size-4 animate-spin" />
             正在加载导出记录…
           </div>
         ) : listError ? (
-          <div className="border-danger/40 bg-danger/5 text-danger flex items-center gap-2 rounded-md border px-3 py-3 text-copy-13">
+          <div className="border-danger/40 bg-danger/5 text-danger text-copy-13 flex items-center gap-2 rounded-md border px-3 py-3">
             <AlertTriangle className="size-4" />
             {listError}
             <Button size="sm" variant="ghost" onClick={() => void loadJobs(page)}>
@@ -388,7 +401,7 @@ export function ExportWorkspace() {
             {rows.map((row) => (
               <JobRow key={row.id} row={row} onRevoke={() => void revoke(row.id)} />
             ))}
-            <div className="text-muted-foreground flex items-center justify-between pt-1 text-copy-12">
+            <div className="text-muted-foreground text-copy-12 flex items-center justify-between pt-1">
               <span>
                 共 {total} 条 · 第 {page + 1} 页
               </span>
@@ -491,7 +504,9 @@ function JobRow({ row, onRevoke }: { row: ExportJobRow; onRevoke: () => void }) 
                 含敏感字段
               </Badge>
             )}
-            <span className="text-muted-foreground font-mono text-copy-12">{row.id.slice(0, 8)}</span>
+            <span className="text-muted-foreground text-copy-12 font-mono">
+              {row.id.slice(0, 8)}
+            </span>
           </div>
           <div className="text-muted-foreground text-copy-12">
             {rowCountText(row)} · {conditionText(row.appliedFilters)} · 排序 {row.sortKey ?? '—'}{' '}

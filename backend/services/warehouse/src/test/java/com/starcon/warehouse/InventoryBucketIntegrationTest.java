@@ -24,16 +24,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.1.1.2 库存明细：bucket 六维下钻、与 balance 的守恒核对、逐级筛选真实生效、
- * 版本与业务时间口径、行内操作入口契约，以及租户隔离三断言。
+ * 7.1.1.2 库存明细：bucket 六维下钻、与 balance 的守恒核对、逐级筛选真实生效、 版本与业务时间口径、行内操作入口契约，以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
  * <p>连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link InventoryOverviewIntegrationTest} 完全一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场），
- * 避免两个测试类各写一套风格。
+ * <p>夹具写法与 {@link InventoryOverviewIntegrationTest} 完全一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）， 避免两个测试类各写一套风格。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -117,11 +115,7 @@ class InventoryBucketIntegrationTest {
       // 只有单页读权限、没有服务级读权限：按 AccessService 的口径必须 403。
       actors.put(
           "Bearer page-reader",
-          actor(
-              user,
-              a,
-              null,
-              List.of(grant("ALL", List.of("warehouse.inventory.read")))));
+          actor(user, a, null, List.of(grant("ALL", List.of("warehouse.inventory.read")))));
       actors.put(
           "Bearer reader",
           actor(
@@ -177,40 +171,98 @@ class InventoryBucketIntegrationTest {
               + " restart identity cascade");
     }
     for (var tenant : List.of(a, b)) {
-      access.run(actorFor(tenant), "warehouse.inventory.read", () -> {
-        sql.execute(
-            "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-            idFor(tenant, 1), tenant, "LE-1", "主体一");
-        sql.execute(
-            "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-            idFor(tenant, 2), tenant, "SKU-1", "商品一");
-        sql.execute(
-            "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-            idFor(tenant, 3), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
-        sql.execute(
-            "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-            idFor(tenant, 4), tenant, "WH-SZ", "深圳仓", "CN", "Asia/Shanghai");
-        sql.execute(
-            "insert into inventory_quality_status(id,tenant_id,code,name,role) values"
-                + "(?,?,?,?,?),(?,?,?,?,?),(?,?,?,?,?)",
-            idFor(tenant, 5), tenant, "SELLABLE", "可售", "SELLABLE",
-            idFor(tenant, 6), tenant, "PENDING", "待检", "PENDING_INSPECTION",
-            idFor(tenant, 7), tenant, "DEFECT", "残次", "DEFECTIVE");
-        // 库位：上海仓三个（两个可拣 + 一个待检不可拣），深圳仓一个
-        sql.execute(
-            "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
-                + " values(?,?,?,?,?,?,?),"
-                + "(?,?,?,?,?,?,?),(?,?,?,?,?,?,?),(?,?,?,?,?,?,?)",
-            idFor(tenant, 8), tenant, idFor(tenant, 3), "A-01-01", "A区01排01", "STORAGE", true,
-            idFor(tenant, 9), tenant, idFor(tenant, 3), "A-01-02", "A区01排02", "STORAGE", true,
-            idFor(tenant, 10), tenant, idFor(tenant, 3), "Q-01", "待检区", "QUARANTINE", false,
-            idFor(tenant, 11), tenant, idFor(tenant, 4), "B-02-01", "B区02排01", "STORAGE", true);
-        sql.execute(
-            "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on)"
-                + " values(?,?,?,?,current_date+365,current_date-10)",
-            idFor(tenant, 12), tenant, idFor(tenant, 2), "LOT-2026-01");
-        return null;
-      });
+      access.run(
+          actorFor(tenant),
+          "warehouse.inventory.read",
+          () -> {
+            sql.execute(
+                "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
+            sql.execute(
+                "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
+            sql.execute(
+                "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
+                idFor(tenant, 3),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
+            sql.execute(
+                "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
+                idFor(tenant, 4),
+                tenant,
+                "WH-SZ",
+                "深圳仓",
+                "CN",
+                "Asia/Shanghai");
+            sql.execute(
+                "insert into inventory_quality_status(id,tenant_id,code,name,role) values"
+                    + "(?,?,?,?,?),(?,?,?,?,?),(?,?,?,?,?)",
+                idFor(tenant, 5),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE",
+                idFor(tenant, 6),
+                tenant,
+                "PENDING",
+                "待检",
+                "PENDING_INSPECTION",
+                idFor(tenant, 7),
+                tenant,
+                "DEFECT",
+                "残次",
+                "DEFECTIVE");
+            // 库位：上海仓三个（两个可拣 + 一个待检不可拣），深圳仓一个
+            sql.execute(
+                "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
+                    + " values(?,?,?,?,?,?,?),"
+                    + "(?,?,?,?,?,?,?),(?,?,?,?,?,?,?),(?,?,?,?,?,?,?)",
+                idFor(tenant, 8),
+                tenant,
+                idFor(tenant, 3),
+                "A-01-01",
+                "A区01排01",
+                "STORAGE",
+                true,
+                idFor(tenant, 9),
+                tenant,
+                idFor(tenant, 3),
+                "A-01-02",
+                "A区01排02",
+                "STORAGE",
+                true,
+                idFor(tenant, 10),
+                tenant,
+                idFor(tenant, 3),
+                "Q-01",
+                "待检区",
+                "QUARANTINE",
+                false,
+                idFor(tenant, 11),
+                tenant,
+                idFor(tenant, 4),
+                "B-02-01",
+                "B区02排01",
+                "STORAGE",
+                true);
+            sql.execute(
+                "insert into inventory_lot(id,tenant_id,sku_id,lot_code,expires_on,received_on)"
+                    + " values(?,?,?,?,current_date+365,current_date-10)",
+                idFor(tenant, 12),
+                tenant,
+                idFor(tenant, 2),
+                "LOT-2026-01");
+            return null;
+          });
     }
   }
 
@@ -226,83 +278,108 @@ class InventoryBucketIntegrationTest {
   /** 写一行 balance（租户 A），返回它的 id。 */
   UUID balance(UUID warehouse, UUID quality, String onHand, String reserved) {
     var id = UUID.randomUUID();
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
-              + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
-          id, a, skuA, warehouse, leA, quality, new BigDecimal(onHand), new BigDecimal(reserved));
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
+                  + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
+              id,
+              a,
+              skuA,
+              warehouse,
+              leA,
+              quality,
+              new BigDecimal(onHand),
+              new BigDecimal(reserved));
+          return null;
+        });
     return id;
   }
 
   /**
    * 把一条 balance 按库位/批次拆开：同一事务内改 balance 与全部 bucket。
    *
-   * <p>必须同一事务 —— V2 的守恒是**延迟**约束触发器，写入中途 balance 还没改完是允许的，
-   * 提交前才对平。分两次写会第二次提交时报不平，这正是设计意图（见
-   * {@code bucket不平被DB拒绝} 与 {@code 只改balance不改bucket被DB拒绝}）。
+   * <p>必须同一事务 —— V2 的守恒是**延迟**约束触发器，写入中途 balance 还没改完是允许的， 提交前才对平。分两次写会第二次提交时报不平，这正是设计意图（见 {@code
+   * bucket不平被DB拒绝} 与 {@code 只改balance不改bucket被DB拒绝}）。
    *
    * <p>balance 的在手被置为各 bucket 之和，所以调用方先建 on_hand=0 的 balance 行。
    */
   void split(UUID balanceId, B... buckets) {
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      var total = BigDecimal.ZERO;
-      for (var b : buckets) total = total.add(new BigDecimal(b.onHand()));
-      sql.execute("update inventory_balance set on_hand=? where id=?", total, balanceId);
-      int i = 0;
-      for (var b : buckets) {
-        sql.execute(
-            "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
-                + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
-                + "last_movement_at) select ?,bal.tenant_id,bal.legal_entity_id,bal.sku_id,"
-                + "bal.warehouse_id,?,?,bal.quality_status_id,bal.id,?,0,?::timestamptz"
-                + " from inventory_balance bal where bal.id=?",
-            UUID.randomUUID(),
-            b.location(),
-            b.lot(),
-            new BigDecimal(b.onHand()),
-            OffsetDateTime.now().plusSeconds(i++),
-            balanceId);
-      }
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          var total = BigDecimal.ZERO;
+          for (var b : buckets) total = total.add(new BigDecimal(b.onHand()));
+          sql.execute("update inventory_balance set on_hand=? where id=?", total, balanceId);
+          int i = 0;
+          for (var b : buckets) {
+            sql.execute(
+                "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
+                    + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
+                    + "last_movement_at) select ?,bal.tenant_id,bal.legal_entity_id,bal.sku_id,"
+                    + "bal.warehouse_id,?,?,bal.quality_status_id,bal.id,?,0,?::timestamptz"
+                    + " from inventory_balance bal where bal.id=?",
+                UUID.randomUUID(),
+                b.location(),
+                b.lot(),
+                new BigDecimal(b.onHand()),
+                OffsetDateTime.now().plusSeconds(i++),
+                balanceId);
+          }
+          return null;
+        });
   }
 
   /** 只写 bucket、不动 balance —— 用来验证守恒触发器会拒绝不平的写入。 */
   void bucketOnly(UUID balanceId, UUID location, UUID lot, String onHand) {
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
-              + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
-              + "last_movement_at) select ?,bal.tenant_id,bal.legal_entity_id,bal.sku_id,"
-              + "bal.warehouse_id,?,?,bal.quality_status_id,bal.id,?,0,?::timestamptz"
-              + " from inventory_balance bal where bal.id=?",
-          UUID.randomUUID(), location, lot, new BigDecimal(onHand), OffsetDateTime.now(), balanceId);
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
+                  + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
+                  + "last_movement_at) select ?,bal.tenant_id,bal.legal_entity_id,bal.sku_id,"
+                  + "bal.warehouse_id,?,?,bal.quality_status_id,bal.id,?,0,?::timestamptz"
+                  + " from inventory_balance bal where bal.id=?",
+              UUID.randomUUID(),
+              location,
+              lot,
+              new BigDecimal(onHand),
+              OffsetDateTime.now(),
+              balanceId);
+          return null;
+        });
   }
 
   /** 写一条带预占的 bucket（预占只能落在可售质量状态上）。 */
   void bucketWithReserved(UUID balanceId, UUID location, UUID lot, String onHand, String reserved) {
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
-              + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
-              + "last_movement_at) select ?,bal.tenant_id,bal.legal_entity_id,bal.sku_id,"
-              + "bal.warehouse_id,?,?,bal.quality_status_id,bal.id,?,?,?::timestamptz"
-              + " from inventory_balance bal where bal.id=?",
-          UUID.randomUUID(),
-          location,
-          lot,
-          new BigDecimal(onHand),
-          new BigDecimal(reserved),
-          OffsetDateTime.now(),
-          balanceId);
-      sql.execute(
-          "update inventory_balance set reserved=? where id=?", new BigDecimal(reserved), balanceId);
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
+                  + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
+                  + "last_movement_at) select ?,bal.tenant_id,bal.legal_entity_id,bal.sku_id,"
+                  + "bal.warehouse_id,?,?,bal.quality_status_id,bal.id,?,?,?::timestamptz"
+                  + " from inventory_balance bal where bal.id=?",
+              UUID.randomUUID(),
+              location,
+              lot,
+              new BigDecimal(onHand),
+              new BigDecimal(reserved),
+              OffsetDateTime.now(),
+              balanceId);
+          sql.execute(
+              "update inventory_balance set reserved=? where id=?",
+              new BigDecimal(reserved),
+              balanceId);
+          return null;
+        });
   }
 
   InventoryBucketDetail detailOf(AccessService.Access who) {
@@ -333,7 +410,9 @@ class InventoryBucketIntegrationTest {
       assertThat(row.locationId()).isIn(locShA, locShB);
     }
     // 库位与批次的展示快照也在行上：界面上要能直接看到货位编码与批号
-    assertThat(rows).extracting(BucketRow::locationCode).containsExactlyInAnyOrder("A-01-01", "A-01-02");
+    assertThat(rows)
+        .extracting(BucketRow::locationCode)
+        .containsExactlyInAnyOrder("A-01-01", "A-01-02");
     assertThat(rows).extracting(BucketRow::lotCode).containsExactlyInAnyOrder("LOT-2026-01", null);
     assertThat(rows).filteredOn(r -> r.lotId() != null).allMatch(r -> r.expiresOn() != null);
     assertThat(rows).noneMatch(BucketRow::expired);
@@ -443,10 +522,14 @@ class InventoryBucketIntegrationTest {
     var balance = balance(whSh, qSellable, "0", "0");
     split(balance, new B(locShA, lotA, "100"));
     assertThatThrownBy(
-            () -> access.run(actorA, "warehouse.inventory.read", () -> {
-              sql.execute("update inventory_balance set on_hand=150 where id=?", balance);
-              return null;
-            }))
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> {
+                      sql.execute("update inventory_balance set on_hand=150 where id=?", balance);
+                      return null;
+                    }))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
   }
 
@@ -458,12 +541,16 @@ class InventoryBucketIntegrationTest {
     var at = OffsetDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS);
     bucketOnly(balance, locShA, lotA, "100");
     // 把业务时间改回两天前（只在数量不变时允许），验证 ?::timestamptz 写入无时区偏移
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "update stock_bucket set last_movement_at=?::timestamptz where balance_id=?",
-          at.minusDays(1), balance);
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "update stock_bucket set last_movement_at=?::timestamptz where balance_id=?",
+              at.minusDays(1),
+              balance);
+          return null;
+        });
 
     var row = detailOf(actorA).rows().get(0);
     // 业务时间原样读回（显式 ?::timestamptz，不发生静默的 28800s 偏移）
@@ -482,19 +569,27 @@ class InventoryBucketIntegrationTest {
 
     // 只改数量、不给新业务时间 → DB 拒绝（否则"最近变动时间"会永远停在建行时刻）
     assertThatThrownBy(
-            () -> access.run(actorA, "warehouse.inventory.read", () -> {
-              sql.execute("update stock_bucket set on_hand=90 where id=?", bucketId);
-              return null;
-            }))
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> {
+                      sql.execute("update stock_bucket set on_hand=90 where id=?", bucketId);
+                      return null;
+                    }))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
 
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "update stock_bucket set on_hand=90,last_movement_at=?::timestamptz where id=?",
-          OffsetDateTime.now().plusMinutes(1), bucketId);
-      sql.execute("update inventory_balance set on_hand=90 where id=?", balance);
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "update stock_bucket set on_hand=90,last_movement_at=?::timestamptz where id=?",
+              OffsetDateTime.now().plusMinutes(1),
+              bucketId);
+          sql.execute("update inventory_balance set on_hand=90 where id=?", balance);
+          return null;
+        });
     // 版本由 DB 自增，调用方无需自记：这是下游并发写入的基础设施
     assertThat(detailOf(actorA).rows().get(0).version()).isEqualTo(1);
     assertThat(detailOf(actorA).rows().get(0).onHand()).isEqualByComparingTo("90");
@@ -578,8 +673,17 @@ class InventoryBucketIntegrationTest {
                     () ->
                         service.detail(
                             new BucketDetailQuery(
-                                null, null, null, null, null, null, null, null,
-                                "1;drop table", null, null))))
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "1;drop table",
+                                null,
+                                null))))
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -594,9 +698,20 @@ class InventoryBucketIntegrationTest {
             () ->
                 service.detail(
                     new BucketDetailQuery(
-                        null, null, null, null, null, null, null, null, "LOCATION_CODE", null, null)));
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "LOCATION_CODE",
+                        null,
+                        null)));
     // 按库位编码升序：A-01-01 在 A-01-02 之前（与在手量的 90/10 顺序相反）
-    assertThat(byLocation.rows()).extracting(BucketRow::locationCode)
+    assertThat(byLocation.rows())
+        .extracting(BucketRow::locationCode)
         .containsExactly("A-01-01", "A-01-02");
   }
 
@@ -656,14 +771,18 @@ class InventoryBucketIntegrationTest {
   void 行内操作入口给出路由契约_未交付时如实标注不可用() {
     var actions = detailOf(actorA).actions();
     assertThat(actions).hasSize(3);
-    assertThat(actions).extracting(BucketAction::action)
+    assertThat(actions)
+        .extracting(BucketAction::action)
         .containsExactly("ADJUST", "TRANSFER", "LEDGER");
     // 7.1.2.1 库存流水台账已交付 → 「查看流水」这条入口现在真的点得动，必须翻成 true，
     // 否则页面上会出现一个已经交付却标着"未交付"的入口。7.4.1.1 调整与 7.5.1.1 调拨仍未交付，
     // 继续如实标 false 并说明原因，而不是给一个点下去 404 的按钮。
-    assertThat(actions).filteredOn(a -> a.action().equals("LEDGER")).singleElement()
+    assertThat(actions)
+        .filteredOn(a -> a.action().equals("LEDGER"))
+        .singleElement()
         .satisfies(a -> assertThat(a.available()).isTrue());
-    assertThat(actions).filteredOn(a -> a.action().equals("ADJUST") || a.action().equals("TRANSFER"))
+    assertThat(actions)
+        .filteredOn(a -> a.action().equals("ADJUST") || a.action().equals("TRANSFER"))
         .allMatch(a -> !a.available());
     assertThat(actions).allMatch(a -> a.ownerModule() != null && !a.ownerModule().isBlank());
     assertThat(actions).allMatch(a -> a.note().contains(a.ownerModule()));
@@ -683,10 +802,14 @@ class InventoryBucketIntegrationTest {
     split(balance, new B(locShA, lotA, "10"));
     var bucketId = detailOf(actorA).rows().get(0).bucketId();
     assertThatThrownBy(
-            () -> access.run(actorA, "warehouse.inventory.read", () -> {
-              sql.execute("delete from stock_bucket where id=?", bucketId);
-              return null;
-            }))
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> {
+                      sql.execute("delete from stock_bucket where id=?", bucketId);
+                      return null;
+                    }))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
   }
 
@@ -695,13 +818,18 @@ class InventoryBucketIntegrationTest {
     var balance = balance(whSh, qPending, "0", "0");
     split(balance, new B(locShQuarantine, null, "10"));
     assertThatThrownBy(
-            () -> access.run(actorA, "warehouse.inventory.read", () -> {
-              sql.execute(
-                  "update stock_bucket set reserved=1,"
-                      + "last_movement_at=?::timestamptz where balance_id=?",
-                  OffsetDateTime.now().plusMinutes(1), balance);
-              return null;
-            }))
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> {
+                      sql.execute(
+                          "update stock_bucket set reserved=1,"
+                              + "last_movement_at=?::timestamptz where balance_id=?",
+                          OffsetDateTime.now().plusMinutes(1),
+                          balance);
+                      return null;
+                    }))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
   }
 
@@ -712,20 +840,31 @@ class InventoryBucketIntegrationTest {
 
     // 复合外键存在：bucket 的 (法人,SKU,仓库,质量状态) 必须与 balance 逐列相同，
     // 所以 bucket 不可能声称自己属于另一个仓。约束名由 PG 截断到 63 字符，这里按前缀匹配。
-    var compositeFk = access.run(actorA, "warehouse.inventory.read", () -> sql.fetchOne(
-        "select count(*) from information_schema.table_constraints"
-            + " where constraint_type='FOREIGN KEY' and table_name='stock_bucket'"
-            + " and constraint_name like 'stock_bucket_tenant_id_balance_id%'"
-            + " and constraint_name like '%sku_id_w_fkey'"));
+    var compositeFk =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                sql.fetchOne(
+                    "select count(*) from information_schema.table_constraints"
+                        + " where constraint_type='FOREIGN KEY' and table_name='stock_bucket'"
+                        + " and constraint_name like 'stock_bucket_tenant_id_balance_id%'"
+                        + " and constraint_name like '%sku_id_w_fkey'"));
     assertThat(compositeFk.get(0, Long.class)).isEqualTo(1);
 
     // 真的写不进去：把 bucket 的仓库改成深圳仓，而 balance 还在上海仓
     assertThatThrownBy(
-            () -> access.run(actorA, "warehouse.inventory.read", () -> {
-              sql.execute(
-                  "update stock_bucket set warehouse_id=? where balance_id=?", whSz, balance);
-              return null;
-            }))
+            () ->
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> {
+                      sql.execute(
+                          "update stock_bucket set warehouse_id=? where balance_id=?",
+                          whSz,
+                          balance);
+                      return null;
+                    }))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
 
     // 跨服务不得建外键：sku 仍只是逻辑 ID，不 REFERENCES 对方表
@@ -735,27 +874,37 @@ class InventoryBucketIntegrationTest {
     // 所以不在这条不变量的范围内，必须在这里显式排除 —— 否则这条断言会把一条本地约束
     // 也当成"跨服务外键"数进去，而它的原意（方法名与注释都写着「跨服务不得建外键」）只是
     // 不让 sku / legal_entity 这类跨服务逻辑 ID 指向对方的表。
-    var skuFk = access.run(actorA, "warehouse.inventory.read", () -> sql.fetchOne(
-        "select count(*) from information_schema.table_constraints"
-            + " where constraint_type='FOREIGN KEY'"
-            + " and table_name in ('stock_bucket','inventory_lot')"
-            + " and constraint_name not like '%balance_id%'"
-            + " and constraint_name not like '%lot_id%'"
-            + " and constraint_name not like '%location_id%'"
-            + " and constraint_name not like 'fk_stock_bucket_stock_owner'"));
+    var skuFk =
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                sql.fetchOne(
+                    "select count(*) from information_schema.table_constraints"
+                        + " where constraint_type='FOREIGN KEY'"
+                        + " and table_name in ('stock_bucket','inventory_lot')"
+                        + " and constraint_name not like '%balance_id%'"
+                        + " and constraint_name not like '%lot_id%'"
+                        + " and constraint_name not like '%location_id%'"
+                        + " and constraint_name not like 'fk_stock_bucket_stock_owner'"));
     assertThat(skuFk.get(0, Long.class)).isZero();
   }
 
   @Test
   void 新表同样受RLS保护() {
     var enabled =
-        access.run(actorA, "warehouse.inventory.read", () -> sql.fetch(
-            "select relname,relrowsecurity,relforcerowsecurity from pg_class"
-                + " where relname in ('stock_bucket','warehouse_location','inventory_lot')"
-                + " order by relname"));
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                sql.fetch(
+                    "select relname,relrowsecurity,relforcerowsecurity from pg_class"
+                        + " where relname in ('stock_bucket','warehouse_location','inventory_lot')"
+                        + " order by relname"));
     assertThat(enabled).hasSize(3);
     assertThat(enabled).allMatch(r -> Boolean.TRUE.equals(r.get("relrowsecurity", Boolean.class)));
-    assertThat(enabled).allMatch(r -> Boolean.TRUE.equals(r.get("relforcerowsecurity", Boolean.class)));
+    assertThat(enabled)
+        .allMatch(r -> Boolean.TRUE.equals(r.get("relforcerowsecurity", Boolean.class)));
   }
 
   // ================================================================ 端点
@@ -785,15 +934,17 @@ class InventoryBucketIntegrationTest {
     var b2 = balance(whSz, qSellable, "0", "0");
     split(b2, new B(locSzA, null, "20"));
 
-    http.perform(get("/warehouse/inventory/buckets")
-            .header("Authorization", "Bearer tenant-a")
-            .param("warehouseId", whSz.toString()))
+    http.perform(
+            get("/warehouse/inventory/buckets")
+                .header("Authorization", "Bearer tenant-a")
+                .param("warehouseId", whSz.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rows.length()").value(1))
         .andExpect(jsonPath("$.rows[0].warehouseCode").value("WH-SZ"));
-    http.perform(get("/warehouse/inventory/buckets")
-            .header("Authorization", "Bearer tenant-a")
-            .param("locationId", locShA.toString()))
+    http.perform(
+            get("/warehouse/inventory/buckets")
+                .header("Authorization", "Bearer tenant-a")
+                .param("locationId", locShA.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rows.length()").value(1))
         .andExpect(jsonPath("$.rows[0].locationCode").value("A-01-01"));
@@ -805,15 +956,17 @@ class InventoryBucketIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(4));
     // 按仓库过滤：逐级下钻的第二级
-    http.perform(get("/warehouse/locations")
-            .header("Authorization", "Bearer tenant-a")
-            .param("warehouseId", whSh.toString()))
+    http.perform(
+            get("/warehouse/locations")
+                .header("Authorization", "Bearer tenant-a")
+                .param("warehouseId", whSh.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(3));
     // 按库位类型过滤：待检区是运营找问题的常用入口
-    http.perform(get("/warehouse/locations")
-            .header("Authorization", "Bearer tenant-a")
-            .param("type", "quarantine"))
+    http.perform(
+            get("/warehouse/locations")
+                .header("Authorization", "Bearer tenant-a")
+                .param("type", "quarantine"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(1))
         .andExpect(jsonPath("$[0].code").value("Q-01"));
@@ -861,23 +1014,26 @@ class InventoryBucketIntegrationTest {
     split(balance, new B(locShA, lotA, "100"));
 
     // 浏览器伪造 X-Tenant-Id 指向 A，身份仍是 B → 只能看到 B 的（空）视图
-    http.perform(get("/warehouse/inventory/buckets")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/buckets")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rows.length()").value(0))
         .andExpect(jsonPath("$.summary.onHand").value(0));
     // 反向：身份是 A 时伪造 B 也拿不到 B 的数据
-    http.perform(get("/warehouse/inventory/buckets")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/inventory/buckets")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rows.length()").value(1))
         .andExpect(jsonPath("$.summary.onHand").value(100));
     // 下拉端点同样不受伪造头影响
-    http.perform(get("/warehouse/locations")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/locations")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(4));
   }
@@ -899,8 +1055,7 @@ class InventoryBucketIntegrationTest {
 
   // ---------------------------------------------------------------- 工具
 
-  InventoryBucketDetail by(
-      UUID warehouse, UUID location, UUID lot, UUID quality, UUID sku) {
+  InventoryBucketDetail by(UUID warehouse, UUID location, UUID lot, UUID quality, UUID sku) {
     return access.run(
         actorA,
         "warehouse.inventory.read",

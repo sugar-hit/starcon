@@ -9,12 +9,10 @@ import java.util.Map;
 /**
  * 3.4.2.2 描述与卖点库的纯规则层：词表、容量上限、模板与变量校验、译文一致性。
  *
- * <p>与 {@link TitleRules} / {@link MediaRules} 同一形状：无状态静态方法。
- * 服务层拒绝时给出的话、前端表单校验、集成测试断言的边界都引同一份实现。
+ * <p>与 {@link TitleRules} / {@link MediaRules} 同一形状：无状态静态方法。 服务层拒绝时给出的话、前端表单校验、集成测试断言的边界都引同一份实现。
  *
  * <p><b>变量缺失报告不在这里产生</b>。那是 {@link DescriptionRenderer} 的职责（要模板解析与
- * 短语池取值），这里只管「参数合不合法」——两类逻辑混在一起会让「缺变量必须被报告」
- * 这条蓝图标着要显式控制的纯函数被校验代码污染。
+ * 短语池取值），这里只管「参数合不合法」——两类逻辑混在一起会让「缺变量必须被报告」 这条蓝图标着要显式控制的纯函数被校验代码污染。
  */
 public final class DescriptionRules {
   private DescriptionRules() {}
@@ -144,8 +142,7 @@ public final class DescriptionRules {
   /**
    * 单次批量最多 200 个 SKU。
    *
-   * <p>不是算力上限（填充是纯字符串计算，每个 SKU 一次替换），而是**可用性**上限：
-   * 一次填充 2000 个 SKU × 每个商品要填详情描述 / 使用说明 / 注意事项三段，
+   * <p>不是算力上限（填充是纯字符串计算，每个 SKU 一次替换），而是**可用性**上限： 一次填充 2000 个 SKU × 每个商品要填详情描述 / 使用说明 / 注意事项三段，
    * 段落列表根本没法逐条核对，而「这段少了哪个变量」正是运营要看的。
    */
   public static final int MAX_SKUS_PER_RENDER = 200;
@@ -156,16 +153,14 @@ public final class DescriptionRules {
   /**
    * 模板正文长度上限 20000 字符。
    *
-   * <p>与 3.4.2.1 的标题模板（2000）差一个数量级：那边受平台标题硬上限约束，
-   * 这边是**长文本**且蓝图明确没有字符上限，20000 足够一整页详情描述与一份说明书。
+   * <p>与 3.4.2.1 的标题模板（2000）差一个数量级：那边受平台标题硬上限约束， 这边是**长文本**且蓝图明确没有字符上限，20000 足够一整页详情描述与一份说明书。
    */
   public static final int MAX_BODY_LENGTH = 20000;
 
   /**
    * 短语文本长度上限 2000 字符。
    *
-   * <p>长句（可含标点与换行），但不是整页：一条卖点陈述超过 2000 字那是在粘说明书，
-   * 而说明书属于 {@code content_type='INSTRUCTION'} 的模板。
+   * <p>长句（可含标点与换行），但不是整页：一条卖点陈述超过 2000 字那是在粘说明书， 而说明书属于 {@code content_type='INSTRUCTION'} 的模板。
    */
   public static final int MAX_PHRASE_LENGTH = 2000;
 
@@ -181,8 +176,7 @@ public final class DescriptionRules {
     String value = MediaRules.normalize(code).toUpperCase(Locale.ROOT);
     if (value.isEmpty()) return "模板编码不能为空";
     if (value.length() > 32) return "模板编码最多 32 个字符";
-    if (!value.matches("[A-Z0-9][A-Z0-9_-]{0,31}"))
-      return "模板编码请使用英文字母、数字、下划线或短横线，长度 1~32 位";
+    if (!value.matches("[A-Z0-9][A-Z0-9_-]{0,31}")) return "模板编码请使用英文字母、数字、下划线或短横线，长度 1~32 位";
     return null;
   }
 
@@ -196,9 +190,7 @@ public final class DescriptionRules {
   public static String contentTypeProblem(String contentType) {
     String value = MediaRules.normalizeUpper(contentType);
     if (!CONTENT_TYPES.contains(value))
-      return "内容类型只能是 "
-          + String.join(" / ", CONTENT_TYPES)
-          + "（详情描述 / 使用说明 / 注意事项 / 卖点段落）";
+      return "内容类型只能是 " + String.join(" / ", CONTENT_TYPES) + "（详情描述 / 使用说明 / 注意事项 / 卖点段落）";
     return null;
   }
 
@@ -212,13 +204,10 @@ public final class DescriptionRules {
   /**
    * 模板正文校验。
    *
-   * <p>与 3.4.2.1 的 patternProblem 有一个**刻意的差别**：那边要求至少一个占位符
-   * （没有变量的标题模板渲染出来每条候选都一样，正是标题库要避免的重复铺货），
-   * 这边**不要求**——「请勿进水」「适用于 0~40℃ 环境」这种注意事项就是一个变量都没有的
-   * 固定句子，它完全成立，强制加占位符只会逼运营写废话占位。
+   * <p>与 3.4.2.1 的 patternProblem 有一个**刻意的差别**：那边要求至少一个占位符 （没有变量的标题模板渲染出来每条候选都一样，正是标题库要避免的重复铺货），
+   * 这边**不要求**——「请勿进水」「适用于 0~40℃ 环境」这种注意事项就是一个变量都没有的 固定句子，它完全成立，强制加占位符只会逼运营写废话占位。
    *
-   * <p>但花括号必须配平：{@code {brand} 采用了} 这种漏写右括号的正文会让
-   * 占位符解析器把后面一大段都吞掉，而填充时看起来「只是少了几个字」——
+   * <p>但花括号必须配平：{@code {brand} 采用了} 这种漏写右括号的正文会让 占位符解析器把后面一大段都吞掉，而填充时看起来「只是少了几个字」——
    * 这正是「静默留下占位符」的另一种形态，所以在校验层就拒。
    */
   public static String bodyProblem(String body) {
@@ -231,7 +220,8 @@ public final class DescriptionRules {
           + (unbalancedBraceIndex(value) + 1)
           + " 附近有一个孤立的 { 或 }。"
           + "漏写右括号会让占位符解析把后面一整段都吞成变量名，填充时看不出来却会漏内容";
-    for (String name : placeholdersOf(value)) if (variableNameProblem(name) != null) return variableNameProblem(name);
+    for (String name : placeholdersOf(value))
+      if (variableNameProblem(name) != null) return variableNameProblem(name);
     return null;
   }
 
@@ -258,8 +248,7 @@ public final class DescriptionRules {
   /**
    * 提取正文里的占位符名（不含花括号），按出现顺序，**去重后**返回。
    *
-   * <p>去重是必要的：{@code {brand} 与 {brand}} 里 brand 出现两次，
-   * 服务层解析成变量列表时只保留第一个绑定源，另一个是同一个词的重复提及。
+   * <p>去重是必要的：{@code {brand} 与 {brand}} 里 brand 出现两次， 服务层解析成变量列表时只保留第一个绑定源，另一个是同一个词的重复提及。
    */
   public static List<String> placeholdersOf(String body) {
     String value = normalizeBody(body);
@@ -289,7 +278,10 @@ public final class DescriptionRules {
   public static String sourceProblem(String source) {
     String value = MediaRules.normalizeUpper(source);
     if (!FACT_SOURCES.contains(value) && !PHRASE_SOURCES.contains(value))
-      return "变量绑定源只能是 " + String.join(" / ", FACT_SOURCES) + " 或 " + String.join(" / ", PHRASE_SOURCES);
+      return "变量绑定源只能是 "
+          + String.join(" / ", FACT_SOURCES)
+          + " 或 "
+          + String.join(" / ", PHRASE_SOURCES);
     return null;
   }
 
@@ -303,8 +295,7 @@ public final class DescriptionRules {
    * 模板声明的变量与模板正文里的占位符必须**互相对得上**。
    *
    * <p>两个方向都要查：正文里写了 {@code {material}} 却没声明 material 的绑定源，
-   * 填充时那个占位符拿不到值——而蓝图明令「变量缺失必须报告，不能静默留下占位符」，
-   * 所以这里直接把配置错误挡在保存时；反过来声明了 material 而正文里没有，
+   * 填充时那个占位符拿不到值——而蓝图明令「变量缺失必须报告，不能静默留下占位符」， 所以这里直接把配置错误挡在保存时；反过来声明了 material 而正文里没有，
    * 那条变量是死配置，会让模板含义与实际填充对不上。
    */
   public static String variableBindingProblem(String body, List<String> declaredNames) {
@@ -312,8 +303,12 @@ public final class DescriptionRules {
     List<String> declared = declaredNames == null ? List.of() : declaredNames;
     for (String placeholder : placeholders)
       if (!declared.contains(placeholder))
-        return "正文里的占位符 {" + placeholder + "} 没有声明绑定源："
-            + "请在变量列表里加一条 " + placeholder + "，并选择它取自 SPU/SKU 字段、短语池还是型号清单。"
+        return "正文里的占位符 {"
+            + placeholder
+            + "} 没有声明绑定源："
+            + "请在变量列表里加一条 "
+            + placeholder
+            + "，并选择它取自 SPU/SKU 字段、短语池还是型号清单。"
             + "没声明的占位符填不出值，会被降级成「缺变量」并报告——那正是 3.4.2.2 明令禁止的静默占位符";
     for (String name : declared)
       if (!placeholders.contains(name))
@@ -326,35 +321,29 @@ public final class DescriptionRules {
   /**
    * 语言标签校验（BCP-47 简写）。
    *
-   * <p>只校验形状不校验语义：本模块不维护语言字典（那是 3.4.3.1 / 18 的事），
-   * 所以 {@code zh-CN} / {@code en-US} / {@code pt-BR} 都被接受，
-   * 而 {@code 中文} / {@code en_US}（下划线）/ {@code e}（太短）被拒——
-   * 下划线写法会让「同一个语言的两种拼法」各建一条译文，locale 唯一键因此形同虚设。
+   * <p>只校验形状不校验语义：本模块不维护语言字典（那是 3.4.3.1 / 18 的事）， 所以 {@code zh-CN} / {@code en-US} / {@code pt-BR}
+   * 都被接受， 而 {@code 中文} / {@code en_US}（下划线）/ {@code e}（太短）被拒—— 下划线写法会让「同一个语言的两种拼法」各建一条译文，locale
+   * 唯一键因此形同虚设。
    *
-   * <p><b>与本类其它 {@code *Problem} 方法同一契约：合法返回 null，非法返回原因文本。</b>
-   * 规范化后的值请用 {@link #normalizeLocale(String)} 取。
-   * （早先这里让本方法「合法时返回规范化值」，于是它被顺手塞进
-   * {@code firstNonNull(...)} 时，"zh-CN" 本身被当成问题报了出来——
-   * 一条方法两种返回语义是这类 bug 的温床。）
+   * <p><b>与本类其它 {@code *Problem} 方法同一契约：合法返回 null，非法返回原因文本。</b> 规范化后的值请用 {@link
+   * #normalizeLocale(String)} 取。 （早先这里让本方法「合法时返回规范化值」，于是它被顺手塞进 {@code firstNonNull(...)} 时，"zh-CN"
+   * 本身被当成问题报了出来—— 一条方法两种返回语义是这类 bug 的温床。）
    */
   public static String localeProblem(String locale) {
     String value = MediaRules.normalize(locale);
     if (value.isEmpty()) return "语言不能为空（例如 zh-CN / en-US）";
     if (value.length() > MAX_LOCALE_LENGTH) return "语言标签最多 " + MAX_LOCALE_LENGTH + " 个字符";
     if (!value.matches("[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})?"))
-      return "语言标签请用 BCP-47 简写（zh-CN / en-US / ja-JP）："
-          + "不要用中文名或下划线写法，同一个语言的两种拼法会各建一条译文";
+      return "语言标签请用 BCP-47 简写（zh-CN / en-US / ja-JP）：" + "不要用中文名或下划线写法，同一个语言的两种拼法会各建一条译文";
     return null;
   }
 
   /**
    * 规范化后的语言标签（BCP-47 规范写法：语言小写 + 地区大写）。
    *
-   * <p><b>入库与查询必须走同一份规范化</b>，否则筛选会静默失效：
-   * 入库存 "zh-CN"、查询用 {@code toUpperCase} 变成 "ZH-CN"，那条筛选就永远匹配不到，
-   * 而页面上表现为「明明有数据却查不出来」——最难查的一类症状。
-   * 规范化同时让 "ZH-cn" / "zh-CN" 收敛成同一个语言，
-   * 这正是 {@link #localeProblem} 拒绝下划线写法的同一个目的。
+   * <p><b>入库与查询必须走同一份规范化</b>，否则筛选会静默失效： 入库存 "zh-CN"、查询用 {@code toUpperCase} 变成 "ZH-CN"，那条筛选就永远匹配不到，
+   * 而页面上表现为「明明有数据却查不出来」——最难查的一类症状。 规范化同时让 "ZH-cn" / "zh-CN" 收敛成同一个语言， 这正是 {@link #localeProblem}
+   * 拒绝下划线写法的同一个目的。
    */
   public static String normalizeLocale(String locale) {
     String value = MediaRules.normalize(locale);
@@ -393,10 +382,8 @@ public final class DescriptionRules {
    * <p>三个方向都要查，因为机器译文最典型的失败模式就是这三个：
    *
    * <ul>
-   *   <li>译文漏了一个占位符（{brand} 直接被译成了品牌名而不是占位符）
-   *       → 填充时那句话对所有 SKU 都一样，正是「变量没参与填充」的静默形态；
-   *   <li>译文多了一个占位符（{color} 是译者自己加的，源模板没有）
-   *       → 填充时必然缺变量，每一批都降级成 INCOMPLETE；
+   *   <li>译文漏了一个占位符（{brand} 直接被译成了品牌名而不是占位符） → 填充时那句话对所有 SKU 都一样，正是「变量没参与填充」的静默形态；
+   *   <li>译文多了一个占位符（{color} 是译者自己加的，源模板没有） → 填充时必然缺变量，每一批都降级成 INCOMPLETE；
    *   <li>占位符拼错（{brnad}）→ 同样多出一个没绑定源的占位符。
    * </ul>
    *
@@ -407,12 +394,16 @@ public final class DescriptionRules {
     List<String> translated = placeholdersOf(translatedBody);
     for (String name : translated)
       if (!source.contains(name))
-        return "译文里的占位符 {" + name + "} 在源语言正文里没有："
+        return "译文里的占位符 {"
+            + name
+            + "} 在源语言正文里没有："
             + "译文必须与源语言的占位符集合完全一致。多出来的占位符（常见于 AI 预填时自己加的）"
             + "填不出值，会让每次填充都降级成「缺变量」";
     for (String name : source)
       if (!translated.contains(name))
-        return "译文漏掉了源语言的占位符 {" + name + "}："
+        return "译文漏掉了源语言的占位符 {"
+            + name
+            + "}："
             + "译文必须与源语言的占位符集合完全一致。漏掉的占位符会让那句话对所有 SKU 都一样，"
             + "而变量其实压根没参与填充";
     return null;
@@ -430,8 +421,7 @@ public final class DescriptionRules {
     String value = MediaRules.normalize(code).toUpperCase(Locale.ROOT);
     if (value.isEmpty()) return "短语编码不能为空";
     if (value.length() > 32) return "短语编码最多 32 个字符";
-    if (!value.matches("[A-Z0-9][A-Z0-9_-]{0,31}"))
-      return "短语编码请使用英文字母、数字、下划线或短横线，长度 1~32 位";
+    if (!value.matches("[A-Z0-9][A-Z0-9_-]{0,31}")) return "短语编码请使用英文字母、数字、下划线或短横线，长度 1~32 位";
     return null;
   }
 

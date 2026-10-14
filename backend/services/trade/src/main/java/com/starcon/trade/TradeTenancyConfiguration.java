@@ -26,8 +26,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class TradeTenancyConfiguration {
 
   @Bean
-  public TenantTransactions tenantTransactions(
-      DSLContext sql, PlatformTransactionManager manager) {
+  public TenantTransactions tenantTransactions(DSLContext sql, PlatformTransactionManager manager) {
     return new TenantTransactions(sql, new TransactionTemplate(manager));
   }
 }

@@ -11,21 +11,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 11.4.2.2 客服知识库与话术：话术条目、多语言版本、平台规则版本挂钩、
- * 待复核任务、引用记录与命中率统计。
+ * 11.4.2.2 客服知识库与话术：话术条目、多语言版本、平台规则版本挂钩、 待复核任务、引用记录与命中率统计。
  *
  * <p>路由挂在 {@code /catalog/kb} 之下，与 {@code /catalog/descriptions}（3.4.2.2
- * 商品侧文案）<b>并列而不合并</b>：那边是消费者在详情页读到的文案（工作流是
- * 「批量填充 SKU」），这边是客服在会话窗口里一键引用的话术（工作流是
- * 「按买家的问题检索并记录使用效果」）。判据是<b>谁在什么时候读</b>，不是文本长短 ——
- * 见 {@code V100} 文件头与 {@link KnowledgeBaseService} 的类注释。
+ * 商品侧文案）<b>并列而不合并</b>：那边是消费者在详情页读到的文案（工作流是 「批量填充 SKU」），这边是客服在会话窗口里一键引用的话术（工作流是
+ * 「按买家的问题检索并记录使用效果」）。判据是<b>谁在什么时候读</b>，不是文本长短 —— 见 {@code V100} 文件头与 {@link KnowledgeBaseService}
+ * 的类注释。
  *
- * <p>第一段是字面量 {@code kb}，与 {@code products/{uuid}}、{@code parties}、
- * {@code supplier-quotes} 各自首段都不同，不存在路由冲突。
+ * <p>第一段是字面量 {@code kb}，与 {@code products/{uuid}}、{@code parties}、 {@code supplier-quotes}
+ * 各自首段都不同，不存在路由冲突。
  *
- * <p>权限沿用素材域：读 {@code catalog.assets.read}，写 {@code catalog.assets.update}
- * （identity V3 的 {@code catalog.assets}「素材与翻译」词表）。不新造词表 ——
- * 新词表要改 identity 服务的迁移，属于另一个服务的写入所有权。
+ * <p>权限沿用素材域：读 {@code catalog.assets.read}，写 {@code catalog.assets.update} （identity V3 的 {@code
+ * catalog.assets}「素材与翻译」词表）。不新造词表 —— 新词表要改 identity 服务的迁移，属于另一个服务的写入所有权。
  */
 @RestController
 @RequestMapping("/catalog/kb")
@@ -192,7 +189,8 @@ public class KnowledgeBaseController {
       @RequestParam(required = false) String status,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
-    return call(auth, "assets.read", a -> kb.listRuleVersions(keyword, platform, status, page, size));
+    return call(
+        auth, "assets.read", a -> kb.listRuleVersions(keyword, platform, status, page, size));
   }
 
   /** 建规则版本（草稿）。草稿不参与挂钩判定。 */
@@ -207,8 +205,8 @@ public class KnowledgeBaseController {
   /**
    * 改规则版本（含发布生效与标记接替）。
    *
-   * <p>标记为 {@code SUPERSEDED} 时，V100 的触发器会<b>自动</b>给挂在它上面的每条话术
-   * 生成一条待复核任务 —— 蓝图「平台政策变化时能定位哪些话术需要更新」的落地点。
+   * <p>标记为 {@code SUPERSEDED} 时，V100 的触发器会<b>自动</b>给挂在它上面的每条话术 生成一条待复核任务 ——
+   * 蓝图「平台政策变化时能定位哪些话术需要更新」的落地点。
    */
   @PutMapping("/rule-versions/{id}")
   public KnowledgeSaved updateRuleVersion(
@@ -273,8 +271,7 @@ public class KnowledgeBaseController {
   /**
    * 待复核任务列表 —— 蓝图「平台政策变化时能定位哪些话术需要更新」的读出口。
    *
-   * <p>每行自带接替它的那一版（{@code supersedingRuleLabel}）与两版的变更摘要，
-   * 客服不用再去翻规则历史才知道该比对什么。
+   * <p>每行自带接替它的那一版（{@code supersedingRuleLabel}）与两版的变更摘要， 客服不用再去翻规则历史才知道该比对什么。
    */
   @GetMapping("/review-tasks")
   public ReviewTaskPage reviewTasks(
@@ -285,9 +282,7 @@ public class KnowledgeBaseController {
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
     return call(
-        auth,
-        "assets.read",
-        a -> kb.listReviewTasks(keyword, reviewStatus, platform, page, size));
+        auth, "assets.read", a -> kb.listReviewTasks(keyword, reviewStatus, platform, page, size));
   }
 
   /** 认领（PENDING→REVIEWING）或完成（→DONE）一条复核任务。 */
@@ -304,8 +299,8 @@ public class KnowledgeBaseController {
   /**
    * 记一次引用（客服一键引用话术）。
    *
-   * <p>真的插一行 {@code kb_usage}：命中率的全部可信度来自明细行是唯一真相，
-   * 累计列会与明细分叉。引用记录<b>没有</b>改删端点（append-only，DB 层触发器 + REVOKE 双重兜底）。
+   * <p>真的插一行 {@code kb_usage}：命中率的全部可信度来自明细行是唯一真相， 累计列会与明细分叉。引用记录<b>没有</b>改删端点（append-only，DB 层触发器
+   * + REVOKE 双重兜底）。
    */
   @PostMapping("/entries/{id}/usages")
   public ResponseEntity<KbUsageRow> recordUsage(
@@ -341,8 +336,7 @@ public class KnowledgeBaseController {
   /**
    * 命中率排行榜 —— 蓝图输出「命中率统计」的可查面。
    *
-   * <p>默认按被引用次数倒序：先看哪些话术真的在用，再看命中率。
-   * 按命中率排会把「只被用过 1 次且那 1 次成功」的话术顶到最上面，那不是运营要的行动顺序。
+   * <p>默认按被引用次数倒序：先看哪些话术真的在用，再看命中率。 按命中率排会把「只被用过 1 次且那 1 次成功」的话术顶到最上面，那不是运营要的行动顺序。
    */
   @GetMapping("/hit-rates")
   public List<EntryHitRateRow> hitRates(

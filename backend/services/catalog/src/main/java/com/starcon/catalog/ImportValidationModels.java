@@ -13,17 +13,13 @@ import java.util.UUID;
  * <p>蓝图的输出是「<b>错误明细表 + 可下载的修正版模板</b>」，所以这里的形状围绕两件事：
  *
  * <ul>
- *   <li>{@link ImportValidationSummary} —— 报告总览：四段行数（三段分「必须修正 / 可跳过 / 校验通过」
- *       + 任务总行数）、按蓝图五类分的统计、按字段列分的统计。
- *       「有多少行真能落库」在这里被分成两个数而不是一个数，因为运营要决定的是
- *       「先改哪一类」和「改完还剩多少」，不是「成没成功」。
+ *   <li>{@link ImportValidationSummary} —— 报告总览：四段行数（三段分「必须修正 / 可跳过 / 校验通过」 +
+ *       任务总行数）、按蓝图五类分的统计、按字段列分的统计。 「有多少行真能落库」在这里被分成两个数而不是一个数，因为运营要决定的是 「先改哪一类」和「改完还剩多少」，不是「成没成功」。
  *   <li>{@link ImportValidationIssueLine} —— 错误明细表的一行，带原始单元格文本与行结论。
  * </ul>
  *
- * <p><b>报告带 {@code stale} 标记</b>：报告是一轮预校验结论的快照（见 V34 文件头），
- * 任务重跑预校验后结论会变，而页面上挂着的那份报告不会自己变。
- * {@code stale=true} 就是「你看到的结论已经不是这一批数据当前的结论了」，
- * 页面必须把它显示出来而不是默默展示旧数字。
+ * <p><b>报告带 {@code stale} 标记</b>：报告是一轮预校验结论的快照（见 V34 文件头）， 任务重跑预校验后结论会变，而页面上挂着的那份报告不会自己变。 {@code
+ * stale=true} 就是「你看到的结论已经不是这一批数据当前的结论了」， 页面必须把它显示出来而不是默默展示旧数字。
  */
 final class ImportValidationModels {
   private ImportValidationModels() {}
@@ -69,15 +65,15 @@ final class ImportValidationModels {
   /**
    * 一列的统计：哪一列错得最多。
    *
-   * <p>字段标签给的是**文件里的列头文字**（{@code fieldLabel}）而不是模板列头 ——
-   * 运营在自己的文件里看到的是前者，两者可能已经不一致（模板列头可改，文件不会跟着改）。
+   * <p>字段标签给的是**文件里的列头文字**（{@code fieldLabel}）而不是模板列头 —— 运营在自己的文件里看到的是前者，两者可能已经不一致（模板列头可改，文件不会跟着改）。
    */
   public record ImportValidationColumnStat(
       String fieldKey, String fieldLabel, int rowCount, int errorCount, int warningCount) {}
 
   /** 报告总览：报告行 + 两组分组统计。 */
   public record ImportValidationSummary(
-      ImportValidationReportRow report, List<ImportValidationCategoryStat> categories,
+      ImportValidationReportRow report,
+      List<ImportValidationCategoryStat> categories,
       List<ImportValidationColumnStat> columns) {}
 
   // ================================================================ 错误明细
@@ -87,10 +83,9 @@ final class ImportValidationModels {
    *
    * @param fieldKey 出错字段键；空串表示整行级问题
    * @param rawValue 该格在文件里的**原始文本** —— 没有它，第 47 行原来填了什么只能回原文件里找
-   * @param rowOutcome 生成报告时这一行的逐行结论（VALID / INVALID / IMPORTED / SKIPPED / FAILED，
-   *     与 V29 的 {@code import_job_row.outcome} 同一词表）
-   * @param rowBlocking 这一行是否**永不落库**。这是行级事实（条级 severity 归并上来的结果），
-   *     报告页与导出文件里的「必须修正 / 是否落库」都读它
+   * @param rowOutcome 生成报告时这一行的逐行结论（VALID / INVALID / IMPORTED / SKIPPED / FAILED， 与 V29 的 {@code
+   *     import_job_row.outcome} 同一词表）
+   * @param rowBlocking 这一行是否**永不落库**。这是行级事实（条级 severity 归并上来的结果）， 报告页与导出文件里的「必须修正 / 是否落库」都读它
    */
   public record ImportValidationIssueLine(
       UUID id,
@@ -111,8 +106,7 @@ final class ImportValidationModels {
   /**
    * 错误明细分页。
    *
-   * @param errorCount / warningCount 是**当前报告全量**的条数（不受本页分页与筛选影响），
-   *     页面顶部的「必须修正 N 条 / 可跳过 M 条」读的是这两个数。
+   * @param errorCount / warningCount 是**当前报告全量**的条数（不受本页分页与筛选影响）， 页面顶部的「必须修正 N 条 / 可跳过 M 条」读的是这两个数。
    */
   public record ImportValidationIssuePage(
       List<ImportValidationIssueLine> items,
@@ -129,8 +123,7 @@ final class ImportValidationModels {
    *
    * @param exportKind ANNOTATED_ERRORS=带标注的错误文件 / FIXED_TEMPLATE=修正版模板
    * @param byteSize 字节数（BigDecimal + NUMERIC(19,6)，不存 bytea）
-   * @param contentSha256 内容哈希：现算导出，所以同一个报告导两次的哈希必须一样，
-   *     这个数让「下载到的和登记的是同一份」可验证
+   * @param contentSha256 内容哈希：现算导出，所以同一个报告导两次的哈希必须一样， 这个数让「下载到的和登记的是同一份」可验证
    * @param stale 登记时的报告已过期 —— 拿它导出的文件对应的是上一轮结论
    */
   public record ImportValidationExportRow(

@@ -71,20 +71,24 @@ ISO 4217 词表是 12 财务的资产、计量单位是 3.3.3 的资产。在本
 ## 文件清单
 
 **迁移**
+
 - `backend/services/catalog/src/main/resources/db/migration/V30__party_role_profiles.sql`
 
 **后端**
+
 - `.../catalog/PartyRoleProfileRules.java`（新增，纯规则 R1~R7）
 - `.../catalog/PartyRoleProfileService.java`（新增，jOOQ 显式 SQL）
 - `.../catalog/PartyRoleProfileController.java`（新增）
 - `.../catalog/CatalogModels.java`（追加 3.6.1.2 的 DTO）
 
 **测试**
+
 - `.../catalog/PartyRoleProfileIntegrationTest.java`（新增，24 例）
 - `.../catalog/PartyRoleProfileRulesTest.java`（新增，22 例）
 - `apps/web/src/components/catalog/party-role-profile-model.test.ts`（新增，21 例）
 
 **前端**
+
 - `apps/web/src/components/catalog/party-role-profile-model.ts`（新增）
 - `apps/web/src/components/catalog/party-role-profile-workspace.tsx`（新增）
 - `apps/web/src/components/catalog/party-workspace.tsx`（挂载面板 + 台账）
@@ -92,6 +96,7 @@ ISO 4217 词表是 12 财务的资产、计量单位是 3.3.3 的资产。在本
 - `apps/web/src/app/api/catalog/[...path]/route.test.ts`（3.6.1.1 那条「supplier-profile 应被拒」的断言翻转）
 
 **生成物 / 台账**
+
 - `packages/api-contracts/src/catalog.ts` + `catalog.openapi.json`（codegen）
 - `docs/product/capability-blueprint/module-progress.md`（只改 3.6.1.2 一行 + sync 重算的计数）
 

@@ -138,7 +138,9 @@ export function fetchRules(
   return api<WarehouseAllocationRulePage>(`${base}/rules${query(params)}`);
 }
 
-export function saveRule(input: WarehouseAllocationRuleInput): Promise<WarehouseAllocationRuleSaved> {
+export function saveRule(
+  input: WarehouseAllocationRuleInput,
+): Promise<WarehouseAllocationRuleSaved> {
   return api<WarehouseAllocationRuleSaved>(`${base}/rules`, 'POST', input);
 }
 
@@ -191,9 +193,7 @@ export function fetchAllocations(
   return api<WarehouseAllocationDecisionPage>(`${base}/allocations${query(params)}`);
 }
 
-export function fetchAllocation(
-  allocationId: string,
-): Promise<WarehouseAllocationDecisionDetail> {
+export function fetchAllocation(allocationId: string): Promise<WarehouseAllocationDecisionDetail> {
   return api<WarehouseAllocationDecisionDetail>(`${base}/allocations/${allocationId}`);
 }
 
@@ -207,10 +207,16 @@ export function advanceAllocationStatus(
   allocationId: string,
   input: WarehouseAllocationStatusInput,
 ): Promise<WarehouseAllocationDecisionSaved> {
-  return api<WarehouseAllocationDecisionSaved>(`${base}/allocations/${allocationId}/status`, 'POST', input);
+  return api<WarehouseAllocationDecisionSaved>(
+    `${base}/allocations/${allocationId}/status`,
+    'POST',
+    input,
+  );
 }
 
-export function fetchHolds(params: WarehouseAllocationHoldParams): Promise<WarehouseAllocationHoldPage> {
+export function fetchHolds(
+  params: WarehouseAllocationHoldParams,
+): Promise<WarehouseAllocationHoldPage> {
   return api<WarehouseAllocationHoldPage>(`${base}/holds${query(params)}`);
 }
 
@@ -360,7 +366,10 @@ export function crossLegalEntityWarning(decision: {
 }
 
 /** 挂起的排除清单是否提到了某个仓（用于把详情与挂起对上）。 */
-export function holdMentions(exclusionDetail: string | null | undefined, warehouseRef: string): boolean {
+export function holdMentions(
+  exclusionDetail: string | null | undefined,
+  warehouseRef: string,
+): boolean {
   if (!exclusionDetail) return false;
   return exclusionDetail.includes(`${warehouseRef}=`);
 }
@@ -393,9 +402,11 @@ export function timeText(value: string | null | undefined): string {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${parsed.getUTCFullYear()}-${pad(parsed.getUTCMonth() + 1)}-${pad(parsed.getUTCDate())}`
-    + ` ${pad(parsed.getUTCHours())}:${pad(parsed.getUTCMinutes())}`
-    + ` ${value.endsWith('Z') ? 'UTC' : value.slice(-6)}`;
+  return (
+    `${parsed.getUTCFullYear()}-${pad(parsed.getUTCMonth() + 1)}-${pad(parsed.getUTCDate())}` +
+    ` ${pad(parsed.getUTCHours())}:${pad(parsed.getUTCMinutes())}` +
+    ` ${value.endsWith('Z') ? 'UTC' : value.slice(-6)}`
+  );
 }
 
 /** 候选是否被选中。 */
@@ -412,7 +423,14 @@ export function candidateChosen(candidate: WarehouseAllocationCandidateRow): boo
 export function scoreBreakdown(
   candidate: WarehouseAllocationCandidateRow,
   rule: WarehouseAllocationRuleRow,
-): { stock: number; cost: number; leadTime: number; legalEntity: number; region: number; total: number } {
+): {
+  stock: number;
+  cost: number;
+  leadTime: number;
+  legalEntity: number;
+  region: number;
+  total: number;
+} {
   const round4 = (n: number) => Math.round(n * 1e4) / 1e4;
   const stock = round4(rule.weightStock * candidate.scoreStock);
   const cost = round4(rule.weightCost * candidate.scoreCost);

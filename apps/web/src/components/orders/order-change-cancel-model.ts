@@ -42,7 +42,9 @@ export function fetchCapabilities() {
 }
 
 export function fetchCancellation(id: string) {
-  return api<OrderChangeCancelCancellationDetail>(`${base}/cancellations/${encodeURIComponent(id)}`);
+  return api<OrderChangeCancelCancellationDetail>(
+    `${base}/cancellations/${encodeURIComponent(id)}`,
+  );
 }
 
 export function fetchChangeRequest(id: string) {
@@ -66,9 +68,7 @@ export function fetchChangeRequests(params: {
   page?: number;
   size?: number;
 }) {
-  return api<OrderChangeCancelPageOrderChangeCancelChangeRow>(
-    `${base}/requests${query(params)}`,
-  );
+  return api<OrderChangeCancelPageOrderChangeCancelChangeRow>(`${base}/requests${query(params)}`);
 }
 
 export function fetchProgress(orderId: string) {

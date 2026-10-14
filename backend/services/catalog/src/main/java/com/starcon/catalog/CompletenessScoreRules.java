@@ -13,23 +13,18 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * 3.9.2.1 完整度评分的纯规则：六个维度与权重、分档阈值、两条阻断链、
- * 缺失码词表、图片阈值、认证四态判定，以及报关属性与认证的写入前置条件。
+ * 3.9.2.1 完整度评分的纯规则：六个维度与权重、分档阈值、两条阻断链、 缺失码词表、图片阈值、认证四态判定，以及报关属性与认证的写入前置条件。
  *
  * <p>与 {@link SupplierQuoteRules} / {@link PhysicalSafetyRules} 同一条纪律：
- * <b>能在算分之前判定的，就不要留到下游才炸</b>。「HS 编码写成了 8471.3」
- * 不会在评分时报错，它会在报关行退单时才炸，而那时单子已经发了。
+ * <b>能在算分之前判定的，就不要留到下游才炸</b>。「HS 编码写成了 8471.3」 不会在评分时报错，它会在报关行退单时才炸，而那时单子已经发了。
  *
- * <p>规则 R1~R8 在 {@code V37__completeness_score.sql} 第十节有同样的文字。
- * 本类是评分的<b>唯一</b>口径实现（V37 第七节：刻意不写 DB 函数，
- * 否则评分逻辑会变成 Java 与 plpgsql 两份，前端预览还要第三份），
- * 前端 {@code completeness-score-model.ts} 是它的镜像。
+ * <p>规则 R1~R8 在 {@code V37__completeness_score.sql} 第十节有同样的文字。 本类是评分的<b>唯一</b>口径实现（V37 第七节：刻意不写 DB
+ * 函数， 否则评分逻辑会变成 Java 与 plpgsql 两份，前端预览还要第三份）， 前端 {@code completeness-score-model.ts} 是它的镜像。
  *
  * <p>本类不碰数据库，可以在离线单测里穷举。
  *
- * <p>类名不叫 {@code CompletenessScore}：那是被静态导入的 DTO record
- * （{@link CompletenessScoreModels}），两者在同一批文件里会直接撞名。
- * 与 {@link SupplierQuoteRules} 同一个理由。
+ * <p>类名不叫 {@code CompletenessScore}：那是被静态导入的 DTO record （{@link
+ * CompletenessScoreModels}），两者在同一批文件里会直接撞名。 与 {@link SupplierQuoteRules} 同一个理由。
  */
 public final class CompletenessScoreRules {
   private CompletenessScoreRules() {}
@@ -117,17 +112,14 @@ public final class CompletenessScoreRules {
   /**
    * 断言权重合计为 1。
    *
-   * <p><b>在类初始化时就跑</b>，而不是等到算分时：权重表改漏一项（或合计写成 0.99）
-   * 应该在<b>启动</b>时炸掉，而不是上线后让所有分数静默偏移 ——
-   * 分数偏移没有任何异常表现，页面照常显示，只是全店都低了 2 分。
-   * 这是 V37 第一节续钉死的那条。
+   * <p><b>在类初始化时就跑</b>，而不是等到算分时：权重表改漏一项（或合计写成 0.99） 应该在<b>启动</b>时炸掉，而不是上线后让所有分数静默偏移 ——
+   * 分数偏移没有任何异常表现，页面照常显示，只是全店都低了 2 分。 这是 V37 第一节续钉死的那条。
    */
   static {
     BigDecimal sum = BigDecimal.ZERO;
     for (Dimension dimension : WEIGHTED_DIMENSIONS) sum = sum.add(dimension.weight());
     if (sum.compareTo(BigDecimal.ONE) != 0) {
-      throw new ExceptionInInitializerError(
-          "完整度维度权重合计必须是 1.0000，实际为 " + sum.toPlainString());
+      throw new ExceptionInInitializerError("完整度维度权重合计必须是 1.0000，实际为 " + sum.toPlainString());
     }
   }
 
@@ -190,31 +182,31 @@ public final class CompletenessScoreRules {
   /**
    * 加权求和 → 总分（规则 R2），从维度展示记录取比率。
    *
-   * <p>刻意<b>不</b>叫 {@code totalScore}：它与下面的 {@code totalScore(List<BigDecimal>)}
-   * 擦除后是同一个签名（两个 {@code List}），Java 不会按泛型参数重载。
+   * <p>刻意<b>不</b>叫 {@code totalScore}：它与下面的 {@code totalScore(List<BigDecimal>)} 擦除后是同一个签名（两个
+   * {@code List}），Java 不会按泛型参数重载。
    */
   public static BigDecimal totalScoreOf(List<CompletenessScoreModels.CompletenessDimension> dims) {
-    return totalScore(dims.stream().map(CompletenessScoreModels.CompletenessDimension::ratio).toList());
+    return totalScore(
+        dims.stream().map(CompletenessScoreModels.CompletenessDimension::ratio).toList());
   }
 
   /**
    * 加权求和 → 总分（规则 R2）。
    *
-   * <p>公式：{@code Σ(weight × ratio) / Σ(weight)}。分母写权重之和而不是写死 1：
-   * 规则 R4 保证每个维度至少一条检查项，所以正常路径上分母恒为 1，而这里的除法是
-   * <b>兜底</b> —— 将来新增维度时若忘了补缺失项，分母会小于 1，分数仍落在 0..1
-   * 而不是超过 1（一个会算出 1.15 的完整度比一个偏低的完整度更容易被察觉，但仍然是错的）。
+   * <p>公式：{@code Σ(weight × ratio) / Σ(weight)}。分母写权重之和而不是写死 1： 规则 R4 保证每个维度至少一条检查项，所以正常路径上分母恒为
+   * 1，而这里的除法是 <b>兜底</b> —— 将来新增维度时若忘了补缺失项，分母会小于 1，分数仍落在 0..1 而不是超过 1（一个会算出 1.15
+   * 的完整度比一个偏低的完整度更容易被察觉，但仍然是错的）。
    *
-   * <p>标度固定 4 位（{@code numeric(5,4)}）：不 scale 的话 {@code 0.25 × 1/3} 会得到
-   * {@code 0.08333333333333333}，写库时被 numeric 舍入，而读出口按 4 位比较时
-   * 与 {@code 0.0833} 的相等判断会时真时假。
+   * <p>标度固定 4 位（{@code numeric(5,4)}）：不 scale 的话 {@code 0.25 × 1/3} 会得到 {@code
+   * 0.08333333333333333}，写库时被 numeric 舍入，而读出口按 4 位比较时 与 {@code 0.0833} 的相等判断会时真时假。
    */
   public static BigDecimal totalScore(List<BigDecimal> ratios) {
     var dimensions = dimensions();
     BigDecimal weighted = BigDecimal.ZERO;
     BigDecimal weightSum = BigDecimal.ZERO;
     for (int i = 0; i < dimensions.size(); i++) {
-      BigDecimal ratio = i < ratios.size() && ratios.get(i) != null ? ratios.get(i) : BigDecimal.ONE;
+      BigDecimal ratio =
+          i < ratios.size() && ratios.get(i) != null ? ratios.get(i) : BigDecimal.ONE;
       weighted = weighted.add(dimensions.get(i).weight().multiply(ratio));
       weightSum = weightSum.add(dimensions.get(i).weight());
     }
@@ -225,11 +217,9 @@ public final class CompletenessScoreRules {
   /**
    * 分档。
    *
-   * <p>阈值与权重同源（都用 0..1），所以改权重时阈值不会被忘记换算。
-   * 用 {@code compareTo} 而不是 {@code equals}：{@code score} 是
-   * {@code numeric(5,4)} 读出来的 BigDecimal，标度不保证与字面量一致，
-   * 而 {@code equals} 会把 {@code 0.75} 与 {@code 0.7500} 判成不等 —— 那会让
-   * 恰好 0.75 分的商品掉到下一档，且没有任何报错。
+   * <p>阈值与权重同源（都用 0..1），所以改权重时阈值不会被忘记换算。 用 {@code compareTo} 而不是 {@code equals}：{@code score} 是
+   * {@code numeric(5,4)} 读出来的 BigDecimal，标度不保证与字面量一致， 而 {@code equals} 会把 {@code 0.75} 与 {@code
+   * 0.7500} 判成不等 —— 那会让 恰好 0.75 分的商品掉到下一档，且没有任何报错。
    */
   public static String gradeOf(BigDecimal score) {
     if (score == null) return "POOR";
@@ -275,7 +265,10 @@ public final class CompletenessScoreRules {
    * @return 就绪与否
    */
   public static boolean chainReady(
-      List<String> chain, BigDecimal gate, List<CompletenessScoreModels.CompletenessDimension> dims, BigDecimal score) {
+      List<String> chain,
+      BigDecimal gate,
+      List<CompletenessScoreModels.CompletenessDimension> dims,
+      BigDecimal score) {
     if (score == null || score.compareTo(gate) < 0) return false;
     for (CompletenessScoreModels.CompletenessDimension dim : dims) {
       if (!chain.contains(dim.dimension())) continue;
@@ -286,11 +279,20 @@ public final class CompletenessScoreRules {
 
   /** 某条链上所有未达标的维度名（阻塞原因）。 */
   public static List<String> chainBlockers(
-      List<String> chain, List<CompletenessScoreModels.CompletenessDimension> dims, BigDecimal score, BigDecimal gate) {
+      List<String> chain,
+      List<CompletenessScoreModels.CompletenessDimension> dims,
+      BigDecimal score,
+      BigDecimal gate) {
     var blockers = new ArrayList<String>();
     if (score == null || score.compareTo(gate) < 0) {
-      blockers.add("总分低于" + (gate.compareTo(CUSTOMS_GATE) == 0 ? "清关" : "刊登") + "就绪门槛（"
-          + percentLabel(score) + " < " + percentLabel(gate) + "）");
+      blockers.add(
+          "总分低于"
+              + (gate.compareTo(CUSTOMS_GATE) == 0 ? "清关" : "刊登")
+              + "就绪门槛（"
+              + percentLabel(score)
+              + " < "
+              + percentLabel(gate)
+              + "）");
     }
     for (CompletenessScoreModels.CompletenessDimension dim : dims) {
       if (chain.contains(dim.dimension()) && !dim.complete()) blockers.add(dim.dimensionLabel());
@@ -301,7 +303,8 @@ public final class CompletenessScoreRules {
   /** 百分数展示串：{@code 0.7500} → {@code 75.00%}。只给界面看，不参与任何比较。 */
   public static String percentLabel(BigDecimal ratio) {
     if (ratio == null) return "—";
-    return ratio.multiply(new BigDecimal("100")).setScale(2, RoundingMode.HALF_UP).toPlainString() + "%";
+    return ratio.multiply(new BigDecimal("100")).setScale(2, RoundingMode.HALF_UP).toPlainString()
+        + "%";
   }
 
   /** 比值的展示串：{@code 0.7500} → {@code 75.00}。存进 {@code scorePercent}。 */
@@ -316,20 +319,15 @@ public final class CompletenessScoreRules {
    * 认证结论的<b>文案与映射</b>侧（规则 R5 的四态判定本身不在这里 —— 见下）。
    *
    * <p><b>为什么本类没有 {@code certificationCompleteness}</b>：认证四态的判定必须是
-   * <b>唯一一份</b>实现，而评分的<b>全部</b>读出口（评分卡 / 列表 / 概览 / 缺失清单）
-   * 都要在 SQL 里按主体<b>聚合</b>出这条结论 —— 一份 SPU 的认证结论是它每个变体结论的汇总。
-   * Java 侧再判一次，两处各算一遍的症状是"评分卡说已齐全、补全清单说待续期"，
-   * 而两边读的是同一张表。所以<b>判定落在 SQL 的 {@code sku_cert} 聚合里</b>（唯一实现），
-   * 本类只保留：结论 → 缺失码、结论 → 中文名、状态 → 中文名、单张证书是否仍有效。
+   * <b>唯一一份</b>实现，而评分的<b>全部</b>读出口（评分卡 / 列表 / 概览 / 缺失清单） 都要在 SQL 里按主体<b>聚合</b>出这条结论 —— 一份 SPU
+   * 的认证结论是它每个变体结论的汇总。 Java 侧再判一次，两处各算一遍的症状是"评分卡说已齐全、补全清单说待续期"， 而两边读的是同一张表。所以<b>判定落在 SQL 的 {@code
+   * sku_cert} 聚合里</b>（唯一实现）， 本类只保留：结论 → 缺失码、结论 → 中文名、状态 → 中文名、单张证书是否仍有效。
    *
-   * <p>SQL 侧 {@code sku_cert} 的 CASE 顺序（与 {@link #certificationMissingCode} 对齐）：
-   * {@code NOT_REQUIRED} → 有效 {@code HELD} → {@code EXPIRED} → {@code PENDING} → {@code NONE}。
-   * 先认「确认不需要」与「确实拿到了」，再认「过期」，最后才是「还在等」——
-   * 反过来写的话，一个既有待审又有过期证书的 SKU 会显示成"还在等审批"，
-   * 而真正要做的是先把过期那张续掉。规则 R5 的三种"不完整"各有各的缺失码，
-   * 因为它们的下一步动作完全不同（补录 / 跟进审批 / 续期）。
+   * <p>SQL 侧 {@code sku_cert} 的 CASE 顺序（与 {@link #certificationMissingCode} 对齐）： {@code
+   * NOT_REQUIRED} → 有效 {@code HELD} → {@code EXPIRED} → {@code PENDING} → {@code NONE}。
+   * 先认「确认不需要」与「确实拿到了」，再认「过期」，最后才是「还在等」—— 反过来写的话，一个既有待审又有过期证书的 SKU 会显示成"还在等审批"， 而真正要做的是先把过期那张续掉。规则
+   * R5 的三种"不完整"各有各的缺失码， 因为它们的下一步动作完全不同（补录 / 跟进审批 / 续期）。
    */
-
 
   /** 认证结论的中文名。 */
   public static String certificationCompletenessLabel(String completeness) {
@@ -376,10 +374,8 @@ public final class CompletenessScoreRules {
   /**
    * 报关属性的完整度结论。
    *
-   * <p>四个检查项各有各的缺失码，因为它们的下一步动作不同：
-   * 没有报关行 → <b>去建档</b>；有行但没填 HS 编码 → <b>去补字段</b>。
-   * 合成一条「报关属性缺失」的话，运营会去建档，发现行已经在了，
-   * 于是以为系统出错 —— 而真正的原因（字段没填）被这句话盖住了。
+   * <p>四个检查项各有各的缺失码，因为它们的下一步动作不同： 没有报关行 → <b>去建档</b>；有行但没填 HS 编码 → <b>去补字段</b>。
+   * 合成一条「报关属性缺失」的话，运营会去建档，发现行已经在了， 于是以为系统出错 —— 而真正的原因（字段没填）被这句话盖住了。
    *
    * @param hasRow 是否已建报关属性行
    * @param hsCode 归一后的 HS 编码（空 = 未填）
@@ -432,15 +428,14 @@ public final class CompletenessScoreRules {
       case MISSING_PRIMARY_CATEGORY -> "SPU 没有指定主分类：类目必填规则取决于它，没分类就没有规则集";
       case MISSING_CATEGORY_RULE_VALUE -> "类目必填属性「" + context + "」未取值";
       case MISSING_PRIMARY_IMAGE -> "没有主图：平台主图位不能空";
-      case MISSING_IMAGE_COUNT -> "图片共 "
-          + context + " 张，少于下限 " + MIN_IMAGE_COUNT + " 张";
-      case MISSING_PRIMARY_IMAGE_EDGE -> "主图最短边 " + context + "px，小于下限 " + MIN_PRIMARY_IMAGE_EDGE_PX + "px";
+      case MISSING_IMAGE_COUNT -> "图片共 " + context + " 张，少于下限 " + MIN_IMAGE_COUNT + " 张";
+      case MISSING_PRIMARY_IMAGE_EDGE ->
+          "主图最短边 " + context + "px，小于下限 " + MIN_PRIMARY_IMAGE_EDGE_PX + "px";
       case MISSING_PACKAGE_RECORD -> "没有包装记录：尺寸重量缺失时无法算体积重与清关申报";
       case MISSING_PACKAGE_DIMENSION -> "包装尺寸不完整（缺 " + context + "）：三边必须都有值才能算体积";
       case MISSING_PACKAGE_WEIGHT -> "包装重量不完整（缺 " + context + "）：净重与毛重都必须有值";
       case MISSING_CERTIFICATION_NONE -> "没有任何认证登记：若该 SKU 确实无需认证，请显式记一条「无需认证」";
-      case MISSING_CERTIFICATION_PENDING -> "认证已申请但尚未取得（" + context
-          + "）：等审批即可，补录证书编号救不了它";
+      case MISSING_CERTIFICATION_PENDING -> "认证已申请但尚未取得（" + context + "）：等审批即可，补录证书编号救不了它";
       case MISSING_CERTIFICATION_EXPIRED -> "认证证书已过期（" + context + "）：需要续期";
       case MISSING_SPU_WITHOUT_SKU -> "该 SPU 还没有任何 SKU：变体级属性、报关与包装都无法确认";
       default -> customsDetail(code);
@@ -469,15 +464,22 @@ public final class CompletenessScoreRules {
   /** 缺失码 → 检查项主体类型（补全清单按它分组）。 */
   public static String missingSubjectType(String code) {
     return switch (code) {
-      case MISSING_REQUIRED_ATTRIBUTE, MISSING_SKU_REQUIRED_ATTRIBUTE,
-              MISSING_CATEGORY_RULE_VALUE -> "ATTRIBUTE";
+      case MISSING_REQUIRED_ATTRIBUTE,
+              MISSING_SKU_REQUIRED_ATTRIBUTE,
+              MISSING_CATEGORY_RULE_VALUE ->
+          "ATTRIBUTE";
       case MISSING_PRIMARY_CATEGORY -> "CATEGORY";
       case MISSING_PRIMARY_IMAGE, MISSING_IMAGE_COUNT, MISSING_PRIMARY_IMAGE_EDGE -> "MEDIA_ASSET";
-      case MISSING_CUSTOMS_DECLARATION, MISSING_HS_CODE, MISSING_DECLARED_NAME,
-              MISSING_ORIGIN_COUNTRY -> "CUSTOMS";
+      case MISSING_CUSTOMS_DECLARATION,
+              MISSING_HS_CODE,
+              MISSING_DECLARED_NAME,
+              MISSING_ORIGIN_COUNTRY ->
+          "CUSTOMS";
       case MISSING_PACKAGE_RECORD, MISSING_PACKAGE_DIMENSION, MISSING_PACKAGE_WEIGHT -> "PACKAGE";
-      case MISSING_CERTIFICATION_NONE, MISSING_CERTIFICATION_PENDING,
-              MISSING_CERTIFICATION_EXPIRED -> "CERTIFICATION";
+      case MISSING_CERTIFICATION_NONE,
+              MISSING_CERTIFICATION_PENDING,
+              MISSING_CERTIFICATION_EXPIRED ->
+          "CERTIFICATION";
       case MISSING_SPU_WITHOUT_SKU -> "SKU";
       default -> "OTHER";
     };
@@ -509,7 +511,8 @@ public final class CompletenessScoreRules {
   /** 维度下拉选项，顺序即展示顺序。 */
   public static List<Option> dimensionOptions() {
     var options = new ArrayList<Option>();
-    for (Dimension dimension : WEIGHTED_DIMENSIONS) options.add(new Option(dimension.code(), dimension.label()));
+    for (Dimension dimension : WEIGHTED_DIMENSIONS)
+      options.add(new Option(dimension.code(), dimension.label()));
     return options;
   }
 
@@ -545,8 +548,15 @@ public final class CompletenessScoreRules {
 
   /** 预检阻塞项（供 4.2.3.2 刊登预检与报关预检共用）。 */
   public record PrecheckBlocker(
-      String ownerType, UUID ownerId, String ownerCode, String ownerName, BigDecimal score,
-      String grade, List<String> missingCodes, List<String> blockers, String hint) {}
+      String ownerType,
+      UUID ownerId,
+      String ownerCode,
+      String ownerName,
+      BigDecimal score,
+      String grade,
+      List<String> missingCodes,
+      List<String> blockers,
+      String hint) {}
 
   /** 批量评估的单条失败（主体不存在 / 跨租户不可见）。 */
   public record EvaluationFailure(UUID ownerId, String reason) {}
@@ -569,9 +579,8 @@ public final class CompletenessScoreRules {
   /**
    * HS 编码规范化：去空白与分隔符后转大写。
    *
-   * <p>去分隔符的理由：报关行回传的编码常带点与短横线（{@code 8471.30}、{@code 8471-30}），
-   * 而我们自己录入的是 {@code 847130}。不归一的话同一个编码会存成两种写法，
-   * 按 HS 编码筛选漏掉一半 —— 而页面上看不出来，因为两行看着一样。
+   * <p>去分隔符的理由：报关行回传的编码常带点与短横线（{@code 8471.30}、{@code 8471-30}）， 而我们自己录入的是 {@code
+   * 847130}。不归一的话同一个编码会存成两种写法， 按 HS 编码筛选漏掉一半 —— 而页面上看不出来，因为两行看着一样。
    */
   public static String normalizeHsCode(String value) {
     String text = emptyToNull(value);
@@ -607,8 +616,7 @@ public final class CompletenessScoreRules {
     String code = normalizeHsCode(value);
     if (code == null) return null; // 空 = 未填，由评分判为缺失，不在写入时拦
     if (code.length() > 32) return "HS 编码最多 32 个字符";
-    if (!code.matches("[0-9A-Z]+"))
-      return "HS 编码只含数字与字母（小数点、短横线会被自动去掉）：" + code;
+    if (!code.matches("[0-9A-Z]+")) return "HS 编码只含数字与字母（小数点、短横线会被自动去掉）：" + code;
     return null;
   }
 
@@ -642,13 +650,14 @@ public final class CompletenessScoreRules {
   /**
    * 报关属性整体校验（写入前）。
    *
-   * <p>刻意<b>不</b>要求 HS 编码与申报品名必填：报关属性是<b>逐步补全</b>的，
-   * 建档时常常只有品名、HS 编码要等供应商确认。要求全填会让第一步"建一行"都做不了，
-   * 于是运营干脆不建 —— 那样连"缺了哪几项"都看不到。
-   * 必填与否由<b>评分</b>判，评分报的是缺失项而不是拒写。
+   * <p>刻意<b>不</b>要求 HS 编码与申报品名必填：报关属性是<b>逐步补全</b>的， 建档时常常只有品名、HS 编码要等供应商确认。要求全填会让第一步"建一行"都做不了，
+   * 于是运营干脆不建 —— 那样连"缺了哪几项"都看不到。 必填与否由<b>评分</b>判，评分报的是缺失项而不是拒写。
    */
   public static String customsProblem(
-      String hsCode, String declaredName, String originCountry, String legalUnit,
+      String hsCode,
+      String declaredName,
+      String originCountry,
+      String legalUnit,
       List<String> declarationElements) {
     String problem = hsCodeProblem(hsCode);
     if (problem != null) return problem;
@@ -665,11 +674,18 @@ public final class CompletenessScoreRules {
 
   /** 一条报关属性是否可以落库（至少有一个字段非空，见 V37 的 CHECK）。 */
   public static boolean customsHasContent(
-      String hsCode, String declaredName, String originCountry, String legalUnit,
-      List<String> declarationElements, Boolean enabled) {
+      String hsCode,
+      String declaredName,
+      String originCountry,
+      String legalUnit,
+      List<String> declarationElements,
+      Boolean enabled) {
     if (normalizeFlag(enabled)) {
-      return notBlank(hsCode) || notBlank(declaredName) || notBlank(originCountry)
-          || notBlank(legalUnit) || (declarationElements != null && !declarationElements.isEmpty());
+      return notBlank(hsCode)
+          || notBlank(declaredName)
+          || notBlank(originCountry)
+          || notBlank(legalUnit)
+          || (declarationElements != null && !declarationElements.isEmpty());
     }
     return true;
   }
@@ -688,29 +704,35 @@ public final class CompletenessScoreRules {
     String status = normalizeEnum(value);
     if (status == null) return "认证状态必填：已取得 / 已申请 / 已过期 / 无需认证";
     if (!CERTIFICATION_STATUSES.contains(status))
-      return "认证状态不在词表里（可用：" + String.join(" / ", certificationStatusOptions().stream().map(Option::label).toList()) + "）";
+      return "认证状态不在词表里（可用："
+          + String.join(" / ", certificationStatusOptions().stream().map(Option::label).toList())
+          + "）";
     return null;
   }
 
   /**
    * 一条认证的写入前置校验。
    *
-   * <p>HELD 必须有证书编号、NOT_REQUIRED 不能有编号与有效期 ——
-   * 与 {@code guard_sku_certification_status} 触发器同一口径（纵深防御：
-   * CHECK 可被 {@code DROP CONSTRAINT} 绕过，触发器不能）。
+   * <p>HELD 必须有证书编号、NOT_REQUIRED 不能有编号与有效期 —— 与 {@code guard_sku_certification_status}
+   * 触发器同一口径（纵深防御： CHECK 可被 {@code DROP CONSTRAINT} 绕过，触发器不能）。
    *
    * @param expiresOn 用来判断长期有效的 null 与具体到期日
    */
   public static String certificationProblem(
-      String code, String name, String status, String certificateNo, LocalDate issuedOn,
-      LocalDate expiresOn, Boolean scored, String note) {
+      String code,
+      String name,
+      String status,
+      String certificateNo,
+      LocalDate issuedOn,
+      LocalDate expiresOn,
+      Boolean scored,
+      String note) {
     String problem = certificationCodeProblem(code);
     if (problem != null) return problem;
     String normalizedStatus = normalizeEnum(status);
     problem = certificationStatusProblem(status);
     if (problem != null) return problem;
-    if (emptyToNull(name) != null && emptyToNull(name).length() > 100)
-      return "认证名称最多 100 个字符";
+    if (emptyToNull(name) != null && emptyToNull(name).length() > 100) return "认证名称最多 100 个字符";
     if (emptyToNull(certificateNo) != null && emptyToNull(certificateNo).length() > 100)
       return "证书编号最多 100 个字符";
     if (emptyToNull(note) != null && emptyToNull(note).length() > 500) return "备注最多 500 个字符";
@@ -758,7 +780,8 @@ public final class CompletenessScoreRules {
   public static String dimensionProblem(String value) {
     String dimension = normalizeEnum(value);
     if (dimension == null) return null;
-    if (!DIMENSION_NAMES.contains(dimension)) return "维度不在词表里（可用：" + String.join(" / ", DIMENSION_NAMES) + "）";
+    if (!DIMENSION_NAMES.contains(dimension))
+      return "维度不在词表里（可用：" + String.join(" / ", DIMENSION_NAMES) + "）";
     return null;
   }
 
@@ -776,8 +799,7 @@ public final class CompletenessScoreRules {
   /**
    * 排序字段规范化。
    *
-   * <p>未知字段**回落到 score** 而不是拼进 SQL：排序字段会进入 {@code order by}，
-   * 未做白名单就等于一个注入口，而 ORDER BY 后面接的列名不能参数化。
+   * <p>未知字段**回落到 score** 而不是拼进 SQL：排序字段会进入 {@code order by}， 未做白名单就等于一个注入口，而 ORDER BY 后面接的列名不能参数化。
    */
   public static String normalizeOrderBy(String value) {
     String field = emptyToNull(value);
@@ -803,10 +825,12 @@ public final class CompletenessScoreRules {
       List<CompletenessScoreModels.CompletenessDimension> dims) {
     var order = dimensionOrder();
     var sorted = new ArrayList<>(dims);
-    sorted.sort(Comparator.comparingInt(dim -> {
-      int index = order.indexOf(dim.dimension());
-      return index < 0 ? order.size() : index;
-    }));
+    sorted.sort(
+        Comparator.comparingInt(
+            dim -> {
+              int index = order.indexOf(dim.dimension());
+              return index < 0 ? order.size() : index;
+            }));
     return sorted;
   }
 
@@ -815,13 +839,14 @@ public final class CompletenessScoreRules {
       List<CompletenessScoreModels.CompletenessCheck> checks) {
     var order = dimensionOrder();
     var sorted = new ArrayList<>(checks);
-    sorted.sort(Comparator
-        .comparingInt((CompletenessScoreModels.CompletenessCheck check) -> {
-          int index = order.indexOf(check.dimension());
-          return index < 0 ? order.size() : index;
-        })
-        .thenComparing(CompletenessScoreModels.CompletenessCheck::code)
-        .thenComparing(check -> check.subjectLabel() == null ? "" : check.subjectLabel()));
+    sorted.sort(
+        Comparator.comparingInt(
+                (CompletenessScoreModels.CompletenessCheck check) -> {
+                  int index = order.indexOf(check.dimension());
+                  return index < 0 ? order.size() : index;
+                })
+            .thenComparing(CompletenessScoreModels.CompletenessCheck::code)
+            .thenComparing(check -> check.subjectLabel() == null ? "" : check.subjectLabel()));
     return sorted;
   }
 
@@ -829,8 +854,13 @@ public final class CompletenessScoreRules {
   public static CompletenessScoreModels.CompletenessCheck check(
       String code, String dimension, String subjectLabel, boolean satisfied) {
     return new CompletenessScoreModels.CompletenessCheck(
-        code, dimension, missingSubjectType(code), subjectLabel, missingDetail(code, subjectLabel),
-        missingRemedy(code), satisfied);
+        code,
+        dimension,
+        missingSubjectType(code),
+        subjectLabel,
+        missingDetail(code, subjectLabel),
+        missingRemedy(code),
+        satisfied);
   }
 
   /** 构造一条满意状态的检查项（不出现在缺失清单里，但仍计入进度）。 */
@@ -844,11 +874,20 @@ public final class CompletenessScoreRules {
   public static CompletenessScoreModels.CompletenessDimension dimensionScore(
       String code, long satisfied, long total) {
     Dimension definition = dimension(code);
-    BigDecimal ratio = total <= 0 ? BigDecimal.ONE
-        : BigDecimal.valueOf(satisfied).divide(BigDecimal.valueOf(total), SCORE_SCALE, RoundingMode.HALF_UP);
+    BigDecimal ratio =
+        total <= 0
+            ? BigDecimal.ONE
+            : BigDecimal.valueOf(satisfied)
+                .divide(BigDecimal.valueOf(total), SCORE_SCALE, RoundingMode.HALF_UP);
     return new CompletenessScoreModels.CompletenessDimension(
-        definition.code(), definition.label(), definition.weight(), satisfied, total, ratio,
-        total > 0 && satisfied >= total, definition.blockedFor());
+        definition.code(),
+        definition.label(),
+        definition.weight(),
+        satisfied,
+        total,
+        ratio,
+        total > 0 && satisfied >= total,
+        definition.blockedFor());
   }
 
   /** 把维度定义按 code 建索引（服务层算完检查项后一次性组装）。 */

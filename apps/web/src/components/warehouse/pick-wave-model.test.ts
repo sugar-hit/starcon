@@ -162,16 +162,20 @@ describe('成员告警', () => {
   });
 
   it('已取消的成员工单不再报「还没拣齐」，改说它仍按成员计', () => {
-    const warnings = memberWarnings({ crossZoneNote: null, fullyPicked: false, taskStatus: 'CANCELLED' });
+    const warnings = memberWarnings({
+      crossZoneNote: null,
+      fullyPicked: false,
+      taskStatus: 'CANCELLED',
+    });
     expect(warnings).toHaveLength(1);
     expect(warnings[0]).toContain('已取消');
     expect(warnings[0]).toContain('仍按它计成员');
   });
 
   it('拣齐了就是没有告警', () => {
-    expect(memberWarnings({ crossZoneNote: null, fullyPicked: true, taskStatus: 'COMPLETED' })).toEqual(
-      [],
-    );
+    expect(
+      memberWarnings({ crossZoneNote: null, fullyPicked: true, taskStatus: 'COMPLETED' }),
+    ).toEqual([]);
   });
 });
 

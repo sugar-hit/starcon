@@ -11,7 +11,6 @@ import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,23 +30,19 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 7.2.1.2 预占分配明细。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p>本测试钉住七件「错了会误导人」的事：
  *
  * <ul>
  *   <li><b>分配到的是具体 bucket</b>：仓 / 货位 / 批次三维都可读可筛，货位与批次可空时有明确口径。
- *   <li><b>跨行守恒</b>：分配之和超过需求量被 <b>DB 层</b> 拒（触发器），不是靠 Java 判断 ——
- *       Java 判断可以被一条裸 SQL 绕开，而超卖不可逆。
+ *   <li><b>跨行守恒</b>：分配之和超过需求量被 <b>DB 层</b> 拒（触发器），不是靠 Java 判断 —— Java 判断可以被一条裸 SQL 绕开，而超卖不可逆。
  *   <li><b>bucket 数与分配笔数分开</b>：同一个 bucket 分两次圈只算一个 bucket。
- *   <li><b>时间线断言写回的值</b>：{@code occurredAt} 与 {@code quantity} 都按传入值逐字比对，
- *       不是「没抛异常」。用 {@code Timestamp.valueOf(LocalDateTime)} 绑定会静默偏 −28800s。
- *   <li><b>分配状态变，预占状态跟着变</b>：全承诺 → 预占 COMMITTED；覆盖需求量全消耗 → CONSUMED。
- *       不同步的话超时清理会把已承诺发货的货误释放，直接超卖。
+ *   <li><b>时间线断言写回的值</b>：{@code occurredAt} 与 {@code quantity} 都按传入值逐字比对， 不是「没抛异常」。用 {@code
+ *       Timestamp.valueOf(LocalDateTime)} 绑定会静默偏 −28800s。
+ *   <li><b>分配状态变，预占状态跟着变</b>：全承诺 → 预占 COMMITTED；覆盖需求量全消耗 → CONSUMED。 不同步的话超时清理会把已承诺发货的货误释放，直接超卖。
  *   <li><b>流水 append-only</b>：UPDATE / DELETE 被 DB 拒。改得动一条历史，追溯结论就能被编出来。
- *   <li><b>租户隔离三断言</b>实跑：两租户互不可见 / 伪造 X-Tenant-Id 无效 /
- *       连接池归还后不串租户。
+ *   <li><b>租户隔离三断言</b>实跑：两租户互不可见 / 伪造 X-Tenant-Id 无效 / 连接池归还后不串租户。
  * </ul>
  */
 @SpringBootTest
@@ -91,11 +86,11 @@ class ReservationAllocationIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
-        s.execute(
-            "create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
+        s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
       }
       identity = HttpServer.create(new InetSocketAddress(0), 0);
       identity.createContext(
@@ -107,7 +102,8 @@ class ReservationAllocationIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -172,27 +168,49 @@ class ReservationAllocationIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 3), tenant, "SKU-" + (tenant.equals(a) ? "A" : "B"), "商品一");
+                idFor(tenant, 3),
+                tenant,
+                "SKU-" + (tenant.equals(a) ? "A" : "B"),
+                "商品一");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-1", "主仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 5),
+                tenant,
+                "WH-1",
+                "主仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, idFor(tenant, 5), "L-01", "货位一");
+                idFor(tenant, 6),
+                tenant,
+                idFor(tenant, 5),
+                "L-01",
+                "货位一");
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 7), tenant, idFor(tenant, 5), "L-02", "货位二");
+                idFor(tenant, 7),
+                tenant,
+                idFor(tenant, 5),
+                "L-02",
+                "货位二");
             // received_on 是业务日期（date，不是字符串）：批次效期与成本分摊都按业务日算。
             sql.execute(
                 "insert into inventory_lot(id,tenant_id,sku_id,lot_code,received_on)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 8), tenant, idFor(tenant, 3), "LOT-A",
+                idFor(tenant, 8),
+                tenant,
+                idFor(tenant, 3),
+                "LOT-A",
                 java.time.LocalDate.parse("2026-10-01"));
             return null;
           });
@@ -222,8 +240,16 @@ class ReservationAllocationIntegrationTest {
               reservations.create(
                   a,
                   new ReservationModels.ReservationCreateInput(
-                      "TRADE", "SALES_ORDER", UUID.randomUUID(), "SO-20261013-001",
-                      leOne, skuOne, new BigDecimal(qty), null, null, null));
+                      "TRADE",
+                      "SALES_ORDER",
+                      UUID.randomUUID(),
+                      "SO-20261013-001",
+                      leOne,
+                      skuOne,
+                      new BigDecimal(qty),
+                      null,
+                      null,
+                      null));
           return created.id();
         });
   }
@@ -261,9 +287,8 @@ class ReservationAllocationIntegrationTest {
   /**
    * 断言写回的时间值。
    *
-   * <p>比的是 {@link Instant} 而不是 {@code OffsetDateTime.equals}：后者同时比瞬时与偏移量，
-   * 而 jOOQ 读回的是会话时区的偏移量，与传入的偏移量不同时刻字面不等、
-   * 但**表示的是同一时刻**。那样断言会失败，而实现其实是对的。
+   * <p>比的是 {@link Instant} 而不是 {@code OffsetDateTime.equals}：后者同时比瞬时与偏移量， 而 jOOQ
+   * 读回的是会话时区的偏移量，与传入的偏移量不同时刻字面不等、 但**表示的是同一时刻**。那样断言会失败，而实现其实是对的。
    */
   static void assertInstant(OffsetDateTime actual, OffsetDateTime expected) {
     assertThat(actual).as("时间值必须逐字写回").isNotNull();
@@ -339,8 +364,15 @@ class ReservationAllocationIntegrationTest {
     UUID reservationId = reserve("20");
     allocate(reservationId, locationOne, lotOne, "5", at("2026-10-13T09:00:00+08:00"));
     allocate(reservationId, locationTwo, lotOne, "7", at("2026-10-13T10:00:00+08:00"));
-    asA("update", () -> service.commit(a, reservationId, allocationIdAt(reservationId, 0),
-        new ReservationAllocationTransitionInput(null, at("2026-10-13T11:00:00+08:00"), null)));
+    asA(
+        "update",
+        () ->
+            service.commit(
+                a,
+                reservationId,
+                allocationIdAt(reservationId, 0),
+                new ReservationAllocationTransitionInput(
+                    null, at("2026-10-13T11:00:00+08:00"), null)));
 
     // 筛选 + 分页后：行数变了，汇总不能变。
     var filtered =
@@ -387,7 +419,8 @@ class ReservationAllocationIntegrationTest {
     assertThat(options.warehouses().get(0).quantity()).isEqualByComparingTo("12");
     assertThat(options.locations()).hasSize(2);
     // 下拉里就能看出「这个货位上圈了 8 件」：L-01 圈了两次共 8，L-02 圈了 4。
-    var l01 = options.locations().stream().filter(o -> o.code().equals("L-01")).findFirst().orElseThrow();
+    var l01 =
+        options.locations().stream().filter(o -> o.code().equals("L-01")).findFirst().orElseThrow();
     assertThat(l01.quantity()).isEqualByComparingTo("8");
     assertThat(l01.allocationCount()).isEqualTo(2);
     // 批次只有一个；没有批次的分配不产生一个「无批次」的假候选值。
@@ -417,20 +450,45 @@ class ReservationAllocationIntegrationTest {
           sql.execute(
               "insert into warehouse(id,tenant_id,code,name,country_code,timezone,status)"
                   + " values(?,?,?,?,?,?,?)",
-              activeWarehouse, a, "WH-2", "次仓", "CN", "Asia/Shanghai", "ACTIVE");
+              activeWarehouse,
+              a,
+              "WH-2",
+              "次仓",
+              "CN",
+              "Asia/Shanghai",
+              "ACTIVE");
           sql.execute(
               "insert into warehouse(id,tenant_id,code,name,country_code,timezone,status)"
                   + " values(?,?,?,?,?,?,?)",
-              archivedWarehouse, a, "WH-OLD", "归档仓", "CN", "Asia/Shanghai", "ARCHIVED");
+              archivedWarehouse,
+              a,
+              "WH-OLD",
+              "归档仓",
+              "CN",
+              "Asia/Shanghai",
+              "ARCHIVED");
           sql.execute(
               "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,status)"
                   + " values(?,?,?,?,?,?)",
-              UUID.randomUUID(), a, activeWarehouse, "L-10", "次仓货位", "ACTIVE");
-          sql.execute("insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-              otherSku, a, "SKU-OTHER", "别的商品");
+              UUID.randomUUID(),
+              a,
+              activeWarehouse,
+              "L-10",
+              "次仓货位",
+              "ACTIVE");
+          sql.execute(
+              "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+              otherSku,
+              a,
+              "SKU-OTHER",
+              "别的商品");
           sql.execute(
               "insert into inventory_lot(id,tenant_id,sku_id,lot_code,status) values(?,?,?,?,?)",
-              otherLot, a, otherSku, "LOT-OTHER", "ACTIVE");
+              otherLot,
+              a,
+              otherSku,
+              "LOT-OTHER",
+              "ACTIVE");
           return null;
         });
 
@@ -440,9 +498,7 @@ class ReservationAllocationIntegrationTest {
         .containsExactlyInAnyOrder("WH-1", "WH-2");
     // 货位按仓分组（parentId 指回所属仓），前端据此按选中的仓过滤
     var secondWarehouseLocations =
-        targets.locations().stream()
-            .filter(l -> l.parentId().equals(activeWarehouse))
-            .toList();
+        targets.locations().stream().filter(l -> l.parentId().equals(activeWarehouse)).toList();
     assertThat(secondWarehouseLocations).hasSize(1);
     assertThat(secondWarehouseLocations.get(0).code()).isEqualTo("L-10");
     // 批次按**预占的 SKU** 过滤：别的商品的批次列出来十有八九会被选错
@@ -464,7 +520,8 @@ class ReservationAllocationIntegrationTest {
     // 每次失败单独一个事务：PG 里一条语句失败后整个事务进入 aborted 状态，
     // 同一事务里再跑任何语句都会得到「current transaction is aborted」。
     assertThatThrownBy(
-            () -> allocate(reservationId, locationTwo, lotOne, "6", at("2026-10-13T10:00:00+08:00")))
+            () ->
+                allocate(reservationId, locationTwo, lotOne, "6", at("2026-10-13T10:00:00+08:00")))
         .isInstanceOf(org.springframework.dao.DataAccessException.class)
         .hasMessageContaining("超卖");
 
@@ -502,11 +559,20 @@ class ReservationAllocationIntegrationTest {
           sql.execute(
               "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                   + " values(?,?,?,?,?,?)",
-              otherWarehouse, a, "WH-2", "次仓", "CN", "Asia/Shanghai");
+              otherWarehouse,
+              a,
+              "WH-2",
+              "次仓",
+              "CN",
+              "Asia/Shanghai");
           sql.execute(
               "insert into warehouse_location(id,tenant_id,warehouse_id,code,name)"
                   + " values(?,?,?,?,?)",
-              foreignLocation, a, otherWarehouse, "L-99", "别的仓的货位");
+              foreignLocation,
+              a,
+              otherWarehouse,
+              "L-99",
+              "别的仓的货位");
           return null;
         });
 
@@ -526,11 +592,18 @@ class ReservationAllocationIntegrationTest {
     asA(
         "update",
         () -> {
-          sql.execute("insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-              otherSku, a, "SKU-OTHER", "别的商品");
+          sql.execute(
+              "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+              otherSku,
+              a,
+              "SKU-OTHER",
+              "别的商品");
           sql.execute(
               "insert into inventory_lot(id,tenant_id,sku_id,lot_code) values(?,?,?,?)",
-              otherLot, a, otherSku, "LOT-B");
+              otherLot,
+              a,
+              otherSku,
+              "LOT-B");
           return null;
         });
 
@@ -567,19 +640,26 @@ class ReservationAllocationIntegrationTest {
         "update",
         () ->
             service.commit(
-                a, reservationId, created.allocationId(),
+                a,
+                reservationId,
+                created.allocationId(),
                 new ReservationAllocationTransitionInput(null, committedAt, "运营确认")));
     asA(
         "update",
         () ->
             service.consume(
-                a, reservationId, created.allocationId(),
-                new ReservationAllocationTransitionInput(new BigDecimal("12"), consumedAt, "整单出库")));
+                a,
+                reservationId,
+                created.allocationId(),
+                new ReservationAllocationTransitionInput(
+                    new BigDecimal("12"), consumedAt, "整单出库")));
 
     var timeline =
         asA(
             "read",
-            () -> service.timeline(a, reservationId, new ReservationAllocationTimelineQuery(null, null, 0, 50)));
+            () ->
+                service.timeline(
+                    a, reservationId, new ReservationAllocationTimelineQuery(null, null, 0, 50)));
     assertThat(timeline.total()).isEqualTo(3);
     assertThat(timeline.entries().stream().map(ReservationAllocationEntryRow::transition))
         .containsExactly("ALLOCATED", "COMMITTED", "CONSUMED");
@@ -622,7 +702,9 @@ class ReservationAllocationIntegrationTest {
             "read",
             () ->
                 service.timeline(
-                    a, reservationId, new ReservationAllocationTimelineQuery(first.allocationId(), null, 0, 50)));
+                    a,
+                    reservationId,
+                    new ReservationAllocationTimelineQuery(first.allocationId(), null, 0, 50)));
     assertThat(onlyFirst.entries()).hasSize(1);
     assertThat(onlyFirst.entries().get(0).allocationId()).isEqualTo(first.allocationId());
 
@@ -633,7 +715,8 @@ class ReservationAllocationIntegrationTest {
                     "read",
                     () ->
                         service.timeline(
-                            a, reservationId,
+                            a,
+                            reservationId,
                             new ReservationAllocationTimelineQuery(null, "WHATEVER", 0, 50))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不支持的迁移类型");
@@ -642,7 +725,8 @@ class ReservationAllocationIntegrationTest {
   @Test
   void 流水appendOnly改与删都被拒() throws Exception {
     UUID reservationId = reserve("10");
-    var created = allocate(reservationId, locationOne, lotOne, "5", at("2026-10-13T09:00:00+08:00"));
+    var created =
+        allocate(reservationId, locationOne, lotOne, "5", at("2026-10-13T09:00:00+08:00"));
     UUID entryId = created.entryId();
 
     assertThatThrownBy(
@@ -650,8 +734,7 @@ class ReservationAllocationIntegrationTest {
                 asA(
                     "update",
                     () -> {
-                      sql.execute(
-                          "update reservation_entry set quantity=999 where id=?", entryId);
+                      sql.execute("update reservation_entry set quantity=999 where id=?", entryId);
                       return null;
                     }))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
@@ -669,14 +752,17 @@ class ReservationAllocationIntegrationTest {
     var timeline =
         asA(
             "read",
-            () -> service.timeline(a, reservationId, new ReservationAllocationTimelineQuery(null, null, 0, 50)));
+            () ->
+                service.timeline(
+                    a, reservationId, new ReservationAllocationTimelineQuery(null, null, 0, 50)));
     assertThat(timeline.entries().get(0).quantity()).isEqualByComparingTo("5");
   }
 
   @Test
   void 分录不得与事实脱节() throws Exception {
     UUID reservationId = reserve("10");
-    var created = allocate(reservationId, locationOne, lotOne, "5", at("2026-10-13T09:00:00+08:00"));
+    var created =
+        allocate(reservationId, locationOne, lotOne, "5", at("2026-10-13T09:00:00+08:00"));
 
     // 凭空追加一条「它曾经变成 COMMITTED」的假流水：分配此刻仍是 HELD，被守卫拒。
     assertThatThrownBy(
@@ -688,8 +774,14 @@ class ReservationAllocationIntegrationTest {
                           "insert into reservation_entry(id,tenant_id,reservation_id,allocation_id,"
                               + "transition,from_status,to_status,quantity,occurred_at)"
                               + " values(?,?,?,?,?,?,?,?,now())",
-                          UUID.randomUUID(), a, reservationId, created.allocationId(),
-                          "COMMITTED", "HELD", "COMMITTED", new BigDecimal("5"));
+                          UUID.randomUUID(),
+                          a,
+                          reservationId,
+                          created.allocationId(),
+                          "COMMITTED",
+                          "HELD",
+                          "COMMITTED",
+                          new BigDecimal("5"));
                       return null;
                     }))
         .isInstanceOf(org.springframework.dao.DataAccessException.class)
@@ -699,15 +791,15 @@ class ReservationAllocationIntegrationTest {
   @Test
   void 非法迁移矩阵被拒() throws Exception {
     UUID reservationId = reserve("10");
-    var created = allocate(reservationId, locationOne, lotOne, "5", at("2026-10-13T09:00:00+08:00"));
+    var created =
+        allocate(reservationId, locationOne, lotOne, "5", at("2026-10-13T09:00:00+08:00"));
 
     // HELD 不能直接跳到 CONSUMED：没承诺就出库等于货没圈住就走了，那正是超卖的定义。
     assertThatThrownBy(
             () ->
                 asA(
                     "update",
-                    () -> service.consume(
-                        a, reservationId, created.allocationId(), null)))
+                    () -> service.consume(a, reservationId, created.allocationId(), null)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已承诺");
   }
@@ -715,15 +807,10 @@ class ReservationAllocationIntegrationTest {
   @Test
   void 终态不可复活且bucket不可改指() throws Exception {
     UUID reservationId = reserve("10");
-    var created = allocate(reservationId, locationOne, lotOne, "5", at("2026-10-13T09:00:00+08:00"));
-    asA(
-        "update",
-        () -> service.commit(a, reservationId, created.allocationId(), null));
-    asA(
-        "update",
-        () ->
-            service.consume(
-                a, reservationId, created.allocationId(), null));
+    var created =
+        allocate(reservationId, locationOne, lotOne, "5", at("2026-10-13T09:00:00+08:00"));
+    asA("update", () -> service.commit(a, reservationId, created.allocationId(), null));
+    asA("update", () -> service.consume(a, reservationId, created.allocationId(), null));
 
     // 已终结的分配不能被改回去
     assertThatThrownBy(
@@ -742,7 +829,8 @@ class ReservationAllocationIntegrationTest {
     // bucket 不可改指：改掉等于把「当初圈在哪」这段审计痕迹改写掉。
     // 用一条**还在 HELD** 的分配来单独验证这条守卫 —— 在已终结的行上改指，
     // 会被「终态不可再改」先挡掉，看到的就不是这条守卫了。
-    ReservationAllocationCreated open = allocate(reservationId, locationTwo, lotOne, "1", at("2026-10-13T12:00:00+08:00"));
+    ReservationAllocationCreated open =
+        allocate(reservationId, locationTwo, lotOne, "1", at("2026-10-13T12:00:00+08:00"));
     assertThatThrownBy(
             () ->
                 asA(
@@ -750,18 +838,20 @@ class ReservationAllocationIntegrationTest {
                     () -> {
                       sql.execute(
                           "update reservation_allocation set location_id=? where id=?",
-                          locationOne, open.allocationId());
+                          locationOne,
+                          open.allocationId());
                       return null;
                     }))
         .isInstanceOf(org.springframework.dao.DataAccessException.class)
         .hasMessageContaining("不可改指");
 
     // 改指被拒之后，那一行仍然指着它当初圈的那个货位
-    assertThat(detail(reservationId).rows().stream()
-            .filter(r -> r.id().equals(open.allocationId()))
-            .findFirst()
-            .orElseThrow()
-            .locationCode())
+    assertThat(
+            detail(reservationId).rows().stream()
+                .filter(r -> r.id().equals(open.allocationId()))
+                .findFirst()
+                .orElseThrow()
+                .locationCode())
         .isEqualTo("L-02");
   }
 
@@ -790,7 +880,8 @@ class ReservationAllocationIntegrationTest {
   @Test
   void 全部消耗且覆盖需求量时预占进入已消耗并对齐已消费量() throws Exception {
     UUID reservationId = reserve("10");
-    var created = allocate(reservationId, locationOne, lotOne, "10", at("2026-10-13T09:00:00+08:00"));
+    var created =
+        allocate(reservationId, locationOne, lotOne, "10", at("2026-10-13T09:00:00+08:00"));
     asA("update", () -> service.commit(a, reservationId, created.allocationId(), null));
     asA("update", () -> service.consume(a, reservationId, created.allocationId(), null));
 
@@ -809,13 +900,16 @@ class ReservationAllocationIntegrationTest {
   @Test
   void 部分消耗时预占不终结但已消费量对齐() throws Exception {
     UUID reservationId = reserve("10");
-    var created = allocate(reservationId, locationOne, lotOne, "10", at("2026-10-13T09:00:00+08:00"));
+    var created =
+        allocate(reservationId, locationOne, lotOne, "10", at("2026-10-13T09:00:00+08:00"));
     asA("update", () -> service.commit(a, reservationId, created.allocationId(), null));
     asA(
         "update",
         () ->
             service.consume(
-                a, reservationId, created.allocationId(),
+                a,
+                reservationId,
+                created.allocationId(),
                 new ReservationAllocationTransitionInput(new BigDecimal("4"), null, "先出 4 件")));
 
     var header = detail(reservationId).reservation();
@@ -828,7 +922,8 @@ class ReservationAllocationIntegrationTest {
   @Test
   void 消耗数量超过该分配剩余量被拒() throws Exception {
     UUID reservationId = reserve("10");
-    var created = allocate(reservationId, locationOne, lotOne, "6", at("2026-10-13T09:00:00+08:00"));
+    var created =
+        allocate(reservationId, locationOne, lotOne, "6", at("2026-10-13T09:00:00+08:00"));
     asA("update", () -> service.commit(a, reservationId, created.allocationId(), null));
 
     assertThatThrownBy(
@@ -837,8 +932,11 @@ class ReservationAllocationIntegrationTest {
                     "update",
                     () ->
                         service.consume(
-                            a, reservationId, created.allocationId(),
-                            new ReservationAllocationTransitionInput(new BigDecimal("7"), null, null))))
+                            a,
+                            reservationId,
+                            created.allocationId(),
+                            new ReservationAllocationTransitionInput(
+                                new BigDecimal("7"), null, null))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("超过该分配的剩余量");
   }
@@ -846,12 +944,12 @@ class ReservationAllocationIntegrationTest {
   @Test
   void 已终结的预占不能再分配() throws Exception {
     UUID reservationId = reserve("10");
-    var created = allocate(reservationId, locationOne, lotOne, "10", at("2026-10-13T09:00:00+08:00"));
+    var created =
+        allocate(reservationId, locationOne, lotOne, "10", at("2026-10-13T09:00:00+08:00"));
     asA("update", () -> service.commit(a, reservationId, created.allocationId(), null));
     asA("update", () -> service.consume(a, reservationId, created.allocationId(), null));
 
-    assertThatThrownBy(
-            () -> allocate(reservationId, locationTwo, lotOne, "1", null))
+    assertThatThrownBy(() -> allocate(reservationId, locationTwo, lotOne, "1", null))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已终结");
   }
@@ -887,7 +985,8 @@ class ReservationAllocationIntegrationTest {
             () ->
                 detail(
                     reservationId,
-                    new ReservationAllocationQuery(null, null, null, null, null, "WHATEVER", 0, 50)))
+                    new ReservationAllocationQuery(
+                        null, null, null, null, null, "WHATEVER", 0, 50)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不支持的排序键");
   }
@@ -924,7 +1023,9 @@ class ReservationAllocationIntegrationTest {
     var timeline =
         asA(
             "read",
-            () -> service.timeline(a, reservationId, new ReservationAllocationTimelineQuery(null, null, 0, 50)));
+            () ->
+                service.timeline(
+                    a, reservationId, new ReservationAllocationTimelineQuery(null, null, 0, 50)));
     assertThat(timeline.entries()).isEmpty();
     assertThat(timeline.total()).isZero();
   }
@@ -953,8 +1054,12 @@ class ReservationAllocationIntegrationTest {
     assertThat(release.note()).contains("/reservations/{id}/release");
     assertThat(release.note()).contains("expire-overdue");
     // 本模块自己的两个维度仍然是已接入
-    for (var dimension : List.of("ALLOCATION_DETAIL", "ALLOCATION_REGISTER", "ALLOCATION_COMMIT",
-        "ALLOCATION_CONSUME")) {
+    for (var dimension :
+        List.of(
+            "ALLOCATION_DETAIL",
+            "ALLOCATION_REGISTER",
+            "ALLOCATION_COMMIT",
+            "ALLOCATION_CONSUME")) {
       var one =
           capabilities.stream()
               .filter(c -> c.dimension().equals(dimension))
@@ -981,7 +1086,8 @@ class ReservationAllocationIntegrationTest {
   @Test
   void 明细端点经HTTP返回分配行与时间线() throws Exception {
     UUID reservationId = reserve("20");
-    var created = allocate(reservationId, locationOne, lotOne, "12", at("2026-10-13T09:00:00+08:00"));
+    var created =
+        allocate(reservationId, locationOne, lotOne, "12", at("2026-10-13T09:00:00+08:00"));
 
     http.perform(
             get("/warehouse/inventory/reservations/{id}/allocations", reservationId)
@@ -1020,7 +1126,10 @@ class ReservationAllocationIntegrationTest {
         .andExpect(jsonPath("$[4].ownerModule").value("7.2.1.3"));
 
     http.perform(
-            post("/warehouse/inventory/reservations/{r}/allocations/{a}/commit", reservationId, created.allocationId())
+            post(
+                    "/warehouse/inventory/reservations/{r}/allocations/{a}/commit",
+                    reservationId,
+                    created.allocationId())
                 .header("Authorization", "Bearer tenant-a")
                 .contentType("application/json")
                 .content("{}"))
@@ -1045,8 +1154,16 @@ class ReservationAllocationIntegrationTest {
                   reservations.create(
                       b,
                       new ReservationModels.ReservationCreateInput(
-                          "TRADE", "SALES_ORDER", UUID.randomUUID(), "SO-B",
-                          idFor(b, 1), idFor(b, 3), new BigDecimal("1"), null, null, null));
+                          "TRADE",
+                          "SALES_ORDER",
+                          UUID.randomUUID(),
+                          "SO-B",
+                          idFor(b, 1),
+                          idFor(b, 3),
+                          new BigDecimal("1"),
+                          null,
+                          null,
+                          null));
               return created.id();
             });
     ReservationAllocationCreated theirsAllocation =
@@ -1054,7 +1171,8 @@ class ReservationAllocationIntegrationTest {
             "update",
             () ->
                 service.allocate(
-                    b, theirs,
+                    b,
+                    theirs,
                     new ReservationAllocationCreateInput(
                         idFor(b, 5), idFor(b, 6), idFor(b, 8), new BigDecimal("1"), null, null)));
 
@@ -1139,8 +1257,16 @@ class ReservationAllocationIntegrationTest {
                   reservations.create(
                       b,
                       new ReservationModels.ReservationCreateInput(
-                          "TRADE", "SALES_ORDER", UUID.randomUUID(), "SO-B",
-                          idFor(b, 1), idFor(b, 3), new BigDecimal("1"), null, null, null));
+                          "TRADE",
+                          "SALES_ORDER",
+                          UUID.randomUUID(),
+                          "SO-B",
+                          idFor(b, 1),
+                          idFor(b, 3),
+                          new BigDecimal("1"),
+                          null,
+                          null,
+                          null));
               return created.id();
             });
     ReservationAllocationCreated theirsAllocation =
@@ -1148,7 +1274,8 @@ class ReservationAllocationIntegrationTest {
             "update",
             () ->
                 service.allocate(
-                    b, theirs,
+                    b,
+                    theirs,
                     new ReservationAllocationCreateInput(
                         idFor(b, 5), idFor(b, 6), idFor(b, 8), new BigDecimal("1"), null, null)));
 
@@ -1188,8 +1315,7 @@ class ReservationAllocationIntegrationTest {
     }
 
     // 不设 app.current_tenant 时读不到任何行：第一道防线在服务层谓词之前就生效。
-    assertThat(
-            sql.fetchOne("select count(*) from reservation_allocation").get(0, Long.class))
+    assertThat(sql.fetchOne("select count(*) from reservation_allocation").get(0, Long.class))
         .isZero();
     assertThat(sql.fetchOne("select count(*) from reservation_entry").get(0, Long.class)).isZero();
   }

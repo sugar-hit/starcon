@@ -190,10 +190,7 @@ export function formatTime(value: string | null | undefined): string {
 }
 
 /** 「待处理数」文案：口径未定义时如实说明，不拿 DRAFT 冒充。 */
-export function pendingCountText(
-  pendingCount: number | null | undefined,
-  owner: string,
-): string {
+export function pendingCountText(pendingCount: number | null | undefined, owner: string): string {
   if (pendingCount === null || pendingCount === undefined) {
     return `待处理数暂无口径（归属 ${owner}）`;
   }

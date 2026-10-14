@@ -17,18 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 7.7.1.2 寄售与代销。
  *
- * <p>蓝图：「管理寄售与代销业务：寄售协议（供应商货、我方销，结算按实际售出）、寄售可用量、
- * 销售触发结算数量、未售退货与期末清理。支持『寄售库存不计入我方采购入库成本，仅在售出时结转』。」
+ * <p>蓝图：「管理寄售与代销业务：寄售协议（供应商货、我方销，结算按实际售出）、寄售可用量、 销售触发结算数量、未售退货与期末清理。支持『寄售库存不计入我方采购入库成本，仅在售出时结转』。」
  * 输出：「寄售库存视图（寄售量/已售/剩余）；结算触发单（→ 12 应付）；期末退回或转入采购的单据。」
  *
- * <p>命名空间沿用 {@code /warehouse/inventory/...}，权限码 {@code warehouse.inventory.read} /
- * {@code warehouse.inventory.update}。端点独立成 {@code ConsignmentController} 而不是并进
- * {@code InventoryController}：那是 7.4.2.1 的文件，两条车道并行时各改各的才不会撞。
+ * <p>命名空间沿用 {@code /warehouse/inventory/...}，权限码 {@code warehouse.inventory.read} / {@code
+ * warehouse.inventory.update}。端点独立成 {@code ConsignmentController} 而不是并进 {@code
+ * InventoryController}：那是 7.4.2.1 的文件，两条车道并行时各改各的才不会撞。
  *
- * <p><b>本模块没有「按寄售量出应付」的端点，而且数据库也不让这么算</b>：
- * 应付只从 {@code /settlements} 出，且每条结算明细都指回一条具体销售事实；
- * V71 把应付额做成生成列（已售数量 × 结算价）并对 sale_id 加唯一约束。
- * 蓝图那句「寄售未售出不产生采购成本与应付」因此是可执行的，而不是一句承诺。
+ * <p><b>本模块没有「按寄售量出应付」的端点，而且数据库也不让这么算</b>： 应付只从 {@code /settlements} 出，且每条结算明细都指回一条具体销售事实； V71
+ * 把应付额做成生成列（已售数量 × 结算价）并对 sale_id 加唯一约束。 蓝图那句「寄售未售出不产生采购成本与应付」因此是可执行的，而不是一句承诺。
  */
 @RestController
 @RequestMapping("/warehouse")
@@ -42,10 +39,7 @@ public class ConsignmentController {
     this.consignments = consignments;
   }
 
-  /**
-   * 统一入口：先向 identity 确认身份与权限（租户**不**来自任何客户端头），
-   * 再在一个事务里绑定 RLS 租户上下文执行查询（与 7.4.2.1 同一个 call）。
-   */
+  /** 统一入口：先向 identity 确认身份与权限（租户**不**来自任何客户端头）， 再在一个事务里绑定 RLS 租户上下文执行查询（与 7.4.2.1 同一个 call）。 */
   private <T> T call(String bearer, String permission, Function<AccessService.Access, T> work) {
     var actor = access.require(bearer, "warehouse." + permission);
     return access.run(actor, "warehouse." + permission, () -> work.apply(actor));
@@ -54,8 +48,7 @@ public class ConsignmentController {
   // ------------------------------------------------------------ 能力
 
   /**
-   * 寄售能力：经营模式、结算周期、期末处理、退货性质，以及五条必须如实讲清楚的说明
-   * （应付口径、采购成本为什么算不出来、货主口径、销售事实来源、交接口径）。
+   * 寄售能力：经营模式、结算周期、期末处理、退货性质，以及五条必须如实讲清楚的说明 （应付口径、采购成本为什么算不出来、货主口径、销售事实来源、交接口径）。
    *
    * <p>前端据此渲染选项与提示，而不是把规则硬编码在界面上。
    */
@@ -84,7 +77,8 @@ public class ConsignmentController {
       @RequestParam(required = false) String keyword,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "20") int size) {
-    return call(auth, "inventory.read", a -> consignments.agreements(status, mode, keyword, page, size));
+    return call(
+        auth, "inventory.read", a -> consignments.agreements(status, mode, keyword, page, size));
   }
 
   /** 协议详情 = 头部 + 全部明细（寄售量/已售/退回/转采购/剩余）+ 审计时间线。 */
@@ -101,7 +95,8 @@ public class ConsignmentController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID agreementId,
       @RequestBody ConsignmentAddLineInput input) {
-    return call(auth, "inventory.update", a -> consignments.addLine(agreementId, input, a.userId()));
+    return call(
+        auth, "inventory.update", a -> consignments.addLine(agreementId, input, a.userId()));
   }
 
   /** 启用协议：DRAFT → ACTIVE。售出、结算都要求协议已启用。 */
@@ -110,7 +105,8 @@ public class ConsignmentController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID agreementId,
       @RequestBody(required = false) ConsignmentNoteInput input) {
-    return call(auth, "inventory.update", a -> consignments.activate(agreementId, input, a.userId()));
+    return call(
+        auth, "inventory.update", a -> consignments.activate(agreementId, input, a.userId()));
   }
 
   /** 暂停协议：ACTIVE → SUSPENDED。暂停后不得再记销售。 */
@@ -119,7 +115,8 @@ public class ConsignmentController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID agreementId,
       @RequestBody(required = false) ConsignmentNoteInput input) {
-    return call(auth, "inventory.update", a -> consignments.suspend(agreementId, input, a.userId()));
+    return call(
+        auth, "inventory.update", a -> consignments.suspend(agreementId, input, a.userId()));
   }
 
   /** 关闭协议：→ CLOSED。关闭后全部明细行被数据库冻结，数量不能再动。 */
@@ -151,8 +148,7 @@ public class ConsignmentController {
   /**
    * 记一条销售事实 —— 这是「销售触发结算数量」的唯一来源。
    *
-   * <p>协议必须已启用；本次售出量不得超过该行剩余；{@code (协议行, saleRef)} 唯一，
-   * 所以重复推送不会卖两次、也就不会算两次应付。
+   * <p>协议必须已启用；本次售出量不得超过该行剩余；{@code (协议行, saleRef)} 唯一， 所以重复推送不会卖两次、也就不会算两次应付。
    */
   @PostMapping("/inventory/consignments/{agreementId}/lines/{lineId}/sales")
   public ConsignmentSale recordSale(
@@ -160,7 +156,10 @@ public class ConsignmentController {
       @PathVariable UUID agreementId,
       @PathVariable UUID lineId,
       @RequestBody ConsignmentSaleInput input) {
-    return call(auth, "inventory.update", a -> consignments.recordSale(agreementId, lineId, input, a.userId()));
+    return call(
+        auth,
+        "inventory.update",
+        a -> consignments.recordSale(agreementId, lineId, input, a.userId()));
   }
 
   /** 销售事实列表（真分页；{@code unsettleableOnly=true} 只看还没进结算单的）。 */
@@ -171,7 +170,8 @@ public class ConsignmentController {
       @RequestParam(required = false) Boolean unsettleableOnly,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "20") int size) {
-    return call(auth, "inventory.read", a -> consignments.sales(agreementId, unsettleableOnly, page, size));
+    return call(
+        auth, "inventory.read", a -> consignments.sales(agreementId, unsettleableOnly, page, size));
   }
 
   // ------------------------------------------------------------ 结算触发单（→ 12 应付）
@@ -187,15 +187,17 @@ public class ConsignmentController {
   /**
    * 出结算触发单：把区间内**已售但还没进任何结算单**的销售事实收成一张交给 12 应付。
    *
-   * <p>区间内没有未结算销售事实时显式拒绝 —— 未售出不产生应付，这正是寄售该有的结果，
-   * 不该靠一张空单来「显得处理过了」。
+   * <p>区间内没有未结算销售事实时显式拒绝 —— 未售出不产生应付，这正是寄售该有的结果， 不该靠一张空单来「显得处理过了」。
    */
   @PostMapping("/inventory/consignments/{agreementId}/settlements")
   public ConsignmentSettlementDetail createSettlement(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID agreementId,
       @RequestBody ConsignmentSettlementInput input) {
-    return call(auth, "inventory.update", a -> consignments.createSettlement(agreementId, input, a.userId()));
+    return call(
+        auth,
+        "inventory.update",
+        a -> consignments.createSettlement(agreementId, input, a.userId()));
   }
 
   /** 结算触发单列表（真分页；合计由数据库延迟约束保证 == Σ 明细）。 */
@@ -206,7 +208,8 @@ public class ConsignmentController {
       @RequestParam(required = false) String status,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "20") int size) {
-    return call(auth, "inventory.read", a -> consignments.settlements(agreementId, status, page, size));
+    return call(
+        auth, "inventory.read", a -> consignments.settlements(agreementId, status, page, size));
   }
 
   /** 结算单详情：每行都指回触发它的那条销售事实，「应付从哪来」一眼可追。 */
@@ -223,7 +226,10 @@ public class ConsignmentController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID settlementId,
       @RequestBody(required = false) ConsignmentNoteInput input) {
-    return call(auth, "inventory.update", a -> consignments.confirmSettlement(settlementId, input, a.userId()));
+    return call(
+        auth,
+        "inventory.update",
+        a -> consignments.confirmSettlement(settlementId, input, a.userId()));
   }
 
   // ------------------------------------------------------------ 未售退货与期末清理
@@ -231,15 +237,15 @@ public class ConsignmentController {
   /**
    * 建未售退货 / 期末清理单（草稿）。
    *
-   * <p>{@code disposition} 决定这张单会不会产生应付：退回供应商不产生；
-   * 转入采购才产生，且必须与协议约定的期末处理一致。
+   * <p>{@code disposition} 决定这张单会不会产生应付：退回供应商不产生； 转入采购才产生，且必须与协议约定的期末处理一致。
    */
   @PostMapping("/inventory/consignments/{agreementId}/returns")
   public ConsignmentReturnDetail createReturn(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID agreementId,
       @RequestBody ConsignmentReturnInput input) {
-    return call(auth, "inventory.update", a -> consignments.createReturn(agreementId, input, a.userId()));
+    return call(
+        auth, "inventory.update", a -> consignments.createReturn(agreementId, input, a.userId()));
   }
 
   /** 退货/清理单列表（真分页）。 */
@@ -267,7 +273,8 @@ public class ConsignmentController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID returnId,
       @RequestBody(required = false) ConsignmentNoteInput input) {
-    return call(auth, "inventory.update", a -> consignments.executeReturn(returnId, input, a.userId()));
+    return call(
+        auth, "inventory.update", a -> consignments.executeReturn(returnId, input, a.userId()));
   }
 
   /** 作废退货/清理单：DRAFT → CANCELLED。草稿没动过数量，作废是无损的。 */
@@ -276,7 +283,8 @@ public class ConsignmentController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID returnId,
       @RequestBody(required = false) ConsignmentNoteInput input) {
-    return call(auth, "inventory.update", a -> consignments.cancelReturn(returnId, input, a.userId()));
+    return call(
+        auth, "inventory.update", a -> consignments.cancelReturn(returnId, input, a.userId()));
   }
 
   // ------------------------------------------------------------ 审计

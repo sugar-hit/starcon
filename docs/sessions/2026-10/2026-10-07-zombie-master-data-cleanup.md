@@ -70,7 +70,7 @@ AGENTS.md 禁止跨服务 SQL/FK/视图，因此不去 join 任何别家服务�
 
 5. **VALUES 列表里裸 `?` 会让 jOOQ 把 `OffsetDateTime` 当 varchar 发**，
    PG 报 `column "observed_at" is of type timestamp with time zone but expression is of
-   type character varying`。所有 timestamptz 写入改 `?::timestamptz`。
+type character varying`。所有 timestamptz 写入改 `?::timestamptz`。
 
 6. **判定投影里不要绑 `?`**（`? - s.updated_at` 算 days_since）：jOOQ 对投影表达式里无名参数的
    计数不可靠，报"未设定参数值 N"而 N 指向 `limit`/`offset`，指针完全不在真正的位置上。
@@ -85,12 +85,12 @@ AGENTS.md 禁止跨服务 SQL/FK/视图，因此不去 join 任何别家服务�
 
 ## 当前哪些引用维度没有可用事件源
 
-| 维度 | 归属 | 本仓库现状 |
-| --- | --- | --- |
-| `INVENTORY_ON_HAND` | warehouse（07 库存） | **服务已交付**，接入只差 warehouse 侧推送方 |
-| `ORDER_LINE_COUNT` | trade（订单） | **服务不存在**（`services/` 下无 trade 目录） |
-| `UNIT_COST` | purchase（06 采购） | **服务不存在** |
-| `LISTING_COUNT` | channel（04 刊登） | 服务存在，但只有平台目录/连接/店铺/同步，**无刊登实体** |
+| 维度                | 归属                 | 本仓库现状                                              |
+| ------------------- | -------------------- | ------------------------------------------------------- |
+| `INVENTORY_ON_HAND` | warehouse（07 库存） | **服务已交付**，接入只差 warehouse 侧推送方             |
+| `ORDER_LINE_COUNT`  | trade（订单）        | **服务不存在**（`services/` 下无 trade 目录）           |
+| `UNIT_COST`         | purchase（06 采购）  | **服务不存在**                                          |
+| `LISTING_COUNT`     | channel（04 刊登）   | 服务存在，但只有平台目录/连接/店铺/同步，**无刊登实体** |
 
 四个开关**默认全 false**，词表带 `wired` 标注、概览列出未接入清单、界面禁用对应开关。
 **没有用假数据糊过去** —— 缺观测就是 INCOMPLETE。
@@ -101,6 +101,7 @@ AGENTS.md 禁止跨服务 SQL/FK/视图，因此不去 join 任何别家服务�
 ## 文件清单
 
 新增：
+
 - `backend/services/catalog/src/main/resources/db/migration/V39__zombie_master_data_cleanup.sql`
 - `backend/.../catalog/ZombieCandidateModels.java` / `ZombieCandidateRules.java` /
   `ZombieCandidateService.java` / `ZombieCandidateController.java` /
@@ -110,6 +111,7 @@ AGENTS.md 禁止跨服务 SQL/FK/视图，因此不去 join 任何别家服务�
 - `apps/web/src/app/products/master-data-cleanup/page.tsx`
 
 改动：
+
 - `backend/.../catalog/ApiErrorHandler.java`（+1 个 handler）
 - `apps/web/src/lib/api-proxy.ts`（+1 个顶层分支，自带前导 `|`）
 - `apps/web/src/app/api/catalog/[...path]/route.test.ts`（+1 例）

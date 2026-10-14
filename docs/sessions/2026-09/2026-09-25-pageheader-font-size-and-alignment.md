@@ -14,12 +14,14 @@
 ## 修复
 
 ### 1. PageHeader h1: h-20 font-medium → h-16 font-semibold
+
 - 字号 20px → 16px
 - weight 500 → 600 (semibold)
 - **用 weight 而不是 size 来突出层级**，跟周围 14px 文字连续
 - 高度 h-14 (56px) → h-12 (48px)，更紧凑
 
 ### 2. 主区 padding: p-4 md:p-6 lg:p-8 → px-5 py-6
+
 - 统一 20px 水平内边距
 - 主区内容起始位置 x=260 (= 240 侧栏宽度 + 20 padding)
 - 跟侧栏 Logo 起始 x=20 视觉对齐（各自容器内 20px 起始）
@@ -28,15 +30,16 @@
 
 ## 验证
 
-| 元素 | 之前 | 现在 |
-|---|---|---|
-| PageHeader h1 | 20px / 500 | 16px / 600 |
-| PageHeader 高度 | 56px | 48px |
-| PageHeader padding | px-4/6/8 | px-5 |
-| 主区 padding | p-4/6/8 | px-5 py-6 |
-| 侧栏 Logo padding | px-5 | px-5 (不变) |
+| 元素               | 之前       | 现在        |
+| ------------------ | ---------- | ----------- |
+| PageHeader h1      | 20px / 500 | 16px / 600  |
+| PageHeader 高度    | 56px       | 48px        |
+| PageHeader padding | px-4/6/8   | px-5        |
+| 主区 padding       | p-4/6/8    | px-5 py-6   |
+| 侧栏 Logo padding  | px-5       | px-5 (不变) |
 
 视觉对比（v3-01-home.png → v4-03-home.png）：
+
 - PageHeader "工作台" 跟 CardTitle "视觉规范 v1.0 已落地" (h-24) 层级清晰
 - 主区内容起始 x 跟侧栏 Logo 起始 x 视觉对齐
 

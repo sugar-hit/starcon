@@ -42,14 +42,17 @@
 ## 文件清单
 
 **迁移**
+
 - `backend/services/catalog/src/main/resources/db/migration/V12__attribute_option_management.sql`
 
 **后端**
+
 - `.../catalog/AttributeOptionService.java`（新增）
 - `.../catalog/AttributeOptionController.java`（新增）
 - `.../catalog/CatalogModels.java`（+8 个 record）
 
 **前端**
+
 - `apps/web/src/components/catalog/attribute-option-model.ts`（新增）
 - `apps/web/src/components/catalog/attribute-option-workspace.tsx`（新增）
 - `apps/web/src/components/catalog/attribute-option-model.test.ts`（新增，9 例）
@@ -58,6 +61,7 @@
 - `apps/web/src/app/api/catalog/[...path]/route.test.ts`（+1 例）
 
 **生成物 / 文档**
+
 - `packages/api-contracts/src/catalog.ts`、`catalog.openapi.json`（codegen，只读）
 - `docs/product/capability-blueprint/module-progress.md`（仅 3.2.1.2 一行 + sync 重算的计数）
 

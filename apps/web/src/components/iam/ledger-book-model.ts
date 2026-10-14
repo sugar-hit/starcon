@@ -72,7 +72,11 @@ export function baseCurrencySummary(
   entityCurrency?: string,
 ): string {
   const mode = baseCurrencyModeLabel(book.baseCurrencyMode);
-  if (book.baseCurrencyMode === 'INHERIT' && entityCurrency && entityCurrency !== book.baseCurrency) {
+  if (
+    book.baseCurrencyMode === 'INHERIT' &&
+    entityCurrency &&
+    entityCurrency !== book.baseCurrency
+  ) {
     return `${book.baseCurrency}（${mode}，法人本位币为 ${entityCurrency}，需同步）`;
   }
   return `${book.baseCurrency}（${mode}）`;
@@ -158,11 +162,7 @@ export function defaultBookBlockReason(
   entityCurrency?: string,
 ): string | null {
   if (!isActive(book)) return '停用账簿不能作为默认账簿，请先启用或改选其他账簿';
-  if (
-    entityCurrency &&
-    book.baseCurrencyMode === 'INHERIT' &&
-    book.baseCurrency !== entityCurrency
-  )
+  if (entityCurrency && book.baseCurrencyMode === 'INHERIT' && book.baseCurrency !== entityCurrency)
     return '继承法人本位币但本位币与法人不一致，需先同步本位币';
   return null;
 }

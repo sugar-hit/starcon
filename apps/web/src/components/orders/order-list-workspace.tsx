@@ -2,15 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ClipboardList, RefreshCw, TriangleAlert } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  EmptyState,
-  Input,
-  PageHeader,
-  SectionCard,
-  StatCard,
-} from '@starcon/ui';
+import { Badge, Button, EmptyState, Input, PageHeader, SectionCard, StatCard } from '@starcon/ui';
 import type {
   SalesOrderListCapabilities,
   SalesOrderListDimension,
@@ -140,9 +132,7 @@ export function OrderListWorkspace() {
         <StatCard
           label="待处理数"
           value={
-            page
-              ? pendingCountText(page.summary.pendingCount, page.summary.pendingCountOwner)
-              : '—'
+            page ? pendingCountText(page.summary.pendingCount, page.summary.pendingCountOwner) : '—'
           }
         />
       </div>
@@ -159,7 +149,7 @@ export function OrderListWorkspace() {
             onChange={(e) => setParams({ ...params, keyword: e.target.value, page: 0 })}
           />
           <select
-            className="border-border bg-background rounded-md border px-3 py-2 text-copy-13"
+            className="border-border bg-background text-copy-13 rounded-md border px-3 py-2"
             value={params.orderSource}
             onChange={(e) => setParams({ ...params, orderSource: e.target.value, page: 0 })}
           >
@@ -172,7 +162,7 @@ export function OrderListWorkspace() {
               ))}
           </select>
           <select
-            className="border-border bg-background rounded-md border px-3 py-2 text-copy-13"
+            className="border-border bg-background text-copy-13 rounded-md border px-3 py-2"
             value={params.documentStatus}
             onChange={(e) => setParams({ ...params, documentStatus: e.target.value, page: 0 })}
           >
@@ -184,7 +174,7 @@ export function OrderListWorkspace() {
             ))}
           </select>
           <select
-            className="border-border bg-background rounded-md border px-3 py-2 text-copy-13"
+            className="border-border bg-background text-copy-13 rounded-md border px-3 py-2"
             value={params.currency}
             onChange={(e) => setParams({ ...params, currency: e.target.value, page: 0 })}
           >
@@ -196,7 +186,7 @@ export function OrderListWorkspace() {
             ))}
           </select>
           <select
-            className="border-border bg-background rounded-md border px-3 py-2 text-copy-13"
+            className="border-border bg-background text-copy-13 rounded-md border px-3 py-2"
             value={params.sort}
             onChange={(e) => setParams({ ...params, sort: e.target.value, page: 0 })}
           >
@@ -235,8 +225,8 @@ export function OrderListWorkspace() {
         <ul className="text-copy-13 text-muted-foreground flex flex-col gap-1">
           {(caps?.bulkOperations ?? []).map((op) => (
             <li key={op.code}>
-              <span className="text-foreground font-medium">{op.label}</span>：归属{' '}
-              {op.ownerModule} —— {op.reason}
+              <span className="text-foreground font-medium">{op.label}</span>：归属 {op.ownerModule}{' '}
+              —— {op.reason}
             </li>
           ))}
         </ul>
@@ -282,7 +272,7 @@ export function OrderListWorkspace() {
           />
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left text-copy-13">
+            <table className="text-copy-13 w-full border-collapse text-left">
               <thead>
                 <tr className="border-border border-b">
                   {listColumns.map((c) => (
@@ -297,8 +287,14 @@ export function OrderListWorkspace() {
               </thead>
               <tbody>
                 {(page?.rows ?? []).map((row) => {
-                  const platform = unavailableCell(row.platformStatus, dimensions.get('platformStatus'));
-                  const payment = unavailableCell(row.paymentStatus, dimensions.get('paymentStatus'));
+                  const platform = unavailableCell(
+                    row.platformStatus,
+                    dimensions.get('platformStatus'),
+                  );
+                  const payment = unavailableCell(
+                    row.paymentStatus,
+                    dimensions.get('paymentStatus'),
+                  );
                   const fulfillment = unavailableCell(
                     row.fulfillmentStatus,
                     dimensions.get('fulfillmentStatus'),
@@ -315,7 +311,9 @@ export function OrderListWorkspace() {
                     <tr key={row.id} className="border-border/60 border-b last:border-0">
                       <td className="px-3 py-2 font-mono">{row.orderNo}</td>
                       <td className="px-3 py-2">
-                        <Badge tone="neutral">{orderSourceLabels[row.orderSource] ?? row.orderSource}</Badge>
+                        <Badge tone="neutral">
+                          {orderSourceLabels[row.orderSource] ?? row.orderSource}
+                        </Badge>
                       </td>
                       <td className="px-3 py-2">{row.buyerName ?? '—'}</td>
                       <td className="px-3 py-2">
@@ -329,7 +327,9 @@ export function OrderListWorkspace() {
                       <td className="px-3 py-2">
                         {formatAmount(row.grandTotalAmount, row.currency)}
                       </td>
-                      <td className="px-3 py-2">{documentStatusLabels[row.documentStatus] ?? row.documentStatus}</td>
+                      <td className="px-3 py-2">
+                        {documentStatusLabels[row.documentStatus] ?? row.documentStatus}
+                      </td>
                       <td className="px-3 py-2">{formatTime(row.createdAt)}</td>
                       <td className="text-muted-foreground px-3 py-2" title={platform.title}>
                         {platform.text}
@@ -353,9 +353,7 @@ export function OrderListWorkspace() {
             </table>
           </div>
         )}
-        {page && (
-          <p className="text-copy-13 text-muted-foreground mt-3">{page.dataScopeNote}</p>
-        )}
+        {page && <p className="text-copy-13 text-muted-foreground mt-3">{page.dataScopeNote}</p>}
       </SectionCard>
 
       <SectionCard

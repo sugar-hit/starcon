@@ -55,16 +55,16 @@ docs/product/capability-blueprint/module-progress.md
 
 ## 本轮动作
 
-| 动作 | 结果 |
-|---|---|
-| `sync.mjs` | 465 模块 · 已交付 59 · 进行中 0 · 未开发 406 |
-| `gate acquire` | ok |
-| `merge-ready` | `merged: []` |
-| `gc` | `removed: []` |
-| `plan --lanes 3` | toDispatch 含 3.8.1.1（newlyPlanned） |
-| 派发 | 1 条：3.8.1.1 解冲突收尾（`bg_d93d21d3`） |
-| 跳过重派 | 3.6.3.1 / 3.6.1.2 —— 心跳 1–2 分钟内、`stale: false`、worktree 有真实未提交产出 |
-| `gate release` | ok |
+| 动作             | 结果                                                                            |
+| ---------------- | ------------------------------------------------------------------------------- |
+| `sync.mjs`       | 465 模块 · 已交付 59 · 进行中 0 · 未开发 406                                    |
+| `gate acquire`   | ok                                                                              |
+| `merge-ready`    | `merged: []`                                                                    |
+| `gc`             | `removed: []`                                                                   |
+| `plan --lanes 3` | toDispatch 含 3.8.1.1（newlyPlanned）                                           |
+| 派发             | 1 条：3.8.1.1 解冲突收尾（`bg_d93d21d3`）                                       |
+| 跳过重派         | 3.6.3.1 / 3.6.1.2 —— 心跳 1–2 分钟内、`stale: false`、worktree 有真实未提交产出 |
+| `gate release`   | ok                                                                              |
 
 ## 资源实测
 

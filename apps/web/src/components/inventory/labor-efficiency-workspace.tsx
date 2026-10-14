@@ -120,7 +120,6 @@ export function LaborEfficiencyWorkspace() {
   const [taskKeyword, setTaskKeyword] = useState('');
   const [taskPage, setTaskPage] = useState(0);
 
-
   // 派工草稿
   const [newType, setNewType] = useState('PICKING');
   const [newWarehouse, setNewWarehouse] = useState('');
@@ -162,7 +161,12 @@ export function LaborEfficiencyWorkspace() {
     setDrillLoading(true);
     setError('');
     try {
-      const scope = { from, to, warehouseId: warehouseId || undefined, workType: workType || undefined };
+      const scope = {
+        from,
+        to,
+        warehouseId: warehouseId || undefined,
+        workType: workType || undefined,
+      };
       const [rep, rank, tr, taskResult] = await Promise.all([
         fetchLaborReport({ ...scope, page: 0, size: 200 }),
         fetchLaborRanking({ ...scope, metric, size: 50 }),
@@ -339,7 +343,16 @@ export function LaborEfficiencyWorkspace() {
     } finally {
       setSaving(false);
     }
-  }, [completing, completeOrders, completeLines, completePieces, completeDistance, completeErrorPieces, completeErrorOrders, reload]);
+  }, [
+    completing,
+    completeOrders,
+    completeLines,
+    completePieces,
+    completeDistance,
+    completeErrorPieces,
+    completeErrorOrders,
+    reload,
+  ]);
 
   const submitException = useCallback(async () => {
     if (!failing) return;
@@ -376,8 +389,8 @@ export function LaborEfficiencyWorkspace() {
       <div className="space-y-4">
         <PageHeader title="作业效率" description="按人按日统计仓库人效。" />
         <Notice tone="danger" title="没有查看权限">
-          当前角色缺少 warehouse.inventory.read，看不到人效报表。人效涉及绩效与提成数据，
-          按 ADR-0005 需要由目标租户成员的角色显式授予。
+          当前角色缺少 warehouse.inventory.read，看不到人效报表。人效涉及绩效与提成数据， 按
+          ADR-0005 需要由目标租户成员的角色显式授予。
         </Notice>
       </div>
     );
@@ -414,7 +427,12 @@ export function LaborEfficiencyWorkspace() {
       >
         <div className="grid gap-3 md:grid-cols-4">
           <FormField label="开始日期" id="labor-from">
-            <Input id="labor-from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            <Input
+              id="labor-from"
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+            />
           </FormField>
           <FormField label="结束日期" id="labor-to">
             <Input id="labor-to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
@@ -519,7 +537,10 @@ export function LaborEfficiencyWorkspace() {
         >
           <dl className="space-y-3 text-sm">
             {capabilities.metricBasis.map((basis) => (
-              <div key={basis.metric} className="border-control-border border-t pt-2 first:border-0 first:pt-0">
+              <div
+                key={basis.metric}
+                className="border-control-border border-t pt-2 first:border-0 first:pt-0"
+              >
                 <dt className="font-medium">
                   {basis.label}（{basis.unit}）
                 </dt>
@@ -575,28 +596,40 @@ export function LaborEfficiencyWorkspace() {
               </thead>
               <tbody>
                 {report.rows.map((row) => (
-                  <tr key={`${row.operatorUserId}-${row.workDay}`} className="border-control-border border-t">
+                  <tr
+                    key={`${row.operatorUserId}-${row.workDay}`}
+                    className="border-control-border border-t"
+                  >
                     <td className="py-2">
-                      <div className="font-medium">
-                        {row.operatorUserId.slice(0, 8)}…
-                      </div>
+                      <div className="font-medium">{row.operatorUserId.slice(0, 8)}…</div>
                       <div className="text-muted-foreground text-xs">{formatDay(row.workDay)}</div>
                     </td>
                     <td className="py-2 text-right tabular-nums">{row.taskCount}</td>
                     <td className="py-2 text-right tabular-nums">{qty(row.pickedPieces)}</td>
                     <td className="py-2 text-right tabular-nums">{row.pickedOrders}</td>
-                    <td className="py-2 text-right tabular-nums">{distanceText(row.travelDistanceM)}</td>
-                    <td className="py-2 text-right tabular-nums">{avgSecondsText(row.avgPackingSeconds)}</td>
+                    <td className="py-2 text-right tabular-nums">
+                      {distanceText(row.travelDistanceM)}
+                    </td>
+                    <td className="py-2 text-right tabular-nums">
+                      {avgSecondsText(row.avgPackingSeconds)}
+                    </td>
                     <td className="py-2 text-right tabular-nums">{rateText(row.reviewAccuracy)}</td>
-                    <td className="py-2 text-right tabular-nums">{rateText(row.errorRateByPiece)}</td>
-                    <td className="py-2 text-right tabular-nums">{rateText(row.errorRateByOrder)}</td>
+                    <td className="py-2 text-right tabular-nums">
+                      {rateText(row.errorRateByPiece)}
+                    </td>
+                    <td className="py-2 text-right tabular-nums">
+                      {rateText(row.errorRateByOrder)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
             <p className="text-muted-foreground mt-2 text-xs">
-              {report.rows[0] ? `${rowSummary(report.rows[0])}（首行示例）· ` : ''}共 {report.total} 行
-              {report.total > report.rows.length ? '，当前只显示前 ' + report.rows.length + ' 行' : ''}
+              {report.rows[0] ? `${rowSummary(report.rows[0])}（首行示例）· ` : ''}共 {report.total}{' '}
+              行
+              {report.total > report.rows.length
+                ? '，当前只显示前 ' + report.rows.length + ' 行'
+                : ''}
             </p>
           </div>
         )}
@@ -624,7 +657,9 @@ export function LaborEfficiencyWorkspace() {
           <EmptyState
             icon={<TrendingUp className="h-5 w-5" />}
             title={drillLoading ? '加载中' : '这个区间还没有可排名的人效'}
-            description={drillLoading ? '正在按区间合计排序。' : '排名只统计区间内有过完成作业的操作人。'}
+            description={
+              drillLoading ? '正在按区间合计排序。' : '排名只统计区间内有过完成作业的操作人。'
+            }
           />
         ) : (
           <div className="overflow-x-auto">
@@ -647,13 +682,21 @@ export function LaborEfficiencyWorkspace() {
                     <td className="py-2 tabular-nums">{row.rank}</td>
                     <td className="py-2 font-medium">{row.operatorUserId.slice(0, 8)}…</td>
                     <td className="py-2 text-right font-medium tabular-nums">
-                      {metricValueText(row.metricValue, ranking.higherIsBetter, metricIsRate(metric))}
+                      {metricValueText(
+                        row.metricValue,
+                        ranking.higherIsBetter,
+                        metricIsRate(metric),
+                      )}
                     </td>
                     <td className="py-2 text-right tabular-nums">{row.workDays}</td>
                     <td className="py-2 text-right tabular-nums">{qty(row.pickedPieces)}</td>
-                    <td className="py-2 text-right tabular-nums">{distanceText(row.travelDistanceM)}</td>
+                    <td className="py-2 text-right tabular-nums">
+                      {distanceText(row.travelDistanceM)}
+                    </td>
                     <td className="py-2 text-right tabular-nums">{rateText(row.reviewAccuracy)}</td>
-                    <td className="py-2 text-right tabular-nums">{rateText(row.errorRateByPiece)}</td>
+                    <td className="py-2 text-right tabular-nums">
+                      {rateText(row.errorRateByPiece)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -667,7 +710,11 @@ export function LaborEfficiencyWorkspace() {
       <SectionCard
         title="人效趋势"
         description="逐日。区间内没有作业的日子也会出现 —— 跳过空白日会让「停了两天」看起来像「产量没变」。"
-        extra={idleDays > 0 ? <span className="text-muted-foreground text-xs">其中 {idleDays} 天无作业</span> : null}
+        extra={
+          idleDays > 0 ? (
+            <span className="text-muted-foreground text-xs">其中 {idleDays} 天无作业</span>
+          ) : null
+        }
       >
         {trend === null || trend.points.length === 0 ? (
           <EmptyState
@@ -694,21 +741,35 @@ export function LaborEfficiencyWorkspace() {
                 {trend.points.map((point) => (
                   <tr
                     key={point.workDay}
-                    className={isIdleDay(point) ? 'border-control-border text-muted-foreground border-t' : 'border-control-border border-t'}
+                    className={
+                      isIdleDay(point)
+                        ? 'border-control-border text-muted-foreground border-t'
+                        : 'border-control-border border-t'
+                    }
                   >
                     <td className="py-2">{formatDay(point.workDay)}</td>
                     <td className="py-2 text-xs">{trendPointText(point)}</td>
                     <td className="py-2 text-right tabular-nums">{qty(point.pickedPieces)}</td>
                     <td className="py-2 text-right tabular-nums">{point.pickedOrders}</td>
-                    <td className="py-2 text-right tabular-nums">{distanceText(point.travelDistanceM)}</td>
-                    <td className="py-2 text-right tabular-nums">{avgSecondsText(point.avgPackingSeconds)}</td>
-                    <td className="py-2 text-right tabular-nums">{rateText(point.reviewAccuracy)}</td>
-                    <td className="py-2 text-right tabular-nums">{rateText(point.errorRateByPiece)}</td>
+                    <td className="py-2 text-right tabular-nums">
+                      {distanceText(point.travelDistanceM)}
+                    </td>
+                    <td className="py-2 text-right tabular-nums">
+                      {avgSecondsText(point.avgPackingSeconds)}
+                    </td>
+                    <td className="py-2 text-right tabular-nums">
+                      {rateText(point.reviewAccuracy)}
+                    </td>
+                    <td className="py-2 text-right tabular-nums">
+                      {rateText(point.errorRateByPiece)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p className="text-muted-foreground mt-2 text-xs">{trend.scopeNote} · {trend.dayBasisNote}</p>
+            <p className="text-muted-foreground mt-2 text-xs">
+              {trend.scopeNote} · {trend.dayBasisNote}
+            </p>
           </div>
         )}
       </SectionCard>
@@ -835,7 +896,8 @@ export function LaborEfficiencyWorkspace() {
                       <div className="font-medium">{task.code}</div>
                       <div className="text-muted-foreground text-xs">
                         {workTypeLabels[task.workType] ?? task.workType} · {task.warehouseCode}
-                        {task.referenceNo ? ` · ${task.referenceNo}` : ''} · 来源 {task.sourceModule}
+                        {task.referenceNo ? ` · ${task.referenceNo}` : ''} · 来源{' '}
+                        {task.sourceModule}
                       </div>
                     </td>
                     <td className="py-2 text-xs">
@@ -847,7 +909,7 @@ export function LaborEfficiencyWorkspace() {
                           taskStatusTone(task.status) === 'bad'
                             ? 'text-destructive text-xs'
                             : taskStatusTone(task.status) === 'warn'
-                              ? 'text-amber-600 text-xs dark:text-amber-400'
+                              ? 'text-xs text-amber-600 dark:text-amber-400'
                               : 'text-muted-foreground text-xs'
                         }
                       >
@@ -862,21 +924,38 @@ export function LaborEfficiencyWorkspace() {
                     <td className="py-2 text-right tabular-nums">
                       {qty(task.pieceCount)} / {qty(task.errorPieceCount)}
                     </td>
-                    <td className="py-2 text-right tabular-nums">{distanceText(task.travelDistanceM)}</td>
-                    <td className="py-2 text-right tabular-nums">{durationText(task.durationSeconds)}</td>
+                    <td className="py-2 text-right tabular-nums">
+                      {distanceText(task.travelDistanceM)}
+                    </td>
+                    <td className="py-2 text-right tabular-nums">
+                      {durationText(task.durationSeconds)}
+                    </td>
                     <td className="py-2 text-right text-xs">{formatDay(task.workDay)}</td>
                     <td className="py-2 text-right">
                       <div className="flex flex-wrap justify-end gap-1">
-                        <Button variant="outline" size="sm" onClick={() => void openDetail(task.id)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => void openDetail(task.id)}
+                        >
                           时间线
                         </Button>
                         {writable && task.status === 'PENDING' && task.operatorUserId && (
-                          <Button size="sm" onClick={() => void startTask(task.id)} disabled={saving}>
+                          <Button
+                            size="sm"
+                            onClick={() => void startTask(task.id)}
+                            disabled={saving}
+                          >
                             开工
                           </Button>
                         )}
                         {writable && task.status === 'PENDING' && (
-                          <Button variant="outline" size="sm" onClick={() => void reassignTask(task.id)} disabled={saving}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => void reassignTask(task.id)}
+                            disabled={saving}
+                          >
                             改派
                           </Button>
                         )}
@@ -892,7 +971,12 @@ export function LaborEfficiencyWorkspace() {
                             >
                               完成
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => setFailing(task)} disabled={saving}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setFailing(task)}
+                              disabled={saving}
+                            >
                               异常
                             </Button>
                           </>
@@ -904,7 +988,9 @@ export function LaborEfficiencyWorkspace() {
               </tbody>
             </table>
             <div className="mt-3 flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">共 {tasks.total} 张 · 第 {tasks.page + 1} 页</span>
+              <span className="text-muted-foreground">
+                共 {tasks.total} 张 · 第 {tasks.page + 1} 页
+              </span>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -936,16 +1022,35 @@ export function LaborEfficiencyWorkspace() {
         >
           <div className="grid gap-3 md:grid-cols-3">
             <FormField label="涉及单量" id="labor-c-orders">
-              <Input id="labor-c-orders" type="number" value={completeOrders} onChange={(e) => setCompleteOrders(e.target.value)} />
+              <Input
+                id="labor-c-orders"
+                type="number"
+                value={completeOrders}
+                onChange={(e) => setCompleteOrders(e.target.value)}
+              />
             </FormField>
             <FormField label="作业行数" id="labor-c-lines">
-              <Input id="labor-c-lines" type="number" value={completeLines} onChange={(e) => setCompleteLines(e.target.value)} />
+              <Input
+                id="labor-c-lines"
+                type="number"
+                value={completeLines}
+                onChange={(e) => setCompleteLines(e.target.value)}
+              />
             </FormField>
             <FormField label="作业件数" id="labor-c-pieces">
-              <Input id="labor-c-pieces" type="number" value={completePieces} onChange={(e) => setCompletePieces(e.target.value)} />
+              <Input
+                id="labor-c-pieces"
+                type="number"
+                value={completePieces}
+                onChange={(e) => setCompletePieces(e.target.value)}
+              />
             </FormField>
             <FormField
-              label={completing.workType === 'PICKING' ? '拣货行走距离（米）' : '行走距离（不适用于本类型）'}
+              label={
+                completing.workType === 'PICKING'
+                  ? '拣货行走距离（米）'
+                  : '行走距离（不适用于本类型）'
+              }
               id="labor-c-distance"
             >
               <Input
@@ -974,7 +1079,10 @@ export function LaborEfficiencyWorkspace() {
             </FormField>
           </div>
           <p className="text-muted-foreground mt-3 text-xs">
-            {basisOf(completing.workType === 'REVIEW' ? 'REVIEW_ACCURACY' : 'PICKED_PIECES')?.denominator}
+            {
+              basisOf(completing.workType === 'REVIEW' ? 'REVIEW_ACCURACY' : 'PICKED_PIECES')
+                ?.denominator
+            }
           </p>
           <div className="mt-3 flex gap-2">
             <Button size="sm" onClick={() => void submitComplete()} disabled={saving}>
@@ -1043,11 +1151,18 @@ export function LaborEfficiencyWorkspace() {
         >
           <ol className="space-y-2 text-sm">
             {openTask.timeline.map((event) => (
-              <li key={event.id} className="border-control-border border-t pt-2 first:border-0 first:pt-0">
+              <li
+                key={event.id}
+                className="border-control-border border-t pt-2 first:border-0 first:pt-0"
+              >
                 <div className="flex flex-wrap items-baseline gap-2">
                   <span className="font-medium">{event.eventType}</span>
-                  <span className="text-muted-foreground text-xs">{formatMoment(event.occurredAt)}</span>
-                  <span className="text-muted-foreground text-xs">操作人 {event.actorUserId.slice(0, 8)}…</span>
+                  <span className="text-muted-foreground text-xs">
+                    {formatMoment(event.occurredAt)}
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    操作人 {event.actorUserId.slice(0, 8)}…
+                  </span>
                 </div>
                 <div className="text-muted-foreground text-xs">{event.detail}</div>
               </li>

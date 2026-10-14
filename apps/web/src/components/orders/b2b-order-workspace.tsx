@@ -2,15 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { RefreshCw, TriangleAlert } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  EmptyState,
-  Input,
-  PageHeader,
-  SectionCard,
-  StatCard,
-} from '@starcon/ui';
+import { Badge, Button, EmptyState, Input, PageHeader, SectionCard, StatCard } from '@starcon/ui';
 import type {
   B2BCapabilities,
   B2BOrderPage,
@@ -122,10 +114,7 @@ export function B2BOrderWorkspace() {
         <StatCard label="批发订单" value={page?.total ?? 0} />
         <StatCard label="已确认待发" value={page?.confirmed ?? 0} />
         <StatCard label="未结应收" value={receivables?.openAmount ?? 0} />
-        <StatCard
-          label="已逾期（到期日已过仍未结）"
-          value={receivables?.overdueAmount ?? 0}
-        />
+        <StatCard label="已逾期（到期日已过仍未结）" value={receivables?.overdueAmount ?? 0} />
       </div>
 
       <SectionCard
@@ -200,7 +189,9 @@ export function B2BOrderWorkspace() {
                 {page.items.map((row: B2BOrderRow) => (
                   <tr key={row.id} className="border-b last:border-0">
                     <td className="px-2 py-2 font-medium">{row.orderNo}</td>
-                    <td className="px-2 py-2">{b2bOrderTypeLabels[row.orderType] ?? row.orderType}</td>
+                    <td className="px-2 py-2">
+                      {b2bOrderTypeLabels[row.orderType] ?? row.orderType}
+                    </td>
                     <td className="px-2 py-2">
                       {row.customerName ?? '—'}
                       <span className="text-muted-foreground">

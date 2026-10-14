@@ -94,7 +94,9 @@ export function StocktakeVarianceWorkspace() {
   const [report, setReport] = useState<StocktakeVarianceReport | null>(null);
   const [audit, setAudit] = useState<StocktakeVarianceAuditEntry[]>([]);
   const [adjustments, setAdjustments] = useState<StocktakeVarianceAdjustmentPage | null>(null);
-  const [openAdjustment, setOpenAdjustment] = useState<StocktakeVarianceAdjustmentDetail | null>(null);
+  const [openAdjustment, setOpenAdjustment] = useState<StocktakeVarianceAdjustmentDetail | null>(
+    null,
+  );
   const [drillLoading, setDrillLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -145,10 +147,20 @@ export function StocktakeVarianceWorkspace() {
       setDrillLoading(true);
       try {
         const [lineResult, rep, trail, adjPage] = await Promise.all([
-          fetchVarianceLines(id, { filter: lineFilter, keyword: lineKeyword, page: linePage, size: 50 }),
+          fetchVarianceLines(id, {
+            filter: lineFilter,
+            keyword: lineKeyword,
+            page: linePage,
+            size: 50,
+          }),
           fetchVarianceReport(id),
           fetchVarianceAudit(id, 200),
-          fetchVarianceAdjustments({ sheetId: id, status: adjustmentStatus, page: adjustmentPage, size: 20 }),
+          fetchVarianceAdjustments({
+            sheetId: id,
+            status: adjustmentStatus,
+            page: adjustmentPage,
+            size: 20,
+          }),
         ]);
         setLines(lineResult);
         setReport(rep);
@@ -377,7 +389,9 @@ export function StocktakeVarianceWorkspace() {
           <EmptyState
             icon={<ClipboardList className="h-5 w-5" />}
             title={loading ? '加载中' : '还没有盘点单'}
-            description={loading ? '正在读取盘点单列表。' : '先在「盘点单」里发起一次盘点并录入实盘数。'}
+            description={
+              loading ? '正在读取盘点单列表。' : '先在「盘点单」里发起一次盘点并录入实盘数。'
+            }
           />
         ) : (
           <div className="flex flex-wrap gap-2">
@@ -432,7 +446,13 @@ export function StocktakeVarianceWorkspace() {
             {lines === null || lines.lines.length === 0 ? (
               <EmptyState
                 icon={<ClipboardCheck className="h-5 w-5" />}
-                title={drillLoading ? '加载中' : lineFilter === 'ALL' ? '这张单没有差异' : '该筛选下没有差异行'}
+                title={
+                  drillLoading
+                    ? '加载中'
+                    : lineFilter === 'ALL'
+                      ? '这张单没有差异'
+                      : '该筛选下没有差异行'
+                }
                 description={
                   drillLoading
                     ? '正在读取差异明细。'
@@ -474,7 +494,7 @@ export function StocktakeVarianceWorkspace() {
                             (line.variance ?? 0) < 0
                               ? 'text-destructive font-medium'
                               : (line.variance ?? 0) > 0
-                                ? 'text-amber-600 dark:text-amber-400 font-medium'
+                                ? 'font-medium text-amber-600 dark:text-amber-400'
                                 : ''
                           }
                         >
@@ -503,7 +523,9 @@ export function StocktakeVarianceWorkspace() {
                         {line.varianceReason ? (
                           <>
                             <div className="font-medium">{reasonLabels[line.varianceReason]}</div>
-                            <div className="text-muted-foreground max-w-xs">{line.varianceNote}</div>
+                            <div className="text-muted-foreground max-w-xs">
+                              {line.varianceNote}
+                            </div>
                             <div className="text-muted-foreground text-xs">
                               {formatMoment(line.attributedAt)}
                             </div>
@@ -830,7 +852,10 @@ export function StocktakeVarianceWorkspace() {
                 <div className="flex flex-wrap items-end gap-2">
                   {openAdjustment.adjustment.status === 'DRAFT' && (
                     <>
-                      <Button onClick={() => void actOnAdjustment('submit', openAdjustment.adjustment.id)} disabled={!writable || saving}>
+                      <Button
+                        onClick={() => void actOnAdjustment('submit', openAdjustment.adjustment.id)}
+                        disabled={!writable || saving}
+                      >
                         提交审批
                       </Button>
                       <Button
@@ -844,7 +869,12 @@ export function StocktakeVarianceWorkspace() {
                   )}
                   {openAdjustment.adjustment.status === 'PENDING_APPROVAL' && (
                     <>
-                      <Button onClick={() => void actOnAdjustment('approve', openAdjustment.adjustment.id)} disabled={!writable || saving}>
+                      <Button
+                        onClick={() =>
+                          void actOnAdjustment('approve', openAdjustment.adjustment.id)
+                        }
+                        disabled={!writable || saving}
+                      >
                         批准
                       </Button>
                       <Button
@@ -858,7 +888,10 @@ export function StocktakeVarianceWorkspace() {
                   )}
                   {openAdjustment.adjustment.status === 'APPROVED' && (
                     <>
-                      <Button onClick={() => void actOnAdjustment('post', openAdjustment.adjustment.id)} disabled={!writable || saving}>
+                      <Button
+                        onClick={() => void actOnAdjustment('post', openAdjustment.adjustment.id)}
+                        disabled={!writable || saving}
+                      >
                         入账（改动库存余额）
                       </Button>
                       <Button

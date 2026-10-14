@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import org.jooq.DSLContext;
@@ -42,34 +41,36 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>蓝图对本模块的界定很窄，这里严格照着做，边界写死在这段注释里：
  *
  * <blockquote>
- * 「定义审批流程：适用单据类型、审批节点（角色/岗位/指定人）、审批方式（串行/并行/条件分支）、
- * 金额阈值分支、超时升级规则。」<br>
+ *
+ * 「定义审批流程：适用单据类型、审批节点（角色/岗位/指定人）、审批方式（串行/并行/条件分支）、 金额阈值分支、超时升级规则。」<br>
  * 「<b>审批流按单据类型注册</b>，未注册的变更类操作默认可直接执行——需要显式定义才有管控。」
+ *
  * </blockquote>
  *
  * <p><b>本模块交付的是定义与校验，不是审批运行时。</b>这里<b>不</b>发起审批、<b>不</b>处理审批实例、
- * <b>不</b>出待办列表，也没有任何定时器会去看超时规则并真的放行或转办：那些是 17.4.1.2 与 17.4.2.1 的
- * 职责。因此 {@code condition_expression} 与 {@code amount_branch} 在这里<b>只被校验形状、不被解析执行</b>；
- * {@link ApprovalEscalationView} 上的 {@code AUTO_APPROVE} 也只是一条被定义出来的策略。
- * 下游真正要回答「这张单据该走哪条流程」，用的是 {@link #active} 这一个只读出口。
+ * <b>不</b>出待办列表，也没有任何定时器会去看超时规则并真的放行或转办：那些是 17.4.1.2 与 17.4.2.1 的 职责。因此 {@code
+ * condition_expression} 与 {@code amount_branch} 在这里<b>只被校验形状、不被解析执行</b>； {@link
+ * ApprovalEscalationView} 上的 {@code AUTO_APPROVE} 也只是一条被定义出来的策略。 下游真正要回答「这张单据该走哪条流程」，用的是 {@link
+ * #active} 这一个只读出口。
  *
  * <p>「按单据类型注册」落在两处：
+ *
  * <ol>
- *   <li>同一租户同一单据类型同时只能有一条 {@code ACTIVE} 流程（库上部分唯一索引兜底，
- *       {@link #rejectDuplicateActive} 先查一次给可读的 409）；
- *   <li>{@link #registrations()} 直接回答「哪些单据类型还没注册」——蓝图那句
- *       「未注册的变更类操作默认可直接执行」在这里是一个可查询的事实，不是注释。
+ *   <li>同一租户同一单据类型同时只能有一条 {@code ACTIVE} 流程（库上部分唯一索引兜底， {@link #rejectDuplicateActive} 先查一次给可读的
+ *       409）；
+ *   <li>{@link #registrations()} 直接回答「哪些单据类型还没注册」——蓝图那句 「未注册的变更类操作默认可直接执行」在这里是一个可查询的事实，不是注释。
  * </ol>
  *
- * <p>节点引用上游 17.3.1.1 的<b>真实 role 表</b>（复合外键 + 写入前查一次），不自造平行角色体系。
- * 「岗位」上游没有，按本模块职责内最小可用由 {@code approval_position} 承载，它不携带任何权限。
+ * <p>节点引用上游 17.3.1.1 的<b>真实 role 表</b>（复合外键 + 写入前查一次），不自造平行角色体系。 「岗位」上游没有，按本模块职责内最小可用由 {@code
+ * approval_position} 承载，它不携带任何权限。
  */
 @RestController
 @RequestMapping("/identity")
 public class ApprovalFlowController {
 
   /** 流程内 node_key 白名单：金额分支与超时规则都按它引用，字符集越宽引用越容易写错。 */
-  private static final java.util.regex.Pattern NODE_KEY = java.util.regex.Pattern.compile("[A-Za-z0-9_-]{1,32}");
+  private static final java.util.regex.Pattern NODE_KEY =
+      java.util.regex.Pattern.compile("[A-Za-z0-9_-]{1,32}");
 
   private static final String FLOW_READ = "identity.approval_flow.read";
   private static final String FLOW_CREATE = "identity.approval_flow.create";
@@ -96,8 +97,7 @@ public class ApprovalFlowController {
   /**
    * 可注册审批的单据类型 + 本租户是否已注册生效流程。
    *
-   * <p>{@code registered=false} 的那一行就是蓝图说的「未注册的变更类操作默认可直接执行」——
-   * 配置页靠它一眼看出哪些单据类型目前<b>没有</b>管控。
+   * <p>{@code registered=false} 的那一行就是蓝图说的「未注册的变更类操作默认可直接执行」—— 配置页靠它一眼看出哪些单据类型目前<b>没有</b>管控。
    */
   public record ApprovalRegistrationView(
       String documentTypeCode,
@@ -127,15 +127,17 @@ public class ApprovalFlowController {
 
   /** 流程定义详情：概览 + 节点 + 金额分支 + 超时升级规则。 */
   public record ApprovalFlowDetailView(
-      ApprovalFlowView flow, List<ApprovalNodeView> nodes, List<ApprovalBranchView> branches,
+      ApprovalFlowView flow,
+      List<ApprovalNodeView> nodes,
+      List<ApprovalBranchView> branches,
       List<ApprovalEscalationView> escalations) {}
 
   /**
    * 审批节点。
    *
-   * <p>三种审批人各认各的列，与库上 {@code approval_flow_node_approver_shape} 同口径：
-   * {@code approverType='ROLE'} 用 {@code roleId}，{@code POSITION} 用 {@code positionId}，
-   * {@code USER} 用 {@code membershipId}，其余两个必须为空。
+   * <p>三种审批人各认各的列，与库上 {@code approval_flow_node_approver_shape} 同口径： {@code approverType='ROLE'} 用
+   * {@code roleId}，{@code POSITION} 用 {@code positionId}， {@code USER} 用 {@code
+   * membershipId}，其余两个必须为空。
    *
    * <p>{@code approverLabel} / {@code approverActive} 是写回时的联表结果：审批人后来被停用时，
    * 配置页不该还显示着一个看似有效的名字却配不出人来。
@@ -244,9 +246,8 @@ public class ApprovalFlowController {
   /**
    * 结构体检的一条结论。
    *
-   * <p>{@code severity=ERROR} 的是**配置期就不该存在**的结构（比如一个阶段里塞了两个串行节点、
-   * 审批人已被停用导致这一节点无人可审）；{@code INFO} 的是提醒（比如该单据类型当前没有生效流程）。
-   * 写入路径已经把这些挡掉，这个出口是让配置页在保存后仍能复核，而不是替代写入校验。
+   * <p>{@code severity=ERROR} 的是**配置期就不该存在**的结构（比如一个阶段里塞了两个串行节点、 审批人已被停用导致这一节点无人可审）；{@code INFO}
+   * 的是提醒（比如该单据类型当前没有生效流程）。 写入路径已经把这些挡掉，这个出口是让配置页在保存后仍能复核，而不是替代写入校验。
    */
   public record ApprovalFindingView(String severity, String code, String message) {}
 
@@ -264,13 +265,16 @@ public class ApprovalFlowController {
   // ------------------------------------------------------------------
 
   /**
-   * 与 {@code NumberRuleController.call} 同口径：解析会话 → 切到该会话的租户事务 →
-   * 锁会话 → 二次校验租户未切换 → 校验权限码 → 组织变更要求 OWNER。
+   * 与 {@code NumberRuleController.call} 同口径：解析会话 → 切到该会话的租户事务 → 锁会话 → 二次校验租户未切换 → 校验权限码 → 组织变更要求
+   * OWNER。
    *
    * <p>租户来自会话成员关系，{@code X-Tenant-Id} 头在这里从头到尾没有出现过。
    */
   private <T> T call(
-      String auth, String permission, boolean mutation, Function<IdentityController.Access, T> work) {
+      String auth,
+      String permission,
+      boolean mutation,
+      Function<IdentityController.Access, T> work) {
     var initial = identity.resolve(auth);
     return tenants.run(
         initial.tenantId(),
@@ -282,7 +286,8 @@ public class ApprovalFlowController {
           require(a.tenantId().equals(initial.tenantId()), "租户已切换，请重试");
           require(
               a.grants().stream()
-                  .anyMatch(g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
+                  .anyMatch(
+                      g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
               "当前角色没有此操作权限");
           if (mutation) require(a.owner(), "审批流定义变更需由当前租户所有者执行");
           return work.apply(a);
@@ -312,10 +317,9 @@ public class ApprovalFlowController {
   /**
    * 成员 id → 用户名。
    *
-   * <p>刻意走 {@code member_names(hash)}（SECURITY DEFINER，以会话成员关系为条件）而不是直连
-   * {@code app_user}：V1 明确「Service account cannot directly enumerate users」，
-   * 直连会吃 42501。调用方没有 {@code identity.member.read} 时解析不出用户名是**正常**的，
-   * 所以「审批人不存在」的判定绝不拿用户名是否为空来判（见 {@link #inspect}）。
+   * <p>刻意走 {@code member_names(hash)}（SECURITY DEFINER，以会话成员关系为条件）而不是直连 {@code app_user}：V1
+   * 明确「Service account cannot directly enumerate users」， 直连会吃 42501。调用方没有 {@code
+   * identity.member.read} 时解析不出用户名是**正常**的， 所以「审批人不存在」的判定绝不拿用户名是否为空来判（见 {@link #inspect}）。
    */
   private Map<UUID, String> memberNames(String auth) {
     var names = new LinkedHashMap<UUID, String>();
@@ -339,9 +343,8 @@ public class ApprovalFlowController {
   /**
    * 出厂单据类型码表（与本租户无关，全租户同一份）。
    *
-   * <p>它和 17.5.1.2 的 {@code document_entity} <b>不是同一张表</b>：那张回答「用哪个码取号」，
-   * 这张回答「这类单据允许挂审批流」。后者刻意多出 ROLE_GRANT / DATA_EXPORT 这类
-   * 「没有编号、但恰恰该被显式管控」的变更类操作。
+   * <p>它和 17.5.1.2 的 {@code document_entity} <b>不是同一张表</b>：那张回答「用哪个码取号」， 这张回答「这类单据允许挂审批流」。后者刻意多出
+   * ROLE_GRANT / DATA_EXPORT 这类 「没有编号、但恰恰该被显式管控」的变更类操作。
    */
   @GetMapping("/approval-flows/document-types")
   public List<ApprovalDocumentTypeView> documentTypes(
@@ -351,7 +354,8 @@ public class ApprovalFlowController {
         FLOW_READ,
         false,
         a ->
-            sql.fetch(
+            sql
+                .fetch(
                     "select code,name,description from approval_document_type"
                         + " where status='ACTIVE' order by sort_order,code")
                 .stream()
@@ -367,9 +371,8 @@ public class ApprovalFlowController {
   /**
    * 「哪些单据类型还没注册生效审批流」。
    *
-   * <p>蓝图那句「未注册的变更类操作默认可直接执行」在这里变成一个可查询的清单：
-   * {@code registered=false} 的行就是当前<b>没有</b>管控的单据类型，配置页据此提示补齐。
-   * 查询走 RLS 保护的 {@code approval_flow}，所以「有没有注册」永远是本租户视角。
+   * <p>蓝图那句「未注册的变更类操作默认可直接执行」在这里变成一个可查询的清单： {@code registered=false}
+   * 的行就是当前<b>没有</b>管控的单据类型，配置页据此提示补齐。 查询走 RLS 保护的 {@code approval_flow}，所以「有没有注册」永远是本租户视角。
    */
   @GetMapping("/approval-flows/registrations")
   public List<ApprovalRegistrationView> registrations(
@@ -379,7 +382,8 @@ public class ApprovalFlowController {
         FLOW_READ,
         false,
         a ->
-            sql.fetch(
+            sql
+                .fetch(
                     "select r.code,r.name,r.flow_id,r.flow_name from approval_flow_no_registration r"
                         + " order by r.sort_order,r.code")
                 .stream()
@@ -404,8 +408,7 @@ public class ApprovalFlowController {
   /**
    * 按单据类型查当前生效的流程（下游运行时的唯一入口）。
    *
-   * <p>同一单据类型最多只有一条 {@code ACTIVE}（库上部分唯一索引保证），所以这个出口
-   * <b>永远返回唯一结果</b>；还没注册就是 404，调用方据此知道该单据类型未被管控。
+   * <p>同一单据类型最多只有一条 {@code ACTIVE}（库上部分唯一索引保证），所以这个出口 <b>永远返回唯一结果</b>；还没注册就是 404，调用方据此知道该单据类型未被管控。
    */
   @GetMapping("/approval-flows/active")
   public ApprovalFlowDetailView active(
@@ -418,13 +421,13 @@ public class ApprovalFlowController {
         a -> {
           var row =
               sql.fetchOne(
-                  selectFlow() + " where f.tenant_id=? and f.document_type_code=? and f.status='ACTIVE'",
+                  selectFlow()
+                      + " where f.tenant_id=? and f.document_type_code=? and f.status='ACTIVE'",
                   a.tenantId(),
                   documentTypeCode.trim());
           if (row == null)
             throw IdentityController.error(
-                HttpStatus.NOT_FOUND,
-                "该单据类型「" + documentTypeCode.trim() + "」尚未注册生效审批流，按默认放行处理");
+                HttpStatus.NOT_FOUND, "该单据类型「" + documentTypeCode.trim() + "」尚未注册生效审批流，按默认放行处理");
           return detail(a.tenantId(), row, memberNames(auth));
         });
   }
@@ -447,11 +450,14 @@ public class ApprovalFlowController {
             condition.bind(documentTypeCode.trim());
           }
           if (status != null && !status.isBlank()) {
-            check(List.of("DRAFT", "ACTIVE", "DISABLED").contains(status), "状态只能是 DRAFT、ACTIVE 或 DISABLED");
+            check(
+                List.of("DRAFT", "ACTIVE", "DISABLED").contains(status),
+                "状态只能是 DRAFT、ACTIVE 或 DISABLED");
             condition.add(" and f.status=?");
             condition.bind(status);
           }
-          return sql.fetch(
+          return sql
+              .fetch(
                   selectFlow() + condition.sql() + " order by f.document_type_code,f.flow_name",
                   condition.bindings())
               .stream()
@@ -470,7 +476,8 @@ public class ApprovalFlowController {
         FLOW_READ,
         false,
         a -> {
-          var row = sql.fetchOne(selectFlow() + " where f.tenant_id=? and f.id=?", a.tenantId(), id);
+          var row =
+              sql.fetchOne(selectFlow() + " where f.tenant_id=? and f.id=?", a.tenantId(), id);
           if (row == null) notFound();
           return detail(a.tenantId(), row, memberNames(auth));
         });
@@ -479,8 +486,7 @@ public class ApprovalFlowController {
   /**
    * 结构体检：把已保存的流程按「配置期就不该存在的结构」重新过一遍。
    *
-   * <p>写入路径已经挡住了绝大多数问题（400 / 409），这里能查出来的是**事后才会暴露**的那类：
-   * 比如审批人昨天还生效、今天被停用（外键只保证角色存在，不保证它还能审批人），
+   * <p>写入路径已经挡住了绝大多数问题（400 / 409），这里能查出来的是**事后才会暴露**的那类： 比如审批人昨天还生效、今天被停用（外键只保证角色存在，不保证它还能审批人），
    * 于是某个节点配置上看着没问题，实际已经无人可审。
    */
   @GetMapping("/approval-flows/{id}/validation")
@@ -492,12 +498,14 @@ public class ApprovalFlowController {
         FLOW_READ,
         false,
         a -> {
-          var row = sql.fetchOne(selectFlow() + " where f.tenant_id=? and f.id=?", a.tenantId(), id);
+          var row =
+              sql.fetchOne(selectFlow() + " where f.tenant_id=? and f.id=?", a.tenantId(), id);
           if (row == null) notFound();
           var nodes = nodes(a.tenantId(), id, memberNames(auth));
           var findings = inspect(row, nodes);
           int errors = (int) findings.stream().filter(f -> f.severity().equals("ERROR")).count();
-          int warnings = (int) findings.stream().filter(f -> f.severity().equals("WARNING")).count();
+          int warnings =
+              (int) findings.stream().filter(f -> f.severity().equals("WARNING")).count();
           return new ApprovalValidationView(
               id,
               row.get("flow_name", String.class),
@@ -521,7 +529,8 @@ public class ApprovalFlowController {
         FLOW_READ,
         false,
         a ->
-            sql.fetch(
+            sql
+                .fetch(
                     "select id,code,name,description,status,created_at,updated_at"
                         + " from approval_position where tenant_id=? order by code",
                     a.tenantId())
@@ -533,8 +542,8 @@ public class ApprovalFlowController {
   /**
    * 新建岗位。
    *
-   * <p>岗位只回答「这一步由哪个岗位的人审」，<b>不携带任何权限</b>——同租户 code 唯一，
-   * 撞码返回 409（库上 {@code UNIQUE(tenant_id,code)} 兜底）。
+   * <p>岗位只回答「这一步由哪个岗位的人审」，<b>不携带任何权限</b>——同租户 code 唯一， 撞码返回 409（库上 {@code UNIQUE(tenant_id,code)}
+   * 兜底）。
    */
   @PostMapping("/approval-flows/positions")
   public UUID createPosition(
@@ -644,8 +653,7 @@ public class ApprovalFlowController {
   /**
    * 新建流程（含节点 / 金额分支 / 超时规则）。
    *
-   * <p>整棵配置一次写完，校验在写入前跑完：节点审批人存在性、阶段串行冲突、
-   * 金额区间交叠、分支与升级规则引用的节点必须存在、生效流程唯一性。
+   * <p>整棵配置一次写完，校验在写入前跑完：节点审批人存在性、阶段串行冲突、 金额区间交叠、分支与升级规则引用的节点必须存在、生效流程唯一性。
    */
   @PostMapping("/approval-flows")
   public UUID create(
@@ -661,7 +669,8 @@ public class ApprovalFlowController {
           var branches = normalizeBranches(input.branches());
           var escalations = normalizeEscalations(a.tenantId(), input.escalations());
           crossCheck(nodes, branches, escalations);
-          rejectDuplicateActive(a.tenantId(), input.documentTypeCode().trim(), null, input.status());
+          rejectDuplicateActive(
+              a.tenantId(), input.documentTypeCode().trim(), null, input.status());
           UUID id = Ids.next();
           sql.execute(
               "insert into approval_flow(id,tenant_id,document_type_code,flow_name,status,description,"
@@ -688,8 +697,7 @@ public class ApprovalFlowController {
   }
 
   /**
-   * 更新流程。节点 / 分支 / 升级规则整体替换（先删后插），不是逐条 diff：
-   * {@code node_key} 被分支与升级规则引用，中间态会出现「分支指向还不存在的节点」。
+   * 更新流程。节点 / 分支 / 升级规则整体替换（先删后插），不是逐条 diff： {@code node_key} 被分支与升级规则引用，中间态会出现「分支指向还不存在的节点」。
    *
    * <p>{@code documentTypeCode} 不允许改：换单据类型等于换一条流程，请删除后新建。
    */
@@ -703,7 +711,9 @@ public class ApprovalFlowController {
         FLOW_UPDATE,
         true,
         a -> {
-          var row = sql.fetchOne("select * from approval_flow where tenant_id=? and id=?", a.tenantId(), id);
+          var row =
+              sql.fetchOne(
+                  "select * from approval_flow where tenant_id=? and id=?", a.tenantId(), id);
           if (row == null) notFound();
           check(
               input.documentTypeCode().trim().equals(row.get("document_type_code", String.class)),
@@ -747,7 +757,9 @@ public class ApprovalFlowController {
         FLOW_DELETE,
         true,
         a -> {
-          var row = sql.fetchOne("select * from approval_flow where tenant_id=? and id=?", a.tenantId(), id);
+          var row =
+              sql.fetchOne(
+                  "select * from approval_flow where tenant_id=? and id=?", a.tenantId(), id);
           if (row == null) notFound();
           var before = snapshot(a.tenantId(), id, memberNames(auth));
           sql.execute("delete from approval_flow where tenant_id=? and id=?", a.tenantId(), id);
@@ -784,11 +796,11 @@ public class ApprovalFlowController {
   /**
    * 同一租户同一单据类型只能有一条生效流程。
    *
-   * <p>先查一次是为了给出可读的 409（带冲突流程名）；库上的
-   * {@code approval_flow_active_document} 部分唯一索引是最后一道兜底，
+   * <p>先查一次是为了给出可读的 409（带冲突流程名）；库上的 {@code approval_flow_active_document} 部分唯一索引是最后一道兜底，
    * 并发下两条同时提交也只会成功一条，那条会以 409 失败而不是产生两条生效流程。
    */
-  private void rejectDuplicateActive(UUID tenantId, String documentTypeCode, UUID self, String status) {
+  private void rejectDuplicateActive(
+      UUID tenantId, String documentTypeCode, UUID self, String status) {
     if (!"ACTIVE".equals(status)) return;
     var row =
         sql.fetchOne(
@@ -816,12 +828,8 @@ public class ApprovalFlowController {
       check(orders.add(n.nodeOrder()), "节点顺序重复：" + n.nodeOrder());
       if (n.approvalMode().equals("CONDITIONAL")) {
         String expression = blankToNull(n.conditionExpression());
-        check(
-            expression != null,
-            "节点「" + n.nodeName() + "」是条件分支，必须填写条件表达式");
-        check(
-            expression.length() <= 500,
-            "条件表达式过长（上限 500 字符）：" + n.nodeName());
+        check(expression != null, "节点「" + n.nodeName() + "」是条件分支，必须填写条件表达式");
+        check(expression.length() <= 500, "条件表达式过长（上限 500 字符）：" + n.nodeName());
       } else {
         check(
             blankToNull(n.conditionExpression()) == null,
@@ -831,7 +839,13 @@ public class ApprovalFlowController {
         check(
             serialStages.add(n.stageIndex()),
             "阶段 " + n.stageIndex() + " 里有多个串行节点；一个阶段只能有一个串行节点，其余请用并行");
-      resolveApprover(tenantId, n.approverType(), n.roleId(), n.positionId(), n.membershipId(), "节点「" + n.nodeName() + "」");
+      resolveApprover(
+          tenantId,
+          n.approverType(),
+          n.roleId(),
+          n.positionId(),
+          n.membershipId(),
+          "节点「" + n.nodeName() + "」");
     }
     return inputs;
   }
@@ -839,8 +853,7 @@ public class ApprovalFlowController {
   /**
    * 审批人解析：三种类型各认各的列，且被指向的对象必须真实存在于**本租户**。
    *
-   * <p>角色指向 17.3.1.1 的真实 {@code role} 表——不自造平行角色体系。
-   * 库里另有复合外键兜底，这里再查一次是为了把「角色不存在」变成可读的 400 而不是 409。
+   * <p>角色指向 17.3.1.1 的真实 {@code role} 表——不自造平行角色体系。 库里另有复合外键兜底，这里再查一次是为了把「角色不存在」变成可读的 400 而不是 409。
    */
   private void resolveApprover(
       UUID tenantId,
@@ -854,7 +867,8 @@ public class ApprovalFlowController {
         check(roleId != null, where + "按角色审批，必须指定 roleId");
         check(positionId == null && membershipId == null, where + "按角色审批时不能同时填岗位或指定人");
         check(
-            sql.fetchExists(sql.selectOne().from("role").where("tenant_id=? and id=?", tenantId, roleId)),
+            sql.fetchExists(
+                sql.selectOne().from("role").where("tenant_id=? and id=?", tenantId, roleId)),
             where + "引用的角色不存在于当前租户");
       }
       case "POSITION" -> {
@@ -862,7 +876,9 @@ public class ApprovalFlowController {
         check(roleId == null && membershipId == null, where + "按岗位审批时不能同时填角色或指定人");
         check(
             sql.fetchExists(
-                sql.selectOne().from("approval_position").where("tenant_id=? and id=?", tenantId, positionId)),
+                sql.selectOne()
+                    .from("approval_position")
+                    .where("tenant_id=? and id=?", tenantId, positionId)),
             where + "引用的岗位不存在于当前租户");
       }
       case "USER" -> {
@@ -870,7 +886,9 @@ public class ApprovalFlowController {
         check(roleId == null && positionId == null, where + "按指定人审批时不能同时填角色或岗位");
         check(
             sql.fetchExists(
-                sql.selectOne().from("membership").where("tenant_id=? and id=?", tenantId, membershipId)),
+                sql.selectOne()
+                    .from("membership")
+                    .where("tenant_id=? and id=?", tenantId, membershipId)),
             where + "引用的成员不存在于当前租户");
       }
       default -> throw IdentityController.error(HttpStatus.BAD_REQUEST, "未知的审批人类型：" + approverType);
@@ -890,9 +908,7 @@ public class ApprovalFlowController {
       if (b.minAmount() != null) check(b.minAmount().signum() >= 0, "金额下限不能为负：" + name);
       if (b.maxAmount() != null) check(b.maxAmount().signum() >= 0, "金额上限不能为负：" + name);
       if (b.minAmount() != null && b.maxAmount() != null)
-        check(
-            b.maxAmount().compareTo(b.minAmount()) > 0,
-            "金额分支「" + name + "」的上下限必须构成正区间");
+        check(b.maxAmount().compareTo(b.minAmount()) > 0, "金额分支「" + name + "」的上下限必须构成正区间");
     }
     rejectOverlappingBranches(list);
     return list;
@@ -901,19 +917,16 @@ public class ApprovalFlowController {
   /**
    * 同币种内金额区间不允许交叠。
    *
-   * <p>交叠意味着某个金额落进两条分支时「该走哪个节点」没有唯一答案，必须在配置期就拒。
-   * 半开区间 {@code [min,max)}：上一条的上限等于下一条的下限不算交叠，那是正常接续。
+   * <p>交叠意味着某个金额落进两条分支时「该走哪个节点」没有唯一答案，必须在配置期就拒。 半开区间 {@code [min,max)}：上一条的上限等于下一条的下限不算交叠，那是正常接续。
    * 不同币种之间允许重合——那本来就是两笔不同币种的金额。
    */
   private void rejectOverlappingBranches(List<ApprovalBranchInput> list) {
     var byCurrency = new LinkedHashMap<String, List<ApprovalBranchInput>>();
-    for (var b : list)
-      byCurrency.computeIfAbsent(b.currencyCode(), k -> new ArrayList<>()).add(b);
+    for (var b : list) byCurrency.computeIfAbsent(b.currencyCode(), k -> new ArrayList<>()).add(b);
     for (var entry : byCurrency.entrySet()) {
       var group = new ArrayList<>(entry.getValue());
       group.sort(
-          Comparator.comparing(
-              b -> b.minAmount() == null ? new BigDecimal("-1") : b.minAmount()));
+          Comparator.comparing(b -> b.minAmount() == null ? new BigDecimal("-1") : b.minAmount()));
       for (int i = 0; i < group.size(); i++)
         for (int j = i + 1; j < group.size(); j++) {
           var a = group.get(i);
@@ -970,8 +983,7 @@ public class ApprovalFlowController {
   /**
    * 交叉校验：金额分支与超时规则引用的节点必须存在于本次提交的节点集合里。
    *
-   * <p>库的复合外键也会兜住「跨流程引用」，但那是 409；这里先查是为了给出指明是哪一个
-   * {@code nodeKey} 写错的 400。
+   * <p>库的复合外键也会兜住「跨流程引用」，但那是 409；这里先查是为了给出指明是哪一个 {@code nodeKey} 写错的 400。
    */
   private void crossCheck(
       List<ApprovalNodeInput> nodes,
@@ -984,9 +996,7 @@ public class ApprovalFlowController {
           keys.contains(b.targetNodeKey().trim()),
           "金额分支「" + b.branchName().trim() + "」指向的节点 " + b.targetNodeKey() + " 不在本流程内");
     for (var e : escalations)
-      check(
-          keys.contains(e.nodeKey().trim()),
-          "超时规则指向的节点 " + e.nodeKey() + " 不在本流程内");
+      check(keys.contains(e.nodeKey().trim()), "超时规则指向的节点 " + e.nodeKey() + " 不在本流程内");
   }
 
   // ------------------------------------------------------------------
@@ -1004,8 +1014,12 @@ public class ApprovalFlowController {
       List<ApprovalNodeInput> nodes,
       List<ApprovalBranchInput> branches,
       List<ApprovalEscalationInput> escalations) {
-    sql.execute("delete from approval_flow_escalation where tenant_id=? and flow_id=?", tenantId, flowId);
-    sql.execute("delete from approval_flow_amount_branch where tenant_id=? and flow_id=?", tenantId, flowId);
+    sql.execute(
+        "delete from approval_flow_escalation where tenant_id=? and flow_id=?", tenantId, flowId);
+    sql.execute(
+        "delete from approval_flow_amount_branch where tenant_id=? and flow_id=?",
+        tenantId,
+        flowId);
     sql.execute("delete from approval_flow_node where tenant_id=? and flow_id=?", tenantId, flowId);
     for (var n : nodes)
       sql.execute(
@@ -1081,7 +1095,10 @@ public class ApprovalFlowController {
         row.get("version", Long.class),
         row.get("created_at", OffsetDateTime.class),
         row.get("updated_at", OffsetDateTime.class),
-        sql.fetchOne("select count(*) as n from approval_flow_node where tenant_id=? and flow_id=?", tenantId, id)
+        sql.fetchOne(
+                "select count(*) as n from approval_flow_node where tenant_id=? and flow_id=?",
+                tenantId,
+                id)
             .get("n", Long.class)
             .intValue(),
         sql.fetchOne(
@@ -1110,11 +1127,11 @@ public class ApprovalFlowController {
   /**
    * 节点 + 审批人可读名。
    *
-   * <p>用 left join 把角色 / 岗位 / 成员的名称与状态一次带出来：审批人被停用是
-   * 「外键还在、但已经没有人能审」的典型形态，必须让配置页看得见。
+   * <p>用 left join 把角色 / 岗位 / 成员的名称与状态一次带出来：审批人被停用是 「外键还在、但已经没有人能审」的典型形态，必须让配置页看得见。
    */
   private List<ApprovalNodeView> nodes(UUID tenantId, UUID flowId, Map<UUID, String> memberNames) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select n.id,n.node_key,n.node_name,n.node_order,n.stage_index,n.approver_type,"
                 + " n.role_id,r.code as role_code,n.position_id,p.name as position_name,n.membership_id,"
                 + " n.approval_mode,n.condition_expression,n.description,"
@@ -1171,7 +1188,8 @@ public class ApprovalFlowController {
   }
 
   private List<ApprovalBranchView> branches(UUID tenantId, UUID flowId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select id,branch_name,currency_code,min_amount,max_amount,target_node_key,priority,description"
                 + " from approval_flow_amount_branch where tenant_id=? and flow_id=?"
                 + " order by currency_code,min_amount nulls first,priority",
@@ -1194,7 +1212,8 @@ public class ApprovalFlowController {
 
   private List<ApprovalEscalationView> escalations(
       UUID tenantId, UUID flowId, Map<UUID, String> memberNames) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select e.id,e.node_key,e.timeout_action,e.timeout_hours,e.escalate_approver_type,"
                 + " e.escalate_role_id,e.escalate_position_id,e.escalate_membership_id,e.description,"
                 + " r.code as role_code,p.name as position_name"
@@ -1213,7 +1232,7 @@ public class ApprovalFlowController {
               if ("ROLE".equals(type)) label = r.get("role_code", String.class);
               else if ("POSITION".equals(type)) label = r.get("position_name", String.class);
               else if ("USER".equals(type))
-        label = memberNames.get(r.get("escalate_membership_id", UUID.class));
+                label = memberNames.get(r.get("escalate_membership_id", UUID.class));
               return new ApprovalEscalationView(
                   r.get("id", UUID.class),
                   r.get("node_key", String.class),
@@ -1232,8 +1251,7 @@ public class ApprovalFlowController {
   /**
    * 结构体检。
    *
-   * <p>能查出来的问题都是<b>写入时看不到、事后才暴露</b>的：审批人被停用导致节点无人可审，
-   * 以及流程本身还没生效（此时该单据类型按蓝图「未注册则默认可直接执行」放行）。
+   * <p>能查出来的问题都是<b>写入时看不到、事后才暴露</b>的：审批人被停用导致节点无人可审， 以及流程本身还没生效（此时该单据类型按蓝图「未注册则默认可直接执行」放行）。
    */
   private List<ApprovalFindingView> inspect(Record flow, List<ApprovalNodeView> nodes) {
     var findings = new ArrayList<ApprovalFindingView>();
@@ -1247,8 +1265,7 @@ public class ApprovalFlowController {
                   + flow.get("status", String.class)
                   + "，该单据类型尚未注册生效审批流；按蓝图约定，未注册的变更类操作默认可直接执行"));
     if (active && nodes.isEmpty())
-      findings.add(
-          new ApprovalFindingView("ERROR", "NO_NODE", "生效流程必须至少有一个审批节点，否则单据提交后无人可审"));
+      findings.add(new ApprovalFindingView("ERROR", "NO_NODE", "生效流程必须至少有一个审批节点，否则单据提交后无人可审"));
     var serialStages = new HashSet<Integer>();
     for (var n : nodes) {
       if (n.approvalMode().equals("SERIAL") && !serialStages.add(n.stageIndex()))

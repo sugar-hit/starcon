@@ -30,18 +30,15 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 15.4.2.1 客服知识库。
  *
- * <p>命名空间 {@code /crm/knowledge}（蓝图 15 卷给本模块指定的路由是 {@code /crm/knowledge}）：
- * 前端入口同名，浏览器只经 /api/crm 代理访问；后端路径按<b>服务</b>命名空间走，
- * 与 catalog（/catalog/...）、trade（/trade/...）同一纪律。
+ * <p>命名空间 {@code /crm/knowledge}（蓝图 15 卷给本模块指定的路由是 {@code /crm/knowledge}）： 前端入口同名，浏览器只经 /api/crm
+ * 代理访问；后端路径按<b>服务</b>命名空间走， 与 catalog（/catalog/...）、trade（/trade/...）同一纪律。
  *
- * <p><b>刻意不与 11.4.2.2 的 {@code /catalog/kb} 共用命名空间</b>：那是另一个 bounded context
- * （catalog 服务、售后域、按平台规则版本组织）已经通过集成测试的既有契约。
- * 两个模块都叫「知识库」，但一个回答「这个平台政策这一版变了没有」，
- * 一个回答「这家店这个类目这个语言此刻该答哪一条」。边界理由见 V99 文件头第零节。
+ * <p><b>刻意不与 11.4.2.2 的 {@code /catalog/kb} 共用命名空间</b>：那是另一个 bounded context （catalog
+ * 服务、售后域、按平台规则版本组织）已经通过集成测试的既有契约。 两个模块都叫「知识库」，但一个回答「这个平台政策这一版变了没有」， 一个回答「这家店这个类目这个语言此刻该答哪一条」。边界理由见
+ * V99 文件头第零节。
  *
- * <p>租户<b>不</b>来自任何请求头：先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
- * 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
+ * <p>租户<b>不</b>来自任何请求头：先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code app.current_tenant}，由 RLS
+ * 在数据库层强制隔离。 伪造的 {@code X-Tenant-Id} 头改不动这个设置。
  */
 @RestController
 @RequestMapping("/crm/knowledge")
@@ -71,8 +68,7 @@ public class KnowledgeBaseController {
   /**
    * 组织范围：真实存在过的「店铺 × 类目 × 语言」格子。
    *
-   * <p>三个下拉框的数据源。刻意做成查询而不是常量 —— 否则「按店铺/类目/语言组织」
-   * 就退化成一个摆设。
+   * <p>三个下拉框的数据源。刻意做成查询而不是常量 —— 否则「按店铺/类目/语言组织」 就退化成一个摆设。
    */
   @GetMapping("/scopes")
   public List<CrmKnowledgeScope> scopes(
@@ -83,8 +79,7 @@ public class KnowledgeBaseController {
   /**
    * 按格子取条目，每条带「此刻生效的那一版」（规则 R4）。
    *
-   * <p>三个维度都可以省，但省掉任何一个都要**看得见地**退化：
-   * 三个都传 = 「这家店这个类目中文版当前有效的条目有哪些」的精确答案。
+   * <p>三个维度都可以省，但省掉任何一个都要**看得见地**退化： 三个都传 = 「这家店这个类目中文版当前有效的条目有哪些」的精确答案。
    *
    * @param at 判定时刻，省略即此刻。带偏移量（例如 {@code 2026-10-10T08:00:00+08:00}）。
    */
@@ -110,8 +105,7 @@ public class KnowledgeBaseController {
    * 「这个格子此刻生效的条目」—— 只含有生效版本的。
    *
    * <p>与 {@code GET /entries} 并列而不合并：后者是**管理视角**（这一格子里都有什么，
-   * 包括还没发布的、已经过期的），本接口是**应答视角**（客服此刻能拿去用的有哪些）。
-   * 下游 15.1.1.2 发送与 15.5.1 自动回复走的是本接口 —— 它们要的是「能用的」，
+   * 包括还没发布的、已经过期的），本接口是**应答视角**（客服此刻能拿去用的有哪些）。 下游 15.1.1.2 发送与 15.5.1 自动回复走的是本接口 —— 它们要的是「能用的」，
    * 不是「存在的」。
    */
   @GetMapping("/entries/effective")
@@ -122,9 +116,7 @@ public class KnowledgeBaseController {
       @RequestParam(required = false) String locale,
       @RequestParam(required = false) String at) {
     return call(
-        auth,
-        "knowledge.read",
-        a -> knowledge.effectiveEntries(shopId, categoryId, locale, at));
+        auth, "knowledge.read", a -> knowledge.effectiveEntries(shopId, categoryId, locale, at));
   }
 
   /** 档案详情 = 档案本体 + 全部版本（按版本号倒序）。 */
@@ -154,9 +146,8 @@ public class KnowledgeBaseController {
   /**
    * 新建一个草稿版本。
    *
-   * <p>与上面的 GET <b>同一路径</b>、不同方法：列表与新建挂在同一条知识下，
-   * 是既有服务（如 catalog 的 {@code bundles/{id}/versions}）的同一形状。
-   * 建草稿是「知识条目编辑 + 版本管理」两个输入里的后者。
+   * <p>与上面的 GET <b>同一路径</b>、不同方法：列表与新建挂在同一条知识下， 是既有服务（如 catalog 的 {@code
+   * bundles/{id}/versions}）的同一形状。 建草稿是「知识条目编辑 + 版本管理」两个输入里的后者。
    */
   @PostMapping("/entries/{entryId}/versions")
   public CrmKnowledgeVersion createVersion(
@@ -203,8 +194,7 @@ public class KnowledgeBaseController {
   /**
    * 记录一次引用（蓝图「输出：知识库内容 + 引用记录」）。
    *
-   * <p>引用是**只追加**的：这里刻意没有 PUT / DELETE 形状 —— 允许改删等于可以把
-   * 「没人用过」这个答案做出来（V99 第五节）。
+   * <p>引用是**只追加**的：这里刻意没有 PUT / DELETE 形状 —— 允许改删等于可以把 「没人用过」这个答案做出来（V99 第五节）。
    *
    * <p>下游 15.1.1.2 发送与 15.5.1 自动回复（**两者当前都未开发**）调用的就是这个端点。
    */
@@ -213,7 +203,8 @@ public class KnowledgeBaseController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID versionId,
       @Valid @RequestBody CrmRecordReferenceInput input) {
-    return call(auth, "knowledge.read", a -> knowledge.recordReference(versionId, input, a.userId()));
+    return call(
+        auth, "knowledge.read", a -> knowledge.recordReference(versionId, input, a.userId()));
   }
 
   /** 某条知识全部版本的引用记录。 */
@@ -227,8 +218,7 @@ public class KnowledgeBaseController {
   /**
    * 「某平台改版后哪些条目需要复核」—— 蓝图粗体句的正面回答。
    *
-   * <p>给定平台码与该平台新政策的生效时刻，返回当前生效版写于改版之前、
-   * 且至今仍无接替版本的条目。判据原文一并返回，页面能自证它按什么查的。
+   * <p>给定平台码与该平台新政策的生效时刻，返回当前生效版写于改版之前、 且至今仍无接替版本的条目。判据原文一并返回，页面能自证它按什么查的。
    */
   @GetMapping("/review-due")
   public CrmReviewDueReport reviewDue(

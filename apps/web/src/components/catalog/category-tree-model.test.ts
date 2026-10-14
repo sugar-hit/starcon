@@ -185,7 +185,11 @@ describe('防环（界面先判一次）', () => {
 describe('计数语义', () => {
   it('直接商品数与子树商品数分开，商品都在子类目时给出提示', () => {
     // 1 件直接挂在服饰，2 件挂在 T恤。
-    const counts = nodeCounts({ directProductCount: 1, subtreeProductCount: 3, secondaryProductCount: 0 });
+    const counts = nodeCounts({
+      directProductCount: 1,
+      subtreeProductCount: 3,
+      secondaryProductCount: 0,
+    });
     expect(counts.direct).toBe(1);
     expect(counts.subtree).toBe(3);
     expect(counts.inherited).toBe(false);

@@ -15,8 +15,7 @@ import java.util.UUID;
 /**
  * 7.2.2.1 可售量口径的传输模型。
  *
- * <p>蓝图原话：「配置不同渠道/店铺的库存口径：是否共享同一池、是否允许超卖多少、平台可售量是按
- * 自有仓还是含 FBA、平台可售数保留缓冲比例。输入：店铺/渠道维度配置（共享策略、缓冲比例、
+ * <p>蓝图原话：「配置不同渠道/店铺的库存口径：是否共享同一池、是否允许超卖多少、平台可售量是按 自有仓还是含 FBA、平台可售数保留缓冲比例。输入：店铺/渠道维度配置（共享策略、缓冲比例、
  * 是否含在途）。输出：生效的可售量口径；供 7.1.1.3 与 04 回写使用。」
  *
  * <p><b>缓冲公式（整个模块只有这一套口径，别处再写一遍就会算错）</b>：
@@ -29,14 +28,12 @@ import java.util.UUID;
  *   余量   headroom       = poolCapacity − committed
  * </pre>
  *
- * <p>缓冲比例越大、每个店铺留给平台的可售数越少，留给同步延迟的余量越大。共享池上
- * <b>各成员的分配比例必须合起来小于 1</b>：两个店铺各留 50% 缓冲时 committed 正好等于
- * 池容量，余量为 0，此时任何一笔在途延迟都会击穿 —— 这就是蓝图说的「多店铺共享池时，
- * 缓冲不足会在同步延迟期间超卖」。所以 {@link PoolSafetyVerdict} 是这个模块真正的产出，
- * 而不是配置本身。
+ * <p>缓冲比例越大、每个店铺留给平台的可售数越少，留给同步延迟的余量越大。共享池上 <b>各成员的分配比例必须合起来小于 1</b>：两个店铺各留 50% 缓冲时 committed 正好等于
+ * 池容量，余量为 0，此时任何一笔在途延迟都会击穿 —— 这就是蓝图说的「多店铺共享池时， 缓冲不足会在同步延迟期间超卖」。所以 {@link PoolSafetyVerdict}
+ * 是这个模块真正的产出， 而不是配置本身。
  *
- * <p>数量与比例一律 {@link BigDecimal}（DB 侧 numeric），比较一律 {@code compareTo}
- * 而非 {@code equals}（后者把 0 与 0.0000 判成不等）。
+ * <p>数量与比例一律 {@link BigDecimal}（DB 侧 numeric），比较一律 {@code compareTo} 而非 {@code equals}（后者把 0 与
+ * 0.0000 判成不等）。
  */
 public final class SellablePolicyModels {
 
@@ -45,8 +42,8 @@ public final class SellablePolicyModels {
   // ------------------------------------------------------------ 枚举
 
   /**
-   * 生效范围。与 17.5.1.1 业务参数的 GLOBAL/LEGAL_ENTITY/SHOP 同一套分档约定，
-   * 这里换成渠道口径：优先级 SHOP &gt; CHANNEL &gt; DEFAULT（{@link #priority()} 升序即更优先）。
+   * 生效范围。与 17.5.1.1 业务参数的 GLOBAL/LEGAL_ENTITY/SHOP 同一套分档约定， 这里换成渠道口径：优先级 SHOP &gt; CHANNEL &gt;
+   * DEFAULT（{@link #priority()} 升序即更优先）。
    */
   public enum PolicyScopeType {
     DEFAULT("全租户兜底"),
@@ -74,8 +71,8 @@ public final class SellablePolicyModels {
   /**
    * 共享池策略。SHARED 表示几档口径扣的是**同一个池子**。
    *
-   * <p>这是策略不是数据：配错直接超卖，所以 {@code poolKey} 对 SHARED 是显式共享名，
-   * 对 EXCLUSIVE 由服务按 {@code EXCL-}{referenceId} 派生并在 DB 层 CHECK 钉死。
+   * <p>这是策略不是数据：配错直接超卖，所以 {@code poolKey} 对 SHARED 是显式共享名， 对 EXCLUSIVE 由服务按 {@code
+   * EXCL-}{referenceId} 派生并在 DB 层 CHECK 钉死。
    */
   public enum PoolMode {
     EXCLUSIVE("独占池"),
@@ -95,8 +92,7 @@ public final class SellablePolicyModels {
   /**
    * 平台可售量口径：只按自有仓，还是含 FBA。
    *
-   * <p>与 7.1.3.1 的「FBA 库存是平台仓观测值，不是自有账本」同一条边界：FBA 计入
-   * **平台回写口径**，但不计入自有账本的可用量推导。
+   * <p>与 7.1.3.1 的「FBA 库存是平台仓观测值，不是自有账本」同一条边界：FBA 计入 **平台回写口径**，但不计入自有账本的可用量推导。
    */
   public enum PlatformStockScope {
     OWN_WAREHOUSE("仅自有仓"),
@@ -116,8 +112,8 @@ public final class SellablePolicyModels {
   /**
    * 池归属的口径下这个仓算自有还是平台观测。
    *
-   * <p>刻意**不改** {@code warehouse} 表加 type 列：warehouse 没有 type 列，
-   * 而全局仓库分类归 7.1.3.1 那条车道。分类挂在口径侧，边界更清楚。
+   * <p>刻意**不改** {@code warehouse} 表加 type 列：warehouse 没有 type 列， 而全局仓库分类归 7.1.3.1
+   * 那条车道。分类挂在口径侧，边界更清楚。
    */
   public enum WarehouseKind {
     OWN("自有仓"),
@@ -139,10 +135,9 @@ public final class SellablePolicyModels {
    *
    * <ul>
    *   <li>{@code GUARDED}：有余量（headroom &gt; 0）。同步延迟期间还有得垫。
-   *   <li>{@code NO_HEADROOM}：余量恰好为 0。分配之和正好等于池容量，**没有任何防线** ——
-   *       独占池留 0% 缓冲、共享池各留 (成员数−1)/成员数 缓冲都会落在这里。
-   *   <li>{@code TOLERATED}：余量为负，但在已配置的超卖容忍额度之内 —— 这是**有意为之**的
-   *       超卖，不是配置错误。
+   *   <li>{@code NO_HEADROOM}：余量恰好为 0。分配之和正好等于池容量，**没有任何防线** —— 独占池留 0% 缓冲、共享池各留 (成员数−1)/成员数
+   *       缓冲都会落在这里。
+   *   <li>{@code TOLERATED}：余量为负，但在已配置的超卖容忍额度之内 —— 这是**有意为之**的 超卖，不是配置错误。
    *   <li>{@code OVERSOLD}：余量为负且超出容忍额度。必然超卖，必须先改缓冲再回写。
    * </ul>
    */
@@ -180,8 +175,7 @@ public final class SellablePolicyModels {
   /**
    * 一档可售量口径。
    *
-   * <p>内容列写定后不可修改（V56 触发器钉死），改口径 = 收口旧档 + 开新档。
-   * {@code effectiveTo} 为 null 表示至今仍在生效。
+   * <p>内容列写定后不可修改（V56 触发器钉死），改口径 = 收口旧档 + 开新档。 {@code effectiveTo} 为 null 表示至今仍在生效。
    *
    * @param bufferRatio 平台可售数保留缓冲比例，0 ~ 1
    * @param oversellTolerance 允许超卖的件数（oversellAllowed=false 时恒为 0）
@@ -220,22 +214,22 @@ public final class SellablePolicyModels {
       WarehouseKind warehouseKind) {}
 
   /** 口径详情 = 分档本身 + 它吃哪几个仓。 */
-  public record SellablePolicyDetail(SellablePolicyRow policy, List<SellablePolicyWarehouseLink> warehouses) {}
+  public record SellablePolicyDetail(
+      SellablePolicyRow policy, List<SellablePolicyWarehouseLink> warehouses) {}
 
   /** 口径列表（真分页，total 不受分页影响）。 */
-  public record SellablePolicyPage(List<SellablePolicyRow> policies, long total, int page, int size) {}
+  public record SellablePolicyPage(
+      List<SellablePolicyRow> policies, long total, int page, int size) {}
 
   // ------------------------------------------------------------ 写入
 
   /**
    * 新建一档口径。
    *
-   * <p>{@code scopeType} 非 DEFAULT 时必须给 {@code sourceSystem} + {@code referenceId}：
-   * 店铺与渠道在 channel 服务，本服务不建外键也不查它的表（AGENTS.md 模块边界纪律），
-   * 只存跨服务定位键 + 写入时的可读名快照。
+   * <p>{@code scopeType} 非 DEFAULT 时必须给 {@code sourceSystem} + {@code referenceId}： 店铺与渠道在 channel
+   * 服务，本服务不建外键也不查它的表（AGENTS.md 模块边界纪律）， 只存跨服务定位键 + 写入时的可读名快照。
    *
-   * <p>{@code effectiveFrom} 缺省取当前时刻；不早于同槽位已有档的起点（重叠由 DB 触发器拒绝，
-   * 错误信息里带冲突档 id）。
+   * <p>{@code effectiveFrom} 缺省取当前时刻；不早于同槽位已有档的起点（重叠由 DB 触发器拒绝， 错误信息里带冲突档 id）。
    *
    * @param bufferRatio 0 ~ 1；越界由 @DecimalMin/@DecimalMax 与 DB CHECK 双重拒绝
    * @param poolKey SHARED 必填（共享池名）；EXCLUSIVE 留空，由服务派生
@@ -259,8 +253,8 @@ public final class SellablePolicyModels {
     /**
      * 挂仓关系的一行。
      *
-     * <p>必须逐个仓声明它是自有仓还是平台仓（FBA），因为「平台可售量按自有仓还是含 FBA」
-     * 正是靠这一列可计算的：{@code OWN_WAREHOUSE} 口径下 PLATFORM_FBA 的仓被排除在池容量外。
+     * <p>必须逐个仓声明它是自有仓还是平台仓（FBA），因为「平台可售量按自有仓还是含 FBA」 正是靠这一列可计算的：{@code OWN_WAREHOUSE} 口径下
+     * PLATFORM_FBA 的仓被排除在池容量外。
      */
     public record SellablePolicyWarehouseBinding(
         @NotNull UUID warehouseId, @NotBlank @Size(max = 16) String warehouseKind) {}
@@ -280,9 +274,8 @@ public final class SellablePolicyModels {
   /**
    * 某一时刻真正生效的口径。
    *
-   * <p>{@code policy} 为 null 表示连兜底档都没配 —— 这是一个**必须如实报出来**的状态，
-   * 而不是"按 0 处理"：没有兜底档时平台可售数没有依据，04 回写应当拒绝而不是回写 0
-   * （回写 0 = 立刻断货，回写满 = 超卖）。
+   * <p>{@code policy} 为 null 表示连兜底档都没配 —— 这是一个**必须如实报出来**的状态， 而不是"按 0 处理"：没有兜底档时平台可售数没有依据，04
+   * 回写应当拒绝而不是回写 0 （回写 0 = 立刻断货，回写满 = 超卖）。
    */
   public record SellablePolicyEffective(
       @Schema(nullable = true) SellablePolicyRow policy,
@@ -310,10 +303,9 @@ public final class SellablePolicyModels {
   /**
    * 一个池的安全体检结论（跨 SKU 汇总）。
    *
-   * <p>{@code headroom} = poolCapacity − committedListing。
-   * 负数表示各成员的回写额加起来已经超过池容量 —— 共享池必然超卖。
-   * {@code oversellToleranceTotal} 是成员容忍额度之和，headroom 为负但在它之内时判定
-   * {@link PoolSafetyVerdict#TOLERATED}（有意的超卖），超出才是 {@code OVERSOLD}。
+   * <p>{@code headroom} = poolCapacity − committedListing。 负数表示各成员的回写额加起来已经超过池容量 —— 共享池必然超卖。 {@code
+   * oversellToleranceTotal} 是成员容忍额度之和，headroom 为负但在它之内时判定 {@link
+   * PoolSafetyVerdict#TOLERATED}（有意的超卖），超出才是 {@code OVERSOLD}。
    */
   public record SellablePoolSummary(
       String poolKey,
@@ -341,8 +333,8 @@ public final class SellablePolicyModels {
   /**
    * 发起一次可售量计算。
    *
-   * <p>用 POST 而不是 GET：请求体是一组 SKU（与 {@code POST /inventory/availability} 同一理由，
-   * 列表放 URL 里会撞长度限制）。租户不来自请求体也不来自任何客户端头。
+   * <p>用 POST 而不是 GET：请求体是一组 SKU（与 {@code POST /inventory/availability} 同一理由， 列表放 URL
+   * 里会撞长度限制）。租户不来自请求体也不来自任何客户端头。
    *
    * @param referenceId 店铺/渠道的跨服务逻辑 id；不传则按兜底档计算
    * @param at 计算口径的生效时刻；不传取当前时刻
@@ -357,8 +349,8 @@ public final class SellablePolicyModels {
   /**
    * 单个 SKU 的口径拆解 —— 7.1.1.3 的「构成拆解（每一项扣了多少）」与 04 回写都读它。
    *
-   * <p>注意{@code qualifiedOnHand} 只含 {@code inventory_quality_status.role='SELLABLE'}
-   * 的 bucket：待检、残次、未上架被**排除**而不是扣减（蓝图 7.1.1.3 原文）。
+   * <p>注意{@code qualifiedOnHand} 只含 {@code inventory_quality_status.role='SELLABLE'} 的
+   * bucket：待检、残次、未上架被**排除**而不是扣减（蓝图 7.1.1.3 原文）。
    *
    * @param inTransitAdded 因口径 includeInTransit=true 而计入的在途量（否则为 0）
    * @param bufferReserved poolCapacity × bufferRatio，即这一档刻意留在池里不外放的部分
@@ -379,8 +371,8 @@ public final class SellablePolicyModels {
   /**
    * 一次计算的完整结论。
    *
-   * <p>{@code effective} 为 null（连兜底档都没配）时 {@code rows} 为空且 {@code verdict}
-   * 为 null：调用方据此拒绝回写，而不是回写 0。
+   * <p>{@code effective} 为 null（连兜底档都没配）时 {@code rows} 为空且 {@code verdict} 为 null：调用方据此拒绝回写，而不是回写
+   * 0。
    */
   public record SellableQuantityResult(
       @Schema(nullable = true) SellablePolicyEffective effective,

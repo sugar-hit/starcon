@@ -31,20 +31,17 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 8.4.1.1 组装单集成测试。
  *
- * <p><b>本测试最要紧的是 {@code 不变量} 一节</b>：蓝图要求「按 BOM 领用组件、消耗组件库存、
- * 产生成品 SKU 库存，同一事务完成」，落成两条业务不变量：
+ * <p><b>本测试最要紧的是 {@code 不变量} 一节</b>：蓝图要求「按 BOM 领用组件、消耗组件库存、 产生成品 SKU 库存，同一事务完成」，落成两条业务不变量：
  *
  * <ul>
  *   <li>I1：组件出库<b>分录</b>之和 = 按 BOM 展开的应领量之和；
  *   <li>I2：成品入库量 = 组装数量。
  * </ul>
  *
- * <p>所以除了「走服务层时成立」，还专门用**绕过服务层直连 SQL** 的写法去证明
- * 「只入成品不扣组件」「少扣组件」同样被 V103 的守卫触发器挡下 —— 否则那条不变量
- * 只是应用层的一行 if，绕过服务就能造出账实不符的记录。
+ * <p>所以除了「走服务层时成立」，还专门用**绕过服务层直连 SQL** 的写法去证明 「只入成品不扣组件」「少扣组件」同样被 V103 的守卫触发器挡下 —— 否则那条不变量 只是应用层的一行
+ * if，绕过服务就能造出账实不符的记录。
  *
- * <p>真实 PostgreSQL 16 + FORCE RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + FORCE RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -53,7 +50,8 @@ class AssemblyOrderIntegrationTest {
   static final UUID a = UUID.randomUUID(), b = UUID.randomUUID(), user = UUID.randomUUID();
   static HttpServer identity;
   static final ObjectMapper json = new ObjectMapper();
-  static final Map<String, AccessService.Access> actors = new java.util.concurrent.ConcurrentHashMap<>();
+  static final Map<String, AccessService.Access> actors =
+      new java.util.concurrent.ConcurrentHashMap<>();
   static final List<String> allPermissions =
       java.util.stream.Stream.of("assembly")
           .flatMap(
@@ -145,9 +143,8 @@ class AssemblyOrderIntegrationTest {
   @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
 
   /**
-   * warehouse 服务<b>没有</b> {@code TenantTransactions} Bean（它的租户绑定点只有
-   * {@link AccessService#run} 一处）。这里按同一个类、同一个绑定语义就地构造一个，
-   * 供「连接池归还后不串租户」断言使用 —— 不给生产代码新增第二条绑定路径。
+   * warehouse 服务<b>没有</b> {@code TenantTransactions} Bean（它的租户绑定点只有 {@link AccessService#run}
+   * 一处）。这里按同一个类、同一个绑定语义就地构造一个， 供「连接池归还后不串租户」断言使用 —— 不给生产代码新增第二条绑定路径。
    */
   TenantTransactions tenants() {
     return new TenantTransactions(
@@ -165,7 +162,10 @@ class AssemblyOrderIntegrationTest {
       qSellA = idFor(a, 6),
       locA1 = idFor(a, 8),
       locA2 = idFor(a, 9);
-  final UUID leB = idFor(b, 1), skuCompB2 = idFor(b, 2), whB = idFor(b, 5), qSellB = idFor(b, 6),
+  final UUID leB = idFor(b, 1),
+      skuCompB2 = idFor(b, 2),
+      whB = idFor(b, 5),
+      qSellB = idFor(b, 6),
       locB1 = idFor(b, 8);
 
   @BeforeEach
@@ -190,32 +190,61 @@ class AssemblyOrderIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "COMP-A", "面料");
+                idFor(tenant, 2),
+                tenant,
+                "COMP-A",
+                "面料");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 3), tenant, "COMP-B", "拉链");
+                idFor(tenant, 3),
+                tenant,
+                "COMP-B",
+                "拉链");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 4), tenant, "KIT-1", "成品礼盒套装");
+                idFor(tenant, 4),
+                tenant,
+                "KIT-1",
+                "成品礼盒套装");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 5),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 6),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,"
                     + "status,pickable) values(?,?,?,?,?,'STORAGE','ACTIVE',true)",
-                idFor(tenant, 8), tenant, idFor(tenant, 5), "A-01", "组件库位");
+                idFor(tenant, 8),
+                tenant,
+                idFor(tenant, 5),
+                "A-01",
+                "组件库位");
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,"
                     + "status,pickable) values(?,?,?,?,?,'STORAGE','ACTIVE',true)",
-                idFor(tenant, 9), tenant, idFor(tenant, 5), "A-02", "成品库位");
+                idFor(tenant, 9),
+                tenant,
+                idFor(tenant, 5),
+                "A-02",
+                "成品库位");
             return null;
           });
     }
@@ -247,13 +276,27 @@ class AssemblyOrderIntegrationTest {
           sql.execute(
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-              balance, a, skuId, whA, leA, qSellA, new BigDecimal(onHand));
+              balance,
+              a,
+              skuId,
+              whA,
+              leA,
+              qSellA,
+              new BigDecimal(onHand));
           sql.execute(
               "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
                   + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
                   + "last_movement_at) values(?,?,?,?,?,?,null,?,?,?,0,?::timestamptz)",
-              UUID.randomUUID(), a, leA, skuId, whA, locationId, qSellA, balance,
-              new BigDecimal(onHand), OffsetDateTime.now());
+              UUID.randomUUID(),
+              a,
+              leA,
+              skuId,
+              whA,
+              locationId,
+              qSellA,
+              balance,
+              new BigDecimal(onHand),
+              OffsetDateTime.now());
           return null;
         });
   }
@@ -263,7 +306,8 @@ class AssemblyOrderIntegrationTest {
         () -> {
           Record row =
               sql.fetchOne(
-                  "select on_hand from stock_bucket where sku_id=? and location_id=?", skuId,
+                  "select on_hand from stock_bucket where sku_id=? and location_id=?",
+                  skuId,
                   locationId);
           return row == null ? null : row.get("on_hand", BigDecimal.class);
         });
@@ -280,15 +324,32 @@ class AssemblyOrderIntegrationTest {
         new AssemblyOrderModels.AssemblyComponentInput(
             skuCompB, idFor(a, 31), compB, new BigDecimal("1"), new BigDecimal("5"), "包材", null));
     return new AssemblyOrderModels.AssemblyOrderCreateInput(
-        skuOutA, bomId, "BOM-KIT-1", idFor(a, 29), "v1", AssemblyOrderModels.SOURCE_DIRECT, null,
-        "", whA, leA, assemblyQuantity, locA1, qSellA, locA2, qSellA, null, null, "组装单测试",
+        skuOutA,
+        bomId,
+        "BOM-KIT-1",
+        idFor(a, 29),
+        "v1",
+        AssemblyOrderModels.SOURCE_DIRECT,
+        null,
+        "",
+        whA,
+        leA,
+        assemblyQuantity,
+        locA1,
+        qSellA,
+        locA2,
+        qSellA,
+        null,
+        null,
+        "组装单测试",
         components);
   }
 
   AssemblyOrderModels.AssemblyOrderCreated newOrder(
       BigDecimal assemblyQuantity, BigDecimal compA, BigDecimal compB) {
-    return asAU(() -> assembly.create(createInput(UUID.randomUUID(), assemblyQuantity, compA, compB),
-        user));
+    return asAU(
+        () ->
+            assembly.create(createInput(UUID.randomUUID(), assemblyQuantity, compA, compB), user));
   }
 
   // ================================================================ 能力与迁移
@@ -303,8 +364,7 @@ class AssemblyOrderIntegrationTest {
     assertThat(caps.bomBoundary()).contains("不 join、不建外键").contains("引用键");
     assertThat(caps.virtualKitBoundary()).contains("虚拟套装").contains("sku_ref");
     assertThat(caps.invariant()).contains("I1").contains("I2");
-    assertThat(caps.upstreamModules())
-        .anySatisfy(m -> assertThat(m.moduleId()).isEqualTo("3.5.2"));
+    assertThat(caps.upstreamModules()).anySatisfy(m -> assertThat(m.moduleId()).isEqualTo("3.5.2"));
     assertThat(caps.downstreamModules())
         .anySatisfy(
             m -> {
@@ -320,8 +380,7 @@ class AssemblyOrderIntegrationTest {
       Boolean forced =
           asA(
               () ->
-                  sql.fetchOne(
-                          "select relforcerowsecurity from pg_class where relname = ?", table)
+                  sql.fetchOne("select relforcerowsecurity from pg_class where relname = ?", table)
                       .get(0, Boolean.class));
       assertThat(forced).as(table).isTrue();
       Boolean notNull =
@@ -366,9 +425,24 @@ class AssemblyOrderIntegrationTest {
   void sourceSystemAndReferenceMustAgree() {
     var directWithRef =
         new AssemblyOrderModels.AssemblyOrderCreateInput(
-            skuOutA, UUID.randomUUID(), "BOM-1", idFor(a, 29), "v1",
-            AssemblyOrderModels.SOURCE_DIRECT, UUID.randomUUID(), "PO-1", whA, leA,
-            new BigDecimal("1"), locA1, qSellA, locA2, qSellA, null, null, null,
+            skuOutA,
+            UUID.randomUUID(),
+            "BOM-1",
+            idFor(a, 29),
+            "v1",
+            AssemblyOrderModels.SOURCE_DIRECT,
+            UUID.randomUUID(),
+            "PO-1",
+            whA,
+            leA,
+            new BigDecimal("1"),
+            locA1,
+            qSellA,
+            locA2,
+            qSellA,
+            null,
+            null,
+            null,
             List.of(
                 new AssemblyOrderModels.AssemblyComponentInput(
                     skuCompA, null, BigDecimal.ONE, null, null, null, null)));
@@ -378,9 +452,24 @@ class AssemblyOrderIntegrationTest {
 
     var processingWithoutRef =
         new AssemblyOrderModels.AssemblyOrderCreateInput(
-            skuOutA, UUID.randomUUID(), "BOM-1", idFor(a, 29), "v1",
-            AssemblyOrderModels.SOURCE_PROCESSING_ORDER, null, "PO-1", whA, leA,
-            new BigDecimal("1"), locA1, qSellA, locA2, qSellA, null, null, null,
+            skuOutA,
+            UUID.randomUUID(),
+            "BOM-1",
+            idFor(a, 29),
+            "v1",
+            AssemblyOrderModels.SOURCE_PROCESSING_ORDER,
+            null,
+            "PO-1",
+            whA,
+            leA,
+            new BigDecimal("1"),
+            locA1,
+            qSellA,
+            locA2,
+            qSellA,
+            null,
+            null,
+            null,
             List.of(
                 new AssemblyOrderModels.AssemblyComponentInput(
                     skuCompA, null, BigDecimal.ONE, null, null, null, null)));
@@ -396,9 +485,24 @@ class AssemblyOrderIntegrationTest {
     // 这里用一个从未登记过的 SKU 复现同一个形状。
     var input =
         new AssemblyOrderModels.AssemblyOrderCreateInput(
-            idFor(a, 91), UUID.randomUUID(), "BOM-1", idFor(a, 29), "v1",
-            AssemblyOrderModels.SOURCE_DIRECT, null, null, whA, leA, new BigDecimal("1"), locA1,
-            qSellA, locA2, qSellA, null, null, null,
+            idFor(a, 91),
+            UUID.randomUUID(),
+            "BOM-1",
+            idFor(a, 29),
+            "v1",
+            AssemblyOrderModels.SOURCE_DIRECT,
+            null,
+            null,
+            whA,
+            leA,
+            new BigDecimal("1"),
+            locA1,
+            qSellA,
+            locA2,
+            qSellA,
+            null,
+            null,
+            null,
             List.of(
                 new AssemblyOrderModels.AssemblyComponentInput(
                     skuCompA, null, BigDecimal.ONE, null, null, null, null)));
@@ -412,9 +516,24 @@ class AssemblyOrderIntegrationTest {
   void duplicateComponentIsRejected() {
     var input =
         new AssemblyOrderModels.AssemblyOrderCreateInput(
-            skuOutA, UUID.randomUUID(), "BOM-1", idFor(a, 29), "v1",
-            AssemblyOrderModels.SOURCE_DIRECT, null, null, whA, leA, new BigDecimal("1"), locA1,
-            qSellA, locA2, qSellA, null, null, null,
+            skuOutA,
+            UUID.randomUUID(),
+            "BOM-1",
+            idFor(a, 29),
+            "v1",
+            AssemblyOrderModels.SOURCE_DIRECT,
+            null,
+            null,
+            whA,
+            leA,
+            new BigDecimal("1"),
+            locA1,
+            qSellA,
+            locA2,
+            qSellA,
+            null,
+            null,
+            null,
             List.of(
                 new AssemblyOrderModels.AssemblyComponentInput(
                     skuCompA, null, new BigDecimal("1"), null, null, null, null),
@@ -430,8 +549,8 @@ class AssemblyOrderIntegrationTest {
   void quantityMustBeExactAtStockScale() {
     // 5 位小数的应领量：向下取整等于吞材料、向上取整等于多领，两种都会让
     // 「组件出库 = 应领量」看起来成立而物料对不上。所以拒绝。
-    assertThatThrownBy(() -> newOrder(new BigDecimal("10"), new BigDecimal("1.000005"),
-            new BigDecimal("50")))
+    assertThatThrownBy(
+            () -> newOrder(new BigDecimal("10"), new BigDecimal("1.000005"), new BigDecimal("50")))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("4 位小数");
 
@@ -440,8 +559,11 @@ class AssemblyOrderIntegrationTest {
                 asAU(
                     () ->
                         assembly.create(
-                            createInput(UUID.randomUUID(), new BigDecimal("1.000005"),
-                                new BigDecimal("5"), new BigDecimal("50")),
+                            createInput(
+                                UUID.randomUUID(),
+                                new BigDecimal("1.000005"),
+                                new BigDecimal("5"),
+                                new BigDecimal("50")),
                             user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("4 位小数");
@@ -499,8 +621,8 @@ class AssemblyOrderIntegrationTest {
     var detail = asA(() -> assembly.detail(order.orderId()));
     assertThat(detail.order().status()).isEqualTo("DRAFT");
     assertThat(detail.entries()).isEmpty();
-    assertThat(detail.components()).allSatisfy(
-        c -> assertThat(c.issuedQuantity()).isEqualByComparingTo("0"));
+    assertThat(detail.components())
+        .allSatisfy(c -> assertThat(c.issuedQuantity()).isEqualByComparingTo("0"));
   }
 
   @Test
@@ -523,21 +645,39 @@ class AssemblyOrderIntegrationTest {
                           "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,"
                               + "legal_entity_id,quality_status_id,on_hand,reserved)"
                               + " values(?,?,?,?,?,?,0,0)",
-                          balance, a, skuOutA, whA, leA, qSellA);
+                          balance,
+                          a,
+                          skuOutA,
+                          whA,
+                          leA,
+                          qSellA);
                       sql.execute(
                           "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,"
                               + "occurred_at,actor_id,notes) values(?,?,'ADJUSTMENT',?,?,"
                               + "?::timestamptz,?,'')",
-                          tx, a, AssemblyOrderModels.REF_TYPE, orderId, at, user);
+                          tx,
+                          a,
+                          AssemblyOrderModels.REF_TYPE,
+                          orderId,
+                          at,
+                          user);
                       sql.execute(
                           "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,"
                               + "on_hand_delta,reserved_delta) values(?,?,?,?,?,0)",
-                          UUID.randomUUID(), a, tx, balance, new BigDecimal("10"));
+                          UUID.randomUUID(),
+                          a,
+                          tx,
+                          balance,
+                          new BigDecimal("10"));
                       sql.execute(
                           "update assembly_order set status='COMPLETED',"
                               + "inventory_transaction_id=?,inbound_product_quantity=?,"
                               + "issued_at=?::timestamptz,issued_by=? where id=?",
-                          tx, new BigDecimal("10"), at, user, orderId);
+                          tx,
+                          new BigDecimal("10"),
+                          at,
+                          user,
+                          orderId);
                       return null;
                     }))
         .hasMessageContaining("I1");
@@ -562,7 +702,12 @@ class AssemblyOrderIntegrationTest {
                           "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,"
                               + "occurred_at,actor_id,notes) values(?,?,'ADJUSTMENT',?,?,"
                               + "?::timestamptz,?,'')",
-                          tx, a, AssemblyOrderModels.REF_TYPE, id, at, user);
+                          tx,
+                          a,
+                          AssemblyOrderModels.REF_TYPE,
+                          id,
+                          at,
+                          user);
                       sql.execute(
                           "insert into assembly_order(id,tenant_id,order_code,product_sku_id,"
                               + "product_sku_code,bom_id,bom_code,bom_version_id,bom_version_no,"
@@ -570,16 +715,33 @@ class AssemblyOrderIntegrationTest {
                               + "status,outbound_location_id,outbound_quality_status_id,"
                               + "inbound_location_id,inbound_quality_status_id,created_by)"
                               + " values(?,?,'ASM-999999',?,?,?,?,?,?,'DIRECT',?,?,?,'DRAFT',?,?,?,?,?)",
-                          id, a, skuOutA, "KIT-1", UUID.randomUUID(), "BOM-1", idFor(a, 29),
-                          "v1", whA, leA, new BigDecimal("5"), locA1, qSellA, locA2, qSellA, user);
+                          id,
+                          a,
+                          skuOutA,
+                          "KIT-1",
+                          UUID.randomUUID(),
+                          "BOM-1",
+                          idFor(a, 29),
+                          "v1",
+                          whA,
+                          leA,
+                          new BigDecimal("5"),
+                          locA1,
+                          qSellA,
+                          locA2,
+                          qSellA,
+                          user);
                       // 分录与入库量先备好，再强行置 COMPLETED —— 只剩「0 组件」这一个变量。
                       sql.execute(
                           "update assembly_order set inventory_transaction_id=?,"
                               + "inbound_product_quantity=?,issued_at=?::timestamptz,issued_by=?"
                               + " where id=?",
-                          tx, new BigDecimal("5"), at, user, id);
-                      sql.execute(
-                          "update assembly_order set status='COMPLETED' where id=?", id);
+                          tx,
+                          new BigDecimal("5"),
+                          at,
+                          user,
+                          id);
+                      sql.execute("update assembly_order set status='COMPLETED' where id=?", id);
                       return null;
                     }))
         .hasMessageContaining("没有任何组件明细");
@@ -635,7 +797,9 @@ class AssemblyOrderIntegrationTest {
     var cancelled =
         asAU(
             () ->
-                assembly.cancel(order.orderId(), new AssemblyOrderModels.AssemblyOrderCancelInput("料没到"),
+                assembly.cancel(
+                    order.orderId(),
+                    new AssemblyOrderModels.AssemblyOrderCancelInput("料没到"),
                     user));
     assertThat(cancelled.status()).isEqualTo("CANCELLED");
     assertThat(cancelled.cancelReason()).isEqualTo("料没到");
@@ -649,8 +813,10 @@ class AssemblyOrderIntegrationTest {
             () ->
                 asAU(
                     () ->
-                        assembly.cancel(done.orderId(),
-                            new AssemblyOrderModels.AssemblyOrderCancelInput("不做了"), user)))
+                        assembly.cancel(
+                            done.orderId(),
+                            new AssemblyOrderModels.AssemblyOrderCancelInput("不做了"),
+                            user)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("只有草稿可以执行或取消");
   }
@@ -665,12 +831,15 @@ class AssemblyOrderIntegrationTest {
     OffsetDateTime written =
         asA(
             () ->
-                sql.fetchOne(
-                        "select issued_at from assembly_order where id=?", order.orderId())
+                sql.fetchOne("select issued_at from assembly_order where id=?", order.orderId())
                     .get(0, OffsetDateTime.class));
     OffsetDateTime readBack = OffsetDateTime.parse(issued.occurredAt());
-    assertThat(written.toInstant()).isEqualTo(readBack.toInstant());
-    assertThat(written.getOffset()).isEqualTo(readBack.getOffset());
+    // PostgreSQL timestamps have microsecond precision; still reject any timezone drift.
+    assertThat(written.toInstant())
+        .isCloseTo(
+            readBack.toInstant(),
+            org.assertj.core.api.Assertions.within(1, java.time.temporal.ChronoUnit.MICROS));
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
   }
 
   // ================================================================ 列表与筛选
@@ -681,8 +850,10 @@ class AssemblyOrderIntegrationTest {
     var first = newOrder(new BigDecimal("10"), new BigDecimal("1"), new BigDecimal("10"));
     asAU(() -> assembly.issue(first.orderId(), null, user));
     var second = newOrder(new BigDecimal("4"), new BigDecimal("2"), new BigDecimal("20"));
-    asAU(() -> assembly.cancel(second.orderId(),
-        new AssemblyOrderModels.AssemblyOrderCancelInput("不做了"), user));
+    asAU(
+        () ->
+            assembly.cancel(
+                second.orderId(), new AssemblyOrderModels.AssemblyOrderCancelInput("不做了"), user));
     newOrder(new BigDecimal("7"), new BigDecimal("3"), new BigDecimal("30"));
 
     var all = asA(() -> assembly.page(null, null, null, null, null, null, "CREATED_AT", 0, 50));
@@ -697,14 +868,17 @@ class AssemblyOrderIntegrationTest {
     assertThat(all.totalRequiredComponentQuantity()).isEqualByComparingTo("66");
 
     // 状态筛选
-    var completed = asA(() -> assembly.page("COMPLETED", null, null, null, null, null, null, 0, 50));
+    var completed =
+        asA(() -> assembly.page("COMPLETED", null, null, null, null, null, null, 0, 50));
     assertThat(completed.total()).isEqualTo(1);
     assertThat(completed.items().get(0).orderCode()).isEqualTo(first.orderCode());
     assertThat(completed.totalAssemblyQuantity()).isEqualByComparingTo("10");
 
     // 关键词筛选（命中单号 / BOM 编码 / 成品编码）
-    assertThat(asA(() -> assembly.page(null, null, null, null, null, first.orderCode(), null, 0, 50))
-            .total()).isEqualTo(1);
+    assertThat(
+            asA(() -> assembly.page(null, null, null, null, null, first.orderCode(), null, 0, 50))
+                .total())
+        .isEqualTo(1);
     assertThat(asA(() -> assembly.page(null, null, null, null, null, "KIT-1", null, 0, 50)).total())
         .isEqualTo(3);
 
@@ -718,9 +892,9 @@ class AssemblyOrderIntegrationTest {
     assertThat(page0.total()).isEqualTo(3);
     assertThat(
             List.of(
-                    page0.items().get(0).orderCode(),
-                    page1.items().get(0).orderCode(),
-                    page2.items().get(0).orderCode()))
+                page0.items().get(0).orderCode(),
+                page1.items().get(0).orderCode(),
+                page2.items().get(0).orderCode()))
         .doesNotHaveDuplicates();
     // 超上限的 size 被压回 200 而不是报错（真分页，不是假分页）
     assertThat(asA(() -> assembly.page(null, null, null, null, null, null, null, 0, 9999)).size())
@@ -731,15 +905,18 @@ class AssemblyOrderIntegrationTest {
   @DisplayName("排序键走白名单（不接受任意排序键，避免拼进 SQL）")
   void sortIsWhitelisted() {
     assertThatThrownBy(
-            () -> asA(() -> assembly.page(null, null, null, null, null, null, "id; drop table", 0, 10)))
+            () ->
+                asA(
+                    () ->
+                        assembly.page(null, null, null, null, null, null, "id; drop table", 0, 10)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不支持的排序键");
     assertThatThrownBy(
             () -> asA(() -> assembly.page("SHIPPED", null, null, null, null, null, null, 0, 10)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不支持的状态");
-    assertThatThrownBy(() -> asA(() -> assembly.page(null, null, null, "SUPPLIER", null, null, null,
-            0, 10)))
+    assertThatThrownBy(
+            () -> asA(() -> assembly.page(null, null, null, "SUPPLIER", null, null, null, 0, 10)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不支持的来源");
   }
@@ -758,9 +935,24 @@ class AssemblyOrderIntegrationTest {
             () ->
                 assembly.create(
                     new AssemblyOrderModels.AssemblyOrderCreateInput(
-                        idFor(b, 4), UUID.randomUUID(), "BOM-B", idFor(b, 29), "v1",
-                        AssemblyOrderModels.SOURCE_DIRECT, null, null, whB, idFor(b, 1),
-                        new BigDecimal("3"), locB1, qSellB, idFor(b, 9), qSellB, null, null, null,
+                        idFor(b, 4),
+                        UUID.randomUUID(),
+                        "BOM-B",
+                        idFor(b, 29),
+                        "v1",
+                        AssemblyOrderModels.SOURCE_DIRECT,
+                        null,
+                        null,
+                        whB,
+                        idFor(b, 1),
+                        new BigDecimal("3"),
+                        locB1,
+                        qSellB,
+                        idFor(b, 9),
+                        qSellB,
+                        null,
+                        null,
+                        null,
                         List.of(
                             new AssemblyOrderModels.AssemblyComponentInput(
                                 idFor(b, 2), null, new BigDecimal("2"), null, null, null, null))),
@@ -826,8 +1018,7 @@ class AssemblyOrderIntegrationTest {
         tenants()
             .run(
                 tenant,
-                () ->
-                    sql.fetchOne("select count(*) from assembly_order").get(0, Long.class));
+                () -> sql.fetchOne("select count(*) from assembly_order").get(0, Long.class));
     return count == null ? 0L : count;
   }
 
@@ -844,8 +1035,9 @@ class AssemblyOrderIntegrationTest {
     http.perform(get("/warehouse/assembly-orders/capabilities"))
         .andExpect(status().isUnauthorized());
 
-    http.perform(get("/warehouse/assembly-orders/capabilities")
-            .header("Authorization", "Bearer read-only"))
+    http.perform(
+            get("/warehouse/assembly-orders/capabilities")
+                .header("Authorization", "Bearer read-only"))
         .andExpect(status().isOk());
 
     // 只读身份不能建单
@@ -853,8 +1045,10 @@ class AssemblyOrderIntegrationTest {
             post("/warehouse/assembly-orders")
                 .header("Authorization", "Bearer read-only")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json.writeValueAsString(createInput(UUID.randomUUID(), BigDecimal.ONE,
-                    BigDecimal.ONE, BigDecimal.ONE))))
+                .content(
+                    json.writeValueAsString(
+                        createInput(
+                            UUID.randomUUID(), BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE))))
         .andExpect(status().isForbidden());
 
     // 数量非正：Bean Validation 直接拒
@@ -864,7 +1058,10 @@ class AssemblyOrderIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     json.writeValueAsString(
-                        createInput(UUID.randomUUID(), BigDecimal.ZERO, new BigDecimal("1"),
+                        createInput(
+                            UUID.randomUUID(),
+                            BigDecimal.ZERO,
+                            new BigDecimal("1"),
                             new BigDecimal("1")))))
         .andExpect(status().isBadRequest());
 

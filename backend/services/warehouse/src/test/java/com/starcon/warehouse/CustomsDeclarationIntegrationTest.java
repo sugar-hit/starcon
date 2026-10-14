@@ -3,8 +3,8 @@ package com.starcon.warehouse;
 import static com.starcon.warehouse.CustomsDeclarationModels.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.sun.net.httpserver.HttpServer;
 import java.math.BigDecimal;
@@ -29,16 +29,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 10.5.1.1 报关单管理。
  *
- * <p>本测试就是 <b>V85 迁移那条 DB 级不变量的独立复验</b>：不采信任何外部结论，
- * 八条闸门逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不是直连数据库，
- * 以便同时验证「服务层 + DB 层」两层都没有把闸门漏掉。
+ * <p>本测试就是 <b>V85 迁移那条 DB 级不变量的独立复验</b>：不采信任何外部结论， 八条闸门逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP
+ * 端点而不是直连数据库， 以便同时验证「服务层 + DB 层」两层都没有把闸门漏掉。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link FirstMileShipmentIntegrationTest} 一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场），
- * 派生 id 的前缀不同，避免夹具互相污染。
+ * <p>夹具写法与 {@link FirstMileShipmentIntegrationTest} 一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）， 派生 id 的前缀不同，避免夹具互相污染。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -46,7 +43,8 @@ class CustomsDeclarationIntegrationTest {
   static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
   static final UUID a = UUID.randomUUID(), b = UUID.randomUUID(), user = UUID.randomUUID();
   static HttpServer identity;
-  static final Map<String, AccessService.Access> actors = new java.util.concurrent.ConcurrentHashMap<>();
+  static final Map<String, AccessService.Access> actors =
+      new java.util.concurrent.ConcurrentHashMap<>();
   static final List<String> allPermissions =
       java.util.stream.Stream.of("inventory")
           .flatMap(
@@ -161,22 +159,42 @@ class CustomsDeclarationIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 4),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-LA", "洛杉矶海外仓", "US", "America/Los_Angeles");
+                idFor(tenant, 5),
+                tenant,
+                "WH-LA",
+                "洛杉矶海外仓",
+                "US",
+                "America/Los_Angeles");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 6),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             // 三票货备好：多数用例只用第一票，但「放行/退单/改单三种结果都落审计」
             // 需要三张**不同**的报关单，而「一票货只报一次关」是 DB 唯一约束
             // （customs_declaration_tenant_id_source_shipment_id_key），
@@ -190,8 +208,8 @@ class CustomsDeclarationIntegrationTest {
   /**
    * 10.4.1.1 头程发运单 + 明细行（报关单的货物来源）。
    *
-   * <p>逐行登记 7.5.1.2 在途腿回执：V80 的延迟约束触发器 {@code first_mile_leg} 钉死
-   * 「已发出量 &gt; 0 的明细行必须恰好有一条在途腿」。这里必须与明细行写在**同一事务**里。
+   * <p>逐行登记 7.5.1.2 在途腿回执：V80 的延迟约束触发器 {@code first_mile_leg} 钉死 「已发出量 &gt; 0
+   * 的明细行必须恰好有一条在途腿」。这里必须与明细行写在**同一事务**里。
    */
   private void seedShipment(UUID tenant, int slot) {
     // 每票货的 id 段互不重叠：单头 10+10·slot，明细 100+10·slot+i，在途腿回执 200+10·slot+i
@@ -203,8 +221,13 @@ class CustomsDeclarationIntegrationTest {
             + "customs_broker,status,created_by,dispatched_at)"
             + " values(?,?,?,'SUPPLIER_PURCHASE','PO-1',?,?,?,'US','洛杉矶海外仓','SEA','COSCO',"
             + "'BK-1','Vessel-1','FOB','BUYER','USD',0,0,0,0,'代理行','DISPATCHED',?,now())",
-        idFor(tenant, 10 + slot * 10), tenant, "FMS-" + (slot + 1), idFor(tenant, 1), idFor(tenant, 4),
-        idFor(tenant, 5), user);
+        idFor(tenant, 10 + slot * 10),
+        tenant,
+        "FMS-" + (slot + 1),
+        idFor(tenant, 1),
+        idFor(tenant, 4),
+        idFor(tenant, 5),
+        user);
     for (int i = 1; i <= 2; i++) {
       sql.execute(
           "insert into first_mile_shipment_line(id,tenant_id,shipment_id,line_no,sku_id,"
@@ -212,15 +235,25 @@ class CustomsDeclarationIntegrationTest {
               + "origin_country_code,declared_unit_value,declared_value,gross_weight_kg,net_weight_kg,"
               + "volume_cbm,carton_count)"
               + " values(?,?,?,?,?,?,?,?,'棉质衬衫','610910','A','CN',10,1000,120,100,0.5,10)",
-          idFor(tenant, 100 + slot * 10 + i), tenant, idFor(tenant, 10 + slot * 10), i, idFor(tenant, 2),
-          idFor(tenant, 6), 100, 100);
+          idFor(tenant, 100 + slot * 10 + i),
+          tenant,
+          idFor(tenant, 10 + slot * 10),
+          i,
+          idFor(tenant, 2),
+          idFor(tenant, 6),
+          100,
+          100);
       sql.execute(
           "insert into first_mile_shipment_leg_receipt(id,tenant_id,shipment_id,line_id,"
               + "transit_leg_id,source_reference,sku_id,quantity,shipped_at,registered_at,registered_by)"
               + " values(?,?,?,?,gen_random_uuid(),?,?,100,now(),now(),?)",
-          idFor(tenant, 200 + slot * 10 + i), tenant, idFor(tenant, 10 + slot * 10),
+          idFor(tenant, 200 + slot * 10 + i),
+          tenant,
+          idFor(tenant, 10 + slot * 10),
           idFor(tenant, 100 + slot * 10 + i),
-          "LEG-" + tenant + "-" + slot + "-" + i, idFor(tenant, 2), user);
+          "LEG-" + tenant + "-" + slot + "-" + i,
+          idFor(tenant, 2),
+          user);
     }
   }
 
@@ -304,7 +337,9 @@ class CustomsDeclarationIntegrationTest {
 
   private UUID reviewed(UUID tenant, int slot) {
     CustomsSaved saved =
-        asA(() -> service.create(tenant, createRequest(tenant, idFor(tenant, 10 + slot * 10), slot)));
+        asA(
+            () ->
+                service.create(tenant, createRequest(tenant, idFor(tenant, 10 + slot * 10), slot)));
     UUID id = saved.id();
     asA(() -> service.submitForReview(id, new CustomsSubmitForReviewRequest("请复核")));
     asA(() -> service.review(id, new CustomsReviewRequest("申报资料逐项核对无误")));
@@ -315,7 +350,10 @@ class CustomsDeclarationIntegrationTest {
   private void finalizeDocuments(UUID id) {
     for (var type : CustomsDocumentType.values()) {
       CustomsSaved saved =
-          asA(() -> service.generateDocument(id, new CustomsGenerateDocumentRequest(type.name(), "")));
+          asA(
+              () ->
+                  service.generateDocument(
+                      id, new CustomsGenerateDocumentRequest(type.name(), "")));
       assertThat(saved.message()).isNotBlank();
       UUID docId =
           asA(
@@ -338,7 +376,11 @@ class CustomsDeclarationIntegrationTest {
     assertThat(saved.status()).isEqualTo("DRAFT");
 
     assertThatThrownBy(
-            () -> asA(() -> service.submit(id, new CustomsSubmitRequest("BR-REF-1", "代理行", "ACCEPTED", ""))))
+            () ->
+                asA(
+                    () ->
+                        service.submit(
+                            id, new CustomsSubmitRequest("BR-REF-1", "代理行", "ACCEPTED", ""))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("必须人工复核");
   }
@@ -372,7 +414,11 @@ class CustomsDeclarationIntegrationTest {
 
     // 复核退回态直接提交 → 状态机与 DB 闸门都拒绝
     assertThatThrownBy(
-            () -> asA(() -> service.submit(id, new CustomsSubmitRequest("BR-REF-2", "代理行", "ACCEPTED", ""))))
+            () ->
+                asA(
+                    () ->
+                        service.submit(
+                            id, new CustomsSubmitRequest("BR-REF-2", "代理行", "ACCEPTED", ""))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("必须人工复核");
   }
@@ -406,10 +452,30 @@ class CustomsDeclarationIntegrationTest {
             service.update(
                 id,
                 new CustomsUpdateRequest(
-                    null, "GENERAL_TRADE", "上海星创电子商务有限公司", "CN", "Pacific Trading LLC",
-                    "US", "", "", "上海报关行", "BR-001", "张三", "US", "US-LAX", "上海港",
-                    "洛杉矶港", "SEA", "BL-2026-000003", "USD", "CNY",
-                    new BigDecimal("7.1234567890"), 6, LocalDate.of(2026, 10, 1), "清空明细", List.of())));
+                    null,
+                    "GENERAL_TRADE",
+                    "上海星创电子商务有限公司",
+                    "CN",
+                    "Pacific Trading LLC",
+                    "US",
+                    "",
+                    "",
+                    "上海报关行",
+                    "BR-001",
+                    "张三",
+                    "US",
+                    "US-LAX",
+                    "上海港",
+                    "洛杉矶港",
+                    "SEA",
+                    "BL-2026-000003",
+                    "USD",
+                    "CNY",
+                    new BigDecimal("7.1234567890"),
+                    6,
+                    LocalDate.of(2026, 10, 1),
+                    "清空明细",
+                    List.of())));
     asA(() -> service.submitForReview(id, new CustomsSubmitForReviewRequest("请复核")));
     assertThatThrownBy(() -> asA(() -> service.review(id, new CustomsReviewRequest("过"))))
         .hasMessageContaining("不允许复核通过");
@@ -487,7 +553,8 @@ class CustomsDeclarationIntegrationTest {
             () ->
                 asA(
                     () -> {
-                      sql.execute("update customs_declaration set declaration_value=1 where id=?", id);
+                      sql.execute(
+                          "update customs_declaration set declaration_value=1 where id=?", id);
                       return null;
                     }))
         .hasMessageContaining("与明细货值合计");
@@ -499,11 +566,18 @@ class CustomsDeclarationIntegrationTest {
   void submitRequiresAllThreeDocumentsFinal() {
     UUID id = reviewed(a);
     // 只生成一份单据就提交 → DB 层报出缺哪几份
-    asA(() -> service.generateDocument(id, new CustomsGenerateDocumentRequest("CUSTOMS_DECLARATION", "")));
+    asA(
+        () ->
+            service.generateDocument(
+                id, new CustomsGenerateDocumentRequest("CUSTOMS_DECLARATION", "")));
     // 这单已经复核过，所以拦下它的**不是**复核闸，而是「三单据必须齐备」那道 DB 闸，
     // 报错必须点名缺哪几份 —— 「缺哪份不能提交」正是这道闸存在的意义。
     assertThatThrownBy(
-            () -> asA(() -> service.submit(id, new CustomsSubmitRequest("BR-REF-3", "代理行", "ACCEPTED", ""))))
+            () ->
+                asA(
+                    () ->
+                        service.submit(
+                            id, new CustomsSubmitRequest("BR-REF-3", "代理行", "ACCEPTED", ""))))
         .isInstanceOf(DataIntegrityViolationException.class)
         .hasMessageContaining("三单据不齐备")
         .hasMessageContaining("PACKING_LIST")
@@ -517,7 +591,11 @@ class CustomsDeclarationIntegrationTest {
       asA(() -> service.generateDocument(id, new CustomsGenerateDocumentRequest(type.name(), "")));
     }
     assertThatThrownBy(
-            () -> asA(() -> service.submit(id, new CustomsSubmitRequest("BR-REF-4", "代理行", "ACCEPTED", ""))))
+            () ->
+                asA(
+                    () ->
+                        service.submit(
+                            id, new CustomsSubmitRequest("BR-REF-4", "代理行", "ACCEPTED", ""))))
         .hasMessageContaining("定稿");
   }
 
@@ -526,7 +604,10 @@ class CustomsDeclarationIntegrationTest {
     UUID id = reviewed(a);
     finalizeDocuments(id);
     CustomsSaved submitted =
-        asA(() -> service.submit(id, new CustomsSubmitRequest("BR-REF-OK", "上海报关行", "ACCEPTED", "已收单")));
+        asA(
+            () ->
+                service.submit(
+                    id, new CustomsSubmitRequest("BR-REF-OK", "上海报关行", "ACCEPTED", "已收单")));
     assertThat(submitted.status()).isEqualTo("SUBMITTED");
 
     CustomsSaved cleared =
@@ -596,8 +677,7 @@ class CustomsDeclarationIntegrationTest {
     asA(
         () ->
             service.recordResult(
-                id,
-                new CustomsResultRequest("AMENDED", "REF-AM", "海关要求改单", null, "", "SRC-AM")));
+                id, new CustomsResultRequest("AMENDED", "REF-AM", "海关要求改单", null, "", "SRC-AM")));
     assertThat(asA(() -> service.detail(id)).declaration().amendmentCount()).isEqualTo(1);
     // DB 层：手填一个与结果条数不符的计数必须被拒
     assertThatThrownBy(
@@ -638,18 +718,20 @@ class CustomsDeclarationIntegrationTest {
 
   @Test
   void capabilitiesDeclareMissingUpstream() {
-    CustomsCapabilities caps = access.run(actorA, "warehouse.inventory.read", () -> service.capabilities());
+    CustomsCapabilities caps =
+        access.run(actorA, "warehouse.inventory.read", () -> service.capabilities());
     assertThat(caps.dependencies())
         .extracting(CustomsDimension::value)
         .contains("HS_CODE_DICTIONARY", "BROKER_API");
     assertThat(caps.dependencies())
         .filteredOn(d -> d.value().equals("HS_CODE_DICTIONARY"))
         .singleElement()
-        .satisfies(d -> {
-          assertThat(d.available()).isFalse();
-          assertThat(d.ownerModule()).isEqualTo("3.7.1.1");
-          assertThat(d.note()).contains("未交付");
-        });
+        .satisfies(
+            d -> {
+              assertThat(d.available()).isFalse();
+              assertThat(d.ownerModule()).isEqualTo("3.7.1.1");
+              assertThat(d.note()).contains("未交付");
+            });
     assertThat(caps.hsCodeNote()).contains("当前不可用");
   }
 
@@ -660,14 +742,31 @@ class CustomsDeclarationIntegrationTest {
     asA(() -> service.create(a, createRequest(a, idFor(a, 10))));
     asB(() -> service.create(b, createRequest(b, idFor(b, 10))));
 
-    assertThat(asA(() -> service.page(new CustomsQuery(null, null, null, null, null, null, null, null, 0, 50)).rows()))
+    assertThat(
+            asA(
+                () ->
+                    service
+                        .page(
+                            new CustomsQuery(null, null, null, null, null, null, null, null, 0, 50))
+                        .rows()))
         .hasSize(1);
-    assertThat(asB(() -> service.page(new CustomsQuery(null, null, null, null, null, null, null, null, 0, 50)).rows()))
+    assertThat(
+            asB(
+                () ->
+                    service
+                        .page(
+                            new CustomsQuery(null, null, null, null, null, null, null, null, 0, 50))
+                        .rows()))
         .hasSize(1);
 
     // 知道 id 也读不到对方的单
-    UUID aId = asA(() -> service.page(new CustomsQuery(null, null, null, null, null, null, null, null, 0, 50)).rows())
-        .get(0).id();
+    UUID aId =
+        asA(() ->
+                service
+                    .page(new CustomsQuery(null, null, null, null, null, null, null, null, 0, 50))
+                    .rows())
+            .get(0)
+            .id();
     assertThatThrownBy(() -> asB(() -> service.detail(aId)))
         .isInstanceOf(ResponseStatusException.class);
   }
@@ -676,9 +775,10 @@ class CustomsDeclarationIntegrationTest {
   void forgedTenantHeaderIsIgnored() throws Exception {
     UUID aId = asA(() -> service.create(a, createRequest(a, idFor(a, 10)))).id();
     // 客户端伪造 X-Tenant-Id 头：端点根本不读它，租户只来自已认证成员关系
-    http.perform(get("/warehouse/customs-declarations/{id}", aId)
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/customs-declarations/{id}", aId)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
   }
 
@@ -689,18 +789,40 @@ class CustomsDeclarationIntegrationTest {
 
     // 连接池固定 1 条连接：这里连续在两个租户间来回走，读的必须始终是当前租户的行。
     for (int i = 0; i < 5; i++) {
-      assertThat(asA(() -> service.page(new CustomsQuery(null, null, null, null, null, null, null, null, 0, 50)).rows()))
+      assertThat(
+              asA(
+                  () ->
+                      service
+                          .page(
+                              new CustomsQuery(
+                                  null, null, null, null, null, null, null, null, 0, 50))
+                          .rows()))
           .singleElement()
           .satisfies(r -> assertThat(r.declarationCode()).doesNotContain(b.toString()));
-      assertThat(asB(() -> service.page(new CustomsQuery(null, null, null, null, null, null, null, null, 0, 50)).rows()))
+      assertThat(
+              asB(
+                  () ->
+                      service
+                          .page(
+                              new CustomsQuery(
+                                  null, null, null, null, null, null, null, null, 0, 50))
+                          .rows()))
           .singleElement();
     }
     // 事件表同样不串。注意这里断言的是「读不到行」而不是「抛异常」：
     // RLS 的隔离语义就是**静默过滤**（对方行对你根本不存在），报不报错反而是次要的。
-    UUID bId = asB(() -> service.page(new CustomsQuery(null, null, null, null, null, null, null, null, 0, 50)).rows())
-        .get(0).id();
+    UUID bId =
+        asB(() ->
+                service
+                    .page(new CustomsQuery(null, null, null, null, null, null, null, null, 0, 50))
+                    .rows())
+            .get(0)
+            .id();
     assertThat(
-            asA(() -> sql.fetch("select * from customs_declaration_event where declaration_id=?", bId)))
+            asA(
+                () ->
+                    sql.fetch(
+                        "select * from customs_declaration_event where declaration_id=?", bId)))
         .isEmpty();
   }
 
@@ -709,21 +831,22 @@ class CustomsDeclarationIntegrationTest {
   @Test
   void endpointsReturnContractShapes() throws Exception {
     asA(() -> service.create(a, createRequest(a, idFor(a, 10))));
-    http.perform(get("/warehouse/customs-declarations/capabilities")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/customs-declarations/capabilities")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.statusOptions").isArray())
         .andExpect(jsonPath("$.tradeModes").isArray())
-        .andExpect(jsonPath("$.dependencies[?(@.value=='HS_CODE_DICTIONARY')].available")
-            .value(false));
-    http.perform(get("/warehouse/customs-declarations")
-            .header("Authorization", "Bearer tenant-a"))
+        .andExpect(
+            jsonPath("$.dependencies[?(@.value=='HS_CODE_DICTIONARY')].available").value(false));
+    http.perform(get("/warehouse/customs-declarations").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rows[0].declarationCode").exists())
         .andExpect(jsonPath("$.summary.total").value(1));
-    http.perform(get("/warehouse/customs-declarations")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/customs-declarations")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.summary.total").value(1));
   }

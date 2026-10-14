@@ -12,10 +12,10 @@ import java.sql.DriverManager;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
-import java.util.Map;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,21 +33,17 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * <p><b>真实 PostgreSQL 16 + FORCE RLS，不使用任何内存替身。</b>
  *
  * <ol>
- *   <li>两租户互不可见；</li>
- *   <li>伪造租户上下文无效 —— 并且<b>要断言行确实落在自称的租户名下</b>，
- *       不是只断言 A 看不见（只断言「看不见」的话，一句「写入被全表拒掉」也能骗过它）；</li>
- *   <li>连接池归还后不串租户。</li>
+ *   <li>两租户互不可见；
+ *   <li>伪造租户上下文无效 —— 并且<b>要断言行确实落在自称的租户名下</b>， 不是只断言 A 看不见（只断言「看不见」的话，一句「写入被全表拒掉」也能骗过它）；
+ *   <li>连接池归还后不串租户。
  * </ol>
  *
- * <p><b>连接池固定为 1 条连接</b>：只有复用同一条连接，才能真正证明归还后不会串租户 ——
- * 池大于 1 时每次可能拿到不同连接，「没串」可能只是碰巧换了条干净连接。
+ * <p><b>连接池固定为 1 条连接</b>：只有复用同一条连接，才能真正证明归还后不会串租户 —— 池大于 1 时每次可能拿到不同连接，「没串」可能只是碰巧换了条干净连接。
  *
- * <p><b>刻意跑在真实业务表上，不建 trade 那种 trade_tenancy_probe 占位表</b>：
- * trade 的 V1 曾建过一张探针表并写明「第一条业务车道落地时应当显式决定保留还是删除」。
- * crm 随 15.4.2.1 一起引导，第一条迁移 V99 直接建出真实业务表，
- * 所以隔离断言直接跑在 {@code crm_knowledge_entry} / {@code crm_knowledge_version} /
- * {@code crm_knowledge_reference} 上 —— 证明的是**真的要用的那张表**被隔离了，
- * 而不是一张之后会被删掉的探针表。
+ * <p><b>刻意跑在真实业务表上，不建 trade 那种 trade_tenancy_probe 占位表</b>： trade 的 V1
+ * 曾建过一张探针表并写明「第一条业务车道落地时应当显式决定保留还是删除」。 crm 随 15.4.2.1 一起引导，第一条迁移 V99 直接建出真实业务表， 所以隔离断言直接跑在 {@code
+ * crm_knowledge_entry} / {@code crm_knowledge_version} / {@code crm_knowledge_reference} 上 ——
+ * 证明的是**真的要用的那张表**被隔离了， 而不是一张之后会被删掉的探针表。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -169,8 +165,7 @@ class CrmTenancyIntegrationTest {
   }
 
   String rawTenantSetting() {
-    return sql.fetch("select current_setting('app.current_tenant', true)")
-        .stream()
+    return sql.fetch("select current_setting('app.current_tenant', true)").stream()
         .findFirst()
         .map(r -> r.get(0, String.class))
         .orElse(null);
@@ -185,15 +180,13 @@ class CrmTenancyIntegrationTest {
   /**
    * 每个用例前清空三张业务表，再种入两租户各一行。
    *
-   * <p>这些测试共享同一个容器与同一个库，用例之间**不会**自动回滚，所以
-   * 「断言 2」写下的伪造头那一行会留在库里，把「断言 1 / 3」的
-   * {@code containsExactly} 变成永远失败 —— 那是测试夹具的脏，不是隔离被破坏。
+   * <p>这些测试共享同一个容器与同一个库，用例之间**不会**自动回滚，所以 「断言 2」写下的伪造头那一行会留在库里，把「断言 1 / 3」的 {@code containsExactly}
+   * 变成永远失败 —— 那是测试夹具的脏，不是隔离被破坏。
    *
-   * <p><b>清空与播种必须在同一个方法里</b>：写成两个 {@code @BeforeEach} 时，
-   * JUnit 5 <b>不保证</b>它们的执行顺序，可能先播种再清空，于是每个用例都从空库开始。
+   * <p><b>清空与播种必须在同一个方法里</b>：写成两个 {@code @BeforeEach} 时， JUnit 5
+   * <b>不保证</b>它们的执行顺序，可能先播种再清空，于是每个用例都从空库开始。
    *
-   * <p>用**迁移用户**（超管）连接来 TRUNCATE：RLS 对超管不生效，
-   * 所以不需要先绑租户；而 FORCE RLS 下的运行角色做不到「清掉所有租户的行」。
+   * <p>用**迁移用户**（超管）连接来 TRUNCATE：RLS 对超管不生效， 所以不需要先绑租户；而 FORCE RLS 下的运行角色做不到「清掉所有租户的行」。
    */
   @BeforeEach
   void resetThenSeed() throws Exception {
@@ -219,12 +212,9 @@ class CrmTenancyIntegrationTest {
               "select relrowsecurity, relforcerowsecurity from pg_class where relname = ?", table);
       assertThat(row).as("V99 必须真的建出 " + table).isNotNull();
       assertThat(row.get(0, Boolean.class)).as(table + " 未启用 RLS").isTrue();
-      assertThat(row.get(1, Boolean.class))
-          .as(table + " 只有 FORCE 才挡得住「运行角色被误授 owner」")
-          .isTrue();
+      assertThat(row.get(1, Boolean.class)).as(table + " 只有 FORCE 才挡得住「运行角色被误授 owner」").isTrue();
       assertThat(
-              sql.fetchOne(
-                      "select has_table_privilege('crm_app','" + table + "','SELECT')")
+              sql.fetchOne("select has_table_privilege('crm_app','" + table + "','SELECT')")
                   .get(0, Boolean.class))
           .as("crm_app 必须真的能读 " + table)
           .isTrue();
@@ -243,8 +233,7 @@ class CrmTenancyIntegrationTest {
         tenants.run(
             a,
             () ->
-                sql.fetch(
-                        "select topic_key from crm_knowledge_entry where id = ?", idFor(b, 1))
+                sql.fetch("select topic_key from crm_knowledge_entry where id = ?", idFor(b, 1))
                     .size());
     assertThat(byId).as("按主键直查也必须被 RLS 挡住").isZero();
   }
@@ -303,8 +292,8 @@ class CrmTenancyIntegrationTest {
             a,
             () ->
                 sql.fetch(
-                        "select id, tenant_id from crm_knowledge_entry where topic_key = ?",
-                        "forged-header-entry"));
+                    "select id, tenant_id from crm_knowledge_entry where topic_key = ?",
+                    "forged-header-entry"));
     assertThat(rows).as("伪造头的请求必须仍然写入成功 —— 头不是鉴权依据").hasSize(1);
     // ...且它落在**会话租户** a 名下，**不是**调用方自称的 b。
     assertThat(rows.get(0).get("tenant_id", UUID.class))

@@ -61,6 +61,7 @@
 ## 文件清单
 
 **后端（trade）**
+
 - `backend/services/trade/src/main/resources/db/migration/V119__trade_order_change_cancel.sql` — 十张新表 + 四条守卫 + RLS/GRANT
 - `backend/services/trade/src/main/java/com/starcon/trade/OrderChangeCancelModels.java`
 - `backend/services/trade/src/main/java/com/starcon/trade/OrderChangeCancelService.java`
@@ -68,6 +69,7 @@
 - `backend/services/trade/src/test/java/com/starcon/trade/OrderChangeCancelIntegrationTest.java` — 40 例
 
 **前端**
+
 - `apps/web/src/components/orders/order-change-cancel-model.ts` + `.test.ts`（17 例）
 - `apps/web/src/components/orders/order-change-cancel-workspace.tsx`
 - `apps/web/src/app/orders/change/cancellations/[id]/page.tsx`
@@ -75,6 +77,7 @@
 - `apps/web/src/lib/api-proxy.ts` — 仅追加一支 alternation
 
 **契约与台账**
+
 - `packages/api-contracts/src/contracts/trade.ts` + `trade.openapi.json`（codegen 产物）
 - `packages/api-contracts/src/contracts/warehouse.ts` + `warehouse.openapi.json`（**顺带修好的既有漂移**，见下）
 - `docs/product/capability-blueprint/module-progress.md` — 只改 9.1.1.3 那一行

@@ -271,7 +271,9 @@ export function ZombieCleanupWorkspace({ writable }: { writable: boolean }) {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <Field
               label="维护阈值（天）"
-              hint={[inactiveDaysProblem(draft.inactiveDays) ?? '距最后一次维护超过这个天数才进入候选']
+              hint={[
+                inactiveDaysProblem(draft.inactiveDays) ?? '距最后一次维护超过这个天数才进入候选',
+              ]
                 .filter(Boolean)
                 .join('；')}
             >
@@ -279,14 +281,15 @@ export function ZombieCleanupWorkspace({ writable }: { writable: boolean }) {
                 type="number"
                 className={control}
                 value={draft.inactiveDays}
-                onChange={(e) =>
-                  setDraft({ ...draft, inactiveDays: Number(e.target.value) })
-                }
+                onChange={(e) => setDraft({ ...draft, inactiveDays: Number(e.target.value) })}
               />
             </Field>
             <Field
               label="快照过期（天）"
-              hint={[staleDaysProblem(draft.snapshotStaleDays) ?? '观测值超过这个天数即视为未知，不参与判定']
+              hint={[
+                staleDaysProblem(draft.snapshotStaleDays) ??
+                  '观测值超过这个天数即视为未知，不参与判定',
+              ]
                 .filter(Boolean)
                 .join('；')}
             >
@@ -294,9 +297,7 @@ export function ZombieCleanupWorkspace({ writable }: { writable: boolean }) {
                 type="number"
                 className={control}
                 value={draft.snapshotStaleDays}
-                onChange={(e) =>
-                  setDraft({ ...draft, snapshotStaleDays: Number(e.target.value) })
-                }
+                onChange={(e) => setDraft({ ...draft, snapshotStaleDays: Number(e.target.value) })}
               />
             </Field>
             <Field label="停用备注" hint="写入停用记录，可按需补充">
@@ -479,7 +480,7 @@ export function ZombieCleanupWorkspace({ writable }: { writable: boolean }) {
                 {rows.map((candidate) => {
                   const reason = selectable(candidate) ? null : '不可停用';
                   return (
-                    <tr key={candidate.entityId} className="border-b last:border-0 align-top">
+                    <tr key={candidate.entityId} className="border-b align-top last:border-0">
                       <td className="py-2 pr-3">
                         {writable && (
                           <input
@@ -508,32 +509,31 @@ export function ZombieCleanupWorkspace({ writable }: { writable: boolean }) {
                           {VERDICT_LABELS[candidate.verdict as Verdict] ?? candidate.verdictLabel}
                         </Badge>
                         <div className="text-muted-foreground mt-1 max-w-[18rem] text-xs">
-                          {VERDICT_ACTIONS[candidate.verdict as Verdict] ??
-                            candidate.verdictLabel}
+                          {VERDICT_ACTIONS[candidate.verdict as Verdict] ?? candidate.verdictLabel}
                         </div>
                       </td>
                       <td className="py-2 pr-3 text-xs">
                         <div className="space-y-0.5">
-                          {candidate.dimensions
-                            .filter(isDimensionRow)
-                            .map((dimension) => (
-                              <div key={dimension.metric} className="flex items-center gap-1">
-                                <span
-                                  className={
-                                    isUnknown(dimension) ? 'text-warning' : 'text-muted-foreground'
-                                  }
-                                >
-                                  {dimensionLabel(dimension.metric)}
+                          {candidate.dimensions.filter(isDimensionRow).map((dimension) => (
+                            <div key={dimension.metric} className="flex items-center gap-1">
+                              <span
+                                className={
+                                  isUnknown(dimension) ? 'text-warning' : 'text-muted-foreground'
+                                }
+                              >
+                                {dimensionLabel(dimension.metric)}
+                              </span>
+                              <span>{dimensionValueText(dimension)}</span>
+                              <span className="text-muted-foreground">
+                                {DIMENSION_STATE_LABELS[dimension.state] ?? dimension.state}
+                              </span>
+                              {dimension.stale && (
+                                <span className="text-warning">
+                                  {dimensionObservedText(dimension)}
                                 </span>
-                                <span>{dimensionValueText(dimension)}</span>
-                                <span className="text-muted-foreground">
-                                  {DIMENSION_STATE_LABELS[dimension.state] ?? dimension.state}
-                                </span>
-                                {dimension.stale && (
-                                  <span className="text-warning">{dimensionObservedText(dimension)}</span>
-                                )}
-                              </div>
-                            ))}
+                              )}
+                            </div>
+                          ))}
                         </div>
                       </td>
                       <td className="py-2">
@@ -579,16 +579,14 @@ export function ZombieCleanupWorkspace({ writable }: { writable: boolean }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {candidate.dimensions
-                          .filter(isDimensionRow)
-                          .map((dimension) => (
-                            <tr key={dimension.metric}>
-                              <td className="py-1 pr-3">{dimensionLabel(dimension.metric)}</td>
-                              <td className="py-1 pr-3">{dimensionValueText(dimension)}</td>
-                              <td className="py-1 pr-3">{dimensionObservedText(dimension)}</td>
-                              <td className="py-1">{dimension.note}</td>
-                            </tr>
-                          ))}
+                        {candidate.dimensions.filter(isDimensionRow).map((dimension) => (
+                          <tr key={dimension.metric}>
+                            <td className="py-1 pr-3">{dimensionLabel(dimension.metric)}</td>
+                            <td className="py-1 pr-3">{dimensionValueText(dimension)}</td>
+                            <td className="py-1 pr-3">{dimensionObservedText(dimension)}</td>
+                            <td className="py-1">{dimension.note}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
@@ -639,7 +637,7 @@ export function ZombieCleanupWorkspace({ writable }: { writable: boolean }) {
               </thead>
               <tbody>
                 {records.map((record) => (
-                  <tr key={record.id} className="border-b last:border-0 align-top">
+                  <tr key={record.id} className="border-b align-top last:border-0">
                     <td className="py-2 pr-3">
                       <div className="font-medium">{record.entityCode}</div>
                       <div className="text-muted-foreground text-xs">{record.entityName}</div>

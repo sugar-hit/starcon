@@ -74,7 +74,10 @@ export function fetchVarianceReport(sheetId: string): Promise<StocktakeVarianceR
   return api<StocktakeVarianceReport>(`${base}/sheets/${sheetId}/report`);
 }
 
-export function fetchVarianceAudit(sheetId: string, limit?: number): Promise<StocktakeVarianceAuditEntry[]> {
+export function fetchVarianceAudit(
+  sheetId: string,
+  limit?: number,
+): Promise<StocktakeVarianceAuditEntry[]> {
   return api<StocktakeVarianceAuditEntry[]>(`${base}/sheets/${sheetId}/audit${query({ limit })}`);
 }
 
@@ -83,14 +86,22 @@ export function attributeVarianceLine(
   lineId: string,
   input: StocktakeVarianceAttributionInput,
 ): Promise<StocktakeVarianceLine> {
-  return api<StocktakeVarianceLine>(`${base}/sheets/${sheetId}/lines/${lineId}/attribute`, 'POST', input);
+  return api<StocktakeVarianceLine>(
+    `${base}/sheets/${sheetId}/lines/${lineId}/attribute`,
+    'POST',
+    input,
+  );
 }
 
 export function createVarianceAdjustment(
   sheetId: string,
   input: { lineIds?: string[]; allAttributed?: boolean; note?: string },
 ): Promise<StocktakeVarianceAdjustmentDetail> {
-  return api<StocktakeVarianceAdjustmentDetail>(`${base}/sheets/${sheetId}/adjustments`, 'POST', input);
+  return api<StocktakeVarianceAdjustmentDetail>(
+    `${base}/sheets/${sheetId}/adjustments`,
+    'POST',
+    input,
+  );
 }
 
 export function fetchVarianceAdjustments(
@@ -104,30 +115,45 @@ export function fetchVarianceAdjustment(id: string): Promise<StocktakeVarianceAd
 }
 
 /** 提交审批 / 批准 / 驳回 / 作废：四个动作同一个形状，只是转移的状态不同。 */
-export function submitVarianceAdjustment(id: string, note?: string): Promise<StocktakeVarianceAdjustment> {
+export function submitVarianceAdjustment(
+  id: string,
+  note?: string,
+): Promise<StocktakeVarianceAdjustment> {
   return api<StocktakeVarianceAdjustment>(`${base}/adjustments/${id}/submit`, 'POST', {
     note: note ?? null,
   });
 }
 
-export function approveVarianceAdjustment(id: string, note?: string): Promise<StocktakeVarianceAdjustment> {
+export function approveVarianceAdjustment(
+  id: string,
+  note?: string,
+): Promise<StocktakeVarianceAdjustment> {
   return api<StocktakeVarianceAdjustment>(`${base}/adjustments/${id}/approve`, 'POST', {
     note: note ?? null,
   });
 }
 
-export function rejectVarianceAdjustment(id: string, note: string): Promise<StocktakeVarianceAdjustment> {
+export function rejectVarianceAdjustment(
+  id: string,
+  note: string,
+): Promise<StocktakeVarianceAdjustment> {
   return api<StocktakeVarianceAdjustment>(`${base}/adjustments/${id}/reject`, 'POST', { note });
 }
 
-export function cancelVarianceAdjustment(id: string, note?: string): Promise<StocktakeVarianceAdjustment> {
+export function cancelVarianceAdjustment(
+  id: string,
+  note?: string,
+): Promise<StocktakeVarianceAdjustment> {
   return api<StocktakeVarianceAdjustment>(`${base}/adjustments/${id}/cancel`, 'POST', {
     note: note ?? null,
   });
 }
 
 /** 入账：唯一会改库存余额的动作，所以返回类型多带一个 transactionId 与改动过的余额行。 */
-export function postVarianceAdjustment(id: string, note?: string): Promise<StocktakeVariancePostResult> {
+export function postVarianceAdjustment(
+  id: string,
+  note?: string,
+): Promise<StocktakeVariancePostResult> {
   return api<StocktakeVariancePostResult>(`${base}/adjustments/${id}/post`, 'POST', {
     note: note ?? null,
   });
@@ -166,16 +192,27 @@ export const adjustmentStatusLabels: Record<string, string> = {
   CANCELLED: '已作废',
 };
 
-export const reasonOptions = Object.entries(reasonLabels).map(([value, label]) => ({ value, label }));
-
-export const decisionOptions = Object.entries(decisionLabels).map(([value, label]) => ({ value, label }));
-
-export const lineFilterOptions = Object.entries(lineFilterLabels).map(([value, label]) => ({ value, label }));
-
-export const adjustmentStatusOptions = Object.entries(adjustmentStatusLabels).map(([value, label]) => ({
+export const reasonOptions = Object.entries(reasonLabels).map(([value, label]) => ({
   value,
   label,
 }));
+
+export const decisionOptions = Object.entries(decisionLabels).map(([value, label]) => ({
+  value,
+  label,
+}));
+
+export const lineFilterOptions = Object.entries(lineFilterLabels).map(([value, label]) => ({
+  value,
+  label,
+}));
+
+export const adjustmentStatusOptions = Object.entries(adjustmentStatusLabels).map(
+  ([value, label]) => ({
+    value,
+    label,
+  }),
+);
 
 /** 单据状态色：已入账是正向完成，待审批/已批待入账是最需要注意的中间态。 */
 export function adjustmentTone(status: string): 'ok' | 'warn' | 'bad' {
@@ -194,7 +231,9 @@ export function dispositionText(line: {
   if (line.varianceDecision === 'RECOUNT') return '已复盘（待重新盘）';
   if (line.varianceDecision === 'IGNORE') return '已忽略（留痕）';
   if (line.varianceDecision === 'ADJUST') {
-    return line.adjustmentStatus ? `调整单 ${adjustmentStatusLabels[line.adjustmentStatus] ?? line.adjustmentStatus}` : '待生成调整单';
+    return line.adjustmentStatus
+      ? `调整单 ${adjustmentStatusLabels[line.adjustmentStatus] ?? line.adjustmentStatus}`
+      : '待生成调整单';
   }
   return '未归因';
 }
@@ -260,7 +299,8 @@ export function progressPercent(done: number, total: number): number {
  * 用户就不用等一个 422 才知道自己写的理由不算数。
  */
 export function attributionProblem(reason: string, decision: string, note: string): string | null {
-  if (!reason) return '必须选择差异原因：五类原因语义不同，少选一类就等于把「账错了」和「账没错」混在一起';
+  if (!reason)
+    return '必须选择差异原因：五类原因语义不同，少选一类就等于把「账错了」和「账没错」混在一起';
   if (!decision) return '必须选择处理决定：调整 / 复盘 / 忽略，三者后果完全不同';
   const text = note.trim();
   if (text === '') {
@@ -268,7 +308,8 @@ export function attributionProblem(reason: string, decision: string, note: strin
       ? '忽略必须写理由：它让这条差异永远不入账'
       : '请写一句判断依据：差异可能要追责到人';
   }
-  if (decision === 'IGNORE' && text.length < 4) return '忽略的理由至少 4 个字：「无」「错」写下来等于没写';
+  if (decision === 'IGNORE' && text.length < 4)
+    return '忽略的理由至少 4 个字：「无」「错」写下来等于没写';
   if (text.length > 500) return '说明超过 500 字，请写结论与依据';
   return null;
 }

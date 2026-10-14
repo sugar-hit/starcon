@@ -8,9 +8,8 @@ import org.junit.jupiter.api.Test;
 /**
  * 属性有效值解析规则的单元测试。
  *
- * <p>这套规则同时决定 3.1.2.2 详情页的属性区与既有商品档案页的 SKU 矩阵，
- * 一旦理解漂移，运营会看到"这个 SKU 明明填了值却显示成公共值"这种无法自查的错误，
- * 所以四种取值模式 × 三种 SKU 侧状态（赋值 / 清空 / 没有这一行）全部穷举。
+ * <p>这套规则同时决定 3.1.2.2 详情页的属性区与既有商品档案页的 SKU 矩阵， 一旦理解漂移，运营会看到"这个 SKU 明明填了值却显示成公共值"这种无法自查的错误， 所以四种取值模式
+ * × 三种 SKU 侧状态（赋值 / 清空 / 没有这一行）全部穷举。
  */
 class EffectiveValuesTest {
 
@@ -81,7 +80,8 @@ class EffectiveValuesTest {
 
   @Test
   void commonLockedAlwaysUsesTheCommonValue() {
-    var inherited = EffectiveValues.resolve(EffectiveValues.COMMON_LOCKED, set("棉"), absent(), false);
+    var inherited =
+        EffectiveValues.resolve(EffectiveValues.COMMON_LOCKED, set("棉"), absent(), false);
     assertThat(inherited.source()).isEqualTo(EffectiveValues.Source.SPU_COMMON);
     assertThat(inherited.effectiveValues()).containsExactly("棉");
     // COMMON_LOCKED 下 V1 的 validate_value_owner 触发器已拒绝 SKU 赋值行；
@@ -106,21 +106,25 @@ class EffectiveValuesTest {
 
   @Test
   void requiredMissingFlagsOnlyWhenEffectiveValueIsEmpty() {
-    assertThat(EffectiveValues.resolve(EffectiveValues.COMMON_DEFAULT, set("棉"), absent(), true)
-            .missingRequired())
+    assertThat(
+            EffectiveValues.resolve(EffectiveValues.COMMON_DEFAULT, set("棉"), absent(), true)
+                .missingRequired())
         .isFalse();
-    assertThat(EffectiveValues.resolve(EffectiveValues.COMMON_DEFAULT, set("棉"), clear(), true)
-            .missingRequired())
+    assertThat(
+            EffectiveValues.resolve(EffectiveValues.COMMON_DEFAULT, set("棉"), clear(), true)
+                .missingRequired())
         .isTrue();
-    assertThat(EffectiveValues.resolve(EffectiveValues.SKU_ONLY, absent(), set("黑色"), true)
-            .missingRequired())
+    assertThat(
+            EffectiveValues.resolve(EffectiveValues.SKU_ONLY, absent(), set("黑色"), true)
+                .missingRequired())
         .isFalse();
   }
 
   @Test
   void multiValuedOverrideKeepsOrdinalOrder() {
     var r =
-        EffectiveValues.resolve(EffectiveValues.COMMON_DEFAULT, absent(), set("A", "B", "C"), false);
+        EffectiveValues.resolve(
+            EffectiveValues.COMMON_DEFAULT, absent(), set("A", "B", "C"), false);
     assertThat(r.effectiveValues()).containsExactly("A", "B", "C");
     assertThat(r.effectiveText()).isEqualTo("A / B / C");
   }

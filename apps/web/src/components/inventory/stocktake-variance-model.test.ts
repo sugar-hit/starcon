@@ -70,7 +70,11 @@ describe('差异与处置文案', () => {
       }),
     ).toBe('调整单 待审批');
     expect(
-      dispositionText({ varianceDecision: 'ADJUST', adjustmentStatus: 'DRAFT', postedAt: '2026-10-07T10:00:00Z' }),
+      dispositionText({
+        varianceDecision: 'ADJUST',
+        adjustmentStatus: 'DRAFT',
+        postedAt: '2026-10-07T10:00:00Z',
+      }),
     ).toBe('已入账');
     expect(dispositionText({ varianceDecision: 'RECOUNT' })).toBe('已复盘（待重新盘）');
     expect(dispositionText({ varianceDecision: 'IGNORE' })).toBe('已忽略（留痕）');

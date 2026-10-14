@@ -2,7 +2,16 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Droplets, RefreshCw, ShieldAlert, Signal } from 'lucide-react';
-import { Button, EmptyState, FormField, Input, Notice, PageHeader, SectionCard, StatCard } from '@starcon/ui';
+import {
+  Button,
+  EmptyState,
+  FormField,
+  Input,
+  Notice,
+  PageHeader,
+  SectionCard,
+  StatCard,
+} from '@starcon/ui';
 import type {
   VmiAgreementDetail,
   VmiAgreementPage,
@@ -235,7 +244,8 @@ export function VmiWorkspace() {
             <p className="text-muted-foreground">{capabilities.sellableNote}</p>
             <p className="text-muted-foreground">{capabilities.ownedAssetNote}</p>
             <p className="text-muted-foreground">
-              自有货值口径：<span className="font-medium">不存在</span> —— 显示「—（不计入自有资产）」而不是 0。
+              自有货值口径：<span className="font-medium">不存在</span> ——
+              显示「—（不计入自有资产）」而不是 0。
             </p>
             <p className="text-muted-foreground">{capabilities.availableQuantityNote}</p>
             <p className="text-muted-foreground">{capabilities.salesFactNote}</p>
@@ -248,7 +258,8 @@ export function VmiWorkspace() {
                 <ul className="list-disc space-y-1 pl-5">
                   {capabilities.unavailable.map((u) => (
                     <li key={`${u.capability}-${u.ownerModule}`}>
-                      <span className="font-medium">{u.capability}</span>（{u.ownerModule} · {u.ownerService}）：{u.reason}
+                      <span className="font-medium">{u.capability}</span>（{u.ownerModule} ·{' '}
+                      {u.ownerService}）：{u.reason}
                       <br />
                       <span className="text-muted-foreground">交接方式：{u.handoff}</span>
                     </li>
@@ -341,7 +352,9 @@ export function VmiWorkspace() {
                     <td className="py-2 text-right">{row.lineCount}</td>
                     <td className="py-2 text-right">{formatQty(row.totalSupplied)}</td>
                     <td className="py-2 text-right">{formatQty(row.totalSold)}</td>
-                    <td className="py-2 text-right">{formatAmount(row.settledAmount, row.currency)}</td>
+                    <td className="py-2 text-right">
+                      {formatAmount(row.settledAmount, row.currency)}
+                    </td>
                     <td className="py-2 text-right">
                       <Button size="sm" variant="outline" onClick={() => setSelected(row.id)}>
                         {selected === row.id ? '已选中' : '查看'}
@@ -356,7 +369,12 @@ export function VmiWorkspace() {
                 共 {agreements?.total ?? 0} 条 · 第 {(agreements?.page ?? 0) + 1} 页
               </span>
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(page - 1)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={page === 0}
+                  onClick={() => setPage(page - 1)}
+                >
                   上一页
                 </Button>
                 <Button
@@ -375,7 +393,10 @@ export function VmiWorkspace() {
 
       {/* ---------------- 选中协议的明细 ---------------- */}
       {!agreement && !loading && (
-        <EmptyState title="选择一份协议" description="选中后这里显示水位监控、补货信号与结算对账单。" />
+        <EmptyState
+          title="选择一份协议"
+          description="选中后这里显示水位监控、补货信号与结算对账单。"
+        />
       )}
 
       {agreement && (
@@ -434,7 +455,9 @@ export function VmiWorkspace() {
             }
           >
             <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
-              <span>供应商：{agreement.supplierName}（{agreement.supplierCode}）</span>
+              <span>
+                供应商：{agreement.supplierName}（{agreement.supplierCode}）
+              </span>
               <span>结算周期：{agreement.settlementCycleLabel}</span>
               <span>补货模式：{agreement.replenishmentModeLabel}</span>
               <span>信号去向：{agreement.signalTargetLabel}</span>
@@ -449,11 +472,22 @@ export function VmiWorkspace() {
               <>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   {/* 卡 1：VMI 可售 —— 计入可售额 */}
-                  <StatCard label="VMI 可售量（计入可售额）" value={cards.sellable} icon={<Droplets className="h-4 w-4" />} />
+                  <StatCard
+                    label="VMI 可售量（计入可售额）"
+                    value={cards.sellable}
+                    icon={<Droplets className="h-4 w-4" />}
+                  />
                   <StatCard label="VMI 可售额" value={cards.sellableValue} />
                   {/* 卡 2：自有货值 —— 恒不计入，显「—」而不是 0 */}
-                  <StatCard label="VMI 自有货值（不计入自有资产）" value={cards.owned} icon={<ShieldAlert className="h-4 w-4" />} />
-                  <StatCard label="水位不足 / 断货行数" value={`${monitor.belowSafetyLineCount} / ${monitor.stockoutLineCount}`} />
+                  <StatCard
+                    label="VMI 自有货值（不计入自有资产）"
+                    value={cards.owned}
+                    icon={<ShieldAlert className="h-4 w-4" />}
+                  />
+                  <StatCard
+                    label="水位不足 / 断货行数"
+                    value={`${monitor.belowSafetyLineCount} / ${monitor.stockoutLineCount}`}
+                  />
                 </div>
 
                 <Notice tone="warning" title="两个口径不可相加">
@@ -461,9 +495,16 @@ export function VmiWorkspace() {
                 </Notice>
 
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  <StatCard label="我方自有量（对照，不含 VMI）" value={formatQty(monitor.selfOwnedSplit.selfOwnedQuantity)} />
+                  <StatCard
+                    label="我方自有量（对照，不含 VMI）"
+                    value={formatQty(monitor.selfOwnedSplit.selfOwnedQuantity)}
+                  />
                   <StatCard label="安全水位合计" value={formatQty(monitor.totalSafetyLevel)} />
-                  <StatCard label="建议补货合计" value={formatQty(monitor.totalProjectedQuantity)} icon={<Signal className="h-4 w-4" />} />
+                  <StatCard
+                    label="建议补货合计"
+                    value={formatQty(monitor.totalProjectedQuantity)}
+                    icon={<Signal className="h-4 w-4" />}
+                  />
                   <StatCard label="未了结信号" value={monitor.openSignalCount} />
                 </div>
 
@@ -482,7 +523,10 @@ export function VmiWorkspace() {
           {/* ---------------- 明细行 ---------------- */}
           <SectionCard title="协议明细与水位">
             {(monitor?.lines.length ?? 0) === 0 && !drillLoading ? (
-              <EmptyState title="这份协议还没有明细行" description="至少需要一行 SKU + 货主 + 安全水位 + 结算价。" />
+              <EmptyState
+                title="这份协议还没有明细行"
+                description="至少需要一行 SKU + 货主 + 安全水位 + 结算价。"
+              />
             ) : (
               <div className="space-y-2">
                 <table className="w-full text-sm">
@@ -516,7 +560,9 @@ export function VmiWorkspace() {
                         <td className="py-2 text-right">{formatQty(l.safetyLevel)}</td>
                         <td className="py-2 text-right">{formatQty(l.currentSellableQuantity)}</td>
                         <td className={`py-2 ${toneClass(waterLevelTone(l.waterLevelStatus))}`}>
-                          <div className="font-medium">{waterLevelLabel(l.waterLevelStatus, l.waterLevelStatusLabel)}</div>
+                          <div className="font-medium">
+                            {waterLevelLabel(l.waterLevelStatus, l.waterLevelStatusLabel)}
+                          </div>
                           <div className="text-muted-foreground">{safetyGapText(l.safetyGap)}</div>
                         </td>
                         <td className={`py-2 ${toneClass(stockSourceTone(l.stockSource))}`}>
@@ -534,7 +580,9 @@ export function VmiWorkspace() {
                             <span className="text-muted-foreground">—</span>
                           )}
                         </td>
-                        <td className="py-2 text-right">{formatAmount(l.ownershipSplit.sellableValue, agreement.currency)}</td>
+                        <td className="py-2 text-right">
+                          {formatAmount(l.ownershipSplit.sellableValue, agreement.currency)}
+                        </td>
                         <td className="text-muted-foreground py-2 text-right">
                           {formatOwnedAssetValue(l.ownershipSplit.ownedAssetValue)}
                         </td>
@@ -564,7 +612,10 @@ export function VmiWorkspace() {
                   onClick={() =>
                     run(async () => {
                       const result = await generateVmiSignals(agreement.id);
-                      const skipped = result.skippedReasons.length > 0 ? ` 跳过：${result.skippedReasons.join('；')}` : '';
+                      const skipped =
+                        result.skippedReasons.length > 0
+                          ? ` 跳过：${result.skippedReasons.join('；')}`
+                          : '';
                       await afterMutation(`已出 ${result.createdCount} 张补货信号。${skipped}`);
                     })
                   }
@@ -576,7 +627,10 @@ export function VmiWorkspace() {
             }
           >
             {(signals?.total ?? 0) === 0 && !drillLoading ? (
-              <EmptyState title="还没有补货信号" description="水位跌破安全水位时点上面的按钮，系统按补货倍数算建议量。" />
+              <EmptyState
+                title="还没有补货信号"
+                description="水位跌破安全水位时点上面的按钮，系统按补货倍数算建议量。"
+              />
             ) : (
               <div className="space-y-2">
                 <table className="w-full text-sm">
@@ -601,9 +655,13 @@ export function VmiWorkspace() {
                         <td className="py-2">{s.triggerReasonLabel}</td>
                         <td className="py-2 text-right">{formatQty(s.currentSellableQuantity)}</td>
                         <td className="py-2 text-right">{formatQty(s.safetyLevel)}</td>
-                        <td className="py-2 text-right font-medium">{formatQty(s.suggestedQuantity)}</td>
-                        <td className="py-2 text-muted-foreground">{s.signalTargetLabel}</td>
-                        <td className={`py-2 ${toneClass(signalTone(s.status))}`}>{s.statusLabel}</td>
+                        <td className="py-2 text-right font-medium">
+                          {formatQty(s.suggestedQuantity)}
+                        </td>
+                        <td className="text-muted-foreground py-2">{s.signalTargetLabel}</td>
+                        <td className={`py-2 ${toneClass(signalTone(s.status))}`}>
+                          {s.statusLabel}
+                        </td>
                         <td className="py-2 text-right">
                           {writable && (
                             <div className="flex justify-end gap-1">
@@ -630,7 +688,9 @@ export function VmiWorkspace() {
                                   onClick={() =>
                                     run(async () => {
                                       await dispatchVmiSignal(s.id);
-                                      await afterMutation(`信号 ${s.signalCode} 已下发，只写了交接键。`);
+                                      await afterMutation(
+                                        `信号 ${s.signalCode} 已下发，只写了交接键。`,
+                                      );
                                     })
                                   }
                                 >
@@ -646,7 +706,9 @@ export function VmiWorkspace() {
                                     run(async () => {
                                       await fulfilVmiSignal(s.id, Number(fulfilQty));
                                       setFulfilQty('');
-                                      await afterMutation(`信号 ${s.signalCode} 已登记到货，累计供货已累加。`);
+                                      await afterMutation(
+                                        `信号 ${s.signalCode} 已登记到货，累计供货已累加。`,
+                                      );
                                     })
                                   }
                                 >
@@ -675,8 +737,16 @@ export function VmiWorkspace() {
                     ))}
                   </tbody>
                 </table>
-                {writable && <Input value={fulfilQty} onChange={(e) => setFulfilQty(e.target.value)} placeholder="到货数量（先填这里再点「登记到货」）" />}
-                <p className="text-muted-foreground text-xs">{agreement.signalTargetLabel}：{signalTargetHint(agreement.signalTarget)}</p>
+                {writable && (
+                  <Input
+                    value={fulfilQty}
+                    onChange={(e) => setFulfilQty(e.target.value)}
+                    placeholder="到货数量（先填这里再点「登记到货」）"
+                  />
+                )}
+                <p className="text-muted-foreground text-xs">
+                  {agreement.signalTargetLabel}：{signalTargetHint(agreement.signalTarget)}
+                </p>
               </div>
             )}
           </SectionCard>
@@ -704,17 +774,27 @@ export function VmiWorkspace() {
             <div className="space-y-3">
               <div className="flex flex-wrap items-end gap-2">
                 <FormField id="vmi-period-start" label="对账起始日">
-                  <Input type="date" value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} />
+                  <Input
+                    type="date"
+                    value={periodStart}
+                    onChange={(e) => setPeriodStart(e.target.value)}
+                  />
                 </FormField>
                 <FormField id="vmi-period-end" label="对账结束日">
-                  <Input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
+                  <Input
+                    type="date"
+                    value={periodEnd}
+                    onChange={(e) => setPeriodEnd(e.target.value)}
+                  />
                 </FormField>
               </div>
 
               <div>
                 <h4 className="mb-1 text-sm font-medium">售出事实（对账的唯一来源）</h4>
                 {(sales?.total ?? 0) === 0 ? (
-                  <p className="text-muted-foreground text-sm">还没有售出记录 —— VMI 是售出才结算，没卖出去就没有应付。</p>
+                  <p className="text-muted-foreground text-sm">
+                    还没有售出记录 —— VMI 是售出才结算，没卖出去就没有应付。
+                  </p>
                 ) : (
                   <table className="w-full text-sm">
                     <thead className="text-muted-foreground text-left">
@@ -775,7 +855,9 @@ export function VmiWorkspace() {
                           </td>
                           <td className="py-2 text-right">{s.lineCount}</td>
                           <td className="py-2 text-right">{formatQty(s.totalQuantity)}</td>
-                          <td className="py-2 text-right font-medium">{formatAmount(s.totalAmount, s.currency)}</td>
+                          <td className="py-2 text-right font-medium">
+                            {formatAmount(s.totalAmount, s.currency)}
+                          </td>
                           <td className="py-2">{s.statusLabel}</td>
                           <td className="py-2 text-right">
                             {writable && s.status === 'OPEN' && !isSettlementLocked(s) && (
@@ -786,7 +868,9 @@ export function VmiWorkspace() {
                                 onClick={() =>
                                   run(async () => {
                                     await confirmVmiSettlement(s.id);
-                                    await afterMutation(`对账单 ${s.settlementCode} 已确认，应付交 12 结算。`);
+                                    await afterMutation(
+                                      `对账单 ${s.settlementCode} 已确认，应付交 12 结算。`,
+                                    );
                                   })
                                 }
                               >
@@ -800,7 +884,8 @@ export function VmiWorkspace() {
                   </table>
                 )}
                 <p className="text-muted-foreground text-xs">
-                  表头应付按 HALF_UP 抹到分，明细金额保留 4 位：明细精确到分以下用于追溯，表头是拿去对账付款的数。
+                  表头应付按 HALF_UP 抹到分，明细金额保留 4
+                  位：明细精确到分以下用于追溯，表头是拿去对账付款的数。
                 </p>
               </div>
 
@@ -823,10 +908,18 @@ export function VmiWorkspace() {
                       </select>
                     </FormField>
                     <FormField id="vmi-sale-qty" label="售出数量">
-                      <Input value={saleQty} onChange={(e) => setSaleQty(e.target.value)} placeholder="数量" />
+                      <Input
+                        value={saleQty}
+                        onChange={(e) => setSaleQty(e.target.value)}
+                        placeholder="数量"
+                      />
                     </FormField>
                     <FormField id="vmi-sale-ref" label="销售引用">
-                      <Input value={saleRef} onChange={(e) => setSaleRef(e.target.value)} placeholder="幂等键，如订单行号" />
+                      <Input
+                        value={saleRef}
+                        onChange={(e) => setSaleRef(e.target.value)}
+                        placeholder="幂等键，如订单行号"
+                      />
                     </FormField>
                     <Button
                       size="sm"
@@ -848,7 +941,8 @@ export function VmiWorkspace() {
                     </Button>
                   </div>
                   <p className="text-muted-foreground text-xs">
-                    累计已售不得超过累计供货 —— 在供应商还没把货送过来之前先记销售会凭空生成一笔应付。
+                    累计已售不得超过累计供货 ——
+                    在供应商还没把货送过来之前先记销售会凭空生成一笔应付。
                   </p>
                 </div>
               )}
@@ -922,7 +1016,11 @@ export function VmiWorkspace() {
                     </select>
                   </FormField>
                   <FormField id="vmi-snap-qty" label="观测在库量">
-                    <Input value={snapshotQty} onChange={(e) => setSnapshotQty(e.target.value)} placeholder="数量" />
+                    <Input
+                      value={snapshotQty}
+                      onChange={(e) => setSnapshotQty(e.target.value)}
+                      placeholder="数量"
+                    />
                   </FormField>
                   <Button
                     size="sm"
@@ -956,7 +1054,10 @@ export function VmiWorkspace() {
                 {audit.map((a) => (
                   <li key={a.id} className="border-border border-t py-2">
                     <span className="font-medium">{auditLabel(a.eventType)}</span>
-                    <span className="text-muted-foreground"> · {a.occurredAt} · {a.detail}</span>
+                    <span className="text-muted-foreground">
+                      {' '}
+                      · {a.occurredAt} · {a.detail}
+                    </span>
                   </li>
                 ))}
               </ul>

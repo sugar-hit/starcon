@@ -12,28 +12,22 @@ import java.util.UUID;
 /**
  * 9.6.1.2 代发单与供应商下单的传输模型。
  *
- * <p>蓝图原话：「买家下单后，自动/手工向 1688 等供应商代发平台下单，传递地址与商品信息，
- * 回填供应商单号与代发成本，计算我方差价毛利。输出：代发单（供应商、单号、发货状态）；
+ * <p>蓝图原话：「买家下单后，自动/手工向 1688 等供应商代发平台下单，传递地址与商品信息， 回填供应商单号与代发成本，计算我方差价毛利。输出：代发单（供应商、单号、发货状态）；
  * 差价成本；差异告警（供应商无货/涨价/失败）。」
  *
- * <p><b>命名纪律（硬要求）</b>：springdoc 用 record 的<b>简单类名</b>做
- * {@code components.schemas} 的键，而本仓已有 {@code WarehouseRow}、
- * {@code AllocationRequest} 等同名 record，同名会互相覆盖。因此本文件所有 record
- * 一律以 {@code DropshipOrder} 开头（与 9.6.1.1 的 {@code Dropship*} 前缀区分，
- * 免得两个模块的类型在契约文件里撞名）。
+ * <p><b>命名纪律（硬要求）</b>：springdoc 用 record 的<b>简单类名</b>做 {@code components.schemas} 的键，而本仓已有 {@code
+ * WarehouseRow}、 {@code AllocationRequest} 等同名 record，同名会互相覆盖。因此本文件所有 record 一律以 {@code
+ * DropshipOrder} 开头（与 9.6.1.1 的 {@code Dropship*} 前缀区分， 免得两个模块的类型在契约文件里撞名）。
  *
  * <p><b>四条建模纪律</b>：
  *
  * <ul>
- *   <li><b>差价可以为负，且必须显式报出。</b>{@code spreadAmount} 是后端生成列，
- *       负值原样透传——亏损单是最需要被看见的那一张。</li>
- *   <li><b>「还没回执」与「回执是 0」不是一回事。</b>
- *       {@code actualPurchaseAmount} 为 {@code null} 表示供应商还没回成本，
- *       {@code 0} 表示供应商回的是 0（真实但极端）。</li>
- *   <li><b>四类告警分开。</b>涨价 / 无货 / 失败 / 差价转负是四个不同的事实，
- *       合并成一条「有异常」就没法处置。</li>
- *   <li><b>付款确认带主体与时刻。</b>{@code paymentConfirmedByMembershipId} 不是可选项：
- *       9.1 没有支付状态列，这张单「谁确认已收款」必须可追责。</li>
+ *   <li><b>差价可以为负，且必须显式报出。</b>{@code spreadAmount} 是后端生成列， 负值原样透传——亏损单是最需要被看见的那一张。
+ *   <li><b>「还没回执」与「回执是 0」不是一回事。</b> {@code actualPurchaseAmount} 为 {@code null} 表示供应商还没回成本， {@code
+ *       0} 表示供应商回的是 0（真实但极端）。
+ *   <li><b>四类告警分开。</b>涨价 / 无货 / 失败 / 差价转负是四个不同的事实， 合并成一条「有异常」就没法处置。
+ *   <li><b>付款确认带主体与时刻。</b>{@code paymentConfirmedByMembershipId} 不是可选项： 9.1
+ *       没有支付状态列，这张单「谁确认已收款」必须可追责。
  * </ul>
  */
 public final class DropshipOrderModels {
@@ -82,9 +76,7 @@ public final class DropshipOrderModels {
   /**
    * 差异告警种类（蓝图点名必须显式告警的那一条）。
    *
-   * <p>四类**互不合并**：处置动作完全不同 ——
-   * 涨价要改售价或换供应商、无货要改供应商、失败要重下或人工处理、
-   * 差价转负要立刻止损。
+   * <p>四类**互不合并**：处置动作完全不同 —— 涨价要改售价或换供应商、无货要改供应商、失败要重下或人工处理、 差价转负要立刻止损。
    */
   public enum DropshipAlertKind {
     PRICE_INCREASE("供应商涨价", "WARNING"),
@@ -132,11 +124,8 @@ public final class DropshipOrderModels {
   public record DropshipOrderInput(
       @NotNull @Schema(description = "9.1 销售订单 ID（同库引用）") UUID salesOrderId,
       @NotNull @Schema(description = "9.6.1.1 代发配置 ID") UUID configId,
-      @NotBlank
-          @Schema(description = "下单方式：AUTO 走 vendor 接口 / MANUAL 人工录入回执")
-          String dispatchMode,
-      @NotBlank @Schema(description = "供应商代发 vendor：MANUAL_ENTRY / ALIBABA_1688")
-          String vendorCode,
+      @NotBlank @Schema(description = "下单方式：AUTO 走 vendor 接口 / MANUAL 人工录入回执") String dispatchMode,
+      @NotBlank @Schema(description = "供应商代发 vendor：MANUAL_ENTRY / ALIBABA_1688") String vendorCode,
       @Size(max = 400) String note) {}
 
   /** 收款人工确认（9.1 无支付状态列，见 V122 文件头第二节）。 */
@@ -148,24 +137,21 @@ public final class DropshipOrderModels {
   /** 供应商回执：单号与**实际**代发成本（蓝图「回填供应商单号与代发成本」）。 */
   public record DropshipSupplierAckInput(
       @NotBlank @Schema(description = "供应商单号") String supplierOrderNo,
-      @NotNull @Schema(description = "供应商实际采购价（回执价，用于涨价判定）")
-          BigDecimal actualPurchaseAmount,
+      @NotNull @Schema(description = "供应商实际采购价（回执价，用于涨价判定）") BigDecimal actualPurchaseAmount,
       @NotNull @Schema(description = "供应商实际运费") BigDecimal actualSupplierShippingAmount,
       @Size(max = 128) String trackingNo,
       @Size(max = 400) String note) {}
 
   /** 供应商发货回执（运单号交给下游 9.6.1.3 / 10 物流）。 */
   public record DropshipShipmentInput(
-      @NotBlank String supplierTrackingNo,
-      @NotNull OffsetDateTime shippedAt) {}
+      @NotBlank String supplierTrackingNo, @NotNull OffsetDateTime shippedAt) {}
 
   /** 下单失败原因（下单失败态必填）。 */
   public record DropshipFailureInput(@NotBlank @Size(max = 400) String reason) {}
 
   /** 告警处置。 */
   public record DropshipAlertAckInput(
-      @NotBlank @Schema(description = "处置说明：怎么处理的（改价/换供应商/退款…）")
-          String resolutionNote) {}
+      @NotBlank @Schema(description = "处置说明：怎么处理的（改价/换供应商/退款…）") String resolutionNote) {}
 
   /** 供应商代发接口登记（只存 credential_ref，不存任何明文凭证）。 */
   public record DropshipEndpointInput(
@@ -173,8 +159,7 @@ public final class DropshipOrderModels {
       @NotBlank String vendorName,
       @Size(max = 300) String baseUrl,
       @Size(max = 200) String credentialRef,
-      @Schema(description = "是否已接线；true 时 baseUrl 必填（DB CHECK 钉死）")
-          Boolean wired,
+      @Schema(description = "是否已接线；true 时 baseUrl 必填（DB CHECK 钉死）") Boolean wired,
       @Size(max = 400) String note) {}
 
   // ------------------------------------------------------------ 读模型
@@ -222,8 +207,7 @@ public final class DropshipOrderModels {
       @Schema(nullable = true) BigDecimal actualPurchaseAmount,
       @Schema(nullable = true) BigDecimal actualSupplierShippingAmount,
       @Schema(description = "代发成本 = 采购价 + 供应商运费（生成列）") BigDecimal dropshipCost,
-      @Schema(description = "差价 = 售价 −（采购价 + 运费），**可以为负**（生成列）")
-          BigDecimal spreadAmount,
+      @Schema(description = "差价 = 售价 −（采购价 + 运费），**可以为负**（生成列）") BigDecimal spreadAmount,
       @Schema(description = "差价率（生成列）；售价为 0 时为 null") BigDecimal marginRate,
       @Schema(nullable = true) OffsetDateTime paymentConfirmedAt,
       @Schema(nullable = true) UUID paymentConfirmedByMembershipId,
@@ -294,10 +278,8 @@ public final class DropshipOrderModels {
   /**
    * 能力声明：把「哪些输入真有依据」显式报出来。
    *
-   * <p>本模块最要紧的一处是 <b>PAYMENT 维度 available=false</b>：
-   * 9.1 的 sales_order 没有支付状态列，12 财务的实收流水未交付，
-   * 因此「已付款」在本模块是**有主体的人工确认**，不是系统读到的支付事实。
-   * 把它报成 true（或画成 0 / 「—」）会让人以为收款状态已经通了。
+   * <p>本模块最要紧的一处是 <b>PAYMENT 维度 available=false</b>： 9.1 的 sales_order 没有支付状态列，12 财务的实收流水未交付，
+   * 因此「已付款」在本模块是**有主体的人工确认**，不是系统读到的支付事实。 把它报成 true（或画成 0 / 「—」）会让人以为收款状态已经通了。
    */
   public record DropshipOrderCapabilities(
       List<DropshipOrderCapabilityVendor> vendors,

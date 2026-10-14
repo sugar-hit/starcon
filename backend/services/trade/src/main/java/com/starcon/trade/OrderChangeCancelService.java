@@ -32,36 +32,28 @@ import org.springframework.web.server.ResponseStatusException;
  * <p>蓝图三条硬规则，本类逐条对应，<b>并在集成测试里逐条单独复验</b>：
  *
  * <ol>
- *   <li><b>已发货数量不可取消，只能转售后</b>（蓝图加粗句）。取消逐行申请时对照
- *       {@code order_fulfillment_line_progress} 的已发量核算可取消量；
- *       拒绝时逐行报出「已发多少、最多还能取消多少、该转售后（ownerModule 11）」。
- *       V119 守卫 9.3 是同一判据的 DB 层形态，绕过服务层写 SQL 同样被挡。</li>
- *   <li><b>取消前必须先确认仓库停止作业并释放占用</b>。建取消单时同步下达
- *       STOP_WORK 与 RELEASE_OCCUPANCY 两条任务；两个阶段都 COMPLETED 之前
- *       {@link #advanceCancellation} 不允许置 CONFIRMED，并把未完成项作为
- *       {@link OrderChangeCancelBlocker} 逐条报出。V119 守卫 9.2 同样在 DB 层复核。</li>
- *   <li><b>仅在责任方确认后才记录取消终态</b>。申请阶段 {@code cancelledQuantity}
- *       恒为 0（V119 守卫 9.1），终态量与退款金额由
- *       {@code confirm_order_cancellation} 在确认那一刻一并落库。</li>
+ *   <li><b>已发货数量不可取消，只能转售后</b>（蓝图加粗句）。取消逐行申请时对照 {@code order_fulfillment_line_progress} 的已发量核算可取消量；
+ *       拒绝时逐行报出「已发多少、最多还能取消多少、该转售后（ownerModule 11）」。 V119 守卫 9.3 是同一判据的 DB 层形态，绕过服务层写 SQL 同样被挡。
+ *   <li><b>取消前必须先确认仓库停止作业并释放占用</b>。建取消单时同步下达 STOP_WORK 与 RELEASE_OCCUPANCY 两条任务；两个阶段都 COMPLETED 之前
+ *       {@link #advanceCancellation} 不允许置 CONFIRMED，并把未完成项作为 {@link OrderChangeCancelBlocker}
+ *       逐条报出。V119 守卫 9.2 同样在 DB 层复核。
+ *   <li><b>仅在责任方确认后才记录取消终态</b>。申请阶段 {@code cancelledQuantity} 恒为 0（V119 守卫 9.1），终态量与退款金额由 {@code
+ *       confirm_order_cancellation} 在确认那一刻一并落库。
  * </ol>
  *
- * <p><b>第四条：数量调整需平台允许</b>。平台可变更规则是租户可维护的真实表
- * （{@code order_platform_change_rule}），按平台 × 店铺 × 变更类型查；
- * 查不到规则、规则不允许、超出可改窗口、超出单次减量上限四种情况分别报出，
- * 不用一个布尔值糊过去 —— 它们的运营动作完全不同（配规则 / 换渠道 / 催平台 / 改走线下）。
+ * <p><b>第四条：数量调整需平台允许</b>。平台可变更规则是租户可维护的真实表 （{@code order_platform_change_rule}），按平台 × 店铺 × 变更类型查；
+ * 查不到规则、规则不允许、超出可改窗口、超出单次减量上限四种情况分别报出， 不用一个布尔值糊过去 —— 它们的运营动作完全不同（配规则 / 换渠道 / 催平台 / 改走线下）。
  *
- * <p><b>本类不改写订单快照。</b>V99 第 8.3 节已把 sales_order_line 与
- * order_address_snapshot 在 SUBMITTED 后冻住，所以地址修改与数量调整都以
- * 「变更请求 + 前后值」的形式留痕，订单侧一行不动。
+ * <p><b>本类不改写订单快照。</b>V99 第 8.3 节已把 sales_order_line 与 order_address_snapshot 在 SUBMITTED
+ * 后冻住，所以地址修改与数量调整都以 「变更请求 + 前后值」的形式留痕，订单侧一行不动。
  *
- * <p><b>时间绑定</b>：一律 {@code ?::timestamptz} + {@link OffsetDateTime}。
- * {@code Timestamp.valueOf(LocalDateTime)} 在本项目所在时区静默偏 −28800s。
+ * <p><b>时间绑定</b>：一律 {@code ?::timestamptz} + {@link OffsetDateTime}。 {@code
+ * Timestamp.valueOf(LocalDateTime)} 在本项目所在时区静默偏 −28800s。
  *
- * <p><b>跨租户与不存在返回同一个 404</b>：RLS 已保证跨租户查不到，本类只负责让
- * 「查不到」和「不存在」走同一条出口，不给「这个 id 存在但不属于你」留出口。
+ * <p><b>跨租户与不存在返回同一个 404</b>：RLS 已保证跨租户查不到，本类只负责让 「查不到」和「不存在」走同一条出口，不给「这个 id 存在但不属于你」留出口。
  *
- * <p><b>租户过滤不写在 WHERE 里</b>：与 9.1.1.1 / 9.1.1.2 / 9.3.2.1 同一写法，
- * 靠 {@code AccessService.run} 绑定的 {@code app.current_tenant} + 表上的 FORCE RLS。
+ * <p><b>租户过滤不写在 WHERE 里</b>：与 9.1.1.1 / 9.1.1.2 / 9.3.2.1 同一写法， 靠 {@code AccessService.run} 绑定的
+ * {@code app.current_tenant} + 表上的 FORCE RLS。
  */
 @Service
 public class OrderChangeCancelService {
@@ -83,10 +75,8 @@ public class OrderChangeCancelService {
           // 待核验不是死局：仓库回执或平台回写回来之后仍可确认。
           OrderChangeStatus.PENDING_VERIFICATION,
               List.of(OrderChangeStatus.CONFIRMED, OrderChangeStatus.REJECTED),
-          OrderChangeStatus.CONFIRMED,
-              List.of(),
-          OrderChangeStatus.REJECTED,
-              List.of());
+          OrderChangeStatus.CONFIRMED, List.of(),
+          OrderChangeStatus.REJECTED, List.of());
 
   /** 下游 7.2.1.3 在 warehouse 服务里的真实释放入口（照抄 ReservationReleaseController 的映射）。 */
   private static final String WAREHOUSE_RELEASE_API =
@@ -103,9 +93,8 @@ public class OrderChangeCancelService {
   /**
    * 本模块哪些能力有数据、哪些还没接上。
    *
-   * <p>「已发货数量」这一段是本模块最要紧的边界：9.3.3.1 履约请求与 8 出库的发货事件
-   * 都未接入，所以 {@code availableProgress} 只有在投影里真有数据时才是 true。
-   * 界面据此把「未发货数量」显示成「未接入」而不是 0。
+   * <p>「已发货数量」这一段是本模块最要紧的边界：9.3.3.1 履约请求与 8 出库的发货事件 都未接入，所以 {@code availableProgress} 只有在投影里真有数据时才是
+   * true。 界面据此把「未发货数量」显示成「未接入」而不是 0。
    */
   public OrderChangeCancelCapabilities capabilities() {
     Long projections =
@@ -116,10 +105,8 @@ public class OrderChangeCancelService {
             "平台可变更规则 order_platform_change_rule（租户维护，按平台 × 店铺 × 变更类型判定）",
             "变更请求 order_change_request + order_change_request_line + order_change_address_field"
                 + "（地址按字段级前后值留痕，**不改写**订单快照）",
-            "取消请求 order_cancellation_request + order_cancellation_line（五态状态机，"
-                + "终态数量仅在责任方确认后落库）",
-            "仓库停止作业与释放占用 order_warehouse_hold_task（两个阶段，"
-                + "都 COMPLETED 才允许确认取消）",
+            "取消请求 order_cancellation_request + order_cancellation_line（五态状态机，" + "终态数量仅在责任方确认后落库）",
+            "仓库停止作业与释放占用 order_warehouse_hold_task（两个阶段，" + "都 COMPLETED 才允许确认取消）",
             "平台回写任务 order_platform_writeback_task（2.5.1.1 接手）",
             "事件时间线 order_change_event（append-only）"),
         List.of(
@@ -150,8 +137,7 @@ public class OrderChangeCancelService {
         "租户来自已认证成员关系（AccessService.require → identity /internal/access），"
             + "在事务内绑定 app.current_tenant，由表上的 FORCE RLS 强制隔离；"
             + "客户端的 X-Tenant-Id 头进不来也改不动它。跨租户与不存在返回同一个 404。",
-        "订单快照不改写：V99 第 8.3 节已把订单行与地址快照在 SUBMITTED 后冻住，"
-            + "所以本模块的地址修改与数量调整都以独立变更单 + 前后值留痕。");
+        "订单快照不改写：V99 第 8.3 节已把订单行与地址快照在 SUBMITTED 后冻住，" + "所以本模块的地址修改与数量调整都以独立变更单 + 前后值留痕。");
   }
 
   // ================================================================ 订单夹具
@@ -201,10 +187,8 @@ public class OrderChangeCancelService {
   /**
    * 录入履约投影（已发货数量）。
    *
-   * <p>这是 9.3.3.1 履约请求 / 8 出库发货事件落地后要调的**授权入口**，
-   * 也是本模块唯一能知道「已发多少」的地方。现在没有调用方，所以规则表里的
-   * 来源枚举保留了 {@code TENANT_MAINTAINED}：运维可以手工登记，让取消核算可测、
-   * 也让「已发货不可取消」这条硬规则在 9.3.3.1 交付前就已经是真的。
+   * <p>这是 9.3.3.1 履约请求 / 8 出库发货事件落地后要调的**授权入口**， 也是本模块唯一能知道「已发多少」的地方。现在没有调用方，所以规则表里的 来源枚举保留了 {@code
+   * TENANT_MAINTAINED}：运维可以手工登记，让取消核算可测、 也让「已发货不可取消」这条硬规则在 9.3.3.1 交付前就已经是真的。
    */
   public OrderChangeCancelProgressRow recordProgress(
       OrderChangeCancelProgressInput input, UUID actorMembershipId) {
@@ -212,8 +196,7 @@ public class OrderChangeCancelService {
     Map<UUID, OrderLine> lines = loadLines(order.id());
     OrderLine line = lines.get(input.orderLineId());
     if (line == null)
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "订单行不属于该订单：" + input.orderLineId());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "订单行不属于该订单：" + input.orderLineId());
 
     BigDecimal reserved = nonNegative(input.reservedQuantity(), "reservedQuantity");
     BigDecimal picking = nonNegative(input.pickingQuantity(), "pickingQuantity");
@@ -222,8 +205,10 @@ public class OrderChangeCancelService {
     if (sum.compareTo(line.quantity()) > 0)
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "预留 + 拣货 + 已发 = " + sum.stripTrailingZeros().toPlainString()
-              + " 超过订单行数量 " + line.quantity().stripTrailingZeros().toPlainString()
+          "预留 + 拣货 + 已发 = "
+              + sum.stripTrailingZeros().toPlainString()
+              + " 超过订单行数量 "
+              + line.quantity().stripTrailingZeros().toPlainString()
               + "：三个口径相加不可能超过原量");
     if (shipped.signum() > 0 && input.shippedAt() == null)
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "已发数量大于 0 时必须给出 shippedAt");
@@ -257,7 +242,14 @@ public class OrderChangeCancelService {
     // 该表按蓝图要求恰好挂一个父单（CHECK 两列异或），而履约投影不属于任何一次
     // 变更或取消请求，硬挂到订单号上会造出一条父单根本不存在的「时间线」。
     // 投影自己的留痕是 observed_at + updated_at + version。
-    return progressRow(line, reserved, picking, shipped, input.shippedAt(), input.progressSource(), input.observedAt());
+    return progressRow(
+        line,
+        reserved,
+        picking,
+        shipped,
+        input.shippedAt(),
+        input.progressSource(),
+        input.observedAt());
   }
 
   /** 按订单读投影；未投影的订单行不在返回里（界面对这些行显示「未接入」）。 */
@@ -274,7 +266,8 @@ public class OrderChangeCancelService {
                 + " where p.order_id = ? order by l.line_no",
             order.id())) {
       BigDecimal shipped = r.get("shipped_qty", BigDecimal.class);
-      OrderProgressSource source = OrderProgressSource.valueOf(r.get("progress_source", String.class));
+      OrderProgressSource source =
+          OrderProgressSource.valueOf(r.get("progress_source", String.class));
       out.add(
           progressRow(
               lines.get(r.get("order_line_id", UUID.class)),
@@ -313,7 +306,8 @@ public class OrderChangeCancelService {
   boolean progressProjected(UUID orderId) {
     Long n =
         sql.fetchOne(
-                "select count(*) c from order_fulfillment_line_progress where order_id = ?", orderId)
+                "select count(*) c from order_fulfillment_line_progress where order_id = ?",
+                orderId)
             .get("c", Long.class);
     return n != null && n > 0;
   }
@@ -428,8 +422,7 @@ public class OrderChangeCancelService {
     } catch (org.springframework.dao.DuplicateKeyException e) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "该平台 × 店铺 × 变更类型已有一条规则：同一维度只允许一条，否则「两条都允许」时"
-              + "选哪条取决于查询顺序，界面与审计会对不上");
+          "该平台 × 店铺 × 变更类型已有一条规则：同一维度只允许一条，否则「两条都允许」时" + "选哪条取决于查询顺序，界面与审计会对不上");
     }
     return oneRule(id);
   }
@@ -494,11 +487,7 @@ public class OrderChangeCancelService {
   // ================================================================ 平台规则判定
 
   record RuleDecision(
-      UUID ruleId,
-      boolean allowed,
-      boolean requiresAck,
-      String reason,
-      BigDecimal maxDecreaseQty) {
+      UUID ruleId, boolean allowed, boolean requiresAck, String reason, BigDecimal maxDecreaseQty) {
 
     static RuleDecision manual(String reason) {
       return new RuleDecision(null, true, false, reason, null);
@@ -508,20 +497,16 @@ public class OrderChangeCancelService {
   /**
    * 判定「这张单能不能改、能不能减」。
    *
-   * <p>四种结果分别报出，刻意不用一个布尔值糊过去：手工单（不适用）／无规则／
-   * 规则不允许／超出可改窗口或减量上限 —— 它们的运营动作完全不同。
+   * <p>四种结果分别报出，刻意不用一个布尔值糊过去：手工单（不适用）／无规则／ 规则不允许／超出可改窗口或减量上限 —— 它们的运营动作完全不同。
    */
   private RuleDecision evaluateRule(
       OrderHead order, String platformCode, String shopCode, OrderChangeKind kind) {
     if ("MANUAL".equals(order.orderSource()))
-      return RuleDecision.manual(
-          "手工单不经过平台，没有平台可变更规则：9.1.2.1 平台订单同步未交付，"
-              + "只有 MANUAL 来源的单会走到这里");
+      return RuleDecision.manual("手工单不经过平台，没有平台可变更规则：9.1.2.1 平台订单同步未交付，" + "只有 MANUAL 来源的单会走到这里");
     if (platformCode == null || platformCode.isBlank())
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "平台单必须给出 platformCode 才能判定平台是否允许变更：sales_order 上没有平台列"
-              + "（9.1.2.1 未交付），平台代码只能由调用方传入");
+          "平台单必须给出 platformCode 才能判定平台是否允许变更：sales_order 上没有平台列" + "（9.1.2.1 未交付），平台代码只能由调用方传入");
     String shopValue = shop(platformCode, shopCode);
     Record r =
         sql.fetchOne(
@@ -538,7 +523,13 @@ public class OrderChangeCancelService {
     if (r == null)
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "平台 " + platformCode + " / 店铺 " + shopValue + " 没有登记「" + label(kind) + "」的可变更规则："
+          "平台 "
+              + platformCode
+              + " / 店铺 "
+              + shopValue
+              + " 没有登记「"
+              + label(kind)
+              + "」的可变更规则："
               + "没有规则不等于允许 —— 请先在平台可变更规则里登记该平台的政策（"
               + "各平台的可改窗口与是否允许改量本来就不一样，不能靠代码里的默认值猜）");
     boolean allowed = Boolean.TRUE.equals(r.get("allowed", Boolean.class));
@@ -546,15 +537,20 @@ public class OrderChangeCancelService {
     if (deadline != null && orderAgeHours(order) > deadline.doubleValue())
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          "超过平台可改窗口：下单已 " + orderAgeHours(order) + " 小时，平台 "
-              + platformCode + " 的「" + label(kind) + "」窗口是 " + deadline + " 小时");
+          "超过平台可改窗口：下单已 "
+              + orderAgeHours(order)
+              + " 小时，平台 "
+              + platformCode
+              + " 的「"
+              + label(kind)
+              + "」窗口是 "
+              + deadline
+              + " 小时");
     return new RuleDecision(
         r.get("id", UUID.class),
         allowed,
         Boolean.TRUE.equals(r.get("requires_platform_ack", Boolean.class)),
-        allowed
-            ? "平台允许" + label(kind)
-            : "平台 " + platformCode + " 不允许" + label(kind) + "（政策登记结果）",
+        allowed ? "平台允许" + label(kind) : "平台 " + platformCode + " 不允许" + label(kind) + "（政策登记结果）",
         r.get("max_decrease_qty", BigDecimal.class));
   }
 
@@ -640,12 +636,10 @@ public class OrderChangeCancelService {
   /**
    * 建变更请求。
    *
-   * <p>三条校验按顺序：平台允许 → 行属于本单且方向合法 → 减量不超规则上限。
-   * 顺序有讲究：先判平台规则，因为「平台根本不允许改量」比「你把第 3 行算错了」
+   * <p>三条校验按顺序：平台允许 → 行属于本单且方向合法 → 减量不超规则上限。 顺序有讲究：先判平台规则，因为「平台根本不允许改量」比「你把第 3 行算错了」
    * 更根本，先报后者会让用户以为改对数量就能提交。
    */
-  public OrderChangeCancelChangeRow createChange(
-      OrderChangeCancelChangeInput input, UUID actor) {
+  public OrderChangeCancelChangeRow createChange(OrderChangeCancelChangeInput input, UUID actor) {
     OrderHead order = loadOrder(input.orderId());
     Map<UUID, OrderLine> lines = loadLines(order.id());
     OrderChangeKind kind = input.changeKind();
@@ -658,8 +652,7 @@ public class OrderChangeCancelService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "修改地址必须给出要变更的字段");
 
     RuleDecision rule = evaluateRule(order, input.platformCode(), input.shopCode(), kind);
-    if (!rule.allowed())
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, rule.reason());
+    if (!rule.allowed()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, rule.reason());
 
     UUID id = UUID.randomUUID();
     OffsetDateTime now = OffsetDateTime.now();
@@ -688,14 +681,20 @@ public class OrderChangeCancelService {
           if (requested.compareTo(cancelable) > 0)
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
-                "订单行 " + base.skuCode() + " 已发 " + plain(shipped)
-                    + " 件，减少后不能低于已发数量：只能减到 " + plain(cancelable)
+                "订单行 "
+                    + base.skuCode()
+                    + " 已发 "
+                    + plain(shipped)
+                    + " 件，减少后不能低于已发数量：只能减到 "
+                    + plain(cancelable)
                     + " 件。已发货数量不可取消，只能转售后（ownerModule 11）");
           if (rule.maxDecreaseQty() != null && decrease.compareTo(rule.maxDecreaseQty()) > 0)
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "单次减量 " + plain(decrease) + " 超过平台规则上限 " + plain(rule.maxDecreaseQty()));
-          refund = refund.add(base.unitPrice().multiply(decrease.abs()).setScale(4, RoundingMode.HALF_UP));
+          refund =
+              refund.add(
+                  base.unitPrice().multiply(decrease.abs()).setScale(4, RoundingMode.HALF_UP));
         }
       }
     }
@@ -747,8 +746,7 @@ public class OrderChangeCancelService {
         String before = field.beforeValue() == null ? "" : field.beforeValue().trim();
         if (before.equals(after))
           throw new ResponseStatusException(
-              HttpStatus.BAD_REQUEST,
-              "地址字段 " + field.fieldCode() + " 的变更前后值相同：不是变更的条目不落库");
+              HttpStatus.BAD_REQUEST, "地址字段 " + field.fieldCode() + " 的变更前后值相同：不是变更的条目不落库");
         sql.execute(
             "insert into order_change_address_field(id,tenant_id,change_request_id,address_role,"
                 + "field_code,before_value,after_value,created_at)"
@@ -764,14 +762,19 @@ public class OrderChangeCancelService {
       }
     }
 
-    writeEvent(id, null, "REQUESTED", "", "REQUESTED", label(kind) + "申请：" + rule.reason(), actor, now);
+    writeEvent(
+        id, null, "REQUESTED", "", "REQUESTED", label(kind) + "申请：" + rule.reason(), actor, now);
     if (rule.ruleId() != null) {
       writeEvent(id, null, "RULE_MATCHED", "", "", "命中平台规则 " + rule.ruleId(), actor, now);
       createWriteback(
-          id, null, kind, input.platformCode(), shop(input.platformCode(), input.shopCode()),
-          order.externalOrderNo(), now);
-      writeEvent(id, null, "WRITEBACK_CREATED", "", "",
-          "已向 2.5.1.1 下达平台回写任务", actor, now);
+          id,
+          null,
+          kind,
+          input.platformCode(),
+          shop(input.platformCode(), input.shopCode()),
+          order.externalOrderNo(),
+          now);
+      writeEvent(id, null, "WRITEBACK_CREATED", "", "", "已向 2.5.1.1 下达平台回写任务", actor, now);
     }
     return oneChange(id);
   }
@@ -809,7 +812,11 @@ public class OrderChangeCancelService {
                         r.get("after_value", String.class)));
     List<OrderChangeCancelWritebackRow> writeback = writebacksForChange(id);
     return new OrderChangeCancelChangeDetail(
-        header, lines, fields, writeback, timelineForChange(id),
+        header,
+        lines,
+        fields,
+        writeback,
+        timelineForChange(id),
         "变更不改写订单快照：订单行与地址快照在 SUBMITTED 后已被 V99 第 8.3 节冻住，"
             + "所以这里记录的是「申请了什么、被确认了什么」，订单本身保持下单当时的样子。");
   }
@@ -837,13 +844,11 @@ public class OrderChangeCancelService {
       for (var task : writebacksForChange(id)) {
         if (task.status() == OrderWritebackStatus.REJECTED)
           throw new ResponseStatusException(
-              HttpStatus.BAD_REQUEST,
-              "平台回写已被拒绝（" + text(task.lastError()) + "），不能把变更确认成生效");
+              HttpStatus.BAD_REQUEST, "平台回写已被拒绝（" + text(task.lastError()) + "），不能把变更确认成生效");
         if (task.status() != OrderWritebackStatus.CONFIRMED)
           throw new ResponseStatusException(
               HttpStatus.BAD_REQUEST,
-              "平台回写尚未被平台接受（当前 " + task.status() + "），变更不能确认成生效："
-                  + "平台规则要求平台确认，本模块不替平台做这个决定");
+              "平台回写尚未被平台接受（当前 " + task.status() + "），变更不能确认成生效：" + "平台规则要求平台确认，本模块不替平台做这个决定");
       }
     }
 
@@ -867,11 +872,16 @@ public class OrderChangeCancelService {
             OffsetDateTime.now(),
             id,
             header.version());
-    if (updated == 0)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "变更请求已被他人推进，请刷新后重试");
+    if (updated == 0) throw new ResponseStatusException(HttpStatus.CONFLICT, "变更请求已被他人推进，请刷新后重试");
     writeEvent(
-        id, null, input.toStatus().name(), header.status().name(), input.toStatus().name(),
-        text(input.reason()), actor, OffsetDateTime.now());
+        id,
+        null,
+        input.toStatus().name(),
+        header.status().name(),
+        input.toStatus().name(),
+        text(input.reason()),
+        actor,
+        OffsetDateTime.now());
     return oneChange(id);
   }
 
@@ -935,9 +945,8 @@ public class OrderChangeCancelService {
   /**
    * 建取消请求：同步下达仓库停止作业与释放占用两条任务。
    *
-   * <p>蓝图要求「先确认仓库停止作业并释放占用」—— 所以任务在**申请时**就下达，
-   * 而不是等到确认那一刻才建。没有这一步，取消单会变成「先取消，释放以后再说」，
-   * 那正是 V119 守卫 9.2 要挡的事。
+   * <p>蓝图要求「先确认仓库停止作业并释放占用」—— 所以任务在**申请时**就下达， 而不是等到确认那一刻才建。没有这一步，取消单会变成「先取消，释放以后再说」， 那正是 V119 守卫
+   * 9.2 要挡的事。
    */
   public OrderChangeCancelCancellationRow createCancellation(
       OrderChangeCancelCancellationInput input, UUID actor) {
@@ -963,20 +972,35 @@ public class OrderChangeCancelService {
         if (shippedQty.signum() > 0)
           throw new ResponseStatusException(
               HttpStatus.CONFLICT,
-              "订单行 " + base.skuCode() + "（" + base.id() + "）已发货 " + plain(shippedQty)
-                  + " 件，原量 " + plain(base.quantity()) + " 件，最多只能取消 " + plain(cancelable)
-                  + " 件，申请了 " + plain(cancel) + " 件。已发货订单不能取消，只能转售后"
+              "订单行 "
+                  + base.skuCode()
+                  + "（"
+                  + base.id()
+                  + "）已发货 "
+                  + plain(shippedQty)
+                  + " 件，原量 "
+                  + plain(base.quantity())
+                  + " 件，最多只能取消 "
+                  + plain(cancelable)
+                  + " 件，申请了 "
+                  + plain(cancel)
+                  + " 件。已发货订单不能取消，只能转售后"
                   + "（ownerModule 11，11 售后尚未开发，需走线下或等其交付）");
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
-            "订单行 " + base.skuCode() + " 申请取消 " + plain(cancel) + " 件，超过原量 "
-                + plain(base.quantity()) + " 件");
+            "订单行 "
+                + base.skuCode()
+                + " 申请取消 "
+                + plain(cancel)
+                + " 件，超过原量 "
+                + plain(base.quantity())
+                + " 件");
       }
     }
 
-    RuleDecision rule = evaluateRule(order, input.platformCode(), input.shopCode(), OrderChangeKind.CANCEL);
-    if (!rule.allowed())
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, rule.reason());
+    RuleDecision rule =
+        evaluateRule(order, input.platformCode(), input.shopCode(), OrderChangeKind.CANCEL);
+    if (!rule.allowed()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, rule.reason());
 
     UUID id = UUID.randomUUID();
     OffsetDateTime now = OffsetDateTime.now();
@@ -1037,8 +1061,7 @@ public class OrderChangeCancelService {
     // 仓库任务：每个仓两个阶段。
     for (String warehouseRef : input.warehouseRefs()) {
       String ref = warehouseRef == null ? "" : warehouseRef.trim();
-      if (ref.isEmpty())
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "仓库清单里有空白的仓库编码");
+      if (ref.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "仓库清单里有空白的仓库编码");
       for (var reservationRef : reservationRefsFor(input)) {
         for (OrderHoldTaskStage stage :
             List.of(OrderHoldTaskStage.STOP_WORK, OrderHoldTaskStage.RELEASE_OCCUPANCY)) {
@@ -1122,8 +1145,7 @@ public class OrderChangeCancelService {
                 + " requested_by_membership_id, decided_at, rejection_reason, version, created_at"
                 + " from order_cancellation_request where id = ?",
             id);
-    if (r == null)
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "取消请求不存在或不属于当前租户");
+    if (r == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "取消请求不存在或不属于当前租户");
     return cancellationRow(r);
   }
 
@@ -1153,10 +1175,7 @@ public class OrderChangeCancelService {
                       r.get("unit_price", BigDecimal.class),
                       r.get("refund_amount", BigDecimal.class),
                       blocking,
-                      blocking
-                          ? "该行已全部发货，可取消数量为 0。已发货订单不能取消，只能转售后"
-                              + "（ownerModule 11）"
-                          : "");
+                      blocking ? "该行已全部发货，可取消数量为 0。已发货订单不能取消，只能转售后" + "（ownerModule 11）" : "");
                 });
     return new OrderChangeCancelCancellationDetail(
         header,
@@ -1174,8 +1193,8 @@ public class OrderChangeCancelService {
   /** 「现在还差什么才能确认」——逐条报出，不让操作人去翻两个服务的表。 */
   public List<OrderChangeCancelBlocker> blockers(UUID cancellationId) {
     OrderChangeCancelCancellationRow header = oneCancellation(cancellationId);
-    if (header.status() == OrderChangeStatus.CONFIRMED || header.status() == OrderChangeStatus.REJECTED)
-      return List.of();
+    if (header.status() == OrderChangeStatus.CONFIRMED
+        || header.status() == OrderChangeStatus.REJECTED) return List.of();
     List<OrderChangeCancelBlocker> blockers = new ArrayList<>();
     for (var task : holdTasks(cancellationId)) {
       if (task.status() != OrderHoldTaskStatus.COMPLETED)
@@ -1183,9 +1202,13 @@ public class OrderChangeCancelService {
             new OrderChangeCancelBlocker(
                 "WAREHOUSE_TASK_" + task.taskStage() + "_" + task.status(),
                 "7.2.1.3",
-                "仓库 " + task.warehouseRef() + " 的"
+                "仓库 "
+                    + task.warehouseRef()
+                    + " 的"
                     + (task.taskStage() == OrderHoldTaskStage.STOP_WORK ? "停止作业" : "释放占用")
-                    + "尚未完成（当前 " + task.status() + "）",
+                    + "尚未完成（当前 "
+                    + task.status()
+                    + "）",
                 Map.of(
                     "taskId", task.id(),
                     "warehouseRef", task.warehouseRef(),
@@ -1208,11 +1231,9 @@ public class OrderChangeCancelService {
   /**
    * 「数据完整性提示」：<b>不是</b>确认闸门。
    *
-   * <p>刻意与 {@link #blockers} 分开：本单没有任何履约投影时，「未发货数量」是
-   * <b>未接入</b>而不是 0，它要求界面明说这一点，但它<b>不</b>阻止确认 ——
-   * 拿它当闸门会让本模块在 9.3.3.1 交付前对所有订单完全不可用，
-   * 而真正要紧的那条规则（已发货数量不可取消）只要投影有数据就自动生效。
-   * 所以：提示挂在 warnings 上并逐条说明该人工核对，硬闸门只留责任方回执。
+   * <p>刻意与 {@link #blockers} 分开：本单没有任何履约投影时，「未发货数量」是 <b>未接入</b>而不是 0，它要求界面明说这一点，但它<b>不</b>阻止确认 ——
+   * 拿它当闸门会让本模块在 9.3.3.1 交付前对所有订单完全不可用， 而真正要紧的那条规则（已发货数量不可取消）只要投影有数据就自动生效。 所以：提示挂在 warnings
+   * 上并逐条说明该人工核对，硬闸门只留责任方回执。
    */
   public List<OrderChangeCancelBlocker> warnings(UUID cancellationId) {
     OrderChangeCancelCancellationRow header = oneCancellation(cancellationId);
@@ -1221,15 +1242,11 @@ public class OrderChangeCancelService {
         new OrderChangeCancelBlocker(
             "FULFILLMENT_PROGRESS_NOT_CONNECTED",
             "9.3.3.1 履约请求",
-            "本单没有任何履约投影记录，「未发货数量」是**未接入**而不是 0："
-                + "本次取消的可取消量核对不完整，确认前请人工确认已发数量",
+            "本单没有任何履约投影记录，「未发货数量」是**未接入**而不是 0：" + "本次取消的可取消量核对不完整，确认前请人工确认已发数量",
             Map.of("orderId", header.orderId())));
   }
 
-  /**
-   * 推进取消状态。CONFIRMED 走 DB 侧的窄函数：终态数量、退款金额、事件与状态翻转
-   * 在**同一事务**里完成，不存在「终态量已落而状态没翻」的中间态。
-   */
+  /** 推进取消状态。CONFIRMED 走 DB 侧的窄函数：终态数量、退款金额、事件与状态翻转 在**同一事务**里完成，不存在「终态量已落而状态没翻」的中间态。 */
   public OrderChangeCancelCancellationRow advanceCancellation(
       UUID id, OrderChangeCancelStatusInput input, UUID actor) {
     OrderChangeCancelCancellationRow header = oneCancellation(id);
@@ -1273,11 +1290,16 @@ public class OrderChangeCancelService {
             OffsetDateTime.now(),
             id,
             header.version());
-    if (updated == 0)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "取消请求已被他人推进，请刷新后重试");
+    if (updated == 0) throw new ResponseStatusException(HttpStatus.CONFLICT, "取消请求已被他人推进，请刷新后重试");
     writeEvent(
-        id, null, input.toStatus().name(), header.status().name(), input.toStatus().name(),
-        text(input.reason()), actor, OffsetDateTime.now());
+        id,
+        null,
+        input.toStatus().name(),
+        header.status().name(),
+        input.toStatus().name(),
+        text(input.reason()),
+        actor,
+        OffsetDateTime.now());
     return oneCancellation(id);
   }
 
@@ -1288,11 +1310,9 @@ public class OrderChangeCancelService {
       UUID cancellationId, UUID taskId, OrderChangeCancelHoldTaskInput input, UUID actor) {
     OrderChangeCancelHoldTaskRow current = oneHoldTask(cancellationId, taskId);
     if (current.status() == OrderHoldTaskStatus.COMPLETED)
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "该任务已是 COMPLETED，回执不可改写：释放结果是举证凭据");
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "该任务已是 COMPLETED，回执不可改写：释放结果是举证凭据");
     if (input.status() == OrderHoldTaskStatus.COMPLETED && text(input.resultNote()).isEmpty())
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "完成必须给出结果说明：没有回执的释放事后无法核对");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "完成必须给出结果说明：没有回执的释放事后无法核对");
     if ((input.status() == OrderHoldTaskStatus.FAILED
             || input.status() == OrderHoldTaskStatus.REJECTED)
         && text(input.failureReason()).isEmpty())
@@ -1316,7 +1336,8 @@ public class OrderChangeCancelService {
             input.status().name(),
             completed,
             text(input.resultNote()),
-            input.status() == OrderHoldTaskStatus.FAILED || input.status() == OrderHoldTaskStatus.REJECTED
+            input.status() == OrderHoldTaskStatus.FAILED
+                    || input.status() == OrderHoldTaskStatus.REJECTED
                 ? text(input.failureReason())
                 : "",
             input.status().name(),
@@ -1326,16 +1347,21 @@ public class OrderChangeCancelService {
             OffsetDateTime.now(),
             taskId,
             current.status().name());
-    if (updated == 0)
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "任务状态已被他人更新，请刷新后重试");
+    if (updated == 0) throw new ResponseStatusException(HttpStatus.CONFLICT, "任务状态已被他人更新，请刷新后重试");
     writeEvent(
         null,
         cancellationId,
         "WAREHOUSE_TASK_" + input.status().name(),
         current.status().name(),
         input.status().name(),
-        "仓库 " + current.warehouseRef() + " / " + current.taskStage() + "："
-            + (text(input.resultNote()).isEmpty() ? text(input.failureReason()) : text(input.resultNote())),
+        "仓库 "
+            + current.warehouseRef()
+            + " / "
+            + current.taskStage()
+            + "："
+            + (text(input.resultNote()).isEmpty()
+                ? text(input.failureReason())
+                : text(input.resultNote())),
         actor,
         OffsetDateTime.now());
     return oneHoldTask(cancellationId, taskId);
@@ -1350,8 +1376,7 @@ public class OrderChangeCancelService {
                 + " from order_warehouse_hold_task where id = ? and cancellation_request_id = ?",
             taskId,
             cancellationId);
-    if (r == null)
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "仓库任务不存在或不属于该取消请求");
+    if (r == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "仓库任务不存在或不属于该取消请求");
     return new OrderChangeCancelHoldTaskRow(
         r.get("id", UUID.class),
         r.get("cancellation_request_id", UUID.class),
@@ -1400,8 +1425,7 @@ public class OrderChangeCancelService {
   /**
    * 下达平台回写任务（下游 2.5.1.1）。
    *
-   * <p><b>只为平台单建</b>：手工单不经过平台，没有可回写的对象。建了却永远没人处理，
-   * 界面上就会挂一条永远「待回写」的任务，那是拿空任务冒充下游已接入。
+   * <p><b>只为平台单建</b>：手工单不经过平台，没有可回写的对象。建了却永远没人处理， 界面上就会挂一条永远「待回写」的任务，那是拿空任务冒充下游已接入。
    */
   private void createWriteback(
       UUID changeRequestId,
@@ -1477,10 +1501,9 @@ public class OrderChangeCancelService {
             "select id, change_request_id, cancellation_request_id, platform_order_ref, change_kind,"
                 + " status, attempt_count from order_platform_writeback_task where id = ?",
             taskId);
-    if (current == null)
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "回写任务不存在或不属于当前租户");
+    if (current == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "回写任务不存在或不属于当前租户");
     if (OrderWritebackStatus.valueOf(current.get("status", String.class))
-            == OrderWritebackStatus.CONFIRMED)
+        == OrderWritebackStatus.CONFIRMED)
       throw new ResponseStatusException(HttpStatus.CONFLICT, "回写任务已被平台接受，不可改写");
     if (input.status() == OrderWritebackStatus.REJECTED && text(input.lastError()).isEmpty())
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "平台拒绝必须给出原因");
@@ -1581,19 +1604,23 @@ public class OrderChangeCancelService {
 
   private UUID currentTenant() {
     String value =
-        sql.fetchOne("select nullif(current_setting('app.current_tenant', true),'') v").get("v", String.class);
-    if (value == null)
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "租户上下文缺失，拒绝写入");
+        sql.fetchOne("select nullif(current_setting('app.current_tenant', true),'') v")
+            .get("v", String.class);
+    if (value == null) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "租户上下文缺失，拒绝写入");
     return UUID.fromString(value);
   }
 
-  private void requireTransition(
-      OrderChangeStatus from, OrderChangeStatus to, String what) {
+  private void requireTransition(OrderChangeStatus from, OrderChangeStatus to, String what) {
     List<OrderChangeStatus> allowed = TRANSITIONS.getOrDefault(from, List.of());
     if (!allowed.contains(to))
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
-          what + " 当前状态「" + from + "」不能转到「" + to + "」，可选："
+          what
+              + " 当前状态「"
+              + from
+              + "」不能转到「"
+              + to
+              + "」，可选："
               + (allowed.isEmpty() ? "无（终态）" : allowed));
   }
 

@@ -76,17 +76,28 @@ describe('11.4.2.2 知识库前端模型', () => {
 
   describe('占位符（规则 R1）', () => {
     it('一致时通过', () => {
-      expect(placeholderProblem('您好 {buyer_name}，订单 {order_no}', 'Hi {buyer_name}, order {order_no}')).toBeNull();
+      expect(
+        placeholderProblem(
+          '您好 {buyer_name}，订单 {order_no}',
+          'Hi {buyer_name}, order {order_no}',
+        ),
+      ).toBeNull();
     });
 
     it('译文漏占位符时报出漏了哪个', () => {
-      const problem = placeholderProblem('您好 {buyer_name}，订单 {order_no}', 'Hi buyer_name, order {order_no}');
+      const problem = placeholderProblem(
+        '您好 {buyer_name}，订单 {order_no}',
+        'Hi buyer_name, order {order_no}',
+      );
       expect(problem).toContain('buyer_name');
       expect(problem).toContain('漏抄');
     });
 
     it('译文多占位符时报出多了哪个与为什么', () => {
-      const problem = placeholderProblem('您好 {buyer_name}', 'Hi {buyer_name}, track {tracking_no}');
+      const problem = placeholderProblem(
+        '您好 {buyer_name}',
+        'Hi {buyer_name}, track {tracking_no}',
+      );
       expect(problem).toContain('tracking_no');
       expect(problem).toContain('永远填不上');
     });
@@ -102,7 +113,9 @@ describe('11.4.2.2 知识库前端模型', () => {
     });
 
     it('出现次数不影响判定', () => {
-      expect(placeholderProblem('请确认 {order_no}', '请确认 {order_no} {order_no} {order_no}')).toBeNull();
+      expect(
+        placeholderProblem('请确认 {order_no}', '请确认 {order_no} {order_no} {order_no}'),
+      ).toBeNull();
     });
 
     it('空花括号与未闭合花括号不算占位符', () => {
@@ -234,9 +247,7 @@ describe('11.4.2.2 知识库前端模型', () => {
       );
       expect(keywordsProblem('词'.repeat(MAX_KEYWORD_LENGTH + 1))).toContain('短词');
       expect(
-        keywordsProblem(
-          Array.from({ length: MAX_KEYWORDS + 1 }, (_, i) => `词${i}`).join(','),
-        ),
+        keywordsProblem(Array.from({ length: MAX_KEYWORDS + 1 }, (_, i) => `词${i}`).join(',')),
       ).toContain(`最多 ${MAX_KEYWORDS} 个`);
     });
 

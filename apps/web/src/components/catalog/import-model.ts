@@ -61,7 +61,11 @@ export const IMPORT_MODES = [
 export const TARGET_ENTITIES = [
   { value: 'SPU', label: '商品 SPU', hint: '编码、名称、描述、品牌、类目、状态' },
   { value: 'SKU', label: 'SKU', hint: '编码、所属商品、名称、基础单位、状态' },
-  { value: 'ATTRIBUTE', label: '属性值', hint: '商品 + 属性编码 + 属性值（只写值，不新建属性定义）' },
+  {
+    value: 'ATTRIBUTE',
+    label: '属性值',
+    hint: '商品 + 属性编码 + 属性值（只写值，不新建属性定义）',
+  },
   { value: 'PACKAGE', label: '包装档案', hint: '长宽高、净重、毛重（毛重不能小于净重）' },
   { value: 'BARCODE', label: '条码', hint: 'SKU + 条码体系 + 条码值（一个条码只能属于一个 SKU）' },
 ] as const;

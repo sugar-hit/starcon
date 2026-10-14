@@ -50,8 +50,7 @@ export const VERDICT_LABELS: Record<Verdict, string> = {
 export const VERDICT_ACTIONS: Record<Verdict, string> = {
   CANDIDATE: '确认后可以批量停用（停用不删除，历史单据仍可展示）',
   NOT_ZOMBIE: '这条主数据有人在用，不会进入停用范围',
-  INCOMPLETE:
-    '缺少有效的上游观测，未知不等于零：先接入该维度的推送，或刷新过期的快照',
+  INCOMPLETE: '缺少有效的上游观测，未知不等于零：先接入该维度的推送，或刷新过期的快照',
 };
 
 export const ENTITY_TYPE_LABELS: Record<string, string> = {
@@ -236,9 +235,7 @@ export function requiredDimensionText(count: number): string {
 }
 
 /** 批量停用按钮的禁用原因。返回 null 表示可以停。 */
-export function deactivateBlockReason(
-  candidate: ZombieCandidate,
-): string | null {
+export function deactivateBlockReason(candidate: ZombieCandidate): string | null {
   switch (candidate.verdict as Verdict) {
     case 'CANDIDATE':
       return null;
@@ -284,10 +281,12 @@ export function zombieErrorText(error: unknown): string {
  */
 export function blockedLines(error: unknown): string[] {
   if (!(error instanceof ApiError) || error.status !== 409) return [];
-  const body = error.body as { blocked?: { code?: string; name?: string; reason?: string }[] } | null;
+  const body = error.body as {
+    blocked?: { code?: string; name?: string; reason?: string }[];
+  } | null;
   if (!body?.blocked?.length) return [];
-  return body.blocked.map(
-    (item) => `${item.code ?? ''} ${item.name ?? ''} —— ${item.reason ?? '不满足停用条件'}`.trim(),
+  return body.blocked.map((item) =>
+    `${item.code ?? ''} ${item.name ?? ''} —— ${item.reason ?? '不满足停用条件'}`.trim(),
   );
 }
 
@@ -309,11 +308,7 @@ export async function saveCleanupRule(
   entityType: string,
   input: ZombieCleanupRuleInput,
 ): Promise<ZombieCleanupRuleView> {
-  return api<ZombieCleanupRuleView>(
-    `catalog/zombie-candidates/rules/${entityType}`,
-    'PUT',
-    input,
-  );
+  return api<ZombieCleanupRuleView>(`catalog/zombie-candidates/rules/${entityType}`, 'PUT', input);
 }
 
 export async function fetchZombieCandidates(

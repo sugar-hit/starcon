@@ -52,7 +52,7 @@ describe('handover-model', () => {
     it('逐箱运单号留空的那些不进请求体，不给后端塞一批空字符串', () => {
       const check = waybillInputOf({
         ...base,
-        parcelWaybills: { 'p1': 'SF-A', 'p2': '  ', 'p3': '' },
+        parcelWaybills: { p1: 'SF-A', p2: '  ', p3: '' },
       });
       expect(check.ok).toBe(true);
       if (check.ok) {
@@ -61,7 +61,7 @@ describe('handover-model', () => {
     });
 
     it('一个逐箱号都没有时整个字段为 null，而不是空数组', () => {
-      const check = waybillInputOf({ ...base, parcelWaybills: { 'p1': '  ' } });
+      const check = waybillInputOf({ ...base, parcelWaybills: { p1: '  ' } });
       expect(check.ok).toBe(true);
       if (check.ok) expect(check.body.parcelWaybillNos).toBeNull();
     });
@@ -175,7 +175,9 @@ describe('handover-model', () => {
     });
 
     it('释放了实物预占时两个数都念出来', () => {
-      expect(ledgerDigest([{ onHandDelta: '-6', reservedDelta: '-2' }])).toBe('出库 -6，释放预占 -2');
+      expect(ledgerDigest([{ onHandDelta: '-6', reservedDelta: '-2' }])).toBe(
+        '出库 -6，释放预占 -2',
+      );
     });
   });
 

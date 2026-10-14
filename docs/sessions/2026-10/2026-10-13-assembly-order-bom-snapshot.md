@@ -25,6 +25,7 @@ BOM 在 catalog 3.5.2（V25 `bom`/`bom_version`/`bom_component`、V26 `bom_explo
 SQL / FK / 共享视图。
 
 做法（仓库既有先例的延续）：
+
 - `bomId` / `bomVersionId` / `bomComponentId` / `referenceId` 全部是**无外键的逻辑引用键**，只作追溯；
 - 组装要用的组件明细在自己的 `assembly_order_component` 上落成**冻结快照**：
   `unit_quantity` / `scrap_rate` / `required_quantity` 全部由调用方按 catalog 规则 R7 的结果传入并原样落库；
@@ -64,12 +65,12 @@ SQL / FK / 共享视图。
 
 四层强制，缺一不可：
 
-| 层 | 机制 | 挡住什么 |
-| --- | --- | --- |
-| ① 行级 | `assembly_order_component` CHECK：`issued_quantity = 0 OR issued_quantity = required_quantity` | 部分领用（把一个套装拆成两半装） |
-| ② 单头 CHECK | `status<>'COMPLETED' OR issued=required` 且 `inbound=assembly` | 单头自报数与明细不符 |
-| ③ 合计触发器 | `refresh_assembly_order_totals()` —— **单头合计列的唯一写入者** | 应用层写一个「发够了但账上没发」的数 |
-| ④ 守卫触发器 | `guard_assembly_order()` 在 BEFORE UPDATE **回读 `inventory_entry` / `inventory_balance`** | **绕过服务层直连 SQL** 造「只入成品不扣组件」「少扣组件」 |
+| 层           | 机制                                                                                           | 挡住什么                                                  |
+| ------------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| ① 行级       | `assembly_order_component` CHECK：`issued_quantity = 0 OR issued_quantity = required_quantity` | 部分领用（把一个套装拆成两半装）                          |
+| ② 单头 CHECK | `status<>'COMPLETED' OR issued=required` 且 `inbound=assembly`                                 | 单头自报数与明细不符                                      |
+| ③ 合计触发器 | `refresh_assembly_order_totals()` —— **单头合计列的唯一写入者**                                | 应用层写一个「发够了但账上没发」的数                      |
+| ④ 守卫触发器 | `guard_assembly_order()` 在 BEFORE UPDATE **回读 `inventory_entry` / `inventory_balance`**     | **绕过服务层直连 SQL** 造「只入成品不扣组件」「少扣组件」 |
 
 第 ④ 层是关键：如果只在前三层，「不变量」就只是应用层的一行 if，
 绕过服务就能造出账实不符的记录。测试 `invariantIsEnforcedByDatabase` /
@@ -95,19 +96,20 @@ SQL / FK / 共享视图。
 
 ## 二、关键 trade-off
 
-| 决策 | 放弃的 | 换来的 |
-| --- | --- | --- |
-| 自建组装单表（不复用 V1 分录表当单据） | 与 `ProcessingOrderService`「不新建表」的简洁一致 | 组装单有独立生命周期、BOM 版本可挂载、业务可不等加工单直接发起 |
-| 组件明细落**冻结快照**而不是实时读 BOM | BOM 改版自动生效 | 已建单据的历史可解释；「每张事实表只有一个写入所有者」；无跨库读 |
-| 拒绝超 4 位小数的量而不是取整 | 「什么都能提交」的表面体验 | 账实相符；不变量可写成严格等号；错误信息指向具体行 |
-| 上游两种发起并存（DIRECT + 加工单引用） | 单一来源的简洁 | 仓库现场不必先开加工单就能组装（蓝图输入只要求「成品 SKU 与 BOM 版本」） |
-| 允许取消草稿 | 状态机更小 | 备料阶段「料没到 / 需求变了」是常态；且取消**不动库存**，无账实风险 |
+| 决策                                    | 放弃的                                            | 换来的                                                                   |
+| --------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------ |
+| 自建组装单表（不复用 V1 分录表当单据）  | 与 `ProcessingOrderService`「不新建表」的简洁一致 | 组装单有独立生命周期、BOM 版本可挂载、业务可不等加工单直接发起           |
+| 组件明细落**冻结快照**而不是实时读 BOM  | BOM 改版自动生效                                  | 已建单据的历史可解释；「每张事实表只有一个写入所有者」；无跨库读         |
+| 拒绝超 4 位小数的量而不是取整           | 「什么都能提交」的表面体验                        | 账实相符；不变量可写成严格等号；错误信息指向具体行                       |
+| 上游两种发起并存（DIRECT + 加工单引用） | 单一来源的简洁                                    | 仓库现场不必先开加工单就能组装（蓝图输入只要求「成品 SKU 与 BOM 版本」） |
+| 允许取消草稿                            | 状态机更小                                        | 备料阶段「料没到 / 需求变了」是常态；且取消**不动库存**，无账实风险      |
 
 ---
 
 ## 三、文件清单
 
 ### 后端（warehouse）
+
 - `backend/services/warehouse/src/main/resources/db/migration/V103__warehouse_assembly_order.sql`（新建）
   — `assembly_order` / `assembly_order_component` / `assembly_order_code_seq` /
   `refresh_assembly_order_totals()` / `guard_assembly_order()` /
@@ -118,10 +120,12 @@ SQL / FK / 共享视图。
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/AssemblyOrderIntegrationTest.java`（新建，21 例）
 
 ### 契约（codegen 产物，未手改）
+
 - `packages/api-contracts/src/contracts/warehouse.ts`
 - `packages/api-contracts/src/warehouse.openapi.json`
 
 ### 前端
+
 - `apps/web/src/app/warehouse/assembly-orders/page.tsx`（新建）
 - `apps/web/src/components/warehouse/assembly-order-workspace.tsx`（新建）
 - `apps/web/src/components/warehouse/assembly-order-model.ts`（新建）
@@ -129,32 +133,33 @@ SQL / FK / 共享视图。
 - `apps/web/src/lib/api-proxy.ts`（**只追加** `assembly-orders` 一支 + 注释，未动他人分支）
 
 ### 文档
+
 - `docs/product/capability-blueprint/module-progress.md`（只改 8.4.1.1 一行的「状态」「证据」两格）
 
 ---
 
 ## 四、验证方式与结果
 
-| 闸 | 命令 | 结果 |
-| --- | --- | --- |
-| L0 | `backend && ./mvnw -q compile` | BUILD SUCCESS |
-| L0 | `pnpm typecheck` | 3/3 tasks successful |
-| L1 | `backend && ./mvnw -pl services/warehouse -am test` | **945 例 0 失败 0 错误，BUILD SUCCESS** |
-| L1（基线对照） | 同上，但把 V103 + 本模块测试类移开 | 924 例 0 失败（BUILD SUCCESS） |
-| 白名单 | `pnpm vitest run apps/web/src/app/api/warehouse apps/web/src/app/api/trade apps/web/src/lib/api-proxy*.test.ts` | 13 文件 / 199 例全绿 |
-| 白名单（单文件） | `pnpm vitest run apps/web/src/app/api/warehouse/assembly-order-allowlist.test.ts` | 6/6 全绿 |
+| 闸               | 命令                                                                                                            | 结果                                    |
+| ---------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| L0               | `backend && ./mvnw -q compile`                                                                                  | BUILD SUCCESS                           |
+| L0               | `pnpm typecheck`                                                                                                | 3/3 tasks successful                    |
+| L1               | `backend && ./mvnw -pl services/warehouse -am test`                                                             | **945 例 0 失败 0 错误，BUILD SUCCESS** |
+| L1（基线对照）   | 同上，但把 V103 + 本模块测试类移开                                                                              | 924 例 0 失败（BUILD SUCCESS）          |
+| 白名单           | `pnpm vitest run apps/web/src/app/api/warehouse apps/web/src/app/api/trade apps/web/src/lib/api-proxy*.test.ts` | 13 文件 / 199 例全绿                    |
+| 白名单（单文件） | `pnpm vitest run apps/web/src/app/api/warehouse/assembly-order-allowlist.test.ts`                               | 6/6 全绿                                |
 
 ### 一次 flake 的如实记录（`SellablePolicyIntegrationTest.断言三_连接池归还后不串租户`）
 
 第一次全量跑出 **945 例 1 失败**，失败点是**本车道不拥有的** `SellablePolicyIntegrationTest`
 （`Expected size: 1 but was: 0`）。没有直接归因为「既有 flake」就放过，而是做了四步排查：
 
-| 检查 | 结果 |
-| --- | --- |
-| 移开 V103，单独跑 `SellablePolicyIntegrationTest` | 17/17 通过 |
-| 恢复 V103，单独跑 `SellablePolicyIntegrationTest` | 17/17 通过（**说明不是迁移引入**） |
-| 两类同跑（`AssemblyOrderIntegrationTest,SellablePolicyIntegrationTest`） | 38/38 通过 |
-| 恢复本模块后**复跑全量** | **945 例 0 失败，BUILD SUCCESS** |
+| 检查                                                                     | 结果                               |
+| ------------------------------------------------------------------------ | ---------------------------------- |
+| 移开 V103，单独跑 `SellablePolicyIntegrationTest`                        | 17/17 通过                         |
+| 恢复 V103，单独跑 `SellablePolicyIntegrationTest`                        | 17/17 通过（**说明不是迁移引入**） |
+| 两类同跑（`AssemblyOrderIntegrationTest,SellablePolicyIntegrationTest`） | 38/38 通过                         |
+| 恢复本模块后**复跑全量**                                                 | **945 例 0 失败，BUILD SUCCESS**   |
 
 结论：是**非确定性的既有 flake**（全量负载下偶发），不是本模块引入的确定性破坏。
 根因未定位（`断言三` 在池大小为 1 的连接上做 20 轮双租户交替往返），**不在本车道范围内，

@@ -18,14 +18,14 @@
 
 ## 6 个变体(B1-1 ~ B1-6)
 
-| 变体 | 名称 | 用途 |
-|---|---|---|
+| 变体                  | 名称                       | 用途                |
+| --------------------- | -------------------------- | ------------------- |
 | **B1-1 经典版(推荐)** | 平衡几何,识别度高,适用最广 | **starcon 主 mark** |
-| B1-2 更几何化 | 圆角克制,专业稳定 | 印刷品 |
-| B1-3 更圆润 | 亲和力,全球市场 | 海外物料 |
-| B1-4 星形更明显 | 中央负空间大,STAR 概念突出 | 营销大尺寸 |
-| B1-5 极简版 | 线条更轻,小尺寸 | **favicon / 16px** |
-| B1-6 动态感 | 微倾斜,连接/流动 | 启动屏/动画 |
+| B1-2 更几何化         | 圆角克制,专业稳定          | 印刷品              |
+| B1-3 更圆润           | 亲和力,全球市场            | 海外物料            |
+| B1-4 星形更明显       | 中央负空间大,STAR 概念突出 | 营销大尺寸          |
+| B1-5 极简版           | 线条更轻,小尺寸            | **favicon / 16px**  |
+| B1-6 动态感           | 微倾斜,连接/流动           | 启动屏/动画         |
 
 ## 落地
 
@@ -44,16 +44,16 @@
 
 ### Logo SVG 重做 (8 个文件,旧 v3 全部废弃)
 
-| 文件 | 角色 | 配色 |
-|---|---|---|
-| `apps/web/public/logo-mark.svg` | 主 mark (B1-1 经典版) | `#0A0A0A` 黑 |
-| `apps/web/public/logo-mark-dark.svg` | 深色背景 | `#FFFFFF` 白 |
-| `apps/web/public/logo-mark-brand.svg` | 数字化场景 | `#1D4ED8` 品牌蓝 |
-| `apps/web/public/favicon.svg` | B1-5 极简版 | `#0A0A0A` 黑 |
-| `apps/web/public/logo-wordmark.svg` | 纯字标 | `#0A0A0A` 黑 |
-| `apps/web/public/logo-lockup.svg` | mark + 字标 横版 | `#0A0A0A` 黑 |
-| `apps/web/public/logo-app-icon-light.svg` | 浅色 App Icon | 黑 mark + `#F5F5F5` 底 |
-| `apps/web/public/logo-app-icon-dark.svg` | 深色 App Icon | 白 mark + `#1D4ED8` 底 |
+| 文件                                      | 角色                  | 配色                   |
+| ----------------------------------------- | --------------------- | ---------------------- |
+| `apps/web/public/logo-mark.svg`           | 主 mark (B1-1 经典版) | `#0A0A0A` 黑           |
+| `apps/web/public/logo-mark-dark.svg`      | 深色背景              | `#FFFFFF` 白           |
+| `apps/web/public/logo-mark-brand.svg`     | 数字化场景            | `#1D4ED8` 品牌蓝       |
+| `apps/web/public/favicon.svg`             | B1-5 极简版           | `#0A0A0A` 黑           |
+| `apps/web/public/logo-wordmark.svg`       | 纯字标                | `#0A0A0A` 黑           |
+| `apps/web/public/logo-lockup.svg`         | mark + 字标 横版      | `#0A0A0A` 黑           |
+| `apps/web/public/logo-app-icon-light.svg` | 浅色 App Icon         | 黑 mark + `#F5F5F5` 底 |
+| `apps/web/public/logo-app-icon-dark.svg`  | 深色 App Icon         | 白 mark + `#1D4ED8` 底 |
 
 ### Logo.tsx (副字标更新)
 
@@ -105,6 +105,7 @@ M packages/ui/src/components/common/logo.tsx (副字标 + 注释)
 ```
 c6993af feat(brand): Logo v4 — 改用品牌源 B1 4 节点 + 中心 4 角星
 ```
+
 ---
 
 ## 2026-09-26 修正 — Logo v4.1 (圆角菱形替代 4 角星)
@@ -117,17 +118,18 @@ c6993af feat(brand): Logo v4 — 改用品牌源 B1 4 节点 + 中心 4 角星
 
 第一版 v4 把"中心之星"实现为**带尖角的 4 角星**(8 个直线段),与品牌源 B1-1 不一致。源图实际上是**圆角菱形**+ 4 凹弧连接 + 4 圆点,中央负空间是**菱形**而非**4 角星**。
 
-| | v4 (错) | v4.1 (正) | 源图 |
-|---|---|---|---|
-| 主体几何 | 8 直线 V 凹 | 4 Q 凹弧 | 4 Q 凹弧 |
-| 中央负空间 | 4 角星 (尖) | 圆角菱形 | 圆角菱形 |
-| 4 圆点连接 | 直线段 | Q 弧线 | Q 弧线 |
+|            | v4 (错)     | v4.1 (正) | 源图     |
+| ---------- | ----------- | --------- | -------- |
+| 主体几何   | 8 直线 V 凹 | 4 Q 凹弧  | 4 Q 凹弧 |
+| 中央负空间 | 4 角星 (尖) | 圆角菱形  | 圆角菱形 |
+| 4 圆点连接 | 直线段      | Q 弧线    | Q 弧线   |
 
 ### 修正
 
 `logo-mark.svg` / `logo-mark-dark.svg` / `logo-mark-brand.svg` / `favicon.svg` / `logo-lockup.svg` / `logo-app-icon-light.svg` / `logo-app-icon-dark.svg` 共 7 个 SVG 全部更新。
 
 新 path:
+
 ```
 M32 10 Q40 24 54 32 Q40 40 32 54 Q24 40 10 32 Q24 24 32 10 Z
 ```

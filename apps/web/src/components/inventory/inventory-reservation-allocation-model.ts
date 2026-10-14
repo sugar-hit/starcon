@@ -203,10 +203,7 @@ export function allocationStatusLabel(status: string | undefined, label?: string
 }
 
 /** 迁移类型标签。 */
-export function allocationTransitionLabel(
-  transition: string | undefined,
-  label?: string,
-): string {
+export function allocationTransitionLabel(transition: string | undefined, label?: string): string {
   if (label) return label;
   switch (transition) {
     case 'ALLOCATED':

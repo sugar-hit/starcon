@@ -21,10 +21,10 @@ catalog.ts(447,13): error TS2300: Duplicate identifier 'PhysicalSafetyRow'.
 
 字段构成实证（`PhysicalSafetyProfile` 两份）：
 
-| 版本 | 字段数 | dangerousGoods | dangerousSubstanceClass | packagingVersion |
-|---|---|---|---|---|
-| 第 1 份（旧） | 24 | ✓ | ✗ | ✗ |
-| 第 2 份（新） | 26 | ✓ | ✓ | ✓ |
+| 版本          | 字段数 | dangerousGoods | dangerousSubstanceClass | packagingVersion |
+| ------------- | ------ | -------------- | ----------------------- | ---------------- |
+| 第 1 份（旧） | 24     | ✓              | ✗                       | ✗                |
+| 第 2 份（新） | 26     | ✓              | ✓                       | ✓                |
 
 已提交的 `catalog.openapi.json` 里 `PhysicalSafetyProfile` **26 个字段，新旧字段都在**
 （`dangerousGoods` / `dangerousSubstanceClass` / `packagingVersion` 均为 True）。
@@ -86,6 +86,7 @@ writeFileSync(oursPath, `${merged.map(([, v]) => v).join('\n')}\n${o.head.join('
 都留下了 —— 而 git 不理解「同名 type 重复声明」是语义冲突。
 
 **这与 3.8.1.1 的 `api-proxy.ts` 冲突是同一个结构性缺口的两面**：
+
 - `api-proxy.ts`：单行巨型正则 → git 无法逐块合并 → 冲突（但驱动没覆盖，手工解）
 - `catalog.ts`：双方在不同位置各插一段 → git 能文本合并 → **静默产出重复声明**
 

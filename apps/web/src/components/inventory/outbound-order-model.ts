@@ -83,7 +83,9 @@ export function fetchOutboundOrders(params: OutboundListParams): Promise<Outboun
   return api<OutboundOrderPage>(`${base}${query(params)}`);
 }
 
-export function createOutboundOrder(input: OutboundOrderCreateInput): Promise<OutboundOrderSummary> {
+export function createOutboundOrder(
+  input: OutboundOrderCreateInput,
+): Promise<OutboundOrderSummary> {
   return api<OutboundOrderSummary>(base, 'POST', input);
 }
 
@@ -103,7 +105,10 @@ export function printOutboundOrders(
   return api<OutboundPrintResult>(`${base}/print`, 'POST', body);
 }
 
-export function cancelOutboundOrders(orderIds: string[], reason: string): Promise<OutboundCancelResult> {
+export function cancelOutboundOrders(
+  orderIds: string[],
+  reason: string,
+): Promise<OutboundCancelResult> {
   const body: OutboundCancelInput = { orderIds, reason };
   return api<OutboundCancelResult>(`${base}/cancel`, 'POST', body);
 }

@@ -69,13 +69,9 @@ import { errorText } from '../inventory/inventory-model';
  */
 export function TransitTrackingWorkspace() {
   const [params, setParams] = useState<TransitTrackingParams>({ page: 0, size: 20 });
-  const [data, setData] = useState<Awaited<ReturnType<typeof fetchTransitTrackings>> | null>(
-    null,
-  );
+  const [data, setData] = useState<Awaited<ReturnType<typeof fetchTransitTrackings>> | null>(null);
   const [caps, setCaps] = useState<TransitTrackCapabilities | null>(null);
-  const [alerts, setAlerts] = useState<
-    Awaited<ReturnType<typeof fetchDelayAlerts>> | null
-  >(null);
+  const [alerts, setAlerts] = useState<Awaited<ReturnType<typeof fetchDelayAlerts>> | null>(null);
   const [thresholds, setThresholds] = useState<DelayThresholdRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -198,11 +194,13 @@ export function TransitTrackingWorkspace() {
           <li>
             <strong className="text-foreground">提前分级，不是到港当天才发现</strong>
             ：剩余窗口 = 生效预计到港 − 现在，按阈值表逐级判定。三档提前量来自
-            <code> first_mile_delay_threshold</code> 表，可在「阈值」页签里改，改一行就换口径，不发版。
+            <code> first_mile_delay_threshold</code>{' '}
+            表，可在「阈值」页签里改，改一行就换口径，不发版。
           </li>
           <li>
             <strong className="text-foreground">负数不是「提前」</strong>
-            ：剩余窗口为负 = 已经过了预计到港仍未到货，严重度与「还有几天到」完全不同，列表分开显示。
+            ：剩余窗口为负 =
+            已经过了预计到港仍未到货，严重度与「还有几天到」完全不同，列表分开显示。
           </li>
           <li>
             <strong className="text-foreground">在途余量是借来的数</strong>
@@ -260,9 +258,7 @@ export function TransitTrackingWorkspace() {
                   className="rounded-md border px-3 py-2"
                   placeholder="发运单号 / 承运人 / 订舱号 / 船名航班号 / 当前位置"
                   defaultValue={params.keyword ?? ''}
-                  onBlur={(e) =>
-                    setParams((p) => ({ ...p, keyword: e.target.value, page: 0 }))
-                  }
+                  onBlur={(e) => setParams((p) => ({ ...p, keyword: e.target.value, page: 0 }))}
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm">
@@ -423,9 +419,8 @@ export function TransitTrackingWorkspace() {
                               r.trackingStage}
                             <div className="text-muted-foreground text-xs">
                               清关{' '}
-                              {(data?.customsStatuses ?? []).find(
-                                (c) => c.code === r.customsStatus,
-                              )?.label ?? r.customsStatus}
+                              {(data?.customsStatuses ?? []).find((c) => c.code === r.customsStatus)
+                                ?.label ?? r.customsStatus}
                             </div>
                           </td>
                           <td className="p-2">
@@ -442,7 +437,9 @@ export function TransitTrackingWorkspace() {
                             </span>
                           </td>
                           <td className="p-2">
-                            <Badge tone={delayTone(r.delayLevel)}>{delayLevelLabel(r.delayLevel)}</Badge>
+                            <Badge tone={delayTone(r.delayLevel)}>
+                              {delayLevelLabel(r.delayLevel)}
+                            </Badge>
                             {r.openAlertCount > 0 ? (
                               <div className="text-muted-foreground text-xs">
                                 {r.openAlertCount} 条未结预警
@@ -517,8 +514,8 @@ export function TransitTrackingWorkspace() {
                     size="sm"
                     variant="outline"
                     disabled={
-                  (params.page ?? 0) + 1 >= Math.ceil((data?.total ?? 0) / (params.size ?? 20))
-                }
+                      (params.page ?? 0) + 1 >= Math.ceil((data?.total ?? 0) / (params.size ?? 20))
+                    }
                     onClick={() => setParams((p) => ({ ...p, page: (p.page ?? 0) + 1 }))}
                   >
                     下一页
@@ -530,7 +527,9 @@ export function TransitTrackingWorkspace() {
         </TabsContent>
 
         <TabsContent value="alerts">
-          <SectionCard title={`延误预警（未结 ${alerts?.openCount ?? 0} / 已确认 ${alerts?.acknowledgedCount ?? 0}）`}>
+          <SectionCard
+            title={`延误预警（未结 ${alerts?.openCount ?? 0} / 已确认 ${alerts?.acknowledgedCount ?? 0}）`}
+          >
             {(alerts?.rows ?? []).length === 0 ? (
               <EmptyState
                 icon={<BellRing className="size-6 w-6" />}
@@ -565,9 +564,7 @@ export function TransitTrackingWorkspace() {
                             : a.status === 'ACKNOWLEDGED'
                               ? '已确认'
                               : `已关闭${a.closeReason ? `：${a.closeReason}` : ''}`}
-                          <div className="text-muted-foreground text-xs">
-                            {moment(a.raisedAt)}
-                          </div>
+                          <div className="text-muted-foreground text-xs">{moment(a.raisedAt)}</div>
                         </td>
                         <td className="p-2">
                           <div className="flex flex-wrap gap-1">
@@ -615,8 +612,8 @@ export function TransitTrackingWorkspace() {
         <TabsContent value="thresholds">
           <SectionCard title="预警阈值口径（改一行就换口径，不发版）">
             <p className="text-muted-foreground mb-3 text-sm">
-              三档提前量按 (运输方式, 目的国) 逐级回落匹配，最差命中{' '}
-              <code>(*, *)</code> 通用行。三级必须递减，否则「进观察区」反而比「进提示区」晚。
+              三档提前量按 (运输方式, 目的国) 逐级回落匹配，最差命中 <code>(*, *)</code>{' '}
+              通用行。三级必须递减，否则「进观察区」反而比「进提示区」晚。
             </p>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -667,7 +664,9 @@ export function TransitTrackingWorkspace() {
                             const warningN = Number(warning);
                             const criticalN = Number(critical);
                             if (
-                              ![watchN, warningN, criticalN].every((n) => Number.isInteger(n) && n >= 0)
+                              ![watchN, warningN, criticalN].every(
+                                (n) => Number.isInteger(n) && n >= 0,
+                              )
                             ) {
                               setActionError('三档提前量必须是不小于 0 的整数天');
                               return;
@@ -723,9 +722,7 @@ export function TransitTrackingWorkspace() {
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm">
-                <span className="text-muted-foreground">
-                  位置发生时间（填了位置就必填）
-                </span>
+                <span className="text-muted-foreground">位置发生时间（填了位置就必填）</span>
                 <input
                   type="datetime-local"
                   className="rounded-md border px-3 py-2"
@@ -770,9 +767,9 @@ function TrackingDetailDialog({
   onClose: () => void;
   onRun: (work: () => Promise<unknown>) => Promise<void>;
 }) {
-  const [detail, setDetail] = useState<
-    Awaited<ReturnType<typeof fetchTransitTrackingDetail>> | null
-  >(null);
+  const [detail, setDetail] = useState<Awaited<
+    ReturnType<typeof fetchTransitTrackingDetail>
+  > | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [note, setNote] = useState('');
   const [location, setLocation] = useState('');
@@ -962,9 +959,7 @@ function TrackingDetailDialog({
                     </select>
                   </label>
                   <label className="flex flex-col gap-1">
-                    <span className="text-muted-foreground">
-                      来源单号（外部来源必填）
-                    </span>
+                    <span className="text-muted-foreground">来源单号（外部来源必填）</span>
                     <input
                       className="rounded-md border px-3 py-2"
                       value={referenceId}
@@ -1010,7 +1005,7 @@ function TrackingDetailDialog({
 
                 <div className="flex gap-2">
                   <input
-                    className="rounded-md border px-3 py-2 flex-1"
+                    className="flex-1 rounded-md border px-3 py-2"
                     placeholder="备注"
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
@@ -1025,10 +1020,9 @@ function TrackingDetailDialog({
             <SectionCard title="节点事件流">
               <ul className="space-y-2 text-sm">
                 {detail.events.map((e) => (
-                  <li key={e.id} className="border-b last:border-0 pb-1">
+                  <li key={e.id} className="border-b pb-1 last:border-0">
                     <div>
-                      <strong>{e.kind}</strong> · {sourceCaption(e)} ·{' '}
-                      {moment(e.occurredAt)}
+                      <strong>{e.kind}</strong> · {sourceCaption(e)} · {moment(e.occurredAt)}
                     </div>
                     {e.locationText ? <div>位置：{e.locationText}</div> : null}
                     {e.etaAfter ? (

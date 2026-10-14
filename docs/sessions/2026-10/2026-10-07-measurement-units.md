@@ -91,33 +91,40 @@
 ## 文件清单
 
 后端（新增）：
+
 - `backend/services/catalog/src/main/resources/db/migration/V17__measurement_units.sql`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/UnitGroupRules.java`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/UnitGroupService.java`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/UnitGroupController.java`
 
 后端（修改）：
+
 - `CatalogModels.java`：追加 3.3.3.1 段（14 个 record）
 - `UnitConversionService.java`：`deleteUnit` 补单位组引用检查
 
 测试（新增）：
+
 - `backend/services/catalog/src/test/java/com/starcon/catalog/UnitGroupRulesTest.java`（11 例）
 - `backend/services/catalog/src/test/java/com/starcon/catalog/UnitGroupIntegrationTest.java`（19 例）
 
 前端（新增）：
+
 - `apps/web/src/app/products/units/page.tsx`
 - `apps/web/src/components/catalog/unit-group-workspace.tsx`
 - `apps/web/src/components/catalog/unit-group-model.ts`
 - `apps/web/src/components/catalog/unit-group-model.test.ts`（27 例）
 
 前端（修改）：
+
 - `apps/web/src/lib/api-proxy.ts`：放行 `unit-groups/**`
 - `apps/web/src/app/api/catalog/[...path]/route.test.ts`：放行用例 1 例
 
 生成物（codegen，禁手改）：
+
 - `packages/api-contracts/src/catalog.ts`、`catalog.openapi.json`
 
 台账：
+
 - `docs/product/capability-blueprint/module-progress.md` 的 3.3.3.1 行 + sync 自动重算的汇总统计
 
 ## 对「真正的欠账清单」的调整

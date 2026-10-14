@@ -26,20 +26,17 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.5.2.1 跨法人调拨：**货权真的换了法人**、转移定价、内部结算凭据、双方确认，
- * 以及租户隔离三断言。
+ * 7.5.2.1 跨法人调拨：**货权真的换了法人**、转移定价、内部结算凭据、双方确认， 以及租户隔离三断言。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link InventoryTransferIntegrationTest} 完全一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
+ * <p>夹具写法与 {@link InventoryTransferIntegrationTest} 完全一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）。
  *
  * <p>本测试刻意盯住三件最容易做错、而错了最贵的事：
  *
  * <ul>
- *   <li><b>货权归属</b>：发出扣的是转出法人的余额，实收加的是<b>转入法人</b>的余额。
- *       如果两边落在同一条余额行上，货权就没转移，12 财务的内部结算也就失去依据。
+ *   <li><b>货权归属</b>：发出扣的是转出法人的余额，实收加的是<b>转入法人</b>的余额。 如果两边落在同一条余额行上，货权就没转移，12 财务的内部结算也就失去依据。
  *   <li><b>定价与舍入</b>：金额由 DB 生成列算出，落 numeric(19,4) 四舍五入（远离零）。
  *   <li><b>两个法人两个人</b>：同一个人把两方都签掉等于没有第二方，DB 触发器必须挡。
  * </ul>
@@ -49,6 +46,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 class LegalEntityTransferIntegrationTest {
   static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
   static final UUID a = UUID.randomUUID(), b = UUID.randomUUID();
+
   /** 两个不同的自然人：转出方与转入方必须是两个人。 */
   static final UUID userSource = UUID.randomUUID(), userTarget = UUID.randomUUID();
 
@@ -64,8 +62,10 @@ class LegalEntityTransferIntegrationTest {
 
   /** 转出法人。 */
   static final UUID leA1 = idFor(a, 1);
+
   /** 转入法人。 */
   static final UUID leA2 = idFor(a, 2);
+
   static final UUID skuA = idFor(a, 3);
   static final UUID whFrom = idFor(a, 4);
   static final UUID whTo = idFor(a, 5);
@@ -78,11 +78,15 @@ class LegalEntityTransferIntegrationTest {
         ("starcon-warehouse-cross-entity-test-" + tenant + "-" + ordinal).getBytes());
   }
 
-  static AccessService.Access actor(
-      UUID uid, UUID tenant, List<AccessService.Grant> grants) {
+  static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -180,25 +184,48 @@ class LegalEntityTransferIntegrationTest {
             // 每个租户都有**两个**法人：本模块的货权从转出方转到转入方
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(t, 1), t, "LE-HK", "转出主体");
+                idFor(t, 1),
+                t,
+                "LE-HK",
+                "转出主体");
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(t, 2), t, "LE-SG", "转入主体");
+                idFor(t, 2),
+                t,
+                "LE-SG",
+                "转入主体");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(t, 3), t, "SKU-1", "商品一");
+                idFor(t, 3),
+                t,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(t, 4), t, "WH-HK", "香港仓", "HK", "Asia/Hong_Kong");
+                idFor(t, 4),
+                t,
+                "WH-HK",
+                "香港仓",
+                "HK",
+                "Asia/Hong_Kong");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(t, 5), t, "WH-SG", "新加坡仓", "SG", "Asia/Singapore");
+                idFor(t, 5),
+                t,
+                "WH-SG",
+                "新加坡仓",
+                "SG",
+                "Asia/Singapore");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
-                idFor(t, 6), t, "SELLABLE", "可售", "SELLABLE");
+                idFor(t, 6),
+                t,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             return null;
           });
     }
@@ -209,11 +236,19 @@ class LegalEntityTransferIntegrationTest {
           sql.execute(
               "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
                   + " values(?,?,?,?,?,'STORAGE',true)",
-              locFrom, a, whFrom, "HK-A-01", "库位 HK-A-01");
+              locFrom,
+              a,
+              whFrom,
+              "HK-A-01",
+              "库位 HK-A-01");
           sql.execute(
               "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,pickable)"
                   + " values(?,?,?,?,?,'STORAGE',true)",
-              locTo, a, whTo, "SG-A-01", "库位 SG-A-01");
+              locTo,
+              a,
+              whTo,
+              "SG-A-01",
+              "库位 SG-A-01");
           return null;
         });
   }
@@ -246,12 +281,25 @@ class LegalEntityTransferIntegrationTest {
           sql.execute(
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-              balanceId, a, skuA, warehouse, legalEntity, qSellable, new BigDecimal(onHand));
+              balanceId,
+              a,
+              skuA,
+              warehouse,
+              legalEntity,
+              qSellable,
+              new BigDecimal(onHand));
           sql.execute(
               "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
                   + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
                   + "last_movement_at) values(?,?,?,?,?,?,null,?,?,?,0,now())",
-              UUID.randomUUID(), a, legalEntity, skuA, warehouse, location, qSellable, balanceId,
+              UUID.randomUUID(),
+              a,
+              legalEntity,
+              skuA,
+              warehouse,
+              location,
+              qSellable,
+              balanceId,
               new BigDecimal(onHand));
           return null;
         });
@@ -264,7 +312,9 @@ class LegalEntityTransferIntegrationTest {
             sql.fetchOne(
                     "select coalesce(sum(on_hand),0) from inventory_balance"
                         + " where sku_id=? and warehouse_id=? and legal_entity_id=?",
-                    skuA, warehouse, legalEntity)
+                    skuA,
+                    warehouse,
+                    legalEntity)
                 .get(0, BigDecimal.class));
   }
 
@@ -307,8 +357,9 @@ class LegalEntityTransferIntegrationTest {
         null,
         "补充新加坡仓",
         "",
-        List.of(new LegalEntityTransferLineRequest(skuA, qSellable,
-            new BigDecimal(quantity), new BigDecimal(price))));
+        List.of(
+            new LegalEntityTransferLineRequest(
+                skuA, qSellable, new BigDecimal(quantity), new BigDecimal(price))));
   }
 
   LegalEntityTransferSaved create() {
@@ -318,12 +369,19 @@ class LegalEntityTransferIntegrationTest {
   /** 走完建单 → 转出确认 → 转入确认，返回已确认待发运的单。 */
   LegalEntityTransferSaved confirmed() {
     var created = create();
-    var s1 = asA(
-        () -> service.sourceConfirm(created.id(), userSource,
-            new LegalEntityTransferApproveRequest(created.version(), "按成本价")));
+    var s1 =
+        asA(
+            () ->
+                service.sourceConfirm(
+                    created.id(),
+                    userSource,
+                    new LegalEntityTransferApproveRequest(created.version(), "按成本价")));
     return asATarget(
-        () -> service.targetConfirm(created.id(), userTarget,
-            new LegalEntityTransferApproveRequest(s1.version(), "同意按此价接收")));
+        () ->
+            service.targetConfirm(
+                created.id(),
+                userTarget,
+                new LegalEntityTransferApproveRequest(s1.version(), "同意按此价接收")));
   }
 
   // ================================================================ 定价
@@ -348,11 +406,25 @@ class LegalEntityTransferIntegrationTest {
         asA(
             () ->
                 service.create(
-                    a, userSource,
+                    a,
+                    userSource,
                     new LegalEntityTransferCreateRequest(
-                        whFrom, whTo, leA1, leA2, "MANUAL", "USD", null, null, "", "",
-                        List.of(new LegalEntityTransferLineRequest(
-                            skuA, qSellable, new BigDecimal("1.0001"), new BigDecimal("1.0001"))))));
+                        whFrom,
+                        whTo,
+                        leA1,
+                        leA2,
+                        "MANUAL",
+                        "USD",
+                        null,
+                        null,
+                        "",
+                        "",
+                        List.of(
+                            new LegalEntityTransferLineRequest(
+                                skuA,
+                                qSellable,
+                                new BigDecimal("1.0001"),
+                                new BigDecimal("1.0001"))))));
     var detail = asA(() -> service.detail(created.id()));
     assertThat(detail.lines().get(0).amount()).isEqualByComparingTo("1.0002");
     assertThat(detail.transfer().totalAmount()).isEqualByComparingTo("1.0002");
@@ -366,11 +438,22 @@ class LegalEntityTransferIntegrationTest {
         asA(
             () ->
                 service.create(
-                    a, userSource,
+                    a,
+                    userSource,
                     new LegalEntityTransferCreateRequest(
-                        whFrom, whTo, leA1, leA2, "MANUAL", "CNY", null, null, "", "",
-                        List.of(new LegalEntityTransferLineRequest(
-                            skuA, qSellable, new BigDecimal("10"), BigDecimal.ZERO)))));
+                        whFrom,
+                        whTo,
+                        leA1,
+                        leA2,
+                        "MANUAL",
+                        "CNY",
+                        null,
+                        null,
+                        "",
+                        "",
+                        List.of(
+                            new LegalEntityTransferLineRequest(
+                                skuA, qSellable, new BigDecimal("10"), BigDecimal.ZERO)))));
     var detail = asA(() -> service.detail(created.id()));
     assertThat(detail.transfer().totalAmount()).isEqualByComparingTo("0.0000");
     assertThat(detail.lines().get(0).unitPrice()).isEqualByComparingTo("0.0000");
@@ -383,11 +466,22 @@ class LegalEntityTransferIntegrationTest {
                 asA(
                     () ->
                         service.create(
-                            a, userSource,
+                            a,
+                            userSource,
                             new LegalEntityTransferCreateRequest(
-                                whFrom, whTo, leA1, leA2, "MANUAL", null, null, null, "", "",
-                                List.of(new LegalEntityTransferLineRequest(
-                                    skuA, qSellable, BigDecimal.ONE, BigDecimal.ONE))))))
+                                whFrom,
+                                whTo,
+                                leA1,
+                                leA2,
+                                "MANUAL",
+                                null,
+                                null,
+                                null,
+                                "",
+                                "",
+                                List.of(
+                                    new LegalEntityTransferLineRequest(
+                                        skuA, qSellable, BigDecimal.ONE, BigDecimal.ONE))))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("必须指定币种");
     assertThatThrownBy(
@@ -395,11 +489,22 @@ class LegalEntityTransferIntegrationTest {
                 asA(
                     () ->
                         service.create(
-                            a, userSource,
+                            a,
+                            userSource,
                             new LegalEntityTransferCreateRequest(
-                                whFrom, whTo, leA1, leA2, "MANUAL", "US", null, null, "", "",
-                                List.of(new LegalEntityTransferLineRequest(
-                                    skuA, qSellable, BigDecimal.ONE, BigDecimal.ONE))))))
+                                whFrom,
+                                whTo,
+                                leA1,
+                                leA2,
+                                "MANUAL",
+                                "US",
+                                null,
+                                null,
+                                "",
+                                "",
+                                List.of(
+                                    new LegalEntityTransferLineRequest(
+                                        skuA, qSellable, BigDecimal.ONE, BigDecimal.ONE))))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("ISO 4217");
   }
@@ -411,12 +516,25 @@ class LegalEntityTransferIntegrationTest {
                 asA(
                     () ->
                         service.create(
-                            a, userSource,
+                            a,
+                            userSource,
                             new LegalEntityTransferCreateRequest(
-                                whFrom, whTo, leA1, leA2, "MANUAL", "CNY", null, null, "", "",
-                                List.of(new LegalEntityTransferLineRequest(
-                                    skuA, qSellable, new BigDecimal("1.00001"),
-                                    BigDecimal.ONE))))))
+                                whFrom,
+                                whTo,
+                                leA1,
+                                leA2,
+                                "MANUAL",
+                                "CNY",
+                                null,
+                                null,
+                                "",
+                                "",
+                                List.of(
+                                    new LegalEntityTransferLineRequest(
+                                        skuA,
+                                        qSellable,
+                                        new BigDecimal("1.00001"),
+                                        BigDecimal.ONE))))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("4 位小数");
   }
@@ -430,11 +548,22 @@ class LegalEntityTransferIntegrationTest {
                 asA(
                     () ->
                         service.create(
-                            a, userSource,
+                            a,
+                            userSource,
                             new LegalEntityTransferCreateRequest(
-                                whFrom, whTo, leA1, leA1, "MANUAL", "CNY", null, null, "", "",
-                                List.of(new LegalEntityTransferLineRequest(
-                                    skuA, qSellable, BigDecimal.ONE, BigDecimal.ONE))))))
+                                whFrom,
+                                whTo,
+                                leA1,
+                                leA1,
+                                "MANUAL",
+                                "CNY",
+                                null,
+                                null,
+                                "",
+                                "",
+                                List.of(
+                                    new LegalEntityTransferLineRequest(
+                                        skuA, qSellable, BigDecimal.ONE, BigDecimal.ONE))))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不能是同一个法人");
   }
@@ -447,12 +576,22 @@ class LegalEntityTransferIntegrationTest {
                 asA(
                     () ->
                         service.create(
-                            a, userSource,
+                            a,
+                            userSource,
                             new LegalEntityTransferCreateRequest(
-                                whFrom, whTo, leA1, idFor(b, 2), "MANUAL", "CNY", null, null,
-                                "", "",
-                                List.of(new LegalEntityTransferLineRequest(
-                                    skuA, qSellable, BigDecimal.ONE, BigDecimal.ONE))))))
+                                whFrom,
+                                whTo,
+                                leA1,
+                                idFor(b, 2),
+                                "MANUAL",
+                                "CNY",
+                                null,
+                                null,
+                                "",
+                                "",
+                                List.of(
+                                    new LegalEntityTransferLineRequest(
+                                        skuA, qSellable, BigDecimal.ONE, BigDecimal.ONE))))))
         .isInstanceOf(Exception.class);
   }
 
@@ -467,21 +606,25 @@ class LegalEntityTransferIntegrationTest {
             () ->
                 asATarget(
                     () ->
-                        service.targetConfirm(created.id(), userTarget,
+                        service.targetConfirm(
+                            created.id(),
+                            userTarget,
                             new LegalEntityTransferApproveRequest(created.version(), ""))))
         .isInstanceOf(ResponseStatusException.class);
     var s1 =
         asA(
             () ->
                 service.sourceConfirm(
-                    created.id(), userSource,
+                    created.id(),
+                    userSource,
                     new LegalEntityTransferApproveRequest(created.version(), "")));
     assertThat(s1.status()).isEqualTo("PENDING_TARGET_CONFIRM");
     var s2 =
         asATarget(
             () ->
                 service.targetConfirm(
-                    created.id(), userTarget,
+                    created.id(),
+                    userTarget,
                     new LegalEntityTransferApproveRequest(s1.version(), "")));
     assertThat(s2.status()).isEqualTo("CONFIRMED");
     var detail = asA(() -> service.detail(created.id()));
@@ -497,7 +640,8 @@ class LegalEntityTransferIntegrationTest {
         asA(
             () ->
                 service.sourceConfirm(
-                    created.id(), userSource,
+                    created.id(),
+                    userSource,
                     new LegalEntityTransferApproveRequest(created.version(), "")));
     // 同一个自然人试图再当转入方签一次
     assertThatThrownBy(
@@ -507,7 +651,8 @@ class LegalEntityTransferIntegrationTest {
                     "warehouse.inventory.update",
                     () ->
                         service.targetConfirm(
-                            created.id(), userSource,
+                            created.id(),
+                            userSource,
                             new LegalEntityTransferApproveRequest(s1.version(), ""))))
         .hasMessageContaining("必须是两个人");
     // 转出方也不能重复确认
@@ -516,7 +661,8 @@ class LegalEntityTransferIntegrationTest {
                 asA(
                     () ->
                         service.sourceConfirm(
-                            created.id(), userSource,
+                            created.id(),
+                            userSource,
                             new LegalEntityTransferApproveRequest(s1.version(), ""))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("已经确认过");
@@ -538,8 +684,13 @@ class LegalEntityTransferIntegrationTest {
     var order = confirmed();
     assertThat(onHand(leA1, whFrom)).isEqualByComparingTo("100");
 
-    var shipped = asA(() -> service.ship(order.id(), userSource,
-        new LegalEntityTransferShipRequest(order.version(), null, "")));
+    var shipped =
+        asA(
+            () ->
+                service.ship(
+                    order.id(),
+                    userSource,
+                    new LegalEntityTransferShipRequest(order.version(), null, "")));
     assertThat(shipped.status()).isEqualTo("IN_TRANSIT");
     // 发出只扣转出法人的余额，转入方一分没多
     assertThat(onHand(leA1, whFrom)).isEqualByComparingTo("40");
@@ -555,11 +706,17 @@ class LegalEntityTransferIntegrationTest {
         asATarget(
             () ->
                 service.receive(
-                    order.id(),userSource,
+                    order.id(),
+                    userSource,
                     new LegalEntityTransferReceiveRequest(
-                        shipped.version(), null, locTo, null, "",
-                        List.of(new LegalEntityTransferReceiveLineRequest(
-                            lineId, new BigDecimal("60"))))));
+                        shipped.version(),
+                        null,
+                        locTo,
+                        null,
+                        "",
+                        List.of(
+                            new LegalEntityTransferReceiveLineRequest(
+                                lineId, new BigDecimal("60"))))));
     assertThat(received.status()).isEqualTo("COMPLETED");
     // 实收落进**转入法人**的余额行 —— 这就是货权转移本身
     assertThat(onHand(leA1, whFrom)).isEqualByComparingTo("40");
@@ -578,7 +735,9 @@ class LegalEntityTransferIntegrationTest {
             () ->
                 asA(
                     () ->
-                        service.ship(order.id(), userSource,
+                        service.ship(
+                            order.id(),
+                            userSource,
                             new LegalEntityTransferShipRequest(order.version(), null, ""))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("可用量不足");
@@ -595,7 +754,9 @@ class LegalEntityTransferIntegrationTest {
             () ->
                 asA(
                     () ->
-                        service.ship(order.id(), userSource,
+                        service.ship(
+                            order.id(),
+                            userSource,
                             new LegalEntityTransferShipRequest(order.version(), null, ""))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("转出法人名下没有这条库存余额");
@@ -605,18 +766,29 @@ class LegalEntityTransferIntegrationTest {
   void 分次实收后仍在途_不提前算已交割() {
     seedBalance(leA1, whFrom, locFrom, "100");
     var order = confirmed();
-    var shipped = asA(() -> service.ship(order.id(), userSource,
-        new LegalEntityTransferShipRequest(order.version(), null, "")));
+    var shipped =
+        asA(
+            () ->
+                service.ship(
+                    order.id(),
+                    userSource,
+                    new LegalEntityTransferShipRequest(order.version(), null, "")));
     var lineId = asA(() -> service.detail(order.id())).lines().get(0).id();
     var first =
         asATarget(
             () ->
                 service.receive(
-                    order.id(),userSource,
+                    order.id(),
+                    userSource,
                     new LegalEntityTransferReceiveRequest(
-                        shipped.version(), null, locTo, null, "",
-                        List.of(new LegalEntityTransferReceiveLineRequest(
-                            lineId, new BigDecimal("20"))))));
+                        shipped.version(),
+                        null,
+                        locTo,
+                        null,
+                        "",
+                        List.of(
+                            new LegalEntityTransferReceiveLineRequest(
+                                lineId, new BigDecimal("20"))))));
     assertThat(first.status()).isEqualTo("IN_TRANSIT");
     assertThat(onHand(leA2, whTo)).isEqualByComparingTo("20");
     assertThat(sharedInTransit()).isEqualByComparingTo("40");
@@ -624,11 +796,17 @@ class LegalEntityTransferIntegrationTest {
         asATarget(
             () ->
                 service.receive(
-                    order.id(),userSource,
+                    order.id(),
+                    userSource,
                     new LegalEntityTransferReceiveRequest(
-                        first.version(), null, locTo, null, "",
-                        List.of(new LegalEntityTransferReceiveLineRequest(
-                            lineId, new BigDecimal("40"))))));
+                        first.version(),
+                        null,
+                        locTo,
+                        null,
+                        "",
+                        List.of(
+                            new LegalEntityTransferReceiveLineRequest(
+                                lineId, new BigDecimal("40"))))));
     assertThat(second.status()).isEqualTo("COMPLETED");
     assertThat(sharedInTransit()).isEqualByComparingTo("0");
   }
@@ -637,20 +815,36 @@ class LegalEntityTransferIntegrationTest {
   void 结案把短少如实记为差异且凭据不因此作废() {
     seedBalance(leA1, whFrom, locFrom, "100");
     var order = confirmed();
-    var shipped = asA(() -> service.ship(order.id(), userSource,
-        new LegalEntityTransferShipRequest(order.version(), null, "")));
+    var shipped =
+        asA(
+            () ->
+                service.ship(
+                    order.id(),
+                    userSource,
+                    new LegalEntityTransferShipRequest(order.version(), null, "")));
     var lineId = asA(() -> service.detail(order.id())).lines().get(0).id();
     var partial =
         asATarget(
             () ->
                 service.receive(
-                    order.id(),userSource,
+                    order.id(),
+                    userSource,
                     new LegalEntityTransferReceiveRequest(
-                        shipped.version(), null, locTo, null, "",
-                        List.of(new LegalEntityTransferReceiveLineRequest(
-                            lineId, new BigDecimal("50"))))));
-    var closed = asA(() -> service.close(order.id(), userSource,
-        new LegalEntityTransferCloseRequest(partial.version(), "运输破损", "")));
+                        shipped.version(),
+                        null,
+                        locTo,
+                        null,
+                        "",
+                        List.of(
+                            new LegalEntityTransferReceiveLineRequest(
+                                lineId, new BigDecimal("50"))))));
+    var closed =
+        asA(
+            () ->
+                service.close(
+                    order.id(),
+                    userSource,
+                    new LegalEntityTransferCloseRequest(partial.version(), "运输破损", "")));
     assertThat(closed.status()).isEqualTo("DISCREPANCY");
     assertThat(sharedInTransit()).isEqualByComparingTo("0");
     assertThat(onHand(leA2, whTo)).isEqualByComparingTo("50");
@@ -664,14 +858,20 @@ class LegalEntityTransferIntegrationTest {
   void 已发运的单不能作废只能结案() {
     seedBalance(leA1, whFrom, locFrom, "100");
     var order = confirmed();
-    var shipped = asA(() -> service.ship(order.id(), userSource,
-        new LegalEntityTransferShipRequest(order.version(), null, "")));
+    var shipped =
+        asA(
+            () ->
+                service.ship(
+                    order.id(),
+                    userSource,
+                    new LegalEntityTransferShipRequest(order.version(), null, "")));
     assertThatThrownBy(
             () ->
                 asA(
                     () ->
                         service.cancel(
-                            order.id(), userSource,
+                            order.id(),
+                            userSource,
                             new LegalEntityTransferCancelRequest(shipped.version(), "不做了"))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("只能结案");
@@ -685,12 +885,18 @@ class LegalEntityTransferIntegrationTest {
                 asA(
                     () ->
                         service.cancel(
-                            order.id(), userSource,
+                            order.id(),
+                            userSource,
                             new LegalEntityTransferCancelRequest(order.version(), " "))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("必须写明原因");
-    var cancelled = asA(() -> service.cancel(order.id(), userSource,
-        new LegalEntityTransferCancelRequest(order.version(), "需求取消")));
+    var cancelled =
+        asA(
+            () ->
+                service.cancel(
+                    order.id(),
+                    userSource,
+                    new LegalEntityTransferCancelRequest(order.version(), "需求取消")));
     assertThat(cancelled.status()).isEqualTo("CANCELLED");
   }
 
@@ -705,8 +911,13 @@ class LegalEntityTransferIntegrationTest {
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("尚未开具");
 
-    var shipped = asA(() -> service.ship(order.id(), userSource,
-        new LegalEntityTransferShipRequest(order.version(), null, "")));
+    var shipped =
+        asA(
+            () ->
+                service.ship(
+                    order.id(),
+                    userSource,
+                    new LegalEntityTransferShipRequest(order.version(), null, "")));
     var handoff = asA(() -> service.settlement(order.id()));
     assertThat(handoff.sourceSystem()).isEqualTo("warehouse");
     assertThat(handoff.referenceId()).isEqualTo(order.id());
@@ -735,17 +946,27 @@ class LegalEntityTransferIntegrationTest {
   void 实收后凭据被确认() {
     seedBalance(leA1, whFrom, locFrom, "100");
     var order = confirmed();
-    var shipped = asA(() -> service.ship(order.id(), userSource,
-        new LegalEntityTransferShipRequest(order.version(), null, "")));
+    var shipped =
+        asA(
+            () ->
+                service.ship(
+                    order.id(),
+                    userSource,
+                    new LegalEntityTransferShipRequest(order.version(), null, "")));
     var lineId = asA(() -> service.detail(order.id())).lines().get(0).id();
     asATarget(
         () ->
             service.receive(
-                order.id(),userSource,
+                order.id(),
+                userSource,
                 new LegalEntityTransferReceiveRequest(
-                    shipped.version(), null, locTo, null, "",
-                    List.of(new LegalEntityTransferReceiveLineRequest(
-                        lineId, new BigDecimal("60"))))));
+                    shipped.version(),
+                    null,
+                    locTo,
+                    null,
+                    "",
+                    List.of(
+                        new LegalEntityTransferReceiveLineRequest(lineId, new BigDecimal("60"))))));
     var handoff = asA(() -> service.settlement(order.id()));
     assertThat(handoff.settlementStatus()).isEqualTo("ACKNOWLEDGED");
     assertThat(handoff.lines().get(0).receivedQuantity()).isEqualByComparingTo("60");
@@ -761,18 +982,17 @@ class LegalEntityTransferIntegrationTest {
     asA(
         () ->
             service.ship(
-                order.id(),userSource,
+                order.id(),
+                userSource,
                 new LegalEntityTransferShipRequest(order.version(), shippedAt, "跨时区发运")));
     // 从库里读回：时刻必须与写入的瞬时一致（用 Timestamp.valueOf 会静默偏 -28800s）
     var stored =
         asA(
             () ->
-                sql.fetchOne(
-                        "select shipped_at from cross_entity_transfer where id=?",
-                        order.id())
+                sql.fetchOne("select shipped_at from cross_entity_transfer where id=?", order.id())
                     .get(0, OffsetDateTime.class));
     assertThat(stored.toInstant()).isEqualTo(shippedAt.toInstant());
-    assertThat(stored.getOffset()).isEqualTo(ZoneOffset.ofHours(8));
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
     var leg =
         asA(
             () ->
@@ -790,27 +1010,32 @@ class LegalEntityTransferIntegrationTest {
     asA(
         () ->
             service.sourceConfirm(
-                created.id(), userSource,
+                created.id(),
+                userSource,
                 new LegalEntityTransferApproveRequest(created.version(), "")));
     assertThatThrownBy(
             () ->
                 asA(
                     () ->
                         service.targetConfirm(
-                            created.id(), userTarget,
+                            created.id(),
+                            userTarget,
                             new LegalEntityTransferApproveRequest(created.version(), ""))))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
   }
 
   @Test
   void 列表按法人筛选并给出待对方确认的计数() {
     seedBalance(leA1, whFrom, locFrom, "100");
     var order = confirmed();
-    var page = asA(() -> service.page(new LegalEntityTransferQuery(
-        leA1, null, null, null, null, null, null, null, 0, 50)));
+    var page =
+        asA(
+            () ->
+                service.page(
+                    new LegalEntityTransferQuery(
+                        leA1, null, null, null, null, null, null, null, 0, 50)));
     assertThat(page.total()).isEqualTo(1);
     // confirmed() 已经把两个方向都确认完，所以此时没有「等对方确认」的单
     assertThat(page.summary().awaitingTargetCount()).isZero();
@@ -822,12 +1047,20 @@ class LegalEntityTransferIntegrationTest {
     assertThat(page.valuationOptions()).hasSize(3);
 
     // 按转入法人筛
-    var byTarget = asA(() -> service.page(new LegalEntityTransferQuery(
-        null, leA2, null, null, null, null, null, null, 0, 50)));
+    var byTarget =
+        asA(
+            () ->
+                service.page(
+                    new LegalEntityTransferQuery(
+                        null, leA2, null, null, null, null, null, null, 0, 50)));
     assertThat(byTarget.total()).isEqualTo(1);
     // 按一个没人用的转入法人筛
-    var none = asA(() -> service.page(new LegalEntityTransferQuery(
-        null, UUID.randomUUID(), null, null, null, null, null, null, 0, 50)));
+    var none =
+        asA(
+            () ->
+                service.page(
+                    new LegalEntityTransferQuery(
+                        null, UUID.randomUUID(), null, null, null, null, null, null, 0, 50)));
     assertThat(none.total()).isZero();
 
     // 再来一张只被转出方确认的单：它正是「等对方确认」那一列要盯的
@@ -835,10 +1068,24 @@ class LegalEntityTransferIntegrationTest {
     asA(
         () ->
             service.sourceConfirm(
-                second.id(), userSource,
+                second.id(),
+                userSource,
                 new LegalEntityTransferApproveRequest(second.version(), "")));
-    var waiting = asA(() -> service.page(new LegalEntityTransferQuery(
-        null, null, null, null, null, List.of("PENDING_TARGET_CONFIRM"), null, null, 0, 50)));
+    var waiting =
+        asA(
+            () ->
+                service.page(
+                    new LegalEntityTransferQuery(
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        List.of("PENDING_TARGET_CONFIRM"),
+                        null,
+                        null,
+                        0,
+                        50)));
     assertThat(waiting.total()).isEqualTo(1);
     assertThat(waiting.summary().awaitingTargetCount()).isEqualTo(1);
     assertThat(waiting.rows().get(0).status()).isEqualTo("PENDING_TARGET_CONFIRM");
@@ -848,17 +1095,30 @@ class LegalEntityTransferIntegrationTest {
                 asA(
                     () ->
                         service.ship(
-                            second.id(), userSource,
+                            second.id(),
+                            userSource,
                             new LegalEntityTransferShipRequest(
                                 waiting.rows().get(0).version(), null, ""))))
         .isInstanceOf(ResponseStatusException.class);
-    asA(() -> service.cancel(second.id(), userSource,
-        new LegalEntityTransferCancelRequest(waiting.rows().get(0).version(), "测试收尾")));
+    asA(
+        () ->
+            service.cancel(
+                second.id(),
+                userSource,
+                new LegalEntityTransferCancelRequest(waiting.rows().get(0).version(), "测试收尾")));
 
-    asA(() -> service.ship(order.id(), userSource,
-        new LegalEntityTransferShipRequest(order.version(), null, "")));
-    var afterShip = asA(() -> service.page(new LegalEntityTransferQuery(
-        null, null, null, null, null, null, null, null, 0, 50)));
+    asA(
+        () ->
+            service.ship(
+                order.id(),
+                userSource,
+                new LegalEntityTransferShipRequest(order.version(), null, "")));
+    var afterShip =
+        asA(
+            () ->
+                service.page(
+                    new LegalEntityTransferQuery(
+                        null, null, null, null, null, null, null, null, 0, 50)));
     assertThat(afterShip.summary().settlementIssuedCount()).isEqualTo(1);
     assertThat(afterShip.summary().inTransitQuantity()).isEqualByComparingTo("60");
   }
@@ -867,13 +1127,19 @@ class LegalEntityTransferIntegrationTest {
   void 分录端点复用台账并说明货权跨法人() throws Exception {
     seedBalance(leA1, whFrom, locFrom, "100");
     var order = confirmed();
-    asA(() -> service.ship(order.id(), userSource,
-        new LegalEntityTransferShipRequest(order.version(), null, "")));
-    http.perform(get("/warehouse/inventory/cross-entity-transfers/{id}/movements", order.id())
-            .header("Authorization", "Bearer tenant-a"))
+    asA(
+        () ->
+            service.ship(
+                order.id(),
+                userSource,
+                new LegalEntityTransferShipRequest(order.version(), null, "")));
+    http.perform(
+            get("/warehouse/inventory/cross-entity-transfers/{id}/movements", order.id())
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.attribution").value("ORDER_GRANULAR"))
-        .andExpect(jsonPath("$.attributionNote").value(org.hamcrest.Matchers.containsString("不同法人")))
+        .andExpect(
+            jsonPath("$.attributionNote").value(org.hamcrest.Matchers.containsString("不同法人")))
         .andExpect(jsonPath("$.movements.total").value(1));
   }
 
@@ -884,11 +1150,19 @@ class LegalEntityTransferIntegrationTest {
     seedBalance(leA1, whFrom, locFrom, "100");
     var order = confirmed();
 
-    var pageA = asA(() -> service.page(new LegalEntityTransferQuery(
-        null, null, null, null, null, null, null, null, 0, 50)));
+    var pageA =
+        asA(
+            () ->
+                service.page(
+                    new LegalEntityTransferQuery(
+                        null, null, null, null, null, null, null, null, 0, 50)));
     assertThat(pageA.total()).isEqualTo(1);
-    var pageB = asB(() -> service.page(new LegalEntityTransferQuery(
-        null, null, null, null, null, null, null, null, 0, 50)));
+    var pageB =
+        asB(
+            () ->
+                service.page(
+                    new LegalEntityTransferQuery(
+                        null, null, null, null, null, null, null, null, 0, 50)));
     assertThat(pageB.total()).isZero();
     assertThat(pageB.summary().transferCount()).isZero();
 
@@ -896,16 +1170,14 @@ class LegalEntityTransferIntegrationTest {
     assertThatThrownBy(() -> asB(() -> service.detail(order.id())))
         .isInstanceOf(ResponseStatusException.class)
         .satisfies(
-            e ->
-                assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     // 拿 A 的单 id 让 B 确认 → 建不出痕迹
     assertThatThrownBy(
             () ->
                 asB(
                     () ->
                         service.sourceConfirm(
-                            order.id(), userSource,
-                            new LegalEntityTransferApproveRequest(0L, ""))))
+                            order.id(), userSource, new LegalEntityTransferApproveRequest(0L, ""))))
         .isInstanceOf(ResponseStatusException.class);
     // B 看不到 A 的凭据
     assertThatThrownBy(() -> asB(() -> service.settlement(order.id())))
@@ -917,28 +1189,32 @@ class LegalEntityTransferIntegrationTest {
     seedBalance(leA1, whFrom, locFrom, "100");
     var order = confirmed();
 
-    http.perform(get("/warehouse/inventory/cross-entity-transfers")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/cross-entity-transfers")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(0));
-    http.perform(get("/warehouse/inventory/cross-entity-transfers")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/inventory/cross-entity-transfers")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.rows[0].transferCode").value(order.transferCode()));
-    http.perform(get("/warehouse/inventory/cross-entity-transfers/{id}", order.id())
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/cross-entity-transfers/{id}", order.id())
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
     http.perform(get("/warehouse/inventory/cross-entity-transfers"))
         .andExpect(status().isUnauthorized());
     // 写端点要 update 权限：只有 read 的角色不能建单
-    http.perform(post("/warehouse/inventory/cross-entity-transfers")
-            .header("Authorization", "Bearer read-only")
-            .contentType("application/json")
-            .content("{\"currencyCode\":\"CNY\"}"))
+    http.perform(
+            post("/warehouse/inventory/cross-entity-transfers")
+                .header("Authorization", "Bearer read-only")
+                .contentType("application/json")
+                .content("{\"currencyCode\":\"CNY\"}"))
         .andExpect(status().isForbidden());
   }
 
@@ -948,11 +1224,19 @@ class LegalEntityTransferIntegrationTest {
     var order = confirmed();
     // 池压到 1 条连接：这里交替跑两个租户，任何一次租户上下文泄漏都会串
     for (int i = 0; i < 5; i++) {
-      assertThat(asA(() -> service.page(new LegalEntityTransferQuery(
-              null, null, null, null, null, null, null, null, 0, 50))).total())
+      assertThat(
+              asA(() ->
+                      service.page(
+                          new LegalEntityTransferQuery(
+                              null, null, null, null, null, null, null, null, 0, 50)))
+                  .total())
           .isEqualTo(1);
-      assertThat(asB(() -> service.page(new LegalEntityTransferQuery(
-              null, null, null, null, null, null, null, null, 0, 50))).total())
+      assertThat(
+              asB(() ->
+                      service.page(
+                          new LegalEntityTransferQuery(
+                              null, null, null, null, null, null, null, null, 0, 50)))
+                  .total())
           .isZero();
       assertThat(asATarget(() -> service.detail(order.id())).transfer().id()).isEqualTo(order.id());
       assertThatThrownBy(() -> asB(() -> service.detail(order.id())))

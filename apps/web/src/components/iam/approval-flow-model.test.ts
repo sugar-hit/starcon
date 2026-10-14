@@ -101,7 +101,9 @@ describe('空草稿', () => {
     });
     // 单据类型与名称还得由用户补，所以这两条仍然在列；除它们之外没有别的问题。
     expect(validateDraft(d, ROLES)).toEqual(['请选择适用单据类型', '请填写流程名称']);
-    expect(validateDraft({ ...d, documentTypeCode: 'PURCHASE_ORDER', flowName: '采购审批' }, ROLES)).toEqual([]);
+    expect(
+      validateDraft({ ...d, documentTypeCode: 'PURCHASE_ORDER', flowName: '采购审批' }, ROLES),
+    ).toEqual([]);
   });
 
   it('没有可用角色时默认节点仍然要求补选审批人', () => {
@@ -162,14 +164,15 @@ describe('草稿校验', () => {
       ),
     ).toBe(true);
     expect(
-      validateDraft(
-        draft({ nodes: [node({ conditionExpression: 'amount > 1' })] }),
-        ROLES,
-      ).some((e) => e.includes('只有条件分支节点能填条件表达式')),
+      validateDraft(draft({ nodes: [node({ conditionExpression: 'amount > 1' })] }), ROLES).some(
+        (e) => e.includes('只有条件分支节点能填条件表达式'),
+      ),
     ).toBe(true);
     expect(
       validateDraft(
-        draft({ nodes: [node({ approvalMode: 'CONDITIONAL', conditionExpression: 'amount > 1' })] }),
+        draft({
+          nodes: [node({ approvalMode: 'CONDITIONAL', conditionExpression: 'amount > 1' })],
+        }),
         ROLES,
       ),
     ).toEqual([]);
@@ -182,10 +185,9 @@ describe('草稿校验', () => {
       ),
     ).toBe(true);
     expect(
-      validateDraft(
-        draft({ nodes: [node({ positionId: 'pos-1' })] }),
-        ROLES,
-      ).some((e) => e.includes('审批人只能选一个')),
+      validateDraft(draft({ nodes: [node({ positionId: 'pos-1' })] }), ROLES).some((e) =>
+        e.includes('审批人只能选一个'),
+      ),
     ).toBe(true);
     expect(
       validateDraft(draft({ nodes: [node({ roleId: 'role-missing' })] }), ROLES).some((e) =>
@@ -196,14 +198,15 @@ describe('草稿校验', () => {
 
   it('金额分支上下限不能都空、不能倒置、币种必须是三位大写', () => {
     expect(
-      validateDraft(draft({ branches: [branch({ minAmount: '', maxAmount: '' })] }), ROLES).some((e) =>
-        e.includes('上下限不能都留空'),
+      validateDraft(draft({ branches: [branch({ minAmount: '', maxAmount: '' })] }), ROLES).some(
+        (e) => e.includes('上下限不能都留空'),
       ),
     ).toBe(true);
     expect(
-      validateDraft(draft({ branches: [branch({ minAmount: '100', maxAmount: '100' })] }), ROLES).some(
-        (e) => e.includes('上限必须大于下限'),
-      ),
+      validateDraft(
+        draft({ branches: [branch({ minAmount: '100', maxAmount: '100' })] }),
+        ROLES,
+      ).some((e) => e.includes('上限必须大于下限')),
     ).toBe(true);
     expect(
       validateDraft(draft({ branches: [branch({ currencyCode: 'usd' })] }), ROLES).some((e) =>
@@ -245,7 +248,11 @@ describe('草稿校验', () => {
       validateDraft(
         draft({
           escalations: [
-            escalation({ timeoutAction: 'ESCALATE', escalateApproverType: 'ROLE', escalateRoleId: ROLE_B }),
+            escalation({
+              timeoutAction: 'ESCALATE',
+              escalateApproverType: 'ROLE',
+              escalateRoleId: ROLE_B,
+            }),
           ],
         }),
         ROLES,
@@ -290,10 +297,7 @@ describe('金额区间交叠检测', () => {
 
   it('不同币种的同一区间允许并存', () => {
     expect(
-      branchConflicts([
-        branch({ currencyCode: 'USD' }),
-        branch({ currencyCode: 'EUR' }),
-      ]),
+      branchConflicts([branch({ currencyCode: 'USD' }), branch({ currencyCode: 'EUR' })]),
     ).toEqual([]);
   });
 
@@ -347,10 +351,16 @@ describe('审批人摘要', () => {
     };
     expect(approverSummary(node(), lookup)).toBe('角色 · 采购经理');
     expect(
-      approverSummary({ approverType: 'POSITION', positionId: 'p1', roleId: null, membershipId: null }, lookup),
+      approverSummary(
+        { approverType: 'POSITION', positionId: 'p1', roleId: null, membershipId: null },
+        lookup,
+      ),
     ).toBe('岗位 · 财务主管岗');
     expect(
-      approverSummary({ approverType: 'USER', membershipId: 'm1', roleId: null, positionId: null }, lookup),
+      approverSummary(
+        { approverType: 'USER', membershipId: 'm1', roleId: null, positionId: null },
+        lookup,
+      ),
     ).toBe('指定人 · zhangsan');
   });
 
@@ -371,11 +381,21 @@ describe('阶段分组与摘要', () => {
   });
 
   it('流程摘要在有分支与超时规则时才提它们', () => {
-    expect(flowSummary({ documentTypeName: '采购订单', nodeCount: 2, branchCount: 0, escalationCount: 0 })).toBe(
-      '采购订单 · 2 个审批节点',
-    );
     expect(
-      flowSummary({ documentTypeName: '采购订单', nodeCount: 2, branchCount: 1, escalationCount: 3 }),
+      flowSummary({
+        documentTypeName: '采购订单',
+        nodeCount: 2,
+        branchCount: 0,
+        escalationCount: 0,
+      }),
+    ).toBe('采购订单 · 2 个审批节点');
+    expect(
+      flowSummary({
+        documentTypeName: '采购订单',
+        nodeCount: 2,
+        branchCount: 1,
+        escalationCount: 3,
+      }),
     ).toBe('采购订单 · 2 个审批节点 · 1 条金额阈值 · 3 条超时规则');
   });
 });
@@ -399,7 +419,10 @@ describe('不可用审批人', () => {
         { nodeName: '法务复核', approverExists: false, approverActive: null },
         { nodeName: '经理审批', approverExists: true, approverActive: true },
       ]),
-    ).toEqual(['财务复核：审批人已停用，该节点无人可审', '法务复核：审批人已不存在，该节点无人可审']);
+    ).toEqual([
+      '财务复核：审批人已停用，该节点无人可审',
+      '法务复核：审批人已不存在，该节点无人可审',
+    ]);
   });
 });
 

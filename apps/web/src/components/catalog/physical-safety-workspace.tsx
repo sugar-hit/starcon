@@ -270,7 +270,9 @@ export function PhysicalSafetyWorkspace({ skuId }: { skuId: string }) {
                         type="checkbox"
                         checked={draft[flag.key]}
                         disabled={busy || !canWrite || !draft.safetyCollected}
-                        onChange={(e) => patch({ [flag.key]: e.target.checked } as Partial<SafetyDraft>)}
+                        onChange={(e) =>
+                          patch({ [flag.key]: e.target.checked } as Partial<SafetyDraft>)
+                        }
                       />
                       {flag.label}
                     </label>
@@ -323,7 +325,9 @@ export function PhysicalSafetyWorkspace({ skuId }: { skuId: string }) {
                     保存
                   </Button>
                   {errors.length > 0 && (
-                    <span className="text-muted-foreground text-xs">有 {errors.length} 项待修正</span>
+                    <span className="text-muted-foreground text-xs">
+                      有 {errors.length} 项待修正
+                    </span>
                   )}
                 </div>
               )}

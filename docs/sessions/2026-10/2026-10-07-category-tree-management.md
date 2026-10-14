@@ -34,11 +34,11 @@ V9 / V11 / V13 三份迁移结尾都写过同一句话：「category 仍是自�
 
 三个方案：
 
-| 方案 | 结论 |
-| --- | --- |
-| **(A) 加 `category_id` 外键，保留 `category` 文本列** | **选它** |
-| (B) 把 `category` 改成 `uuid` | 否：`category` 是 `category_attribute_rule` 主键 `(tenant_id,category,attribute_id)` 的一列，`category_attribute_option` / `category_spec_axis` 都有指向它的复合外键。改类型会连带重写三个已交付模块的 Service / Controller / DTO / OpenAPI 契约 / 前端页面 / 约 40 处集成测试夹具——那是**重开旧账**，与三份迁移反复强调的口径不符 |
-| (C) 另建关联表 `category_rule_link` | 否：多一张事实表就多一个写入所有者，同一条规则出现在两个地方 |
+| 方案                                                  | 结论                                                                                                                                                                                                                                                                                                                               |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **(A) 加 `category_id` 外键，保留 `category` 文本列** | **选它**                                                                                                                                                                                                                                                                                                                           |
+| (B) 把 `category` 改成 `uuid`                         | 否：`category` 是 `category_attribute_rule` 主键 `(tenant_id,category,attribute_id)` 的一列，`category_attribute_option` / `category_spec_axis` 都有指向它的复合外键。改类型会连带重写三个已交付模块的 Service / Controller / DTO / OpenAPI 契约 / 前端页面 / 约 40 处集成测试夹具——那是**重开旧账**，与三份迁移反复强调的口径不符 |
+| (C) 另建关联表 `category_rule_link`                   | 否：多一张事实表就多一个写入所有者，同一条规则出现在两个地方                                                                                                                                                                                                                                                                       |
 
 选 (A) 之后唯一的风险是「文本与主键各说各话」，口径写死成一条：
 **`CategoryTreeService` 是唯一允许写 `category` 文本的地方，且只在重命名路径写**（同一事务同步三张表）。
@@ -82,6 +82,7 @@ V9 / V11 / V13 三份迁移结尾都写过同一句话：「category 仍是自�
 ## 文件清单
 
 新增：
+
 - `backend/services/catalog/src/main/resources/db/migration/V14__category_tree.sql`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/CategoryTreeService.java`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/CategoryTreeController.java`
@@ -93,6 +94,7 @@ V9 / V11 / V13 三份迁移结尾都写过同一句话：「category 仍是自�
 - `apps/web/src/app/products/categories/page.tsx`
 
 改动：
+
 - `CatalogModels.java`（3.3.1.1 的 DTO）
 - `AttributeDictionaryService.java` / `SpecAxisService.java`（构造器注入 + 写 `category_id`）
 - `api-proxy.ts`（放行 `categories` 前缀 + 中文注释说明每段路径用途）

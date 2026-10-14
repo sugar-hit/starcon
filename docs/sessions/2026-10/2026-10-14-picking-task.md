@@ -22,12 +22,12 @@ V72 的 `outbound_order` / `outbound_order_line` / `outbound_pick_request` / `ou
 「所有作业动作与库存分录在同一本地事务完成」。两句话放一起会诱导人写一个
 「出库分录 + 入库分录」的双向流水，**本模块刻意不写**：
 
-* 打包区是同仓的 `warehouse_location.type='SHIPPING'`，而 `inventory_balance` 的六元组
+- 打包区是同仓的 `warehouse_location.type='SHIPPING'`，而 `inventory_balance` 的六元组
   （sku × warehouse × legal_entity × quality）**不含库位与批次**，所以同仓内换库位
   在 balance 层什么都没发生；
-* `inventory_entry` 有 `CHECK(on_hand_delta<>0 OR reserved_delta<>0)`，delta=0 的分录写不进去，
+- `inventory_entry` 有 `CHECK(on_hand_delta<>0 OR reserved_delta<>0)`，delta=0 的分录写不进去，
   而写两条 ±q 互相抵消只会把「Σ分录 == 余额变化」这条守恒式变成两笔噪音；
-* V2 §4.4 的 bucket 守恒式（balance = Σ bucket）在事务提交时天然成立 —— 两侧 bucket 一增一减，
+- V2 §4.4 的 bucket 守恒式（balance = Σ bucket）在事务提交时天然成立 —— 两侧 bucket 一增一减，
   合计没变。
 
 **reserved 跟着货一起搬**（`min(reserved, 实拣量)`），既不释放也不留在原地：
@@ -49,9 +49,9 @@ V110 那一列的注释把这个理由写死。
 
 ### 4. 没有「强制完成」，但有「重开」
 
-* 没有强制完成：9/10 的任务提交到复核，复核看到的仍然是缺件，而缺件的原因
+- 没有强制完成：9/10 的任务提交到复核，复核看到的仍然是缺件，而缺件的原因
   （本该缺货、还是有人漏拣）在那一刻已经分不清。每一段要么拣齐，要么已按缺货登记。
-* 但必须有重开：8.3.1.1 的 `outbound_pick_request` 上有 `UNIQUE(tenant_id, order_id)`
+- 但必须有重开：8.3.1.1 的 `outbound_pick_request` 上有 `UNIQUE(tenant_id, order_id)`
   （一张出库单只交接一次），而它的状态机里留着「待复核 → 拣货中」的返工边。
   没有重开，被复核退回的订单会永远停在「拣货中」而没有作业入口。
   重开后**实拣量累加不覆盖** —— 覆盖等于抹掉第一次的事实，而复核退回的原因恰恰在第一次的记录里。
@@ -67,10 +67,10 @@ identity 只注册了 `warehouse.inventory` 与 `warehouse.facilities` 两个页
 8.5.2.1 库位利用率的六类建议里，两类的 `ownerModule` 写的是「8.3.2.1 拣货路径优化」。
 本模块把它们落成两个**同名口径**的字段，作业侧逐行标出来：
 
-| 8.5.2.1 建议 | 本模块字段 | 触发 |
-|---|---|---|
-| HIGH_FREQUENT_NON_PICKABLE「高频货在不可拣库位」 | `pick_task_line.non_pickable_source` | 优先可拣且 ACTIVE 的库位；没有可拣来源才退到不可拣位，并把该行标出来 |
-| SKU_DISPERSION「SKU 散在多库位」 | `pick_task_line.sku_location_count`（真实跨库位计数）+ 收敛分配 | 同一 SKU 优先在一个库位一次拣齐，拣不齐才拆段 |
+| 8.5.2.1 建议                                     | 本模块字段                                                      | 触发                                                                 |
+| ------------------------------------------------ | --------------------------------------------------------------- | -------------------------------------------------------------------- |
+| HIGH_FREQUENT_NON_PICKABLE「高频货在不可拣库位」 | `pick_task_line.non_pickable_source`                            | 优先可拣且 ACTIVE 的库位；没有可拣来源才退到不可拣位，并把该行标出来 |
+| SKU_DISPERSION「SKU 散在多库位」                 | `pick_task_line.sku_location_count`（真实跨库位计数）+ 收敛分配 | 同一 SKU 优先在一个库位一次拣齐，拣不齐才拆段                        |
 
 另有一条 UI 侧的告示把两个数回指建议来源模块。
 
@@ -84,19 +84,23 @@ identity 只注册了 `warehouse.inventory` 与 `warehouse.facilities` 两个页
 ## 文件清单
 
 **迁移**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V110__warehouse_pick_task.sql`
 
 **后端**
+
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/PickTaskModels.java`（新建）
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/PickTaskService.java`（新建）
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/PickTaskController.java`（新建）
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/PickTaskIntegrationTest.java`（新建，33 例）
 
 **契约（codegen 产物，只由脚本写出）**
+
 - `packages/api-contracts/src/warehouse.openapi.json`
 - `packages/api-contracts/src/contracts/warehouse.ts`
 
 **前端**
+
 - `apps/web/src/components/warehouse/pick-task-model.ts`（新建）
 - `apps/web/src/components/warehouse/pick-task-model.test.ts`（新建，15 例）
 - `apps/web/src/components/warehouse/pick-task-workspace.tsx`（新建）
@@ -105,6 +109,7 @@ identity 只注册了 `warehouse.inventory` 与 `warehouse.facilities` 两个页
 - `apps/web/src/lib/api-proxy.ts`（**只追加** `pick-tasks` 一个顶层分支）
 
 **台账 / 会话**
+
 - `docs/product/capability-blueprint/module-progress.md`（只改 8.3.2.1 那一行）
 - `docs/sessions/2026-10/2026-10-14-picking-task.md`（本文件）
 
@@ -119,16 +124,16 @@ identity 只注册了 `warehouse.inventory` 与 `warehouse.facilities` 两个页
 pick-tasks(?:\/capabilities|\/[0-9a-f-]+(?:\/(?:assign|picks|exceptions(?:\/[0-9a-f-]+\/resolve)?|complete|reopen|cancel))?)?
 ```
 
-* `\/capabilities` **排在 `\/[0-9a-f-]+` 之前**（alternation 首个命中即返回，
+- `\/capabilities` **排在 `\/[0-9a-f-]+` 之前**（alternation 首个命中即返回，
   且 "capabilities" 里的 c/a/p/b/l/t/i/e/s 大量落在 `[0-9a-f-]` 内，顺序反了会被 UUID 分支吃掉）。
-* 十个真实形状全放行；`{id}/waves`（8.3.2.2 未交付）、多一层后缀、`pick-task` / `pick_task` 拼错仍 404。
+- 十个真实形状全放行；`{id}/waves`（8.3.2.2 未交付）、多一层后缀、`pick-task` / `pick_task` 拼错仍 404。
 
 ## 验证
 
-* L0：`cd backend && ./mvnw -q compile` ✅；`pnpm typecheck` 3/3 ✅
-* L1：`cd backend && ./mvnw -pl services/warehouse -am test` ✅（含 PickTaskIntegrationTest 33 例）
-* L1 前端：`pnpm vitest run <pick-task-model.test.ts> <pick-task-allowlist.test.ts>` → 2 files / 23 tests 全绿
-* 契约：`python3 tools/codegen/catalog-contracts.py --spec-dir packages/api-contracts/src`
+- L0：`cd backend && ./mvnw -q compile` ✅；`pnpm typecheck` 3/3 ✅
+- L1：`cd backend && ./mvnw -pl services/warehouse -am test` ✅（含 PickTaskIntegrationTest 33 例）
+- L1 前端：`pnpm vitest run <pick-task-model.test.ts> <pick-task-allowlist.test.ts>` → 2 files / 23 tests 全绿
+- 契约：`python3 tools/codegen/catalog-contracts.py --spec-dir packages/api-contracts/src`
   → 1583 DTOs / 6 服务，新增 22 schema + 10 path，零重名
 
 ## 后续待办

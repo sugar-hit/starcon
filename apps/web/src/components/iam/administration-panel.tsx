@@ -149,7 +149,7 @@ export function AdministrationPanel({
         <p role="status">正在加载…</p>
       ) : loadFailed ? (
         // 失败和"没有数据"必须能分辨，否则管理员会把接口故障当成"租户里一个人都没有"
-        <div className="space-y-2 rounded-lg border border-destructive/40 p-6 text-sm">
+        <div className="border-destructive/40 space-y-2 rounded-lg border p-6 text-sm">
           <p className="text-destructive">数据加载失败，上方横幅是具体原因。</p>
           <Button size="sm" variant="outline" disabled={busy} onClick={() => void load()}>
             重试
@@ -189,7 +189,8 @@ export function AdministrationPanel({
                   {member && (
                     <p className="text-muted-foreground text-xs">
                       {member.status === 'ACTIVE' ? '启用' : '停用'} ·{' '}
-                      {departmentRows.find((d) => d.node.id === member.departmentId)?.node.name ?? '未设置部门'}{' '}
+                      {departmentRows.find((d) => d.node.id === member.departmentId)?.node.name ??
+                        '未设置部门'}{' '}
                       ·{' '}
                       {member.assignments
                         .map(
@@ -314,9 +315,7 @@ export function AdministrationPanel({
               members={members}
               busy={busy}
               save={(input) => {
-                const editingDepartment = departmentRows.find(
-                  (d) => d.node.id === editing,
-                )?.node;
+                const editingDepartment = departmentRows.find((d) => d.node.id === editing)?.node;
                 return mutate(async () => {
                   if (editing === 'new') {
                     await saveAdministration('departments', undefined, input);
@@ -570,12 +569,11 @@ function MemberForm({
                 </select>
               </Field>
             ))}
-        {canReadRoles &&
-          roles.filter((r) => !r.system).length === 0 && (
-            <p className="text-muted-foreground text-xs">
-              租户内还没有可分配的自定义角色，请先到「角色配置」新建。
-            </p>
-          )}
+        {canReadRoles && roles.filter((r) => !r.system).length === 0 && (
+          <p className="text-muted-foreground text-xs">
+            租户内还没有可分配的自定义角色，请先到「角色配置」新建。
+          </p>
+        )}
       </fieldset>
     </Form>
   );
@@ -741,11 +739,7 @@ function DepartmentForm({
         />
       </Field>
       <Field label="上级部门" hint="留空表示根部门。层级也可以在树上拖拽调整。">
-        <select
-          className={control}
-          value={parentId}
-          onChange={(e) => setParentId(e.target.value)}
-        >
+        <select className={control} value={parentId} onChange={(e) => setParentId(e.target.value)}>
           <option value="">（根部门）</option>
           {candidates.map((row) => (
             <option key={row.node.id} value={row.node.id}>

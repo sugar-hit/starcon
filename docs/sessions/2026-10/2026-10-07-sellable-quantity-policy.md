@@ -66,19 +66,19 @@ headroom         = poolCapacity − Σ memberListing_i
 
 ## 文件清单
 
-| 类别 | 路径 |
-| --- | --- |
-| 迁移 | `backend/services/warehouse/src/main/resources/db/migration/V56__warehouse_sellable_policy.sql` |
-| 模型 | `backend/services/warehouse/src/main/java/com/starcon/warehouse/SellablePolicyModels.java` |
-| 服务 | `backend/services/warehouse/src/main/java/com/starcon/warehouse/SellablePolicyService.java` |
-| 端点 | `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryController.java`（9 个新端点） |
-| 测试 | `backend/services/warehouse/src/test/java/com/starcon/warehouse/SellablePolicyIntegrationTest.java`（17 例） |
-| 页面 | `apps/web/src/app/inventory/sellable-policies/page.tsx` |
-| 组件 | `apps/web/src/components/inventory/sellable-policy-workspace.tsx` |
-| 前端模型 | `apps/web/src/components/inventory/sellable-policy-model.ts` |
-| 代理放行 | `apps/web/src/lib/api-proxy.ts` |
-| 契约 | `packages/api-contracts/src/catalog.ts`（+14 类型，−0）、`warehouse.openapi.json` |
-| 台账 | `docs/product/capability-blueprint/module-progress.md` 第 7.2.2.1 行 |
+| 类别     | 路径                                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------------------ |
+| 迁移     | `backend/services/warehouse/src/main/resources/db/migration/V56__warehouse_sellable_policy.sql`              |
+| 模型     | `backend/services/warehouse/src/main/java/com/starcon/warehouse/SellablePolicyModels.java`                   |
+| 服务     | `backend/services/warehouse/src/main/java/com/starcon/warehouse/SellablePolicyService.java`                  |
+| 端点     | `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryController.java`（9 个新端点）      |
+| 测试     | `backend/services/warehouse/src/test/java/com/starcon/warehouse/SellablePolicyIntegrationTest.java`（17 例） |
+| 页面     | `apps/web/src/app/inventory/sellable-policies/page.tsx`                                                      |
+| 组件     | `apps/web/src/components/inventory/sellable-policy-workspace.tsx`                                            |
+| 前端模型 | `apps/web/src/components/inventory/sellable-policy-model.ts`                                                 |
+| 代理放行 | `apps/web/src/lib/api-proxy.ts`                                                                              |
+| 契约     | `packages/api-contracts/src/catalog.ts`（+14 类型，−0）、`warehouse.openapi.json`                            |
+| 台账     | `docs/product/capability-blueprint/module-progress.md` 第 7.2.2.1 行                                         |
 
 ## 过程中发现的一个既有现象（非本模块引入）
 

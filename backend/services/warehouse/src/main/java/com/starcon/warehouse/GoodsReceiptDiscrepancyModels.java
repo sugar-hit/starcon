@@ -17,12 +17,11 @@ import java.util.UUID;
  *   <li>输出：差异处理记录 + 索赔单（6 采购）+ 库存拒收不入账记录。
  * </ul>
  *
- * <p>DTO 一律带 {@code Discrepancy} 前缀：四个服务的 schema 被 codegen 拍平进同一命名空间，
- * 重名会被**静默覆盖且没有任何警告**（AGENTS.md 契约纪律）。
+ * <p>DTO 一律带 {@code Discrepancy} 前缀：四个服务的 schema 被 codegen 拍平进同一命名空间， 重名会被**静默覆盖且没有任何警告**（AGENTS.md
+ * 契约纪律）。
  *
- * <p>界面上最容易做错的一件事，这个模块在 DTO 层面就把它写死：{@code disposition} 与
- * {@code acceptedQuantity} / {@code rejectedQuantity} 是**同一份决定的两面** ——
- * 接受量与拒收量之和恒等于差异数量（DB 触发器钉死），所以「这批货到底哪部分留下、哪部分赔掉」
+ * <p>界面上最容易做错的一件事，这个模块在 DTO 层面就把它写死：{@code disposition} 与 {@code acceptedQuantity} / {@code
+ * rejectedQuantity} 是**同一份决定的两面** —— 接受量与拒收量之和恒等于差异数量（DB 触发器钉死），所以「这批货到底哪部分留下、哪部分赔掉」
  * 永远能从一行里算出来，而不是靠人去回忆当初点的是哪个按钮。
  */
 public final class GoodsReceiptDiscrepancyModels {
@@ -31,17 +30,14 @@ public final class GoodsReceiptDiscrepancyModels {
   /**
    * 处理状态词表。与 {@code goods_receipt_discrepancy_handling.status} 的 CHECK 逐值对应。
    *
-   * <p>合法转换只有这一张表（{@link #ALLOWED} 是唯一真相，服务层与前端共用）：
-   * {@code PENDING → DECIDED}、{@code DECIDED → CLAIMED / CLOSED}、
-   * {@code CLAIMED → CLOSED}、{@code CLOSED} 为终态。
+   * <p>合法转换只有这一张表（{@link #ALLOWED} 是唯一真相，服务层与前端共用）： {@code PENDING → DECIDED}、{@code DECIDED →
+   * CLAIMED / CLOSED}、 {@code CLAIMED → CLOSED}、{@code CLOSED} 为终态。
    *
-   * <p>刻意**没有**「处理中」这一态：它唯一的存在理由是「等 6.4.2.1 质检结论」，
-   * 而质检单尚未交付 —— 一个没有人能推进它的状态只会让待办列表永远挂着假待办。
+   * <p>刻意**没有**「处理中」这一态：它唯一的存在理由是「等 6.4.2.1 质检结论」， 而质检单尚未交付 —— 一个没有人能推进它的状态只会让待办列表永远挂着假待办。
    * 现场拍照留证在待处理状态下随时可做，不必先切一个中间态。
    *
    * <p>{@code DECIDED} **不能改判**（{@code DECIDED → DECIDED} 不在表内）：改判会让已经发生的
-   * 库存分录没法用「一次改判」讲清楚。要改判请另登记一条差异 —— 改写历史不如追加事实，
-   * 这与 8.2.1.1「预期与实收分开记录」是同一条纪律。
+   * 库存分录没法用「一次改判」讲清楚。要改判请另登记一条差异 —— 改写历史不如追加事实， 这与 8.2.1.1「预期与实收分开记录」是同一条纪律。
    */
   public enum HandlingStatus {
     /** 待处理：已接手，尚未决定。 */
@@ -69,8 +65,7 @@ public final class GoodsReceiptDiscrepancyModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的差异处理状态：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的差异处理状态：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -91,10 +86,8 @@ public final class GoodsReceiptDiscrepancyModels {
   /**
    * 处理决定词表。
    *
-   * <p>蓝图硬规则：「**破损与短少必须拒收或待检入库**，直接入可售会把问题货卖出去。」
-   * 因此 {@code ACCEPT}（正常入库）**只对超收与错发开放**；破损 / 短少 / 型号不符 / 过期
-   * 一律只能拒收、部分接收或转待检。服务层与 DB 触发器各拦一半，改决定绕不过前者，
-   * 直接写库存流转绕不过后者。
+   * <p>蓝图硬规则：「**破损与短少必须拒收或待检入库**，直接入可售会把问题货卖出去。」 因此 {@code ACCEPT}（正常入库）**只对超收与错发开放**；破损 / 短少 /
+   * 型号不符 / 过期 一律只能拒收、部分接收或转待检。服务层与 DB 触发器各拦一半，改决定绕不过前者， 直接写库存流转绕不过后者。
    */
   public enum HandlingDisposition {
     /** 拒收：全部不要。货已入库则撤出，从未入库则只留「拒收不入账」痕迹。 */
@@ -122,8 +115,7 @@ public final class GoodsReceiptDiscrepancyModels {
           return d;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的处理决定：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的处理决定：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -134,8 +126,7 @@ public final class GoodsReceiptDiscrepancyModels {
   /**
    * 哪些差异类型**禁止**按「正常入库」处理。
    *
-   * <p>蓝图点名了破损与短少；这里把型号不符与过期一并禁掉 —— 「型号不符」意味着这箱货不是
-   * 买家要的那个型号，「过期」意味着它根本不该再卖。四类里只有超收与错发是
+   * <p>蓝图点名了破损与短少；这里把型号不符与过期一并禁掉 —— 「型号不符」意味着这箱货不是 买家要的那个型号，「过期」意味着它根本不该再卖。四类里只有超收与错发是
    * 「货本身没问题、只是单据对不上」，那两类才允许正常入库。
    *
    * <p>与迁移 V78 的 {@code guard_discrepancy_disposition} 逐值对应。
@@ -174,8 +165,7 @@ public final class GoodsReceiptDiscrepancyModels {
           return t;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的索赔类型：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的索赔类型：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -186,8 +176,8 @@ public final class GoodsReceiptDiscrepancyModels {
   /**
    * 索赔状态词表。
    *
-   * <p>只到 {@code SUBMITTED} 为止：{@code ACKNOWLEDGED} / {@code SETTLED} 归 6.5.1 对账索赔拥有。
-   * {@code WITHDRAWN} 是 warehouse 自己的终态 —— 发起方在对方受理前撤回。
+   * <p>只到 {@code SUBMITTED} 为止：{@code ACKNOWLEDGED} / {@code SETTLED} 归 6.5.1 对账索赔拥有。 {@code
+   * WITHDRAWN} 是 warehouse 自己的终态 —— 发起方在对方受理前撤回。
    */
   public enum ClaimStatus {
     /** 已发起：已建记录，尚未提交给对方。 */
@@ -213,8 +203,7 @@ public final class GoodsReceiptDiscrepancyModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的索赔状态：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的索赔状态：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -249,8 +238,7 @@ public final class GoodsReceiptDiscrepancyModels {
           return t;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的凭证类型：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的凭证类型：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -263,9 +251,8 @@ public final class GoodsReceiptDiscrepancyModels {
     /** 拒收不入账：这批货从没进过库存。蓝图的「库存拒收不入账记录」就是这一行。 */
     NOT_POSTED("拒收不入账"),
     /**
-     * 撤出：从某个质量状态扣掉。两种来源共用这一个方向 —— 拒收撤出、
-     * 以及「已入库的货改判待检」时的质量状态流转出。两者在库存上是同一个动作；
-     * 具体是拒收还是改判由处理记录上的 disposition 表达，不在这里重复一遍。
+     * 撤出：从某个质量状态扣掉。两种来源共用这一个方向 —— 拒收撤出、 以及「已入库的货改判待检」时的质量状态流转出。两者在库存上是同一个动作； 具体是拒收还是改判由处理记录上的
+     * disposition 表达，不在这里重复一遍。
      */
     WITHDRAW("撤出"),
     /** 转入待检 / 残次。 */
@@ -273,8 +260,7 @@ public final class GoodsReceiptDiscrepancyModels {
     /** 正常入库：入可售。风险差异类型禁止此方向。 */
     INBOUND_TO_SELLABLE("正常入库"),
     /**
-     * 无需移动：货已经在去向质量状态里（超收确认就是这种 —— 收货时已入可售，现在只是确认）。
-     * 单独记一行是为了回答「为什么这条处理没有库存变动」：完全没有痕迹的话，
+     * 无需移动：货已经在去向质量状态里（超收确认就是这种 —— 收货时已入可售，现在只是确认）。 单独记一行是为了回答「为什么这条处理没有库存变动」：完全没有痕迹的话，
      * 界面上「库存没动」看起来像处理漏了。
      */
     NO_MOVE("无需移动");
@@ -295,8 +281,7 @@ public final class GoodsReceiptDiscrepancyModels {
           return d;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的库存流转方向：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的库存流转方向：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -307,15 +292,15 @@ public final class GoodsReceiptDiscrepancyModels {
   /**
    * 下游维度接入情况。
    *
-   * <p>沿用仓库既有约定（8.2.1.1 {@code ReceiptSourceCapability}、7.1.1.2 参照数据）：
-   * {@code available=false} 时 {@code href} 仍然给出 —— 它是**路由契约**而不是死链，
-   * 指明这个出口落在哪个模块、上游交付后直接可用；{@code note} 说明当前为什么不可用。
+   * <p>沿用仓库既有约定（8.2.1.1 {@code ReceiptSourceCapability}、7.1.1.2 参照数据）： {@code available=false} 时
+   * {@code href} 仍然给出 —— 它是**路由契约**而不是死链， 指明这个出口落在哪个模块、上游交付后直接可用；{@code note} 说明当前为什么不可用。
    */
   public record DiscrepancyDependencyCapability(
       String key, String label, boolean available, String ownerModule, String href, String note) {}
 
   /** 状态机的合法转换，前端据此只给合法的按钮。 */
-  public record DiscrepancyHandlingTransition(String from, String to, boolean allowed, String note) {}
+  public record DiscrepancyHandlingTransition(
+      String from, String to, boolean allowed, String note) {}
 
   public record DiscrepancyHandlingOption(String value, String label, long count) {}
 
@@ -328,8 +313,7 @@ public final class GoodsReceiptDiscrepancyModels {
       String note) {}
 
   /**
-   * 差异处理能力：五态状态机、四种处理决定、索赔与凭证词表、五条下游出口接入情况，
-   * 以及三条必须如实讲清楚的说明（可售硬规则、索赔单归属、拒收不入账口径）。
+   * 差异处理能力：五态状态机、四种处理决定、索赔与凭证词表、五条下游出口接入情况， 以及三条必须如实讲清楚的说明（可售硬规则、索赔单归属、拒收不入账口径）。
    *
    * <p>前端据此渲染动作按钮与去向质量状态选择器，而不是把规则硬编码在界面上。
    */
@@ -438,8 +422,7 @@ public final class GoodsReceiptDiscrepancyModels {
       UUID actorId) {}
 
   /**
-   * 凭证行。{@code dataUrl} 是 base64 data URI —— 凭证本体真落 PostgreSQL（bytea），
-   * 不是「将来会有的」外链：索赔时拿不出照片等于没留证。
+   * 凭证行。{@code dataUrl} 是 base64 data URI —— 凭证本体真落 PostgreSQL（bytea）， 不是「将来会有的」外链：索赔时拿不出照片等于没留证。
    */
   public record DiscrepancyEvidenceRow(
       UUID id,
@@ -503,18 +486,16 @@ public final class GoodsReceiptDiscrepancyModels {
   /**
    * 接手一条差异事实，建处理记录。
    *
-   * <p>刻意**没有备注字段**：接手是一次状态推进，不是内容录入。给「接手」配一个备注框，
-   * 现场会以为它会被记进处理过程，而实际上处理记录上没有一个「接手时写的话」该待的地方 ——
-   * 塞进决定说明会撒谎（还没决定），塞进凭证说明会混成一条凭证。
-   * 要留话就在留证或处理决定里写。
+   * <p>刻意**没有备注字段**：接手是一次状态推进，不是内容录入。给「接手」配一个备注框， 现场会以为它会被记进处理过程，而实际上处理记录上没有一个「接手时写的话」该待的地方 ——
+   * 塞进决定说明会撒谎（还没决定），塞进凭证说明会混成一条凭证。 要留话就在留证或处理决定里写。
    */
   public record DiscrepancyHandlingIntakeRequest(UUID discrepancyId) {}
 
   /**
    * 拍照留证请求。
    *
-   * <p>{@code contentBase64} 是 base64 编码的字节（前端在浏览器侧把照片压到长边 ≤1280px
-   * 的 JPEG 再上传）。凭证本体落 PostgreSQL，单条上限 1.5 MB（DB CHECK 兜底）。
+   * <p>{@code contentBase64} 是 base64 编码的字节（前端在浏览器侧把照片压到长边 ≤1280px 的 JPEG 再上传）。凭证本体落
+   * PostgreSQL，单条上限 1.5 MB（DB CHECK 兜底）。
    */
   public record DiscrepancyEvidenceRequest(
       String evidenceType,
@@ -527,8 +508,8 @@ public final class GoodsReceiptDiscrepancyModels {
   /**
    * 处理决定请求。
    *
-   * <p>数量口径：{@code acceptedQuantity} 与 {@code rejectedQuantity} 之和必须**恰好**等于差异数量
-   * （DB 触发器钉死）。四种决定的填法：
+   * <p>数量口径：{@code acceptedQuantity} 与 {@code rejectedQuantity} 之和必须**恰好**等于差异数量 （DB
+   * 触发器钉死）。四种决定的填法：
    *
    * <ul>
    *   <li>拒收：拒收量留空，服务层按差异数量补满，接受量必须为 0。
@@ -536,8 +517,7 @@ public final class GoodsReceiptDiscrepancyModels {
    *   <li>待检入库 / 正常入库：接受量留空由服务层按差异数量补满，去向质量状态与落库库位必填。
    * </ul>
    *
-   * <p>{@code locationId} 的有无决定拒收那部分的库存痕迹：
-   * 给了就是「货已入库、真从库存撤出」，不给就是「这批货从没进过库」，
+   * <p>{@code locationId} 的有无决定拒收那部分的库存痕迹： 给了就是「货已入库、真从库存撤出」，不给就是「这批货从没进过库」，
    * 只留一条拒收不入账记录。两者都如实记录，界面也据实显示。
    */
   public record DiscrepancyDecisionRequest(

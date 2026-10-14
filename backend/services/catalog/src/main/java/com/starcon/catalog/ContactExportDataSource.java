@@ -11,19 +11,15 @@ import org.springframework.stereotype.Component;
 /**
  * 往来单位联系人导出数据源（上游 3.6.3.1 地址与联系人）。
  *
- * <p><b>这个数据源是「PII 授权」这条要求的落点，不是顺手多加的一个来源。</b>
- * 蓝图 3.8.2.1 写死了「含联系方式等敏感字段的导出需显式授权并留审计」，
- * 而 SPU 与 SKU 两张表里**一个联系方式字段都没有** —— 只接这两个源，
- * 那条要求就只能落成一个永远为假的布尔开关，等于没做。
+ * <p><b>这个数据源是「PII 授权」这条要求的落点，不是顺手多加的一个来源。</b> 蓝图 3.8.2.1 写死了「含联系方式等敏感字段的导出需显式授权并留审计」， 而 SPU 与 SKU
+ * 两张表里**一个联系方式字段都没有** —— 只接这两个源， 那条要求就只能落成一个永远为假的布尔开关，等于没做。
  *
- * <p>{@link ExportColumn#pii()} 为 true 的三列（EMAIL / PHONE / MOBILE）就是敏感字段：
- * 勾选它们必须由服务层校验 {@code piiPurpose} 非空，并写进 {@code export_job}
- * 的 {@code includes_pii / pii_fields / pii_purpose} 三列（DB CHECK 再拒一道）。
+ * <p>{@link ExportColumn#pii()} 为 true 的三列（EMAIL / PHONE / MOBILE）就是敏感字段： 勾选它们必须由服务层校验 {@code
+ * piiPurpose} 非空，并写进 {@code export_job} 的 {@code includes_pii / pii_fields / pii_purpose} 三列（DB
+ * CHECK 再拒一道）。
  *
- * <p>为什么是「显式授权」而不是「有权限就能导」：联系方式的批量外流是数据合规里
- * 单独成条的风险（GDPR / 数据出境），它的处置动作（谁、为什么、导了哪些字段、
- * 多少行）必须可回溯且**可举证**。权限回答的是「这个人能不能看」，
- * 授权回答的是「这次导出可不可以发生」——两件事，不是一件事。
+ * <p>为什么是「显式授权」而不是「有权限就能导」：联系方式的批量外流是数据合规里 单独成条的风险（GDPR / 数据出境），它的处置动作（谁、为什么、导了哪些字段、
+ * 多少行）必须可回溯且**可举证**。权限回答的是「这个人能不能看」， 授权回答的是「这次导出可不可以发生」——两件事，不是一件事。
  */
 @Component
 class ContactExportDataSource extends SqlExportDataSource {
@@ -41,9 +37,9 @@ class ContactExportDataSource extends SqlExportDataSource {
           // ↑↑↑
           new ExportColumn(
               "IS_PRIMARY", "是否默认联系人", false, r -> r.get("is_primary", Boolean.class) ? "是" : "否"),
+          new ExportColumn("ROLE_TYPES", "已指派身份", false, r -> r.get("role_types", String.class)),
           new ExportColumn(
-              "ROLE_TYPES", "已指派身份", false, r -> r.get("role_types", String.class)),
-          new ExportColumn("CREATED_AT", "创建时间", false, r -> instant(r.get("created_at", OffsetDateTime.class))),
+              "CREATED_AT", "创建时间", false, r -> instant(r.get("created_at", OffsetDateTime.class))),
           new ExportColumn("ID", "联系人 ID", false, r -> r.get("id", String.class)));
 
   private static final List<ExportSort> SORTS =
@@ -57,10 +53,10 @@ class ContactExportDataSource extends SqlExportDataSource {
       List.of(
           new ExportFilterInfo("q", "关键字（姓名 / 邮箱 / 电话 / 手机）", "TEXT", true, ""),
           new ExportFilterInfo("partyId", "所属往来单位", "TEXT", true, ""),
-          new ExportFilterInfo(
-              "partyType", "主体类型", "ENUM", true, "取值：ORGANIZATION / INDIVIDUAL"),
+          new ExportFilterInfo("partyType", "主体类型", "ENUM", true, "取值：ORGANIZATION / INDIVIDUAL"),
           new ExportFilterInfo("primary", "仅默认联系人", "BOOLEAN", true, ""),
-          new ExportFilterInfo("roleType", "已指派身份", "ENUM", true, "取值：SUPPLIER / CUSTOMER / CARRIER"));
+          new ExportFilterInfo(
+              "roleType", "已指派身份", "ENUM", true, "取值：SUPPLIER / CUSTOMER / CARRIER"));
 
   ContactExportDataSource(DSLContext sql) {
     super(sql);
@@ -156,8 +152,9 @@ class ContactExportDataSource extends SqlExportDataSource {
       var value = spec.roleType().trim().toUpperCase();
       CatalogService.check(
           List.of("SUPPLIER", "CUSTOMER", "CARRIER").contains(value), "无效的身份：" + spec.roleType());
-      where.add("exists (select 1 from party_role pr where pr.tenant_id=c.tenant_id"
-          + " and pr.party_id=c.party_id and pr.role_type=?)");
+      where.add(
+          "exists (select 1 from party_role pr where pr.tenant_id=c.tenant_id"
+              + " and pr.party_id=c.party_id and pr.role_type=?)");
       binds.add(value);
     }
   }

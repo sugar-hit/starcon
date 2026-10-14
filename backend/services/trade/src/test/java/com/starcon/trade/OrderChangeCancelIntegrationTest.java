@@ -35,20 +35,17 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 9.1.1.3 订单变更与取消。
  *
- * <p>本测试是 <b>V119 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论，
- * 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不只是直连数据库，
+ * <p>本测试是 <b>V119 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论， 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不只是直连数据库，
  * 以便同时验证「服务层 + DB 层」两层都没有把闸门漏掉。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p><b>蓝图三条硬规则各自单列一节</b>：
+ *
  * <ol>
- *   <li><b>已发货数量不可取消</b>（服务层拒绝 + 绕过服务层写 SQL 也被挡 + 边界值 6 = 10−4 可过）；</li>
- *   <li><b>取消前必须先确认仓库停止作业并释放占用</b>（两个阶段都 COMPLETED 才允许确认，
- *       且确认被拒时逐条报出还差什么）；</li>
- *   <li><b>仅在责任方确认后记录取消终态</b>（申请阶段 cancelledQty 恒 0，
- *       确认那一刻终态量与退款金额一并落库，且时间戳零漂移）。</li>
+ *   <li><b>已发货数量不可取消</b>（服务层拒绝 + 绕过服务层写 SQL 也被挡 + 边界值 6 = 10−4 可过）；
+ *   <li><b>取消前必须先确认仓库停止作业并释放占用</b>（两个阶段都 COMPLETED 才允许确认， 且确认被拒时逐条报出还差什么）；
+ *   <li><b>仅在责任方确认后记录取消终态</b>（申请阶段 cancelledQty 恒 0， 确认那一刻终态量与退款金额一并落库，且时间戳零漂移）。
  * </ol>
  *
  * <p>另含<b>多租户三断言</b>：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。
@@ -60,11 +57,12 @@ class OrderChangeCancelIntegrationTest {
   static final UUID a = UUID.randomUUID(), b = UUID.randomUUID(), user = UUID.randomUUID();
   static HttpServer identity;
   static final ObjectMapper json = new ObjectMapper();
-  static final Map<String, AccessService.Access> actors = new java.util.concurrent.ConcurrentHashMap<>();
+  static final Map<String, AccessService.Access> actors =
+      new java.util.concurrent.ConcurrentHashMap<>();
+
   /**
-   * 本模块的权限码是 trade.order-change.*，但夹具要经 **9.1.2.2 的真实写端点**建单
-   * （本模块读的是真写入者的产出），所以 actor 还要有 trade.orders.* ——
-   * 与 SalesOrderOverviewIntegrationTest 同一套授权，不为了图省事绕过别人的写入口。
+   * 本模块的权限码是 trade.order-change.*，但夹具要经 **9.1.2.2 的真实写端点**建单 （本模块读的是真写入者的产出），所以 actor 还要有
+   * trade.orders.* —— 与 SalesOrderOverviewIntegrationTest 同一套授权，不为了图省事绕过别人的写入口。
    */
   static final List<String> allPermissions =
       java.util.stream.Stream.of("order-change", "orders")
@@ -117,7 +115,8 @@ class OrderChangeCancelIntegrationTest {
       actors.put("Bearer tenant-a", actor(user, a, List.of(grant("ALL", allPermissions))));
       actors.put("Bearer tenant-b", actor(user, b, List.of(grant("ALL", allPermissions))));
       actors.put(
-          "Bearer read-only", actor(user, a, List.of(grant("ALL", List.of("trade.order-change.read")))));
+          "Bearer read-only",
+          actor(user, a, List.of(grant("ALL", List.of("trade.order-change.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -189,7 +188,8 @@ class OrderChangeCancelIntegrationTest {
   /** 一张已提交的手工单（SUBMITTED 之后订单行与地址快照被 V99 冻住）。 */
   String manualOrder(String orderNo, String qty, String unitPrice) throws Exception {
     String id = postOrder(orderNo, qty, unitPrice);
-    http.perform(post("/trade/sales-orders/{id}/submit", id).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            post("/trade/sales-orders/{id}/submit", id).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk());
     return id;
   }
@@ -266,8 +266,7 @@ class OrderChangeCancelIntegrationTest {
   }
 
   /**
-   * @param ageHours 下单距今多少小时。可改窗口判定读的是「下单时刻」，
-   *     所以测窗口必须能把下单时间挪到过去，而不是靠测试跑得够慢。
+   * @param ageHours 下单距今多少小时。可改窗口判定读的是「下单时刻」， 所以测窗口必须能把下单时间挪到过去，而不是靠测试跑得够慢。
    */
   UUID platformOrder(String orderNo, int ageHours) {
     UUID orderId = UUID.randomUUID();
@@ -315,7 +314,8 @@ class OrderChangeCancelIntegrationTest {
     rule("*", kind, allowed, deadlineHours, maxDecrease);
   }
 
-  void rule(String shopCode, String kind, boolean allowed, String deadlineHours, String maxDecrease) {
+  void rule(
+      String shopCode, String kind, boolean allowed, String deadlineHours, String maxDecrease) {
     asA(
         () -> {
           sql.execute(
@@ -339,7 +339,8 @@ class OrderChangeCancelIntegrationTest {
         });
   }
 
-  void recordProgress(UUID orderId, UUID lineId, String reserved, String shipped, OffsetDateTime observed) {
+  void recordProgress(
+      UUID orderId, UUID lineId, String reserved, String shipped, OffsetDateTime observed) {
     BigDecimal shippedQty = new BigDecimal(shipped);
     asA(
         () -> {
@@ -368,8 +369,7 @@ class OrderChangeCancelIntegrationTest {
         null,
         warehouses,
         List.of(
-            new OrderChangeCancelCancellationLineInput(
-                lineId, new BigDecimal(qty), "RSV-001")));
+            new OrderChangeCancelCancellationLineInput(lineId, new BigDecimal(qty), "RSV-001")));
   }
 
   // ==========================================================================
@@ -412,7 +412,8 @@ class OrderChangeCancelIntegrationTest {
         asA(
             () ->
                 service.createCancellation(
-                    cancellationInput(orderId, lineId, "6", List.of("WH-CN-SH")), UUID.randomUUID()));
+                    cancellationInput(orderId, lineId, "6", List.of("WH-CN-SH")),
+                    UUID.randomUUID()));
     assertThat(row.status()).isEqualTo(OrderChangeStatus.REQUESTED);
   }
 
@@ -442,8 +443,10 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
-                        cancellationInput(orderId, lineId, "2", List.of("WH-CN-SH")), UUID.randomUUID())
+                service
+                    .createCancellation(
+                        cancellationInput(orderId, lineId, "2", List.of("WH-CN-SH")),
+                        UUID.randomUUID())
                     .id());
 
     var thrown =
@@ -482,7 +485,8 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "3", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -505,7 +509,8 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "3", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -524,8 +529,7 @@ class OrderChangeCancelIntegrationTest {
                     () ->
                         service.advanceCancellation(
                             cancelId,
-                            new OrderChangeCancelStatusInput(
-                                OrderChangeStatus.CONFIRMED, null),
+                            new OrderChangeCancelStatusInput(OrderChangeStatus.CONFIRMED, null),
                             UUID.randomUUID())));
     assertThat(thrown.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     assertThat(thrown.getReason())
@@ -545,7 +549,8 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "3", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -589,10 +594,7 @@ class OrderChangeCancelIntegrationTest {
                 cancelId,
                 task.id(),
                 new OrderChangeCancelHoldTaskInput(
-                    OrderHoldTaskStatus.COMPLETED,
-                    task.targetQuantity(),
-                    "仓库已停止作业并释放占用",
-                    ""),
+                    OrderHoldTaskStatus.COMPLETED, task.targetQuantity(), "仓库已停止作业并释放占用", ""),
                 UUID.randomUUID()));
   }
 
@@ -603,7 +605,8 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "3", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -634,7 +637,8 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "3", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -655,12 +659,16 @@ class OrderChangeCancelIntegrationTest {
   void 确认那一刻才落终态数量与退款金额_且时间戳零漂移() throws Exception {
     UUID orderId = UUID.fromString(manualOrder("SO-TERM-2", "10", "9.99"));
     UUID lineId = lineIdOf(orderId);
-    OffsetDateTime observed = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.ofHours(8));
+    OffsetDateTime observed =
+        OffsetDateTime.now()
+            .truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+            .withOffsetSameInstant(ZoneOffset.ofHours(8));
     recordProgress(orderId, lineId, "10", "0", observed);
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "3", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -700,7 +708,8 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "3", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -734,7 +743,8 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "3", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -765,7 +775,8 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "3", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -787,7 +798,8 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "3", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -835,10 +847,7 @@ class OrderChangeCancelIntegrationTest {
                                         platformLineId(orderId), new BigDecimal("9"))),
                                 null),
                             UUID.randomUUID())));
-    assertThat(thrown.getReason())
-        .as("没有规则不等于允许")
-        .contains("没有登记")
-        .contains("不能靠代码里的默认值猜");
+    assertThat(thrown.getReason()).as("没有规则不等于允许").contains("没有登记").contains("不能靠代码里的默认值猜");
   }
 
   @Test
@@ -932,14 +941,11 @@ class OrderChangeCancelIntegrationTest {
                         "少买两件",
                         "AMAZON",
                         "SHOP-1",
-                        List.of(
-                            new OrderChangeCancelChangeLineInput(lineId, new BigDecimal("8"))),
+                        List.of(new OrderChangeCancelChangeLineInput(lineId, new BigDecimal("8"))),
                         null),
                     UUID.randomUUID()));
     assertThat(row.status()).isEqualTo(OrderChangeStatus.REQUESTED);
-    assertThat(row.refundAmount())
-        .as("10 − 8 = 2 件 × 9.99")
-        .isEqualByComparingTo("19.9800");
+    assertThat(row.refundAmount()).as("10 − 8 = 2 件 × 9.99").isEqualByComparingTo("19.9800");
     assertThat(row.platformRuleId()).as("必须记下当时按哪条规则判的").isNotNull();
   }
 
@@ -951,19 +957,19 @@ class OrderChangeCancelIntegrationTest {
     UUID changeId =
         asA(
             () ->
-                    service.createChange(
-                            new OrderChangeCancelChangeInput(
-                                orderId,
-                                OrderChangeKind.QUANTITY_DECREASE,
-                                "少买两件",
-                                "AMAZON",
-                                "SHOP-1",
-                                List.of(
-                                    new OrderChangeCancelChangeLineInput(
-                                        lineId, new BigDecimal("8"))),
-                                null),
-                            UUID.randomUUID())
-                        .id());
+                service
+                    .createChange(
+                        new OrderChangeCancelChangeInput(
+                            orderId,
+                            OrderChangeKind.QUANTITY_DECREASE,
+                            "少买两件",
+                            "AMAZON",
+                            "SHOP-1",
+                            List.of(
+                                new OrderChangeCancelChangeLineInput(lineId, new BigDecimal("8"))),
+                            null),
+                        UUID.randomUUID())
+                    .id());
 
     var tasks = asA(() -> service.writebacks(changeId, false));
     assertThat(tasks).hasSize(1);
@@ -1006,33 +1012,42 @@ class OrderChangeCancelIntegrationTest {
     var requestId =
         asA(
             () ->
-                    service.createChange(
-                            new OrderChangeCancelChangeInput(
-                                orderId,
-                                OrderChangeKind.ADDRESS_MODIFY,
-                                "买家搬家了",
-                                null,
-                                null,
-                                null,
-                                List.of(
-                                    new OrderChangeCancelAddressFieldInput(
-                                        OrderAddressRole.SHIPPING,
-                                        OrderAddressFieldCode.RECIPIENT_NAME,
-                                        "Jane Doe",
-                                        "Jane A. Doe"),
-                                    new OrderChangeCancelAddressFieldInput(
-                                        OrderAddressRole.SHIPPING,
-                                        OrderAddressFieldCode.POSTCODE,
-                                        "90001",
-                                        "90210"))),
-                            UUID.randomUUID())
-                        .id());
+                service
+                    .createChange(
+                        new OrderChangeCancelChangeInput(
+                            orderId,
+                            OrderChangeKind.ADDRESS_MODIFY,
+                            "买家搬家了",
+                            null,
+                            null,
+                            null,
+                            List.of(
+                                new OrderChangeCancelAddressFieldInput(
+                                    OrderAddressRole.SHIPPING,
+                                    OrderAddressFieldCode.RECIPIENT_NAME,
+                                    "Jane Doe",
+                                    "Jane A. Doe"),
+                                new OrderChangeCancelAddressFieldInput(
+                                    OrderAddressRole.SHIPPING,
+                                    OrderAddressFieldCode.POSTCODE,
+                                    "90001",
+                                    "90210"))),
+                        UUID.randomUUID())
+                    .id());
 
     var detail = asA(() -> service.changeDetail(requestId));
     assertThat(detail.addressFields())
         .hasSize(2)
-        .anyMatch(f -> f.fieldCode() == OrderAddressFieldCode.RECIPIENT_NAME && "Jane Doe".equals(f.beforeValue()) && "Jane A. Doe".equals(f.afterValue()))
-        .anyMatch(f -> f.fieldCode() == OrderAddressFieldCode.POSTCODE && "90001".equals(f.beforeValue()) && "90210".equals(f.afterValue()));
+        .anyMatch(
+            f ->
+                f.fieldCode() == OrderAddressFieldCode.RECIPIENT_NAME
+                    && "Jane Doe".equals(f.beforeValue())
+                    && "Jane A. Doe".equals(f.afterValue()))
+        .anyMatch(
+            f ->
+                f.fieldCode() == OrderAddressFieldCode.POSTCODE
+                    && "90001".equals(f.beforeValue())
+                    && "90210".equals(f.afterValue()));
 
     // 订单侧快照保持下单当时的样子
     var address =
@@ -1097,19 +1112,19 @@ class OrderChangeCancelIntegrationTest {
     UUID requestId =
         asA(
             () ->
-                    service.createChange(
-                            new OrderChangeCancelChangeInput(
-                                orderId,
-                                OrderChangeKind.QUANTITY_DECREASE,
-                                "少买两件",
-                                "AMAZON",
-                                "SHOP-1",
-                                List.of(
-                                    new OrderChangeCancelChangeLineInput(
-                                        lineId, new BigDecimal("8"))),
-                                null),
-                            UUID.randomUUID())
-                        .id());
+                service
+                    .createChange(
+                        new OrderChangeCancelChangeInput(
+                            orderId,
+                            OrderChangeKind.QUANTITY_DECREASE,
+                            "少买两件",
+                            "AMAZON",
+                            "SHOP-1",
+                            List.of(
+                                new OrderChangeCancelChangeLineInput(lineId, new BigDecimal("8"))),
+                            null),
+                        UUID.randomUUID())
+                    .id());
     var line = asA(() -> service.changeDetail(requestId)).lines().get(0);
     assertThat(line.originalQuantity()).isEqualByComparingTo("10");
     assertThat(line.requestedQuantity()).isEqualByComparingTo("8");
@@ -1131,8 +1146,7 @@ class OrderChangeCancelIntegrationTest {
                         "少买一件",
                         null,
                         null,
-                        List.of(
-                            new OrderChangeCancelChangeLineInput(lineId, new BigDecimal("1"))),
+                        List.of(new OrderChangeCancelChangeLineInput(lineId, new BigDecimal("1"))),
                         null),
                     UUID.randomUUID()));
     assertThat(row.platformRuleId()).as("手工单没有平台规则").isNull();
@@ -1198,7 +1212,8 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "3", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -1235,7 +1250,8 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "3", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -1260,7 +1276,8 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "3", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -1285,11 +1302,12 @@ class OrderChangeCancelIntegrationTest {
     // 第二层：即使绕过 GRANT（用迁移用户直连，权限与 RLS 都挡不住），
     // 触发器仍然拒绝 —— append-only 不能只剩一条注释。
     String message = "";
-    try (var c =
-            DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+    try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
         var s = c.createStatement()) {
-      s.execute("update order_change_event set detail='篡改' where cancellation_request_id = '"
-          + cancelId + "'");
+      s.execute(
+          "update order_change_event set detail='篡改' where cancellation_request_id = '"
+              + cancelId
+              + "'");
     } catch (Exception e) {
       message = rootMessage(e);
     }
@@ -1395,11 +1413,8 @@ class OrderChangeCancelIntegrationTest {
     assertThat(page1.items()).hasSize(3);
     assertThat(page3.items()).hasSize(1);
     assertThat(page1.total()).isEqualTo(7);
-    assertThat(page3.total())
-        .as("汇总不受分页影响")
-        .isEqualTo(7);
-    var ids1 =
-        page1.items().stream().map(OrderChangeCancelRuleRow::id).toList();
+    assertThat(page3.total()).as("汇总不受分页影响").isEqualTo(7);
+    var ids1 = page1.items().stream().map(OrderChangeCancelRuleRow::id).toList();
     var ids3 = page3.items().stream().map(OrderChangeCancelRuleRow::id).toList();
     assertThat(ids1).doesNotContainAnyElementsOf(ids3);
   }
@@ -1416,7 +1431,8 @@ class OrderChangeCancelIntegrationTest {
         asA(
             () ->
                 service.pageCancellations(
-                    new OrderChangeCancelQuery(null, null, OrderChangeStatus.REQUESTED, null, 0, 50)));
+                    new OrderChangeCancelQuery(
+                        null, null, OrderChangeStatus.REQUESTED, null, 0, 50)));
     assertThat(byStatus.total()).isEqualTo(1);
     var byNo =
         asA(
@@ -1440,7 +1456,8 @@ class OrderChangeCancelIntegrationTest {
         .as("未接上的能力必须显式报出 ownerModule 与原因，不能靠空数组让人猜")
         .anyMatch(b -> b.ownerModule().startsWith("11"))
         .anyMatch(b -> b.ownerModule().contains("9.3.3.1"));
-    assertThat(caps.statusTransitions()).contains("REQUESTED", "CONFIRMED", "REJECTED", "PENDING_VERIFICATION");
+    assertThat(caps.statusTransitions())
+        .contains("REQUESTED", "CONFIRMED", "REJECTED", "PENDING_VERIFICATION");
     assertThat(caps.warehouseReleaseApi()).contains("reservations");
     assertThat(caps.snapshotNote()).contains("不改写");
   }
@@ -1455,7 +1472,9 @@ class OrderChangeCancelIntegrationTest {
         .andExpect(status().isUnauthorized());
 
     // 只读角色读可以，写不行
-    http.perform(get("/trade/sales-orders/change/platform-rules").header("Authorization", "Bearer read-only"))
+    http.perform(
+            get("/trade/sales-orders/change/platform-rules")
+                .header("Authorization", "Bearer read-only"))
         .andExpect(status().isOk());
     // 请求体必须**合法**：Spring 先做 @Valid 再进控制器，
     // 非法体会先被 400 拦下，那样测到的就不是权限边界了。
@@ -1466,8 +1485,17 @@ class OrderChangeCancelIntegrationTest {
                 .content(
                     json.writeValueAsString(
                         new OrderChangeCancelRuleInput(
-                            "AMAZON", "*", OrderChangeKind.CANCEL, true,
-                            null, null, true, null, null, "只读角色不该能建", null))))
+                            "AMAZON",
+                            "*",
+                            OrderChangeKind.CANCEL,
+                            true,
+                            null,
+                            null,
+                            true,
+                            null,
+                            null,
+                            "只读角色不该能建",
+                            null))))
         .andExpect(status().isForbidden());
   }
 
@@ -1500,8 +1528,9 @@ class OrderChangeCancelIntegrationTest {
             .getContentAsString();
     UUID cancelId = UUID.fromString(json.readTree(resp).get("id").asText());
 
-    http.perform(get("/trade/sales-orders/change/cancellations/{id}", cancelId)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/trade/sales-orders/change/cancellations/{id}", cancelId)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.lines[0].cancelQuantity").value(2.0))
         .andExpect(jsonPath("$.warehouseTasks.length()").value(2));
@@ -1547,7 +1576,8 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "2", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
@@ -1556,10 +1586,15 @@ class OrderChangeCancelIntegrationTest {
     assertThrows(
         ResponseStatusException.class, () -> asB(() -> service.cancellationDetail(cancelId)));
 
-    http.perform(get("/trade/sales-orders/change/cancellations/{id}", cancelId)
-            .header("Authorization", "Bearer tenant-b"))
+    http.perform(
+            get("/trade/sales-orders/change/cancellations/{id}", cancelId)
+                .header("Authorization", "Bearer tenant-b"))
         .andExpect(status().isNotFound());
-    assertThat(asB(() -> service.pageCancellations(new OrderChangeCancelQuery(null, null, null, null, 0, 50))).total())
+    assertThat(
+            asB(() ->
+                    service.pageCancellations(
+                        new OrderChangeCancelQuery(null, null, null, null, 0, 50)))
+                .total())
         .isZero();
   }
 
@@ -1573,20 +1608,23 @@ class OrderChangeCancelIntegrationTest {
     UUID cancelId =
         asA(
             () ->
-                service.createCancellation(
+                service
+                    .createCancellation(
                         cancellationInput(orderId, lineId, "2", List.of("WH-CN-SH")),
                         UUID.randomUUID())
                     .id());
 
     // A 的会话 + 伪造指向 B 的头 → 依然读得到自己的单（头不改租户）
-    http.perform(get("/trade/sales-orders/change/cancellations/{id}", cancelId)
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b))
+    http.perform(
+            get("/trade/sales-orders/change/cancellations/{id}", cancelId)
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b))
         .andExpect(status().isOk());
     // B 的会话 + 伪造指向 A 的头 → 404
-    http.perform(get("/trade/sales-orders/change/cancellations/{id}", cancelId)
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a))
+    http.perform(
+            get("/trade/sales-orders/change/cancellations/{id}", cancelId)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
 
     // 写入路径同样不认头：B 会话伪造 A 的头，落库仍属 B
@@ -1599,13 +1637,30 @@ class OrderChangeCancelIntegrationTest {
                 .content(
                     json.writeValueAsString(
                         new OrderChangeCancelRuleInput(
-                            "SHOPIFY", "*", OrderChangeKind.CANCEL, true,
-                            null, null, true, null, null, "伪造头写入", null))))
+                            "SHOPIFY",
+                            "*",
+                            OrderChangeKind.CANCEL,
+                            true,
+                            null,
+                            null,
+                            true,
+                            null,
+                            null,
+                            "伪造头写入",
+                            null))))
         .andExpect(status().isOk());
-    assertThat(asA(() -> service.pageRules(new OrderChangeCancelRuleQuery("SHOPIFY", null, null, null, 0, 10))).total())
+    assertThat(
+            asA(() ->
+                    service.pageRules(
+                        new OrderChangeCancelRuleQuery("SHOPIFY", null, null, null, 0, 10)))
+                .total())
         .as("伪造头不得把数据写进别的租户")
         .isZero();
-    assertThat(asB(() -> service.pageRules(new OrderChangeCancelRuleQuery("SHOPIFY", null, null, null, 0, 10))).total())
+    assertThat(
+            asB(() ->
+                    service.pageRules(
+                        new OrderChangeCancelRuleQuery("SHOPIFY", null, null, null, 0, 10)))
+                .total())
         .isEqualTo(1);
 
     // 提交后租户上下文必须已清空
@@ -1623,19 +1678,35 @@ class OrderChangeCancelIntegrationTest {
 
     // 池大小为 1：每次读写都复用同一条连接
     for (int i = 0; i < 5; i++) {
-      assertThat(asA(() -> service.pageCancellations(new OrderChangeCancelQuery(null, null, null, null, 0, 50))).total())
+      assertThat(
+              asA(() ->
+                      service.pageCancellations(
+                          new OrderChangeCancelQuery(null, null, null, null, 0, 50)))
+                  .total())
           .as("第 %d 轮 A", i)
           .isEqualTo(1);
-      assertThat(asB(() -> service.pageCancellations(new OrderChangeCancelQuery(null, null, null, null, 0, 50))).total())
+      assertThat(
+              asB(() ->
+                      service.pageCancellations(
+                          new OrderChangeCancelQuery(null, null, null, null, 0, 50)))
+                  .total())
           .as("第 %d 轮 B", i)
           .isZero();
       assertThat(sql.fetch("select id from order_cancellation_request").size())
           .as("第 %d 轮事务外", i)
           .isZero();
     }
-    assertThat(asB(() -> service.pageCancellations(new OrderChangeCancelQuery(null, null, null, null, 0, 50))).total())
+    assertThat(
+            asB(() ->
+                    service.pageCancellations(
+                        new OrderChangeCancelQuery(null, null, null, null, 0, 50)))
+                .total())
         .isZero();
-    assertThat(asA(() -> service.pageCancellations(new OrderChangeCancelQuery(null, null, null, null, 0, 50))).total())
+    assertThat(
+            asA(() ->
+                    service.pageCancellations(
+                        new OrderChangeCancelQuery(null, null, null, null, 0, 50)))
+                .total())
         .isEqualTo(1);
   }
 

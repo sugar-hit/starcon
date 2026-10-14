@@ -30,24 +30,20 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 9.6.1.2 代发单与供应商下单。
  *
- * <p>本测试是 <b>V122 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论，
- * 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不只直连数据库，
+ * <p>本测试是 <b>V122 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论， 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不只直连数据库，
  * 以便同时验证「服务层 + DB 层」两层都没有把闸门漏掉。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p><b>五组断言</b>：
+ *
  * <ol>
- *   <li><b>差价毛利口径</b>：代发成本 = 采购价 + 供应商运费；差价 = 售价 − 代发成本，
- *       三列都是 DB 生成列，绕开服务层写 SQL 也改不了；</li>
- *   <li><b>涨价必须显式告警</b>（蓝图点名的那一条）：实际采购价高于下单冻结价 →
- *       PRICE_INCREASE，且**差价按实际成本重算**；涨价到差价转负时再落一条
- *       NEGATIVE_SPREAD —— 不重算就永远报不出来，正是蓝图说的静默亏损；</li>
- *   <li><b>未确认收款不许下单</b>：DB 触发器在服务层之外再挡一次；</li>
- *   <li><b>未接线 vendor 不得伪造成功</b>：1688 未登记时显式失败并落 ORDER_FAILED，
- *       绝不返回编造的供应商单号；</li>
- *   <li><b>多租户三断言</b>：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。</li>
+ *   <li><b>差价毛利口径</b>：代发成本 = 采购价 + 供应商运费；差价 = 售价 − 代发成本， 三列都是 DB 生成列，绕开服务层写 SQL 也改不了；
+ *   <li><b>涨价必须显式告警</b>（蓝图点名的那一条）：实际采购价高于下单冻结价 → PRICE_INCREASE，且**差价按实际成本重算**；涨价到差价转负时再落一条
+ *       NEGATIVE_SPREAD —— 不重算就永远报不出来，正是蓝图说的静默亏损；
+ *   <li><b>未确认收款不许下单</b>：DB 触发器在服务层之外再挡一次；
+ *   <li><b>未接线 vendor 不得伪造成功</b>：1688 未登记时显式失败并落 ORDER_FAILED， 绝不返回编造的供应商单号；
+ *   <li><b>多租户三断言</b>：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。
  * </ol>
  */
 @SpringBootTest
@@ -57,7 +53,8 @@ class DropshipOrderIntegrationTest {
   static final UUID a = UUID.randomUUID(), b = UUID.randomUUID(), user = UUID.randomUUID();
   static HttpServer identity;
   static final ObjectMapper json = new ObjectMapper();
-  static final Map<String, AccessService.Access> actors = new java.util.concurrent.ConcurrentHashMap<>();
+  static final Map<String, AccessService.Access> actors =
+      new java.util.concurrent.ConcurrentHashMap<>();
   static final List<String> allPermissions =
       java.util.stream.Stream.of("fulfillment")
           .flatMap(
@@ -251,10 +248,8 @@ class DropshipOrderIntegrationTest {
   }
 
   /**
-   * @param submitted 销售订单是否已提交。草稿单（{@code false}）用来验证
-   *     「买家还没下单的单不能向供应商采购」—— 注意 V99 的触发器
-   *     {@code sales_order_submitted_terminal} **不允许**把已提交的订单退回草稿，
-   *     所以这条用例必须从头就种成草稿，而不是改状态。
+   * @param submitted 销售订单是否已提交。草稿单（{@code false}）用来验证 「买家还没下单的单不能向供应商采购」—— 注意 V99 的触发器 {@code
+   *     sales_order_submitted_terminal} **不允许**把已提交的订单退回草稿， 所以这条用例必须从头就种成草稿，而不是改状态。
    */
   Fixture seedTenant(UUID tenant, String cost, String sellPrice, String qty, boolean submitted) {
     return as(
@@ -271,11 +266,18 @@ class DropshipOrderIntegrationTest {
                   + " values (?,?,'DSH-ORD-1','代发单用配置','SHOP','SHOP-US-1','',"
                   + "'SUPPLIER_DIRECT','SUP-ACME','PURE_AGENCY','','ON_RECEIPT','FLAT_COST','USD',"
                   + "?,?,'SKIP','ALWAYS_LIST',10,'ACTIVE',?::timestamptz,?::timestamptz,'')",
-              configId, tenant, new BigDecimal(cost), new BigDecimal(sellPrice), at(-1), at(-1));
+              configId,
+              tenant,
+              new BigDecimal(cost),
+              new BigDecimal(sellPrice),
+              at(-1),
+              at(-1));
           sql.execute(
               "insert into fulfillment_dropship_config_line(id,tenant_id,config_id,sku_ref,"
                   + "sku_name,active) values (?,?,?,'SKU-A','测试商品',true)",
-              idFor(tenant, 12), tenant, configId);
+              idFor(tenant, 12),
+              tenant,
+              configId);
 
           // 9.1：已提交的销售订单（status 必须 SUBMITTED 才允许建代发单）
           UUID orderId = idFor(tenant, 21);
@@ -288,31 +290,48 @@ class DropshipOrderIntegrationTest {
                     + "payment_method,status,submitted_at,subtotal_amount,grand_total_amount)"
                     + " values (?,?,'SO-TEST-1','MANUAL','DROPSHIP','USD','PREPAID','SUBMITTED',"
                     + "?::timestamptz,?,?)",
-                orderId, tenant, at(-1), lineAmount, lineAmount);
+                orderId,
+                tenant,
+                at(-1),
+                lineAmount,
+                lineAmount);
           } else {
             sql.execute(
                 "insert into sales_order(id,tenant_id,order_no,order_source,manual_kind,currency,"
                     + "payment_method,status,subtotal_amount,grand_total_amount)"
                     + " values (?,?,'SO-TEST-1','MANUAL','DROPSHIP','USD','PREPAID','DRAFT',?,?)",
-                orderId, tenant, lineAmount, lineAmount);
+                orderId,
+                tenant,
+                lineAmount,
+                lineAmount);
           }
           sql.execute(
               "insert into sales_order_line(id,tenant_id,order_id,line_no,sku_id,sku_code,sku_name,"
                   + "quantity,unit_price,line_amount)"
                   + " values (?,?,?,1,?,'SKU-A','测试商品',?,?,?)",
-              idFor(tenant, 22), tenant, orderId, idFor(tenant, 23), quantity, unitPrice,
+              idFor(tenant, 22),
+              tenant,
+              orderId,
+              idFor(tenant, 23),
+              quantity,
+              unitPrice,
               lineAmount);
           sql.execute(
               "insert into sales_order_party_snapshot(id,tenant_id,order_id,customer_party_id,"
                   + "customer_code,customer_name,customer_type)"
                   + " values (?,?,?,?,'C-1','测试买家','INDIVIDUAL')",
-              idFor(tenant, 24), tenant, orderId, idFor(tenant, 25));
+              idFor(tenant, 24),
+              tenant,
+              orderId,
+              idFor(tenant, 25));
           sql.execute(
               "insert into order_address_snapshot(id,tenant_id,order_id,address_role,recipient_name,"
                   + "recipient_phone,country_code,province,city,address_line1)"
-              + " values (?,?,?,'SHIPPING','收件人','13800000000','US','CA','Los Angeles',"
-              + "'123 Main St')",
-              idFor(tenant, 26), tenant, orderId);
+                  + " values (?,?,?,'SHIPPING','收件人','13800000000','US','CA','Los Angeles',"
+                  + "'123 Main St')",
+              idFor(tenant, 26),
+              tenant,
+              orderId);
           return new Fixture(configId, orderId);
         });
   }
@@ -324,7 +343,8 @@ class DropshipOrderIntegrationTest {
         () -> {
           var saved =
               service.createOrder(
-                  new DropshipOrderInput(f.salesOrderId(), f.configId(), "MANUAL", "MANUAL_ENTRY", ""),
+                  new DropshipOrderInput(
+                      f.salesOrderId(), f.configId(), "MANUAL", "MANUAL_ENTRY", ""),
                   idFor(tenant, 99));
           return saved.id();
         });
@@ -337,7 +357,8 @@ class DropshipOrderIntegrationTest {
         () -> {
           var saved =
               service.createOrder(
-                  new DropshipOrderInput(f.salesOrderId(), f.configId(), "MANUAL", "MANUAL_ENTRY", ""),
+                  new DropshipOrderInput(
+                      f.salesOrderId(), f.configId(), "MANUAL", "MANUAL_ENTRY", ""),
                   idFor(tenant, 99));
           service.confirmPayment(
               saved.id(),
@@ -355,8 +376,8 @@ class DropshipOrderIntegrationTest {
     return as(
         tenant,
         () ->
-            service.pageAlerts(
-                    new DropshipAlertQuery(orderId, null, null, null, null, 0, 50))
+            service
+                .pageAlerts(new DropshipAlertQuery(orderId, null, null, null, null, 0, 50))
                 .items());
   }
 
@@ -380,7 +401,9 @@ class DropshipOrderIntegrationTest {
                       "select relrowsecurity as rls, relforcerowsecurity as force"
                           + " from pg_class where relname = ?",
                       table));
-      assertThat(flags.get("rls", Boolean.class)).as("%s 必须 ENABLE ROW LEVEL SECURITY", table).isTrue();
+      assertThat(flags.get("rls", Boolean.class))
+          .as("%s 必须 ENABLE ROW LEVEL SECURITY", table)
+          .isTrue();
       assertThat(flags.get("force", Boolean.class))
           .as("%s 必须 FORCE ROW LEVEL SECURITY（否则表所有者绕过策略）", table)
           .isTrue();
@@ -393,12 +416,7 @@ class DropshipOrderIntegrationTest {
         .as("事务外必须读不到任何行（FORCE RLS 对表所有者同样生效）")
         .isZero();
     // 绑了租户上下文才看得到自己的行 —— 与上一行同一张表、同一连接池，只差一个 GUC
-    var seen =
-        as(
-            a,
-            () ->
-                sql.fetchOne(
-                    "select count(*) c from fulfillment_dropship_order_event"));
+    var seen = as(a, () -> sql.fetchOne("select count(*) c from fulfillment_dropship_order_event"));
     assertThat(seen.get("c", Long.class)).as("绑了租户才看得到行").isEqualTo(1L);
   }
 
@@ -485,26 +503,28 @@ class DropshipOrderIntegrationTest {
   void 供应商涨价落显式告警且差价按实际重算() {
     // 冻结采购价 10 × 2 = 20，售价 50 → 冻结差价 +30
     var f = seedTenant(a, "10.0000", "25.0000", "2.000000");
-    UUID orderId = as(
-        a,
-        () -> {
-          var saved =
-              service.createOrder(
-                  new DropshipOrderInput(f.salesOrderId(), f.configId(), "MANUAL", "MANUAL_ENTRY", ""),
+    UUID orderId =
+        as(
+            a,
+            () -> {
+              var saved =
+                  service.createOrder(
+                      new DropshipOrderInput(
+                          f.salesOrderId(), f.configId(), "MANUAL", "MANUAL_ENTRY", ""),
+                      idFor(a, 99));
+              service.confirmPayment(
+                  saved.id(),
+                  new DropshipPaymentConfirmInput(at(0), idFor(a, 99), "银行流水号 BR-1"),
                   idFor(a, 99));
-          service.confirmPayment(
-              saved.id(),
-              new DropshipPaymentConfirmInput(at(0), idFor(a, 99), "银行流水号 BR-1"),
-              idFor(a, 99));
-          service.dispatch(saved.id(), idFor(a, 99));
-          // 供应商实际按 13 结算（多 6），运费 2
-          service.recordSupplierAck(
-              saved.id(),
-              new DropshipSupplierAckInput(
-                  "SO-EXT-1", new BigDecimal("26.0000"), new BigDecimal("2.0000"), "", "回执"),
-              idFor(a, 99));
-          return saved.id();
-        });
+              service.dispatch(saved.id(), idFor(a, 99));
+              // 供应商实际按 13 结算（多 6），运费 2
+              service.recordSupplierAck(
+                  saved.id(),
+                  new DropshipSupplierAckInput(
+                      "SO-EXT-1", new BigDecimal("26.0000"), new BigDecimal("2.0000"), "", "回执"),
+                  idFor(a, 99));
+              return saved.id();
+            });
 
     var rows = alerts(a, orderId);
     assertThat(rows).as("涨价必须显式告警，不能静默").isNotEmpty();
@@ -525,33 +545,38 @@ class DropshipOrderIntegrationTest {
   void 涨到差价转负必须再落一条亏损告警() {
     // 冻结采购价 10 × 1 = 10，售价 20 → 冻结差价 +10
     var f = seedTenant(a, "10.0000", "20.0000", "1.000000");
-    UUID orderId = as(
-        a,
-        () -> {
-          var saved =
-              service.createOrder(
-                  new DropshipOrderInput(f.salesOrderId(), f.configId(), "MANUAL", "MANUAL_ENTRY", ""),
+    UUID orderId =
+        as(
+            a,
+            () -> {
+              var saved =
+                  service.createOrder(
+                      new DropshipOrderInput(
+                          f.salesOrderId(), f.configId(), "MANUAL", "MANUAL_ENTRY", ""),
+                      idFor(a, 99));
+              service.confirmPayment(
+                  saved.id(),
+                  new DropshipPaymentConfirmInput(at(0), idFor(a, 99), "银行流水号 BR-1"),
                   idFor(a, 99));
-          service.confirmPayment(
-              saved.id(),
-              new DropshipPaymentConfirmInput(at(0), idFor(a, 99), "银行流水号 BR-1"),
-              idFor(a, 99));
-          service.dispatch(saved.id(), idFor(a, 99));
-          // 供应商实际按 25 结算 → 20 − 25 = −5，差价由正转负
-          service.recordSupplierAck(
-              saved.id(),
-              new DropshipSupplierAckInput(
-                  "SO-EXT-2", new BigDecimal("25.0000"), new BigDecimal("0.0000"), "", "回执"),
-              idFor(a, 99));
-          return saved.id();
-        });
+              service.dispatch(saved.id(), idFor(a, 99));
+              // 供应商实际按 25 结算 → 20 − 25 = −5，差价由正转负
+              service.recordSupplierAck(
+                  saved.id(),
+                  new DropshipSupplierAckInput(
+                      "SO-EXT-2", new BigDecimal("25.0000"), new BigDecimal("0.0000"), "", "回执"),
+                  idFor(a, 99));
+              return saved.id();
+            });
 
     var rows = alerts(a, orderId);
     assertThat(rows.stream().anyMatch(x -> "PRICE_INCREASE".equals(x.alertKind())))
         .as("涨价本身要告警")
         .isTrue();
     var loss =
-        rows.stream().filter(x -> "NEGATIVE_SPREAD".equals(x.alertKind())).findFirst().orElseThrow();
+        rows.stream()
+            .filter(x -> "NEGATIVE_SPREAD".equals(x.alertKind()))
+            .findFirst()
+            .orElseThrow();
     assertThat(loss.severity()).isEqualTo("CRITICAL");
     assertThat(loss.actualAmount()).isEqualByComparingTo("-5.0000");
     assertThat(loss.detail()).as("必须写清是按实际成本重算的").contains("按供应商实际成本重算");
@@ -565,9 +590,7 @@ class DropshipOrderIntegrationTest {
         a,
         () -> {
           service.markFailed(
-              orderId,
-              new DropshipFailureInput("供应商回复该 SKU 已断货，拒绝接单"),
-              idFor(a, 99));
+              orderId, new DropshipFailureInput("供应商回复该 SKU 已断货，拒绝接单"), idFor(a, 99));
           return null;
         });
     var rows = alerts(a, orderId);
@@ -593,11 +616,23 @@ class DropshipOrderIntegrationTest {
     // **判定证据**不可改写：UPDATE 权限是有的（处置要改 status），
     // 所以这里必须靠触发器逐字段挡住，改写判定数值要以 23514 失败。
     assertDbRefused(
-        () -> asTableOwner(a, "update fulfillment_dropship_alert set actual_amount = 0 where id = '" + alertId + "'").run(),
+        () ->
+            asTableOwner(
+                    a,
+                    "update fulfillment_dropship_alert set actual_amount = 0 where id = '"
+                        + alertId
+                        + "'")
+                .run(),
         "不可改写",
         "23514");
     assertDbRefused(
-        () -> asTableOwner(a, "update fulfillment_dropship_alert set alert_kind = 'NEGATIVE_SPREAD' where id = '" + alertId + "'").run(),
+        () ->
+            asTableOwner(
+                    a,
+                    "update fulfillment_dropship_alert set alert_kind = 'NEGATIVE_SPREAD' where id = '"
+                        + alertId
+                        + "'")
+                .run(),
         "不可改写",
         "23514");
     // 但**处置字段**是允许改的（否则「已处置」无处落地）：
@@ -620,7 +655,9 @@ class DropshipOrderIntegrationTest {
     // 删除被**触发器**挡住（表所有者也过不了这一层）→ 23514。
     // REVOKE DELETE 是给运行角色 trade_app 的第二层，两层都在。
     assertDbRefused(
-        () -> asTableOwner(a, "delete from fulfillment_dropship_alert where id = '" + alertId + "'").run(),
+        () ->
+            asTableOwner(a, "delete from fulfillment_dropship_alert where id = '" + alertId + "'")
+                .run(),
         "不可删除",
         "23514");
   }
@@ -640,9 +677,7 @@ class DropshipOrderIntegrationTest {
         as(
             a,
             () ->
-                service.acknowledgeAlert(
-                    before.id(),
-                    new DropshipAlertAckInput("已换供应商重下，并调高售价")));
+                service.acknowledgeAlert(before.id(), new DropshipAlertAckInput("已换供应商重下，并调高售价")));
     assertThat(after.status()).isEqualTo("RESOLVED");
     assertThat(after.resolutionNote()).isNotBlank();
     assertThat(after.acknowledgedAt()).as("处置必须留时刻").isNotNull();
@@ -706,7 +741,8 @@ class DropshipOrderIntegrationTest {
         a,
         () -> {
           service.confirmPayment(
-              orderId, new DropshipPaymentConfirmInput(confirmedAt, idFor(a, 99), "流水 BR-9"),
+              orderId,
+              new DropshipPaymentConfirmInput(confirmedAt, idFor(a, 99), "流水 BR-9"),
               idFor(a, 99));
           return null;
         });
@@ -729,14 +765,15 @@ class DropshipOrderIntegrationTest {
             .filter(d -> "VENDOR_1688".equals(d.code()))
             .findFirst()
             .orElseThrow();
-    assertThat(alibaba.available())
-        .as("仓库里没有 1688 的接入信息，必须报未接线而不是报可用")
-        .isFalse();
+    assertThat(alibaba.available()).as("仓库里没有 1688 的接入信息，必须报未接线而不是报可用").isFalse();
     // 人工录入这条路径是通的
     assertThat(caps.vendors()).anyMatch(v -> "MANUAL_ENTRY".equals(v.vendorCode()) && v.wired());
     // 支付状态必须显式报不可用（9.1 无支付状态列，12 财务未交付）
     var payment =
-        caps.dimensions().stream().filter(d -> "PAYMENT".equals(d.code())).findFirst().orElseThrow();
+        caps.dimensions().stream()
+            .filter(d -> "PAYMENT".equals(d.code()))
+            .findFirst()
+            .orElseThrow();
     assertThat(payment.available()).isFalse();
     assertThat(payment.ownerModule()).isNotBlank();
     assertThat(caps.paymentStatusReadable()).isFalse();
@@ -767,16 +804,13 @@ class DropshipOrderIntegrationTest {
 
     var row = order(a, orderId);
     assertThat(row.status()).as("未接线必须显式失败").isEqualTo("FAILED");
-    assertThat(row.supplierOrderNo())
-        .as("绝不能编造一个供应商单号")
-        .isEmpty();
-    var failed = alerts(a, orderId).stream()
-        .filter(x -> "ORDER_FAILED".equals(x.alertKind()))
-        .findFirst()
-        .orElseThrow();
-    assertThat(failed.detail())
-        .as("失败原因必须写明是「未接线」，否则运营会去查一个根本没调过的供应商")
-        .contains("尚未接线");
+    assertThat(row.supplierOrderNo()).as("绝不能编造一个供应商单号").isEmpty();
+    var failed =
+        alerts(a, orderId).stream()
+            .filter(x -> "ORDER_FAILED".equals(x.alertKind()))
+            .findFirst()
+            .orElseThrow();
+    assertThat(failed.detail()).as("失败原因必须写明是「未接线」，否则运营会去查一个根本没调过的供应商").contains("尚未接线");
   }
 
   @Test
@@ -819,9 +853,7 @@ class DropshipOrderIntegrationTest {
     as(a, () -> service.dispatch(orderId, idFor(a, 99)));
     var row = order(a, orderId);
     assertThat(row.status()).isEqualTo("DISPATCHED");
-    assertThat(row.supplierOrderNo())
-        .as("人工路径下还没回执，单号必须空而不是填 0 或占位")
-        .isEmpty();
+    assertThat(row.supplierOrderNo()).as("人工路径下还没回执，单号必须空而不是填 0 或占位").isEmpty();
   }
 
   @Test
@@ -924,7 +956,12 @@ class DropshipOrderIntegrationTest {
                       + "'自营发货，货权当然在我方','7.7','ON_RECEIPT','FLAT_COST','USD',"
                       + "10.0000,25.0000,'SKIP','ALWAYS_LIST',10,'ACTIVE',?::timestamptz,"
                       + "?::timestamptz,'')",
-                  idFor(a, 31), a, at(-1), idFor(a, 99), at(-1), at(-1));
+                  idFor(a, 31),
+                  a,
+                  at(-1),
+                  idFor(a, 99),
+                  at(-1),
+                  at(-1));
               return idFor(a, 31);
             });
     assertThatThrownBy(
@@ -959,8 +996,16 @@ class DropshipOrderIntegrationTest {
     UUID orderA = newOrder(a, fa);
     UUID orderB = newOrder(b, fb);
 
-    var inA = asA(() -> service.pageOrders(new DropshipOrderQuery(null, null, null, null, null, null, null, 0, 50)));
-    var inB = asB(() -> service.pageOrders(new DropshipOrderQuery(null, null, null, null, null, null, null, 0, 50)));
+    var inA =
+        asA(
+            () ->
+                service.pageOrders(
+                    new DropshipOrderQuery(null, null, null, null, null, null, null, 0, 50)));
+    var inB =
+        asB(
+            () ->
+                service.pageOrders(
+                    new DropshipOrderQuery(null, null, null, null, null, null, null, 0, 50)));
     assertThat(inA.total()).isEqualTo(1);
     assertThat(inB.total()).isEqualTo(1);
     // 按主键直查对方租户的行也拿不到（不只是列表过滤）
@@ -971,7 +1016,12 @@ class DropshipOrderIntegrationTest {
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不存在或不属于当前租户");
     // 告警工作台同样隔离
-    assertThat(asA(() -> service.pageAlerts(new DropshipAlertQuery(orderB, null, null, null, null, 0, 50)).total()))
+    assertThat(
+            asA(
+                () ->
+                    service
+                        .pageAlerts(new DropshipAlertQuery(orderB, null, null, null, null, 0, 50))
+                        .total()))
         .as("对方租户的告警不可见")
         .isZero();
   }
@@ -1005,8 +1055,16 @@ class DropshipOrderIntegrationTest {
                         .formatted(fa.salesOrderId(), fa.configId())))
         .andExpect(status().is4xxClientError());
 
-    var inA = asA(() -> service.pageOrders(new DropshipOrderQuery(null, null, null, null, null, null, null, 0, 50)));
-    var inB = asB(() -> service.pageOrders(new DropshipOrderQuery(null, null, null, null, null, null, null, 0, 50)));
+    var inA =
+        asA(
+            () ->
+                service.pageOrders(
+                    new DropshipOrderQuery(null, null, null, null, null, null, null, 0, 50)));
+    var inB =
+        asB(
+            () ->
+                service.pageOrders(
+                    new DropshipOrderQuery(null, null, null, null, null, null, null, 0, 50)));
     assertThat(inA.total()).as("伪造头不得把数据写进别的租户").isEqualTo(1);
     assertThat(inB.total()).as("B 的写入失败，不得落到 A").isZero();
 
@@ -1025,12 +1083,23 @@ class DropshipOrderIntegrationTest {
     newOrder(b, fb);
     // 池大小为 1：下面每次读写都复用同一条连接。
     for (int i = 0; i < 5; i++) {
-      assertThat(asA(() -> service.pageOrders(new DropshipOrderQuery(null, null, null, null, null, null, null, 0, 50))).total())
-          .as("第 %d 轮租户 A", i).isEqualTo(1);
-      assertThat(asB(() -> service.pageOrders(new DropshipOrderQuery(null, null, null, null, null, null, null, 0, 50))).total())
-          .as("第 %d 轮租户 B", i).isEqualTo(1);
+      assertThat(
+              asA(() ->
+                      service.pageOrders(
+                          new DropshipOrderQuery(null, null, null, null, null, null, null, 0, 50)))
+                  .total())
+          .as("第 %d 轮租户 A", i)
+          .isEqualTo(1);
+      assertThat(
+              asB(() ->
+                      service.pageOrders(
+                          new DropshipOrderQuery(null, null, null, null, null, null, null, 0, 50)))
+                  .total())
+          .as("第 %d 轮租户 B", i)
+          .isEqualTo(1);
       assertThat(sql.fetch("select id from fulfillment_dropship_order").size())
-          .as("第 %d 轮事务外", i).isZero();
+          .as("第 %d 轮事务外", i)
+          .isZero();
     }
   }
 

@@ -23,14 +23,14 @@
 **可疑定位是本模块真正的产出。** 返回一个差额数字等于什么都没说。四类各有可计算信号，
 且都落到具体的余额行或业务单上：
 
-| 类别 | 信号 | 严重度 |
-| --- | --- | --- |
-| 漏记 MISSING | 快照非零，但核对区间内一条分录都没有（`period_entry_count = 0`） | WARN |
-| 迟到补记 BACKFILL | 入库时刻比声称的发生时刻晚超过 24h（漏记的晚期形态） | WARN |
-| 重复记 DUPLICATE | 同余额行、同类型、同数量、同操作人，相隔 ≤60s 的两笔不同业务单 | HIGH |
-| 并发丢失 LOST_UPDATE | 同余额行在**写入时刻**上撞在一起（≤60s 内多次写入） | HIGH |
+| 类别                 | 信号                                                             | 严重度 |
+| -------------------- | ---------------------------------------------------------------- | ------ |
+| 漏记 MISSING         | 快照非零，但核对区间内一条分录都没有（`period_entry_count = 0`） | WARN   |
+| 迟到补记 BACKFILL    | 入库时刻比声称的发生时刻晚超过 24h（漏记的晚期形态）             | WARN   |
+| 重复记 DUPLICATE     | 同余额行、同类型、同数量、同操作人，相隔 ≤60s 的两笔不同业务单   | HIGH   |
+| 并发丢失 LOST_UPDATE | 同余额行在**写入时刻**上撞在一起（≤60s 内多次写入）              | HIGH   |
 
-`DUPLICATE` 的分区键是 `(balance_id, kind, on_hand_delta, reserved_delta, actor_id)` —— 
+`DUPLICATE` 的分区键是 `(balance_id, kind, on_hand_delta, reserved_delta, actor_id)` ——
 V1 的 `UNIQUE(tenant_id, ref_type, ref_id)` 挡得住同一来源单据重投，挡不住「同一批货被两张不同的单据各记一次」，
 所以签名里**不含 ref_type**。怀疑一律成对给出（`relatedTransactionId` + `gapSeconds`），
 只说「重复了」而不告诉你是跟谁重复，人还是得回去翻流水。
@@ -61,7 +61,7 @@ V1 的 `UNIQUE(tenant_id, ref_type, ref_id)` 挡得住同一来源单据重投�
    cast 落在绑定序列末位会让 jOOQ 整体错位一格。
 4. **写入时 `?::timestamptz` 一个都不能省。** 纯文本语句里 jOOQ 无从推断 `OffsetDateTime`，
    不 cast 会被驱动当 varchar 送过去，报 `column window_from is of type timestamp with time zone
-   but expression is of type character varying`。run 表刻意把 `created_at` 排在列清单倒数第三位，
+but expression is of type character varying`。run 表刻意把 `created_at` 排在列清单倒数第三位，
    末位留给普通列，避免 cast 落到绑定序列末尾。
 
 占位符用 `String.join(",", Collections.nCopies(n, "?"))` 按列位置生成，不手数 ——
@@ -79,6 +79,7 @@ V1 的 `UNIQUE(tenant_id, ref_type, ref_id)` 挡得住同一来源单据重投�
 ## 文件清单
 
 后端：
+
 - `backend/services/warehouse/src/main/resources/db/migration/V54__warehouse_inventory_reconciliation.sql`（新增）
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryReconciliationModels.java`（新增）
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryReconciliationService.java`（新增）
@@ -86,6 +87,7 @@ V1 的 `UNIQUE(tenant_id, ref_type, ref_id)` 挡得住同一来源单据重投�
 - `backend/services/warehouse/src/test/java/com/starcon/warehouse/InventoryReconciliationIntegrationTest.java`（新增，30 例）
 
 前端：
+
 - `apps/web/src/components/inventory/inventory-reconciliation.tsx`（新增）
 - `apps/web/src/components/inventory/inventory-model.ts`（改：核对接口 + 标签 + 纯函数）
 - `apps/web/src/components/inventory/inventory-model.test.ts`（改：+10 例，含 parseLedgerHref 新增 transactionId 的断言更新）
@@ -94,6 +96,7 @@ V1 的 `UNIQUE(tenant_id, ref_type, ref_id)` 挡得住同一来源单据重投�
 - `packages/api-contracts/src/catalog.ts`、`warehouse.openapi.json`、`identity.openapi.json`（codegen 产物）
 
 台账 / 文档：
+
 - `docs/product/capability-blueprint/module-progress.md`（7.1.2.2 那一行的状态与证据）
 - 本文件
 

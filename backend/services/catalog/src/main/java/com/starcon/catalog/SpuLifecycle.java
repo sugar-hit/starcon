@@ -38,7 +38,11 @@ public enum SpuLifecycle {
 
   /** 一次合法流转：是否强制填原因、是否需要前置条件。 */
   public record Transition(
-      SpuLifecycle from, SpuLifecycle to, boolean reasonRequired, boolean requiresActiveSku, String note) {}
+      SpuLifecycle from,
+      SpuLifecycle to,
+      boolean reasonRequired,
+      boolean requiresActiveSku,
+      String note) {}
 
   private static final Map<SpuLifecycle, List<Transition>> MATRIX =
       Map.of(
@@ -58,8 +62,7 @@ public enum SpuLifecycle {
               List.of(
                   new Transition(SUSPENDED, ON_SALE, true, true, "恢复在售"),
                   new Transition(SUSPENDED, DISCONTINUED, true, false, "停产")),
-          DISCONTINUED,
-              List.of());
+          DISCONTINUED, List.of());
 
   /** 合法转换矩阵：每个 (from, to) 的合法性、是否强制原因、是否需要前置条件都在此显式建模。 */
   public List<Transition> transitionsFrom() {

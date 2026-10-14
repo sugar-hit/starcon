@@ -19,23 +19,18 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 10.4.1.1 头程发运单。
  *
- * <p>命名空间 {@code /warehouse/first-mile-shipments}：与收货单（8.2.1.1）同一 {@code
- * /warehouse} 前缀，浏览器只经 /api/warehouse 代理访问。刻意不挂在 {@code /logistics/}
- * 下面 —— 蓝图的 10 物流与头程目前只有 warehouse 服务一个可落地后端，
- * 而本模块的货物来源、在途腿与质量状态全在 warehouse 服务内，
- * 放进 {@code /inventory/} 也会让「8.2 现场作业」与「10 货权转移」两套语义混在一个前缀里。
+ * <p>命名空间 {@code /warehouse/first-mile-shipments}：与收货单（8.2.1.1）同一 {@code /warehouse} 前缀，浏览器只经
+ * /api/warehouse 代理访问。刻意不挂在 {@code /logistics/} 下面 —— 蓝图的 10 物流与头程目前只有 warehouse 服务一个可落地后端，
+ * 而本模块的货物来源、在途腿与质量状态全在 warehouse 服务内， 放进 {@code /inventory/} 也会让「8.2 现场作业」与「10 货权转移」两套语义混在一个前缀里。
  *
- * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}，
- * 全部写动作（建单 / 改单 / 确认 / 发出 / 取消）挂 {@code warehouse.inventory.update} ——
- * 发出那一刻货权转移、在途腿登记落库，权限等级与调拨发货同档。
+ * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}， 全部写动作（建单 / 改单 / 确认 / 发出 / 取消）挂
+ * {@code warehouse.inventory.update} —— 发出那一刻货权转移、在途腿登记落库，权限等级与调拨发货同档。
  *
- * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
- * 客户端伪造的 {@code X-Tenant-Id} 进不来也改不动它。
+ * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code app.current_tenant}，由
+ * RLS 在数据库层强制隔离。 客户端伪造的 {@code X-Tenant-Id} 进不来也改不动它。
  *
- * <p>动作端点是 **POST**（{@code /confirm}、{@code /dispatch}、{@code /cancel}）：
- * 它们都是「发生一次业务事件」，用 PUT 会被 HTTP 语义读成「把单据设置成某个状态」，
- * 而实际发生的是货权转移 + 在途腿登记。
+ * <p>动作端点是 **POST**（{@code /confirm}、{@code /dispatch}、{@code /cancel}）： 它们都是「发生一次业务事件」，用 PUT 会被
+ * HTTP 语义读成「把单据设置成某个状态」， 而实际发生的是货权转移 + 在途腿登记。
  */
 @RestController
 @RequestMapping("/warehouse/first-mile-shipments")
@@ -56,11 +51,9 @@ public class FirstMileShipmentController {
   }
 
   /**
-   * 头程发运能力：货物来源接入情况、**未交付依赖逐条声明**、四态状态机、
-   * 运输方式与贸易术语词表，以及四条口径说明。
+   * 头程发运能力：货物来源接入情况、**未交付依赖逐条声明**、四态状态机、 运输方式与贸易术语词表，以及四条口径说明。
    *
-   * <p>前端据此渲染来源下拉、运输方式、货权/风险选择与提示 —— 未交付的来源与下游
-   * **显式报不可用并给出归属模块**，而不是给一个点下去没反应的选项。
+   * <p>前端据此渲染来源下拉、运输方式、货权/风险选择与提示 —— 未交付的来源与下游 **显式报不可用并给出归属模块**，而不是给一个点下去没反应的选项。
    */
   @GetMapping("/capabilities")
   public FirstMileCapabilities capabilities(
@@ -71,9 +64,8 @@ public class FirstMileShipmentController {
   /**
    * 可发批次候选（8.2.1.1 逐次实收行）。
    *
-   * <p>头程发运的输入是「选择货物与批次」，而批次挂在**逐次实收**上：
-   * 同一 SKU 分三车到货可以是三个批次。所以这里精确到实收行而不是精确到 SKU，
-   * 并如实给出「还能发走多少」（实收 − 拒收 − 已被其他发运单占用）。
+   * <p>头程发运的输入是「选择货物与批次」，而批次挂在**逐次实收**上： 同一 SKU 分三车到货可以是三个批次。所以这里精确到实收行而不是精确到 SKU， 并如实给出「还能发走多少」（实收
+   * − 拒收 − 已被其他发运单占用）。
    */
   @GetMapping("/source-candidates")
   public SourceCandidatePage sourceCandidates(
@@ -139,8 +131,7 @@ public class FirstMileShipmentController {
   /**
    * 本单的发货分录（**在途腿**，真在 7.5.1.2 名下）。
    *
-   * <p>未达量与已了结量是 7.5.1.2 的权威值，本模块只如实读出来一起返回：
-   * 「发运单发出 100、到货 60」这两个数必须并排可读，否则会被读成账丢了 40。
+   * <p>未达量与已了结量是 7.5.1.2 的权威值，本模块只如实读出来一起返回： 「发运单发出 100、到货 60」这两个数必须并排可读，否则会被读成账丢了 40。
    */
   @GetMapping("/{shipmentId}/transit-legs")
   public List<FirstMileTransitLegRow> transitLegs(
@@ -198,9 +189,8 @@ public class FirstMileShipmentController {
   /**
    * 发出：**货权转移与转在途就在这一刻发生**。
    *
-   * <p>逐行在 7.5.1.2 登记 FIRST_MILE 在途腿（sourceSystem=FIRST_MILE、
-   * sourceReference=发运单号-行号），**不扣在手库存** —— 头程货在到货前从未进过我方库存账。
-   * 重复发出撞 7.5.1.2 的幂等唯一索引，不会双记在途。
+   * <p>逐行在 7.5.1.2 登记 FIRST_MILE 在途腿（sourceSystem=FIRST_MILE、 sourceReference=发运单号-行号），**不扣在手库存**
+   * —— 头程货在到货前从未进过我方库存账。 重复发出撞 7.5.1.2 的幂等唯一索引，不会双记在途。
    */
   @PostMapping("/{shipmentId}/dispatch")
   public FirstMileSaved dispatch(
@@ -235,31 +225,65 @@ public class FirstMileShipmentController {
   private static FirstMileCreateRequest emptyCreate() {
     return new FirstMileCreateRequest(
         // sourceType, sourceRefId, sourceRefCode, legalEntityId,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // originWarehouseId, destinationWarehouseId, destinationCountryCode, destinationName,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // transportMode, carrierName, bookingNo, vesselOrFlightNo,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // incoterm, riskBearer, currency, freightCost,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // insuranceCost, dutyEstimate, handlingCost, customsBroker,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // departAt, expectedArriveAt, notes, lines
-        null, null, null, List.of());
+        null,
+        null,
+        null,
+        List.of());
   }
 
   private static FirstMileUpdateRequest emptyUpdate() {
     return new FirstMileUpdateRequest(
         // expectedVersion, sourceRefCode, destinationWarehouseId, destinationCountryCode,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // destinationName, transportMode, carrierName, bookingNo,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // vesselOrFlightNo, incoterm, riskBearer, currency,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // freightCost, insuranceCost, dutyEstimate, handlingCost,
-        null, null, null, null,
+        null,
+        null,
+        null,
+        null,
         // customsBroker, departAt, expectedArriveAt, notes, lines
-        null, null, null, null, List.of());
+        null,
+        null,
+        null,
+        null,
+        List.of());
   }
 
   private static FirstMileConfirmRequest emptyConfirm() {

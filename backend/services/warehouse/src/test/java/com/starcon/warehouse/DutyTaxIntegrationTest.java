@@ -31,16 +31,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 10.5.1.3 关税与税费。
  *
- * <p>本测试就是 <b>V90 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论，
- * 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不是直连数据库，
+ * <p>本测试就是 <b>V90 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论， 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不是直连数据库，
  * 以便同时验证「服务层 + DB 层」两层都没有把闸门漏掉。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link CustomsDeclarationIntegrationTest} 一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场），
- * 派生 id 的前缀不同，避免夹具互相污染。
+ * <p>夹具写法与 {@link CustomsDeclarationIntegrationTest} 一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）， 派生 id 的前缀不同，避免夹具互相污染。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -48,7 +45,8 @@ class DutyTaxIntegrationTest {
   static final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
   static final UUID a = UUID.randomUUID(), b = UUID.randomUUID(), user = UUID.randomUUID();
   static HttpServer identity;
-  static final Map<String, AccessService.Access> actors = new java.util.concurrent.ConcurrentHashMap<>();
+  static final Map<String, AccessService.Access> actors =
+      new java.util.concurrent.ConcurrentHashMap<>();
   static final List<String> allPermissions =
       java.util.stream.Stream.of("inventory")
           .flatMap(
@@ -144,9 +142,8 @@ class DutyTaxIntegrationTest {
   AccessService.Access actorB;
 
   /**
-   * 真实报关单 id。报关单的 id 由 {@link CustomsDeclarationService#create} 生成 UUID
-   * （10.5.1.1 用发号器发 declaration_code，但主键是随机 UUID），所以夹具必须**记下真实 id**，
-   * 不能用本地派生 id 去引用 —— 那是本测试第一版栽的坑。
+   * 真实报关单 id。报关单的 id 由 {@link CustomsDeclarationService#create} 生成 UUID （10.5.1.1 用发号器发
+   * declaration_code，但主键是随机 UUID），所以夹具必须**记下真实 id**， 不能用本地派生 id 去引用 —— 那是本测试第一版栽的坑。
    */
   final Map<UUID, List<UUID>> declarationIds = new java.util.concurrent.ConcurrentHashMap<>();
 
@@ -156,11 +153,9 @@ class DutyTaxIntegrationTest {
   }
 
   /**
-   * 每个租户一整套夹具：法人、SKU、国内仓、海外仓、质量状态、**10.4.1.1 头程发运单**
-   * + **10.5.1.1 报关单与明细** + **US 关税/增值税税率**。
+   * 每个租户一整套夹具：法人、SKU、国内仓、海外仓、质量状态、**10.4.1.1 头程发运单** + **10.5.1.1 报关单与明细** + **US 关税/增值税税率**。
    *
-   * <p>税率是本模块的**输入数据**（蓝图：「输入：HS 编码税率表；目的国税则」），
-   * 所以它必须落库而不是写死在代码里 —— 每个租户各配一套，才能顺带验证税率也按租户隔离。
+   * <p>税率是本模块的**输入数据**（蓝图：「输入：HS 编码税率表；目的国税则」）， 所以它必须落库而不是写死在代码里 —— 每个租户各配一套，才能顺带验证税率也按租户隔离。
    */
   @BeforeEach
   void seed() throws Exception {
@@ -184,22 +179,42 @@ class DutyTaxIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 2), tenant, "SKU-1", "商品一");
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 4), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 4),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-LA", "洛杉矶海外仓", "US", "America/Los_Angeles");
+                idFor(tenant, 5),
+                tenant,
+                "WH-LA",
+                "洛杉矶海外仓",
+                "US",
+                "America/Los_Angeles");
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 6),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             for (int slot = 0; slot < 3; slot++) {
               seedShipment(tenant, slot);
               seedDeclaration(tenant, slot);
@@ -220,8 +235,13 @@ class DutyTaxIntegrationTest {
             + "customs_broker,status,created_by,dispatched_at)"
             + " values(?,?,?,'SUPPLIER_PURCHASE','PO-1',?,?,?,'US','洛杉矶海外仓','SEA','COSCO',"
             + "'BK-1','Vessel-1','FOB','BUYER','USD',0,0,0,0,'代理行','DISPATCHED',?,now())",
-        idFor(tenant, 10 + slot * 10), tenant, "FMS-" + (slot + 1), idFor(tenant, 1), idFor(tenant, 4),
-        idFor(tenant, 5), user);
+        idFor(tenant, 10 + slot * 10),
+        tenant,
+        "FMS-" + (slot + 1),
+        idFor(tenant, 1),
+        idFor(tenant, 4),
+        idFor(tenant, 5),
+        user);
     for (int i = 1; i <= 2; i++) {
       sql.execute(
           "insert into first_mile_shipment_line(id,tenant_id,shipment_id,line_no,sku_id,"
@@ -229,54 +249,63 @@ class DutyTaxIntegrationTest {
               + "origin_country_code,declared_unit_value,declared_value,gross_weight_kg,net_weight_kg,"
               + "volume_cbm,carton_count)"
               + " values(?,?,?,?,?,?,?,?,'棉质衬衫','610910','A','CN',10,1000,120,100,0.5,10)",
-          idFor(tenant, 100 + slot * 10 + i), tenant, idFor(tenant, 10 + slot * 10), i, idFor(tenant, 2),
-          idFor(tenant, 6), 100, 100);
+          idFor(tenant, 100 + slot * 10 + i),
+          tenant,
+          idFor(tenant, 10 + slot * 10),
+          i,
+          idFor(tenant, 2),
+          idFor(tenant, 6),
+          100,
+          100);
       sql.execute(
           "insert into first_mile_shipment_leg_receipt(id,tenant_id,shipment_id,line_id,"
               + "transit_leg_id,source_reference,sku_id,quantity,shipped_at,registered_at,registered_by)"
               + " values(?,?,?,?,gen_random_uuid(),?,?,100,now(),now(),?)",
-          idFor(tenant, 200 + slot * 10 + i), tenant, idFor(tenant, 10 + slot * 10),
+          idFor(tenant, 200 + slot * 10 + i),
+          tenant,
+          idFor(tenant, 10 + slot * 10),
           idFor(tenant, 100 + slot * 10 + i),
-          "LEG-" + tenant + "-" + slot + "-" + i, idFor(tenant, 2), user);
+          "LEG-" + tenant + "-" + slot + "-" + i,
+          idFor(tenant, 2),
+          user);
     }
   }
 
   /**
    * 10.5.1.1 报关单（10.5.1.3 的直接上游）—— <b>走真实的上游服务</b>建，不手写 SQL 抄状态机。
    *
-   * <p>这里刻意复用 {@link CustomsDeclarationService} 而不是直接 INSERT：
-   * V85 把「人工复核闸」「三单据齐备才能提交」「放行要结果回执」都钉在 DB 触发器里，
-   * 手写 SQL 抄状态机会绕过这些纪律，夹具就变成了一个上游并不存在的世界。
+   * <p>这里刻意复用 {@link CustomsDeclarationService} 而不是直接 INSERT： V85 把「人工复核闸」「三单据齐备才能提交」「放行要结果回执」都钉在
+   * DB 触发器里， 手写 SQL 抄状态机会绕过这些纪律，夹具就变成了一个上游并不存在的世界。
    *
    * <p>第 1 张（slot 0）走完整流程到「已放行」，第 2、3 张停在「已提交」/「已复核」——
-   * 因为**一张报关单只估一次税**（UNIQUE(tenant_id,declaration_id)），
-   * 多个用例需要各自独立的估算单，必须备三张报关单。
+   * 因为**一张报关单只估一次税**（UNIQUE(tenant_id,declaration_id)）， 多个用例需要各自独立的估算单，必须备三张报关单。
    *
-   * <p>注意 V85 的裁决：{@code submitted_at} 是<b>历史痕迹，打上就永不消失</b>，
-   * 所以「已报关 / 未报关」必须看 {@code submitted_at} 而不能看 {@code status}。
+   * <p>注意 V85 的裁决：{@code submitted_at} 是<b>历史痕迹，打上就永不消失</b>， 所以「已报关 / 未报关」必须看 {@code submitted_at}
+   * 而不能看 {@code status}。
    */
   private void seedDeclaration(UUID tenant, int slot) {
     List<CustomsLineRequest> lines = new ArrayList<>();
     for (int i = 1; i <= 2; i++) {
-      lines.add(new CustomsLineRequest(
-          idFor(tenant, 100 + slot * 10 + i),
-          "棉质衬衫 100% 棉",
-          "610910",
-          "MANUAL_COMPLETE",
-          Map.of("fiber", "100% 棉", "weave", "平纹"),
-          "100% 棉",
-          "女装衬衫",
-          "A",
-          "SH-100",
-          "CN",
-          new BigDecimal("100"),
-          "PCS",
-          new BigDecimal("10.0000"),
-          new BigDecimal("1000.0000"),
-          new BigDecimal("120.0000"),
-          new BigDecimal("100.0000"),
-          new BigDecimal("0.500000"),
-          10));
+      lines.add(
+          new CustomsLineRequest(
+              idFor(tenant, 100 + slot * 10 + i),
+              "棉质衬衫 100% 棉",
+              "610910",
+              "MANUAL_COMPLETE",
+              Map.of("fiber", "100% 棉", "weave", "平纹"),
+              "100% 棉",
+              "女装衬衫",
+              "A",
+              "SH-100",
+              "CN",
+              new BigDecimal("100"),
+              "PCS",
+              new BigDecimal("10.0000"),
+              new BigDecimal("1000.0000"),
+              new BigDecimal("120.0000"),
+              new BigDecimal("100.0000"),
+              new BigDecimal("0.500000"),
+              10));
     }
     CustomsCreateRequest request =
         new CustomsCreateRequest(
@@ -324,13 +353,13 @@ class DutyTaxIntegrationTest {
               .id();
       declarations.finalizeDocument(docId, new CustomsFinalizeDocumentRequest(""));
     }
-    declarations.submit(id, new CustomsSubmitRequest("BR-REF-" + (slot + 1), "上海报关行", "ACCEPTED", "已受理"));
+    declarations.submit(
+        id, new CustomsSubmitRequest("BR-REF-" + (slot + 1), "上海报关行", "ACCEPTED", "已受理"));
     if (slot == 0) {
       // resultAt 传 null 用服务默认的 now()：V85 钉死「结果时间不得早于提交时间」，
       // 而提交时间是建夹具那一刻的 now()，写一个固定的历史时刻会被这条纪律挡下。
-      declarations.recordResult(id, new CustomsResultRequest(
-          "CLEARED", "RL-1", "查验通过放行", null,
-          "MANUAL_ENTRY", "CR-1"));
+      declarations.recordResult(
+          id, new CustomsResultRequest("CLEARED", "RL-1", "查验通过放行", null, "MANUAL_ENTRY", "CR-1"));
     }
   }
 
@@ -348,17 +377,23 @@ class DutyTaxIntegrationTest {
         "insert into duty_tax_rate(id,tenant_id,destination_country_code,rate_scope,hs_code_prefix,"
             + "tax_kind,ad_valorem_rate,effective_from,tax_source,source_system,source_reference,created_by)"
             + " values(?,?,'US','HS','6109','DUTY',0.0325,'2026-01-01','MANUAL','MANUAL_ENTRY','HTS-2026-CH61',?)",
-        idFor(tenant, 500), tenant, user);
+        idFor(tenant, 500),
+        tenant,
+        user);
     sql.execute(
         "insert into duty_tax_rate(id,tenant_id,destination_country_code,rate_scope,hs_code_prefix,"
             + "tax_kind,ad_valorem_rate,effective_from,tax_source,source_system,source_reference,created_by)"
             + " values(?,?,'US','HS','610910','DUTY',0.05,'2026-01-01','MANUAL','MANUAL_ENTRY','HTS-2026-610910',?)",
-        idFor(tenant, 501), tenant, user);
+        idFor(tenant, 501),
+        tenant,
+        user);
     sql.execute(
         "insert into duty_tax_rate(id,tenant_id,destination_country_code,rate_scope,hs_code_prefix,"
             + "tax_kind,ad_valorem_rate,effective_from,tax_source,source_system,source_reference,created_by)"
             + " values(?,?,'US','COUNTRY','','VAT',0.10,'2026-01-01','MANUAL','MANUAL_ENTRY','US-IRB-2026',?)",
-        idFor(tenant, 502), tenant, user);
+        idFor(tenant, 502),
+        tenant,
+        user);
   }
 
   AccessService.Access actorFor(UUID tenant) {
@@ -378,7 +413,8 @@ class DutyTaxIntegrationTest {
     return estimateRequest(tenant, slot, "DDU", "BUYER");
   }
 
-  private DutyEstimateCreateRequest estimateRequest(UUID tenant, int slot, String incoterm, String bearer) {
+  private DutyEstimateCreateRequest estimateRequest(
+      UUID tenant, int slot, String incoterm, String bearer) {
     return new DutyEstimateCreateRequest(
         declId(tenant, slot),
         incoterm,
@@ -461,13 +497,15 @@ class DutyTaxIntegrationTest {
     assertThat(detail.lines()).hasSize(2);
 
     // 最长前缀优先：610910（5%）压过章级 6109（3.25%）。
-    assertThat(detail.lines()).allSatisfy(line -> {
-      assertThat(line.hsCode()).isEqualTo("610910");
-      assertThat(line.dutyRatePrefix()).isEqualTo("610910");
-      assertThat(line.dutyAdValoremRate()).isEqualByComparingTo("0.05");
-      assertThat(line.rateMatchStatus()).isEqualTo("MATCHED");
-      assertThat(line.vatRateMatched()).isTrue();
-    });
+    assertThat(detail.lines())
+        .allSatisfy(
+            line -> {
+              assertThat(line.hsCode()).isEqualTo("610910");
+              assertThat(line.dutyRatePrefix()).isEqualTo("610910");
+              assertThat(line.dutyAdValoremRate()).isEqualByComparingTo("0.05");
+              assertThat(line.rateMatchStatus()).isEqualTo("MATCHED");
+              assertThat(line.vatRateMatched()).isTrue();
+            });
 
     // 逐行分摊与税额：HALF_UP 到分，逐项断言。
     var line1 = detail.lines().get(0);
@@ -486,9 +524,10 @@ class DutyTaxIntegrationTest {
     assertThat(head.estimatedTotalTax()).isEqualByComparingTo("322.00");
 
     // 分摊合计精确等于单头金额（最后一行吃余数，所以不会有半分钱对不上）。
-    var allocatedFreight = detail.lines().stream()
-        .map(DutyEstimateLineRow::allocatedFreight)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    var allocatedFreight =
+        detail.lines().stream()
+            .map(DutyEstimateLineRow::allocatedFreight)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
     assertThat(allocatedFreight).isEqualByComparingTo("100.00");
   }
 
@@ -506,12 +545,40 @@ class DutyTaxIntegrationTest {
   @Test
   void rateIsLookedUpByEffectiveDate() {
     // 单行 HS 610910 命中 610910 优先，其次 6109，最后没有就 NO_MATCH。
-    var rates = asA(() -> service.rates(a, new DutyRateQuery(
-        "US", "DUTY", "HS", null, null, LocalDate.of(2026, 6, 1), null, "EFFECTIVE_FROM", 0, 50)));
+    var rates =
+        asA(
+            () ->
+                service.rates(
+                    a,
+                    new DutyRateQuery(
+                        "US",
+                        "DUTY",
+                        "HS",
+                        null,
+                        null,
+                        LocalDate.of(2026, 6, 1),
+                        null,
+                        "EFFECTIVE_FROM",
+                        0,
+                        50)));
     assertThat(rates).extracting(DutyRateRow::hsCodePrefix).contains("610910", "6109");
     // 2025 年的生效日上，两条都还没生效 → 查不到
-    assertThat(asA(() -> service.rates(a, new DutyRateQuery(
-            "US", "DUTY", "HS", null, null, LocalDate.of(2025, 6, 1), null, "EFFECTIVE_FROM", 0, 50))))
+    assertThat(
+            asA(
+                () ->
+                    service.rates(
+                        a,
+                        new DutyRateQuery(
+                            "US",
+                            "DUTY",
+                            "HS",
+                            null,
+                            null,
+                            LocalDate.of(2025, 6, 1),
+                            null,
+                            "EFFECTIVE_FROM",
+                            0,
+                            50))))
         .isEmpty();
   }
 
@@ -520,19 +587,39 @@ class DutyTaxIntegrationTest {
   @Test
   void unmatchedDutyRateBlocksLock() {
     // DE 目的国没配任何税率 → 关税 NO_MATCH + VAT 未配
-    UUID id = asA(() -> service.create(a, new DutyEstimateCreateRequest(
-        declId(a, 0), "DDU", "BUYER", idFor(a, 1), "DE", "USD", "CNY",
-        new BigDecimal("7.1"), 6, LocalDate.of(2026, 10, 1),
-        new BigDecimal("2000"), new BigDecimal("2000"), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
-        LocalDate.of(2026, 10, 1), ""))).id();
+    UUID id =
+        asA(() ->
+                service.create(
+                    a,
+                    new DutyEstimateCreateRequest(
+                        declId(a, 0),
+                        "DDU",
+                        "BUYER",
+                        idFor(a, 1),
+                        "DE",
+                        "USD",
+                        "CNY",
+                        new BigDecimal("7.1"),
+                        6,
+                        LocalDate.of(2026, 10, 1),
+                        new BigDecimal("2000"),
+                        new BigDecimal("2000"),
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        LocalDate.of(2026, 10, 1),
+                        "")))
+            .id();
     var detail = asA(() -> service.detail(a, id));
-    assertThat(detail.lines()).allSatisfy(line -> {
-      assertThat(line.rateMatchStatus()).isEqualTo("NO_MATCH");
-      assertThat(line.vatRateMatched()).isFalse();
-      assertThat(line.estimatedDutyAmount()).isEqualByComparingTo("0");
-      // 备注必须讲清「按 0 税估算」，不能让界面上凭空猜
-      assertThat(line.notes()).contains("匹配到");
-    });
+    assertThat(detail.lines())
+        .allSatisfy(
+            line -> {
+              assertThat(line.rateMatchStatus()).isEqualTo("NO_MATCH");
+              assertThat(line.vatRateMatched()).isFalse();
+              assertThat(line.estimatedDutyAmount()).isEqualByComparingTo("0");
+              // 备注必须讲清「按 0 税估算」，不能让界面上凭空猜
+              assertThat(line.notes()).contains("匹配到");
+            });
     assertThat(detail.estimate().unmatchedRateLines()).isEqualTo(2);
 
     assertThatThrownBy(() -> asA(() -> service.lock(a, id, new DutyLockRequest(""))))
@@ -543,11 +630,29 @@ class DutyTaxIntegrationTest {
   /** DB 层同样要挡住：绕过服务层直接把状态改成 LOCKED 也必须失败。 */
   @Test
   void dbBlocksLockWhenRateUnmatched() {
-    UUID id = asA(() -> service.create(a, new DutyEstimateCreateRequest(
-        declId(a, 0), "DDU", "BUYER", idFor(a, 1), "DE", "USD", "CNY",
-        new BigDecimal("7.1"), 6, LocalDate.of(2026, 10, 1),
-        new BigDecimal("2000"), new BigDecimal("2000"), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
-        LocalDate.of(2026, 10, 1), ""))).id();
+    UUID id =
+        asA(() ->
+                service.create(
+                    a,
+                    new DutyEstimateCreateRequest(
+                        declId(a, 0),
+                        "DDU",
+                        "BUYER",
+                        idFor(a, 1),
+                        "DE",
+                        "USD",
+                        "CNY",
+                        new BigDecimal("7.1"),
+                        6,
+                        LocalDate.of(2026, 10, 1),
+                        new BigDecimal("2000"),
+                        new BigDecimal("2000"),
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        LocalDate.of(2026, 10, 1),
+                        "")))
+            .id();
     assertThatThrownBy(
             () ->
                 asA(
@@ -567,27 +672,83 @@ class DutyTaxIntegrationTest {
   @Test
   void zeroPercentRateIsAValidConfiguration() {
     // GB：关税 0%（零税率商品）+ 增值税 0%
-    asA(() -> service.createRate(a, new DutyRateCreateRequest(
-        "GB", "HS", "610910", "DUTY", new BigDecimal("0"), null, "PCS", false, "",
-        LocalDate.of(2026, 1, 1), null, "MANUAL", true, "MANUAL_ENTRY", "UK-ZERO", "")));
-    asA(() -> service.createRate(a, new DutyRateCreateRequest(
-        "GB", "COUNTRY", "", "VAT", new BigDecimal("0"), null, "PCS", false, "",
-        LocalDate.of(2026, 1, 1), null, "MANUAL", true, "MANUAL_ENTRY", "UK-ZERO-VAT", "")));
+    asA(
+        () ->
+            service.createRate(
+                a,
+                new DutyRateCreateRequest(
+                    "GB",
+                    "HS",
+                    "610910",
+                    "DUTY",
+                    new BigDecimal("0"),
+                    null,
+                    "PCS",
+                    false,
+                    "",
+                    LocalDate.of(2026, 1, 1),
+                    null,
+                    "MANUAL",
+                    true,
+                    "MANUAL_ENTRY",
+                    "UK-ZERO",
+                    "")));
+    asA(
+        () ->
+            service.createRate(
+                a,
+                new DutyRateCreateRequest(
+                    "GB",
+                    "COUNTRY",
+                    "",
+                    "VAT",
+                    new BigDecimal("0"),
+                    null,
+                    "PCS",
+                    false,
+                    "",
+                    LocalDate.of(2026, 1, 1),
+                    null,
+                    "MANUAL",
+                    true,
+                    "MANUAL_ENTRY",
+                    "UK-ZERO-VAT",
+                    "")));
 
     // 目的国按 GB 建估算单：请求里显式给 GB（服务取「请求的目的国」优先于报关单的），
     // 而不是去改已放行的报关单 —— V85 钉死已放行之后不允许再动申报资料。
-    UUID id = asA(() -> service.create(a, new DutyEstimateCreateRequest(
-        declId(a, 0), "DDU", "BUYER", idFor(a, 1), "GB", "USD", "CNY",
-        new BigDecimal("7.1"), 6, LocalDate.of(2026, 10, 1),
-        new BigDecimal("2000"), new BigDecimal("2000"), new BigDecimal("100"), new BigDecimal("20"),
-        BigDecimal.ZERO, LocalDate.of(2026, 10, 1), ""))).id();
+    UUID id =
+        asA(() ->
+                service.create(
+                    a,
+                    new DutyEstimateCreateRequest(
+                        declId(a, 0),
+                        "DDU",
+                        "BUYER",
+                        idFor(a, 1),
+                        "GB",
+                        "USD",
+                        "CNY",
+                        new BigDecimal("7.1"),
+                        6,
+                        LocalDate.of(2026, 10, 1),
+                        new BigDecimal("2000"),
+                        new BigDecimal("2000"),
+                        new BigDecimal("100"),
+                        new BigDecimal("20"),
+                        BigDecimal.ZERO,
+                        LocalDate.of(2026, 10, 1),
+                        "")))
+            .id();
     var detail = asA(() -> service.detail(a, id));
-    assertThat(detail.lines()).allSatisfy(line -> {
-      assertThat(line.rateMatchStatus()).isEqualTo("MATCHED");
-      assertThat(line.vatRateMatched()).isTrue();
-      assertThat(line.estimatedDutyAmount()).isEqualByComparingTo("0");
-      assertThat(line.estimatedVatAmount()).isEqualByComparingTo("0");
-    });
+    assertThat(detail.lines())
+        .allSatisfy(
+            line -> {
+              assertThat(line.rateMatchStatus()).isEqualTo("MATCHED");
+              assertThat(line.vatRateMatched()).isTrue();
+              assertThat(line.estimatedDutyAmount()).isEqualByComparingTo("0");
+              assertThat(line.estimatedVatAmount()).isEqualByComparingTo("0");
+            });
     // 0% 税率配齐了 → 允许锁定
     assertThat(asA(() -> service.lock(a, id, new DutyLockRequest("零税率批次"))).status())
         .isEqualTo("LOCKED");
@@ -626,7 +787,8 @@ class DutyTaxIntegrationTest {
                 asA(
                     () -> {
                       sql.execute(
-                          "update duty_tax_estimate set incoterm='DDU',duty_bearer='SELLER' where id=?", id);
+                          "update duty_tax_estimate set incoterm='DDU',duty_bearer='SELLER' where id=?",
+                          id);
                       return null;
                     }))
         .isInstanceOf(DataIntegrityViolationException.class);
@@ -641,7 +803,8 @@ class DutyTaxIntegrationTest {
                 asA(
                     () -> {
                       sql.execute(
-                          "update duty_tax_estimate set landed_cost_seller=landed_cost_total where id=?", id);
+                          "update duty_tax_estimate set landed_cost_seller=landed_cost_total where id=?",
+                          id);
                       return null;
                     }))
         .isInstanceOf(DataIntegrityViolationException.class)
@@ -654,8 +817,10 @@ class DutyTaxIntegrationTest {
   @Test
   void paymentAlwaysProducesVarianceSnapshot() {
     UUID id = estimated(a);
-    asA(() -> service.recordPayment(a, id,
-        payment("DUTY", "120.0000", "PAY-DUTY-1", "BUYER", "HS_CLASSIFICATION")));
+    asA(
+        () ->
+            service.recordPayment(
+                a, id, payment("DUTY", "120.0000", "PAY-DUTY-1", "BUYER", "HS_CLASSIFICATION")));
 
     var detail = asA(() -> service.detail(a, id));
     assertThat(detail.payments()).hasSize(1);
@@ -693,7 +858,10 @@ class DutyTaxIntegrationTest {
                               + "paid_at,source_reference,created_by)"
                               + " values(gen_random_uuid(),?,?,?,1,'DUTY',50,'USD','BUYER','RAW-SQL-1',"
                               + "now(),'SR-RAW',?)",
-                          a, id, declarationId, user);
+                          a,
+                          id,
+                          declarationId,
+                          user);
                       return null;
                     }))
         .isInstanceOf(DataIntegrityViolationException.class)
@@ -704,14 +872,13 @@ class DutyTaxIntegrationTest {
    * 实缴与差异是 append-only，而且**两道防线都在**：
    *
    * <ul>
-   *   <li>授权层：V90 对 warehouse_app {@code REVOKE UPDATE, DELETE}（本测试连的就是 warehouse_app，
-   *       所以直接写 SQL 会先被权限拒掉）
-   *   <li>触发器层：{@code duty_payment_append_only} / {@code duty_variance_append_only}
-   *       —— 换一个仍然有权限的角色去改同样被挡
+   *   <li>授权层：V90 对 warehouse_app {@code REVOKE UPDATE, DELETE}（本测试连的就是 warehouse_app， 所以直接写 SQL
+   *       会先被权限拒掉）
+   *   <li>触发器层：{@code duty_payment_append_only} / {@code duty_variance_append_only} ——
+   *       换一个仍然有权限的角色去改同样被挡
    * </ul>
    *
-   * <p>两条都断言：只测一条的话，将来有人把 REVOKE 撤掉而触发器还在（或反过来），
-   * 另一条防线就没有回归保护了。
+   * <p>两条都断言：只测一条的话，将来有人把 REVOKE 撤掉而触发器还在（或反过来）， 另一条防线就没有回归保护了。
    */
   @Test
   void paymentsAndVariancesAreAppendOnly() {
@@ -724,10 +891,10 @@ class DutyTaxIntegrationTest {
               asA(
                   () ->
                       sql.fetchOne(
-                              "select has_table_privilege('warehouse_app',?,'UPDATE') u,"
-                                  + "has_table_privilege('warehouse_app',?,'DELETE') d",
-                              table,
-                              table)))
+                          "select has_table_privilege('warehouse_app',?,'UPDATE') u,"
+                              + "has_table_privilege('warehouse_app',?,'DELETE') d",
+                          table,
+                          table)))
           .satisfies(
               r -> {
                 assertThat(r.get("u", Boolean.class)).as("%s 的 UPDATE 权限", table).isFalse();
@@ -741,7 +908,8 @@ class DutyTaxIntegrationTest {
       assertThatThrownBy(
               () ->
                   c.createStatement()
-                      .executeUpdate("update duty_tax_payment set paid_amount=1 where tenant_id='" + a + "'"))
+                      .executeUpdate(
+                          "update duty_tax_payment set paid_amount=1 where tenant_id='" + a + "'"))
           .hasMessageContaining("append-only");
       assertThatThrownBy(
               () ->
@@ -779,11 +947,29 @@ class DutyTaxIntegrationTest {
   /** 估 0 却真收到税：差异率无意义（除零），用 rate_calculable=false 如实标记。 */
   @Test
   void zeroEstimateWithRealPaymentMarksRateNotCalculable() {
-    UUID id = asA(() -> service.create(a, new DutyEstimateCreateRequest(
-        declId(a, 0), "DDU", "BUYER", idFor(a, 1), "DE", "USD", "CNY",
-        new BigDecimal("7.1"), 6, LocalDate.of(2026, 10, 1),
-        new BigDecimal("2000"), new BigDecimal("2000"), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
-        LocalDate.of(2026, 10, 1), ""))).id();
+    UUID id =
+        asA(() ->
+                service.create(
+                    a,
+                    new DutyEstimateCreateRequest(
+                        declId(a, 0),
+                        "DDU",
+                        "BUYER",
+                        idFor(a, 1),
+                        "DE",
+                        "USD",
+                        "CNY",
+                        new BigDecimal("7.1"),
+                        6,
+                        LocalDate.of(2026, 10, 1),
+                        new BigDecimal("2000"),
+                        new BigDecimal("2000"),
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        LocalDate.of(2026, 10, 1),
+                        "")))
+            .id();
     asA(() -> service.recordPayment(a, id, payment("DUTY", "88.0000", "PAY-UNMATCHED", "BUYER")));
 
     var variance = asA(() -> service.detail(a, id)).variances().get(0);
@@ -800,12 +986,33 @@ class DutyTaxIntegrationTest {
   @Test
   void varianceAnalysisAggregatesByCauseAndHsCode() {
     UUID id = estimated(a);
-    asA(() -> service.recordPayment(a, id, payment("DUTY", "150.0000", "PAY-ANALYSIS", "BUYER", "HS_CLASSIFICATION")));
-    UUID unmatched = asA(() -> service.create(a, new DutyEstimateCreateRequest(
-        declId(a, 1), "DDU", "BUYER", idFor(a, 1), "DE", "USD", "CNY",
-        new BigDecimal("7.1"), 6, LocalDate.of(2026, 10, 1),
-        new BigDecimal("2000"), new BigDecimal("2000"), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
-        LocalDate.of(2026, 10, 1), ""))).id();
+    asA(
+        () ->
+            service.recordPayment(
+                a, id, payment("DUTY", "150.0000", "PAY-ANALYSIS", "BUYER", "HS_CLASSIFICATION")));
+    UUID unmatched =
+        asA(() ->
+                service.create(
+                    a,
+                    new DutyEstimateCreateRequest(
+                        declId(a, 1),
+                        "DDU",
+                        "BUYER",
+                        idFor(a, 1),
+                        "DE",
+                        "USD",
+                        "CNY",
+                        new BigDecimal("7.1"),
+                        6,
+                        LocalDate.of(2026, 10, 1),
+                        new BigDecimal("2000"),
+                        new BigDecimal("2000"),
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        LocalDate.of(2026, 10, 1),
+                        "")))
+            .id();
     assertThat(unmatched).isNotNull();
 
     var analysis = asA(() -> service.varianceAnalysis(a, "US", null, null));
@@ -831,8 +1038,15 @@ class DutyTaxIntegrationTest {
     UUID id = estimated(a);
     asA(() -> service.lock(a, id, new DutyLockRequest("报价已发出")));
 
-    assertThatThrownBy(() -> asA(() -> service.update(a, id, new DutyEstimateUpdateRequest(
-        null, "DDP", null, null, null, null, null, null, null, "改承担方"))))
+    assertThatThrownBy(
+            () ->
+                asA(
+                    () ->
+                        service.update(
+                            a,
+                            id,
+                            new DutyEstimateUpdateRequest(
+                                null, "DDP", null, null, null, null, null, null, null, "改承担方"))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不允许改基础");
     assertThatThrownBy(() -> asA(() -> service.recalculate(a, id, LocalDate.of(2026, 10, 1))))
@@ -843,8 +1057,7 @@ class DutyTaxIntegrationTest {
             () ->
                 asA(
                     () -> {
-                      sql.execute(
-                          "update duty_tax_estimate set customs_value=1 where id=?", id);
+                      sql.execute("update duty_tax_estimate set customs_value=1 where id=?", id);
                       return null;
                     }))
         .isInstanceOf(DataIntegrityViolationException.class)
@@ -862,8 +1075,12 @@ class DutyTaxIntegrationTest {
     // 作废后不能再录缴款
     UUID voided = estimated(a, 1);
     asA(() -> service.voidEstimate(a, voided, new DutyVoidRequest("重复估算")));
-    assertThatThrownBy(() -> asA(() -> service.recordPayment(a, voided,
-            payment("DUTY", "10.0000", "PAY-AFTER-VOID", "BUYER"))))
+    assertThatThrownBy(
+            () ->
+                asA(
+                    () ->
+                        service.recordPayment(
+                            a, voided, payment("DUTY", "10.0000", "PAY-AFTER-VOID", "BUYER"))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("已作废");
   }
@@ -880,21 +1097,81 @@ class DutyTaxIntegrationTest {
 
   @Test
   void ratesRequireTraceableSource() {
-    assertThatThrownBy(() -> asA(() -> service.createRate(a, new DutyRateCreateRequest(
-        "US", "HS", "6201", "DUTY", new BigDecimal("0.1"), null, "PCS", false, "",
-        LocalDate.of(2026, 1, 1), null, "MANUAL", true, "MANUAL_ENTRY", "", ""))))
+    assertThatThrownBy(
+            () ->
+                asA(
+                    () ->
+                        service.createRate(
+                            a,
+                            new DutyRateCreateRequest(
+                                "US",
+                                "HS",
+                                "6201",
+                                "DUTY",
+                                new BigDecimal("0.1"),
+                                null,
+                                "PCS",
+                                false,
+                                "",
+                                LocalDate.of(2026, 1, 1),
+                                null,
+                                "MANUAL",
+                                true,
+                                "MANUAL_ENTRY",
+                                "",
+                                ""))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("税率出处");
     // 优惠税率必须有协定代码
-    assertThatThrownBy(() -> asA(() -> service.createRate(a, new DutyRateCreateRequest(
-        "US", "HS", "6201", "DUTY", new BigDecimal("0"), null, "PCS", true, "",
-        LocalDate.of(2026, 1, 1), null, "MANUAL", true, "MANUAL_ENTRY", "REF", ""))))
+    assertThatThrownBy(
+            () ->
+                asA(
+                    () ->
+                        service.createRate(
+                            a,
+                            new DutyRateCreateRequest(
+                                "US",
+                                "HS",
+                                "6201",
+                                "DUTY",
+                                new BigDecimal("0"),
+                                null,
+                                "PCS",
+                                true,
+                                "",
+                                LocalDate.of(2026, 1, 1),
+                                null,
+                                "MANUAL",
+                                true,
+                                "MANUAL_ENTRY",
+                                "REF",
+                                ""))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("协定代码");
     // 国别税率不能带 HS 前缀
-    assertThatThrownBy(() -> asA(() -> service.createRate(a, new DutyRateCreateRequest(
-        "US", "COUNTRY", "6201", "VAT", new BigDecimal("0.1"), null, "PCS", false, "",
-        LocalDate.of(2026, 1, 1), null, "MANUAL", true, "MANUAL_ENTRY", "REF", ""))))
+    assertThatThrownBy(
+            () ->
+                asA(
+                    () ->
+                        service.createRate(
+                            a,
+                            new DutyRateCreateRequest(
+                                "US",
+                                "COUNTRY",
+                                "6201",
+                                "VAT",
+                                new BigDecimal("0.1"),
+                                null,
+                                "PCS",
+                                false,
+                                "",
+                                LocalDate.of(2026, 1, 1),
+                                null,
+                                "MANUAL",
+                                true,
+                                "MANUAL_ENTRY",
+                                "REF",
+                                ""))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("没有 HS 编码前缀");
   }
@@ -906,15 +1183,34 @@ class DutyTaxIntegrationTest {
     assertThat(asA(() -> service.detail(a, id)).lines().get(0).dutyAdValoremRate())
         .isEqualByComparingTo("0.05");
 
-    asA(() -> service.updateRate(a, idFor(a, 501), new DutyRateUpdateRequest(
-        new BigDecimal("0.08"), null, null, null, null, null, null, "HTS-2026-610910-REV", null, null)));
+    asA(
+        () ->
+            service.updateRate(
+                a,
+                idFor(a, 501),
+                new DutyRateUpdateRequest(
+                    new BigDecimal("0.08"),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "HTS-2026-610910-REV",
+                    null,
+                    null)));
 
     // 历史行仍写着 0.05
     assertThat(asA(() -> service.detail(a, id)).lines().get(0).dutyAdValoremRate())
         .isEqualByComparingTo("0.05");
     // 但税率表本身已经是 0.08
-    var rate = asA(() -> service.rates(a, new DutyRateQuery(
-        "US", "DUTY", "HS", "610910", null, null, null, "CREATED_AT", 0, 10))).get(0);
+    var rate =
+        asA(() ->
+                service.rates(
+                    a,
+                    new DutyRateQuery(
+                        "US", "DUTY", "HS", "610910", null, null, null, "CREATED_AT", 0, 10)))
+            .get(0);
     assertThat(rate.adValoremRate()).isEqualByComparingTo("0.08");
   }
 
@@ -925,29 +1221,72 @@ class DutyTaxIntegrationTest {
     asA(() -> service.create(a, estimateRequest(a, 0)));
     asB(() -> service.create(b, estimateRequest(b, 0)));
 
-    assertThat(asA(() -> service.page(a, new DutyEstimateQuery(
-        null, null, null, null, null, null, null, null, null, 0, 50))).rows())
+    assertThat(
+            asA(() ->
+                    service.page(
+                        a,
+                        new DutyEstimateQuery(
+                            null, null, null, null, null, null, null, null, null, 0, 50)))
+                .rows())
         .hasSize(1);
-    assertThat(asB(() -> service.page(b, new DutyEstimateQuery(
-        null, null, null, null, null, null, null, null, null, 0, 50))).rows())
+    assertThat(
+            asB(() ->
+                    service.page(
+                        b,
+                        new DutyEstimateQuery(
+                            null, null, null, null, null, null, null, null, null, 0, 50)))
+                .rows())
         .hasSize(1);
 
     // 知道 id 也读不到对方的估算单
-    UUID aId = asA(() -> service.page(a, new DutyEstimateQuery(
-        null, null, null, null, null, null, null, null, null, 0, 50))).rows().get(0).id();
+    UUID aId =
+        asA(() ->
+                service.page(
+                    a,
+                    new DutyEstimateQuery(
+                        null, null, null, null, null, null, null, null, null, 0, 50)))
+            .rows()
+            .get(0)
+            .id();
     assertThatThrownBy(() -> asB(() -> service.detail(b, aId)))
         .isInstanceOf(ResponseStatusException.class);
     // 税率表也隔离：两个租户各配了一套 US 610910 税率，B 必须只看到自己那一条
     // （派生 id 随租户而不同，所以「看到的是不是自己的那条」是可断言的）。
-    var aRates = asA(() -> service.rates(a, new DutyRateQuery(
-        "US", "DUTY", "HS", "610910", null, null, null, "CREATED_AT", 0, 10)));
-    var bRates = asB(() -> service.rates(b, new DutyRateQuery(
-        "US", "DUTY", "HS", "610910", null, null, null, "CREATED_AT", 0, 10)));
+    var aRates =
+        asA(
+            () ->
+                service.rates(
+                    a,
+                    new DutyRateQuery(
+                        "US", "DUTY", "HS", "610910", null, null, null, "CREATED_AT", 0, 10)));
+    var bRates =
+        asB(
+            () ->
+                service.rates(
+                    b,
+                    new DutyRateQuery(
+                        "US", "DUTY", "HS", "610910", null, null, null, "CREATED_AT", 0, 10)));
     assertThat(aRates).singleElement().satisfies(r -> assertThat(r.id()).isEqualTo(idFor(a, 501)));
     assertThat(bRates).singleElement().satisfies(r -> assertThat(r.id()).isEqualTo(idFor(b, 501)));
     // 直接用对方的税率 id 改：查不到
-    assertThatThrownBy(() -> asB(() -> service.updateRate(b, idFor(a, 501), new DutyRateUpdateRequest(
-        new BigDecimal("0.99"), null, null, null, null, null, null, "HACK", null, null))))
+    assertThatThrownBy(
+            () ->
+                asB(
+                    () ->
+                        service.updateRate(
+                            b,
+                            idFor(a, 501),
+                            new DutyRateUpdateRequest(
+                                new BigDecimal("0.99"),
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                "HACK",
+                                null,
+                                null))))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -955,22 +1294,25 @@ class DutyTaxIntegrationTest {
   void forgedTenantHeaderIsIgnored() throws Exception {
     UUID aId = asA(() -> service.create(a, estimateRequest(a, 0))).id();
     // 客户端伪造 X-Tenant-Id 头：端点根本不读它，租户只来自已认证成员关系
-    http.perform(get("/warehouse/duty-taxes/{id}", aId)
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/duty-taxes/{id}", aId)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
     // 列表也不受伪造头影响：tenant-b 自己一张估算单都没有，伪造 A 的头也必须是 0 ——
     // 如果代理或端点信了这个头，这里就会变成 1。
-    http.perform(get("/warehouse/duty-taxes")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/duty-taxes")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.summary.total").value(0));
     // B 自己建一张后就是 1，仍然看不到 A 的那一张
     asB(() -> service.create(b, estimateRequest(b, 0)));
-    http.perform(get("/warehouse/duty-taxes")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/duty-taxes")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.summary.total").value(1));
   }
@@ -982,17 +1324,38 @@ class DutyTaxIntegrationTest {
 
     // 连接池固定 1 条连接：连续在两个租户间来回走，读的必须始终是当前租户的行。
     for (int i = 0; i < 5; i++) {
-      assertThat(asA(() -> service.page(a, new DutyEstimateQuery(
-          null, null, null, null, null, null, null, null, null, 0, 50)).rows()))
+      assertThat(
+              asA(
+                  () ->
+                      service
+                          .page(
+                              a,
+                              new DutyEstimateQuery(
+                                  null, null, null, null, null, null, null, null, null, 0, 50))
+                          .rows()))
           .singleElement()
           .satisfies(r -> assertThat(r.declarationCode()).startsWith("CD-"));
-      assertThat(asB(() -> service.page(b, new DutyEstimateQuery(
-          null, null, null, null, null, null, null, null, null, 0, 50)).rows()))
+      assertThat(
+              asB(
+                  () ->
+                      service
+                          .page(
+                              b,
+                              new DutyEstimateQuery(
+                                  null, null, null, null, null, null, null, null, null, 0, 50))
+                          .rows()))
           .singleElement();
     }
     // 缴款与差异表同样不串
-    UUID aId = asA(() -> service.page(a, new DutyEstimateQuery(
-        null, null, null, null, null, null, null, null, null, 0, 50))).rows().get(0).id();
+    UUID aId =
+        asA(() ->
+                service.page(
+                    a,
+                    new DutyEstimateQuery(
+                        null, null, null, null, null, null, null, null, null, 0, 50)))
+            .rows()
+            .get(0)
+            .id();
     asA(() -> service.recordPayment(a, aId, payment("DUTY", "100.0000", "PAY-LEAK", "BUYER")));
     assertThat(asB(() -> sql.fetch("select * from duty_tax_payment where estimate_id=?", aId)))
         .isEmpty();
@@ -1007,17 +1370,22 @@ class DutyTaxIntegrationTest {
     var caps = asA(() -> service.capabilities());
     assertThat(caps.statusOptions()).isNotEmpty();
     assertThat(caps.taxKinds()).extracting(DutyTaxKindOption::value).contains("DUTY", "VAT", "GST");
-    assertThat(caps.dutyBearers()).extracting(DutyTaxBearerOption::value).contains("SELLER", "BUYER");
+    assertThat(caps.dutyBearers())
+        .extracting(DutyTaxBearerOption::value)
+        .contains("SELLER", "BUYER");
     assertThat(caps.dependencies())
-        .anySatisfy(d -> {
-          assertThat(d.value()).isEqualTo("HS_CODE_DICTIONARY");
-          assertThat(d.available()).isFalse();
-          assertThat(d.ownerModule()).isEqualTo("3.7.1.1");
-        });
-    assertThat(caps.dependencies()).anySatisfy(d -> {
-      assertThat(d.value()).isEqualTo("TARIFF_TAX_BASIS");
-      assertThat(d.ownerModule()).isEqualTo("16.3.1.1");
-    });
+        .anySatisfy(
+            d -> {
+              assertThat(d.value()).isEqualTo("HS_CODE_DICTIONARY");
+              assertThat(d.available()).isFalse();
+              assertThat(d.ownerModule()).isEqualTo("3.7.1.1");
+            });
+    assertThat(caps.dependencies())
+        .anySatisfy(
+            d -> {
+              assertThat(d.value()).isEqualTo("TARIFF_TAX_BASIS");
+              assertThat(d.ownerModule()).isEqualTo("16.3.1.1");
+            });
     assertThat(caps.estimateVsPaymentNote()).contains("差异");
     assertThat(caps.zeroRateNote()).contains("0%");
   }
@@ -1025,42 +1393,49 @@ class DutyTaxIntegrationTest {
   @Test
   void endpointsReturnContractShapes() throws Exception {
     asA(() -> service.create(a, estimateRequest(a, 0)));
-    http.perform(get("/warehouse/duty-taxes/capabilities")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/duty-taxes/capabilities").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.taxKinds").isArray())
-        .andExpect(jsonPath("$.dependencies[?(@.value=='HS_CODE_DICTIONARY')].available")
-            .value(false));
-    http.perform(get("/warehouse/duty-taxes/rates")
-            .header("Authorization", "Bearer tenant-a"))
+        .andExpect(
+            jsonPath("$.dependencies[?(@.value=='HS_CODE_DICTIONARY')].available").value(false));
+    http.perform(get("/warehouse/duty-taxes/rates").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[?(@.hsCodePrefix=='610910')].adValoremRate").value(0.05));
-    http.perform(get("/warehouse/duty-taxes")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(get("/warehouse/duty-taxes").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rows[0].estimateCode").exists())
         .andExpect(jsonPath("$.summary.total").value(1));
-    UUID id = asA(() -> service.page(a, new DutyEstimateQuery(
-        null, null, null, null, null, null, null, null, null, 0, 50))).rows().get(0).id();
-    http.perform(get("/warehouse/duty-taxes/{id}", id)
-            .header("Authorization", "Bearer tenant-a"))
+    UUID id =
+        asA(() ->
+                service.page(
+                    a,
+                    new DutyEstimateQuery(
+                        null, null, null, null, null, null, null, null, null, 0, 50)))
+            .rows()
+            .get(0)
+            .id();
+    http.perform(get("/warehouse/duty-taxes/{id}", id).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.lines[0].dutyAdValoremRate").value(0.05))
         .andExpect(jsonPath("$.lines[0].rateMatchStatus").value("MATCHED"));
-    http.perform(get("/warehouse/duty-taxes/{id}/lines", id)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/duty-taxes/{id}/lines", id).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].hsCode").value("610910"));
-    http.perform(get("/warehouse/duty-taxes/{id}/payments", id)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/duty-taxes/{id}/payments", id)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray());
-    http.perform(get("/warehouse/duty-taxes/{id}/variances", id)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/duty-taxes/{id}/variances", id)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$").isArray());
-    http.perform(get("/warehouse/duty-taxes/variance-analysis")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/duty-taxes/variance-analysis")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.byCause").isArray());
   }
@@ -1068,10 +1443,11 @@ class DutyTaxIntegrationTest {
   /** 只读角色不能改税率也不能录实缴：录实缴那一刻钱就出去了。 */
   @Test
   void readOnlyRoleCannotWrite() throws Exception {
-    http.perform(post("/warehouse/duty-taxes/rates")
-            .header("Authorization", "Bearer read-only")
-            .contentType("application/json")
-            .content("{}"))
+    http.perform(
+            post("/warehouse/duty-taxes/rates")
+                .header("Authorization", "Bearer read-only")
+                .contentType("application/json")
+                .content("{}"))
         .andExpect(status().isForbidden());
   }
 }

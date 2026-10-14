@@ -21,16 +21,16 @@
 
 ## 关键 trade-off
 
-| 取舍 | 选择 | 理由 |
-| --- | --- | --- |
-| 货权是「闸」还是「分」 | **两者都是** | 「收入记在哪个法人」是记账正确性，不是可权衡项，所以先当闸；但闸开着时同法人多个仓「都合法」不等于「一样好」，所以还要当权重 |
-| 放宽货权闸的入口 | **只允许显式配** | `CROSS_LEGAL_ENTITY` 兜底策略，或把 `require_legal_entity_match` 关掉。两者都会让 `cross_legal_entity` 被如实标记并进汇总，无法悄悄发生 |
-| 无可行仓时 | **挂起（SUSPEND），不是回落默认仓** | 悄悄回落会让「这单没货」显示成「已决策走 A 仓」。DB 用延迟约束触发器双向钉死（ALLOCATED 必有 selected 候选；SUSPENDED 必有 hold 且零 selected 候选） |
-| 部分分配 | **只在 `ALLOW_PARTIAL` 下允许**，差额必须挂起 | 否则「已分 30 / 需 50」会显示成已全部分配 |
-| 无任何仓库档案 | **400 报错，不是挂起** | 没有仓可枚举时「逐条列出每个仓被排除的原因」无从谈起，那是配置错误不是业务结论 |
-| 库存不足（兜底非 ALLOW_PARTIAL） | **不可行**，不做隐式放宽 | 兜底策略是租户显式口径，服务层不替它放宽 |
-| 候选数据 | **落库**，不查询时联算 | 库存会被补上、运费估算会被改、权重会被调，联算会让「当时为什么分了 A 仓」永远答不出来 |
-| 判定顺序 | **资格 → 库存 → 成本 → 打分** | 与 9.3.2.2 的「资格 → 库存 → 成本」自洽；货权进第 1 层做闸、进第 4 层做权重 |
+| 取舍                             | 选择                                          | 理由                                                                                                                                                 |
+| -------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 货权是「闸」还是「分」           | **两者都是**                                  | 「收入记在哪个法人」是记账正确性，不是可权衡项，所以先当闸；但闸开着时同法人多个仓「都合法」不等于「一样好」，所以还要当权重                         |
+| 放宽货权闸的入口                 | **只允许显式配**                              | `CROSS_LEGAL_ENTITY` 兜底策略，或把 `require_legal_entity_match` 关掉。两者都会让 `cross_legal_entity` 被如实标记并进汇总，无法悄悄发生              |
+| 无可行仓时                       | **挂起（SUSPEND），不是回落默认仓**           | 悄悄回落会让「这单没货」显示成「已决策走 A 仓」。DB 用延迟约束触发器双向钉死（ALLOCATED 必有 selected 候选；SUSPENDED 必有 hold 且零 selected 候选） |
+| 部分分配                         | **只在 `ALLOW_PARTIAL` 下允许**，差额必须挂起 | 否则「已分 30 / 需 50」会显示成已全部分配                                                                                                            |
+| 无任何仓库档案                   | **400 报错，不是挂起**                        | 没有仓可枚举时「逐条列出每个仓被排除的原因」无从谈起，那是配置错误不是业务结论                                                                       |
+| 库存不足（兜底非 ALLOW_PARTIAL） | **不可行**，不做隐式放宽                      | 兜底策略是租户显式口径，服务层不替它放宽                                                                                                             |
+| 候选数据                         | **落库**，不查询时联算                        | 库存会被补上、运费估算会被改、权重会被调，联算会让「当时为什么分了 A 仓」永远答不出来                                                                |
+| 判定顺序                         | **资格 → 库存 → 成本 → 打分**                 | 与 9.3.2.2 的「资格 → 库存 → 成本」自洽；货权进第 1 层做闸、进第 4 层做权重                                                                          |
 
 ## 踩过的坑（都已在代码或注释里钉住）
 
@@ -54,6 +54,7 @@
 ## 文件清单
 
 新增：
+
 - `backend/services/trade/src/main/resources/db/migration/V116__trade_warehouse_allocation.sql`
 - `backend/services/trade/src/main/java/com/starcon/trade/WarehouseAllocationModels.java`
 - `backend/services/trade/src/main/java/com/starcon/trade/WarehouseAllocationService.java`
@@ -66,6 +67,7 @@
 - `apps/web/src/app/api/trade/warehouse-allocation-allowlist.test.ts`
 
 修改：
+
 - `apps/web/src/lib/api-proxy.ts`（新起 `fulfillment/allocation` 一组）
 - `packages/api-contracts/src/contracts/trade.ts`、`packages/api-contracts/src/trade.openapi.json`（codegen 产物，纯新增）
 - `docs/product/capability-blueprint/module-progress.md`（**仅 9.3.2.1 那一行的两格**）

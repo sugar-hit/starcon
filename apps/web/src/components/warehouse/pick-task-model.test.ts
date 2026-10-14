@@ -135,10 +135,12 @@ describe('8.5.2.1 两条建议在拣货路径上的落地', () => {
   });
 
   it('警示文案回指建议来源模块，不让读者去猜这是谁提的', () => {
-    expect(lineWarnings({ nonPickableSource: true, skuLocationCount: 1, sourceHasStock: true })[0])
-      .toContain('8.5.2.1');
-    expect(lineWarnings({ nonPickableSource: false, skuLocationCount: 2, sourceHasStock: true })[0])
-      .toContain('8.5.2.1');
+    expect(
+      lineWarnings({ nonPickableSource: true, skuLocationCount: 1, sourceHasStock: true })[0],
+    ).toContain('8.5.2.1');
+    expect(
+      lineWarnings({ nonPickableSource: false, skuLocationCount: 2, sourceHasStock: true })[0],
+    ).toContain('8.5.2.1');
   });
 });
 

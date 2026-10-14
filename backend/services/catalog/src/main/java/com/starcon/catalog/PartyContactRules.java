@@ -6,13 +6,11 @@ import static com.starcon.catalog.PartyRules.emptyToNull;
 import static com.starcon.catalog.PartyRules.normalizeText;
 
 /**
- * 3.6.3.1 联系人的纯规则：姓名与联系方式校验、至少给一项（规则 C1）、
- * 默认联系人约束与删除前置、选中阻断判定。
+ * 3.6.3.1 联系人的纯规则：姓名与联系方式校验、至少给一项（规则 C1）、 默认联系人约束与删除前置、选中阻断判定。
  *
- * <p>与 {@link PartyRules} / {@link PartyAddressRules} 同一批纪律：
- * 判定只有一处实现，规则 C1 与 C2 在
- * {@code V31__party_addresses_contacts.sql} 第九节有同样的文字，
- * 服务层这里与前端 {@code party-contact-model.ts} 是它的两份实现，改一处必须同步三处。
+ * <p>与 {@link PartyRules} / {@link PartyAddressRules} 同一批纪律： 判定只有一处实现，规则 C1 与 C2 在 {@code
+ * V31__party_addresses_contacts.sql} 第九节有同样的文字， 服务层这里与前端 {@code party-contact-model.ts}
+ * 是它的两份实现，改一处必须同步三处。
  *
  * <p>本类不碰数据库，可以在离线单测里穷举。
  */
@@ -65,8 +63,7 @@ public final class PartyContactRules {
   }
 
   /**
-   * 电话与手机号校验。与 {@link PartyRules#phoneProblem} 同一口径：
-   * 只允许数字与 {@code + - ( ) . }，分机用 {@code -} 连接 ——
+   * 电话与手机号校验。与 {@link PartyRules#phoneProblem} 同一口径： 只允许数字与 {@code + - ( ) . }，分机用 {@code -} 连接 ——
    * 允许字母会让 06 采购单上的号码在拨号时变成一串读不出来的字符。
    */
   public static String phoneProblem(String value, String label) {
@@ -95,10 +92,8 @@ public final class PartyContactRules {
   /**
    * 联系方式整体校验：邮箱 / 电话 / 手机<b>至少给一项</b>（规则 C1）。
    *
-   * <p>与 V27 的 P3 同源：三个都空的联系人是一行在 06 采购问交期、10 物流约提货、
-   * 11 售后约退货时都用不了的记录，而它看上去和真联系人完全一样 ——
-   * 那正是 3.9.2.2 僵尸主数据清理要处理的形态。所以被拒的应该是**建这一行**，
-   * 不是等它变成僵尸之后再清理。
+   * <p>与 V27 的 P3 同源：三个都空的联系人是一行在 06 采购问交期、10 物流约提货、 11 售后约退货时都用不了的记录，而它看上去和真联系人完全一样 —— 那正是 3.9.2.2
+   * 僵尸主数据清理要处理的形态。所以被拒的应该是**建这一行**， 不是等它变成僵尸之后再清理。
    */
   public static String reachProblem(String email, String phone, String mobile) {
     // 「填了但只有空格」先单独判：它比「至少给一项」更具体，而且直接说清了该做什么。
@@ -106,17 +101,19 @@ public final class PartyContactRules {
     // 那条提示让运营以为格式写错了，实际上他只是多按了几下空格。
     String dirty =
         firstNonNull(
-            blankButPresent(email, "邮箱"), blankButPresent(phone, "电话"), blankButPresent(mobile, "手机号"));
+            blankButPresent(email, "邮箱"),
+            blankButPresent(phone, "电话"),
+            blankButPresent(mobile, "手机号"));
     if (dirty != null) return dirty;
-    String format = firstNonNull(emailProblem(email), phoneProblem(phone, "电话"), mobileProblem(mobile));
+    String format =
+        firstNonNull(emailProblem(email), phoneProblem(phone, "电话"), mobileProblem(mobile));
     if (format != null) return format;
     boolean blank =
         normalizeText(email).isEmpty()
             && normalizeText(phone).isEmpty()
             && normalizeText(mobile).isEmpty();
     if (blank)
-      return "邮箱、电话、手机号至少填写一项：06 采购问交期、10 物流约提货、11 售后约退货都要靠它"
-          + "联系到这个人，三项都空的联系人在任何一张单据上都无法使用";
+      return "邮箱、电话、手机号至少填写一项：06 采购问交期、10 物流约提货、11 售后约退货都要靠它" + "联系到这个人，三项都空的联系人在任何一张单据上都无法使用";
     return null;
   }
 
@@ -129,12 +126,7 @@ public final class PartyContactRules {
 
   /** 一条联系人请求的整体校验，返回第一条可执行的原因。 */
   public static String contactProblem(
-      String name,
-      String position,
-      String email,
-      String phone,
-      String mobile,
-      String note) {
+      String name, String position, String email, String phone, String mobile, String note) {
     return firstNonNull(
         nameProblem(name),
         positionProblem(position),
@@ -147,24 +139,20 @@ public final class PartyContactRules {
   /**
    * 删除前置：这条还是默认联系人（规则 C2）。
    *
-   * <p>与地址的 A4 同一个理由：「这个供应商找谁签字」不能因为一次删除就静默消失。
-   * 报错要说明该做什么（先改默认），而不是只说「不能删」。
+   * <p>与地址的 A4 同一个理由：「这个供应商找谁签字」不能因为一次删除就静默消失。 报错要说明该做什么（先改默认），而不是只说「不能删」。
    */
   public static String deleteProblem(boolean isPrimary) {
     if (!isPrimary) return null;
-    return "这条还是默认联系人，请先把默认联系人改到别的联系人再删除："
-        + "「这个供应商找谁签字」不能因为一次删除就静默消失";
+    return "这条还是默认联系人，请先把默认联系人改到别的联系人再删除：" + "「这个供应商找谁签字」不能因为一次删除就静默消失";
   }
 
   /**
-   * 设默认的前置：这条联系人自己已被软删除 —— 联系人没有软删除字段，
-   * 这里只是把「行还在不在」这件事写成一个显式判定（服务层在查行时已经知道 404），
-   * 保留这个方法是为了让 A6 / C2 的形状在两个模块里一致可读。
+   * 设默认的前置：这条联系人自己已被软删除 —— 联系人没有软删除字段， 这里只是把「行还在不在」这件事写成一个显式判定（服务层在查行时已经知道 404）， 保留这个方法是为了让 A6 / C2
+   * 的形状在两个模块里一致可读。
    */
   public static String primaryProblem(String partyStatus) {
     if (!"BLACKLISTED".equals(normalizeText(partyStatus))) return null;
-    return "该往来单位在拉黑名单里，不能设默认联系人：请先解除拉黑"
-        + "（停用状态下仍可指定默认联系人 —— 启用后立即生效）";
+    return "该往来单位在拉黑名单里，不能设默认联系人：请先解除拉黑" + "（停用状态下仍可指定默认联系人 —— 启用后立即生效）";
   }
 
   // ============================================================ A6 选中阻断（06 / 11 / 10 的下拉口径）
@@ -184,8 +172,8 @@ public final class PartyContactRules {
   /**
    * 判定一个联系人当前能否被下游单据选中（规则 A6）。
    *
-   * <p>与 {@link PartyAddressRules#selectionBlock} 同一形态、同一优先级，
-   * 差别只是联系人没有自己的删除状态，所以少一个 {@code ADDRESS_DELETED} 分支。
+   * <p>与 {@link PartyAddressRules#selectionBlock} 同一形态、同一优先级， 差别只是联系人没有自己的删除状态，所以少一个 {@code
+   * ADDRESS_DELETED} 分支。
    *
    * @return null 表示可选；否则是原因码
    */

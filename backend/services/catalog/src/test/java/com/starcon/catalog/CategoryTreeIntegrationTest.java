@@ -21,8 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.3.1.1 分类树管理：多棵独立的树、多级层级、拖拽排序、防环、启用停用、
- * SPU 主分类与辅助分类、多语言分类名、类目商品数统计，以及租户隔离三断言。
+ * 3.3.1.1 分类树管理：多棵独立的树、多级层级、拖拽排序、防环、启用停用、 SPU 主分类与辅助分类、多语言分类名、类目商品数统计，以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
@@ -92,7 +91,10 @@ class CategoryTreeIntegrationTest {
       actors.put(
           "Bearer reader",
           actor(
-              user, a, null, List.of(grant("ALL", List.of("catalog.spu.read", "catalog.attribute.read")))));
+              user,
+              a,
+              null,
+              List.of(grant("ALL", List.of("catalog.spu.read", "catalog.attribute.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -185,26 +187,25 @@ class CategoryTreeIntegrationTest {
                     actor,
                     treeId,
                     null,
-                    new CategoryInput(
-                        uniqueCode("CAT"), name, parentId, null, true, List.of(), 0)))
+                    new CategoryInput(uniqueCode("CAT"), name, parentId, null, true, List.of(), 0)))
         .id();
   }
 
   UUID spu() {
     return write(
-            actor,
-            () ->
-                catalog.saveSpu(
-                    actor,
-                    null,
-                    new SpuInput(
-                        "CAT-" + UUID.randomUUID().toString().substring(0, 8),
-                        "分类树测试商品",
-                        "描述",
-                        "品牌",
-                        "",
-                        "DRAFT",
-                        0)));
+        actor,
+        () ->
+            catalog.saveSpu(
+                actor,
+                null,
+                new SpuInput(
+                    "CAT-" + UUID.randomUUID().toString().substring(0, 8),
+                    "分类树测试商品",
+                    "描述",
+                    "品牌",
+                    "",
+                    "DRAFT",
+                    0)));
   }
 
   // ------------------------------------------------------------ 多棵独立的树
@@ -217,33 +218,79 @@ class CategoryTreeIntegrationTest {
 
     // 同编码可以在不同树里各有一条（两棵树不共享命名空间），但同树内必须唯一。
     String code = uniqueCode("SHARED");
-    write(actor, () -> categories.save(actor, internal, null,
-        new CategoryInput(code, "内部同码", null, null, true, List.of(), 0)));
-    write(actor, () -> categories.save(actor, amazon, null,
-        new CategoryInput(code, "平台同码", null, null, true, List.of(), 0)));
+    write(
+        actor,
+        () ->
+            categories.save(
+                actor,
+                internal,
+                null,
+                new CategoryInput(code, "内部同码", null, null, true, List.of(), 0)));
+    write(
+        actor,
+        () ->
+            categories.save(
+                actor,
+                amazon,
+                null,
+                new CategoryInput(code, "平台同码", null, null, true, List.of(), 0)));
     // 同树内重复编码必须被拒（DB 23505 被服务层包成 409，不让 500 冒到界面上）。
-    assertThatThrownBy(() -> write(actor, () -> categories.save(actor, internal, null,
-        new CategoryInput(code, "同树重码", null, null, true, List.of(), 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        categories.save(
+                            actor,
+                            internal,
+                            null,
+                            new CategoryInput(code, "同树重码", null, null, true, List.of(), 0))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value())
-            .isEqualTo(409));
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
 
     var all = tx(actor, () -> categories.trees());
     assertThat(all).extracting(CategoryTree::id).contains(internal, amazon, shopify);
     assertThat(all.stream().filter(t -> t.id().equals(amazon)).findFirst().orElseThrow().treeKind())
         .isEqualTo("PLATFORM");
-    assertThat(all.stream().filter(t -> t.id().equals(amazon)).findFirst().orElseThrow().platformCode())
+    assertThat(
+            all.stream()
+                .filter(t -> t.id().equals(amazon))
+                .findFirst()
+                .orElseThrow()
+                .platformCode())
         .isEqualTo("AMAZON");
-    assertThat(all.stream().filter(t -> t.id().equals(internal)).findFirst().orElseThrow().platformCode())
+    assertThat(
+            all.stream()
+                .filter(t -> t.id().equals(internal))
+                .findFirst()
+                .orElseThrow()
+                .platformCode())
         .isNull();
 
     // 平台树缺 platformCode 必须被拒（V14 的 CHECK 与服务层同一口径）。
-    assertThatThrownBy(() -> write(actor, () -> categories.saveTree(actor, null,
-        new CategoryTreeInput(uniqueCode("BAD"), "缺平台", "PLATFORM", null, true, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        categories.saveTree(
+                            actor,
+                            null,
+                            new CategoryTreeInput(
+                                uniqueCode("BAD"), "缺平台", "PLATFORM", null, true, 0))))
         .isInstanceOf(ResponseStatusException.class);
     // 内部树带 platformCode 同样被拒。
-    assertThatThrownBy(() -> write(actor, () -> categories.saveTree(actor, null,
-        new CategoryTreeInput(uniqueCode("BAD"), "内部带平台", "INTERNAL", "AMAZON", true, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        categories.saveTree(
+                            actor,
+                            null,
+                            new CategoryTreeInput(
+                                uniqueCode("BAD"), "内部带平台", "INTERNAL", "AMAZON", true, 0))))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -271,12 +318,15 @@ class CategoryTreeIntegrationTest {
     UUID p1 = spu();
     UUID p2 = spu();
     UUID p3 = spu();
-    write(actor, () -> categories.saveSpuCategories(actor, p1,
-        new SpuCategoryInput(shirt, List.of())));
-    write(actor, () -> categories.saveSpuCategories(actor, p2,
-        new SpuCategoryInput(shirt, List.of())));
-    write(actor, () -> categories.saveSpuCategories(actor, p3,
-        new SpuCategoryInput(apparel, List.of())));
+    write(
+        actor,
+        () -> categories.saveSpuCategories(actor, p1, new SpuCategoryInput(shirt, List.of())));
+    write(
+        actor,
+        () -> categories.saveSpuCategories(actor, p2, new SpuCategoryInput(shirt, List.of())));
+    write(
+        actor,
+        () -> categories.saveSpuCategories(actor, p3, new SpuCategoryInput(apparel, List.of())));
 
     nodes = tx(actor, () -> categories.tree(t, false));
     for (CategoryNode n : nodes) {
@@ -302,25 +352,42 @@ class CategoryTreeIntegrationTest {
     UUID shirt = category(t, tops, "T恤");
 
     // 服务层：把「服饰」挪到自己的孙子「T恤」下面 —— 必须被拒。
-    assertThatThrownBy(() -> write(actor, () -> categories.move(actor, apparel,
-        new CategoryMoveInput(shirt, 0, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () -> categories.move(actor, apparel, new CategoryMoveInput(shirt, 0, 0))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getReason())
-            .contains("不能把分类挂到它自己的子孙节点下"));
+        .satisfies(
+            e ->
+                assertThat(((ResponseStatusException) e).getReason()).contains("不能把分类挂到它自己的子孙节点下"));
 
     // 服务层：挂到直接的子节点下同样成环。
-    assertThatThrownBy(() -> write(actor, () -> categories.move(actor, apparel,
-        new CategoryMoveInput(tops, 0, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () -> categories.move(actor, apparel, new CategoryMoveInput(tops, 0, 0))))
         .isInstanceOf(ResponseStatusException.class);
 
     // DB 层：绕过服务层直接 UPDATE，触发器仍必须挡住（否则运维 psql 能造出有环的树）。
-    assertThatThrownBy(() -> writeVoid(actor, () -> sql.execute(
-        "update product_category set parent_id=? where id=?", shirt, apparel)))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "update product_category set parent_id=? where id=?", shirt, apparel)))
         .hasMessageContaining("不能把分类挂到它自己的子孙节点下");
 
     // 自环：CHECK 与触发器都会拒。
-    assertThatThrownBy(() -> writeVoid(actor, () -> sql.execute(
-        "update product_category set parent_id=id where id=?", apparel)))
+    assertThatThrownBy(
+            () ->
+                writeVoid(
+                    actor,
+                    () ->
+                        sql.execute(
+                            "update product_category set parent_id=id where id=?", apparel)))
         .isInstanceOf(Exception.class);
 
     // 树没有被破坏：层级仍是 服饰 > 上装 > T恤。
@@ -337,8 +404,9 @@ class CategoryTreeIntegrationTest {
     UUID shirt = category(t, tops, "T恤");
 
     // 合法移动：把 T恤 挪到「服饰」下面（原来在「上装」下面）。path_ids 前缀必须跟着改。
-    write(actor, () -> categories.move(actor, shirt,
-        new CategoryMoveInput(apparel, 0, versionOf(shirt))));
+    write(
+        actor,
+        () -> categories.move(actor, shirt, new CategoryMoveInput(apparel, 0, versionOf(shirt))));
 
     var nodes = tx(actor, () -> categories.tree(t, false));
     for (CategoryNode n : nodes) {
@@ -351,8 +419,11 @@ class CategoryTreeIntegrationTest {
   }
 
   long versionOf(UUID id) {
-    return tx(actor, () -> sql.fetchOne("select version from product_category where id=?", id)
-        .get("version", Long.class));
+    return tx(
+        actor,
+        () ->
+            sql.fetchOne("select version from product_category where id=?", id)
+                .get("version", Long.class));
   }
 
   // ------------------------------------------------------------ 拖拽同级排序
@@ -377,9 +448,14 @@ class CategoryTreeIntegrationTest {
     assertThat(order(t)).containsExactly(x, y, z);
 
     // 顺序落库：position 互不相同，否则顺序是不确定的。
-    var positions = tx(actor, () -> sql.fetch(
-        "select position from product_category where parent_id=? order by position", root))
-        .getValues("position", Integer.class);
+    var positions =
+        tx(
+                actor,
+                () ->
+                    sql.fetch(
+                        "select position from product_category where parent_id=? order by position",
+                        root))
+            .getValues("position", Integer.class);
     assertThat(positions).doesNotHaveDuplicates();
   }
 
@@ -399,7 +475,9 @@ class CategoryTreeIntegrationTest {
     UUID root = category(t, null, "根");
     UUID leaf = category(t, root, "叶子");
     UUID spuId = spu();
-    write(actor, () -> categories.saveSpuCategories(actor, spuId, new SpuCategoryInput(leaf, List.of())));
+    write(
+        actor,
+        () -> categories.saveSpuCategories(actor, spuId, new SpuCategoryInput(leaf, List.of())));
 
     assertThat(tx(actor, () -> categories.tree(t, false))).hasSize(2);
     writeVoid(actor, () -> categories.setEnabled(actor, leaf, false));
@@ -415,14 +493,19 @@ class CategoryTreeIntegrationTest {
         assertThat(n.directProductCount()).isEqualTo(1);
       }
     // 已挂商品的分类不能删，只能停用。
-    assertThatThrownBy(() -> writeVoid(actor, () -> categories.delete(actor, leaf, versionOf(leaf))))
+    assertThatThrownBy(
+            () -> writeVoid(actor, () -> categories.delete(actor, leaf, versionOf(leaf))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getReason())
-            .contains("这个分类上还挂着"));
+        .satisfies(e -> assertThat(((ResponseStatusException) e).getReason()).contains("这个分类上还挂着"));
 
     // 停用的分类不能再作为新的挂载目标。
-    assertThatThrownBy(() -> write(actor, () -> categories.saveSpuCategories(actor, spu(),
-        new SpuCategoryInput(leaf, List.of()))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        categories.saveSpuCategories(
+                            actor, spu(), new SpuCategoryInput(leaf, List.of()))))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -433,10 +516,10 @@ class CategoryTreeIntegrationTest {
     UUID child = category(t, root, "子");
 
     // 有子分类时不能删（否则整支子树连坐消失）。
-    assertThatThrownBy(() -> writeVoid(actor, () -> categories.delete(actor, root, versionOf(root))))
+    assertThatThrownBy(
+            () -> writeVoid(actor, () -> categories.delete(actor, root, versionOf(root))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getReason())
-            .contains("子分类"));
+        .satisfies(e -> assertThat(((ResponseStatusException) e).getReason()).contains("子分类"));
 
     // 叶子能删。
     writeVoid(actor, () -> categories.delete(actor, child, versionOf(child)));
@@ -453,19 +536,36 @@ class CategoryTreeIntegrationTest {
     UUID secondaryB = category(t, null, "辅助B");
     UUID spuId = spu();
 
-    write(actor, () -> categories.saveSpuCategories(actor, spuId,
-        new SpuCategoryInput(primary,
-            List.of(new SpuCategoryLinkInput(secondaryA, 0), new SpuCategoryLinkInput(secondaryB, 1)))));
+    write(
+        actor,
+        () ->
+            categories.saveSpuCategories(
+                actor,
+                spuId,
+                new SpuCategoryInput(
+                    primary,
+                    List.of(
+                        new SpuCategoryLinkInput(secondaryA, 0),
+                        new SpuCategoryLinkInput(secondaryB, 1)))));
 
     var assignment = tx(actor, () -> categories.spuAssignment(spuId));
     assertThat(assignment.primaryCategoryId()).isEqualTo(primary);
     assertThat(assignment.primaryCategoryName()).isEqualTo("主类目");
-    assertThat(assignment.secondary()).extracting(SpuCategoryLink::categoryId)
+    assertThat(assignment.secondary())
+        .extracting(SpuCategoryLink::categoryId)
         .containsExactlyInAnyOrder(secondaryA, secondaryB);
 
     // 同一个分类不能既是主分类又是辅助分类。
-    assertThatThrownBy(() -> write(actor, () -> categories.saveSpuCategories(actor, spuId,
-        new SpuCategoryInput(primary, List.of(new SpuCategoryLinkInput(primary, 0))))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        categories.saveSpuCategories(
+                            actor,
+                            spuId,
+                            new SpuCategoryInput(
+                                primary, List.of(new SpuCategoryLinkInput(primary, 0))))))
         .isInstanceOf(ResponseStatusException.class);
 
     // 辅助分类不计入主分类口径的商品数统计（否则品类分析会被辅助归类污染）。
@@ -507,16 +607,35 @@ class CategoryTreeIntegrationTest {
                             0)))
             .id();
 
-    var node = tx(actor, () -> categories.tree(t, false)).stream()
-        .filter(n -> n.id().equals(id)).findFirst().orElseThrow();
+    var node =
+        tx(actor, () -> categories.tree(t, false)).stream()
+            .filter(n -> n.id().equals(id))
+            .findFirst()
+            .orElseThrow();
     // locale 规范化成小写：zh-CN 与 zh-cn 是同一个语言，不允许各存一条。
     assertThat(node.names()).containsEntry("en-us", "Tops").containsEntry("ja-jp", "トップス");
     assertThat(node.name()).isEqualTo("上装");
 
     // 同一个语言配两条必须被拒。
-    assertThatThrownBy(() -> write(actor, () -> categories.save(actor, t, null,
-        new CategoryInput(uniqueCode("I18N"), "重名", null, null, true,
-            List.of(new CategoryNameInput("en-US", "A"), new CategoryNameInput("EN-us", "B")), 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        categories.save(
+                            actor,
+                            t,
+                            null,
+                            new CategoryInput(
+                                uniqueCode("I18N"),
+                                "重名",
+                                null,
+                                null,
+                                true,
+                                List.of(
+                                    new CategoryNameInput("en-US", "A"),
+                                    new CategoryNameInput("EN-us", "B")),
+                                0))))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -540,23 +659,46 @@ class CategoryTreeIntegrationTest {
                         actor,
                         null,
                         new AttributeDefinitionInput(
-                            attributeCode, "颜色", "OPTION", "COMMON_DEFAULT", "DESCRIPTION",
-                            false, true, false, false, "", "基本参数", 0, true,
-                            List.of("红色"), 0)))
+                            attributeCode,
+                            "颜色",
+                            "OPTION",
+                            "COMMON_DEFAULT",
+                            "DESCRIPTION",
+                            false,
+                            true,
+                            false,
+                            false,
+                            "",
+                            "基本参数",
+                            0,
+                            true,
+                            List.of("红色"),
+                            0)))
             .id();
     String legacyCategory = "规则专用-" + UUID.randomUUID().toString().substring(0, 6);
-    write(actor, () -> dictionary.saveCategoryRule(actor, attributeId,
-        new CategoryAttributeRuleInput(legacyCategory, true, null, null, 0, List.of("红色"))));
+    write(
+        actor,
+        () ->
+            dictionary.saveCategoryRule(
+                actor,
+                attributeId,
+                new CategoryAttributeRuleInput(
+                    legacyCategory, true, null, null, 0, List.of("红色"))));
 
     // 规则挂在一个真实类目上（V14 的 NOT NULL 外键要求必须有类目）。
     UUID ruleCategory = category(t, null, legacyCategory);
-    writeVoid(actor, () -> {
-      var definition = sql.fetchOne("select tenant_id from attribute_definition where id=?", attributeId)
-          .get("tenant_id", UUID.class);
-      sql.execute(
-          "update category_attribute_rule set category_id=? where tenant_id=? and category=?",
-          ruleCategory, definition, legacyCategory);
-    });
+    writeVoid(
+        actor,
+        () -> {
+          var definition =
+              sql.fetchOne("select tenant_id from attribute_definition where id=?", attributeId)
+                  .get("tenant_id", UUID.class);
+          sql.execute(
+              "update category_attribute_rule set category_id=? where tenant_id=? and category=?",
+              ruleCategory,
+              definition,
+              legacyCategory);
+        });
 
     // category_id 已经把规则锚在类目主键上，而不是自由文本。
     var rule =
@@ -572,23 +714,52 @@ class CategoryTreeIntegrationTest {
     // 重命名类目：只改名称，**编码保持不变**（编码建后不可改，服务层会拒——
     // 刊登映射与类目规则按 code 对齐它）。文本列被同步，
     // 否则 3.2.1.1 的类目缺口统计按文本比就永远对不上分类树。
-    String currentCode = tx(actor, () -> categories.tree(t, false)).stream()
-        .filter(n -> n.id().equals(id)).findFirst().orElseThrow().code();
+    String currentCode =
+        tx(actor, () -> categories.tree(t, false)).stream()
+            .filter(n -> n.id().equals(id))
+            .findFirst()
+            .orElseThrow()
+            .code();
     String renamedTo = "改名后的类目-" + UUID.randomUUID().toString().substring(0, 6);
-    write(actor, () -> categories.save(actor, t, id,
-        new CategoryInput(currentCode, renamedTo, null, 0, true, List.of(), versionOf(id))));
+    write(
+        actor,
+        () ->
+            categories.save(
+                actor,
+                t,
+                id,
+                new CategoryInput(
+                    currentCode, renamedTo, null, 0, true, List.of(), versionOf(id))));
 
-    var renamed = tx(actor, () -> categories.tree(t, false)).stream()
-        .filter(n -> n.id().equals(id)).findFirst().orElseThrow();
+    var renamed =
+        tx(actor, () -> categories.tree(t, false)).stream()
+            .filter(n -> n.id().equals(id))
+            .findFirst()
+            .orElseThrow();
     assertThat(renamed.name()).isEqualTo(renamedTo);
     assertThat(renamed.code()).isEqualTo(currentCode);
 
     // 编码改不动：这条约束保证「按 code 对齐」的锚点是稳定的。
-    assertThatThrownBy(() -> write(actor, () -> categories.save(actor, t, id,
-        new CategoryInput(uniqueCode("CAT"), "还想改编码", null, 0, true, List.of(), versionOf(id)))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        categories.save(
+                            actor,
+                            t,
+                            id,
+                            new CategoryInput(
+                                uniqueCode("CAT"),
+                                "还想改编码",
+                                null,
+                                0,
+                                true,
+                                List.of(),
+                                versionOf(id)))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getReason())
-            .contains("分类编码建后不可修改"));
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getReason()).contains("分类编码建后不可修改"));
   }
 
   // ------------------------------------------------------------ 租户隔离三断言
@@ -598,35 +769,75 @@ class CategoryTreeIntegrationTest {
     UUID t = tree("INTERNAL", null);
     UUID mine = category(t, null, "我租户的类目");
     UUID spuId = spu();
-    write(actor, () -> categories.saveSpuCategories(actor, spuId, new SpuCategoryInput(mine, List.of())));
+    write(
+        actor,
+        () -> categories.saveSpuCategories(actor, spuId, new SpuCategoryInput(mine, List.of())));
 
     // B 租户建自己的树（**同租户隔离**：树是租户级配置）。
-    UUID theirTree = write(actorB, () -> categories.saveTree(actorB, null,
-        new CategoryTreeInput(uniqueCode("THEIRS"), "B 的树", "INTERNAL", null, true, 0))).id();
-    UUID theirs = write(actorB, () -> categories.save(actorB, theirTree, null,
-        new CategoryInput(uniqueCode("CAT"), "B 的类目", null, null, true, List.of(), 0))).id();
+    UUID theirTree =
+        write(
+                actorB,
+                () ->
+                    categories.saveTree(
+                        actorB,
+                        null,
+                        new CategoryTreeInput(
+                            uniqueCode("THEIRS"), "B 的树", "INTERNAL", null, true, 0)))
+            .id();
+    UUID theirs =
+        write(
+                actorB,
+                () ->
+                    categories.save(
+                        actorB,
+                        theirTree,
+                        null,
+                        new CategoryInput(
+                            uniqueCode("CAT"), "B 的类目", null, null, true, List.of(), 0)))
+            .id();
 
     // 1) 两租户互不可见
-    assertThat(tx(actor, () -> categories.tree(t, false))).extracting(CategoryNode::id).contains(mine);
-    assertThat(tx(actorB, () -> categories.tree(theirTree, false))).extracting(CategoryNode::id)
-        .contains(theirs).doesNotContain(mine);
+    assertThat(tx(actor, () -> categories.tree(t, false)))
+        .extracting(CategoryNode::id)
+        .contains(mine);
+    assertThat(tx(actorB, () -> categories.tree(theirTree, false)))
+        .extracting(CategoryNode::id)
+        .contains(theirs)
+        .doesNotContain(mine);
     // B 读不到 A 的树
     assertThatThrownBy(() -> tx(actorB, () -> categories.tree(t, false)))
         .isInstanceOf(ResponseStatusException.class);
     // B 改 A 的分类 → 404（RLS 已过滤，服务层表现为「不存在或没有访问权限」）
-    assertThatThrownBy(() -> write(actorB, () -> categories.save(actorB, t, mine,
-        new CategoryInput(uniqueCode("CAT"), "B 改的名字", null, 0, true, List.of(), 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actorB,
+                    () ->
+                        categories.save(
+                            actorB,
+                            t,
+                            mine,
+                            new CategoryInput(
+                                uniqueCode("CAT"), "B 改的名字", null, 0, true, List.of(), 0))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     // B 删 A 的分类 → 404
     assertThatThrownBy(() -> writeVoid(actorB, () -> categories.delete(actorB, mine, 0)))
         .isInstanceOf(ResponseStatusException.class);
     // B 把 A 的商品挂到 A 的分类上 → 404（spu_category 的 data_scope 策略跟着 SPU 可见性）
-    assertThatThrownBy(() -> write(actorB, () -> categories.saveSpuCategories(actorB, spuId,
-        new SpuCategoryInput(mine, List.of()))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actorB,
+                    () ->
+                        categories.saveSpuCategories(
+                            actorB, spuId, new SpuCategoryInput(mine, List.of()))))
         .isInstanceOf(ResponseStatusException.class);
     // A 的数据仍在
-    assertThat(tx(actor, () -> categories.tree(t, false))).extracting(CategoryNode::id).contains(mine);
+    assertThat(tx(actor, () -> categories.tree(t, false)))
+        .extracting(CategoryNode::id)
+        .contains(mine);
 
     // 2) 伪造 tenant header 无效：租户只来自已认证的成员关系
     http.perform(
@@ -647,17 +858,23 @@ class CategoryTreeIntegrationTest {
                 .contentType("application/json")
                 .content("{\"code\":\"FORGED\",\"name\":\"伪造头写入\",\"enabled\":true,\"version\":0}"))
         .andExpect(status().isNotFound());
-    assertThat(tx(actor, () -> categories.tree(t, false))).extracting(CategoryNode::name)
+    assertThat(tx(actor, () -> categories.tree(t, false)))
+        .extracting(CategoryNode::name)
         .doesNotContain("伪造头写入");
 
     // 3) 连接池归还后不串租户（单连接反复交替）
     for (int i = 0; i < 5; i++) {
-      assertThat(tx(actor, () -> categories.tree(t, false))).extracting(CategoryNode::id).contains(mine);
-      assertThat(tx(actorB, () -> categories.tree(theirTree, false))).extracting(CategoryNode::id)
-          .contains(theirs).doesNotContain(mine);
+      assertThat(tx(actor, () -> categories.tree(t, false)))
+          .extracting(CategoryNode::id)
+          .contains(mine);
+      assertThat(tx(actorB, () -> categories.tree(theirTree, false)))
+          .extracting(CategoryNode::id)
+          .contains(theirs)
+          .doesNotContain(mine);
       assertThatThrownBy(() -> tx(actorB, () -> categories.spuAssignment(spuId)))
           .isInstanceOf(ResponseStatusException.class);
-      assertThat(tx(actor, () -> categories.spuAssignment(spuId)).primaryCategoryId()).isEqualTo(mine);
+      assertThat(tx(actor, () -> categories.spuAssignment(spuId)).primaryCategoryId())
+          .isEqualTo(mine);
     }
   }
 
@@ -667,7 +884,8 @@ class CategoryTreeIntegrationTest {
             post("/catalog/categories/trees")
                 .header("Authorization", "Bearer reader")
                 .contentType("application/json")
-                .content("{\"code\":\"RBAC\",\"name\":\"只读\",\"treeKind\":\"INTERNAL\",\"enabled\":true,\"version\":0}"))
+                .content(
+                    "{\"code\":\"RBAC\",\"name\":\"只读\",\"treeKind\":\"INTERNAL\",\"enabled\":true,\"version\":0}"))
         .andExpect(status().isForbidden());
     http.perform(get("/catalog/categories/trees").header("Authorization", "Bearer reader"))
         .andExpect(status().isOk());
@@ -744,7 +962,8 @@ class CategoryTreeIntegrationTest {
                 + " and (not relrowsecurity or not relforcerowsecurity)");
     assertThat(weak).isEmpty();
     for (String table :
-        List.of("product_category_tree", "product_category", "product_category_name", "spu_category")) {
+        List.of(
+            "product_category_tree", "product_category", "product_category_name", "spu_category")) {
       var nullable =
           sql.fetchOne(
               "select is_nullable from information_schema.columns"

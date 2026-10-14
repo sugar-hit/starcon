@@ -132,10 +132,7 @@ export function volumeText(profile: {
 }
 
 /** 体积重展示：不选除数时说明「除数是渠道口径」，不默默套一个默认值（规则 R3）。 */
-export function volumetricText(
-  volumetricWeightKg: number | null,
-  divisor: string,
-): string {
+export function volumetricText(volumetricWeightKg: number | null, divisor: string): string {
   if (volumetricWeightKg !== null && divisor.trim() !== '') {
     return `${decimal(volumetricWeightKg, 'kg')}（除数 ${divisor.trim()}）`;
   }
@@ -239,8 +236,7 @@ export function validateDraft(draft: SafetyDraft): string[] {
   if (substance.length > 64) errors.push('危险品类别最多 64 个字符');
   if (draft.dangerousGoods && substance === '')
     errors.push('勾了危险品就必须填写危险品类别：16 合规要按类别决定申报路径与所需证书');
-  if (!draft.dangerousGoods && substance !== '')
-    errors.push('没有勾危险品就不该填危险品类别');
+  if (!draft.dangerousGoods && substance !== '') errors.push('没有勾危险品就不该填危险品类别');
   return errors;
 }
 

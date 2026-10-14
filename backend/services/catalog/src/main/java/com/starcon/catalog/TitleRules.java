@@ -15,8 +15,7 @@ import java.util.Set;
  * 服务层拒绝时给出的话、前端表单校验、集成测试断言的边界都引同一份实现。
  *
  * <p><b>标题渲染与生成不在这里。</b>那是 {@link TitleGenerator} 的职责（要模板解析与候选轮转），
- * 这里只管「参数合不合法」与「两条标题有多像」——两类逻辑混在一起会让「相似度」这个
- * 蓝图标着要显式控制的纯函数被候选循环污染。
+ * 这里只管「参数合不合法」与「两条标题有多像」——两类逻辑混在一起会让「相似度」这个 蓝图标着要显式控制的纯函数被候选循环污染。
  */
 public final class TitleRules {
   private TitleRules() {}
@@ -94,9 +93,8 @@ public final class TitleRules {
   /**
    * 单次批量最多 200 个 SKU。
    *
-   * <p>不是算力上限（重复度比较范围限定在单个 SKU 内，几百个 SKU 只是几十毫秒），
-   * 而是**可用性**上限：一次生成 2000 个 SKU × 3 平台 × 5 候选 = 3 万条标题，
-   * 候选集页面根本没法用，运营也没法逐条选用。要大批量应该分批并分平台发。
+   * <p>不是算力上限（重复度比较范围限定在单个 SKU 内，几百个 SKU 只是几十毫秒）， 而是**可用性**上限：一次生成 2000 个 SKU × 3 平台 × 5 候选 = 3
+   * 万条标题， 候选集页面根本没法用，运营也没法逐条选用。要大批量应该分批并分平台发。
    */
   public static final int MAX_SKUS_PER_GENERATION = 200;
 
@@ -106,8 +104,7 @@ public final class TitleRules {
   /**
    * 每个 SKU 每个平台最多 8 条候选。
    *
-   * <p>上界是词序轮转档数与词池大小的量级：模板变量通常 3~5 个（轮转档数就是变量个数），
-   * 再乘修饰词池，超过 8 条后候选之间开始出现肉眼可见的「凑数」——
+   * <p>上界是词序轮转档数与词池大小的量级：模板变量通常 3~5 个（轮转档数就是变量个数）， 再乘修饰词池，超过 8 条后候选之间开始出现肉眼可见的「凑数」——
    * 而凑数出来的候选恰恰是重复铺货判定最爱抓的。
    */
   public static final int MAX_CANDIDATES_PER_SKU = 8;
@@ -133,18 +130,15 @@ public final class TitleRules {
   /**
    * 每条候选在重复度闸门前的最大确定性尝试次数。
    *
-   * <p>算法不掷骰子（那会让「重复度已受控」变成不可断言的事实），
-   * 而是按固定顺序枚举「词序轮转档 × 词池下标」的组合，取第一个过闸的。
-   * 上限 24 = 8 条候选 × 3 轮：词池太小时宁可拒掉并给出原因，
-   * 也不要靠无限轮转凑出一条与已有标题雷同的。
+   * <p>算法不掷骰子（那会让「重复度已受控」变成不可断言的事实）， 而是按固定顺序枚举「词序轮转档 × 词池下标」的组合，取第一个过闸的。 上限 24 = 8 条候选 × 3
+   * 轮：词池太小时宁可拒掉并给出原因， 也不要靠无限轮转凑出一条与已有标题雷同的。
    */
   public static final int MAX_ATTEMPTS_PER_CANDIDATE = 24;
 
   /**
    * 重复度上限的**上界是 999 而不是 1000**。
    *
-   * <p>1000‰ 表示「允许与已有标题完全一样」，那等于没有重复度控制。
-   * V20 的 CHECK 与这里的校验都把 999 当天花板，让完全雷同在配置层就不可能被配出来。
+   * <p>1000‰ 表示「允许与已有标题完全一样」，那等于没有重复度控制。 V20 的 CHECK 与这里的校验都把 999 当天花板，让完全雷同在配置层就不可能被配出来。
    */
   public static final int MAX_SIMILARITY_PERMILLE = 999;
 
@@ -177,9 +171,8 @@ public final class TitleRules {
   /**
    * 两条标题的相似度（千分比，0~1000）。
    *
-   * <p>两侧为空串时返回 0：两个空标题「完全相同」，但空标题根本不会被生成
-   * （渲染结果为空的组合在 {@link TitleGenerator} 里就被拒了），
-   * 这里给 0 只是为了让这个纯函数对任意入参都有定义。
+   * <p>两侧为空串时返回 0：两个空标题「完全相同」，但空标题根本不会被生成 （渲染结果为空的组合在 {@link TitleGenerator} 里就被拒了）， 这里给 0
+   * 只是为了让这个纯函数对任意入参都有定义。
    */
   public static int similarityPermille(String left, String right) {
     String a = normalizeForCompare(left);
@@ -207,11 +200,9 @@ public final class TitleRules {
    * 分词口径（确定性，三步）：
    *
    * <ol>
-   *   <li>NFKC 规范化并转小写——全角「ＡＢＣ」与半角「abc」是同一个词，
-   *       不归一的话「换全角避重复」会成为一种假差异化。
+   *   <li>NFKC 规范化并转小写——全角「ＡＢＣ」与半角「abc」是同一个词， 不归一的话「换全角避重复」会成为一种假差异化。
    *   <li>按 Unicode 码点遍历：拉丁/数字连续段合并成一个词元（「bluetooth5」是一个词元）。
-   *   <li>CJK 字符**逐字**成词元——中文没有空格，逐字切分是唯一确定性的口径，
-   *       且它能捕捉「换一个字」这种最典型的差异化手段。
+   *   <li>CJK 字符**逐字**成词元——中文没有空格，逐字切分是唯一确定性的口径， 且它能捕捉「换一个字」这种最典型的差异化手段。
    * </ol>
    */
   public static List<String> tokenize(String normalizedValue) {
@@ -238,8 +229,7 @@ public final class TitleRules {
     Set<String> out = new HashSet<>();
     if (normalizedValue == null) return out;
     int[] cps = normalizedValue.codePoints().toArray();
-    for (int i = 0; i + 1 < cps.length; i++)
-      out.add(new String(cps, i, 2));
+    for (int i = 0; i + 1 < cps.length; i++) out.add(new String(cps, i, 2));
     return out;
   }
 
@@ -273,8 +263,7 @@ public final class TitleRules {
   /**
    * CJK 判定：汉字（基本区 + 扩展 A + 扩展 B~F + 兼容区）、假名、谚文。
    *
-   * <p>「汉字兼容表意文字」（U+F900~U+FAFF）刻意**不**算 CJK：NFKC 之后它们已经
-   * 归一成基本区汉字了，留在这一段会让同一个字被切成两个词元。
+   * <p>「汉字兼容表意文字」（U+F900~U+FAFF）刻意**不**算 CJK：NFKC 之后它们已经 归一成基本区汉字了，留在这一段会让同一个字被切成两个词元。
    */
   static boolean isCjk(int cp) {
     return (cp >= 0x4E00 && cp <= 0x9FFF)
@@ -319,8 +308,7 @@ public final class TitleRules {
     String value = MediaRules.normalize(code).toUpperCase(Locale.ROOT);
     if (value.isEmpty()) return "模板编码不能为空";
     if (value.length() > 32) return "模板编码最多 32 个字符";
-    if (!value.matches("[A-Z0-9][A-Z0-9_-]{0,31}"))
-      return "模板编码请使用英文字母、数字、下划线或短横线，长度 1~32 位";
+    if (!value.matches("[A-Z0-9][A-Z0-9_-]{0,31}")) return "模板编码请使用英文字母、数字、下划线或短横线，长度 1~32 位";
     return null;
   }
 
@@ -341,8 +329,7 @@ public final class TitleRules {
   /**
    * 模板文本校验。
    *
-   * <p>要求至少有一个占位符：一个完全没有变量的模板渲染出来就是一句固定的话，
-   * 批量生成会产出 N 条一模一样的标题——而 3.4.2.1 存在的理由正是「不要一模一样」。
+   * <p>要求至少有一个占位符：一个完全没有变量的模板渲染出来就是一句固定的话， 批量生成会产出 N 条一模一样的标题——而 3.4.2.1 存在的理由正是「不要一模一样」。
    */
   public static String patternProblem(String pattern) {
     String value = normalizePattern(pattern);
@@ -352,15 +339,15 @@ public final class TitleRules {
     if (placeholders.isEmpty())
       return "标题模板里至少要有一个变量占位（例如 {brand} {category} {core}）："
           + "没有变量的模板渲染出来每条候选都一样，正是 3.4.2.1 要避免的重复铺货";
-    for (String name : placeholders) if (variableNameProblem(name) != null) return variableNameProblem(name);
+    for (String name : placeholders)
+      if (variableNameProblem(name) != null) return variableNameProblem(name);
     return null;
   }
 
   /**
    * 提取模板里的占位符名（不含花括号），按出现顺序，**去重后**返回。
    *
-   * <p>去重是必要的：{@code {brand} {category} {brand}} 里 brand 出现两次，
-   * 服务层解析成变量列表时只保留第一个绑定源，第二个是同一个词的重复提及。
+   * <p>去重是必要的：{@code {brand} {category} {brand}} 里 brand 出现两次， 服务层解析成变量列表时只保留第一个绑定源，第二个是同一个词的重复提及。
    */
   public static List<String> placeholdersOf(String pattern) {
     String value = normalizePattern(pattern);
@@ -390,7 +377,10 @@ public final class TitleRules {
   public static String sourceProblem(String source) {
     String value = MediaRules.normalizeUpper(source);
     if (!FACT_SOURCES.contains(value) && !KEYWORD_SOURCES.contains(value))
-      return "变量绑定源只能是 " + String.join(" / ", FACT_SOURCES) + " 或 " + String.join(" / ", KEYWORD_SOURCES);
+      return "变量绑定源只能是 "
+          + String.join(" / ", FACT_SOURCES)
+          + " 或 "
+          + String.join(" / ", KEYWORD_SOURCES);
     return null;
   }
 
@@ -403,17 +393,20 @@ public final class TitleRules {
   /**
    * 模板声明的变量与模板文本里的占位符必须**互相对得上**。
    *
-   * <p>两个方向都要查：文本里写了 {@code {core}} 却没声明 core 的绑定源，
-   * 渲染时会拿不到词而留一个 {@code {core}} 字面量（那正是 3.4.2.2 明令禁止的
-   * 「静默留下占位符」）；反过来声明了 core 而文本里没有，那条变量是死配置。
+   * <p>两个方向都要查：文本里写了 {@code {core}} 却没声明 core 的绑定源， 渲染时会拿不到词而留一个 {@code {core}} 字面量（那正是 3.4.2.2
+   * 明令禁止的 「静默留下占位符」）；反过来声明了 core 而文本里没有，那条变量是死配置。
    */
   public static String variableBindingProblem(String pattern, List<String> declaredNames) {
     List<String> placeholders = placeholdersOf(pattern);
     List<String> declared = declaredNames == null ? List.of() : declaredNames;
     for (String placeholder : placeholders)
       if (!declared.contains(placeholder))
-        return "模板里的占位符 {" + placeholder + "} 没有声明绑定源："
-            + "请在变量列表里加一条 " + placeholder + "，并选择它取自 SPU/SKU 字段还是词池";
+        return "模板里的占位符 {"
+            + placeholder
+            + "} 没有声明绑定源："
+            + "请在变量列表里加一条 "
+            + placeholder
+            + "，并选择它取自 SPU/SKU 字段还是词池";
     for (String name : declared)
       if (!placeholders.contains(name))
         return "变量 " + name + " 在模板文本里没有出现（应为 {" + name + "}）：死配置会让模板含义与实际渲染对不上";
@@ -423,22 +416,19 @@ public final class TitleRules {
   /**
    * 至少要有一个词根变量。
    *
-   * <p>只绑 SPU/SKU 事实字段的模板（{@code {brand} {category} {sku_name}}）渲染出来
-   * 每个 SKU 只有一种可能文本，候选之间的差异只能来自词序轮转——那最多也就
-   * 「变量个数」种排法，几轮就用完了。词根变量才是差异化的主力。
+   * <p>只绑 SPU/SKU 事实字段的模板（{@code {brand} {category} {sku_name}}）渲染出来 每个 SKU
+   * 只有一种可能文本，候选之间的差异只能来自词序轮转——那最多也就 「变量个数」种排法，几轮就用完了。词根变量才是差异化的主力。
    */
   public static String needsKeywordVariableProblem(List<String> sources) {
     if (sources == null || sources.isEmpty()) return "模板至少要声明一个变量";
     for (String source : sources) if (keywordTypeOfSource(source) != null) return null;
-    return "模板至少要有一个词根变量（核心词 / 卖点 / 修饰词）："
-        + "只绑 SPU/SKU 字段的话每个 SKU 只有一种文本，批量生成产出的候选会彼此雷同";
+    return "模板至少要有一个词根变量（核心词 / 卖点 / 修饰词）：" + "只绑 SPU/SKU 字段的话每个 SKU 只有一种文本，批量生成产出的候选会彼此雷同";
   }
 
   public static String maxSimilarityProblem(Integer permille) {
     if (permille == null) return "重复度上限不能为空";
     if (permille < 0 || permille > MAX_SIMILARITY_PERMILLE)
-      return "重复度上限必须在 0~" + MAX_SIMILARITY_PERMILLE
-          + "‰ 之间（1000‰ 就是允许完全一样，等于没有重复度控制，所以上界是 999）";
+      return "重复度上限必须在 0~" + MAX_SIMILARITY_PERMILLE + "‰ 之间（1000‰ 就是允许完全一样，等于没有重复度控制，所以上界是 999）";
     return null;
   }
 
@@ -465,7 +455,8 @@ public final class TitleRules {
   }
 
   public static String templatePlatformsSizeProblem(int size) {
-    if (size > MAX_PLATFORMS_PER_TEMPLATE) return "一个模板最多配 " + MAX_PLATFORMS_PER_TEMPLATE + " 个平台长度上限";
+    if (size > MAX_PLATFORMS_PER_TEMPLATE)
+      return "一个模板最多配 " + MAX_PLATFORMS_PER_TEMPLATE + " 个平台长度上限";
     return null;
   }
 
@@ -486,8 +477,7 @@ public final class TitleRules {
     String value = MediaRules.normalize(code).toUpperCase(Locale.ROOT);
     if (value.isEmpty()) return "词根编码不能为空";
     if (value.length() > 32) return "词根编码最多 32 个字符";
-    if (!value.matches("[A-Z0-9][A-Z0-9_-]{0,31}"))
-      return "词根编码请使用英文字母、数字、下划线或短横线，长度 1~32 位";
+    if (!value.matches("[A-Z0-9][A-Z0-9_-]{0,31}")) return "词根编码请使用英文字母、数字、下划线或短横线，长度 1~32 位";
     return null;
   }
 
@@ -518,7 +508,8 @@ public final class TitleRules {
 
   public static String platformsSizeProblem(int size) {
     if (size == 0) return "请至少选择一个目标平台";
-    if (size > MAX_PLATFORMS_PER_GENERATION) return "单次最多为 " + MAX_PLATFORMS_PER_GENERATION + " 个平台生成标题";
+    if (size > MAX_PLATFORMS_PER_GENERATION)
+      return "单次最多为 " + MAX_PLATFORMS_PER_GENERATION + " 个平台生成标题";
     return null;
   }
 
@@ -537,12 +528,12 @@ public final class TitleRules {
     Set<String> t = Set.copyOf(KEYWORD_TYPES);
     if (t.size() != KEYWORD_TYPES.size()) throw new IllegalStateException("KEYWORD_TYPES 有重复项");
     Set<String> g = Set.copyOf(GENERATION_STATUSES);
-    if (g.size() != GENERATION_STATUSES.size()) throw new IllegalStateException("GENERATION_STATUSES 有重复项");
+    if (g.size() != GENERATION_STATUSES.size())
+      throw new IllegalStateException("GENERATION_STATUSES 有重复项");
     Set<String> r = Set.copyOf(RECORD_STATUSES);
     if (r.size() != RECORD_STATUSES.size()) throw new IllegalStateException("RECORD_STATUSES 有重复项");
     Set<String> o = Set.copyOf(SKU_OUTCOMES);
     if (o.size() != SKU_OUTCOMES.size()) throw new IllegalStateException("SKU_OUTCOMES 有重复项");
-    if (WEIGHT_DICE + WEIGHT_ADJACENT != 1000)
-      throw new IllegalStateException("相似度两个权重之和必须是 1000");
+    if (WEIGHT_DICE + WEIGHT_ADJACENT != 1000) throw new IllegalStateException("相似度两个权重之和必须是 1000");
   }
 }

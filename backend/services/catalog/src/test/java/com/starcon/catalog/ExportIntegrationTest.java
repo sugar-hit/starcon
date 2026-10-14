@@ -25,10 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-/**
- * 3.8.2.1 导出：字段选择、排序还原、异步生成、下载有效期、PII 授权、数据范围过滤，
- * 以及租户隔离三断言。真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
- */
+/** 3.8.2.1 导出：字段选择、排序还原、异步生成、下载有效期、PII 授权、数据范围过滤， 以及租户隔离三断言。真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。 */
 @SpringBootTest
 @AutoConfigureMockMvc
 class ExportIntegrationTest {
@@ -179,8 +176,7 @@ class ExportIntegrationTest {
     // 规格轴（颜色）：每个 SKU 取一个不同的取值，于是 variant_signature 在同一 SPU 内唯一
     // —— V1 的 UNIQUE(tenant_id,spu_id,variant_signature) 是真实约束，
     // 不造出不同的规格签名就建不出第二个 SKU（而导出的行序断言需要不止一行）。
-    final List<String> colors =
-        List.of("黑色", "白色", "蓝色", "金色", "银色", "灰色", "灰色2", "灰色3");
+    final List<String> colors = List.of("黑色", "白色", "蓝色", "金色", "银色", "灰色", "灰色2", "灰色3");
     final long spuVersion0 =
         call(who, "catalog.spu.read", () -> CatalogServiceHolder.catalog.detail(spuId))
             .product()
@@ -233,7 +229,11 @@ class ExportIntegrationTest {
                       spuId,
                       null,
                       new SkuInput(
-                          prefix + "-SKU" + index + "-" + UUID.randomUUID().toString().substring(0, 6),
+                          prefix
+                              + "-SKU"
+                              + index
+                              + "-"
+                              + UUID.randomUUID().toString().substring(0, 6),
                           prefix + " 规格" + index,
                           "BC" + UUID.randomUUID().toString().replace("-", "").substring(0, 10),
                           "PCS",
@@ -290,8 +290,7 @@ class ExportIntegrationTest {
   /**
    * 按键名构造筛选条件（与 SkuListIntegrationTest 的 query() 同一手法）。
    *
-   * <p>不直接写 18 个位置参数：数错一个 null 的后果是「条件悄悄落到了另一个字段上」，
-   * 而这类错误在断言里往往看不出来。
+   * <p>不直接写 18 个位置参数：数错一个 null 的后果是「条件悄悄落到了另一个字段上」， 而这类错误在断言里往往看不出来。
    */
   private static ExportFilterInput filter(Object... kv) {
     var map = new HashMap<String, Object>();
@@ -352,8 +351,7 @@ class ExportIntegrationTest {
   void everySourceDeclaresItsOwnFieldsSortsAndFilters() {
     var page = call(actor(), "catalog.spu.read", () -> jobs.sourcePage());
     assertThat(page.items()).extracting(ExportSourceInfo::key).contains("SPU", "SKU", "CONTACT");
-    var sku =
-        page.items().stream().filter(s -> s.key().equals("SKU")).findFirst().orElseThrow();
+    var sku = page.items().stream().filter(s -> s.key().equals("SKU")).findFirst().orElseThrow();
     // 字段与排序都由后端声明，前端不硬编码。
     assertThat(sku.fields()).extracting(ExportFieldInfo::key).contains("CODE", "NAME", "BARCODE");
     assertThat(sku.sorts()).extracting(ExportSortInfo::key).contains("updated_at", "code");
@@ -365,9 +363,13 @@ class ExportIntegrationTest {
     // PII 标记来自字段定义本身。
     var contact =
         page.items().stream().filter(s -> s.key().equals("CONTACT")).findFirst().orElseThrow();
-    assertThat(contact.fields()).filteredOn(ExportFieldInfo::pii).extracting(ExportFieldInfo::key)
+    assertThat(contact.fields())
+        .filteredOn(ExportFieldInfo::pii)
+        .extracting(ExportFieldInfo::key)
         .containsExactlyInAnyOrder("EMAIL", "PHONE", "MOBILE");
-    assertThat(contact.fields()).filteredOn(f -> !f.pii()).extracting(ExportFieldInfo::key)
+    assertThat(contact.fields())
+        .filteredOn(f -> !f.pii())
+        .extracting(ExportFieldInfo::key)
         .contains("PARTY_CODE", "NAME");
   }
 
@@ -403,10 +405,18 @@ class ExportIntegrationTest {
     for (UUID id : f.skuIds())
       expectedPairs.add(
           List.of(
-              call(who, "catalog.sku.read",
-                  () -> sql.fetchOne("select code from sku where id=?", id).get("code", String.class)),
-              call(who, "catalog.sku.read",
-                  () -> sql.fetchOne("select barcode from sku where id=?", id).get("barcode", String.class))));
+              call(
+                  who,
+                  "catalog.sku.read",
+                  () ->
+                      sql.fetchOne("select code from sku where id=?", id)
+                          .get("code", String.class)),
+              call(
+                  who,
+                  "catalog.sku.read",
+                  () ->
+                      sql.fetchOne("select barcode from sku where id=?", id)
+                          .get("barcode", String.class))));
     assertThat(dataRows(lines))
         .allSatisfy(
             line -> {
@@ -440,11 +450,7 @@ class ExportIntegrationTest {
         .hasMessageContaining("not_a_sort");
     // 字段来自别的数据源：必须点名，而不是静默忽略。
     assertThatThrownBy(
-            () ->
-                start(
-                    who,
-                    new ExportJobInput(
-                        "SPU", List.of("BARCODE"), noFilter(), null, null)))
+            () -> start(who, new ExportJobInput("SPU", List.of("BARCODE"), noFilter(), null, null)))
         .hasMessageContaining("BARCODE");
     // 一个字段都不选也是非法请求。
     assertThatThrownBy(
@@ -460,10 +466,30 @@ class ExportIntegrationTest {
     // 三个 SKU 的编码本就互不相同，排序断言直接成立；不需要额外改动数据。
     var f = fixture(who, "SRT", 3);
 
-    var asc = await(start(who, new ExportJobInput(
-        "SKU", List.of("CODE"), skuFilter(f.spuId()), new ExportSortInput("code", "asc"), null)).id(), who);
-    var desc = await(start(who, new ExportJobInput(
-        "SKU", List.of("CODE"), skuFilter(f.spuId()), new ExportSortInput("code", "desc"), null)).id(), who);
+    var asc =
+        await(
+            start(
+                    who,
+                    new ExportJobInput(
+                        "SKU",
+                        List.of("CODE"),
+                        skuFilter(f.spuId()),
+                        new ExportSortInput("code", "asc"),
+                        null))
+                .id(),
+            who);
+    var desc =
+        await(
+            start(
+                    who,
+                    new ExportJobInput(
+                        "SKU",
+                        List.of("CODE"),
+                        skuFilter(f.spuId()),
+                        new ExportSortInput("code", "desc"),
+                        null))
+                .id(),
+            who);
 
     var ascCodes = codesInOrder(asc.id(), who);
     var descCodes = codesInOrder(desc.id(), who);
@@ -479,17 +505,33 @@ class ExportIntegrationTest {
   void filtersAreFrozenIntoTheRecordForAudit() {
     var who = actor();
     var f = fixture(who, "FRZ", 2);
-    var done = await(start(who, new ExportJobInput(
-        "SKU",
-        List.of("CODE"),
-        filter("spuId", f.spuId(), "category", "家居", "status", List.of("ACTIVE"), "q", "FRZ"),
-        new ExportSortInput("code", "asc"),
-        null)).id(), who);
+    var done =
+        await(
+            start(
+                    who,
+                    new ExportJobInput(
+                        "SKU",
+                        List.of("CODE"),
+                        filter(
+                            "spuId",
+                            f.spuId(),
+                            "category",
+                            "家居",
+                            "status",
+                            List.of("ACTIVE"),
+                            "q",
+                            "FRZ"),
+                        new ExportSortInput("code", "asc"),
+                        null))
+                .id(),
+            who);
     assertThat(done.rowCount()).isEqualTo(2);
-    assertThat(done.appliedFilters()).extracting(ExportAppliedFilter::key)
+    assertThat(done.appliedFilters())
+        .extracting(ExportAppliedFilter::key)
         .contains("spuId", "category", "status", "q");
     // 审计回显的是**标签**而不是键名，用户看得懂这份导出按什么条件做的。
-    assertThat(done.appliedFilters()).extracting(ExportAppliedFilter::label)
+    assertThat(done.appliedFilters())
+        .extracting(ExportAppliedFilter::label)
         .contains("所属 SPU", "分类", "状态");
   }
 
@@ -501,12 +543,7 @@ class ExportIntegrationTest {
             () ->
                 start(
                     who,
-                    new ExportJobInput(
-                        "SKU",
-                        List.of("CODE"),
-                        filter("brand", "某品牌"),
-                        null,
-                        null)))
+                    new ExportJobInput("SKU", List.of("CODE"), filter("brand", "某品牌"), null, null)))
         .hasMessageContaining("品牌");
     // 依赖未接入投影的条件要点名归属服务。
     assertThatThrownBy(
@@ -528,7 +565,10 @@ class ExportIntegrationTest {
   void exportIsAsynchronousAndTheRecordIsTraceableToTheActor() {
     var who = actor();
     var f = fixture(who, "ASY", 2);
-    var accepted = start(who, new ExportJobInput("SKU", List.of("CODE", "NAME"), skuFilter(f.spuId()), null, null));
+    var accepted =
+        start(
+            who,
+            new ExportJobInput("SKU", List.of("CODE", "NAME"), skuFilter(f.spuId()), null, null));
     // POST 返回时文件**还没生成**：状态只能是已受理。
     assertThat(List.of("PENDING", "RUNNING")).contains(accepted.status());
     assertThat(accepted.fileName()).isNull();
@@ -550,8 +590,14 @@ class ExportIntegrationTest {
     var csv = download(who, done.id());
     assertThat(csv).contains("SKU 编码").contains("SKU 名称");
     for (UUID id : f.skuIds())
-      assertThat(csv).contains(call(who, "catalog.spu.read",
-          () -> sql.fetchOne("select code from sku where id=?", id).get("code", String.class)));
+      assertThat(csv)
+          .contains(
+              call(
+                  who,
+                  "catalog.spu.read",
+                  () ->
+                      sql.fetchOne("select code from sku where id=?", id)
+                          .get("code", String.class)));
   }
 
   // ================================================================ PII 授权
@@ -562,13 +608,25 @@ class ExportIntegrationTest {
     fixture(who, "PII", 1);
     // 敏感字段 + 空理由 → 拒绝。
     assertThatThrownBy(
-            () -> start(who, new ExportJobInput(
-                "CONTACT", List.of("PARTY_CODE", "EMAIL"), noFilter(), null, null)))
+            () ->
+                start(
+                    who,
+                    new ExportJobInput(
+                        "CONTACT", List.of("PARTY_CODE", "EMAIL"), noFilter(), null, null)))
         .hasMessageContaining("敏感字段");
 
-    var authorized = await(start(who, new ExportJobInput(
-        "CONTACT", List.of("PARTY_CODE", "EMAIL", "MOBILE"), noFilter(), null, "跨境客服工单派单")
-    ).id(), who);
+    var authorized =
+        await(
+            start(
+                    who,
+                    new ExportJobInput(
+                        "CONTACT",
+                        List.of("PARTY_CODE", "EMAIL", "MOBILE"),
+                        noFilter(),
+                        null,
+                        "跨境客服工单派单"))
+                .id(),
+            who);
 
     assertThat(authorized.includesPii()).isTrue();
     assertThat(authorized.piiFields()).containsExactly("EMAIL", "MOBILE");
@@ -579,8 +637,14 @@ class ExportIntegrationTest {
     assertThat(download(who, authorized.id())).contains("邮箱").contains("手机");
 
     // 不含敏感字段的导出不需要理由，且 includesPii=false。
-    var plain = await(start(who, new ExportJobInput(
-        "CONTACT", List.of("PARTY_CODE", "NAME"), noFilter(), null, null)).id(), who);
+    var plain =
+        await(
+            start(
+                    who,
+                    new ExportJobInput(
+                        "CONTACT", List.of("PARTY_CODE", "NAME"), noFilter(), null, null))
+                .id(),
+            who);
     assertThat(plain.includesPii()).isFalse();
     assertThat(plain.piiFields()).isEmpty();
   }
@@ -610,8 +674,18 @@ class ExportIntegrationTest {
   @Test
   void snapshotsCannotBeRewrittenAfterCreation() {
     var who = actor();
-    var done = await(start(who, new ExportJobInput(
-        "SKU", List.of("CODE"), noFilter(), new ExportSortInput("code", "asc"), null)).id(), who);
+    var done =
+        await(
+            start(
+                    who,
+                    new ExportJobInput(
+                        "SKU",
+                        List.of("CODE"),
+                        noFilter(),
+                        new ExportSortInput("code", "asc"),
+                        null))
+                .id(),
+            who);
     // 条件/字段/排序是创建那一刻的快照，事后改写会让「当时按什么导出的」没有答案。
     assertThatThrownBy(
             () ->
@@ -644,19 +718,40 @@ class ExportIntegrationTest {
   @Test
   void expiredExportIsGoneReturnsGoneAndDeletesTheFile() throws Exception {
     var who = actor();
-    var done = await(start(who, new ExportJobInput("SKU", List.of("CODE"), noFilter(), null, null)).id(), who);
-    var key = call(who, "catalog.spu.read",
-        () -> sql.fetchOne("select storage_key from export_job where tenant_id=? and id=?",
-            who.tenantId(), done.id()).get("storage_key", String.class));
-    assertThat(call(who, "catalog.spu.read",
-        () -> sql.fetchOne("select 1 from export_job where tenant_id=? and id=?",
-            who.tenantId(), done.id()))).isNotNull();
+    var done =
+        await(
+            start(who, new ExportJobInput("SKU", List.of("CODE"), noFilter(), null, null)).id(),
+            who);
+    var key =
+        call(
+            who,
+            "catalog.spu.read",
+            () ->
+                sql.fetchOne(
+                        "select storage_key from export_job where tenant_id=? and id=?",
+                        who.tenantId(),
+                        done.id())
+                    .get("storage_key", String.class));
+    assertThat(
+            call(
+                who,
+                "catalog.spu.read",
+                () ->
+                    sql.fetchOne(
+                        "select 1 from export_job where tenant_id=? and id=?",
+                        who.tenantId(),
+                        done.id())))
+        .isNotNull();
 
     // 把有效期推到过去：走的是真实的 expires_at 列，不是测试里的假开关。
-    call(who, "catalog.spu.read",
-        () -> sql.execute(
-            "update export_job set expires_at=now() - interval '1 hour' where tenant_id=? and id=?",
-            who.tenantId(), done.id()));
+    call(
+        who,
+        "catalog.spu.read",
+        () ->
+            sql.execute(
+                "update export_job set expires_at=now() - interval '1 hour' where tenant_id=? and id=?",
+                who.tenantId(),
+                done.id()));
     // 状态推进由服务层惰性过期触发（此时状态仍是 SUCCEEDED，可以合法迁到 EXPIRED）。
     var after = call(who, "catalog.spu.read", () -> jobs.job(who.tenantId(), done.id()));
     assertThat(after.status())
@@ -667,15 +762,21 @@ class ExportIntegrationTest {
     // 文件确实被删了，而不是只把状态改成"过期"好看一点。
     assertThat(Files.exists(storageRoot.resolve(key))).isFalse();
 
-    http.perform(get("/catalog/export-jobs/" + done.id() + "/file")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/export-jobs/" + done.id() + "/file")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isGone());
     // EXPIRED 是终态，不可迁回 SUCCEEDED。
     assertThatThrownBy(
-            () -> call(who, "catalog.spu.read",
-                () -> sql.execute(
-                    "update export_job set status='SUCCEEDED' where tenant_id=? and id=?",
-                    who.tenantId(), done.id())))
+            () ->
+                call(
+                    who,
+                    "catalog.spu.read",
+                    () ->
+                        sql.execute(
+                            "update export_job set status='SUCCEEDED' where tenant_id=? and id=?",
+                            who.tenantId(),
+                            done.id())))
         .hasMessageContaining("状态不可从");
   }
 
@@ -683,7 +784,11 @@ class ExportIntegrationTest {
   void cancelBlocksDownloadImmediatelyButKeepsTheAuditFacts() {
     var who = actor();
     var f = fixture(who, "CAN", 2);
-    var done = await(start(who, new ExportJobInput("SKU", List.of("CODE"), skuFilter(f.spuId()), null, null)).id(), who);
+    var done =
+        await(
+            start(who, new ExportJobInput("SKU", List.of("CODE"), skuFilter(f.spuId()), null, null))
+                .id(),
+            who);
     assertThat(done.downloadable()).isTrue();
 
     var cancelled = call(who, "catalog.spu.update", () -> jobs.cancel(who, done.id()));
@@ -710,14 +815,24 @@ class ExportIntegrationTest {
     var f = fixture(ownerActor, "SCP", 3);
 
     // ALL 范围（owner）：导得出全部 3 行。
-    var full = await(start(ownerActor, new ExportJobInput(
-        "SKU", List.of("CODE"), skuFilter(f.spuId()), null, null)).id(), ownerActor);
+    var full =
+        await(
+            start(
+                    ownerActor,
+                    new ExportJobInput("SKU", List.of("CODE"), skuFilter(f.spuId()), null, null))
+                .id(),
+            ownerActor);
     assertThat(full.rowCount()).isEqualTo(3);
 
     // SELF 范围的另一个用户：同样条件导出 0 行 —— **数据范围在导出上逐行生效**。
-    var scopedJob = call(scopedActor, "catalog.spu.read",
-        () -> jobs.create(scopedActor, new ExportJobInput(
-            "SKU", List.of("CODE"), skuFilter(f.spuId()), null, null)));
+    var scopedJob =
+        call(
+            scopedActor,
+            "catalog.spu.read",
+            () ->
+                jobs.create(
+                    scopedActor,
+                    new ExportJobInput("SKU", List.of("CODE"), skuFilter(f.spuId()), null, null)));
     var scopedDone = await(scopedJob.id(), scopedActor);
     assertThat(scopedDone.status()).isEqualTo("SUCCEEDED");
     assertThat(scopedDone.rowCount()).isZero();
@@ -728,13 +843,19 @@ class ExportIntegrationTest {
 
     // 同样地，SPU 数据源在 SELF 范围下也导不出别人的行。
     // scoped 用户从未创建过任何记录，所以它看本租户全部 SPU 的结果必须是 0 行。
-    var spuScoped = await(start(scopedActor, new ExportJobInput(
-        "SPU", List.of("CODE"), noFilter(), null, null)).id(), scopedActor);
+    var spuScoped =
+        await(
+            start(scopedActor, new ExportJobInput("SPU", List.of("CODE"), noFilter(), null, null))
+                .id(),
+            scopedActor);
     assertThat(spuScoped.status()).isEqualTo("SUCCEEDED");
     assertThat(spuScoped.rowCount()).isZero();
     // 对照：同一条件下 ALL 范围的 owner 导得出本租户的 SPU（不为 0 才说明上面不是「压根没数据」）。
-    var spuOwner = await(start(ownerActor, new ExportJobInput(
-        "SPU", List.of("CODE"), noFilter(), null, null)).id(), ownerActor);
+    var spuOwner =
+        await(
+            start(ownerActor, new ExportJobInput("SPU", List.of("CODE"), noFilter(), null, null))
+                .id(),
+            ownerActor);
     assertThat(spuOwner.rowCount()).isPositive();
   }
 
@@ -746,55 +867,72 @@ class ExportIntegrationTest {
     var theirs = fixture(actors.get("Bearer tenant-b"), "ISO-THEIRS", 3);
 
     // 1) 两租户互不可见
-    var mineJob = await(start(actor(), new ExportJobInput(
-        "SKU", List.of("CODE"), skuFilter(mine.spuId()), null, null)).id(), actor());
+    var mineJob =
+        await(
+            start(
+                    actor(),
+                    new ExportJobInput("SKU", List.of("CODE"), skuFilter(mine.spuId()), null, null))
+                .id(),
+            actor());
     assertThat(mineJob.rowCount()).isEqualTo(2);
     var theirFilter = filter("spuId", theirs.spuId());
     var bActor = actors.get("Bearer tenant-b");
-    var theirAccepted = start(bActor, new ExportJobInput(
-        "SKU", List.of("CODE"), theirFilter, null, null));
+    var theirAccepted =
+        start(bActor, new ExportJobInput("SKU", List.of("CODE"), theirFilter, null, null));
     var theirView = await(theirAccepted.id(), bActor);
     assertThat(theirView.rowCount()).isEqualTo(3);
     var theirJobId = theirAccepted.id();
     // 拿别人的 SPU ID 去导出，结果是 0 行而不是报错或数据。
-    var cross = await(start(actors.get("Bearer tenant-b"), new ExportJobInput(
-        "SKU", List.of("CODE"), skuFilter(mine.spuId()), null, null)).id(), actors.get("Bearer tenant-b"));
+    var cross =
+        await(
+            start(
+                    actors.get("Bearer tenant-b"),
+                    new ExportJobInput("SKU", List.of("CODE"), skuFilter(mine.spuId()), null, null))
+                .id(),
+            actors.get("Bearer tenant-b"));
     assertThat(cross.rowCount()).isZero();
     // 拿别人的导出任务 id 去读 / 下载：不存在（RLS 下取不到），且不泄露存在性。
-    assertThatThrownBy(() -> call(bActor, "catalog.spu.read", () -> jobs.job(bActor.tenantId(), mineJob.id())))
+    assertThatThrownBy(
+            () -> call(bActor, "catalog.spu.read", () -> jobs.job(bActor.tenantId(), mineJob.id())))
         .hasMessageContaining("不存在");
-    assertThatThrownBy(() -> call(bActor, "catalog.spu.read", () -> jobs.file(bActor, mineJob.id())))
+    assertThatThrownBy(
+            () -> call(bActor, "catalog.spu.read", () -> jobs.file(bActor, mineJob.id())))
         .hasMessageContaining("不存在");
 
     // 2) 伪造 tenant header 无效：租户只来自已认证的成员关系
-    http.perform(post("/catalog/export-jobs")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a)
-            .contentType("application/json")
-            .content("{\"sourceKey\":\"SKU\",\"fields\":[\"CODE\"],\"filters\":{\"spuId\":\""
-                + mine.spuId() + "\"}}"))
+    http.perform(
+            post("/catalog/export-jobs")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a)
+                .contentType("application/json")
+                .content(
+                    "{\"sourceKey\":\"SKU\",\"fields\":[\"CODE\"],\"filters\":{\"spuId\":\""
+                        + mine.spuId()
+                        + "\"}}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.actorId").value(owner.toString()));
     // 该任务属于 B 租户，导不出 A 的数据。
     var id = jsonUuid(http, mine.spuId());
-    assertThat(call(bActor, "catalog.spu.read", () -> jobs.job(bActor.tenantId(), id)).rowCount()).isZero();
+    assertThat(call(bActor, "catalog.spu.read", () -> jobs.job(bActor.tenantId(), id)).rowCount())
+        .isZero();
     // 伪造头也不能借道读别人的导出记录列表里的那条。
-    http.perform(get("/catalog/export-jobs/" + id).header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a))
+    http.perform(
+            get("/catalog/export-jobs/" + id)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rowCount").value(0));
 
     // 3) 连接池归还后不串租户（单连接反复交替）
     for (int i = 0; i < 5; i++) {
-      assertThat(call(actor(), "catalog.spu.read",
-          () -> jobs.job(a, mineJob.id())).rowCount()).isEqualTo(2);
+      assertThat(call(actor(), "catalog.spu.read", () -> jobs.job(a, mineJob.id())).rowCount())
+          .isEqualTo(2);
       assertThatThrownBy(() -> call(bActor, "catalog.spu.read", () -> jobs.job(b, mineJob.id())))
           .hasMessageContaining("不存在");
-      assertThat(call(bActor, "catalog.spu.read",
-          () -> jobs.job(b, theirJobId)).rowCount()).isEqualTo(3);
+      assertThat(call(bActor, "catalog.spu.read", () -> jobs.job(b, theirJobId)).rowCount())
+          .isEqualTo(3);
     }
   }
-
 
   @Test
   void everyNewTableHasForcedRls() {
@@ -804,7 +942,8 @@ class ExportIntegrationTest {
                 + " where n.nspname='public' and relkind='r' and relname='export_job'"
                 + " and (not relrowsecurity or not relforcerowsecurity)");
     assertThat(weak).isEmpty();
-    var role = sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
+    var role =
+        sql.fetchOne("select rolsuper,rolbypassrls from pg_roles where rolname=current_user");
     assertThat(role.get("rolsuper", Boolean.class)).isFalse();
     assertThat(role.get("rolbypassrls", Boolean.class)).isFalse();
     var column =
@@ -825,11 +964,14 @@ class ExportIntegrationTest {
         .andExpect(jsonPath("$.items[0].maxRows").isNumber());
 
     var created =
-        http.perform(post("/catalog/export-jobs")
-                .header("Authorization", "Bearer tenant-a")
-                .contentType("application/json")
-                .content("{\"sourceKey\":\"SKU\",\"fields\":[\"CODE\",\"NAME\"],\"filters\":{\"spuId\":\""
-                    + f.spuId() + "\"},\"sort\":{\"key\":\"code\",\"order\":\"asc\"}}"))
+        http.perform(
+                post("/catalog/export-jobs")
+                    .header("Authorization", "Bearer tenant-a")
+                    .contentType("application/json")
+                    .content(
+                        "{\"sourceKey\":\"SKU\",\"fields\":[\"CODE\",\"NAME\"],\"filters\":{\"spuId\":\""
+                            + f.spuId()
+                            + "\"},\"sort\":{\"key\":\"code\",\"order\":\"asc\"}}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.sourceKey").value("SKU"))
             .andReturn();
@@ -837,7 +979,10 @@ class ExportIntegrationTest {
     await(UUID.fromString(id), who);
 
     // 记录列表：同租户历史导出会累积，这里断言形状与可追溯性，不断言总数。
-    http.perform(get("/catalog/export-jobs").param("size", "5").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/export-jobs")
+                .param("size", "5")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").isNumber())
         .andExpect(jsonPath("$.items[0].actorId").value(owner.toString()))
@@ -850,24 +995,29 @@ class ExportIntegrationTest {
         .andExpect(jsonPath("$.headers[0]").value("SKU 编码"));
 
     var file =
-        http.perform(get("/catalog/export-jobs/" + id + "/file")
-                .header("Authorization", "Bearer tenant-a"))
+        http.perform(
+                get("/catalog/export-jobs/" + id + "/file")
+                    .header("Authorization", "Bearer tenant-a"))
             .andExpect(status().isOk())
-            .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString(".csv")))
+            .andExpect(
+                header()
+                    .string("Content-Disposition", org.hamcrest.Matchers.containsString(".csv")))
             .andReturn();
     var body = file.getResponse().getContentAsString(StandardCharsets.UTF_8);
     assertThat(body).contains("SKU 编码").contains("SKU 名称").contains("HTTP-SKU");
 
     // 缺字段 → 400；未知数据源 → 404。
-    http.perform(post("/catalog/export-jobs")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"sourceKey\":\"SKU\",\"fields\":[]}"))
+    http.perform(
+            post("/catalog/export-jobs")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"sourceKey\":\"SKU\",\"fields\":[]}"))
         .andExpect(status().isBadRequest());
-    http.perform(post("/catalog/export-jobs")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"sourceKey\":\"NOPE\",\"fields\":[\"CODE\"]}"))
+    http.perform(
+            post("/catalog/export-jobs")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"sourceKey\":\"NOPE\",\"fields\":[\"CODE\"]}"))
         .andExpect(status().isNotFound());
   }
 
@@ -875,11 +1025,16 @@ class ExportIntegrationTest {
 
   private String download(AccessService.Access who, UUID id) {
     try {
-      var result = http.perform(get("/catalog/export-jobs/" + id + "/file")
-              .header("Authorization", who.tenantId().equals(a) ? "Bearer tenant-a"
-                  : who.tenantId().equals(b) ? "Bearer tenant-b" : "Bearer scoped"))
-          .andExpect(status().isOk())
-          .andReturn();
+      var result =
+          http.perform(
+                  get("/catalog/export-jobs/" + id + "/file")
+                      .header(
+                          "Authorization",
+                          who.tenantId().equals(a)
+                              ? "Bearer tenant-a"
+                              : who.tenantId().equals(b) ? "Bearer tenant-b" : "Bearer scoped"))
+              .andExpect(status().isOk())
+              .andReturn();
       return result.getResponse().getContentAsString(StandardCharsets.UTF_8);
     } catch (Exception e) {
       throw new IllegalStateException(e);
@@ -904,8 +1059,10 @@ class ExportIntegrationTest {
 
   private UUID jsonUuid(MockMvc http, UUID ignored) throws Exception {
     var latest =
-        http.perform(get("/catalog/export-jobs").param("size", "1")
-                .header("Authorization", "Bearer tenant-b"))
+        http.perform(
+                get("/catalog/export-jobs")
+                    .param("size", "1")
+                    .header("Authorization", "Bearer tenant-b"))
             .andExpect(status().isOk())
             .andReturn();
     return UUID.fromString(jsonPathValue(latest, "$.items[0].id"));
@@ -913,8 +1070,9 @@ class ExportIntegrationTest {
 
   private static String jsonPathValue(MvcResult result, String path) {
     try {
-      var node = new com.fasterxml.jackson.databind.ObjectMapper()
-          .readTree(result.getResponse().getContentAsString(StandardCharsets.UTF_8));
+      var node =
+          new com.fasterxml.jackson.databind.ObjectMapper()
+              .readTree(result.getResponse().getContentAsString(StandardCharsets.UTF_8));
       var current = node;
       for (String segment : path.replace("$.", "").split("\\.")) {
         // 支持 items[0] 这种带下标的段：split 之后是 ["items[0]", "id"]。
@@ -935,5 +1093,4 @@ class ExportIntegrationTest {
       throw new IllegalStateException("读取响应字段失败：" + path, e);
     }
   }
-
 }

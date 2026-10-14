@@ -60,9 +60,7 @@ export const ROLE_PROFILE_KINDS = [
 export type RoleProfileKind = (typeof ROLE_PROFILE_KINDS)[number]['value'];
 
 export function kindOf(value: string | null | undefined): (typeof ROLE_PROFILE_KINDS)[number] {
-  return (
-    ROLE_PROFILE_KINDS.find((item) => item.value === value) ?? ROLE_PROFILE_KINDS[0]
-  );
+  return ROLE_PROFILE_KINDS.find((item) => item.value === value) ?? ROLE_PROFILE_KINDS[0];
 }
 
 export function kindLabel(value: string | null | undefined): string {
@@ -76,7 +74,10 @@ export function kindLabel(value: string | null | undefined): string {
  */
 export type ProfileSlotState = 'not-assigned' | 'no-profile' | 'saved';
 
-export function slotState(roleId: string | null | undefined, profileFound: boolean): ProfileSlotState {
+export function slotState(
+  roleId: string | null | undefined,
+  profileFound: boolean,
+): ProfileSlotState {
   if (!roleId) return 'not-assigned';
   return profileFound ? 'saved' : 'no-profile';
 }
@@ -265,12 +266,14 @@ export function supplierFormProblem(form: SupplierProfileForm): string | null {
 
   const quantity = form.moqQuantity.trim();
   const unit = form.moqUnitCode.trim();
-  if (quantity && !unit) return '填了最小起订量就必须填采购单位（同样是「100」，在「件」和「箱」下差几十倍）';
+  if (quantity && !unit)
+    return '填了最小起订量就必须填采购单位（同样是「100」，在「件」和「箱」下差几十倍）';
   if (!quantity && unit) return '填了采购单位就必须填最小起订量，只给单位没有数量说不清起订门槛';
   if (quantity) {
     const value = Number(quantity);
-    if (!Number.isFinite(value) || value <= 0) return '最小起订量必须大于 0（不设起订量请留空，不要填 0）';
-    const decimals = quantity.includes('.') ? quantity.split('.')[1]?.length ?? 0 : 0;
+    if (!Number.isFinite(value) || value <= 0)
+      return '最小起订量必须大于 0（不设起订量请留空，不要填 0）';
+    const decimals = quantity.includes('.') ? (quantity.split('.')[1]?.length ?? 0) : 0;
     if (decimals > 6) return '最小起订量最多 6 位小数';
   }
   if (form.note.length > 2000) return '备注最多 2000 个字符';
@@ -342,7 +345,7 @@ export function customerFormProblem(form: CustomerProfileForm): string | null {
     const value = Number(limitText);
     if (!Number.isFinite(value) || value <= 0)
       return '信用额度必须大于 0（不设额度请留空 —— 「没设额度」表示不限制赊账，而「额度为 0」表示完全不许赊）';
-    const decimals = limitText.includes('.') ? limitText.split('.')[1]?.length ?? 0 : 0;
+    const decimals = limitText.includes('.') ? (limitText.split('.')[1]?.length ?? 0) : 0;
     if (decimals > 4) return '信用额度最多 4 位小数';
     if (!currency)
       return '填了信用额度就必须填默认币种 —— 12 应收拿它和发票币种对比，没币种的额度只能靠假设，而假设错了不会报错';
@@ -553,7 +556,8 @@ export function roleStatusLabel(value: string | null | undefined): string {
 /** 概览里「应为零」的两个探针的说明。 */
 export const PROBE_HINTS: Record<string, string> = {
   riskyCustomerWithCreditCount: '风险客户里仍留着信用额度的条数（规则 R4 生效后应为 0）',
-  termsWithoutCreditCount: '有账期但结算方式不是账期结算的供应商条数（规则 R1 的 DB 兜底生效后应为 0）',
+  termsWithoutCreditCount:
+    '有账期但结算方式不是账期结算的供应商条数（规则 R1 的 DB 兜底生效后应为 0）',
 };
 
 /** 列表行摘要为空时的兜底文案（三种「没有」各有各的说法）。 */

@@ -103,7 +103,9 @@ export function ImageProcessWorkspace() {
   const [editing, setEditing] = useState<MediaProcessRecipeInput | null>(null);
   // 提交面板：选中的配方与素材
   const [picking, setPicking] = useState<{ recipeId: string } | null>(null);
-  const [assets, setAssets] = useState<{ id: string; name: string; widthPx: number | null; heightPx: number | null }[]>([]);
+  const [assets, setAssets] = useState<
+    { id: string; name: string; widthPx: number | null; heightPx: number | null }[]
+  >([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [assetKeyword, setAssetKeyword] = useState('');
 
@@ -301,7 +303,11 @@ export function ImageProcessWorkspace() {
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="处理任务" value={overview?.jobCount ?? 0} icon={<Wand2 className="h-4 w-4" />} />
+        <StatCard
+          label="处理任务"
+          value={overview?.jobCount ?? 0}
+          icon={<Wand2 className="h-4 w-4" />}
+        />
         {/* 「进行中」用 neutral：不是坏事也不是好事，只是在跑。
             StatCard 的 polarity 只有 positive/negative/neutral，没有 warning——
             自造一个名字会编译不过，而改 UI 包是另一个模块的写入所有权。 */}
@@ -379,7 +385,10 @@ export function ImageProcessWorkspace() {
           ) : (
             <ul className="divide-border divide-y">
               {recipes.map((recipe) => (
-                <li key={recipe.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <li
+                  key={recipe.id}
+                  className="flex flex-wrap items-center justify-between gap-3 py-3"
+                >
                   <div className="min-w-0 space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{recipe.name}</span>
@@ -393,8 +402,7 @@ export function ImageProcessWorkspace() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() =>
-                        setPicking({ recipeId: recipe.id })}
+                      onClick={() => setPicking({ recipeId: recipe.id })}
                       disabled={!recipe.enabled}
                     >
                       用它处理
@@ -478,7 +486,7 @@ export function ImageProcessWorkspace() {
                       <span className="font-medium">{job.recipeName}</span>
                       <Badge tone={jobStatusTone(job.status)}>{jobStatusLabel(job.status)}</Badge>
                       {pollable(job.status) && (
-                        <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                        <Loader2 className="text-muted-foreground h-3 w-3 animate-spin" />
                       )}
                     </div>
                     <p className="text-muted-foreground text-xs">
@@ -526,7 +534,12 @@ export function ImageProcessWorkspace() {
           extra={
             <div className="flex items-center gap-2">
               {pollable(detail.job.status) && (
-                <Button size="sm" variant="outline" onClick={() => void onCancel(detail.job.id)} disabled={busy}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void onCancel(detail.job.id)}
+                  disabled={busy}
+                >
                   <Ban className="h-4 w-4" />
                   取消
                 </Button>
@@ -538,7 +551,7 @@ export function ImageProcessWorkspace() {
             </div>
           }
         >
-          <div className="mb-3 h-2 w-full overflow-hidden rounded bg-muted">
+          <div className="bg-muted mb-3 h-2 w-full overflow-hidden rounded">
             <div
               className="bg-primary h-full transition-[width]"
               style={{ width: `${progressPercent(detail.job)}%` }}
@@ -551,7 +564,10 @@ export function ImageProcessWorkspace() {
               .join(' + ') || '（无比例档，按配方自身尺寸输出一版）'}
           </p>
           {detail.items.length === 0 ? (
-            <EmptyState title="这个任务还没有条目" description="提交处理后，每个素材会在这里占一行。" />
+            <EmptyState
+              title="这个任务还没有条目"
+              description="提交处理后，每个素材会在这里占一行。"
+            />
           ) : (
             <ul className="divide-border divide-y">
               {detail.items.map((item) => (
@@ -561,7 +577,15 @@ export function ImageProcessWorkspace() {
                       <ImageIcon className="h-4 w-4" />
                       {item.assetName}
                     </span>
-                    <Badge tone={item.status === 'SUCCEEDED' ? 'success' : item.status === 'FAILED' ? 'danger' : 'neutral'}>
+                    <Badge
+                      tone={
+                        item.status === 'SUCCEEDED'
+                          ? 'success'
+                          : item.status === 'FAILED'
+                            ? 'danger'
+                            : 'neutral'
+                      }
+                    >
                       {itemStatusLabel(item.status)}
                     </Badge>
                   </div>
@@ -872,7 +896,12 @@ function RecipeEditor({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => set('ratios', ratios.filter((_, i) => i !== index))}
+                    onClick={() =>
+                      set(
+                        'ratios',
+                        ratios.filter((_, i) => i !== index),
+                      )
+                    }
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -937,7 +966,11 @@ function Picker({
         {sizeProblem && <p className="text-destructive text-sm">{sizeProblem}</p>}
 
         <Field label="处理配方">
-          <select className={control} value={recipeId} onChange={(e) => onRecipeChange(e.target.value)}>
+          <select
+            className={control}
+            value={recipeId}
+            onChange={(e) => onRecipeChange(e.target.value)}
+          >
             {recipes.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.name} —— {recipeSummary(r)}
@@ -948,7 +981,8 @@ function Picker({
 
         {chosen && (
           <p className="text-muted-foreground text-xs">
-            每个素材会产出 {Math.max(1, chosen.ratios.length)} 个版本；原图版本保留在素材的版本历史里。
+            每个素材会产出 {Math.max(1, chosen.ratios.length)}{' '}
+            个版本；原图版本保留在素材的版本历史里。
           </p>
         )}
 

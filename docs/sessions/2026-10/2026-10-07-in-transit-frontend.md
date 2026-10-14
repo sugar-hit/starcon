@@ -12,15 +12,15 @@
 
 命名空间 `/warehouse/inventory/in-transit`，浏览器只经 `/api/warehouse` 代理：
 
-| 方法 | 路径 | 用途 |
-| --- | --- | --- |
-| GET | `` | 清单（真分页 + **不受分页影响**的全量汇总 + 三组下拉词表） |
-| GET | `/alerts` | 到达预警（按 ETA 升序） |
-| GET | `/netting` | 补货可扣在途净额（目的仓 × SKU） |
-| GET | `/{legId}` | 详情（行 + 到达/差异时间线 + 指标口径说明） |
-| POST | `` | 登记外部在途腿 |
-| POST | `/{legId}/arrive` | 分批到货 |
-| POST | `/{legId}/discrepancy` | 差异登记 |
+| 方法 | 路径                   | 用途                                                       |
+| ---- | ---------------------- | ---------------------------------------------------------- |
+| GET  | ``                     | 清单（真分页 + **不受分页影响**的全量汇总 + 三组下拉词表） |
+| GET  | `/alerts`              | 到达预警（按 ETA 升序）                                    |
+| GET  | `/netting`             | 补货可扣在途净额（目的仓 × SKU）                           |
+| GET  | `/{legId}`             | 详情（行 + 到达/差异时间线 + 指标口径说明）                |
+| POST | ``                     | 登记外部在途腿                                             |
+| POST | `/{legId}/arrive`      | 分批到货                                                   |
+| POST | `/{legId}/discrepancy` | 差异登记                                                   |
 
 排序白名单 6 键（`EXPECTED_ARRIVE` / `SHIPPED_AT` / `QUANTITY` / `SKU_CODE` / `OVERDUE` / `CREATED_AT`），
 净额排序 3 键（`QUANTITY` / `LATEST_ARRIVAL` / `SKU_CODE`），白名单外的键返回 400 —— 下拉只给这几个。
@@ -47,12 +47,14 @@
 ## 文件清单
 
 新增
+
 - `apps/web/src/app/inventory/transit/page.tsx`（路由）
 - `apps/web/src/components/inventory/inventory-in-transit-model.ts`
 - `apps/web/src/components/inventory/inventory-in-transit-model.test.ts`（49 例）
 - `apps/web/src/components/inventory/inventory-in-transit.tsx`
 
 修改（均为共用文件，只做与本模块相关的最小改动）
+
 - `apps/web/src/lib/api-proxy.ts`（warehouse 白名单加 `in-transit` 分支 + 中文注释）
 - `apps/web/src/app/api/warehouse/[...path]/route.test.ts`（放行 6 条真实调用点 + 拒绝 5 条未交付子路径）
 - `packages/api-contracts/src/catalog.ts`、`warehouse.openapi.json`（**codegen 产物，未手改**）
@@ -86,6 +88,7 @@
 只在其正则里 `transfers(...)` 之后插入本车道那一条 `in-transit` 分支 + 注释。
 
 求并正确性是**可验证**的，不是靠肉眼：
+
 - `npx vitest run apps/web/src/app/api` → **5 文件 / 56 例全过**，含四条车道各自的
   allowlist 用例（catalog 35 例、iam 7 例、warehouse 8 例、`cross-entity-transfer-allowlist` 2 例）。
   这些用例逐条断言各自车道的路径仍被放行，所以「漏掉别人的分支」会被直接测出来。

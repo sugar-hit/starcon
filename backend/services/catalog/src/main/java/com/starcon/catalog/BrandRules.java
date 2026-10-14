@@ -7,18 +7,16 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * 3.3.2.1 品牌管理的纯规则：编码与名称规范化、授权状态词表、多语言名校验、
- * 凭证有效期判定，以及蓝图点名的**阻止刊登判定**。
+ * 3.3.2.1 品牌管理的纯规则：编码与名称规范化、授权状态词表、多语言名校验、 凭证有效期判定，以及蓝图点名的**阻止刊登判定**。
  *
  * <p>与 {@link CategoryTreeRules} / {@link SpecAxisRules} / {@link AttributeDictionaryRules} /
- * {@link UnitRules} 同一条纪律：**能在保存前判定的，就不要留到刊登时才炸**。
- * 「需授权品牌没有有效凭证」这件事如果只在刊登时才发现，代价是一批已经排好的货；
+ * {@link UnitRules} 同一条纪律：**能在保存前判定的，就不要留到刊登时才炸**。 「需授权品牌没有有效凭证」这件事如果只在刊登时才发现，代价是一批已经排好的货；
  * 而在品牌页就能当场看见「这个品牌现在登不了，缺一张有效凭证」，代价只是一行提示。
  *
  * <p>本类不碰数据库，可以在离线单测里穷举，与前端 {@code brand-model.ts} 同口径。
  *
- * <p>类名不叫 {@code Brand}：那是被静态导入的 DTO record（{@link CatalogModels}），
- * 两者在同一批文件里会直接撞名，编译期才炸。与 {@link CategoryTreeRules} 同一个理由。
+ * <p>类名不叫 {@code Brand}：那是被静态导入的 DTO record（{@link CatalogModels}）， 两者在同一批文件里会直接撞名，编译期才炸。与 {@link
+ * CategoryTreeRules} 同一个理由。
  */
 public final class BrandRules {
   private BrandRules() {}
@@ -53,11 +51,11 @@ public final class BrandRules {
   /**
    * 阻止刊登的原因码。返回体里给机器读的是它，给运营看的是 {@link #blockMessage}。
    *
-   * <p>用码而不是一句话做接口字段：04 刊登与 16 侵权检测要按「缺凭证」「凭证过期」
-   * 走**不同的处理**（前者提示补材料，后者要立刻下架该品牌下的商品）。
+   * <p>用码而不是一句话做接口字段：04 刊登与 16 侵权检测要按「缺凭证」「凭证过期」 走**不同的处理**（前者提示补材料，后者要立刻下架该品牌下的商品）。
    * 只返回一句中文的话，两个下游只能去匹配字符串。
    */
   public static final String BLOCK_BRAND_DISABLED = "BRAND_DISABLED";
+
   public static final String BLOCK_LICENSE_MISSING = "LICENSE_MISSING";
   public static final String BLOCK_LICENSE_NOT_YET_EFFECTIVE = "LICENSE_NOT_YET_EFFECTIVE";
   public static final String BLOCK_LICENSE_EXPIRED = "LICENSE_EXPIRED";
@@ -72,8 +70,7 @@ public final class BrandRules {
     String code = normalizeCode(value);
     if (code.isEmpty()) return "品牌编码不能为空";
     if (code.length() > MAX_CODE_LENGTH) return "品牌编码最多 " + MAX_CODE_LENGTH + " 个字符";
-    if (!code.matches("[A-Z0-9][A-Z0-9_-]{0,63}"))
-      return "品牌编码请使用英文字母、数字、下划线或短横线，长度 1~64 位";
+    if (!code.matches("[A-Z0-9][A-Z0-9_-]{0,63}")) return "品牌编码请使用英文字母、数字、下划线或短横线，长度 1~64 位";
     return null;
   }
 
@@ -119,8 +116,7 @@ public final class BrandRules {
     String key = normalizeLocale(locale);
     String value = normalizeName(name);
     if (key.isEmpty()) return "多语言名的语言标识不能为空（如 zh-CN / en-US）";
-    if (key.length() > MAX_LOCALE_LENGTH)
-      return "语言标识最多 " + MAX_LOCALE_LENGTH + " 个字符";
+    if (key.length() > MAX_LOCALE_LENGTH) return "语言标识最多 " + MAX_LOCALE_LENGTH + " 个字符";
     if (!key.matches("[a-z]{2,3}(-[a-z0-9]{2,8})?"))
       return "语言标识请使用 BCP 47 形式，如 zh-CN / en-US / ja";
     if (value.isEmpty()) return "多语言名的内容不能为空";
@@ -172,16 +168,14 @@ public final class BrandRules {
   public static String grantorProblem(String value) {
     String grantor = normalizeText(value);
     if (grantor.isEmpty()) return "授权方不能为空";
-    if (grantor.length() > MAX_GRANTOR_LENGTH)
-      return "授权方最多 " + MAX_GRANTOR_LENGTH + " 个字符";
+    if (grantor.length() > MAX_GRANTOR_LENGTH) return "授权方最多 " + MAX_GRANTOR_LENGTH + " 个字符";
     return null;
   }
 
   /**
    * 凭证有效期校验。
    *
-   * <p>{@code validTo} 为空表示长期有效，不是漏填——自有品牌的历史合约经常没有终止日。
-   * 但填了就不能早于生效日：那种行写进库会让「有效区间」在界面上显示成倒着的，
+   * <p>{@code validTo} 为空表示长期有效，不是漏填——自有品牌的历史合约经常没有终止日。 但填了就不能早于生效日：那种行写进库会让「有效区间」在界面上显示成倒着的，
    * 而且没人会注意到它被判成了永远无效。
    */
   public static String validityProblem(LocalDate from, LocalDate to) {
@@ -193,22 +187,18 @@ public final class BrandRules {
   /** 凭证材料引用校验：可空，填了不能超长。 */
   public static String evidenceProblem(String value) {
     String evidence = normalizeText(value);
-    if (evidence.length() > MAX_EVIDENCE_LENGTH)
-      return "凭证材料引用最多 " + MAX_EVIDENCE_LENGTH + " 个字符";
+    if (evidence.length() > MAX_EVIDENCE_LENGTH) return "凭证材料引用最多 " + MAX_EVIDENCE_LENGTH + " 个字符";
     return null;
   }
 
   /**
    * 一条凭证在指定日期是否有效。
    *
-   * <p>判定与 {@link #publishBlock} 同口径，两处各写一遍的话，
-   * 页面说「有效」而刊登判定说「过期」的那类分裂 bug 要等到出事才发现。
+   * <p>判定与 {@link #publishBlock} 同口径，两处各写一遍的话， 页面说「有效」而刊登判定说「过期」的那类分裂 bug 要等到出事才发现。
    *
-   * <p>{@code enabled=false} 的凭证一律无效：撤销一张授权不该靠删行来表达——
-   * 删了就查不到「曾经有过授权、后来被撤销」，而 16 侵权检测恰恰要这个事实。
+   * <p>{@code enabled=false} 的凭证一律无效：撤销一张授权不该靠删行来表达—— 删了就查不到「曾经有过授权、后来被撤销」，而 16 侵权检测恰恰要这个事实。
    */
-  public static boolean validOn(
-      boolean enabled, LocalDate from, LocalDate to, LocalDate on) {
+  public static boolean validOn(boolean enabled, LocalDate from, LocalDate to, LocalDate on) {
     if (!enabled || from == null || on == null) return false;
     if (on.isBefore(from)) return false;
     return to == null || !on.isAfter(to);
@@ -218,10 +208,7 @@ public final class BrandRules {
 
   /** 一次凭证判定所需的全部输入。抽成 record 是为了让纯规则不依赖数据库行。 */
   public record PublishInputs(
-      boolean enabled,
-      String authorizationStatus,
-      List<Credential> credentials,
-      LocalDate asOf) {}
+      boolean enabled, String authorizationStatus, List<Credential> credentials, LocalDate asOf) {}
 
   /** 一条凭证的判定输入：启用状态与有效期。 */
   public record Credential(boolean enabled, LocalDate validFrom, LocalDate validTo) {}
@@ -229,23 +216,17 @@ public final class BrandRules {
   /**
    * 判定一个品牌当前能否刊登。
    *
-   * <p>蓝图原话：「品牌授权状态直接影响能否刊登，品牌『需授权』但无有效凭证时应阻止发布」。
-   * 落成四条原因码，判定顺序即优先级：
+   * <p>蓝图原话：「品牌授权状态直接影响能否刊登，品牌『需授权』但无有效凭证时应阻止发布」。 落成四条原因码，判定顺序即优先级：
    *
    * <ol>
-   *   <li>品牌已停用 → {@link #BLOCK_BRAND_DISABLED}。停用的品牌在任何授权状态下都登不了，
-   *       否则「停用」这个动作就失去意义（它只剩界面的视觉意义）。
-   *   <li>状态不是 LICENSED（自有 / 代理）→ 恒可刊登。这两个状态本身就是「已有授权」，
-   *       再要求凭证就等于逼运营给自有品牌伪造一份授权书。
+   *   <li>品牌已停用 → {@link #BLOCK_BRAND_DISABLED}。停用的品牌在任何授权状态下都登不了， 否则「停用」这个动作就失去意义（它只剩界面的视觉意义）。
+   *   <li>状态不是 LICENSED（自有 / 代理）→ 恒可刊登。这两个状态本身就是「已有授权」， 再要求凭证就等于逼运营给自有品牌伪造一份授权书。
    *   <li>需授权且一条凭证都没有 → {@link #BLOCK_LICENSE_MISSING}。
-   *   <li>需授权、有凭证但当前都不在有效期内 →
-   *       {@link #BLOCK_LICENSE_NOT_YET_EFFECTIVE}（有凭证、最早一条还没到生效日）或
-   *       {@link #BLOCK_LICENSE_EXPIRED}（有过期日、已经全过期）。
-   *       两者分开是因为处理动作不同：前者「等着」，后者「要续约或换品牌」。
+   *   <li>需授权、有凭证但当前都不在有效期内 → {@link #BLOCK_LICENSE_NOT_YET_EFFECTIVE}（有凭证、最早一条还没到生效日）或 {@link
+   *       #BLOCK_LICENSE_EXPIRED}（有过期日、已经全过期）。 两者分开是因为处理动作不同：前者「等着」，后者「要续约或换品牌」。
    * </ol>
    *
-   * <p>被停用的凭证（{@code enabled=false}）不参与判定：撤销就该等于无效，
-   * 但行还在，可查——理由见 {@link #validOn}。
+   * <p>被停用的凭证（{@code enabled=false}）不参与判定：撤销就该等于无效， 但行还在，可查——理由见 {@link #validOn}。
    *
    * @return 可刊登返回 null，否则返回原因码
    */

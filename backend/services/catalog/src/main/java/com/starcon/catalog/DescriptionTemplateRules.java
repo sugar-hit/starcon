@@ -10,12 +10,10 @@ import java.util.Map;
  * 4.2.2.2 描述模板的纯规则层：段落类型词表、插图位词表、容量上限、模板与段落校验、HTML 转义。
  *
  * <p>与 {@link DescriptionRules} / {@link TitleRules} 同一形状：无状态静态方法。
- * 服务层拒绝时给出的话、前端表单校验、集成测试断言的边界都引同一份实现，
- * 所以前端那份 {@code description-template-model.ts} 是逐条照抄这里的。
+ * 服务层拒绝时给出的话、前端表单校验、集成测试断言的边界都引同一份实现， 所以前端那份 {@code description-template-model.ts} 是逐条照抄这里的。
  *
- * <p><b>本类不碰数据库，也不碰渲染</b>。渲染在 {@link DescriptionTemplateRenderer}，
- * 取值（变量绑到哪个字段、短语池取哪句）在 {@link DescriptionRenderer}（3.4.2.2 复用）。
- * 三者分开的理由与 V21 相同：把「参数合不合法」和「填出什么」混在一起，
+ * <p><b>本类不碰数据库，也不碰渲染</b>。渲染在 {@link DescriptionTemplateRenderer}， 取值（变量绑到哪个字段、短语池取哪句）在 {@link
+ * DescriptionRenderer}（3.4.2.2 复用）。 三者分开的理由与 V21 相同：把「参数合不合法」和「填出什么」混在一起，
  * 会让「缺变量必须被显式提示」这条蓝图标着要显式控制的纯函数被校验代码污染。
  */
 public final class DescriptionTemplateRules {
@@ -26,9 +24,8 @@ public final class DescriptionTemplateRules {
   /**
    * 五类段落。与 V96 的 description_template_section.section_type CHECK 逐字一致。
    *
-   * <p>蓝图原文「段落结构（产品介绍、使用场景、规格参数、注意事项、售后承诺）」——
-   * 五类**显式建模**而不是一列自由文本，也不是糊成一个正文大字符串：
-   * 「规格参数这一段还没配英文」必须在 SQL 里一次问得出来。
+   * <p>蓝图原文「段落结构（产品介绍、使用场景、规格参数、注意事项、售后承诺）」—— 五类**显式建模**而不是一列自由文本，也不是糊成一个正文大字符串： 「规格参数这一段还没配英文」必须在
+   * SQL 里一次问得出来。
    */
   public static final List<String> SECTION_TYPES =
       List.of("INTRO", "SCENE", "SPEC", "CAUTION", "SERVICE_PROMISE");
@@ -44,9 +41,8 @@ public final class DescriptionTemplateRules {
   /**
    * 缺失报告的成因。
    *
-   * <p>前四项与 V21 的 {@code content_render_issue.issue_kind} **逐字一致**——共用取值口径，
-   * 「brand 缺了」在这两个模块里说的是同一件事；第五项 IMAGE_UNBOUND 是本模块新增的
-   * （V21 全程纯文本，没有图片概念）。
+   * <p>前四项与 V21 的 {@code content_render_issue.issue_kind} **逐字一致**——共用取值口径， 「brand
+   * 缺了」在这两个模块里说的是同一件事；第五项 IMAGE_UNBOUND 是本模块新增的 （V21 全程纯文本，没有图片概念）。
    */
   public static final List<String> ISSUE_KINDS =
       List.of(
@@ -132,9 +128,8 @@ public final class DescriptionTemplateRules {
   /**
    * 一个描述模板最多 8 个段落。
    *
-   * <p>蓝图给的是五类，所以上限定 8 而不是 5：留出「同类再拆一段」的余地
-   * （一个类目既要「产品介绍」又要「使用场景」，但也可能要两段注意事项：安装 / 保养）。
-   * 同类超过一段需要显式改 sort_order，而不是让 DB 的 UNIQUE(tenant_id,template_id,section_type) 拦下。
+   * <p>蓝图给的是五类，所以上限定 8 而不是 5：留出「同类再拆一段」的余地 （一个类目既要「产品介绍」又要「使用场景」，但也可能要两段注意事项：安装 / 保养）。 同类超过一段需要显式改
+   * sort_order，而不是让 DB 的 UNIQUE(tenant_id,template_id,section_type) 拦下。
    */
   public static final int MAX_SECTIONS = 8;
 
@@ -189,13 +184,11 @@ public final class DescriptionTemplateRules {
   /**
    * 段落重复与缺口校验。
    *
-   * <p>重复：同一模板里两段「产品介绍」会让渲染出两个同名 section，
-   * 页面与平台上都分不清哪段是哪段（所以 DB 上还有
-   * {@code UNIQUE(tenant_id,template_id,section_type)} 兜底）。
+   * <p>重复：同一模板里两段「产品介绍」会让渲染出两个同名 section， 页面与平台上都分不清哪段是哪段（所以 DB 上还有 {@code
+   * UNIQUE(tenant_id,template_id,section_type)} 兜底）。
    *
-   * <p><b>缺口不拦</b>：五类段落不是全必填。很多商品没有独立售后承诺段
-   * （承诺写在「注意事项」里），硬要求五段齐全只会逼运营填废话。
-   * 缺口由概览的 {@code missingSectionTypeCount} 提示，而不是在保存时拒绝。
+   * <p><b>缺口不拦</b>：五类段落不是全必填。很多商品没有独立售后承诺段 （承诺写在「注意事项」里），硬要求五段齐全只会逼运营填废话。 缺口由概览的 {@code
+   * missingSectionTypeCount} 提示，而不是在保存时拒绝。
    */
   public static String sectionTypesProblem(List<String> sectionTypes) {
     List<String> seen = new ArrayList<>();
@@ -224,18 +217,16 @@ public final class DescriptionTemplateRules {
   /**
    * 图片 URL 校验。
    *
-   * <p><b>只允许 http/https</b>：渲染出的 HTML 是要直接交给平台上传的，
-   * {@code javascript:alert(1)} 落在 {@code <img src>} 上是一条真实注入路径
-   * （{@code src} 上 javascript: 在部分浏览器仍然会执行）。
-   * 与 {@link DescriptionTemplateRenderer} 里 {@link #escapeAttribute} 的转义互为纵深。
+   * <p><b>只允许 http/https</b>：渲染出的 HTML 是要直接交给平台上传的， {@code javascript:alert(1)} 落在 {@code <img
+   * src>} 上是一条真实注入路径 （{@code src} 上 javascript: 在部分浏览器仍然会执行）。 与 {@link DescriptionTemplateRenderer}
+   * 里 {@link #escapeAttribute} 的转义互为纵深。
    */
   public static String imageUrlProblem(String url) {
     String value = MediaRules.normalize(url);
     if (value.isEmpty()) return "图片地址不能为空";
     if (value.length() > 1000) return "图片地址最多 1000 个字符";
     if (!value.matches("(?i)https?://[^\\s\"'<>]+"))
-      return "图片地址必须以 http:// 或 https:// 开头："
-          + "渲染出的 HTML 是直接交给平台上传的，javascript: 之类的协议会变成一条注入路径";
+      return "图片地址必须以 http:// 或 https:// 开头：" + "渲染出的 HTML 是直接交给平台上传的，javascript: 之类的协议会变成一条注入路径";
     return null;
   }
 
@@ -253,17 +244,13 @@ public final class DescriptionTemplateRules {
   /**
    * 渲染提交的校验（locales 与 skuId 之外的可读理由）。
    *
-   * <p>缺译文**不**在这里拒：那与 3.4.2.2 的批量填充不同——那边一次填几十个 SKU，
-   * 缺译文会让整批报废所以要提交前拦；这边渲染的是一个 SKU，
-   * 缺一段译文按「该段落报 TRANSLATION_MISSING 并降级 INCOMPLETE」处理更有用
-   * （运营能立刻看到「就差英文」而不是提交失败）。
+   * <p>缺译文**不**在这里拒：那与 3.4.2.2 的批量填充不同——那边一次填几十个 SKU， 缺译文会让整批报废所以要提交前拦；这边渲染的是一个 SKU， 缺一段译文按「该段落报
+   * TRANSLATION_MISSING 并降级 INCOMPLETE」处理更有用 （运营能立刻看到「就差英文」而不是提交失败）。
    */
   public static String renderStatusProblem(String status) {
     String value = MediaRules.normalizeUpper(status);
     if (!RENDER_STATUSES.contains(value))
-      return "渲染状态只能是 "
-          + String.join(" / ", RENDER_STATUSES)
-          + "（已填好 / 有段落缺变量或缺图 / 未渲染出可用段落）";
+      return "渲染状态只能是 " + String.join(" / ", RENDER_STATUSES) + "（已填好 / 有段落缺变量或缺图 / 未渲染出可用段落）";
     return null;
   }
 
@@ -272,12 +259,10 @@ public final class DescriptionTemplateRules {
   /**
    * 正文转义。
    *
-   * <p>段落正文里除了变量占位符，允许运营写**行内富文本**（蓝图要求「富文本描述模板」）：
-   * {@code <b> <em> <strong> <ul> <li> <br> <p>}。这些标签原样保留，
-   * 其余标签（{@code <script>}、{@code <iframe>}、{@code onload=} 之类）一律转义成文本。
+   * <p>段落正文里除了变量占位符，允许运营写**行内富文本**（蓝图要求「富文本描述模板」）： {@code <b> <em> <strong> <ul> <li> <br>
+   * <p>}。这些标签原样保留， 其余标签（{@code <script>}、{@code <iframe>}、{@code onload=} 之类）一律转义成文本。
    *
-   * <p>白名单而不是「全部转义」：全部转义等于只支持纯文本，与蓝图「富文本」矛盾；
-   * 全部放行等于把 XSS 交给运营。两头都不能要，所以显式列白名单。
+   * <p>白名单而不是「全部转义」：全部转义等于只支持纯文本，与蓝图「富文本」矛盾； 全部放行等于把 XSS 交给运营。两头都不能要，所以显式列白名单。
    */
   private static final List<String> INLINE_TAGS =
       List.of("b", "strong", "em", "i", "u", "br", "ul", "ol", "li", "p", "span");
@@ -291,8 +276,7 @@ public final class DescriptionTemplateRules {
   /**
    * HTML 转义：白名单标签原样保留，其余全部转义。
    *
-   * <p>变量绑定值（品牌名、SKU 规格、短语文本）会先经过这里再拼进 HTML——
-   * 一个叫 {@code <img onerror=...>} 的品牌名不该变成一个标签。
+   * <p>变量绑定值（品牌名、SKU 规格、短语文本）会先经过这里再拼进 HTML—— 一个叫 {@code <img onerror=...>} 的品牌名不该变成一个标签。
    * 短语文本尤其危险：它是租户可编辑的长文本。
    */
   public static String escapeHtml(String raw) {

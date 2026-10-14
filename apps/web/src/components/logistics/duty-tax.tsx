@@ -205,8 +205,7 @@ export function DutyTaxWorkspace() {
           </li>
           <li>
             <strong className="text-foreground">DDP/DDU 改变成本归属</strong>
-            ：DDU 下关税与目的国税费由买方承担，卖方到岸成本不含它们；
-            关税由谁付不影响税率是多少。
+            ：DDU 下关税与目的国税费由买方承担，卖方到岸成本不含它们； 关税由谁付不影响税率是多少。
           </li>
           {caps && (
             <>
@@ -226,7 +225,7 @@ export function DutyTaxWorkspace() {
       </SectionCard>
 
       {error && (
-        <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-md border p-3 text-sm">
           {error}
         </div>
       )}
@@ -237,9 +236,21 @@ export function DutyTaxWorkspace() {
       )}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <StatCard label="估算单" value={summary?.total ?? 0} comparisonLabel={`已锁定 ${summary?.locked ?? 0}`} />
-        <StatCard label="估算税费合计" value={fmt(summary?.estimatedTaxTotal)} comparisonLabel="不受分页影响" />
-        <StatCard label="实缴合计" value={fmt(summary?.paidTotal)} comparisonLabel="只取最新对账快照" />
+        <StatCard
+          label="估算单"
+          value={summary?.total ?? 0}
+          comparisonLabel={`已锁定 ${summary?.locked ?? 0}`}
+        />
+        <StatCard
+          label="估算税费合计"
+          value={fmt(summary?.estimatedTaxTotal)}
+          comparisonLabel="不受分页影响"
+        />
+        <StatCard
+          label="实缴合计"
+          value={fmt(summary?.paidTotal)}
+          comparisonLabel="只取最新对账快照"
+        />
         <StatCard
           label="估算与实缴差额"
           value={fmt(summary?.varianceTotal)}
@@ -255,7 +266,10 @@ export function DutyTaxWorkspace() {
       {/* 差异分析：蓝图那句「长期差异大说明 HS 归类或税率配置有误」的出口 */}
       <SectionCard title="差异分析">
         {!analysis ? (
-          <EmptyState title="暂无差异数据" description="还没有录过实际缴纳，所以没有可对比的差异。" />
+          <EmptyState
+            title="暂无差异数据"
+            description="还没有录过实际缴纳，所以没有可对比的差异。"
+          />
         ) : (
           <div className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-4">
@@ -324,7 +338,11 @@ export function DutyTaxWorkspace() {
               className={inputClass}
               value={params.status?.[0] ?? ''}
               onChange={(e) =>
-                setParams((p) => ({ ...p, page: 0, status: e.target.value ? [e.target.value] : [] }))
+                setParams((p) => ({
+                  ...p,
+                  page: 0,
+                  status: e.target.value ? [e.target.value] : [],
+                }))
               }
             >
               <option value="">全部</option>
@@ -399,7 +417,9 @@ export function DutyTaxWorkspace() {
               <input
                 type="checkbox"
                 checked={params.varianceOnly ?? false}
-                onChange={(e) => setParams((p) => ({ ...p, page: 0, varianceOnly: e.target.checked }))}
+                onChange={(e) =>
+                  setParams((p) => ({ ...p, page: 0, varianceOnly: e.target.checked }))
+                }
               />
               只看有差异
             </label>
@@ -547,7 +567,7 @@ export function DutyTaxWorkspace() {
                     <td className="py-2">
                       {r.effectiveFrom} ~ {dateOnly(r.effectiveTo)}
                     </td>
-                    <td className="py-2 text-muted-foreground">{r.sourceReference}</td>
+                    <td className="text-muted-foreground py-2">{r.sourceReference}</td>
                   </tr>
                 ))}
               </tbody>
@@ -567,7 +587,7 @@ export function DutyTaxWorkspace() {
               {detailLoading ? (
                 <p className="text-muted-foreground py-6 text-center text-sm">加载中…</p>
               ) : detailError ? (
-                <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+                <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-md border p-3 text-sm">
                   {detailError}
                 </div>
               ) : detail ? (
@@ -575,30 +595,49 @@ export function DutyTaxWorkspace() {
                   <div className="grid gap-3 sm:grid-cols-3">
                     <StatCard
                       label="估算关税"
-                      value={money(detail.estimate.estimatedDutyAmount, detail.estimate.estimateCurrency)}
+                      value={money(
+                        detail.estimate.estimatedDutyAmount,
+                        detail.estimate.estimateCurrency,
+                      )}
                     />
                     <StatCard
                       label="估算增值税/GST"
-                      value={money(detail.estimate.estimatedVatAmount, detail.estimate.estimateCurrency)}
+                      value={money(
+                        detail.estimate.estimatedVatAmount,
+                        detail.estimate.estimateCurrency,
+                      )}
                     />
                     <StatCard
                       label="估算税费合计"
-                      value={money(detail.estimate.estimatedTotalTax, detail.estimate.estimateCurrency)}
+                      value={money(
+                        detail.estimate.estimatedTotalTax,
+                        detail.estimate.estimateCurrency,
+                      )}
                     />
                     <StatCard
                       label="到岸成本（含税）"
-                      value={money(detail.estimate.landedCostTotal, detail.estimate.estimateCurrency)}
+                      value={money(
+                        detail.estimate.landedCostTotal,
+                        detail.estimate.estimateCurrency,
+                      )}
                     />
                     <StatCard
                       label="卖方承担部分"
-                      value={money(detail.estimate.landedCostSeller, detail.estimate.estimateCurrency)}
+                      value={money(
+                        detail.estimate.landedCostSeller,
+                        detail.estimate.estimateCurrency,
+                      )}
                       comparisonLabel={
                         detail.estimate.dutyBearer === 'BUYER'
                           ? 'DDU：不含关税与税费'
                           : '含全部税费'
                       }
                     />
-                    <StatCard label="汇率快照" value={String(detail.estimate.exchangeRate ?? '—')} comparisonLabel={`刻度 ${detail.estimate.exchangeRateScale ?? '—'} @ ${detail.estimate.exchangeRateDate ?? '—'}`} />
+                    <StatCard
+                      label="汇率快照"
+                      value={String(detail.estimate.exchangeRate ?? '—')}
+                      comparisonLabel={`刻度 ${detail.estimate.exchangeRateScale ?? '—'} @ ${detail.estimate.exchangeRateDate ?? '—'}`}
+                    />
                   </div>
 
                   {blockers.length > 0 && (
@@ -681,7 +720,8 @@ export function DutyTaxWorkspace() {
                                   </>
                                 ) : (
                                   <span className="text-amber-600">
-                                    {rateMatchStatusLabels[line.rateMatchStatus] ?? line.rateMatchStatus}
+                                    {rateMatchStatusLabels[line.rateMatchStatus] ??
+                                      line.rateMatchStatus}
                                   </span>
                                 )}
                               </td>
@@ -725,9 +765,7 @@ export function DutyTaxWorkspace() {
                                 {paymentKindLabels[p.paymentKind] ?? p.paymentKind}
                               </td>
                               <td className="py-1 text-right">{money(p.paidAmount, p.currency)}</td>
-                              <td className="py-1">
-                                {dutyBearerLabels[p.payer] ?? p.payer}
-                              </td>
+                              <td className="py-1">{dutyBearerLabels[p.payer] ?? p.payer}</td>
                               <td className="py-1">{p.paymentReference}</td>
                               <td className="py-1">{moment(p.paidAt)}</td>
                             </tr>
@@ -738,12 +776,11 @@ export function DutyTaxWorkspace() {
                   </div>
 
                   <div>
-                    <h4 className="mb-2 text-sm font-medium">
-                      估算与实缴差异（蓝图要求必须记录）
-                    </h4>
+                    <h4 className="mb-2 text-sm font-medium">估算与实缴差异（蓝图要求必须记录）</h4>
                     {detail.variances.length === 0 ? (
                       <p className="text-muted-foreground text-sm">
-                        还没有差异记录 —— 录一笔实缴就会自动落一条差异快照，「先存实缴、差异以后再补」做不到。
+                        还没有差异记录 ——
+                        录一笔实缴就会自动落一条差异快照，「先存实缴、差异以后再补」做不到。
                       </p>
                     ) : (
                       <table className="w-full text-sm">
@@ -851,9 +888,7 @@ function CreateEstimateModal({
   useEffect(() => {
     fetchEstimatableDeclarations()
       .then((page) => {
-        setDeclarations(
-          page.rows.map((r) => ({ id: r.id, declarationCode: r.declarationCode })),
-        );
+        setDeclarations(page.rows.map((r) => ({ id: r.id, declarationCode: r.declarationCode })));
         if (page.rows[0]) {
           setDeclarationId(page.rows[0].id);
           setCountry(page.rows[0].destinationCountryCode);
@@ -904,7 +939,11 @@ function CreateEstimateModal({
           <div className="grid gap-3 sm:grid-cols-2">
             {field(
               '贸易条款',
-              <select className={inputClass} value={incoterm} onChange={(e) => setIncoterm(e.target.value)}>
+              <select
+                className={inputClass}
+                value={incoterm}
+                onChange={(e) => setIncoterm(e.target.value)}
+              >
                 {Object.entries(incotermLabels).map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}（{value}）
@@ -926,13 +965,63 @@ function CreateEstimateModal({
                 ))}
               </select>,
             )}
-            {field('目的国', <input className={inputClass} value={country} onChange={(e) => setCountry(e.target.value)} />)}
-            {field('计价币种', <input className={inputClass} value={currency} onChange={(e) => setCurrency(e.target.value)} />)}
-            {field('完税价格', <input className={inputClass} value={customsValue} onChange={(e) => setCustomsValue(e.target.value)} placeholder="默认取申报货值" />)}
-            {field('货值', <input className={inputClass} value={goodsValue} onChange={(e) => setGoodsValue(e.target.value)} />)}
-            {field('运费', <input className={inputClass} value={freight} onChange={(e) => setFreight(e.target.value)} />)}
-            {field('保险费', <input className={inputClass} value={insurance} onChange={(e) => setInsurance(e.target.value)} />)}
-            {field('其他费用', <input className={inputClass} value={other} onChange={(e) => setOther(e.target.value)} />)}
+            {field(
+              '目的国',
+              <input
+                className={inputClass}
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+              />,
+            )}
+            {field(
+              '计价币种',
+              <input
+                className={inputClass}
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+              />,
+            )}
+            {field(
+              '完税价格',
+              <input
+                className={inputClass}
+                value={customsValue}
+                onChange={(e) => setCustomsValue(e.target.value)}
+                placeholder="默认取申报货值"
+              />,
+            )}
+            {field(
+              '货值',
+              <input
+                className={inputClass}
+                value={goodsValue}
+                onChange={(e) => setGoodsValue(e.target.value)}
+              />,
+            )}
+            {field(
+              '运费',
+              <input
+                className={inputClass}
+                value={freight}
+                onChange={(e) => setFreight(e.target.value)}
+              />,
+            )}
+            {field(
+              '保险费',
+              <input
+                className={inputClass}
+                value={insurance}
+                onChange={(e) => setInsurance(e.target.value)}
+              />,
+            )}
+            {field(
+              '其他费用',
+              <input
+                className={inputClass}
+                value={other}
+                onChange={(e) => setOther(e.target.value)}
+              />,
+            )}
           </div>
           {loading && <p className="text-muted-foreground text-sm">加载报关单…</p>}
         </div>
@@ -1007,10 +1096,21 @@ function AddRateModal({
         <div className="space-y-3">
           {error && <div className="text-destructive text-sm">{error}</div>}
           <div className="grid gap-3 sm:grid-cols-2">
-            {field('目的国', <input className={inputClass} value={country} onChange={(e) => setCountry(e.target.value)} />)}
+            {field(
+              '目的国',
+              <input
+                className={inputClass}
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+              />,
+            )}
             {field(
               '适用范围',
-              <select className={inputClass} value={scope} onChange={(e) => setScope(e.target.value)}>
+              <select
+                className={inputClass}
+                value={scope}
+                onChange={(e) => setScope(e.target.value)}
+              >
                 <option value="HS">按 HS 编码（关税）</option>
                 <option value="COUNTRY">国别（增值税/GST）</option>
               </select>,
@@ -1027,7 +1127,11 @@ function AddRateModal({
             )}
             {field(
               '税种',
-              <select className={inputClass} value={taxKind} onChange={(e) => setTaxKind(e.target.value)}>
+              <select
+                className={inputClass}
+                value={taxKind}
+                onChange={(e) => setTaxKind(e.target.value)}
+              >
                 <option value="DUTY">关税</option>
                 <option value="VAT">增值税</option>
                 <option value="GST">商品服务税</option>
@@ -1035,15 +1139,40 @@ function AddRateModal({
             )}
             {field(
               '从价税率（小数，0.0325 = 3.25%）',
-              <input className={inputClass} value={rate} onChange={(e) => setRate(e.target.value)} placeholder="0.0325" />,
+              <input
+                className={inputClass}
+                value={rate}
+                onChange={(e) => setRate(e.target.value)}
+                placeholder="0.0325"
+              />,
             )}
-            {field('生效日', <input type="date" className={inputClass} value={from} onChange={(e) => setFrom(e.target.value)} />)}
+            {field(
+              '生效日',
+              <input
+                type="date"
+                className={inputClass}
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+              />,
+            )}
           </div>
           {field(
             '税率出处',
-            <input className={inputClass} value={source} onChange={(e) => setSource(e.target.value)} placeholder="如 HTS-2026-610910" />,
+            <input
+              className={inputClass}
+              value={source}
+              onChange={(e) => setSource(e.target.value)}
+              placeholder="如 HTS-2026-610910"
+            />,
           )}
-          {field('备注', <input className={inputClass} value={notes} onChange={(e) => setNotes(e.target.value)} />)}
+          {field(
+            '备注',
+            <input
+              className={inputClass}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />,
+          )}
         </div>
         <ModalFooter>
           <Button variant="ghost" onClick={onClose}>
@@ -1111,9 +1240,9 @@ function AddPaymentModal({
         <ModalHeader>
           <ModalTitle>记录实际缴纳</ModalTitle>
           <ModalDescription>
-            实缴与差异是<strong>同一次动作</strong>写下的：蓝图要求「税费估算与实际缴纳差异要记录」，
-            所以录完实缴会立刻落一条差异快照，DB 层也会核对「有实缴却没有差异记录」并拒收。
-            缴错了请新增退汇/调整记录，不要改旧行。
+            实缴与差异是<strong>同一次动作</strong>
+            写下的：蓝图要求「税费估算与实际缴纳差异要记录」， 所以录完实缴会立刻落一条差异快照，DB
+            层也会核对「有实缴却没有差异记录」并拒收。 缴错了请新增退汇/调整记录，不要改旧行。
           </ModalDescription>
         </ModalHeader>
         <div className="space-y-3">
@@ -1121,7 +1250,11 @@ function AddPaymentModal({
           <div className="grid gap-3 sm:grid-cols-2">
             {field(
               '税种',
-              <select className={inputClass} value={taxKind} onChange={(e) => setTaxKind(e.target.value)}>
+              <select
+                className={inputClass}
+                value={taxKind}
+                onChange={(e) => setTaxKind(e.target.value)}
+              >
                 <option value="DUTY">关税</option>
                 <option value="VAT">增值税</option>
                 <option value="GST">商品服务税</option>
@@ -1129,7 +1262,11 @@ function AddPaymentModal({
             )}
             {field(
               '缴款性质',
-              <select className={inputClass} value={paymentKind} onChange={(e) => setPaymentKind(e.target.value)}>
+              <select
+                className={inputClass}
+                value={paymentKind}
+                onChange={(e) => setPaymentKind(e.target.value)}
+              >
                 <option value="PAYMENT">正常缴纳</option>
                 <option value="REFUND">退汇（多缴退回）</option>
                 <option value="ADJUSTMENT">海关核定后调整</option>
@@ -1137,11 +1274,20 @@ function AddPaymentModal({
             )}
             {field(
               '金额',
-              <input className={inputClass} value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={currency} />,
+              <input
+                className={inputClass}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder={currency}
+              />,
             )}
             {field(
               '付款方',
-              <select className={inputClass} value={payer} onChange={(e) => setPayer(e.target.value)}>
+              <select
+                className={inputClass}
+                value={payer}
+                onChange={(e) => setPayer(e.target.value)}
+              >
                 {Object.entries(dutyBearerLabels).map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
@@ -1152,7 +1298,12 @@ function AddPaymentModal({
           </div>
           {field(
             '缴款凭证号（必填）',
-            <input className={inputClass} value={reference} onChange={(e) => setReference(e.target.value)} placeholder="海关缴款通知书号 / 银行流水号" />,
+            <input
+              className={inputClass}
+              value={reference}
+              onChange={(e) => setReference(e.target.value)}
+              placeholder="海关缴款通知书号 / 银行流水号"
+            />,
           )}
           {field(
             '差异归因（可留空，留空则待人工确认）',
@@ -1167,7 +1318,14 @@ function AddPaymentModal({
                 ))}
             </select>,
           )}
-          {field('归因说明', <input className={inputClass} value={causeNote} onChange={(e) => setCauseNote(e.target.value)} />)}
+          {field(
+            '归因说明',
+            <input
+              className={inputClass}
+              value={causeNote}
+              onChange={(e) => setCauseNote(e.target.value)}
+            />,
+          )}
         </div>
         <ModalFooter>
           <Button variant="ghost" onClick={onClose}>

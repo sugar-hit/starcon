@@ -8,10 +8,10 @@
 
 本批 `./mvnw verify` 连续两次 BUILD FAILURE，但**两次红的用例完全不同，且都与本批改动无关**：
 
-| 轮次 | 失败 | 报错 |
-| --- | --- | --- |
+| 轮次    | 失败                                             | 报错                               |
+| ------- | ------------------------------------------------ | ---------------------------------- |
 | 第 1 次 | `catalog.DuplicateDetectionIntegrationTest` 2 例 | `expected:<200/404> but was:<503>` |
-| 第 2 次 | `warehouse.StockOwnershipIntegrationTest` 1 例 | UUID 不匹配 |
+| 第 2 次 | `warehouse.StockOwnershipIntegrationTest` 1 例   | UUID 不匹配                        |
 
 **本批改动清单里没有任何 catalog / identity / tenancy / StockOwnership 文件**
 （`git diff --name-only b41a14f d6c882c` 全是 warehouse / apps/web / contracts）。

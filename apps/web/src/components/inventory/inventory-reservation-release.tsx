@@ -309,7 +309,7 @@ export function InventoryReservationReleaseWorkspace() {
                       </div>
                     </td>
                     <td className="py-2 text-right">{qty(row.requestedQuantity)}</td>
-                    <td className="text-right py-2">
+                    <td className="py-2 text-right">
                       {restoredText(row.restorableQuantity, row.requestedQuantity)}
                     </td>
                     <td className="py-2">{overdueText(row.overdueSeconds)}</td>
@@ -435,8 +435,8 @@ export function InventoryReservationReleaseWorkspace() {
       {/* 批量过期清理：显式端点，页面不挂定时器 */}
       <SectionCard title="批量过期清理">
         <p className="text-muted-foreground text-xs">
-          清理由显式端点触发：页面上是「立即干跑 / 立即执行」，定时由外部调度器调用同一个端点并带幂等键。
-          一批一个事务，失败整批回滚。
+          清理由显式端点触发：页面上是「立即干跑 /
+          立即执行」，定时由外部调度器调用同一个端点并带幂等键。 一批一个事务，失败整批回滚。
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <input
@@ -554,11 +554,9 @@ export function InventoryReservationReleaseWorkspace() {
             </div>
             {detail.releases.map((r) => (
               <div key={r.id} className="text-xs">
-                {r.reservationNo} · {r.modeLabel} · 还回 {restoredText(
-                  r.restoredQuantity,
-                  r.releasedDemandQuantity,
-                )} · 分配 {r.allocationCount} 条 ·{' '}
-                {new Date(r.occurredAt).toLocaleString('zh-CN')}
+                {r.reservationNo} · {r.modeLabel} · 还回{' '}
+                {restoredText(r.restoredQuantity, r.releasedDemandQuantity)} · 分配{' '}
+                {r.allocationCount} 条 · {new Date(r.occurredAt).toLocaleString('zh-CN')}
                 {r.reason ? ` · ${r.reason}` : ''}
               </div>
             ))}

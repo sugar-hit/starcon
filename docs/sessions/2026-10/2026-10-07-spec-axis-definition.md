@@ -14,12 +14,12 @@
 
 **解法**：新增四张表，**不改 `attribute_definition` 的列语义、不迁移既有行**：
 
-| 表 | 作用域 | 作用 |
-| --- | --- | --- |
-| `spec_axis` | 租户级 | 规格轴字典（code/name/enabled），**无 spu_id**——这是"可复用"的落点 |
-| `spu_spec_axis` | SPU | 绑定一行 = 「这个 SPU 用这条轴，由这个 variant_axis 属性承载它的选项」，含 `attribute_definition_id` 复合外键 |
-| `spec_axis_option` | 租户级（按轴） | 轴的选项，值域与 `attribute_option.value` 同为 varchar(100) |
-| `category_spec_axis` | 租户级 | 类目允许的规格轴规则（`spu.category` 是自由文本，3.3.1.1 未开发） |
+| 表                   | 作用域         | 作用                                                                                                          |
+| -------------------- | -------------- | ------------------------------------------------------------------------------------------------------------- |
+| `spec_axis`          | 租户级         | 规格轴字典（code/name/enabled），**无 spu_id**——这是"可复用"的落点                                            |
+| `spu_spec_axis`      | SPU            | 绑定一行 = 「这个 SPU 用这条轴，由这个 variant_axis 属性承载它的选项」，含 `attribute_definition_id` 复合外键 |
+| `spec_axis_option`   | 租户级（按轴） | 轴的选项，值域与 `attribute_option.value` 同为 varchar(100)                                                   |
+| `category_spec_axis` | 租户级         | 类目允许的规格轴规则（`spu.category` 是自由文本，3.3.1.1 未开发）                                             |
 
 **值源硬约束用两个触发器双向兜住**（不是应用层自觉）：
 
@@ -80,22 +80,27 @@ V1 允许这种属性独立存在，3.1.1/3.1.2 的既有测试就是这么写�
 ## 文件清单
 
 **迁移**
+
 - `backend/services/catalog/src/main/resources/db/migration/V9__spec_axes.sql`
 
 **后端**
+
 - `backend/services/catalog/src/main/java/com/starcon/catalog/SpecAxisRules.java`（新增，纯规则）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/SpecAxisService.java`（新增）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/SpecAxisController.java`（新增）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/CatalogModels.java`（改：追加 3.1.3.1 DTO）
 
 **测试**
+
 - `backend/services/catalog/src/test/java/com/starcon/catalog/SpecAxisRulesTest.java`（新增，9 例）
 - `backend/services/catalog/src/test/java/com/starcon/catalog/SpecAxisIntegrationTest.java`（新增，27 例）
 
 **契约（codegen 产物，未手改）**
+
 - `packages/api-contracts/src/catalog.ts`、`catalog.openapi.json`
 
 **前端**
+
 - `apps/web/src/components/catalog/spec-axis-model.ts`（新增）
 - `apps/web/src/components/catalog/spec-axis-model.test.ts`（新增，25 例）
 - `apps/web/src/components/catalog/spec-axis-workspace.tsx`（新增）
@@ -105,26 +110,27 @@ V1 允许这种属性独立存在，3.1.1/3.1.2 的既有测试就是这么写�
 - `apps/web/src/components/catalog/sku-list-workspace.tsx`（改：列表页加入口链接，最小改动）
 
 **台账 / 日志**
+
 - `docs/product/capability-blueprint/module-progress.md`（只改 3.1.3.1 一行；其余 5 行是
   sync.mjs 自动重算的计数器 37→38）
 
 ## 端点
 
-| 方法 | 路径 | 权限 |
-| --- | --- | --- |
-| GET | `/catalog/spec-axis/axes` | `catalog.attribute.read` |
-| POST | `/catalog/spec-axis/axes` | `catalog.attribute.update` |
-| PUT | `/catalog/spec-axis/axes/{id}` | `catalog.attribute.update` |
-| DELETE | `/catalog/spec-axis/axes/{id}?version=` | `catalog.attribute.update` |
-| GET | `/catalog/spec-axis/overview` | `catalog.attribute.read` |
-| GET | `/catalog/spec-axis/axes/{id}/options` | `catalog.attribute.read` |
-| POST | `/catalog/spec-axis/axes/{id}/options` | `catalog.attribute.update` |
-| DELETE | `/catalog/spec-axis/axes/{id}/options?value=` | `catalog.attribute.update` |
-| GET | `/catalog/spec-axis/spus/{id}` | `catalog.attribute.read` |
-| POST | `/catalog/spec-axis/spus/{id}/axes` | `catalog.attribute.update` |
-| DELETE | `/catalog/spec-axis/spus/{id}/axes/{axisId}` | `catalog.attribute.update` |
-| GET | `/catalog/spec-axis/category-rules?category=` | `catalog.attribute.read` |
-| POST | `/catalog/spec-axis/category-rules?specAxisId=` | `catalog.attribute.update` |
+| 方法   | 路径                                                      | 权限                       |
+| ------ | --------------------------------------------------------- | -------------------------- |
+| GET    | `/catalog/spec-axis/axes`                                 | `catalog.attribute.read`   |
+| POST   | `/catalog/spec-axis/axes`                                 | `catalog.attribute.update` |
+| PUT    | `/catalog/spec-axis/axes/{id}`                            | `catalog.attribute.update` |
+| DELETE | `/catalog/spec-axis/axes/{id}?version=`                   | `catalog.attribute.update` |
+| GET    | `/catalog/spec-axis/overview`                             | `catalog.attribute.read`   |
+| GET    | `/catalog/spec-axis/axes/{id}/options`                    | `catalog.attribute.read`   |
+| POST   | `/catalog/spec-axis/axes/{id}/options`                    | `catalog.attribute.update` |
+| DELETE | `/catalog/spec-axis/axes/{id}/options?value=`             | `catalog.attribute.update` |
+| GET    | `/catalog/spec-axis/spus/{id}`                            | `catalog.attribute.read`   |
+| POST   | `/catalog/spec-axis/spus/{id}/axes`                       | `catalog.attribute.update` |
+| DELETE | `/catalog/spec-axis/spus/{id}/axes/{axisId}`              | `catalog.attribute.update` |
+| GET    | `/catalog/spec-axis/category-rules?category=`             | `catalog.attribute.read`   |
+| POST   | `/catalog/spec-axis/category-rules?specAxisId=`           | `catalog.attribute.update` |
 | DELETE | `/catalog/spec-axis/category-rules?category=&specAxisId=` | `catalog.attribute.update` |
 
 权限用属性域（`catalog.attribute.*`）而非 SKU：规格轴落在属性域内（值源就是属性选项），

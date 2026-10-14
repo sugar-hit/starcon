@@ -10,19 +10,15 @@ import java.util.UUID;
  * 8.3.4.2 面单与标签打印的传输模型。
  *
  * <p>蓝图 08-warehouse-operations.md 8.3.4.2 原文：「打印面单、装箱单、SKU 条码、库位标签、箱唛，
- * 支持批量打印、模板配置、打印次数记录（平台对重复打印有要求）。」输入：「打印任务（对象集合、模板）；
- * 打印机配置。」输出：「打印任务记录 + 打印内容（PDF/指令流）；打印日志。」以及本模块的红线：
- * 「**面单打印次数需记录**，部分平台对重复面单有明确规则。」
+ * 支持批量打印、模板配置、打印次数记录（平台对重复打印有要求）。」输入：「打印任务（对象集合、模板）； 打印机配置。」输出：「打印任务记录 +
+ * 打印内容（PDF/指令流）；打印日志。」以及本模块的红线： 「**面单打印次数需记录**，部分平台对重复面单有明确规则。」
  *
- * <p><b>面单数据不在本模块</b>：蓝图上游是 10 物流（面单数据）与 3.1.2.3（条码），两者都尚未交付。
- * 所以本模块不建物流表、不读 10 服务的库（AGENTS.md：禁止跨服务 SQL / FK），
- * 打印对象是调用方传入的**快照**加一个纯文本外部引用。本模块负责的是
- * 「打印任务 → 模板 → 渲染 → 次数 → 日志」这条闭环；上游交付后要改的是「谁来填快照」，
+ * <p><b>面单数据不在本模块</b>：蓝图上游是 10 物流（面单数据）与 3.1.2.3（条码），两者都尚未交付。 所以本模块不建物流表、不读 10 服务的库（AGENTS.md：禁止跨服务
+ * SQL / FK）， 打印对象是调用方传入的**快照**加一个纯文本外部引用。本模块负责的是 「打印任务 → 模板 → 渲染 → 次数 → 日志」这条闭环；上游交付后要改的是「谁来填快照」，
  * 不是这条链路本身。
  *
- * <p><b>打印次数是本模块最容易被做成假逻辑的地方</b>：只往日志表里写一行「第 3 次打印」，
- * 而权威计数列纹丝不动，重复打印就永远查不出来。所以 {@link LabelPrintTarget#printCount} 是权威计数
- * （DB 触发器钉死只增不减），{@link LabelPrintLog#printSequence} 与它同步落库，
+ * <p><b>打印次数是本模块最容易被做成假逻辑的地方</b>：只往日志表里写一行「第 3 次打印」， 而权威计数列纹丝不动，重复打印就永远查不出来。所以 {@link
+ * LabelPrintTarget#printCount} 是权威计数 （DB 触发器钉死只增不减），{@link LabelPrintLog#printSequence} 与它同步落库，
  * {@link LabelReprintRule} 给出平台维度的判据，三者互相校验。
  */
 public final class LabelPrintModels {
@@ -54,6 +50,7 @@ public final class LabelPrintModels {
 
     private final String label;
     private final String description;
+
     /** 该对象类型是否受「重复打印次数」判据约束（其余类型默认不限次但仍计数留痕）。 */
     private final boolean reprintGoverned;
 
@@ -84,8 +81,7 @@ public final class LabelPrintModels {
    *   <li>{@link #HTML} 打印视图 —— 单据类（装箱单 / 箱唛）走这条，浏览器直接排版打印。
    * </ul>
    *
-   * <p>两种都是<b>由本服务按模板与快照现算</b>的，库里没有写死的假 PDF；
-   * 下载端点按本字段原样吐字节。
+   * <p>两种都是<b>由本服务按模板与快照现算</b>的，库里没有写死的假 PDF； 下载端点按本字段原样吐字节。
    */
   public enum PrintContentFormat {
     ZPL("ZPL 指令流", "标签机指令流，热敏打印机直接接收"),
@@ -239,7 +235,8 @@ public final class LabelPrintModels {
       String fieldLayout,
       Boolean active) {}
 
-  public record LabelPrintTemplatePage(List<LabelPrintTemplate> rows, long total, int page, int size) {}
+  public record LabelPrintTemplatePage(
+      List<LabelPrintTemplate> rows, long total, int page, int size) {}
 
   // ------------------------------------------------------------ 打印对象（快照）
 
@@ -312,10 +309,7 @@ public final class LabelPrintModels {
       OffsetDateTime startedAt,
       OffsetDateTime finishedAt) {}
 
-  @Schema(
-      description =
-          "新建打印任务（批量打印：targetIds 一次给多个对象，真批量展开成 N 行、"
-              + "渲染 N 份内容、写 N 条打印凭据）")
+  @Schema(description = "新建打印任务（批量打印：targetIds 一次给多个对象，真批量展开成 N 行、" + "渲染 N 份内容、写 N 条打印凭据）")
   public record LabelPrintJobRequest(
       UUID templateId,
       List<UUID> targetIds,
@@ -349,7 +343,13 @@ public final class LabelPrintModels {
       int contentBytes) {
     /** 渲染内容体积在列表里不回传（可能很大），下载端点单独取。 */
     public String contentPreview() {
-      return "（" + contentFormat.label() + "，共 " + contentBytes + " 字节，按内容校验和 " + contentChecksum + " 固定）";
+      return "（"
+          + contentFormat.label()
+          + "，共 "
+          + contentBytes
+          + " 字节，按内容校验和 "
+          + contentChecksum
+          + " 固定）";
     }
   }
 
@@ -393,14 +393,17 @@ public final class LabelPrintModels {
 
   @Schema(description = "新建 / 更新重复打印规则")
   public record LabelReprintRuleRequest(
-      String platformCode, PrintObjectType objectType, Integer warningCount, Integer maxCount, String note) {}
+      String platformCode,
+      PrintObjectType objectType,
+      Integer warningCount,
+      Integer maxCount,
+      String note) {}
 
   // ------------------------------------------------------------ 能力声明
 
   @Schema(
       description =
-          "本模块能力声明：五种打印对象各自的渲染形态与必填字段、重复打印判据的取值区间，"
-              + "以及「面单数据来自调用方」这一事实的显式声明（前端据此渲染表单与提示）")
+          "本模块能力声明：五种打印对象各自的渲染形态与必填字段、重复打印判据的取值区间，" + "以及「面单数据来自调用方」这一事实的显式声明（前端据此渲染表单与提示）")
   public record LabelPrintCapabilities(
       List<ObjectTypeCapability> objectTypes,
       ReprintCapability reprint,
@@ -416,10 +419,7 @@ public final class LabelPrintModels {
       List<String> requiredFields,
       boolean reprintGoverned) {}
 
-  @Schema(
-      description =
-          "重复打印判据说明：判定用的是「下一次打印的序号 = 当前次数 + 1」，"
-              + "三段区间与强制重打的口径都在这里，前端据此提示而不是自己猜")
+  @Schema(description = "重复打印判据说明：判定用的是「下一次打印的序号 = 当前次数 + 1」，" + "三段区间与强制重打的口径都在这里，前端据此提示而不是自己猜")
   public record ReprintCapability(
       String verdictBasis,
       List<VerdictRange> ranges,

@@ -118,19 +118,15 @@ export function completeRecount(sessionId: string) {
 }
 
 export function openRecountBox(sessionId: string, reason: string) {
-  return api<RecountCreated>(
-    `${base}/${encodeURIComponent(sessionId)}/open-box`,
-    'POST',
-    { reason },
-  );
+  return api<RecountCreated>(`${base}/${encodeURIComponent(sessionId)}/open-box`, 'POST', {
+    reason,
+  });
 }
 
 export function escalateRecount(sessionId: string, note: string) {
-  return api<RecountExceptionRow>(
-    `${base}/${encodeURIComponent(sessionId)}/escalate`,
-    'POST',
-    { note },
-  );
+  return api<RecountExceptionRow>(`${base}/${encodeURIComponent(sessionId)}/escalate`, 'POST', {
+    note,
+  });
 }
 
 export function resolveRecountException(
@@ -147,11 +143,7 @@ export function resolveRecountException(
 }
 
 export function cancelRecount(sessionId: string, reason: string) {
-  return api<RecountCreated>(
-    `${base}/${encodeURIComponent(sessionId)}/cancel`,
-    'POST',
-    { reason },
-  );
+  return api<RecountCreated>(`${base}/${encodeURIComponent(sessionId)}/cancel`, 'POST', { reason });
 }
 
 export function fetchRecountRules() {
@@ -367,7 +359,10 @@ export function canEscalate(pendingExceptionCount: number, sessionStatus: string
 /** 处置意见必填：四个处置值全都要求写下怎么处理或为什么接受。 */
 export function needsResolveNote(resolution: string): boolean {
   return (
-    resolution === 'MANUAL' || resolution === 'CORRECTED' || resolution === 'ACCEPTED' || resolution === 'IGNORED'
+    resolution === 'MANUAL' ||
+    resolution === 'CORRECTED' ||
+    resolution === 'ACCEPTED' ||
+    resolution === 'IGNORED'
   );
 }
 
@@ -380,13 +375,17 @@ export function needsResolveNote(resolution: string): boolean {
 export function completionText(verdict: RecountVerdictReport | null | undefined): string {
   if (!verdict) return '';
   if (verdict.verdict === 'PASSED') {
-    return '复核通过：每一行都核过、序列号逐件对上、没有未处理的异常。'
-      + '出库单已交到「待打包」（8.3.3.2）——复核不写库存分录、不释放预占，'
-      + '货与占用都还在打包区，发货由 8.3.4.1 写。';
+    return (
+      '复核通过：每一行都核过、序列号逐件对上、没有未处理的异常。' +
+      '出库单已交到「待打包」（8.3.3.2）——复核不写库存分录、不释放预占，' +
+      '货与占用都还在打包区，发货由 8.3.4.1 写。'
+    );
   }
-  return `复核没通过：${verdict.blockingReasons.join('；')}。`
-    + '检出拣错或漏件时的出口是退回拣货（出库单「待复核」→「拣货中」，由 8.3.2.1 重开），'
-    + '本模块不改库存。';
+  return (
+    `复核没通过：${verdict.blockingReasons.join('；')}。` +
+    '检出拣错或漏件时的出口是退回拣货（出库单「待复核」→「拣货中」，由 8.3.2.1 重开），' +
+    '本模块不改库存。'
+  );
 }
 
 /**
@@ -399,6 +398,6 @@ export function highValueHint(verdict: RecountVerdictReport | null | undefined):
   if (!verdict?.openBoxRequired) return '';
   return verdict.openBox
     ? '本单已开箱复核。'
-    : `本单应发件数 ${verdict.baselineQuantity ?? '—'} 达到高价值阈值，`
-      + '建议开箱复核后再放行（开箱要人工确认并写明原因）。';
+    : `本单应发件数 ${verdict.baselineQuantity ?? '—'} 达到高价值阈值，` +
+        '建议开箱复核后再放行（开箱要人工确认并写明原因）。';
 }

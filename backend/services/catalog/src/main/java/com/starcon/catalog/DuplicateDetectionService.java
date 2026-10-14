@@ -26,27 +26,22 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.9.1.1 重复 SKU 识别：扫描全量商品与 SKU，产出重复候选清单，并登记人工的合并/保留决定。
  *
- * <p>蓝图原文：「职责：识别重复/近重复商品：同 SPU 下重复规格组合、同商品不同 SPU 重复建档、
- * 同条码多 SKU、近似标题+相似图片疑似同品，输出候选与相似度供人工确认。」
- * 「输入：商品与 SKU 全量；条码、标题、属性、图片特征。」
- * 「输出：重复候选清单（相似度、重叠维度、影响引用数）；确认合并/保留决定。」
- * 「关系：上游 = 3.1.1.1/3.1.2.1；下游 = 3.9.1.2。<b>重复 SKU 会污染销量、采购、库存与利润统计</b>。」
+ * <p>蓝图原文：「职责：识别重复/近重复商品：同 SPU 下重复规格组合、同商品不同 SPU 重复建档、 同条码多 SKU、近似标题+相似图片疑似同品，输出候选与相似度供人工确认。」
+ * 「输入：商品与 SKU 全量；条码、标题、属性、图片特征。」 「输出：重复候选清单（相似度、重叠维度、影响引用数）；确认合并/保留决定。」 「关系：上游 = 3.1.1.1/3.1.2.1；下游
+ * = 3.9.1.2。<b>重复 SKU 会污染销量、采购、库存与利润统计</b>。」
  *
- * <p><b>本模块只识别 + 登记决定，不执行合并</b>：合并是 3.9.1.2 的职责，
- * 它执行时要带着本模块登记的 {@code primary_version} / {@code secondary_version} 回来比对
- * （那就是蓝图说的 {@code expected_version}）。本类<b>不改 sku / spu 的任何一列</b>，
- * 也不碰 listing、库存、采购、价格 —— 那些是别的服务的写入所有权（AGENTS.md 模块边界纪律）。
+ * <p><b>本模块只识别 + 登记决定，不执行合并</b>：合并是 3.9.1.2 的职责， 它执行时要带着本模块登记的 {@code primary_version} / {@code
+ * secondary_version} 回来比对 （那就是蓝图说的 {@code expected_version}）。本类<b>不改 sku / spu 的任何一列</b>， 也不碰
+ * listing、库存、采购、价格 —— 那些是别的服务的写入所有权（AGENTS.md 模块边界纪律）。
  *
  * <h2>为什么扫描在应用层而不是一条 SQL</h2>
  *
- * <p>相似度是<b>算</b>出来的（Jaccard / 编辑距离 / 集合交并），不是查出来的；
- * 而「把全量 SKU 两两比一遍」在 PG 里只能靠递归 CTE 硬写，既慢又不可审阅。
+ * <p>相似度是<b>算</b>出来的（Jaccard / 编辑距离 / 集合交并），不是查出来的； 而「把全量 SKU 两两比一遍」在 PG 里只能靠递归 CTE 硬写，既慢又不可审阅。
  * 本类分两步，两步都可审阅：
  *
  * <ol>
- *   <li><b>用显式 SQL 把事实读上来</b>（本类 {@code load*} 方法）：SKU 与其 SPU 的身份与标题/
- *       品牌/类目、全部条码（{@code sku.barcode} + V7 物料标识表）、按轴值现算的规格组合、
- *       素材内容哈希、九类 catalog 引用计数。全部走 jOOQ 显式 SQL，不用 JPA 懒加载。
+ *   <li><b>用显式 SQL 把事实读上来</b>（本类 {@code load*} 方法）：SKU 与其 SPU 的身份与标题/ 品牌/类目、全部条码（{@code
+ *       sku.barcode} + V7 物料标识表）、按轴值现算的规格组合、 素材内容哈希、九类 catalog 引用计数。全部走 jOOQ 显式 SQL，不用 JPA 懒加载。
  *   <li><b>判定与打分交给 {@link DuplicateRules} 的纯函数</b>，落库再走显式 SQL。
  * </ol>
  *
@@ -57,21 +52,18 @@ import org.springframework.web.server.ResponseStatusException;
  * <ul>
  *   <li>BARCODE 的前提是「归一化条码相等」→ 按条码值分组；
  *   <li>CROSS_SPU 的前提是「归一化标题 + 品牌 + 类目三者全同」→ 按这三者的复合键分组；
- *   <li>SIMILAR_PRODUCT 的前提里就有「至少重合一张图片」→ 按共享素材内容哈希分组
- *       （{@link DuplicateRules#similarProductSignal} 在没有共享哈希时直接返回 null，
- *       所以按哈希分组对这一维<b>不丢任何候选</b>）；
- *   <li>VARIANT_COMBINATION 的前提是「签名相同或轴值有交集」→ 同 SPU 内按共享的
- *       {@code 轴=取值} 分组。Jaccard&gt;0 蕴含至少共享一个轴值，所以也是无损的。
+ *   <li>SIMILAR_PRODUCT 的前提里就有「至少重合一张图片」→ 按共享素材内容哈希分组 （{@link DuplicateRules#similarProductSignal}
+ *       在没有共享哈希时直接返回 null， 所以按哈希分组对这一维<b>不丢任何候选</b>）；
+ *   <li>VARIANT_COMBINATION 的前提是「签名相同或轴值有交集」→ 同 SPU 内按共享的 {@code 轴=取值} 分组。Jaccard&gt;0
+ *       蕴含至少共享一个轴值，所以也是无损的。
  * </ul>
  *
- * <p>四个前提都是判定的<b>必要条件</b>，所以分组只影响速度，不影响召回 ——
- * 这一条由集成测试「稀疏全量扫描不漏已知重复」逐维钉死。
+ * <p>四个前提都是判定的<b>必要条件</b>，所以分组只影响速度，不影响召回 —— 这一条由集成测试「稀疏全量扫描不漏已知重复」逐维钉死。
  *
  * <h2>引用数只算 catalog 自己的</h2>
  *
  * <p>{@link #REFERENCE_QUERIES} 是 catalog 自有的九类引用。04 映射 / 07 库存 / 09 订单的引用
- * 在别的服务的库里，跨库读是模块边界纪律明令禁止的，所以那部分留给 3.9.1.2 走各自授权 API。
- * 逐项拆分而不是只给总数：运营要判断「合并不合并得动」时，需要知道是哪几类引用在挡路
+ * 在别的服务的库里，跨库读是模块边界纪律明令禁止的，所以那部分留给 3.9.1.2 走各自授权 API。 逐项拆分而不是只给总数：运营要判断「合并不合并得动」时，需要知道是哪几类引用在挡路
  * （报价有 3 条 vs 素材 3 张，处理成本完全不同）。
  */
 @Service
@@ -82,8 +74,7 @@ public class DuplicateDetectionService {
   /**
    * 单次扫描的 SKU 上限。
    *
-   * <p>超过就<b>明确报错并让用户收窄范围</b>，而不是截断了悄悄扫一半：
-   * 一份「看起来扫完了其实只扫了前 20000 个 SKU」的候选清单，比扫不出来糟糕得多 ——
+   * <p>超过就<b>明确报错并让用户收窄范围</b>，而不是截断了悄悄扫一半： 一份「看起来扫完了其实只扫了前 20000 个 SKU」的候选清单，比扫不出来糟糕得多 ——
    * 运营会拿它当「已经干净了」的结论。
    */
   static final int MAX_SCAN_SKUS = 20000;
@@ -91,21 +82,21 @@ public class DuplicateDetectionService {
   /**
    * 引用计数的九类分项：{@code {维度, 中文名, 表, 额外条件}}（顺序即页面展示顺序）。
    *
-   * <p><b>表名与条件写在一起而不是写两条成品 SQL</b>：分组的（全量聚合）与单 SKU 的
-   * （详情页逐项拆分）两条查询必须永远同源，分开写两份字符串迟早会只改到一处。
+   * <p><b>表名与条件写在一起而不是写两条成品 SQL</b>：分组的（全量聚合）与单 SKU 的 （详情页逐项拆分）两条查询必须永远同源，分开写两份字符串迟早会只改到一处。
    *
-   * <p>「额外条件」里的 {@code sku_id is not null} 是必需的：{@code attribute_value} 的
-   * {@code sku_id} 可空（公共属性值不挂 SKU），可空列上等值匹配会漏掉它们，
-   * 而 {@code media_reference} 的 owner_type 形状约束（V18）同样要求显式限定。
+   * <p>「额外条件」里的 {@code sku_id is not null} 是必需的：{@code attribute_value} 的 {@code sku_id} 可空（公共属性值不挂
+   * SKU），可空列上等值匹配会漏掉它们， 而 {@code media_reference} 的 owner_type 形状约束（V18）同样要求显式限定。
    *
-   * <p>九类里<b>没有</b> {@code sku.barcode} 列：V7 的触发器把它同步成主条码的投影，
-   * 再数一次会让「条码引用」虚高一倍。条码本身在 {@code BARCODE} 项里按 {@code sku_identifier} 计数。
+   * <p>九类里<b>没有</b> {@code sku.barcode} 列：V7 的触发器把它同步成主条码的投影， 再数一次会让「条码引用」虚高一倍。条码本身在 {@code
+   * BARCODE} 项里按 {@code sku_identifier} 计数。
    */
   private static final List<String[]> REFERENCE_QUERIES =
       List.of(
           new String[] {"BARCODE", "条码与物料标识", "sku_identifier", "1=1"},
           new String[] {"ATTRIBUTE", "属性值", "attribute_value", "sku_id is not null"},
-          new String[] {"MEDIA", "素材引用", "media_reference", "owner_type='SKU' and sku_id is not null"},
+          new String[] {
+            "MEDIA", "素材引用", "media_reference", "owner_type='SKU' and sku_id is not null"
+          },
           new String[] {"QUOTE", "供应商报价", "supplier_quote", "1=1"},
           new String[] {"BUNDLE", "套装组件", "bundle_component", "1=1"},
           new String[] {"BOM", "BOM 组件", "bom_component", "1=1"},
@@ -131,14 +122,19 @@ public class DuplicateDetectionService {
     String spuName = "";
     String brand = "";
     String category = "";
+
     /** 存在 sku.barcode 列里的条码。 */
     final List<String> columnBarcodes = new ArrayList<>();
+
     /** V7 物料标识表里的条码（与上一项分开留，详情页要分开展示来源）。 */
     final List<String> identifierBarcodes = new ArrayList<>();
+
     /** 按轴值现算的规格组合签名；为空 = 一个轴值都解析不出来。 */
     String variantSignature = "";
+
     /** 挂在本 SKU 上的素材内容哈希（去重）。 */
     final Set<String> mediaHashes = new LinkedHashSet<>();
+
     /** 九类引用计数，缺项为 0。 */
     final Map<String, Integer> references = new LinkedHashMap<>();
 
@@ -210,9 +206,8 @@ public class DuplicateDetectionService {
   /**
    * 条码：{@code sku.barcode} 列 + V7 物料标识表。
    *
-   * <p>两个来源都要，因为「同一条码被录进两个地方」正是批量导入最常见的错：
-   * A 的 {@code sku.barcode} 与 B 的 {@code sku_identifier.value} 同值时，
-   * 只看任何一侧都发现不了这个重复。
+   * <p>两个来源都要，因为「同一条码被录进两个地方」正是批量导入最常见的错： A 的 {@code sku.barcode} 与 B 的 {@code
+   * sku_identifier.value} 同值时， 只看任何一侧都发现不了这个重复。
    */
   private void loadIdentifierBarcodes(UUID tenantId, Map<UUID, SkuFacts> facts) {
     for (Record r :
@@ -227,14 +222,15 @@ public class DuplicateDetectionService {
   /**
    * 规格组合：<b>按轴值现算</b>，不复用 {@code sku.variant_signature} 列。
    *
-   * <p>查询形状与 3.1.3.1 {@code VariantCombinationService} 的「已存在的真实 SKU」来源完全一致
-   * （{@code attribute_value.state='SET'} × {@code attribute_definition.variant_axis}
-   * × {@code attribute_value_item.option_value}），这样本模块判出的组合与商品页显示的组合
-   * 是同一个东西；拼装也复用 {@link CombinationRules#signature}，不写第二套拼接规则。
+   * <p>查询形状与 3.1.3.1 {@code VariantCombinationService} 的「已存在的真实 SKU」来源完全一致 （{@code
+   * attribute_value.state='SET'} × {@code attribute_definition.variant_axis} × {@code
+   * attribute_value_item.option_value}），这样本模块判出的组合与商品页显示的组合 是同一个东西；拼装也复用 {@link
+   * CombinationRules#signature}，不写第二套拼接规则。
    */
   private void loadVariantCombinations(UUID tenantId, Map<UUID, SkuFacts> facts) {
     var parts =
-        sql.fetch(
+        sql
+            .fetch(
                 "select v.sku_id,d.code,i.option_value from attribute_value v"
                     + " join attribute_definition d"
                     + "   on d.tenant_id=v.tenant_id and d.id=v.attribute_id and d.variant_axis"
@@ -287,8 +283,7 @@ public class DuplicateDetectionService {
                   + " where tenant_id=? and "
                   + query[3]
                   + " group by sku_id",
-              tenantId))
-        counts.put(r.get("sku_id", UUID.class), r.get("c", Integer.class));
+              tenantId)) counts.put(r.get("sku_id", UUID.class), r.get("c", Integer.class));
       for (Map.Entry<UUID, SkuFacts> entry : facts.entrySet()) {
         Integer count = counts.get(entry.getKey());
         entry.getValue().references.put(query[0], count == null ? 0 : count);
@@ -301,17 +296,15 @@ public class DuplicateDetectionService {
   /**
    * 扫一次全量（或按类目/品牌收窄的）商品与 SKU，产出候选清单并落库。
    *
-   * <p>每一次调用都留下一份<b>独立且不可变</b>的结论，所以「治理之后重新扫一次，
-   * 候选数从 87 降到 6」这句话需要两次扫描都在场才能说 —— 这与 V34 校验报告的
-   * 「快照 + 过期标记」不同：那边是因为上游预校验会就地覆盖，本模块的候选从不覆盖，
-   * 所以不需要过期标记。
+   * <p>每一次调用都留下一份<b>独立且不可变</b>的结论，所以「治理之后重新扫一次， 候选数从 87 降到 6」这句话需要两次扫描都在场才能说 —— 这与 V34 校验报告的 「快照 +
+   * 过期标记」不同：那边是因为上游预校验会就地覆盖，本模块的候选从不覆盖， 所以不需要过期标记。
    */
   public DuplicateScanRow scan(AccessService.Access actor, DuplicateScanInput input) {
     UUID tenantId = actor.tenantId();
-    BigDecimal threshold = DuplicateRules.minSimilarity(input == null ? null : input.minSimilarity());
+    BigDecimal threshold =
+        DuplicateRules.minSimilarity(input == null ? null : input.minSimilarity());
     CatalogService.check(
-        threshold.signum() >= 0 && threshold.compareTo(BigDecimal.ONE) <= 0,
-        "相似度阈值必须在 0 到 1 之间");
+        threshold.signum() >= 0 && threshold.compareTo(BigDecimal.ONE) <= 0, "相似度阈值必须在 0 到 1 之间");
     String category = trimTo(input == null ? null : input.category());
     String brand = trimTo(input == null ? null : input.brand());
     CatalogService.check(category.length() <= 100, "类目最多 100 字");
@@ -368,8 +361,9 @@ public class DuplicateDetectionService {
             .thenComparing(e -> e.getKey().left().toString())
             .thenComparing(e -> e.getKey().right().toString()));
 
-    long durationMs = Duration.between(startedAt.toInstant(), OffsetDateTime.now(ZoneOffset.UTC).toInstant())
-        .toMillis();
+    long durationMs =
+        Duration.between(startedAt.toInstant(), OffsetDateTime.now(ZoneOffset.UTC).toInstant())
+            .toMillis();
     for (Map.Entry<Pair, List<Signal>> entry : ordered) {
       Pair pair = entry.getKey();
       Candidate candidate = DuplicateRules.candidate(entry.getValue());
@@ -438,7 +432,8 @@ public class DuplicateDetectionService {
           group,
           (a, b) -> {
             Signal signal = barcodeSignal(a.allBarcodes(), b.allBarcodes(), threshold);
-            if (signal != null) hits.computeIfAbsent(Pair.of(a.skuId, b.skuId), k -> new ArrayList<>()).add(signal);
+            if (signal != null)
+              hits.computeIfAbsent(Pair.of(a.skuId, b.skuId), k -> new ArrayList<>()).add(signal);
           });
 
     // 线 2：VARIANT_COMBINATION —— 同 SPU 内按共享的「轴=取值」分组。
@@ -459,7 +454,8 @@ public class DuplicateDetectionService {
             (a, b) -> {
               if (a.skuId.equals(b.skuId)) return;
               Signal signal = variantSignal(a.variantSignature, b.variantSignature, threshold);
-              if (signal != null) hits.computeIfAbsent(Pair.of(a.skuId, b.skuId), k -> new ArrayList<>()).add(signal);
+              if (signal != null)
+                hits.computeIfAbsent(Pair.of(a.skuId, b.skuId), k -> new ArrayList<>()).add(signal);
             });
 
     // 线 3：CROSS_SPU —— 按「归一化标题 + 品牌 + 类目」复合键分组（组内必是不同 SPU）。
@@ -488,7 +484,8 @@ public class DuplicateDetectionService {
                     a.category,
                     b.category,
                     threshold);
-            if (signal != null) hits.computeIfAbsent(Pair.of(a.skuId, b.skuId), k -> new ArrayList<>()).add(signal);
+            if (signal != null)
+              hits.computeIfAbsent(Pair.of(a.skuId, b.skuId), k -> new ArrayList<>()).add(signal);
           });
 
     // 线 4：SIMILAR_PRODUCT —— 按共享素材内容哈希分组。
@@ -505,18 +502,22 @@ public class DuplicateDetectionService {
             if (a.skuId.equals(b.skuId)) return;
             Signal signal =
                 similarProductSignal(a.skuName, b.skuName, a.mediaHashes, b.mediaHashes, threshold);
-            if (signal != null) hits.computeIfAbsent(Pair.of(a.skuId, b.skuId), k -> new ArrayList<>()).add(signal);
+            if (signal != null)
+              hits.computeIfAbsent(Pair.of(a.skuId, b.skuId), k -> new ArrayList<>()).add(signal);
           });
     return hits;
   }
 
   /** 组内两两比较（组内成员按 skuId 去重，避免同一 SKU 因多个共享值重复配对）。 */
-  private static void forEachPair(List<SkuFacts> group, java.util.function.BiConsumer<SkuFacts, SkuFacts> work) {
-    List<SkuFacts> unique = new ArrayList<>(new LinkedHashMap<UUID, SkuFacts>() {
-      {
-        group.forEach(f -> put(f.skuId, f));
-      }
-    }.values());
+  private static void forEachPair(
+      List<SkuFacts> group, java.util.function.BiConsumer<SkuFacts, SkuFacts> work) {
+    List<SkuFacts> unique =
+        new ArrayList<>(
+            new LinkedHashMap<UUID, SkuFacts>() {
+              {
+                group.forEach(f -> put(f.skuId, f));
+              }
+            }.values());
     if (unique.size() < 2) return;
     for (int i = 0; i < unique.size(); i++)
       for (int j = i + 1; j < unique.size(); j++) work.accept(unique.get(i), unique.get(j));
@@ -541,7 +542,8 @@ public class DuplicateDetectionService {
     List<DuplicateScanRow> items = new ArrayList<>();
     for (Record r : rows) items.add(scanRow(r.get("id", UUID.class)));
     int totalCandidates =
-        sql.fetchOne("select coalesce(sum(candidate_count),0) from sku_duplicate_scan where tenant_id=?",
+        sql.fetchOne(
+                "select coalesce(sum(candidate_count),0) from sku_duplicate_scan where tenant_id=?",
                 currentTenantId())
             .get(0, Integer.class);
     return new DuplicateScanPage(List.copyOf(items), p, s, total, totalCandidates);
@@ -550,7 +552,10 @@ public class DuplicateDetectionService {
   /** 单次扫描详情（含决定计数）。 */
   public DuplicateScanRow scanRow(UUID scanId) {
     Record row =
-        sql.fetchOne("select * from sku_duplicate_scan where tenant_id=? and id=?", currentTenantId(), scanId);
+        sql.fetchOne(
+            "select * from sku_duplicate_scan where tenant_id=? and id=?",
+            currentTenantId(),
+            scanId);
     if (row == null) throw CatalogService.missing();
     return scanRowOf(row);
   }
@@ -590,8 +595,7 @@ public class DuplicateDetectionService {
                 + "   on d.tenant_id=k.tenant_id and d.candidate_id=k.id"
                 + " where k.tenant_id=? and k.scan_id=? group by 1",
             currentTenantId(),
-            scanId))
-      counts.put(r.get("state", String.class), r.get("c", Integer.class));
+            scanId)) counts.put(r.get("state", String.class), r.get("c", Integer.class));
     return counts;
   }
 
@@ -603,14 +607,7 @@ public class DuplicateDetectionService {
             currentTenantId());
     if (latest == null)
       return new DuplicateOverview(
-          null,
-          List.of(),
-          0,
-          0,
-          0,
-          0,
-          0,
-          "还没有扫描过：点「开始扫描」读全量商品与 SKU，扫完才有候选清单。");
+          null, List.of(), 0, 0, 0, 0, 0, "还没有扫描过：点「开始扫描」读全量商品与 SKU，扫完才有候选清单。");
     UUID scanId = latest.get("id", UUID.class);
     DuplicateScanRow scan = scanRow(scanId);
     Map<String, Record> stats = new LinkedHashMap<>();
@@ -619,8 +616,7 @@ public class DuplicateDetectionService {
             "select dimension,count(*) as pair_count,max(score) as top_score"
                 + " from sku_duplicate_signal where tenant_id=? and scan_id=? group by dimension",
             currentTenantId(),
-            scanId))
-      stats.put(r.get("dimension", String.class), r);
+            scanId)) stats.put(r.get("dimension", String.class), r);
     List<DuplicateDimensionStat> dimensions = new ArrayList<>();
     for (DuplicateRules.Dimension d : DuplicateRules.Dimension.values()) {
       Record r = stats.get(d.name());
@@ -651,11 +647,16 @@ public class DuplicateDetectionService {
   /**
    * 候选清单（分页 + 维度 / 决定 / 最低相似度三种筛选，可任意组合）。
    *
-   * <p>维度筛选用 {@code exists} 而不是 join：同一对命中四条线时 join 会产生 4 行，
-   * 分页的 {@code total} 与实际候选数对不上（这正是 V36 把「一对一行」当硬约束的原因）。
+   * <p>维度筛选用 {@code exists} 而不是 join：同一对命中四条线时 join 会产生 4 行， 分页的 {@code total} 与实际候选数对不上（这正是 V36
+   * 把「一对一行」当硬约束的原因）。
    */
   public DuplicateCandidatePage candidates(
-      UUID scanId, String dimension, String decision, BigDecimal minSimilarity, int page, int size) {
+      UUID scanId,
+      String dimension,
+      String decision,
+      BigDecimal minSimilarity,
+      int page,
+      int size) {
     DuplicateScanRow scan = scanRow(scanId);
     int p = Math.max(0, page);
     int s = size <= 0 ? 20 : Math.min(size, MAX_PAGE_SIZE);
@@ -669,7 +670,10 @@ public class DuplicateDetectionService {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "未知的检测维度：" + dimension);
       }
     }
-    String state = decision == null || decision.isBlank() ? null : decision.trim().toUpperCase(java.util.Locale.ROOT);
+    String state =
+        decision == null || decision.isBlank()
+            ? null
+            : decision.trim().toUpperCase(java.util.Locale.ROOT);
     CatalogService.check(
         state == null || Set.of("PENDING", "MERGE", "KEEP").contains(state),
         "决定筛选只能是 PENDING / MERGE / KEEP");
@@ -679,8 +683,9 @@ public class DuplicateDetectionService {
     binds.add(currentTenantId());
     binds.add(scanId);
     if (dim != null) {
-      where.append(" and exists(select 1 from sku_duplicate_signal g where g.tenant_id=k.tenant_id"
-          + " and g.candidate_id=k.id and g.dimension=?)");
+      where.append(
+          " and exists(select 1 from sku_duplicate_signal g where g.tenant_id=k.tenant_id"
+              + " and g.candidate_id=k.id and g.dimension=?)");
       binds.add(dim.name());
     }
     if (minSimilarity != null) {
@@ -698,10 +703,11 @@ public class DuplicateDetectionService {
     }
 
     long total =
-        sql.fetchOne("select count(*) from sku_duplicate_candidate k" + decisionJoin + where, binds.toArray())
+        sql.fetchOne(
+                "select count(*) from sku_duplicate_candidate k" + decisionJoin + where,
+                binds.toArray())
             .get(0, Long.class);
-    if (total == 0)
-      return new DuplicateCandidatePage(List.of(), p, s, 0, scan);
+    if (total == 0) return new DuplicateCandidatePage(List.of(), p, s, 0, scan);
 
     List<Object> pageBinds = new ArrayList<>(binds);
     pageBinds.add(s);
@@ -781,7 +787,8 @@ public class DuplicateDetectionService {
   /** 两个 SKU 现算的规格组合签名（与扫描时同一条 SQL、同一套拼装）。 */
   private String derivedSignature(UUID skuId) {
     var parts =
-        sql.fetch(
+        sql
+            .fetch(
                 "select d.code,i.option_value from attribute_value v"
                     + " join attribute_definition d"
                     + "   on d.tenant_id=v.tenant_id and d.id=v.attribute_id and d.variant_axis"
@@ -792,7 +799,10 @@ public class DuplicateDetectionService {
                 currentTenantId(),
                 skuId)
             .stream()
-            .map(r -> new CombinationRules.Part(r.get("code", String.class), r.get("option_value", String.class)))
+            .map(
+                r ->
+                    new CombinationRules.Part(
+                        r.get("code", String.class), r.get("option_value", String.class)))
             .toList();
     var signature = CombinationRules.signature(parts, Set.of());
     return signature.signature() == null ? "" : signature.signature();
@@ -801,7 +811,9 @@ public class DuplicateDetectionService {
   /** 一个 SKU 的全部条码（{@code sku.barcode} 列 + 物料标识表）。 */
   private List<String> barcodesOf(UUID skuId) {
     List<String> out = new ArrayList<>();
-    Record column = sql.fetchOne("select barcode from sku where tenant_id=? and id=?", currentTenantId(), skuId);
+    Record column =
+        sql.fetchOne(
+            "select barcode from sku where tenant_id=? and id=?", currentTenantId(), skuId);
     if (column != null) {
       String value = nvl(column.get("barcode", String.class));
       if (!value.isEmpty()) out.add(value);
@@ -810,8 +822,7 @@ public class DuplicateDetectionService {
         sql.fetch(
             "select value from sku_identifier where tenant_id=? and sku_id=? order by id",
             currentTenantId(),
-            skuId))
-      out.add(r.get("value", String.class));
+            skuId)) out.add(r.get("value", String.class));
     return List.copyOf(out);
   }
 
@@ -821,7 +832,11 @@ public class DuplicateDetectionService {
     for (String[] query : REFERENCE_QUERIES) {
       int count =
           sql.fetchOne(
-                  "select count(*) from " + query[2] + " where tenant_id=? and " + query[3] + " and sku_id=?",
+                  "select count(*) from "
+                      + query[2]
+                      + " where tenant_id=? and "
+                      + query[3]
+                      + " and sku_id=?",
                   currentTenantId(),
                   skuId)
               .get(0, Integer.class);
@@ -838,14 +853,16 @@ public class DuplicateDetectionService {
         sql.fetch(
             "select dimension,score,evidence from sku_duplicate_signal where tenant_id=? and candidate_id=?",
             currentTenantId(),
-            candidateId))
-      byDimension.put(r.get("dimension", String.class), r);
+            candidateId)) byDimension.put(r.get("dimension", String.class), r);
     for (DuplicateRules.Dimension d : DuplicateRules.Dimension.values()) {
       Record r = byDimension.get(d.name());
       if (r == null) continue;
       out.add(
           new DuplicateSignalView(
-              d.name(), d.label(), r.get("score", BigDecimal.class), r.get("evidence", String.class)));
+              d.name(),
+              d.label(),
+              r.get("score", BigDecimal.class),
+              r.get("evidence", String.class)));
     }
     return out;
   }
@@ -882,8 +899,7 @@ public class DuplicateDetectionService {
     if ("MERGE".equals(decision))
       return "3.9.1.2 执行合并时必须带着 primary_version / secondary_version 作为 expected_version 比对："
           + "对不上说明登记之后商品被改过，合并前提已不成立，需要重新确认。";
-    if ("KEEP".equals(decision))
-      return "已判为保留两条：3.9.1.2 不应对这一对做任何归并。若后来发现判错，改决定即可（带 version 乐观锁）。";
+    if ("KEEP".equals(decision)) return "已判为保留两条：3.9.1.2 不应对这一对做任何归并。若后来发现判错，改决定即可（带 version 乐观锁）。";
     return "尚未决定：本模块只登记决定，不执行合并。";
   }
 
@@ -892,16 +908,14 @@ public class DuplicateDetectionService {
   /**
    * 登记人工决定（MERGE / KEEP）。
    *
-   * <p><b>本方法不改 sku / spu 的任何一列</b>：执行合并是 3.9.1.2 的职责。
-   * 这里只做三件蓝图点名的事：把决定登记成可查的事实、把主记录指出来、
-   * 把登记那一刻的 {@code sku.version} 留给 3.9.1.2 当 {@code expected_version}。
+   * <p><b>本方法不改 sku / spu 的任何一列</b>：执行合并是 3.9.1.2 的职责。 这里只做三件蓝图点名的事：把决定登记成可查的事实、把主记录指出来、 把登记那一刻的
+   * {@code sku.version} 留给 3.9.1.2 当 {@code expected_version}。
    *
-   * <p><b>MERGE 必须指主记录，且必须是这一对里的一个</b>：不指主记录的「确认合并」
-   * 无法执行，而指到第三个 SKU 的主记录会把不相干的两条并掉。
-   * 两条都由 DB CHECK 与这里各挡一次（CHECK 管「MERGE 与主记录同时有或同时没有」，
-   * 这里管「主记录在候选的两侧之内」）。
+   * <p><b>MERGE 必须指主记录，且必须是这一对里的一个</b>：不指主记录的「确认合并」 无法执行，而指到第三个 SKU 的主记录会把不相干的两条并掉。 两条都由 DB CHECK
+   * 与这里各挡一次（CHECK 管「MERGE 与主记录同时有或同时没有」， 这里管「主记录在候选的两侧之内」）。
    */
-  public DuplicateDecisionRow decide(AccessService.Access actor, UUID candidateId, DuplicateDecisionInput input) {
+  public DuplicateDecisionRow decide(
+      AccessService.Access actor, UUID candidateId, DuplicateDecisionInput input) {
     UUID tenantId = actor.tenantId();
     Record candidate =
         sql.fetchOne(
@@ -909,7 +923,8 @@ public class DuplicateDetectionService {
             tenantId,
             candidateId);
     if (candidate == null) throw CatalogService.missing();
-    String decision = input.decision() == null ? "" : input.decision().trim().toUpperCase(java.util.Locale.ROOT);
+    String decision =
+        input.decision() == null ? "" : input.decision().trim().toUpperCase(java.util.Locale.ROOT);
     CatalogService.check(
         Set.of("MERGE", "KEEP").contains(decision), "决定只能是 MERGE（确认合并）或 KEEP（保留两条）");
     String note = trimTo(input.note());
@@ -976,15 +991,15 @@ public class DuplicateDetectionService {
               secondaryVersion,
               note,
               actor.userId());
-      CatalogService.check(
-          inserted == 1, "这个候选的决定已被他人修改，请刷新后重试");
+      CatalogService.check(inserted == 1, "这个候选的决定已被他人修改，请刷新后重试");
     }
     audit(actor, candidateId, "SkuDuplicateDecided");
     return decisionRow(candidateId);
   }
 
   private long skuVersion(UUID tenantId, UUID skuId) {
-    Record row = sql.fetchOne("select version from sku where tenant_id=? and id=?", tenantId, skuId);
+    Record row =
+        sql.fetchOne("select version from sku where tenant_id=? and id=?", tenantId, skuId);
     if (row == null) throw CatalogService.missing();
     return row.get("version", Long.class);
   }
@@ -1050,5 +1065,4 @@ public class DuplicateDetectionService {
   private static java.time.Instant instant(OffsetDateTime value) {
     return value == null ? null : value.toInstant();
   }
-
 }

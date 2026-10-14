@@ -51,9 +51,11 @@ AI 翻译建议的采纳流程、翻译状态三态（待翻 / 已翻 / 已校�
 ## 文件清单
 
 **迁移**
+
 - `backend/services/catalog/src/main/resources/db/migration/V22__multilingual_content.sql`
 
 **后端**
+
 - `TranslationRules.java`（纯规则层：语言标签、三态与正文一致性、状态流转、占位符拒绝、容量上限）
 - `TranslationService.java`（语言需求 / 译文 / 建议 / 完整度 / CSV / 合并视图）
 - `TranslationBatchService.java`（三件同步批量 + 逐条结果）
@@ -62,22 +64,26 @@ AI 翻译建议的采纳流程、翻译状态三态（待翻 / 已翻 / 已校�
 - `CatalogModels.java`（追加 29 个 DTO record）
 
 **测试**
+
 - `TranslationIntegrationTest.java`（26 例，Testcontainers 真实 PostgreSQL 16，连接池固定 1 条）
 - `TranslationRulesTest.java`（16 例）
 - `apps/web/src/components/catalog/multilingual-model.test.ts`（29 例）
 - `apps/web/src/app/api/catalog/[...path]/route.test.ts`（追加 3 例，正反断言）
 
 **前端**
+
 - `apps/web/src/components/catalog/multilingual-workspace.tsx`
 - `apps/web/src/components/catalog/multilingual-model.ts`
 - `apps/web/src/app/products/translations/page.tsx`
 - `apps/web/src/lib/api-proxy.ts`（`translations` 白名单放行 + 中文注释）
 
 **契约**（`pnpm contracts:generate --spec-dir backend/target/openapi` 重新生成，只增不改）
+
 - `packages/api-contracts/src/catalog.ts`（+29 个 `Translation*` DTO）
 - `packages/api-contracts/src/catalog.openapi.json`
 
 **台账与会话**
+
 - `docs/product/capability-blueprint/module-progress.md`（3.4.3.1 → 已交付）
 - `docs/sessions/2026-10/2026-10-07-multilingual-content.md`（本文件）
 

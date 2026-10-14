@@ -13,20 +13,19 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
 import org.jooq.DSLContext;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.3.2.1 品牌管理：品牌字典 CRUD、多语言名（按语言唯一）、Logo、授权状态、关联类目、
- * 授权凭证、**阻止刊登判定**（蓝图点名的业务规则），以及租户隔离三断言。
+ * 3.3.2.1 品牌管理：品牌字典 CRUD、多语言名（按语言唯一）、Logo、授权状态、关联类目、 授权凭证、**阻止刊登判定**（蓝图点名的业务规则），以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
@@ -155,42 +154,85 @@ class BrandIntegrationTest {
   }
 
   String uniqueCode(String hint) {
-    return hint + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
+    return hint
+        + UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT);
   }
 
   UUID tree(AccessService.Access who, String kind, String platformCode) {
-    return write(who, () -> categories.saveTree(who, null,
-        new CategoryTreeInput(uniqueCode("TREE"), "分类树", kind, platformCode, true, 0))).id();
+    return write(
+            who,
+            () ->
+                categories.saveTree(
+                    who,
+                    null,
+                    new CategoryTreeInput(uniqueCode("TREE"), "分类树", kind, platformCode, true, 0)))
+        .id();
   }
 
   UUID category(AccessService.Access who, UUID treeId, UUID parentId, String name) {
-    return write(who, () -> categories.save(who, treeId, null,
-        new CategoryInput(uniqueCode("CAT"), name, parentId, null, true, List.of(), 0))).id();
+    return write(
+            who,
+            () ->
+                categories.save(
+                    who,
+                    treeId,
+                    null,
+                    new CategoryInput(uniqueCode("CAT"), name, parentId, null, true, List.of(), 0)))
+        .id();
   }
 
   /** 建一个品牌。status 缺省 OWNED（自有，恒可刊登），这样夹具不会意外制造阻断状态。 */
-  UUID brand(AccessService.Access who, String name, String status, List<BrandNameInput> names,
+  UUID brand(
+      AccessService.Access who,
+      String name,
+      String status,
+      List<BrandNameInput> names,
       List<BrandCategoryLinkInput> links) {
     String code = uniqueCode("BR");
     // Logo 引用取编码而不是名字：名字里可能带空格，而引用不能（未编码的空格不是合法 URI）。
-    return write(who, () -> brands.save(who, null,
-        new BrandInput(code, name, "logos/" + code + ".png", status, true, names, links, 0))).id();
+    return write(
+            who,
+            () ->
+                brands.save(
+                    who,
+                    null,
+                    new BrandInput(
+                        code, name, "logos/" + code + ".png", status, true, names, links, 0)))
+        .id();
   }
 
-  BrandSaved credential(AccessService.Access who, UUID brandId, LocalDate from, LocalDate to, boolean enabled) {
-    return write(who, () -> brands.saveAuthorization(who, brandId, null,
-        new BrandAuthorizationInput(
-            uniqueCode("CERT"), "品牌权利人", from.toString(), to == null ? null : to.toString(),
-            "evidence/" + UUID.randomUUID() + ".pdf", "测试凭证", enabled, 0)));
+  BrandSaved credential(
+      AccessService.Access who, UUID brandId, LocalDate from, LocalDate to, boolean enabled) {
+    return write(
+        who,
+        () ->
+            brands.saveAuthorization(
+                who,
+                brandId,
+                null,
+                new BrandAuthorizationInput(
+                    uniqueCode("CERT"),
+                    "品牌权利人",
+                    from.toString(),
+                    to == null ? null : to.toString(),
+                    "evidence/" + UUID.randomUUID() + ".pdf",
+                    "测试凭证",
+                    enabled,
+                    0)));
   }
 
   // ------------------------------------------------------------ 品牌字典 CRUD 与唯一性
 
   @Test
   void brandDictionaryKeepsNameLocaleLogoAndUniqueness() {
-    UUID owned = brand(actor, "自有品牌", "OWNED",
-        List.of(new BrandNameInput("zh-CN", "自有品牌"), new BrandNameInput("en-US", "Owned Brand")),
-        List.of());
+    UUID owned =
+        brand(
+            actor,
+            "自有品牌",
+            "OWNED",
+            List.of(
+                new BrandNameInput("zh-CN", "自有品牌"), new BrandNameInput("en-US", "Owned Brand")),
+            List.of());
     var detail = tx(actor, () -> brands.detail(owned));
     assertThat(detail.code()).startsWith("BR");
     assertThat(detail.logoUri()).isEqualTo("logos/" + detail.code() + ".png");
@@ -199,41 +241,118 @@ class BrandIntegrationTest {
     assertThat(detail.enabled()).isTrue();
 
     // locale 规范化后重复必须被拒：zh-CN 与 zh-cn 是同一个语言，不允许两条。
-    assertThatThrownBy(() -> write(actor, () -> brands.save(actor, owned,
-        brandInput(detail, List.of(new BrandNameInput("zh-CN", "甲"), new BrandNameInput("zh-cn", "乙"))))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        brands.save(
+                            actor,
+                            owned,
+                            brandInput(
+                                detail,
+                                List.of(
+                                    new BrandNameInput("zh-CN", "甲"),
+                                    new BrandNameInput("zh-cn", "乙"))))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
+        .satisfies(
+            e ->
+                assertThat(((ResponseStatusException) e).getStatusCode())
+                    .isEqualTo(HttpStatus.BAD_REQUEST));
     assertThat(tx(actor, () -> brands.detail(owned)).names()).containsOnlyKeys("zh-cn", "en-us");
 
     // 编码建后不可改（刊登与侵权检测按 code 对齐）。状态码与 3.3.1.1 的分类编码同一口径：
     // 不可改字段是 400（提交的内容不合法），409 留给 version 乐观锁与唯一键冲突。
-    assertThatThrownBy(() -> write(actor, () -> brands.save(actor, owned,
-        new BrandInput("OTHERCODE1", "改名", null, "OWNED", true, List.of(), List.of(), detail.version()))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        brands.save(
+                            actor,
+                            owned,
+                            new BrandInput(
+                                "OTHERCODE1",
+                                "改名",
+                                null,
+                                "OWNED",
+                                true,
+                                List.of(),
+                                List.of(),
+                                detail.version()))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
+        .satisfies(
+            e ->
+                assertThat(((ResponseStatusException) e).getStatusCode())
+                    .isEqualTo(HttpStatus.BAD_REQUEST));
 
     // 同租户编码重复：新建时 409，不让 500 冒到界面上。
     String code = uniqueCode("DUP");
-    write(actor, () -> brands.save(actor, null,
-        new BrandInput(code, "先建", null, "OWNED", true, List.of(), List.of(), 0)));
-    assertThatThrownBy(() -> write(actor, () -> brands.save(actor, null,
-        new BrandInput(code, "后建", null, "OWNED", true, List.of(), List.of(), 0))))
+    write(
+        actor,
+        () ->
+            brands.save(
+                actor,
+                null,
+                new BrandInput(code, "先建", null, "OWNED", true, List.of(), List.of(), 0)));
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        brands.save(
+                            actor,
+                            null,
+                            new BrandInput(
+                                code, "后建", null, "OWNED", true, List.of(), List.of(), 0))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode()).isEqualTo(HttpStatus.CONFLICT));
+        .satisfies(
+            e ->
+                assertThat(((ResponseStatusException) e).getStatusCode())
+                    .isEqualTo(HttpStatus.CONFLICT));
 
     // 编码与授权状态校验（纯规则，出口是可执行的原因而不是约束名）。
-    assertThatThrownBy(() -> write(actor, () -> brands.save(actor, null,
-        new BrandInput("中文编码", "非法编码", null, "OWNED", true, List.of(), List.of(), 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        brands.save(
+                            actor,
+                            null,
+                            new BrandInput(
+                                "中文编码", "非法编码", null, "OWNED", true, List.of(), List.of(), 0))))
         .isInstanceOf(ResponseStatusException.class);
-    assertThatThrownBy(() -> write(actor, () -> brands.save(actor, null,
-        new BrandInput(uniqueCode("OK"), "非法状态", null, "BORROWED", true, List.of(), List.of(), 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        brands.save(
+                            actor,
+                            null,
+                            new BrandInput(
+                                uniqueCode("OK"),
+                                "非法状态",
+                                null,
+                                "BORROWED",
+                                true,
+                                List.of(),
+                                List.of(),
+                                0))))
         .isInstanceOf(ResponseStatusException.class);
   }
 
   private static BrandInput brandInput(BrandDetail detail, List<BrandNameInput> names) {
     return new BrandInput(
-        detail.code(), detail.name(), detail.logoUri(), detail.authorizationStatus(), detail.enabled(),
-        names, List.of(), detail.version());
+        detail.code(),
+        detail.name(),
+        detail.logoUri(),
+        detail.authorizationStatus(),
+        detail.enabled(),
+        names,
+        List.of(),
+        detail.version());
   }
 
   @Test
@@ -247,10 +366,28 @@ class BrandIntegrationTest {
     assertThat(disabled.version()).isGreaterThan(version);
 
     // 乐观锁：拿旧 version 保存必须被拒。
-    assertThatThrownBy(() -> write(actor, () -> brands.save(actor, id,
-        new BrandInput(disabled.code(), "并发改", null, "OWNED", false, List.of(), List.of(), version))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        brands.save(
+                            actor,
+                            id,
+                            new BrandInput(
+                                disabled.code(),
+                                "并发改",
+                                null,
+                                "OWNED",
+                                false,
+                                List.of(),
+                                List.of(),
+                                version))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode()).isEqualTo(HttpStatus.CONFLICT));
+        .satisfies(
+            e ->
+                assertThat(((ResponseStatusException) e).getStatusCode())
+                    .isEqualTo(HttpStatus.CONFLICT));
 
     writeVoid(actor, () -> brands.setEnabled(actor, id, true));
     assertThat(tx(actor, () -> brands.detail(id)).enabled()).isTrue();
@@ -281,8 +418,8 @@ class BrandIntegrationTest {
     UUID t = tree(actor, "INTERNAL", null);
     UUID apparel = category(actor, t, null, "服饰");
     UUID tops = category(actor, t, apparel, "上装");
-    UUID id = brand(actor, "关联品牌", "OWNED", List.of(),
-        List.of(new BrandCategoryLinkInput(tops, null)));
+    UUID id =
+        brand(actor, "关联品牌", "OWNED", List.of(), List.of(new BrandCategoryLinkInput(tops, null)));
 
     var detail = tx(actor, () -> brands.detail(id));
     assertThat(detail.categories()).hasSize(1);
@@ -291,33 +428,81 @@ class BrandIntegrationTest {
     assertThat(detail.categories().getFirst().categoryPath()).isEqualTo("服饰 / 上装");
 
     // 列表行也带类目名与条数（同一份口径，不让前端再打一次详情）。
-    var row = tx(actor, () -> brands.list(new BrandQuery(null, null, null, null, null, 0, 200)))
-        .items().stream().filter(r -> r.id().equals(id)).findFirst().orElseThrow();
+    var row =
+        tx(actor, () -> brands.list(new BrandQuery(null, null, null, null, null, 0, 200)))
+            .items()
+            .stream()
+            .filter(r -> r.id().equals(id))
+            .findFirst()
+            .orElseThrow();
     assertThat(row.categoryCount()).isEqualTo(1);
     assertThat(row.categoryNames()).isEqualTo("上装");
 
     // 重命名类目后，关联上的显示名自动跟着变（关联指向主键，不是快照）。
-    long topsVersion = tx(actor, () -> categories.tree(t, true)).stream()
-        .filter(n -> n.id().equals(tops)).findFirst().orElseThrow().version();
-    write(actor, () -> categories.save(actor, t, tops,
-        new CategoryInput(detail.categories().getFirst().categoryCode(), "短袖", apparel, 0, true, List.of(), topsVersion)));
-    assertThat(tx(actor, () -> brands.detail(id)).categories().getFirst().categoryName()).isEqualTo("短袖");
+    long topsVersion =
+        tx(actor, () -> categories.tree(t, true)).stream()
+            .filter(n -> n.id().equals(tops))
+            .findFirst()
+            .orElseThrow()
+            .version();
+    write(
+        actor,
+        () ->
+            categories.save(
+                actor,
+                t,
+                tops,
+                new CategoryInput(
+                    detail.categories().getFirst().categoryCode(),
+                    "短袖",
+                    apparel,
+                    0,
+                    true,
+                    List.of(),
+                    topsVersion)));
+    assertThat(tx(actor, () -> brands.detail(id)).categories().getFirst().categoryName())
+        .isEqualTo("短袖");
 
     // 按类目筛选走的是 brand_category 的复合外键关系，不是字符串比。
-    assertThat(tx(actor, () -> brands.list(new BrandQuery(null, null, null, null, tops, 0, 200))).items())
-        .extracting(BrandRow::id).contains(id);
-    assertThat(tx(actor, () -> brands.list(new BrandQuery(null, null, null, null, apparel, 0, 200))).items())
-        .extracting(BrandRow::id).doesNotContain(id);
+    assertThat(
+            tx(actor, () -> brands.list(new BrandQuery(null, null, null, null, tops, 0, 200)))
+                .items())
+        .extracting(BrandRow::id)
+        .contains(id);
+    assertThat(
+            tx(actor, () -> brands.list(new BrandQuery(null, null, null, null, apparel, 0, 200)))
+                .items())
+        .extracting(BrandRow::id)
+        .doesNotContain(id);
 
     // 不存在或不属于本租户的类目：关联必须被拒。
-    assertThatThrownBy(() -> write(actor, () -> brands.save(actor, id,
-        new BrandInput(row.code(), "关联品牌", null, "OWNED", true, List.of(),
-            List.of(new BrandCategoryLinkInput(UUID.randomUUID(), null)), row.version()))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        brands.save(
+                            actor,
+                            id,
+                            new BrandInput(
+                                row.code(),
+                                "关联品牌",
+                                null,
+                                "OWNED",
+                                true,
+                                List.of(),
+                                List.of(new BrandCategoryLinkInput(UUID.randomUUID(), null)),
+                                row.version()))))
         .isInstanceOf(ResponseStatusException.class);
 
     // 整体替换语义：提交空列表等于清空关联（不是增量追加）。
-    write(actor, () -> brands.save(actor, id,
-        new BrandInput(row.code(), "关联品牌", null, "OWNED", true, List.of(), List.of(), 0)));
+    write(
+        actor,
+        () ->
+            brands.save(
+                actor,
+                id,
+                new BrandInput(row.code(), "关联品牌", null, "OWNED", true, List.of(), List.of(), 0)));
     assertThat(tx(actor, () -> brands.detail(id)).categories()).isEmpty();
   }
 
@@ -329,9 +514,23 @@ class BrandIntegrationTest {
 
     // 停用类目不允许**新增**关联：新建一个指向停用类目的关联没有意义。
     writeVoid(actor, () -> categories.setEnabled(actor, c, false));
-    assertThatThrownBy(() -> write(actor, () -> brands.save(actor, id,
-        new BrandInput(uniqueCode("X"), "品牌", null, "OWNED", true, List.of(),
-            List.of(new BrandCategoryLinkInput(c, null)), 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        brands.save(
+                            actor,
+                            id,
+                            new BrandInput(
+                                uniqueCode("X"),
+                                "品牌",
+                                null,
+                                "OWNED",
+                                true,
+                                List.of(),
+                                List.of(new BrandCategoryLinkInput(c, null)),
+                                0))))
         .isInstanceOf(ResponseStatusException.class);
 
     // 但已有关联保留，且照样显示（运营要看见「这个品牌挂在哪个已停用的类目上」）。
@@ -351,8 +550,7 @@ class BrandIntegrationTest {
     assertThat(tx(actor, () -> brands.eligibility(licensed)).publishable()).isFalse();
     assertThat(tx(actor, () -> brands.eligibility(licensed)).blockCode())
         .isEqualTo(BrandRules.BLOCK_LICENSE_MISSING);
-    assertThat(tx(actor, () -> brands.detail(licensed)).publishBlockMessage())
-        .contains("没有任何授权凭证");
+    assertThat(tx(actor, () -> brands.detail(licensed)).publishBlockMessage()).contains("没有任何授权凭证");
 
     // 凭证已存在但尚未到生效日 → 未生效（等一等就能刊登，两个下游处理动作不同）。
     credential(actor, licensed, today().plusDays(30), today().plusDays(400), true);
@@ -366,10 +564,22 @@ class BrandIntegrationTest {
     // 把所有凭证都挪到过去 → 全部过期，判定给出 EXPIRED 而不是 MISSING。
     var list = tx(actor, () -> brands.authorizations(licensed));
     for (var each : list) {
-      write(actor, () -> brands.saveAuthorization(actor, licensed, each.id(),
-          new BrandAuthorizationInput(each.certificateNo(), each.grantor(),
-              today().minusDays(400).toString(), today().minusDays(200).toString(),
-              each.evidenceUri(), each.note(), true, each.version())));
+      write(
+          actor,
+          () ->
+              brands.saveAuthorization(
+                  actor,
+                  licensed,
+                  each.id(),
+                  new BrandAuthorizationInput(
+                      each.certificateNo(),
+                      each.grantor(),
+                      today().minusDays(400).toString(),
+                      today().minusDays(200).toString(),
+                      each.evidenceUri(),
+                      each.note(),
+                      true,
+                      each.version())));
     }
     assertThat(tx(actor, () -> brands.eligibility(licensed)).blockCode())
         .isEqualTo(BrandRules.BLOCK_LICENSE_EXPIRED);
@@ -378,9 +588,22 @@ class BrandIntegrationTest {
     // 撤销（enabled=false）等于无效：行仍在，可查「曾经有过授权、后来被撤销」。
     var expired = tx(actor, () -> brands.authorizations(licensed));
     for (var each : expired) {
-      write(actor, () -> brands.saveAuthorization(actor, licensed, each.id(),
-          new BrandAuthorizationInput(each.certificateNo(), each.grantor(),
-              each.validFrom(), each.validTo(), each.evidenceUri(), each.note(), false, each.version())));
+      write(
+          actor,
+          () ->
+              brands.saveAuthorization(
+                  actor,
+                  licensed,
+                  each.id(),
+                  new BrandAuthorizationInput(
+                      each.certificateNo(),
+                      each.grantor(),
+                      each.validFrom(),
+                      each.validTo(),
+                      each.evidenceUri(),
+                      each.note(),
+                      false,
+                      each.version())));
     }
     assertThat(tx(actor, () -> brands.authorizations(licensed))).hasSize(expired.size());
     assertThat(tx(actor, () -> brands.eligibility(licensed)).blockCode())
@@ -420,8 +643,21 @@ class BrandIntegrationTest {
     assertThat(tx(actor, () -> brands.eligibility(id)).publishable()).isTrue();
     // 自有 → 需授权：运营改状态就是想表达「从现在起需要凭证」，刊登必须立刻被拦住。
     var detail = tx(actor, () -> brands.detail(id));
-    write(actor, () -> brands.save(actor, id,
-        new BrandInput(detail.code(), detail.name(), null, "LICENSED", true, List.of(), List.of(), detail.version())));
+    write(
+        actor,
+        () ->
+            brands.save(
+                actor,
+                id,
+                new BrandInput(
+                    detail.code(),
+                    detail.name(),
+                    null,
+                    "LICENSED",
+                    true,
+                    List.of(),
+                    List.of(),
+                    detail.version())));
     assertThat(tx(actor, () -> brands.eligibility(id)).publishable()).isFalse();
     // 补上凭证后放行。
     credential(actor, id, today().minusDays(1), today().plusDays(30), true);
@@ -432,23 +668,79 @@ class BrandIntegrationTest {
   void duplicateCertificateNumberAndReversedValidityAreRejected() {
     UUID id = brand(actor, "凭证校验", "LICENSED", List.of(), List.of());
     String no = uniqueCode("CERT");
-    write(actor, () -> brands.saveAuthorization(actor, id, null,
-        new BrandAuthorizationInput(no, "授权方", today().toString(), today().plusDays(90).toString(),
-            null, null, true, 0)));
+    write(
+        actor,
+        () ->
+            brands.saveAuthorization(
+                actor,
+                id,
+                null,
+                new BrandAuthorizationInput(
+                    no,
+                    "授权方",
+                    today().toString(),
+                    today().plusDays(90).toString(),
+                    null,
+                    null,
+                    true,
+                    0)));
     // 同一品牌下凭证编号唯一：重复导入同一份合约会让「有几条有效凭证」翻倍。
-    assertThatThrownBy(() -> write(actor, () -> brands.saveAuthorization(actor, id, null,
-        new BrandAuthorizationInput(no, "授权方", today().toString(), null, null, null, true, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        brands.saveAuthorization(
+                            actor,
+                            id,
+                            null,
+                            new BrandAuthorizationInput(
+                                no, "授权方", today().toString(), null, null, null, true, 0))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode()).isEqualTo(HttpStatus.CONFLICT));
+        .satisfies(
+            e ->
+                assertThat(((ResponseStatusException) e).getStatusCode())
+                    .isEqualTo(HttpStatus.CONFLICT));
 
     // 失效早于生效：写进库会让有效区间显示成倒着的。
-    assertThatThrownBy(() -> write(actor, () -> brands.saveAuthorization(actor, id, null,
-        new BrandAuthorizationInput(uniqueCode("BAD"), "授权方", today().plusDays(10).toString(),
-            today().toString(), null, null, true, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        brands.saveAuthorization(
+                            actor,
+                            id,
+                            null,
+                            new BrandAuthorizationInput(
+                                uniqueCode("BAD"),
+                                "授权方",
+                                today().plusDays(10).toString(),
+                                today().toString(),
+                                null,
+                                null,
+                                true,
+                                0))))
         .isInstanceOf(ResponseStatusException.class);
     // 日期格式错误也要给可读原因。
-    assertThatThrownBy(() -> write(actor, () -> brands.saveAuthorization(actor, id, null,
-        new BrandAuthorizationInput(uniqueCode("BAD"), "授权方", "2026/12/31", null, null, null, true, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actor,
+                    () ->
+                        brands.saveAuthorization(
+                            actor,
+                            id,
+                            null,
+                            new BrandAuthorizationInput(
+                                uniqueCode("BAD"),
+                                "授权方",
+                                "2026/12/31",
+                                null,
+                                null,
+                                null,
+                                true,
+                                0))))
         .isInstanceOf(ResponseStatusException.class);
   }
 
@@ -458,7 +750,8 @@ class BrandIntegrationTest {
     // 凭证是品牌层面的合规事实，与某个类目被删无关。
     UUID t = tree(actor, "INTERNAL", null);
     UUID c = category(actor, t, null, "临时类目");
-    UUID id = brand(actor, "凭证留存", "LICENSED", List.of(), List.of(new BrandCategoryLinkInput(c, null)));
+    UUID id =
+        brand(actor, "凭证留存", "LICENSED", List.of(), List.of(new BrandCategoryLinkInput(c, null)));
     credential(actor, id, today().minusDays(1), today().plusDays(100), true);
     assertThat(tx(actor, () -> brands.detail(id)).categories()).hasSize(1);
 
@@ -476,31 +769,66 @@ class BrandIntegrationTest {
   void listPagesSearchesAndFiltersOnRealRows() {
     String mark = uniqueCode("MK");
     UUID owned = brand(actor, mark + "-自有", "OWNED", List.of(), List.of());
-    UUID licensed = brand(actor, mark + "-需授权", "LICENSED",
-        List.of(new BrandNameInput("ja-JP", "テストブランド" + mark)), List.of());
+    UUID licensed =
+        brand(
+            actor,
+            mark + "-需授权",
+            "LICENSED",
+            List.of(new BrandNameInput("ja-JP", "テストブランド" + mark)),
+            List.of());
     UUID blocked = brand(actor, mark + "-停用", "LICENSED", List.of(), List.of());
     writeVoid(actor, () -> brands.setEnabled(actor, blocked, false));
 
     // 关键词命中编码、名称与多语言名三条路。
-    assertThat(tx(actor, () -> brands.list(new BrandQuery(mark, null, null, null, null, 0, 200))).items())
+    assertThat(
+            tx(actor, () -> brands.list(new BrandQuery(mark, null, null, null, null, 0, 200)))
+                .items())
         .hasSize(3);
-    assertThat(tx(actor, () -> brands.list(new BrandQuery("テストブランド", null, null, null, null, 0, 200))).items())
-        .extracting(BrandRow::id).containsExactly(licensed);
+    assertThat(
+            tx(actor, () -> brands.list(new BrandQuery("テストブランド", null, null, null, null, 0, 200)))
+                .items())
+        .extracting(BrandRow::id)
+        .containsExactly(licensed);
     // LIKE 通配符按字面处理，不允许 % 把整表捞出来。
-    assertThat(tx(actor, () -> brands.list(new BrandQuery("%", null, null, null, null, 0, 200))).items())
+    assertThat(
+            tx(actor, () -> brands.list(new BrandQuery("%", null, null, null, null, 0, 200)))
+                .items())
         .isEmpty();
 
-    assertThat(tx(actor, () -> brands.list(new BrandQuery(mark, "OWNED", null, null, null, 0, 200))).items())
-        .extracting(BrandRow::id).containsExactly(owned);
-    assertThat(tx(actor, () -> brands.list(new BrandQuery(mark, null, Boolean.TRUE, null, null, 0, 200))).items())
-        .extracting(BrandRow::id).containsExactlyInAnyOrder(owned, licensed);
+    assertThat(
+            tx(actor, () -> brands.list(new BrandQuery(mark, "OWNED", null, null, null, 0, 200)))
+                .items())
+        .extracting(BrandRow::id)
+        .containsExactly(owned);
+    assertThat(
+            tx(
+                    actor,
+                    () -> brands.list(new BrandQuery(mark, null, Boolean.TRUE, null, null, 0, 200)))
+                .items())
+        .extracting(BrandRow::id)
+        .containsExactlyInAnyOrder(owned, licensed);
     // publishable 筛选：列表用的 SQL 表达式与判定服务必须给同一个集合。
-    assertThat(tx(actor, () -> brands.list(new BrandQuery(mark, null, null, Boolean.TRUE, null, 0, 200))).items())
-        .extracting(BrandRow::id).containsExactly(owned);
-    assertThat(tx(actor, () -> brands.list(new BrandQuery(mark, null, null, Boolean.FALSE, null, 0, 200))).items())
-        .extracting(BrandRow::id).containsExactlyInAnyOrder(licensed, blocked);
+    assertThat(
+            tx(
+                    actor,
+                    () -> brands.list(new BrandQuery(mark, null, null, Boolean.TRUE, null, 0, 200)))
+                .items())
+        .extracting(BrandRow::id)
+        .containsExactly(owned);
+    assertThat(
+            tx(
+                    actor,
+                    () ->
+                        brands.list(new BrandQuery(mark, null, null, Boolean.FALSE, null, 0, 200)))
+                .items())
+        .extracting(BrandRow::id)
+        .containsExactlyInAnyOrder(licensed, blocked);
     // 非法授权状态是 400 而不是「筛不出东西」。
-    assertThatThrownBy(() -> tx(actor, () -> brands.list(new BrandQuery(mark, "BORROWED", null, null, null, 0, 200))))
+    assertThatThrownBy(
+            () ->
+                tx(
+                    actor,
+                    () -> brands.list(new BrandQuery(mark, "BORROWED", null, null, null, 0, 200))))
         .isInstanceOf(ResponseStatusException.class);
 
     // 分页是真的分页：size=1 时 total 仍然是全量行数。
@@ -512,7 +840,9 @@ class BrandIntegrationTest {
     assertThat(second.items()).hasSize(1);
     assertThat(second.items().getFirst().id()).isNotEqualTo(page.items().getFirst().id());
     // 超上限的 size 被夹到上限，而不是放行几千行。
-    assertThat(tx(actor, () -> brands.list(new BrandQuery(mark, null, null, null, null, 0, 9999))).size())
+    assertThat(
+            tx(actor, () -> brands.list(new BrandQuery(mark, null, null, null, null, 0, 9999)))
+                .size())
         .isEqualTo(200);
   }
 
@@ -552,11 +882,18 @@ class BrandIntegrationTest {
 
     // includeBlocked 时连不可刊登的也返回，且带机器可读原因码。
     var all = tx(actor, () -> brands.candidates(null, mark, true));
-    assertThat(all).extracting(BrandPublishEligibility::brandId)
+    assertThat(all)
+        .extracting(BrandPublishEligibility::brandId)
         .containsExactlyInAnyOrder(ok, blocked, off);
-    assertThat(all.stream().filter(e -> e.brandId().equals(blocked)).findFirst().orElseThrow().blockCode())
+    assertThat(
+            all.stream()
+                .filter(e -> e.brandId().equals(blocked))
+                .findFirst()
+                .orElseThrow()
+                .blockCode())
         .isEqualTo(BrandRules.BLOCK_LICENSE_MISSING);
-    assertThat(all.stream().filter(e -> e.brandId().equals(off)).findFirst().orElseThrow().blockCode())
+    assertThat(
+            all.stream().filter(e -> e.brandId().equals(off)).findFirst().orElseThrow().blockCode())
         .isEqualTo(BrandRules.BLOCK_BRAND_DISABLED);
   }
 
@@ -571,34 +908,87 @@ class BrandIntegrationTest {
     UUID theirTree = tree(actorB, "INTERNAL", null);
     UUID theirCategory = category(actorB, theirTree, null, "B 的类目");
     UUID theirs =
-        write(actorB, () -> brands.save(actorB, null,
-            new BrandInput(uniqueCode("BR"), mark + "-B 租户", null, "LICENSED", true, List.of(),
-                List.of(new BrandCategoryLinkInput(theirCategory, null)), 0))).id();
+        write(
+                actorB,
+                () ->
+                    brands.save(
+                        actorB,
+                        null,
+                        new BrandInput(
+                            uniqueCode("BR"),
+                            mark + "-B 租户",
+                            null,
+                            "LICENSED",
+                            true,
+                            List.of(),
+                            List.of(new BrandCategoryLinkInput(theirCategory, null)),
+                            0)))
+            .id();
     credential(actorB, theirs, today().minusDays(1), today().plusDays(100), true);
 
     // 1) 两租户互不可见
-    assertThat(tx(actor, () -> brands.detail(mine)).code()).isEqualTo(
-        tx(actor, () -> brands.detail(mine)).code());
+    assertThat(tx(actor, () -> brands.detail(mine)).code())
+        .isEqualTo(tx(actor, () -> brands.detail(mine)).code());
     assertThat(tx(actorB, () -> brands.detail(theirs)).names()).isEmpty();
     assertThatThrownBy(() -> tx(actorB, () -> brands.detail(mine)))
         .isInstanceOf(ResponseStatusException.class);
     assertThatThrownBy(() -> tx(actor, () -> brands.detail(theirs)))
         .isInstanceOf(ResponseStatusException.class);
     // 列表也不串：按关键词取，A 租户看不见 B 租户那条。
-    assertThat(tx(actor, () -> brands.list(new BrandQuery(mark, null, null, null, null, 0, 200))).items())
-        .extracting(BrandRow::id).contains(mine).doesNotContain(theirs);
-    assertThat(tx(actorB, () -> brands.list(new BrandQuery(mark, null, null, null, null, 0, 200))).items())
-        .extracting(BrandRow::id).contains(theirs).doesNotContain(mine);
+    assertThat(
+            tx(actor, () -> brands.list(new BrandQuery(mark, null, null, null, null, 0, 200)))
+                .items())
+        .extracting(BrandRow::id)
+        .contains(mine)
+        .doesNotContain(theirs);
+    assertThat(
+            tx(actorB, () -> brands.list(new BrandQuery(mark, null, null, null, null, 0, 200)))
+                .items())
+        .extracting(BrandRow::id)
+        .contains(theirs)
+        .doesNotContain(mine);
     // 跨租户写入也不该污染：B 租户不能把凭证挂到 A 租户的品牌上。
-    assertThatThrownBy(() -> write(actorB, () -> brands.saveAuthorization(actorB, mine, null,
-        new BrandAuthorizationInput(uniqueCode("X"), "越权", today().toString(), null, null, null, true, 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actorB,
+                    () ->
+                        brands.saveAuthorization(
+                            actorB,
+                            mine,
+                            null,
+                            new BrandAuthorizationInput(
+                                uniqueCode("X"),
+                                "越权",
+                                today().toString(),
+                                null,
+                                null,
+                                null,
+                                true,
+                                0))))
         .isInstanceOf(ResponseStatusException.class);
     assertThat(tx(actor, () -> brands.authorizations(mine)))
-        .extracting(BrandAuthorization::grantor).doesNotContain("越权");
+        .extracting(BrandAuthorization::grantor)
+        .doesNotContain("越权");
     // 跨租户改 B 租户的品牌也不该动到 A 的。
     var mineDetail = tx(actor, () -> brands.detail(mine));
-    assertThatThrownBy(() -> write(actorB, () -> brands.save(actorB, mine,
-        new BrandInput(mineDetail.code(), "被改", null, "OWNED", true, List.of(), List.of(), 0))))
+    assertThatThrownBy(
+            () ->
+                write(
+                    actorB,
+                    () ->
+                        brands.save(
+                            actorB,
+                            mine,
+                            new BrandInput(
+                                mineDetail.code(),
+                                "被改",
+                                null,
+                                "OWNED",
+                                true,
+                                List.of(),
+                                List.of(),
+                                0))))
         .isInstanceOf(ResponseStatusException.class);
     assertThat(tx(actor, () -> brands.detail(mine)).name()).isEqualTo(mark + "-A 租户");
 
@@ -621,10 +1011,12 @@ class BrandIntegrationTest {
                 .contentType("application/json")
                 .content(
                     "{\"certificateNo\":\"FORGED\",\"grantor\":\"伪造\",\"validFrom\":\""
-                        + today() + "\",\"enabled\":true}"))
+                        + today()
+                        + "\",\"enabled\":true}"))
         .andExpect(status().isNotFound());
     assertThat(tx(actor, () -> brands.authorizations(mine)))
-        .extracting(BrandAuthorization::certificateNo).doesNotContain("FORGED");
+        .extracting(BrandAuthorization::certificateNo)
+        .doesNotContain("FORGED");
 
     // 3) 连接池归还后不串租户（单连接反复交替）
     for (int i = 0; i < 5; i++) {
@@ -639,9 +1031,13 @@ class BrandIntegrationTest {
           .isInstanceOf(ResponseStatusException.class);
       // 候选列表同理。
       assertThat(tx(actor, () -> brands.candidates(null, mark, true)))
-          .extracting(BrandPublishEligibility::brandId).contains(mine).doesNotContain(theirs);
+          .extracting(BrandPublishEligibility::brandId)
+          .contains(mine)
+          .doesNotContain(theirs);
       assertThat(tx(actorB, () -> brands.candidates(null, mark, true)))
-          .extracting(BrandPublishEligibility::brandId).contains(theirs).doesNotContain(mine);
+          .extracting(BrandPublishEligibility::brandId)
+          .contains(theirs)
+          .doesNotContain(mine);
     }
   }
 
@@ -658,19 +1054,24 @@ class BrandIntegrationTest {
                 .header("Authorization", "Bearer tenant-a")
                 .contentType("application/json")
                 .content(
-                    "{\"code\":\"" + code + "\",\"name\":\"HTTP 品牌\",\"logoUri\":\"logos/http.png\","
+                    "{\"code\":\""
+                        + code
+                        + "\",\"name\":\"HTTP 品牌\",\"logoUri\":\"logos/http.png\","
                         + "\"authorizationStatus\":\"LICENSED\",\"enabled\":true,"
                         + "\"names\":[{\"locale\":\"zh-CN\",\"name\":\"HTTP 品牌\"},"
                         + "{\"locale\":\"en-US\",\"name\":\"HTTP Brand\"}],"
-                        + "\"categories\":[{\"categoryId\":\"" + c + "\"}]}"))
+                        + "\"categories\":[{\"categoryId\":\""
+                        + c
+                        + "\"}]}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.publishable").value(false))
         .andExpect(jsonPath("$.publishBlockCode").value(BrandRules.BLOCK_LICENSE_MISSING));
 
     // 判定端点：缺凭证时不可刊登。
     String id = jsonId(http, "/catalog/brands?keyword=" + code);
-    http.perform(get("/catalog/brands/" + id + "/listing-eligibility")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/brands/" + id + "/listing-eligibility")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.publishable").value(false))
         .andExpect(jsonPath("$.blockCode").value(BrandRules.BLOCK_LICENSE_MISSING))
@@ -682,13 +1083,17 @@ class BrandIntegrationTest {
                 .header("Authorization", "Bearer tenant-a")
                 .contentType("application/json")
                 .content(
-                    "{\"certificateNo\":\"" + uniqueCode("C") + "\",\"grantor\":\"品牌权利人\","
-                        + "\"validFrom\":\"" + today().minusDays(1) + "\",\"validTo\":\""
-                        + today().plusDays(90) + "\",\"enabled\":true}"))
+                    "{\"certificateNo\":\""
+                        + uniqueCode("C")
+                        + "\",\"grantor\":\"品牌权利人\","
+                        + "\"validFrom\":\""
+                        + today().minusDays(1)
+                        + "\",\"validTo\":\""
+                        + today().plusDays(90)
+                        + "\",\"enabled\":true}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.publishable").value(true));
-    http.perform(get("/catalog/brands/" + id)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(get("/catalog/brands/" + id).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.publishable").value(true))
         .andExpect(jsonPath("$.categories[0].categoryName").value("HTTP 类目"))
@@ -705,8 +1110,9 @@ class BrandIntegrationTest {
         .andExpect(jsonPath("$[0].publishable").value(true));
 
     // 引用候选：默认只给可刊登的。
-    http.perform(get("/catalog/brands/candidates?keyword=" + code)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/brands/candidates?keyword=" + code)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(1));
 
@@ -729,7 +1135,10 @@ class BrandIntegrationTest {
             post("/catalog/brands")
                 .header("Authorization", "Bearer reader")
                 .contentType("application/json")
-                .content("{\"code\":\"" + uniqueCode("R") + "\",\"name\":\"读者建的\",\"authorizationStatus\":\"OWNED\"}"))
+                .content(
+                    "{\"code\":\""
+                        + uniqueCode("R")
+                        + "\",\"name\":\"读者建的\",\"authorizationStatus\":\"OWNED\"}"))
         .andExpect(status().isForbidden());
   }
 

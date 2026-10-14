@@ -12,13 +12,11 @@ import java.sql.DriverManager;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.jooq.DSLContext;
-import org.jooq.Record;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,27 +29,21 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 8.3.2.2 波次与合并拣货。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p>本测试钉住十件「错了会误导人」的事：
  *
  * <ul>
- *   <li><b>三个合并维度都是真的。</b>承运渠道分两组就分成两个波次；库区取的是
- *       <b>库位树顶层根节点</b>（在 B-1 拣货的订单属于 B 区，不属于「B-1」）；
+ *   <li><b>三个合并维度都是真的。</b>承运渠道分两组就分成两个波次；库区取的是 <b>库位树顶层根节点</b>（在 B-1 拣货的订单属于 B 区，不属于「B-1」）；
  *       订单数上限撞顶后剩下的确实在等下一波，不是被悄悄丢掉。
- *   <li><b>时段按仓本地小时判</b>，不是 UTC：一条 09:00–18:00 的规则收不到
- *       落在窗口外的出库单；波次的计划拣货时刻真的落在仓本地 09:00（+08:00）。
+ *   <li><b>时段按仓本地小时判</b>，不是 UTC：一条 09:00–18:00 的规则收不到 落在窗口外的出库单；波次的计划拣货时刻真的落在仓本地 09:00（+08:00）。
  *   <li><b>跨区任务没有单一库区</b>，只能进「库区不限」的规则 —— 不被硬塞进某一个区。
- *   <li><b>同键只能有一个未完波次、一张工单只能在一个未完波次里</b>：用
- *       <b>超级用户直连 SQL</b>证明绕开服务层也过不去（23505）。
+ *   <li><b>同键只能有一个未完波次、一张工单只能在一个未完波次里</b>：用 <b>超级用户直连 SQL</b>证明绕开服务层也过不去（23505）。
  *   <li><b>移出成员后位置重排为 1..n 连续</b>，不留下 1,2,4 这种洞。
- *   <li><b>波次完成 = 全部成员工单终态</b>：少一条时服务层报错，
- *       直连 SQL 也被 V113 的守卫拒（23514）。这是「合并不改订单粒度」在 DB 层的落点。
- *   <li><b>合并不改订单粒度</b>：成员一行就是一张出库单的一张拣货任务；
- *       出库单状态停在「拣货中」；取消波次不动 inventory_balance / inventory_entry。
- *   <li><b>波次流水 append-only</b>、<b>规则停用必填原因且只能停一次</b>、
- *       <b>四条原因缺失的请求全部 400</b>，都直连 SQL 验过。
+ *   <li><b>波次完成 = 全部成员工单终态</b>：少一条时服务层报错， 直连 SQL 也被 V113 的守卫拒（23514）。这是「合并不改订单粒度」在 DB 层的落点。
+ *   <li><b>合并不改订单粒度</b>：成员一行就是一张出库单的一张拣货任务； 出库单状态停在「拣货中」；取消波次不动 inventory_balance /
+ *       inventory_entry。
+ *   <li><b>波次流水 append-only</b>、<b>规则停用必填原因且只能停一次</b>、 <b>四条原因缺失的请求全部 400</b>，都直连 SQL 验过。
  *   <li><b>租户隔离三断言</b>实跑 + 四张表逐张断言 FORCE RLS。
  * </ul>
  */
@@ -75,8 +67,13 @@ class PickWaveIntegrationTest {
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -86,7 +83,8 @@ class PickWaveIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -101,7 +99,8 @@ class PickWaveIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -173,21 +172,37 @@ class PickWaveIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             for (int i = 2; i <= 8; i++) {
               sql.execute(
                   "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                  idFor(tenant, i), tenant, "SKU-" + (i - 1), "商品" + (i - 1));
+                  idFor(tenant, i),
+                  tenant,
+                  "SKU-" + (i - 1),
+                  "商品" + (i - 1));
             }
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 9), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 9),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,kind,country_code,timezone,"
                     + "default_legal_entity_id,status) values(?,?,?,?,?,?,?,?,?)",
-                idFor(tenant, 11), tenant, "WH-" + (tenant.equals(a) ? "A" : "B"), "本租仓库",
-                "LOCAL", tenant.equals(a) ? "CN" : "US", WAREHOUSE_ZONE.getId(),
-                idFor(tenant, 1), "ACTIVE");
+                idFor(tenant, 11),
+                tenant,
+                "WH-" + (tenant.equals(a) ? "A" : "B"),
+                "本租仓库",
+                "LOCAL",
+                tenant.equals(a) ? "CN" : "US",
+                WAREHOUSE_ZONE.getId(),
+                idFor(tenant, 1),
+                "ACTIVE");
             return null;
           });
     }
@@ -197,9 +212,17 @@ class PickWaveIntegrationTest {
     return tenant.equals(a) ? actorA : actorB;
   }
 
-  UUID wh(UUID tenant) { return idFor(tenant, 11); }
-  UUID sku(UUID tenant, int n) { return idFor(tenant, 1 + n); }
-  UUID sellable(UUID tenant) { return idFor(tenant, 9); }
+  UUID wh(UUID tenant) {
+    return idFor(tenant, 11);
+  }
+
+  UUID sku(UUID tenant, int n) {
+    return idFor(tenant, 1 + n);
+  }
+
+  UUID sellable(UUID tenant) {
+    return idFor(tenant, 9);
+  }
 
   <T> T as(UUID tenant, java.util.function.Supplier<T> work) {
     return access.run(actorFor(tenant), "warehouse.inventory.read", work);
@@ -231,7 +254,14 @@ class PickWaveIntegrationTest {
           sql.execute(
               "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
                   + "pickable,parent_id) values(?,?,?,?,?,?,'ACTIVE',?,?)",
-              id, tenant, wh(tenant), code, code + " 位", type, pickable, parent);
+              id,
+              tenant,
+              wh(tenant),
+              code,
+              code + " 位",
+              type,
+              pickable,
+              parent);
           return id;
         });
   }
@@ -245,14 +275,28 @@ class PickWaveIntegrationTest {
               "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                   + "quality_status_id,on_hand,reserved)"
                   + " values(?,?,?,?,?,?,cast(? as numeric),0)",
-              balance, tenant, skuId, wh(tenant), idFor(tenant, 1), sellable(tenant), onHand);
+              balance,
+              tenant,
+              skuId,
+              wh(tenant),
+              idFor(tenant, 1),
+              sellable(tenant),
+              onHand);
           sql.execute(
               "insert into stock_bucket(id,tenant_id,legal_entity_id,sku_id,warehouse_id,"
                   + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
                   + "last_movement_at)"
                   + " values(?,?,?,?,?,?,null,?,?,cast(? as numeric),0,?::timestamptz)",
-              UUID.randomUUID(), tenant, idFor(tenant, 1), skuId, wh(tenant), loc,
-              sellable(tenant), balance, onHand, OffsetDateTime.now());
+              UUID.randomUUID(),
+              tenant,
+              idFor(tenant, 1),
+              skuId,
+              wh(tenant),
+              loc,
+              sellable(tenant),
+              balance,
+              onHand,
+              OffsetDateTime.now());
           return null;
         });
   }
@@ -269,7 +313,13 @@ class PickWaveIntegrationTest {
               "insert into outbound_order(id,tenant_id,order_code,source_type,source_external_ref,"
                   + "warehouse_id,carrier_code,status,created_by_user_id)"
                   + " values(?,?,?,'SALES',?,?,?,'PENDING_PICKING',?)",
-              orderId, tenant, code, "SO-" + code, wh(tenant), carrier, user);
+              orderId,
+              tenant,
+              code,
+              "SO-" + code,
+              wh(tenant),
+              carrier,
+              user);
           BigDecimal total = BigDecimal.ZERO;
           int lineNo = 0;
           for (UUID skuId : skuIds) {
@@ -277,18 +327,30 @@ class PickWaveIntegrationTest {
             sql.execute(
                 "insert into outbound_order_line(id,tenant_id,order_id,line_no,sku_id,sku_code,"
                     + "sku_name,quantity) values(?,?,?,?,?,?,?,'10')",
-                UUID.randomUUID(), tenant, orderId, lineNo, skuId,
-                codes.get(skuId), "商品" + lineNo);
+                UUID.randomUUID(),
+                tenant,
+                orderId,
+                lineNo,
+                skuId,
+                codes.get(skuId),
+                "商品" + lineNo);
             total = total.add(new BigDecimal("10"));
           }
           sql.execute(
               "insert into outbound_pick_request(id,tenant_id,order_id,line_count,"
                   + "total_piece_count,requested_by_user_id,requested_at)"
                   + " values(?,?,?,?,?,?,?::timestamptz)",
-              UUID.randomUUID(), tenant, orderId, skuIds.length, total, user, OffsetDateTime.now());
+              UUID.randomUUID(),
+              tenant,
+              orderId,
+              skuIds.length,
+              total,
+              user,
+              OffsetDateTime.now());
           sql.execute(
               "update outbound_order set status='PICKING' where tenant_id=? and id=?",
-              tenant, orderId);
+              tenant,
+              orderId);
           return orderId;
         });
   }
@@ -307,13 +369,15 @@ class PickWaveIntegrationTest {
   /** 走 8.3.2.1 的真实入口生成拣货任务（不手工插 pick_task，保证链路是真的）。 */
   UUID pickTask(UUID tenant, UUID orderId) {
     return asWrite(
-            tenant, () -> pickTasks.generate(
-                new PickTaskModels.PickTaskGenerateInput(orderId, null, null), user))
+            tenant,
+            () ->
+                pickTasks.generate(
+                    new PickTaskModels.PickTaskGenerateInput(orderId, null, null), user))
         .id();
   }
 
-  PickWaveRuleRow rule(UUID tenant, String code, String carrier, UUID zoneId, int start, int end,
-      int cap) {
+  PickWaveRuleRow rule(
+      UUID tenant, String code, String carrier, UUID zoneId, int start, int end, int cap) {
     return asWrite(
         tenant,
         () ->
@@ -326,13 +390,18 @@ class PickWaveIntegrationTest {
   PickWaveCreated wave(UUID tenant, UUID ruleId, String carrier, UUID zoneId) {
     return asWrite(
         tenant,
-        () -> service.create(new PickWaveCreateInput(wh(tenant), ruleId, carrier, zoneId, null, null, null), user));
+        () ->
+            service.create(
+                new PickWaveCreateInput(wh(tenant), ruleId, carrier, zoneId, null, null, null),
+                user));
   }
 
   /** 把一张拣货任务推到终态（走 8.3.2.1 的真实动作）。 */
   void finishTask(UUID tenant, UUID taskId) {
     var lines = asWrite(tenant, () -> pickTasks.detail(taskId).lines());
-    asWrite(tenant, () -> pickTasks.assign(taskId, new PickTaskModels.PickTaskAssignInput(user, null), user));
+    asWrite(
+        tenant,
+        () -> pickTasks.assign(taskId, new PickTaskModels.PickTaskAssignInput(user, null), user));
     for (var line : lines) {
       asWrite(
           tenant,
@@ -340,8 +409,13 @@ class PickWaveIntegrationTest {
               pickTasks.recordPick(
                   taskId,
                   new PickTaskModels.PickTaskPickInput(
-                      line.id(), line.sourceLocationId(), null, line.plannedQuantity(),
-                      null, null, null),
+                      line.id(),
+                      line.sourceLocationId(),
+                      null,
+                      line.plannedQuantity(),
+                      null,
+                      null,
+                      null),
                   user));
     }
     asWrite(tenant, () -> pickTasks.complete(taskId, user));
@@ -373,7 +447,8 @@ class PickWaveIntegrationTest {
                     "select on_hand from inventory_balance where tenant_id"
                         + " = current_setting('app.current_tenant', true)::uuid"
                         + " and sku_id = ? and warehouse_id = ?",
-                    skuId, wh(tenant))
+                    skuId,
+                    wh(tenant))
                 .get("on_hand", BigDecimal.class));
   }
 
@@ -454,9 +529,7 @@ class PickWaveIntegrationTest {
   void twoActiveRulesCannotClaimTheSameCarrierZoneAndSlot() {
     layout(a);
     rule(a, "R-1", "SF", null, 9, 18, 10);
-    assertThat(
-            catchThrowable(
-                () -> rule(a, "R-2", "SF", null, 9, 18, 20)))
+    assertThat(catchThrowable(() -> rule(a, "R-2", "SF", null, 9, 18, 20)))
         .hasMessageContaining("只能有一条生效规则");
     // 时段窗口不同 → 两条规则共存合法（它们认领的是不同批次的货），
     // 而 R-2 因为撞了 pick_wave_rule_active_key 没有被创建，所以台账上是 2 条。
@@ -475,8 +548,7 @@ class PickWaveIntegrationTest {
     assertThat(retired.status()).isEqualTo("INACTIVE");
     assertThat(retired.retiredAt()).isNotNull();
     assertThat(retired.retireReason()).isEqualTo("承运商换了");
-    assertThat(catchThrowable(() -> retire(a, r.id(), "再来一次")))
-        .hasMessageContaining("已经停用");
+    assertThat(catchThrowable(() -> retire(a, r.id(), "再来一次"))).hasMessageContaining("已经停用");
   }
 
   PickWaveRuleRow retire(UUID tenant, UUID ruleId, String reason) {
@@ -598,11 +670,15 @@ class PickWaveIntegrationTest {
     bucket(a, la.a1(), sku(a, 2), "100");
     // 两张单：一张的创建时刻落在仓本地 08:00（UTC 00:00），一张落在 20:00。
     UUID morning = outbound(a, "OB-MORNING", "SF", sku(a, 1));
-    setCreatedAt(a, morning, LocalDate.now(WAREHOUSE_ZONE).atTime(8, 0)
-        .atZone(WAREHOUSE_ZONE).toOffsetDateTime());
+    setCreatedAt(
+        a,
+        morning,
+        LocalDate.now(WAREHOUSE_ZONE).atTime(8, 0).atZone(WAREHOUSE_ZONE).toOffsetDateTime());
     UUID night = outbound(a, "OB-NIGHT", "SF", sku(a, 2));
-    setCreatedAt(a, night, LocalDate.now(WAREHOUSE_ZONE).atTime(20, 0)
-        .atZone(WAREHOUSE_ZONE).toOffsetDateTime());
+    setCreatedAt(
+        a,
+        night,
+        LocalDate.now(WAREHOUSE_ZONE).atTime(20, 0).atZone(WAREHOUSE_ZONE).toOffsetDateTime());
     pickTask(a, morning);
     pickTask(a, night);
 
@@ -610,12 +686,17 @@ class PickWaveIntegrationTest {
     // 改成 08:00–19:00 才收得到上午那张、收不到晚上那张。
     var morningOnly = rule(a, "R-SLOT-AM", "SF", la.zoneA(), 8, 19, 10);
     var group = groupOf(as(a, () -> service.candidates(wh(a))), "SF", la.zoneA());
-    assertThat(group.candidates().stream().filter(c -> c.blocked() || true).count())
-        .isEqualTo(2);
-    var morningRow = group.candidates().stream()
-        .filter(c -> c.outboundOrderCode().equals("OB-MORNING")).findFirst().orElseThrow();
-    var nightRow = group.candidates().stream()
-        .filter(c -> c.outboundOrderCode().equals("OB-NIGHT")).findFirst().orElseThrow();
+    assertThat(group.candidates().stream().filter(c -> c.blocked() || true).count()).isEqualTo(2);
+    var morningRow =
+        group.candidates().stream()
+            .filter(c -> c.outboundOrderCode().equals("OB-MORNING"))
+            .findFirst()
+            .orElseThrow();
+    var nightRow =
+        group.candidates().stream()
+            .filter(c -> c.outboundOrderCode().equals("OB-NIGHT"))
+            .findFirst()
+            .orElseThrow();
     assertThat(morningRow.localHour()).isEqualTo(8);
     assertThat(nightRow.localHour()).isEqualTo(20);
     assertThat(morningRow.matchedRuleId()).isEqualTo(morningOnly.id());
@@ -629,8 +710,10 @@ class PickWaveIntegrationTest {
     Layout la = layout(a);
     bucket(a, la.a1(), sku(a, 1), "100");
     UUID plan = outbound(a, "OB-PLAN", "SF", sku(a, 1));
-    setCreatedAt(a, plan, LocalDate.now(WAREHOUSE_ZONE).atTime(10, 0)
-        .atZone(WAREHOUSE_ZONE).toOffsetDateTime());
+    setCreatedAt(
+        a,
+        plan,
+        LocalDate.now(WAREHOUSE_ZONE).atTime(10, 0).atZone(WAREHOUSE_ZONE).toOffsetDateTime());
     pickTask(a, plan);
     var r = rule(a, "R-SLOT-PLAN", "SF", la.zoneA(), 9, 18, 10);
     var created = wave(a, r.id(), "SF", la.zoneA());
@@ -640,7 +723,7 @@ class PickWaveIntegrationTest {
     OffsetDateTime expected =
         LocalDate.now(WAREHOUSE_ZONE).atStartOfDay(WAREHOUSE_ZONE).plusHours(9).toOffsetDateTime();
     assertThat(created.plannedPickAt()).isEqualTo(expected);
-    assertThat(created.plannedPickAt().getOffset()).isEqualTo(ZoneOffset.ofHours(8));
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
     assertThat(as(a, () -> service.detail(created.id())).members().get(0).plannedPickAt())
         .isEqualTo(expected);
 
@@ -652,20 +735,33 @@ class PickWaveIntegrationTest {
             () ->
                 service.create(
                     new PickWaveCreateInput(
-                        wh(a), null, "YTO", null,
+                        wh(a),
+                        null,
+                        "YTO",
+                        null,
                         List.of(pickTask(a, outbound(a, "OB-PLAN2", "YTO", sku(a, 1)))),
-                        given, null),
+                        given,
+                        null),
                     user));
     assertThat(explicit.plannedPickAt()).isEqualTo(OffsetDateTime.parse(given));
   }
 
   PickWaveCandidateGroup groupOf(PickWaveCandidatePage page, String carrier, UUID zoneId) {
     return page.groups().stream()
-        .filter(g -> g.carrierCode().equals(carrier) && java.util.Objects.equals(g.zoneId(), zoneId))
+        .filter(
+            g -> g.carrierCode().equals(carrier) && java.util.Objects.equals(g.zoneId(), zoneId))
         .findFirst()
-        .orElseThrow(() -> new AssertionError("找不到合并键 " + carrier + "/" + zoneId
-            + "，现有：" + page.groups().stream()
-                .map(g -> g.carrierCode() + "/" + g.zoneId()).toList()));
+        .orElseThrow(
+            () ->
+                new AssertionError(
+                    "找不到合并键 "
+                        + carrier
+                        + "/"
+                        + zoneId
+                        + "，现有："
+                        + page.groups().stream()
+                            .map(g -> g.carrierCode() + "/" + g.zoneId())
+                            .toList()));
   }
 
   void setCreatedAt(UUID tenant, UUID orderId, OffsetDateTime at) {
@@ -674,7 +770,9 @@ class PickWaveIntegrationTest {
         () -> {
           sql.execute(
               "update outbound_order set created_at=?::timestamptz where tenant_id=? and id=?",
-              at, tenant, orderId);
+              at,
+              tenant,
+              orderId);
           return null;
         });
   }
@@ -695,8 +793,15 @@ class PickWaveIntegrationTest {
                     superuserSql(
                         "insert into pick_wave(id,tenant_id,wave_code,warehouse_id,carrier_code,"
                             + "zone_id,merge_basis,status,planned_pick_at,created_by)"
-                            + " values(gen_random_uuid(),'" + a + "','PW-DUP','" + wh(a)
-                            + "','SF','" + la.zoneA() + "','手工绕过服务层','PLANNED',now(),'" + user + "')")))
+                            + " values(gen_random_uuid(),'"
+                            + a
+                            + "','PW-DUP','"
+                            + wh(a)
+                            + "','SF','"
+                            + la.zoneA()
+                            + "','手工绕过服务层','PLANNED',now(),'"
+                            + user
+                            + "')")))
         .hasMessageContaining("pick_wave_open_key");
 
     // 服务层也要给出人话（而不是只抛一个约束名）。
@@ -727,9 +832,16 @@ class PickWaveIntegrationTest {
                     superuserSql(
                         "insert into pick_wave_task(id,tenant_id,wave_id,pick_task_id,"
                             + "outbound_order_id,position,planned_pick_at)"
-                            + " select gen_random_uuid(),'" + a + "','" + waveTwo.id() + "','"
-                            + taskOne + "',o.id,99,now() from outbound_order o"
-                            + " where o.tenant_id='" + a + "' and o.order_code='OB-T1'")))
+                            + " select gen_random_uuid(),'"
+                            + a
+                            + "','"
+                            + waveTwo.id()
+                            + "','"
+                            + taskOne
+                            + "',o.id,99,now() from outbound_order o"
+                            + " where o.tenant_id='"
+                            + a
+                            + "' and o.order_code='OB-T1'")))
         .hasMessageContaining("pick_wave_task_active");
   }
 
@@ -741,9 +853,7 @@ class PickWaveIntegrationTest {
     pickTask(a, outbound(a, "OB-C1", "SF", sku(a, 1)));
     pickTask(a, outbound(a, "OB-C2", "SF", sku(a, 2)));
     var created = wave(a, rule(a, "R-C", "SF", la.zoneA(), 0, 24, 10).id(), "SF", la.zoneA());
-    asWrite(
-        a,
-        () -> service.release(created.id(), new PickWaveReleaseInput(user, null), user));
+    asWrite(a, () -> service.release(created.id(), new PickWaveReleaseInput(user, null), user));
 
     // 服务层先说人话。
     assertThat(catchThrowable(() -> complete(a, created.id())))
@@ -755,7 +865,11 @@ class PickWaveIntegrationTest {
                 () ->
                     superuserSql(
                         "update pick_wave set status='COMPLETED', completed_at=now()"
-                            + " where tenant_id='" + a + "' and id='" + created.id() + "'")))
+                            + " where tenant_id='"
+                            + a
+                            + "' and id='"
+                            + created.id()
+                            + "'")))
         .hasMessageContaining("不替代任何一张工单的完成");
 
     // 两张都到终态之后就能完成。
@@ -781,7 +895,11 @@ class PickWaveIntegrationTest {
                 () ->
                     superuserSql(
                         "update pick_wave set status='COMPLETED', completed_at=now()"
-                            + " where tenant_id='" + a + "' and id='" + created.id() + "'")))
+                            + " where tenant_id='"
+                            + a
+                            + "' and id='"
+                            + created.id()
+                            + "'")))
         .hasMessageContaining("不能从 PLANNED 变成 COMPLETED");
     // 已放行之后不能退回「已排波」。
     asWrite(a, () -> service.release(created.id(), new PickWaveReleaseInput(user, null), user));
@@ -789,8 +907,11 @@ class PickWaveIntegrationTest {
             catchThrowable(
                 () ->
                     superuserSql(
-                        "update pick_wave set status='PLANNED' where tenant_id='" + a
-                            + "' and id='" + created.id() + "'")))
+                        "update pick_wave set status='PLANNED' where tenant_id='"
+                            + a
+                            + "' and id='"
+                            + created.id()
+                            + "'")))
         .hasMessageContaining("不能从 PICKING 变成 PLANNED");
   }
 
@@ -808,8 +929,11 @@ class PickWaveIntegrationTest {
             catchThrowable(
                 () ->
                     superuserSql(
-                        "update pick_wave_event set detail='改过了' where tenant_id='" + a
-                            + "' and id='" + events.get(0).id() + "'")))
+                        "update pick_wave_event set detail='改过了' where tenant_id='"
+                            + a
+                            + "' and id='"
+                            + events.get(0).id()
+                            + "'")))
         .hasMessageContaining("append-only");
   }
 
@@ -830,13 +954,17 @@ class PickWaveIntegrationTest {
     assertThat(after.members()).hasSize(2);
     // 移走中间那个之后必须重排成 1,2，不能留下 1,3。
     assertThat(after.members()).extracting(PickWaveMemberRow::position).containsExactly(1, 2);
-    assertThat(after.members()).extracting(PickWaveMemberRow::outboundOrderCode)
+    assertThat(after.members())
+        .extracting(PickWaveMemberRow::outboundOrderCode)
         .containsExactly("OB-D1", "OB-D3");
     // 移出后它回到候选池：不再 blocked，但因为这一波还没收工（同键未完波次挡住），
     // 它是「在等下一波」而不是「现在就能并」—— 这正是 pick_wave_open_key 的代价。
     var candidates = as(a, () -> service.candidates(wh(a)));
-    var detachedRow = candidates.groups().get(0).candidates().stream()
-        .filter(c -> c.pickTaskId().equals(middle)).findFirst().orElseThrow();
+    var detachedRow =
+        candidates.groups().get(0).candidates().stream()
+            .filter(c -> c.pickTaskId().equals(middle))
+            .findFirst()
+            .orElseThrow();
     assertThat(detachedRow.blocked()).isFalse();
     assertThat(candidates.totalWaiting()).isGreaterThanOrEqualTo(1);
 
@@ -848,9 +976,14 @@ class PickWaveIntegrationTest {
     pickTask(a, outbound(a, "OB-D5", "YTO", sku(a, 5)));
     var two = wave(a, rule(a, "R-D-YTO", "YTO", la.zoneA(), 0, 24, 10).id(), "YTO", la.zoneA());
     assertThat(two.memberCount()).isEqualTo(2);
-    var one = asWrite(
-        a, () -> service.detach(two.id(), as(a, () -> service.detail(two.id())).members().get(0)
-            .pickTaskId(), user));
+    var one =
+        asWrite(
+            a,
+            () ->
+                service.detach(
+                    two.id(),
+                    as(a, () -> service.detail(two.id())).members().get(0).pickTaskId(),
+                    user));
     assertThat(one.members()).hasSize(1);
     var last = one.members().get(0).pickTaskId();
     assertThat(catchThrowable(() -> asWrite(a, () -> service.detach(two.id(), last, user))))
@@ -877,11 +1010,17 @@ class PickWaveIntegrationTest {
     bucket(a, la.a1(), sku(a, 1), "100");
     pickTask(a, outbound(a, "OB-REL", "SF", sku(a, 1)));
     var created = wave(a, rule(a, "R-REL", "SF", la.zoneA(), 0, 24, 10).id(), "SF", la.zoneA());
-    assertThat(catchThrowable(
-            () -> asWrite(a, () -> service.release(created.id(), new PickWaveReleaseInput(null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.release(
+                                created.id(), new PickWaveReleaseInput(null, null), user))))
         .hasMessageContaining("assigneeUserId");
-    var released = asWrite(
-        a, () -> service.release(created.id(), new PickWaveReleaseInput(user, "早班"), user));
+    var released =
+        asWrite(a, () -> service.release(created.id(), new PickWaveReleaseInput(user, "早班"), user));
     assertThat(released.wave().status()).isEqualTo("PICKING");
     assertThat(released.wave().assigneeUserId()).isEqualTo(user);
     assertThat(released.wave().startedAt()).isNotNull();
@@ -898,27 +1037,31 @@ class PickWaveIntegrationTest {
 
     long entriesBefore = inventoryEntryCount(a);
     BigDecimal balanceBefore = balanceOnHand(a, sku(a, 1));
-    assertThat(catchThrowable(
-            () -> asWrite(a, () -> service.cancel(created.id(), new PickWaveCancelInput(""), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a, () -> service.cancel(created.id(), new PickWaveCancelInput(""), user))))
         .hasMessageContaining("reason");
 
-    var cancelled = asWrite(
-        a, () -> service.cancel(created.id(), new PickWaveCancelInput("货还没到齐"), user));
+    var cancelled =
+        asWrite(a, () -> service.cancel(created.id(), new PickWaveCancelInput("货还没到齐"), user));
     assertThat(cancelled.wave().status()).isEqualTo("CANCELLED");
     assertThat(cancelled.wave().cancelReason()).isEqualTo("货还没到齐");
     // 取消不动库存、不写分录。
     assertThat(inventoryEntryCount(a)).isEqualTo(entriesBefore);
     assertThat(balanceOnHand(a, sku(a, 1))).isEqualByComparingTo(balanceBefore);
     // 成员被放回候选池（released=true）。
-    long notReleased = as(
-        a,
-        () ->
-            sql.fetchOne(
-                    "select count(*) as c from pick_wave_task where tenant_id"
-                        + " = current_setting('app.current_tenant', true)::uuid"
-                        + " and wave_id = ? and not released",
-                    created.id())
-                .get("c", Long.class));
+    long notReleased =
+        as(
+            a,
+            () ->
+                sql.fetchOne(
+                        "select count(*) as c from pick_wave_task where tenant_id"
+                            + " = current_setting('app.current_tenant', true)::uuid"
+                            + " and wave_id = ? and not released",
+                        created.id())
+                    .get("c", Long.class));
     assertThat(notReleased).isZero();
 
     // 放回池子之后同一合并键可以再开一波（未完波次的唯一键不再挡路）。
@@ -940,7 +1083,8 @@ class PickWaveIntegrationTest {
     var members = as(a, () -> service.detail(created.id())).members();
     // 一个波次，两个成员 —— 每个成员仍是各自那张出库单、各自那张拣货任务。
     assertThat(members).hasSize(2);
-    assertThat(members).extracting(PickWaveMemberRow::outboundOrderId)
+    assertThat(members)
+        .extracting(PickWaveMemberRow::outboundOrderId)
         .containsExactlyInAnyOrder(o1, o2);
     assertThat(members.stream().map(PickWaveMemberRow::pickTaskId).distinct()).hasSize(2);
     // 出库单状态没有被波次动过，仍是「拣货中」（复核/打包是 8.3.3.1 按订单做的事）。
@@ -981,8 +1125,7 @@ class PickWaveIntegrationTest {
             a,
             () ->
                 service.create(
-                    new PickWaveCreateInput(
-                        wh(a), null, null, null, List.of(sfTask), null, null),
+                    new PickWaveCreateInput(wh(a), null, null, null, List.of(sfTask), null, null),
                     user));
     assertThat(manual.memberCount()).isEqualTo(1);
     assertThat(manual.carrierCode()).isEqualTo("SF");
@@ -1017,19 +1160,31 @@ class PickWaveIntegrationTest {
     assertThat(first.items().get(0).id()).isNotEqualTo(second.items().get(0).id());
 
     // 真筛选：承运渠道 / 状态 / 关键字。
-    assertThat(as(a, () -> service.page(wh(a), null, "SF", null, null, "PLANNED_PICK_AT", 0, 20))
-            .total()).isEqualTo(1);
-    assertThat(as(a, () -> service.page(wh(a), "PICKING", null, null, null, "PLANNED_PICK_AT", 0, 20))
-            .total()).isZero();
-    assertThat(as(a, () -> service.page(wh(a), null, null, null, "OB-L2", "PLANNED_PICK_AT", 0, 20))
-            .total()).isEqualTo(1);
+    assertThat(
+            as(a, () -> service.page(wh(a), null, "SF", null, null, "PLANNED_PICK_AT", 0, 20))
+                .total())
+        .isEqualTo(1);
+    assertThat(
+            as(a, () -> service.page(wh(a), "PICKING", null, null, null, "PLANNED_PICK_AT", 0, 20))
+                .total())
+        .isZero();
+    assertThat(
+            as(a, () -> service.page(wh(a), null, null, null, "OB-L2", "PLANNED_PICK_AT", 0, 20))
+                .total())
+        .isEqualTo(1);
 
     // 排序白名单：非法排序名直接 400，不静默降级。
-    assertThat(catchThrowable(
-            () -> as(a, () -> service.page(wh(a), null, null, null, null, "DROP TABLE", 0, 20))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    as(a, () -> service.page(wh(a), null, null, null, null, "DROP TABLE", 0, 20))))
         .hasMessageContaining("排序只能是");
-    assertThat(catchThrowable(
-            () -> as(a, () -> service.page(wh(a), "NOT_A_STATUS", null, null, null, null, 0, 20))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    as(
+                        a,
+                        () -> service.page(wh(a), "NOT_A_STATUS", null, null, null, null, 0, 20))))
         .hasMessageContaining("状态只能是");
   }
 
@@ -1059,7 +1214,9 @@ class PickWaveIntegrationTest {
 
   PickWaveRuleRow ruleOf(UUID tenant, UUID ruleId) {
     return as(tenant, () -> service.rules(null)).items().stream()
-        .filter(r -> r.id().equals(ruleId)).findFirst().orElse(null);
+        .filter(r -> r.id().equals(ruleId))
+        .findFirst()
+        .orElse(null);
   }
 
   PickWaveDetail complete(UUID tenant, UUID waveId) {
@@ -1085,11 +1242,16 @@ class PickWaveIntegrationTest {
     // B 也看不到 A 的规则。
     assertThat(ruleOf(b, waveA.ruleId())).isNull();
     // B 的列表里只有自己那一波。
-    assertThat(as(b, () -> service.page(wh(b), null, null, null, null, "PLANNED_PICK_AT", 0, 50))
-            .total()).isEqualTo(1);
+    assertThat(
+            as(b, () -> service.page(wh(b), null, null, null, null, "PLANNED_PICK_AT", 0, 50))
+                .total())
+        .isEqualTo(1);
     assertThat(as(b, () -> service.detail(waveB.id())).members()).hasSize(1);
-    assertThat(catchThrowable(
-            () -> asWrite(b, () -> service.cancel(waveA.id(), new PickWaveCancelInput("x"), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        b, () -> service.cancel(waveA.id(), new PickWaveCancelInput("x"), user))))
         .hasMessageContaining("不存在");
   }
 
@@ -1118,9 +1280,9 @@ class PickWaveIntegrationTest {
 
     // 带上真实身份但伪造租户头：看到的仍然只有 A 自己的那一波。
     http.perform(
-                get("/warehouse/pick-waves")
-                    .header("Authorization", "Bearer tenant-a")
-                    .header("X-Tenant-Id", b.toString()))
+            get("/warehouse/pick-waves")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.items[0].waveCode").value(created.waveCode()))
@@ -1140,14 +1302,24 @@ class PickWaveIntegrationTest {
 
     // A → B → A 三轮：连接池只有 1 条连接，每次归还后都可能被下一个人拿到。
     for (int round = 0; round < 3; round++) {
-      assertThat(as(a, () -> service.page(wh(a), null, null, null, null, "PLANNED_PICK_AT", 0, 50))
-              .items().get(0).id()).isEqualTo(waveA.id());
-      assertThat(as(b, () -> service.page(wh(b), null, null, null, null, "PLANNED_PICK_AT", 0, 50))
-              .items().get(0).id()).isEqualTo(waveB.id());
+      assertThat(
+              as(a, () -> service.page(wh(a), null, null, null, null, "PLANNED_PICK_AT", 0, 50))
+                  .items()
+                  .get(0)
+                  .id())
+          .isEqualTo(waveA.id());
+      assertThat(
+              as(b, () -> service.page(wh(b), null, null, null, null, "PLANNED_PICK_AT", 0, 50))
+                  .items()
+                  .get(0)
+                  .id())
+          .isEqualTo(waveB.id());
       assertThat(as(a, () -> service.rules(wh(a))).items())
-          .extracting(PickWaveRuleRow::ruleCode).containsExactly("R-POOL-A");
+          .extracting(PickWaveRuleRow::ruleCode)
+          .containsExactly("R-POOL-A");
       assertThat(as(b, () -> service.rules(wh(b))).items())
-          .extracting(PickWaveRuleRow::ruleCode).containsExactly("R-POOL-B");
+          .extracting(PickWaveRuleRow::ruleCode)
+          .containsExactly("R-POOL-B");
     }
   }
 
@@ -1157,14 +1329,19 @@ class PickWaveIntegrationTest {
         as(
             a,
             () ->
-                sql.fetch(
+                sql
+                    .fetch(
                         "select relname, relrowsecurity, relforcerowsecurity from pg_class"
                             + " where relname in ('pick_wave','pick_wave_rule','pick_wave_task',"
                             + " 'pick_wave_event') order by relname")
                     .stream()
-                    .map(r -> r.get("relname", String.class) + ":"
-                        + r.get("relrowsecurity", Boolean.class) + "/"
-                        + r.get("relforcerowsecurity", Boolean.class))
+                    .map(
+                        r ->
+                            r.get("relname", String.class)
+                                + ":"
+                                + r.get("relrowsecurity", Boolean.class)
+                                + "/"
+                                + r.get("relforcerowsecurity", Boolean.class))
                     .toList());
     assertThat(forced).hasSize(4);
     assertThat(forced).allMatch(s -> s.endsWith("true/true"));
@@ -1180,13 +1357,13 @@ class PickWaveIntegrationTest {
     UUID task = pickTask(a, outbound(a, "OB-H1", "SF", sku(a, 1)));
     pickTask(a, outbound(a, "OB-H2", "SF", sku(a, 2)));
 
-    http.perform(get("/warehouse/pick-waves/capabilities"))
-        .andExpect(status().isUnauthorized());
-    http.perform(get("/warehouse/pick-waves/capabilities").header("Authorization",
-            "Bearer no-permission"))
+    http.perform(get("/warehouse/pick-waves/capabilities")).andExpect(status().isUnauthorized());
+    http.perform(
+            get("/warehouse/pick-waves/capabilities")
+                .header("Authorization", "Bearer no-permission"))
         .andExpect(status().isForbidden());
-    http.perform(get("/warehouse/pick-waves/capabilities").header("Authorization",
-            "Bearer read-only"))
+    http.perform(
+            get("/warehouse/pick-waves/capabilities").header("Authorization", "Bearer read-only"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.refType").value("PICK_WAVE"))
         .andExpect(jsonPath("$.carrierMergeLive").value(true))
@@ -1202,7 +1379,8 @@ class PickWaveIntegrationTest {
                 .contentType("application/json")
                 .content(
                     "{\"ruleCode\":\"R-HTTP\",\"ruleName\":\"读权限不能建规则\",\"warehouseId\":\""
-                        + wh(a) + "\",\"maxOrderCount\":5}"))
+                        + wh(a)
+                        + "\",\"maxOrderCount\":5}"))
         .andExpect(status().isForbidden());
 
     var created =
@@ -1212,7 +1390,9 @@ class PickWaveIntegrationTest {
                     .contentType("application/json")
                     .content(
                         "{\"ruleCode\":\"R-HTTP\",\"ruleName\":\"HTTP 建规则\",\"warehouseId\":\""
-                            + wh(a) + "\",\"carrierMatch\":\"SF\",\"zoneId\":\"" + la.zoneA()
+                            + wh(a)
+                            + "\",\"carrierMatch\":\"SF\",\"zoneId\":\""
+                            + la.zoneA()
                             + "\",\"timeSlotStart\":0,\"timeSlotEnd\":24,\"maxOrderCount\":5}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.ruleCode").value("R-HTTP"))
@@ -1224,16 +1404,19 @@ class PickWaveIntegrationTest {
     assertThat(created).contains("R-HTTP");
 
     // 候选 + 建波次 + 详情。
-    http.perform(get("/warehouse/pick-waves/candidates?warehouseId=" + wh(a))
-                    .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/pick-waves/candidates?warehouseId=" + wh(a))
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.groups[0].carrierCode").value("SF"))
         .andExpect(jsonPath("$.groups[0].eligibleCount").value(2))
         .andExpect(jsonPath("$.timezone").value("Asia/Shanghai"));
 
-    http.perform(post("/warehouse/pick-waves").header("Authorization", "Bearer read-only")
-                    .contentType("application/json")
-                    .content("{\"warehouseId\":\"" + wh(a) + "\",\"carrierCode\":\"SF\"}"))
+    http.perform(
+            post("/warehouse/pick-waves")
+                .header("Authorization", "Bearer read-only")
+                .contentType("application/json")
+                .content("{\"warehouseId\":\"" + wh(a) + "\",\"carrierCode\":\"SF\"}"))
         .andExpect(status().isForbidden());
 
     var waveBody =
@@ -1242,8 +1425,13 @@ class PickWaveIntegrationTest {
                     .header("Authorization", "Bearer tenant-a")
                     .contentType("application/json")
                     .content(
-                        "{\"warehouseId\":\"" + wh(a) + "\",\"carrierCode\":\"SF\",\"zoneId\":\""
-                            + la.zoneA() + "\",\"pickTaskIds\":[\"" + task + "\"]}"))
+                        "{\"warehouseId\":\""
+                            + wh(a)
+                            + "\",\"carrierCode\":\"SF\",\"zoneId\":\""
+                            + la.zoneA()
+                            + "\",\"pickTaskIds\":[\""
+                            + task
+                            + "\"]}"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.status").value("PLANNED"))
             .andExpect(jsonPath("$.memberCount").value(1))
@@ -1260,20 +1448,23 @@ class PickWaveIntegrationTest {
         .andExpect(jsonPath("$.report.orderGranularityNote").isNotEmpty());
 
     // 必填校验：放行不给负责人 → 400（带原因原文，不静默接受）。
-    http.perform(post("/warehouse/pick-waves/" + waveId + "/release")
-                    .header("Authorization", "Bearer tenant-a")
-                    .contentType("application/json")
-                    .content("{}"))
+    http.perform(
+            post("/warehouse/pick-waves/" + waveId + "/release")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{}"))
         .andExpect(status().isBadRequest());
-    http.perform(post("/warehouse/pick-waves/" + waveId + "/cancel")
-                    .header("Authorization", "Bearer tenant-a")
-                    .contentType("application/json")
-                    .content("{\"reason\":\"\"}"))
+    http.perform(
+            post("/warehouse/pick-waves/" + waveId + "/cancel")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"reason\":\"\"}"))
         .andExpect(status().isBadRequest());
-    http.perform(post("/warehouse/pick-waves/rules/" + UUID.randomUUID() + "/retire")
-                    .header("Authorization", "Bearer tenant-a")
-                    .contentType("application/json")
-                    .content("{\"reason\":\"没有原因\"}"))
+    http.perform(
+            post("/warehouse/pick-waves/rules/" + UUID.randomUUID() + "/retire")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"reason\":\"没有原因\"}"))
         .andExpect(status().isNotFound());
   }
 

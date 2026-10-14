@@ -31,18 +31,17 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 9.3.2.2 FBA 与自发货选择。
  *
- * <p>本测试是 <b>V92 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论，
- * 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不是直连数据库，
+ * <p>本测试是 <b>V92 迁移那些 DB 级不变量的独立复验</b>：不采信任何外部结论， 逐条在真实 PostgreSQL 16 上跑一遍，并且走 HTTP 端点而不是直连数据库，
  * 以便同时验证「服务层 + DB 层」两层都没有把闸门漏掉。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p>三条最要紧的断言各自单列一节：
+ *
  * <ol>
- *   <li><b>缺货切换记录是硬输出</b>：非平台仓决策没有切换记录提交不了（DB 拒绝）；</li>
- *   <li><b>无资质不许切自发货</b>：绕过服务层直接写 SQL 同样被挡；</li>
- *   <li><b>多租户三断言</b>：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。</li>
+ *   <li><b>缺货切换记录是硬输出</b>：非平台仓决策没有切换记录提交不了（DB 拒绝）；
+ *   <li><b>无资质不许切自发货</b>：绕过服务层直接写 SQL 同样被挡；
+ *   <li><b>多租户三断言</b>：两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户。
  * </ol>
  */
 @SpringBootTest
@@ -52,7 +51,8 @@ class FulfillmentRoutingIntegrationTest {
   static final UUID a = UUID.randomUUID(), b = UUID.randomUUID(), user = UUID.randomUUID();
   static HttpServer identity;
   static final ObjectMapper json = new ObjectMapper();
-  static final Map<String, AccessService.Access> actors = new java.util.concurrent.ConcurrentHashMap<>();
+  static final Map<String, AccessService.Access> actors =
+      new java.util.concurrent.ConcurrentHashMap<>();
   static final List<String> allPermissions =
       java.util.stream.Stream.of("fulfillment")
           .flatMap(
@@ -162,8 +162,7 @@ class FulfillmentRoutingIntegrationTest {
   /**
    * 每个租户一整套夹具：MCF 资质（已授权）、三条路径的成本参数、三条路径的库存快照。
    *
-   * <p>库存与成本是本模块的**输入数据**（蓝图：「输入：各渠道库存；平台多渠道配送权限；
-   * 成本与时效对比」），所以必须落库而不是写死在代码里 —— 两个租户各配一套，
+   * <p>库存与成本是本模块的**输入数据**（蓝图：「输入：各渠道库存；平台多渠道配送权限； 成本与时效对比」），所以必须落库而不是写死在代码里 —— 两个租户各配一套，
    * 才能顺带验证它们也按租户隔离。
    */
   @BeforeEach
@@ -195,26 +194,44 @@ class FulfillmentRoutingIntegrationTest {
                   + "created_by_membership_id)"
                   + " values (?,?,?,'SHOP-US','AUTHORIZED','TENANT_MAINTAINED','MCF-REF-1',"
                   + "  ?::timestamptz,?,?::timestamptz,'平台后台已开启多渠道配送',?)",
-              idFor(tenant, 1), tenant, "AMAZON", at(-30), user, at(300), user);
+              idFor(tenant, 1),
+              tenant,
+              "AMAZON",
+              at(-30),
+              user,
+              at(300),
+              user);
           // 成本参数：平台仓比自发货贵（让 COST_FIRST 与 PLATFORM_FIRST 能给出不同结论）。
           sql.execute(
               "insert into fulfillment_path_cost_profile"
                   + "(id,tenant_id,platform_code,path_kind,destination_country_code,unit_cost,"
                   + "lead_time_days,platform_fee,currency_code,effective_from,updated_by_membership_id)"
                   + " values (?,?,?,'PLATFORM_FBA','*',6.5,2.0,0.0,'USD',?::timestamptz,?)",
-              idFor(tenant, 10), tenant, "AMAZON", at(-30), user);
+              idFor(tenant, 10),
+              tenant,
+              "AMAZON",
+              at(-30),
+              user);
           sql.execute(
               "insert into fulfillment_path_cost_profile"
                   + "(id,tenant_id,platform_code,path_kind,destination_country_code,unit_cost,"
                   + "lead_time_days,platform_fee,currency_code,effective_from,updated_by_membership_id)"
                   + " values (?,?,?,'MERCHANT_OWN','*',4.25,6.0,0.0,'USD',?::timestamptz,?)",
-              idFor(tenant, 11), tenant, "AMAZON", at(-30), user);
+              idFor(tenant, 11),
+              tenant,
+              "AMAZON",
+              at(-30),
+              user);
           sql.execute(
               "insert into fulfillment_path_cost_profile"
                   + "(id,tenant_id,platform_code,path_kind,destination_country_code,unit_cost,"
                   + "lead_time_days,platform_fee,currency_code,effective_from,updated_by_membership_id)"
                   + " values (?,?,?,'THIRD_PARTY','*',5.00,4.0,0.0,'USD',?::timestamptz,?)",
-              idFor(tenant, 12), tenant, "AMAZON", at(-30), user);
+              idFor(tenant, 12),
+              tenant,
+              "AMAZON",
+              at(-30),
+              user);
           // 库存快照：平台仓 100 件充足，自有仓 500 件充足，第三方仓充足。
           sql.execute(
               "insert into fulfillment_platform_stock_snapshot"
@@ -223,7 +240,11 @@ class FulfillmentRoutingIntegrationTest {
                   + "created_by_membership_id)"
                   + " values (?,?,?,'SHOP-US','SKU-1','PLATFORM_FBA','FBA-US-WEST-1','美国西部 FBA 仓',"
                   + " 100,?::timestamptz,'MODULE_7_1_3_1','FBA-REPORT-1',?)",
-              idFor(tenant, 20), tenant, "AMAZON", at(-1), user);
+              idFor(tenant, 20),
+              tenant,
+              "AMAZON",
+              at(-1),
+              user);
           sql.execute(
               "insert into fulfillment_platform_stock_snapshot"
                   + "(id,tenant_id,platform_code,shop_code,sku_ref,path_kind,warehouse_ref,"
@@ -231,7 +252,11 @@ class FulfillmentRoutingIntegrationTest {
                   + "created_by_membership_id)"
                   + " values (?,?,?,'SHOP-US','SKU-1','MERCHANT_OWN','WH-LA','洛杉矶海外仓',"
                   + " 500,?::timestamptz,'TENANT_MAINTAINED','WH-LA',?)",
-              idFor(tenant, 21), tenant, "AMAZON", at(-1), user);
+              idFor(tenant, 21),
+              tenant,
+              "AMAZON",
+              at(-1),
+              user);
           sql.execute(
               "insert into fulfillment_platform_stock_snapshot"
                   + "(id,tenant_id,platform_code,shop_code,sku_ref,path_kind,warehouse_ref,"
@@ -239,7 +264,11 @@ class FulfillmentRoutingIntegrationTest {
                   + "created_by_membership_id)"
                   + " values (?,?,?,'SHOP-US','SKU-1','THIRD_PARTY','3PL-1','第三方中转仓',"
                   + " 300,?::timestamptz,'TENANT_MAINTAINED','3PL-1',?)",
-              idFor(tenant, 22), tenant, "AMAZON", at(-1), user);
+              idFor(tenant, 22),
+              tenant,
+              "AMAZON",
+              at(-1),
+              user);
           return null;
         });
   }
@@ -266,13 +295,14 @@ class FulfillmentRoutingIntegrationTest {
             "fulfillment_routing_candidate",
             "fulfillment_routing_switch",
             "fulfillment_routing_event")) {
-      var row = sql.fetchOne("select relrowsecurity,relforcerowsecurity from pg_class where relname = ?", table);
+      var row =
+          sql.fetchOne(
+              "select relrowsecurity,relforcerowsecurity from pg_class where relname = ?", table);
       assertThat(row).as("V92 必须建出 " + table).isNotNull();
       assertThat(row.get(0, Boolean.class)).as(table + " 未启用 RLS").isTrue();
       assertThat(row.get(1, Boolean.class)).as(table + " 只有 FORCE 才挡得住运行角色被误授 owner").isTrue();
       assertThat(
-              sql.fetchOne(
-                      "select has_table_privilege('trade_app',?,'SELECT')", table)
+              sql.fetchOne("select has_table_privilege('trade_app',?,'SELECT')", table)
                   .get(0, Boolean.class))
           .as(table + "：trade_app 必须真的能读")
           .isTrue();
@@ -280,8 +310,7 @@ class FulfillmentRoutingIntegrationTest {
     // 运行角色对举证凭据**没有** UPDATE/DELETE 权限：append-only 是真的，不是注释。
     for (var table : List.of("fulfillment_routing_switch", "fulfillment_routing_event")) {
       assertThat(
-              sql.fetchOne(
-                      "select has_table_privilege('trade_app',?,'UPDATE')", table)
+              sql.fetchOne("select has_table_privilege('trade_app',?,'UPDATE')", table)
                   .get(0, Boolean.class))
           .as(table + " 必须对 trade_app 只读")
           .isFalse();
@@ -290,7 +319,9 @@ class FulfillmentRoutingIntegrationTest {
 
   @Test
   void 能力声明如实报出上游状态() throws Exception {
-    http.perform(get("/trade/fulfillment/routing/capabilities").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/trade/fulfillment/routing/capabilities")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.crossServiceReadAvailable").value(false))
         .andExpect(jsonPath("$.paths.length()").value(3))
@@ -298,7 +329,8 @@ class FulfillmentRoutingIntegrationTest {
         // 渠道库存与 MCF 资质可用（自维护），订单行与履约请求不可用（如实报出，不假装）。
         .andExpect(jsonPath("$.dimensions[?(@.code=='CHANNEL_STOCK')].available").value(true))
         .andExpect(jsonPath("$.dimensions[?(@.code=='ORDER_LINE')].available").value(false))
-        .andExpect(jsonPath("$.dimensions[?(@.code=='FULFILLMENT_REQUEST')].available").value(false));
+        .andExpect(
+            jsonPath("$.dimensions[?(@.code=='FULFILLMENT_REQUEST')].available").value(false));
   }
 
   // ==========================================================================
@@ -306,8 +338,7 @@ class FulfillmentRoutingIntegrationTest {
   // ==========================================================================
   @Test
   void 平台仓库存充足时按优先平台仓走平台仓() {
-    var result =
-        asA(() -> service.evaluate(evaluation("SO-1", 10, null)));
+    var result = asA(() -> service.evaluate(evaluation("SO-1", 10, null)));
     assertThat(result.chosenPath()).isEqualTo(PathKind.PLATFORM_FBA);
     assertThat(result.mcfStatus()).isEqualTo(McfStatus.AUTHORIZED);
     assertThat(result.mcfUsable()).isTrue();
@@ -316,8 +347,14 @@ class FulfillmentRoutingIntegrationTest {
     assertThat(result.platformAvailableQty()).isEqualByComparingTo("100.000000");
     // 三条候选都要给出，平台仓被选中
     assertThat(result.candidates()).hasSize(3);
-    assertThat(result.candidates().stream().filter(RoutingCandidateRow::chosen).count()).isEqualTo(1);
-    assertThat(result.candidates().stream().filter(c -> c.chosen()).findFirst().orElseThrow().pathKind())
+    assertThat(result.candidates().stream().filter(RoutingCandidateRow::chosen).count())
+        .isEqualTo(1);
+    assertThat(
+            result.candidates().stream()
+                .filter(c -> c.chosen())
+                .findFirst()
+                .orElseThrow()
+                .pathKind())
         .isEqualTo(PathKind.PLATFORM_FBA);
   }
 
@@ -339,7 +376,8 @@ class FulfillmentRoutingIntegrationTest {
     assertThat(platform.infeasibleReason()).contains("2.000000");
 
     setPlatformStock(a, new BigDecimal("2"));
-    var saved = asA(() -> service.decide(decision("SO-2", 10, "PLATFORM_FIRST", false, null), user));
+    var saved =
+        asA(() -> service.decide(decision("SO-2", 10, "PLATFORM_FIRST", false, null), user));
     assertThat(saved.chosenPath()).isEqualTo(PathKind.MERCHANT_OWN);
     assertThat(saved.switchId()).as("缺货切换必须留痕，这是蓝图输出的硬要求").isNotNull();
     assertThat(saved.switchTrigger()).isEqualTo(SwitchTriggerReason.PLATFORM_STOCK_SHORTAGE);
@@ -361,7 +399,8 @@ class FulfillmentRoutingIntegrationTest {
   @Test
   void 缺货切换记录在数据库里可单独查询() {
     setPlatformStock(a, new BigDecimal("1"));
-    var saved = asA(() -> service.decide(decision("SO-2B", 5, "PLATFORM_FIRST", false, null), user));
+    var saved =
+        asA(() -> service.decide(decision("SO-2B", 5, "PLATFORM_FIRST", false, null), user));
     var page = asA(() -> service.pageSwitches(new SwitchQuery(null, null, "AMAZON", null, 0, 50)));
     assertThat(page.total()).isGreaterThanOrEqualTo(1);
     assertThat(page.items().stream().map(RoutingSwitchRow::decisionId))
@@ -374,8 +413,7 @@ class FulfillmentRoutingIntegrationTest {
     var result = asA(() -> service.evaluate(evaluation("SO-3", 10, null)));
     assertThat(result.platformEligible()).isTrue();
 
-    var saved =
-        asA(() -> service.decide(decision("SO-3", 10, "COST_FIRST", false, null), user));
+    var saved = asA(() -> service.decide(decision("SO-3", 10, "COST_FIRST", false, null), user));
     assertThat(saved.chosenPath()).isEqualTo(PathKind.MERCHANT_OWN);
     assertThat(saved.reasonCode()).isEqualTo("COST_ADVANTAGE");
     // 选了非平台仓就必须有切换记录，触发原因是成本优势
@@ -443,7 +481,10 @@ class FulfillmentRoutingIntegrationTest {
                   + "(id,tenant_id,platform_code,shop_code,status,authorization_source,"
                   + "note,created_by_membership_id)"
                   + " values (?,?,?,'SHOP-US','UNKNOWN','TENANT_MAINTAINED','尚未核验',?)",
-              idFor(a, 99), a, "AMAZON", user);
+              idFor(a, 99),
+              a,
+              "AMAZON",
+              user);
           return null;
         });
     // 平台仓仍有货：这条用例要验的是**资质闸门**，若平台仓也缺货，
@@ -459,7 +500,8 @@ class FulfillmentRoutingIntegrationTest {
       }
     }
     // 人工强改也不行 —— 没有资质时切过去会被平台判违规发货
-    assertThatThrownBy(() -> service.decide(decision("SO-7", 10, "PLATFORM_FIRST", true, null), user))
+    assertThatThrownBy(
+            () -> service.decide(decision("SO-7", 10, "PLATFORM_FIRST", true, null), user))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("多渠道配送资质");
   }
@@ -469,8 +511,7 @@ class FulfillmentRoutingIntegrationTest {
     asA(
         () -> {
           sql.execute(
-              "update fulfillment_mcf_authorization set expires_at = ?::timestamptz",
-              at(-1));
+              "update fulfillment_mcf_authorization set expires_at = ?::timestamptz", at(-1));
           return null;
         });
     var result = asA(() -> service.evaluate(evaluation("SO-8", 10, new BigDecimal("100"))));
@@ -483,7 +524,8 @@ class FulfillmentRoutingIntegrationTest {
   void 绕过服务层直接写sql也切不了自发货() {
     // 先落一条合规的决策（资质有效时），再把资质撤销，模拟「资质在两个动作之间被收回」。
     setPlatformStock(a, new BigDecimal("0"));
-    var saved = asA(() -> service.decide(decision("SO-9", 10, "PLATFORM_FIRST", false, null), user));
+    var saved =
+        asA(() -> service.decide(decision("SO-9", 10, "PLATFORM_FIRST", false, null), user));
     asA(
         () -> {
           sql.execute("update fulfillment_mcf_authorization set status = 'DENIED'");
@@ -501,7 +543,11 @@ class FulfillmentRoutingIntegrationTest {
                               + "switched_by_membership_id)"
                               + " values (?,?,?,'PLATFORM_FBA','MERCHANT_OWN',"
                               + "'PLATFORM_STOCK_SHORTAGE','绕过服务层',0,1,?::timestamptz,?)",
-                          UUID.randomUUID(), a, saved.decisionId(), at(0), user);
+                          UUID.randomUUID(),
+                          a,
+                          saved.decisionId(),
+                          at(0),
+                          user);
                       return null;
                     }))
         .isInstanceOf(DataIntegrityViolationException.class)
@@ -528,7 +574,10 @@ class FulfillmentRoutingIntegrationTest {
                               + " values (?,?,'SO-NO-SW','AMAZON','SHOP-US','SKU-1',10,"
                               + "'COST_FIRST','TENANT_POLICY','MERCHANT_OWN','COST_ADVANTAGE',"
                               + "'成本更优',2,'AUTHORIZED','DECIDED',?::timestamptz,?)",
-                          UUID.randomUUID(), a, at(0), user);
+                          UUID.randomUUID(),
+                          a,
+                          at(0),
+                          user);
                       return null;
                     }))
         .isInstanceOf(DataIntegrityViolationException.class)
@@ -537,7 +586,8 @@ class FulfillmentRoutingIntegrationTest {
 
   @Test
   void 选了平台仓却记了切走的留痕会被拒() {
-    var saved = asA(() -> service.decide(decision("SO-10", 10, "PLATFORM_FIRST", false, null), user));
+    var saved =
+        asA(() -> service.decide(decision("SO-10", 10, "PLATFORM_FIRST", false, null), user));
     assertThat(saved.chosenPath()).isEqualTo(PathKind.PLATFORM_FBA);
     assertThat(saved.switchId()).as("走平台仓不该有切换记录").isNull();
     // 直接插一条「切到自发货」的留痕，与决策矛盾 → 延迟约束拒绝
@@ -552,7 +602,11 @@ class FulfillmentRoutingIntegrationTest {
                               + "switched_by_membership_id)"
                               + " values (?,?,?,'PLATFORM_FBA','MERCHANT_OWN',"
                               + "'PLATFORM_STOCK_SHORTAGE','与决策矛盾',0,10,?::timestamptz,?)",
-                          UUID.randomUUID(), a, saved.decisionId(), at(0), user);
+                          UUID.randomUUID(),
+                          a,
+                          saved.decisionId(),
+                          at(0),
+                          user);
                       return null;
                     }))
         .isInstanceOf(DataIntegrityViolationException.class)
@@ -574,7 +628,10 @@ class FulfillmentRoutingIntegrationTest {
                               + " values (?,?,'SO-BAD-MCF','AMAZON','SHOP-US','SKU-1',10,"
                               + "'COST_FIRST','TENANT_POLICY','MERCHANT_OWN','COST_ADVANTAGE',"
                               + "'没资质却切自发货',2,'UNKNOWN','DECIDED',?::timestamptz,?)",
-                          UUID.randomUUID(), a, at(0), user);
+                          UUID.randomUUID(),
+                          a,
+                          at(0),
+                          user);
                       return null;
                     }))
         .isInstanceOf(DataIntegrityViolationException.class);
@@ -630,7 +687,11 @@ class FulfillmentRoutingIntegrationTest {
                   + "created_by_membership_id)"
                   + " values (?,?,?,'SHOP-US','SKU-FUTURE','MERCHANT_OWN','WH-1','自有仓',"
                   + " 80,?::timestamptz,'TENANT_MAINTAINED','WH-1',?)",
-              UUID.randomUUID(), a, "AMAZON", now, user);
+              UUID.randomUUID(),
+              a,
+              "AMAZON",
+              now,
+              user);
           sql.execute(
               "insert into fulfillment_platform_stock_snapshot"
                   + "(id,tenant_id,platform_code,shop_code,sku_ref,path_kind,warehouse_ref,"
@@ -638,7 +699,11 @@ class FulfillmentRoutingIntegrationTest {
                   + "created_by_membership_id)"
                   + " values (?,?,?,'SHOP-US','SKU-FUTURE','PLATFORM_FBA','FBA-1','FBA 仓',"
                   + " 999,?::timestamptz,'TENANT_MAINTAINED','FBA-1',?)",
-              UUID.randomUUID(), a, "AMAZON", collected, user);
+              UUID.randomUUID(),
+              a,
+              "AMAZON",
+              collected,
+              user);
           return null;
         });
     var result =
@@ -646,8 +711,14 @@ class FulfillmentRoutingIntegrationTest {
             () ->
                 service.evaluate(
                     new RoutingEvaluationRequest(
-                        "SO-13", null, "AMAZON", "SHOP-US", "SKU-FUTURE", new BigDecimal("10"),
-                        null, now)));
+                        "SO-13",
+                        null,
+                        "AMAZON",
+                        "SHOP-US",
+                        "SKU-FUTURE",
+                        new BigDecimal("10"),
+                        null,
+                        now)));
     // SKU-FUTURE 只有一条「未来采集」的快照 → 可用量必须是 null（没测过），不是 100
     var platform =
         result.candidates().stream()
@@ -684,11 +755,11 @@ class FulfillmentRoutingIntegrationTest {
     assertThat(saved.decision().selectedUnitCost()).isEqualByComparingTo("4.26");
     var raw =
         asA(
-                () ->
-                    sql.fetchOne(
-                            "select selected_unit_cost from fulfillment_routing_decision where id = ?",
-                            saved.decision().id())
-                        .get(0, BigDecimal.class));
+            () ->
+                sql.fetchOne(
+                        "select selected_unit_cost from fulfillment_routing_decision where id = ?",
+                        saved.decision().id())
+                    .get(0, BigDecimal.class));
     assertThat(raw.setScale(2, java.math.RoundingMode.HALF_UP)).isEqualByComparingTo("4.26");
     assertThat(raw.scale()).isEqualTo(4);
   }
@@ -701,18 +772,27 @@ class FulfillmentRoutingIntegrationTest {
             () ->
                 service.decide(
                     new RoutingDecisionRequest(
-                        "SO-15", "L-1", "AMAZON", "SHOP-US", "SKU-1", new BigDecimal("10"),
-                        "PLATFORM_FIRST", null, false, null, decidedAt),
+                        "SO-15",
+                        "L-1",
+                        "AMAZON",
+                        "SHOP-US",
+                        "SKU-1",
+                        new BigDecimal("10"),
+                        "PLATFORM_FIRST",
+                        null,
+                        false,
+                        null,
+                        decidedAt),
                     user));
     var readBack =
         asA(
-                () ->
-                    sql.fetchOne(
-                            "select decided_at from fulfillment_routing_decision where id = ?",
-                            saved.decisionId())
-                        .get(0, OffsetDateTime.class));
+            () ->
+                sql.fetchOne(
+                        "select decided_at from fulfillment_routing_decision where id = ?",
+                        saved.decisionId())
+                    .get(0, OffsetDateTime.class));
     assertThat(readBack.toInstant()).isEqualTo(decidedAt.toInstant());
-    assertThat(readBack.getOffset()).isEqualTo(ZoneOffset.ofHours(8));
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
   }
 
   // ==========================================================================
@@ -720,7 +800,8 @@ class FulfillmentRoutingIntegrationTest {
   // ==========================================================================
   @Test
   void 决策状态可推进到已确认且终态不可离开() throws Exception {
-    var saved = asA(() -> service.decide(decision("SO-16", 10, "PLATFORM_FIRST", false, null), user));
+    var saved =
+        asA(() -> service.decide(decision("SO-16", 10, "PLATFORM_FIRST", false, null), user));
     http.perform(
             post("/trade/fulfillment/routing/decisions/{id}/status", saved.decisionId())
                 .header("Authorization", "Bearer tenant-a")
@@ -747,7 +828,8 @@ class FulfillmentRoutingIntegrationTest {
 
   @Test
   void 作废必须给原因() {
-    var saved = asA(() -> service.decide(decision("SO-17", 10, "PLATFORM_FIRST", false, null), user));
+    var saved =
+        asA(() -> service.decide(decision("SO-17", 10, "PLATFORM_FIRST", false, null), user));
     assertThatThrownBy(
             () ->
                 asA(
@@ -761,7 +843,8 @@ class FulfillmentRoutingIntegrationTest {
   @Test
   void 决策与切换不可改写或删除() {
     setPlatformStock(a, new BigDecimal("0"));
-    var saved = asA(() -> service.decide(decision("SO-18", 10, "PLATFORM_FIRST", false, null), user));
+    var saved =
+        asA(() -> service.decide(decision("SO-18", 10, "PLATFORM_FIRST", false, null), user));
     // 走本服务的运行角色根本没有 DELETE 权限，语句在到达触发器之前就被 DB 挡掉
     // （42501 会被 Spring 翻译成 bad SQL grammar）—— 断言真实的错误类型，
     // 别把它说成「触发器拦下来的」，那会让后来的人去改一个根本没被执行的触发器。
@@ -780,7 +863,8 @@ class FulfillmentRoutingIntegrationTest {
     assertThatThrownBy(
             () -> {
               try (var c =
-                      DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+                      DriverManager.getConnection(
+                          pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
                   var s = c.createStatement()) {
                 s.execute(
                     "delete from fulfillment_routing_switch where id = '" + saved.switchId() + "'");
@@ -794,19 +878,44 @@ class FulfillmentRoutingIntegrationTest {
   // ==========================================================================
   @Test
   void 非法输入被拒() {
-    assertThatThrownBy(() -> service.saveCostProfile(new CostProfileInput(
-            "AMAZON", "PLATFORM_FBA", "*", new BigDecimal("-1"), null, null, null, null, "")))
+    assertThatThrownBy(
+            () ->
+                service.saveCostProfile(
+                    new CostProfileInput(
+                        "AMAZON",
+                        "PLATFORM_FBA",
+                        "*",
+                        new BigDecimal("-1"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        "")))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不能为负");
-    assertThatThrownBy(() -> service.saveCostProfile(new CostProfileInput(
-            "AMAZON", "PLATFORM_FBA", "USA", new BigDecimal("1"), null, null, null, null, "")))
+    assertThatThrownBy(
+            () ->
+                service.saveCostProfile(
+                    new CostProfileInput(
+                        "AMAZON",
+                        "PLATFORM_FBA",
+                        "USA",
+                        new BigDecimal("1"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        "")))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("两位国家码");
     assertThatThrownBy(() -> service.evaluate(evaluation("SO-19", 0, null)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("必须大于 0");
-    assertThatThrownBy(() -> service.pageDecisions(
-            new DecisionQuery(null, null, null, null, "NOT_A_PATH", null, null, null, 0, 50)))
+    assertThatThrownBy(
+            () ->
+                service.pageDecisions(
+                    new DecisionQuery(
+                        null, null, null, null, "NOT_A_PATH", null, null, null, 0, 50)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("未知的履约路径");
   }
@@ -835,19 +944,22 @@ class FulfillmentRoutingIntegrationTest {
             return null;
           });
     }
-    var first = asA(() -> service.pageDecisions(new DecisionQuery(null, null, null, null, null, null, null, null, 0, 2)));
+    var first =
+        asA(
+            () ->
+                service.pageDecisions(
+                    new DecisionQuery(null, null, null, null, null, null, null, null, 0, 2)));
     assertThat(first.items()).hasSize(2);
     assertThat(first.total()).isGreaterThanOrEqualTo(5);
-    assertThat(first.platformPathCount())
-        .as("汇总不随分页变化：翻页不能改变看板上的数字")
-        .isEqualTo(first.total());
+    assertThat(first.platformPathCount()).as("汇总不随分页变化：翻页不能改变看板上的数字").isEqualTo(first.total());
 
     // 按 SKU 过滤真的生效，且过滤后 total 变小
     var filtered =
         asA(
             () ->
                 service.pageDecisions(
-                    new DecisionQuery(null, null, null, "SKU-PAGE", null, null, null, null, 0, 50)));
+                    new DecisionQuery(
+                        null, null, null, "SKU-PAGE", null, null, null, null, 0, 50)));
     assertThat(filtered.total()).isZero();
   }
 
@@ -858,13 +970,15 @@ class FulfillmentRoutingIntegrationTest {
         asA(
             () ->
                 service.pageDecisions(
-                    new DecisionQuery(null, null, null, null, null, null, null, "KEY-UNIQUE", 0, 50)));
+                    new DecisionQuery(
+                        null, null, null, null, null, null, null, "KEY-UNIQUE", 0, 50)));
     assertThat(hit.total()).isEqualTo(1);
     var miss =
         asA(
             () ->
                 service.pageDecisions(
-                    new DecisionQuery(null, null, null, null, null, null, null, "NOT-EXIST-XYZ", 0, 50)));
+                    new DecisionQuery(
+                        null, null, null, null, null, null, null, "NOT-EXIST-XYZ", 0, 50)));
     assertThat(miss.total()).isZero();
   }
 
@@ -874,14 +988,16 @@ class FulfillmentRoutingIntegrationTest {
   @Test
   void 未认证与权限不足被拒() throws Exception {
     http.perform(get("/trade/fulfillment/routing/decisions")).andExpect(status().isUnauthorized());
-    http.perform(get("/trade/fulfillment/routing/decisions").header("Authorization", "Bearer read-only"))
+    http.perform(
+            get("/trade/fulfillment/routing/decisions").header("Authorization", "Bearer read-only"))
         .andExpect(status().isOk());
     // 只读角色不能落决策
     http.perform(
             post("/trade/fulfillment/routing/decisions")
                 .header("Authorization", "Bearer read-only")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+                .content(
+                    """
                     {"orderRef":"SO-X","platformCode":"AMAZON","shopCode":"SHOP-US",
                      "skuRef":"SKU-1","requestedQty":1,"selectedPolicy":"PLATFORM_FIRST"}"""))
         .andExpect(status().isForbidden());
@@ -914,16 +1030,28 @@ class FulfillmentRoutingIntegrationTest {
   // ==========================================================================
   @Test
   void 断言1_两租户互不可见() {
-    var savedA = asA(() -> service.decide(decision("SO-A-ONLY", 10, "PLATFORM_FIRST", false, null), user));
+    var savedA =
+        asA(() -> service.decide(decision("SO-A-ONLY", 10, "PLATFORM_FIRST", false, null), user));
     setPlatformStock(b, new BigDecimal("0"));
-    var savedB = asB(() -> service.decide(decision("SO-B-ONLY", 10, "PLATFORM_FIRST", false, null), user));
+    var savedB =
+        asB(() -> service.decide(decision("SO-B-ONLY", 10, "PLATFORM_FIRST", false, null), user));
 
-    var pageA = asA(() -> service.pageDecisions(new DecisionQuery(null, null, null, null, null, null, null, null, 0, 50)));
-    var pageB = asB(() -> service.pageDecisions(new DecisionQuery(null, null, null, null, null, null, null, null, 0, 50)));
+    var pageA =
+        asA(
+            () ->
+                service.pageDecisions(
+                    new DecisionQuery(null, null, null, null, null, null, null, null, 0, 50)));
+    var pageB =
+        asB(
+            () ->
+                service.pageDecisions(
+                    new DecisionQuery(null, null, null, null, null, null, null, null, 0, 50)));
     assertThat(pageA.items().stream().map(RoutingDecisionRow::orderRef))
         .contains("SO-A-ONLY")
         .doesNotContain("SO-B-ONLY");
-    assertThat(pageB.items().stream().map(RoutingDecisionRow::orderRef)).contains("SO-B-ONLY").doesNotContain("SO-A-ONLY");
+    assertThat(pageB.items().stream().map(RoutingDecisionRow::orderRef))
+        .contains("SO-B-ONLY")
+        .doesNotContain("SO-A-ONLY");
 
     // 更强的一格：按 id 直查对方的决策也拿不到（不只是列表过滤）
     assertThatThrownBy(() -> asA(() -> service.decision(savedB.decisionId())))
@@ -941,14 +1069,18 @@ class FulfillmentRoutingIntegrationTest {
     // 配置表也隔离：A 改成本参数不影响 B
     asA(
         () -> {
-          sql.execute("update fulfillment_path_cost_profile set unit_cost = 99 where path_kind = 'MERCHANT_OWN'");
+          sql.execute(
+              "update fulfillment_path_cost_profile set unit_cost = 99 where path_kind = 'MERCHANT_OWN'");
           return null;
         });
     var costB =
         asB(
             () ->
-                service.pageCostProfiles(
-                    new CostProfileQuery(null, "MERCHANT_OWN", null, null, 0, 10)).items().get(0).unitCost());
+                service
+                    .pageCostProfiles(new CostProfileQuery(null, "MERCHANT_OWN", null, null, 0, 10))
+                    .items()
+                    .get(0)
+                    .unitCost());
     assertThat(costB).isEqualByComparingTo("4.25");
   }
 
@@ -963,7 +1095,11 @@ class FulfillmentRoutingIntegrationTest {
         .isZero();
 
     // (2) HTTP 边界：带合法会话 + 伪造 X-Tenant-Id → 仍然只看得到会话租户的行。
-    var savedA = asA(() -> service.decide(decision("SO-FAKE-HEADER", 10, "PLATFORM_FIRST", false, null), user));
+    var savedA =
+        asA(
+            () ->
+                service.decide(
+                    decision("SO-FAKE-HEADER", 10, "PLATFORM_FIRST", false, null), user));
     http.perform(
             get("/trade/fulfillment/routing/decisions/{id}", savedA.decisionId())
                 .header("Authorization", "Bearer tenant-a")
@@ -984,12 +1120,23 @@ class FulfillmentRoutingIntegrationTest {
                 .header("Authorization", "Bearer tenant-b")
                 .header("X-Tenant-Id", a)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+                .content(
+                    """
                     {"orderRef":"SO-FAKE-WRITE","platformCode":"AMAZON","shopCode":"SHOP-US",
                      "skuRef":"SKU-1","requestedQty":1,"selectedPolicy":"PLATFORM_FIRST"}"""))
         .andExpect(status().isOk());
-    var inA = asA(() -> service.pageDecisions(new DecisionQuery("SO-FAKE-WRITE", null, null, null, null, null, null, null, 0, 10)));
-    var inB = asB(() -> service.pageDecisions(new DecisionQuery("SO-FAKE-WRITE", null, null, null, null, null, null, null, 0, 10)));
+    var inA =
+        asA(
+            () ->
+                service.pageDecisions(
+                    new DecisionQuery(
+                        "SO-FAKE-WRITE", null, null, null, null, null, null, null, 0, 10)));
+    var inB =
+        asB(
+            () ->
+                service.pageDecisions(
+                    new DecisionQuery(
+                        "SO-FAKE-WRITE", null, null, null, null, null, null, null, 0, 10)));
     assertThat(inA.total()).as("伪造头不得把数据写进别的租户").isZero();
     assertThat(inB.total()).isEqualTo(1);
 
@@ -1007,18 +1154,40 @@ class FulfillmentRoutingIntegrationTest {
     // 池大小为 1：下面每次读写都复用同一条连接，只有事务局部绑定 + 提交即清空
     // 才能保证第 6 次读到的仍然是 B 而不是上一轮残留的 A。
     for (int i = 0; i < 5; i++) {
-      var pageA = asA(() -> service.pageDecisions(new DecisionQuery("SO-POOL", null, null, null, null, null, null, null, 0, 50)));
-      var pageB = asB(() -> service.pageDecisions(new DecisionQuery("SO-POOL", null, null, null, null, null, null, null, 0, 50)));
-      assertThat(pageA.items().stream().map(RoutingDecisionRow::orderRef)).as("第 %d 轮 A", i).containsExactly("SO-POOL");
+      var pageA =
+          asA(
+              () ->
+                  service.pageDecisions(
+                      new DecisionQuery(
+                          "SO-POOL", null, null, null, null, null, null, null, 0, 50)));
+      var pageB =
+          asB(
+              () ->
+                  service.pageDecisions(
+                      new DecisionQuery(
+                          "SO-POOL", null, null, null, null, null, null, null, 0, 50)));
+      assertThat(pageA.items().stream().map(RoutingDecisionRow::orderRef))
+          .as("第 %d 轮 A", i)
+          .containsExactly("SO-POOL");
       assertThat(pageB.total()).as("第 %d 轮 B", i).isZero();
       assertThat(sql.fetch("select id from fulfillment_routing_decision").size())
           .as("第 %d 轮事务外", i)
           .isZero();
     }
     // 归还后再单独借一次，仍然干净。
-    assertThat(asB(() -> service.pageDecisions(new DecisionQuery("SO-POOL", null, null, null, null, null, null, null, 0, 50))).total())
+    assertThat(
+            asB(() ->
+                    service.pageDecisions(
+                        new DecisionQuery(
+                            "SO-POOL", null, null, null, null, null, null, null, 0, 50)))
+                .total())
         .isZero();
-    assertThat(asA(() -> service.pageDecisions(new DecisionQuery("SO-POOL", null, null, null, null, null, null, null, 0, 50))).total())
+    assertThat(
+            asA(() ->
+                    service.pageDecisions(
+                        new DecisionQuery(
+                            "SO-POOL", null, null, null, null, null, null, null, 0, 50)))
+                .total())
         .isEqualTo(1);
   }
 
@@ -1027,29 +1196,47 @@ class FulfillmentRoutingIntegrationTest {
   // ==========================================================================
   RoutingEvaluationRequest evaluation(String orderRef, int qty, BigDecimal platformAvailable) {
     return new RoutingEvaluationRequest(
-        orderRef, "L-1", "AMAZON", "SHOP-US", "SKU-1", new BigDecimal(qty), platformAvailable, null);
+        orderRef,
+        "L-1",
+        "AMAZON",
+        "SHOP-US",
+        "SKU-1",
+        new BigDecimal(qty),
+        platformAvailable,
+        null);
   }
 
   /**
    * 构造一条落库请求。
    *
-   * <p>{@code platformAvailable} 非空时**先把库存快照改成这个值**：落库路径读的是真实快照，
-   * 它不看「手工指定的可用量」—— 那个覆盖值只给只读预演用。让 decide() 假装能用一个
-   * 它并不读的参数，会让这条用例实际什么都没测到。
+   * <p>{@code platformAvailable} 非空时**先把库存快照改成这个值**：落库路径读的是真实快照， 它不看「手工指定的可用量」—— 那个覆盖值只给只读预演用。让
+   * decide() 假装能用一个 它并不读的参数，会让这条用例实际什么都没测到。
    */
   RoutingDecisionRequest decision(
-      String orderRef, int qty, String policy, boolean forceMerchant, BigDecimal platformAvailable) {
+      String orderRef,
+      int qty,
+      String policy,
+      boolean forceMerchant,
+      BigDecimal platformAvailable) {
     return new RoutingDecisionRequest(
-        orderRef, "L-1", "AMAZON", "SHOP-US", "SKU-1", new BigDecimal(qty), policy, null,
-        forceMerchant, null, at(0));
+        orderRef,
+        "L-1",
+        "AMAZON",
+        "SHOP-US",
+        "SKU-1",
+        new BigDecimal(qty),
+        policy,
+        null,
+        forceMerchant,
+        null,
+        at(0));
   }
 
   /**
    * 把平台仓快照的可用量改成给定值（造缺货场景用），在**指定租户**的事务里执行。
    *
-   * <p>刻意做成独立方法、由用例显式调用，而不是塞进 {@link #decision} 的参数处理里：
-   * {@code decision(...)} 是在 {@code asA(...)} 的实参位置上被调用的，那一刻**还没有租户事务**，
-   * 在那里写库会被 RLS 静默过滤成 0 行 —— 用例看着跑了，实际什么也没造出来。
+   * <p>刻意做成独立方法、由用例显式调用，而不是塞进 {@link #decision} 的参数处理里： {@code decision(...)} 是在 {@code asA(...)}
+   * 的实参位置上被调用的，那一刻**还没有租户事务**， 在那里写库会被 RLS 静默过滤成 0 行 —— 用例看着跑了，实际什么也没造出来。
    */
   void setPlatformStock(UUID tenant, BigDecimal available) {
     as(

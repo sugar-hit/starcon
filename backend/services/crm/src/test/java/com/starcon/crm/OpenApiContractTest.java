@@ -17,9 +17,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 /**
  * 导出真实的 SpringDoc 契约，不碰数据库也不开监听端口。
  *
- * <p>与 identity / catalog / channel / warehouse / trade 五个服务的同名测试逐字同构。
- * crm 的第一条业务端点是 15.4.2.1 知识库，因此这份契约导出随它一起落地，
- * 并把 {@code crm} 加进 {@code tools/codegen/catalog-contracts.py} 的服务清单。
+ * <p>与 identity / catalog / channel / warehouse / trade 五个服务的同名测试逐字同构。 crm 的第一条业务端点是 15.4.2.1
+ * 知识库，因此这份契约导出随它一起落地， 并把 {@code crm} 加进 {@code tools/codegen/catalog-contracts.py} 的服务清单。
  */
 @SpringBootTest(
     properties = {

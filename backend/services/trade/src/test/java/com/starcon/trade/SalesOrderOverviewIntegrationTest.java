@@ -31,18 +31,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
  *
  * <p>全部走 <b>HTTP 端点 + 真实 PostgreSQL 16 + 强制 RLS</b>，不使用任何内存替身。
  *
- * <p><b>夹具一律经 9.1.2.2 的真实写端点创建</b>（POST /trade/sales-orders），
- * 而不是在本测试里直接 INSERT —— 本模块是读投影，它读到的必须是<b>真正的写入者</b>
- * 写出来的数据。
+ * <p><b>夹具一律经 9.1.2.2 的真实写端点创建</b>（POST /trade/sales-orders）， 而不是在本测试里直接 INSERT ——
+ * 本模块是读投影，它读到的必须是<b>真正的写入者</b> 写出来的数据。
  *
- * <p><b>本测试刻意证明三件「没有」的事</b>（蓝图要而本服务做不到的）：
- * 费用分摊、组件展开、支付与退款、履约批次与包裹、物流轨迹、售后关联、
- * 平台侧原始报文 <b>七段在响应里必须是 null 而不是空数组或 0</b>；
- * 四条操作入口必须 available=false；
- * <b>状态时间线必须只有单据维度的 CREATED / SUBMITTED</b> ——
- * 绝不能拿 documentStatus 冒充履约状态。
- * 这类断言才是本模块真正在守的东西 —— 只断言「详情能返回数据」的话，
- * 哪天有人拿 charge_kind 冒充分摊、拿 documentStatus 冒充履约状态也照样全绿。
+ * <p><b>本测试刻意证明三件「没有」的事</b>（蓝图要而本服务做不到的）： 费用分摊、组件展开、支付与退款、履约批次与包裹、物流轨迹、售后关联、 平台侧原始报文 <b>七段在响应里必须是
+ * null 而不是空数组或 0</b>； 四条操作入口必须 available=false； <b>状态时间线必须只有单据维度的 CREATED / SUBMITTED</b> —— 绝不能拿
+ * documentStatus 冒充履约状态。 这类断言才是本模块真正在守的东西 —— 只断言「详情能返回数据」的话， 哪天有人拿 charge_kind 冒充分摊、拿
+ * documentStatus 冒充履约状态也照样全绿。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -116,7 +111,8 @@ class SalesOrderOverviewIntegrationTest {
                           "trade.orders.read", "trade.orders.create", "trade.orders.update")))));
       // SELF 数据范围：本租户、只有 orders.read、范围 = 仅本人。
       actors.put(
-          "Bearer self-scope", actor(userB, a, List.of(grant("SELF", List.of("trade.orders.read")))));
+          "Bearer self-scope",
+          actor(userB, a, List.of(grant("SELF", List.of("trade.orders.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -249,10 +245,28 @@ class SalesOrderOverviewIntegrationTest {
     m.put(
         "charges",
         List.of(
-            Map.of("chargeType", "SHIPPING", "label", "海运费", "amount", "8.00",
-                "chargeLevel", "ORDER", "note", ""),
-            Map.of("chargeType", "DISCOUNT", "label", "老客户折扣", "amount", "-3.00",
-                "chargeLevel", "ORDER", "note", "")));
+            Map.of(
+                "chargeType",
+                "SHIPPING",
+                "label",
+                "海运费",
+                "amount",
+                "8.00",
+                "chargeLevel",
+                "ORDER",
+                "note",
+                ""),
+            Map.of(
+                "chargeType",
+                "DISCOUNT",
+                "label",
+                "老客户折扣",
+                "amount",
+                "-3.00",
+                "chargeLevel",
+                "ORDER",
+                "note",
+                "")));
     return m;
   }
 
@@ -289,8 +303,14 @@ class SalesOrderOverviewIntegrationTest {
 
     // 地址快照：收货与账单**各一行**（合并会让「收货改了、账单没改」无法表达）。
     assertThat(d.addresses()).hasSize(2);
-    assertThat(d.addresses()).extracting(x -> x.addressRole()).containsExactly("BILLING", "SHIPPING");
-    var ship = d.addresses().stream().filter(x -> x.addressRole().equals("SHIPPING")).findFirst().orElseThrow();
+    assertThat(d.addresses())
+        .extracting(x -> x.addressRole())
+        .containsExactly("BILLING", "SHIPPING");
+    var ship =
+        d.addresses().stream()
+            .filter(x -> x.addressRole().equals("SHIPPING"))
+            .findFirst()
+            .orElseThrow();
     assertThat(ship.recipientName()).isEqualTo("Jane Doe");
     assertThat(ship.countryCode()).isEqualTo("US");
     assertThat(ship.postcode()).isEqualTo("90001");
@@ -325,14 +345,17 @@ class SalesOrderOverviewIntegrationTest {
 
     // 构成：两笔费用行。
     assertThat(d.charges()).hasSize(2);
-    assertThat(d.charges()).extracting(c -> c.chargeType()).containsExactlyInAnyOrder("DISCOUNT", "SHIPPING");
+    assertThat(d.charges())
+        .extracting(c -> c.chargeType())
+        .containsExactlyInAnyOrder("DISCOUNT", "SHIPPING");
 
     // 汇总与订单头逐项相等 —— V99 的 guard_sales_order_totals 触发器保证头与明细永远相等。
     assertThat(d.chargeTotals().subtotalAmount()).isEqualByComparingTo(d.header().subtotalAmount());
     assertThat(d.chargeTotals().discountAmount()).isEqualByComparingTo(d.header().discountAmount());
     assertThat(d.chargeTotals().taxAmount()).isEqualByComparingTo(d.header().taxAmount());
     assertThat(d.chargeTotals().shippingAmount()).isEqualByComparingTo(d.header().shippingAmount());
-    assertThat(d.chargeTotals().grandTotalAmount()).isEqualByComparingTo(d.header().grandTotalAmount());
+    assertThat(d.chargeTotals().grandTotalAmount())
+        .isEqualByComparingTo(d.header().grandTotalAmount());
     assertThat(d.chargeTotals().currency()).isEqualTo("USD");
     assertThat(d.chargeTotals().chargeRowCount()).isEqualTo(2);
 
@@ -347,7 +370,8 @@ class SalesOrderOverviewIntegrationTest {
   void 状态时间线是单据维度_绝不拿documentStatus冒充履约状态() throws Exception {
     UUID id = UUID.fromString(postOrder("Bearer tenant-a", uniqueNo()));
     // 提交一次，事件流里就有两条 CREATED + SUBMITTED。
-    http.perform(post("/trade/sales-orders/{id}/submit", id).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            post("/trade/sales-orders/{id}/submit", id).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk());
     var d = detailOf(actorA, id);
 
@@ -400,16 +424,24 @@ class SalesOrderOverviewIntegrationTest {
   @Test
   void 不可得分区逐条点名ownerModule与原因_组件展开与费用分摊归9_1_2_2() {
     var caps = access.run(actorA, "trade.orders.read", service::capabilities);
-    Map<String, SalesOrderOverviewModels.SalesOrderOverviewSection> byKey = new java.util.HashMap<>();
+    Map<String, SalesOrderOverviewModels.SalesOrderOverviewSection> byKey =
+        new java.util.HashMap<>();
     caps.unavailableSections().forEach(s -> byKey.put(s.key(), s));
     // ⚠️ 用 containsExactlyInAnyOrder 而不是 containsExactly：keySet() 是
     // HashMap 的视图，**迭代顺序不保证**（本车道实测过一次 containsExactly
     // 因为顺序不同而红，那种红是断言写错，不是产品坏了）。
     assertThat(byKey.keySet())
         .containsExactlyInAnyOrder(
-            "chargeAllocations", "lineComponents", "payments", "refunds",
-            "fulfillmentBatches", "packages", "logisticsTrace", "aftersalesRefs",
-            "platformRawPayload", "fulfillmentStatus");
+            "chargeAllocations",
+            "lineComponents",
+            "payments",
+            "refunds",
+            "fulfillmentBatches",
+            "packages",
+            "logisticsTrace",
+            "aftersalesRefs",
+            "platformRawPayload",
+            "fulfillmentStatus");
 
     for (var s : caps.unavailableSections()) {
       assertThat(s.available()).as(s.key() + " 必须显式报 false").isFalse();
@@ -429,9 +461,7 @@ class SalesOrderOverviewIntegrationTest {
     // 费用分摊：没有分摊表；且必须说清 charge_kind 不是分摊记号。
     var allocations = byKey.get("chargeAllocations");
     assertThat(allocations.ownerModule()).startsWith("9.1.2.2");
-    assertThat(allocations.reason())
-        .contains("order_charge_allocation")
-        .contains("charge_kind");
+    assertThat(allocations.reason()).contains("order_charge_allocation").contains("charge_kind");
 
     // 其余各段的归属。
     assertThat(byKey.get("payments").ownerModule()).startsWith("12");
@@ -450,13 +480,15 @@ class SalesOrderOverviewIntegrationTest {
   @Test
   void 四条操作入口全部available为false_本模块没有任何写端点() throws Exception {
     var caps = access.run(actorA, "trade.orders.read", service::capabilities);
-    assertThat(caps.actions()).extracting(SalesOrderOverviewModels.SalesOrderOverviewAction::code)
+    assertThat(caps.actions())
+        .extracting(SalesOrderOverviewModels.SalesOrderOverviewAction::code)
         .containsExactly("REVIEW", "NOTE", "CANCEL", "DUNNING");
     assertThat(caps.actions()).allMatch(x -> !x.available());
     assertThat(caps.actions()).allMatch(x -> x.ownerModule() != null && !x.ownerModule().isBlank());
 
     // 备注归 9.1.2.2：它是 sales_order.note 的**写入所有者**，本模块是读投影不抢写。
-    var note = caps.actions().stream().filter(x -> x.code().equals("NOTE")).findFirst().orElseThrow();
+    var note =
+        caps.actions().stream().filter(x -> x.code().equals("NOTE")).findFirst().orElseThrow();
     assertThat(note.ownerModule()).startsWith("9.1.2.2");
     assertThat(note.reason()).contains("写入所有权");
 
@@ -466,12 +498,18 @@ class SalesOrderOverviewIntegrationTest {
     // 404 反而会掩盖「这个路径其实有 GET、只是方法不对」这个事实。
     // （若哪天有人给本模块加了写端点，这里会变成 2xx 并当场红掉。）
     UUID id = UUID.fromString(postOrder("Bearer tenant-a", uniqueNo()));
-    http.perform(post("/trade/sales-orders/detail/{id}", id).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            post("/trade/sales-orders/detail/{id}", id).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isMethodNotAllowed());
-    http.perform(put("/trade/sales-orders/detail/{id}", id).header("Authorization", "Bearer tenant-a")
-            .contentType(MediaType.APPLICATION_JSON).content("{}"))
+    http.perform(
+            put("/trade/sales-orders/detail/{id}", id)
+                .header("Authorization", "Bearer tenant-a")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
         .andExpect(status().isMethodNotAllowed());
-    http.perform(delete("/trade/sales-orders/detail/{id}", id).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            delete("/trade/sales-orders/detail/{id}", id)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isMethodNotAllowed());
   }
 
@@ -520,7 +558,9 @@ class SalesOrderOverviewIntegrationTest {
     // 来源给错 → 查不到（而不是查到一张不相干的单）。
     var self = actors.get("Bearer tenant-a");
     assertThatThrownBy(
-            () -> access.run(self, "trade.orders.read", () -> service.fulfillmentReference(no, "PLATFORM")))
+            () ->
+                access.run(
+                    self, "trade.orders.read", () -> service.fulfillmentReference(no, "PLATFORM")))
         .hasMessageContaining("不存在或无权查看");
 
     // 订单号也必填。
@@ -566,9 +606,12 @@ class SalesOrderOverviewIntegrationTest {
     UUID id = UUID.fromString(postOrder("Bearer tenant-a", uniqueNo()));
 
     // 本模块的详情端点。
-    http.perform(get("/trade/sales-orders/detail/{id}", id).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/trade/sales-orders/detail/{id}", id).header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk());
-    http.perform(get("/trade/sales-orders/detail/capabilities").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/trade/sales-orders/detail/capabilities")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk());
 
     // ⚠️ 9.1.2.2 已交付的三个端点必须**逐字不变**地继续工作。
@@ -593,7 +636,8 @@ class SalesOrderOverviewIntegrationTest {
   void 未认证与无权限被拒() throws Exception {
     UUID id = UUID.fromString(postOrder("Bearer tenant-a", uniqueNo()));
     http.perform(get("/trade/sales-orders/detail/{id}", id)).andExpect(status().isUnauthorized());
-    http.perform(get("/trade/sales-orders/detail/capabilities")).andExpect(status().isUnauthorized());
+    http.perform(get("/trade/sales-orders/detail/capabilities"))
+        .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -604,12 +648,15 @@ class SalesOrderOverviewIntegrationTest {
 
     // SELF 收窄：userB 经手过的订单里没有这张（A 建的）→ 404，与「不存在」同一形状。
     assertThatThrownBy(
-            () -> access.run(self, "trade.orders.read", () -> service.overview(id, self.userId(), true)))
+            () ->
+                access.run(
+                    self, "trade.orders.read", () -> service.overview(id, self.userId(), true)))
         .hasMessageContaining("不存在或无权查看");
 
     // ALL 范围（同一个 self 身份但 selfOnly=false）能读到 —— 证明上面不是「RLS 没生效」。
     assertThat(
-            access.run(self, "trade.orders.read", () -> service.overview(id, self.userId(), false))
+            access
+                .run(self, "trade.orders.read", () -> service.overview(id, self.userId(), false))
                 .header()
                 .orderNo())
         .isNotBlank();
@@ -698,7 +745,9 @@ class SalesOrderOverviewIntegrationTest {
 
     // B 用 A 的订单号查履约引用 → 同一个 404 形状，不能泄露 A 有这么一张单。
     assertThatThrownBy(
-            () -> access.run(actorB, "trade.orders.read", () -> service.fulfillmentReference(noA, "MANUAL")))
+            () ->
+                access.run(
+                    actorB, "trade.orders.read", () -> service.fulfillmentReference(noA, "MANUAL")))
         .hasMessageContaining("不存在或无权查看");
     // 且 B 用 A 的订单号走 HTTP 端点同样是 404。
     http.perform(

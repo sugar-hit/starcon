@@ -52,7 +52,8 @@ public class WarehouseDetailService {
   /** 状态词表与 V1 的 CHECK 逐字一致。ARCHIVED 是终态，不可回退。 */
   private static final List<String> STATUSES = List.of("ACTIVE", "INACTIVE", "ARCHIVED");
 
-  private static final DateTimeFormatter LOCAL_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+  private static final DateTimeFormatter LOCAL_TIME =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
   /** 库位类型词表与 V2 的 CHECK 逐字一致。 */
   private static final List<String> LOCATION_TYPES =
@@ -82,8 +83,7 @@ public class WarehouseDetailService {
         strategies(warehouseId, platform),
         labor(warehouseId),
         entryPoints(),
-        "库存分布与作业统计来自本服务已落库的事实表；平台仓观测值与自有账本不相加，"
-            + "未交付的维度在各入口上标注为「未接入」并写明归属模块。");
+        "库存分布与作业统计来自本服务已落库的事实表；平台仓观测值与自有账本不相加，" + "未交付的维度在各入口上标注为「未接入」并写明归属模块。");
   }
 
   private WarehouseBase base(UUID warehouseId) {
@@ -144,8 +144,7 @@ public class WarehouseDetailService {
   /**
    * 地址。
    *
-   * <p>五个字段全部可空（V77），所以这里显式报出**缺哪几个**而不是让界面显示一行空白：
-   * 「境外仓没有邮编」与「这家仓压根没填地址」必须能一眼分开。
+   * <p>五个字段全部可空（V77），所以这里显式报出**缺哪几个**而不是让界面显示一行空白： 「境外仓没有邮编」与「这家仓压根没填地址」必须能一眼分开。
    */
   private WarehouseAddress address(WarehouseBase base) {
     var r =
@@ -174,7 +173,13 @@ public class WarehouseDetailService {
     text.add(base.countryCode());
 
     return new WarehouseAddress(
-        line1, line2, city, region, postal, base.countryCode(), missing,
+        line1,
+        line2,
+        city,
+        region,
+        postal,
+        base.countryCode(),
+        missing,
         text.isEmpty() ? null : String.join(" ", text));
   }
 
@@ -276,11 +281,11 @@ public class WarehouseDetailService {
   }
 
   /**
-   * 平台仓观测值。每个 {@code (仓库, SKU, 来源)} 只取最新一条 ——
-   * platform_stock_observation 是 append-only 历史序列（V55），求和会得到 300+310=610 这个不存在的数。
+   * 平台仓观测值。每个 {@code (仓库, SKU, 来源)} 只取最新一条 —— platform_stock_observation 是 append-only
+   * 历史序列（V55），求和会得到 300+310=610 这个不存在的数。
    *
-   * <p>自有仓恒不调用本方法（由 {@link #detail} 的 {@code platformObserved()} 裁决）：
-   * 「这个来源不存在」与「观测到 0 件」在界面上含义完全不同。
+   * <p>自有仓恒不调用本方法（由 {@link #detail} 的 {@code platformObserved()} 裁决）： 「这个来源不存在」与「观测到 0
+   * 件」在界面上含义完全不同。
    */
   private WarehouseFacilityModels.PlatformStock platformStock(UUID warehouseId) {
     var r =
@@ -300,7 +305,8 @@ public class WarehouseDetailService {
                                and warehouse_id = ?
                              order by sku_id,source,collected_at desc)
             """,
-            warehouseId, warehouseId);
+            warehouseId,
+            warehouseId);
     if (r == null || r.get("source_count", Long.class) == 0L) return null;
     return new WarehouseFacilityModels.PlatformStock(
         r.get("source_count", Long.class),
@@ -316,9 +322,8 @@ public class WarehouseDetailService {
    * 库位结构。
    *
    * <p>{@code warehouse_location} 表**确实存在**（V2，带 type / status / pickable），
-   * 所以库位数量、类型分布、可拣库位数都是真实数据。没交付的是**层级**：
-   * 表上没有 {@code parent_id}，也没有容量与承重列 —— 那是 8.1.2.1 的事，
-   * 在 {@link #entryPoints()} 里报 {@code available=false}。
+   * 所以库位数量、类型分布、可拣库位数都是真实数据。没交付的是**层级**： 表上没有 {@code parent_id}，也没有容量与承重列 —— 那是 8.1.2.1 的事， 在
+   * {@link #entryPoints()} 里报 {@code available=false}。
    */
   private LocationStructure locationStructure(UUID warehouseId) {
     var r =
@@ -351,8 +356,7 @@ public class WarehouseDetailService {
    * 按库位类型的分布。
    *
    * <p>{@link StockDistribution#byLocationType()} 与 {@link LocationStructure#byType()} 是**同一份
-   * 事实的同一段 SQL**，故意调用两次而不是让调用方互相传值：两处返回同一批行，
-   * 库存分布与库位结构两个面板因此不可能各算各的。
+   * 事实的同一段 SQL**，故意调用两次而不是让调用方互相传值：两处返回同一批行， 库存分布与库位结构两个面板因此不可能各算各的。
    */
   private List<LocationTypeSlice> locationTypeSlice(UUID warehouseId) {
     return sql.fetch(
@@ -386,8 +390,8 @@ public class WarehouseDetailService {
    * 作业统计。
    *
    * <p>四个来源各自收口后相加，**不** join —— join 会让一张调拨单同时命中 from 与 to 两行而翻倍。
-   * 上架（8.2.2.1）、拣货出库（8.3）、组装（8.4）没有表，所以不在这个合计里，
-   * 它们在 {@link #entryPoints()} 里报 available=false，**不算成 0 冒充「这个仓不作业」**。
+   * 上架（8.2.2.1）、拣货出库（8.3）、组装（8.4）没有表，所以不在这个合计里， 它们在 {@link #entryPoints()} 里报 available=false，**不算成
+   * 0 冒充「这个仓不作业」**。
    */
   private WorkStatistics work(UUID warehouseId) {
     var r =
@@ -440,9 +444,19 @@ public class WarehouseDetailService {
                      where e.tenant_id = current_setting('app.current_tenant', true)::uuid
                        and b.warehouse_id=?) as movement_count
             """,
-            warehouseId, warehouseId, warehouseId, warehouseId,
-            warehouseId, warehouseId, warehouseId, warehouseId,
-            warehouseId, warehouseId, warehouseId, warehouseId, warehouseId);
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId);
     long receiptTotal = r.get("receipt_total", Long.class);
     long taskCount = r.get("task_count", Long.class);
     long transferIn = r.get("transfer_in", Long.class);
@@ -470,10 +484,9 @@ public class WarehouseDetailService {
   /**
    * 自发货 / 中转 / FBA 三条备货策略。
    *
-   * <p>三条的**配置**都属 8.1.1.3 仓库配置（批次序列号开关、拣货策略、复核比例、拆零发货、
-   * 工作时段），本模块未交付，所以 {@code available=false}。
-   * 但每条背后**已经有真实事实**：调拨单、在途腿与到货事件、平台观测都能真算出来，
-   * 所以 {@link StrategyFacts} 给实数 —— 「没有这条策略」与「这条策略下现在没货」是两件事。
+   * <p>三条的**配置**都属 8.1.1.3 仓库配置（批次序列号开关、拣货策略、复核比例、拆零发货、 工作时段），本模块未交付，所以 {@code available=false}。
+   * 但每条背后**已经有真实事实**：调拨单、在途腿与到货事件、平台观测都能真算出来， 所以 {@link StrategyFacts} 给实数 ——
+   * 「没有这条策略」与「这条策略下现在没货」是两件事。
    */
   private List<StrategyBinding> strategies(
       UUID warehouseId, WarehouseFacilityModels.PlatformStock platform) {
@@ -494,7 +507,10 @@ public class WarehouseDetailService {
                      where e.tenant_id = current_setting('app.current_tenant', true)::uuid
                        and t.from_warehouse_id=?) as arrival_event
             """,
-            warehouseId, warehouseId, warehouseId, warehouseId);
+            warehouseId,
+            warehouseId,
+            warehouseId,
+            warehouseId);
     var selfFulfillment =
         new StrategyFacts(
             counts.get("transfer_out", Long.class),
@@ -511,7 +527,8 @@ public class WarehouseDetailService {
             null,
             null,
             "中转在途取 inventory_transfer 中本仓为起点的未达腿，到货事件 "
-                + counts.get("arrival_event", Long.class) + " 笔；中转策略参数属 8.1.1.3，未交付。");
+                + counts.get("arrival_event", Long.class)
+                + " 笔；中转策略参数属 8.1.1.3，未交付。");
     var fba =
         new StrategyFacts(
             0L,
@@ -521,22 +538,33 @@ public class WarehouseDetailService {
             platform == null ? null : platform.sourceCount(),
             platform == null
                 ? "本仓没有平台观测记录：FBA 备货策略属 8.1.1.3，未交付。"
-                : "平台观测在手来自 platform_stock_observation 最新一条，与自有账本不相加；"
-                    + "FBA 备货策略属 8.1.1.3，未交付。");
+                : "平台观测在手来自 platform_stock_observation 最新一条，与自有账本不相加；" + "FBA 备货策略属 8.1.1.3，未交付。");
 
     return List.of(
         new StrategyBinding(
-            "SELF_FULFILLMENT", "自发货", false, "8.1.1.3",
+            "SELF_FULFILLMENT",
+            "自发货",
+            false,
+            "8.1.1.3",
             "自发货策略（拣货策略、默认复核比例、是否允许拆零发货、工作时段与班次）属仓库配置 8.1.1.3，尚未交付。",
-            null, selfFulfillment),
+            null,
+            selfFulfillment),
         new StrategyBinding(
-            "CROSS_DOCK", "中转", false, "8.1.1.3",
+            "CROSS_DOCK",
+            "中转",
+            false,
+            "8.1.1.3",
             "中转策略参数属仓库配置 8.1.1.3，尚未交付；下方的在途腿与到货事件是已落库的真实事实。",
-            "/warehouse/transfers", crossDock),
+            "/warehouse/transfers",
+            crossDock),
         new StrategyBinding(
-            "FBA_STOCKING", "FBA 备货", false, "8.1.1.3",
+            "FBA_STOCKING",
+            "FBA 备货",
+            false,
+            "8.1.1.3",
             "FBA 备货策略（补货节奏、安全库存）属仓库配置 8.1.1.3，尚未交付；下方的观测在手是平台报出的观测值。",
-            null, fba));
+            null,
+            fba));
   }
 
   // ------------------------------------------------------------ 人员与设备
@@ -544,10 +572,8 @@ public class WarehouseDetailService {
   /**
    * 作业人员与设备。
    *
-   * <p>三个子维度分别表态，因为交付状态真的不一样：
-   * 作业任务与派工已接入（{@code warehouse_work_task}，V74 / 8.5.1.1）；
-   * 花名册与排班没有表；设备表 {@code print_device}（V73）**没有 warehouse_id** ——
-   * 设备是租户级的，与仓库之间不存在绑定关系，所以按仓统计设备数在数据层就无从谈起。
+   * <p>三个子维度分别表态，因为交付状态真的不一样： 作业任务与派工已接入（{@code warehouse_work_task}，V74 / 8.5.1.1）； 花名册与排班没有表；设备表
+   * {@code print_device}（V73）**没有 warehouse_id** —— 设备是租户级的，与仓库之间不存在绑定关系，所以按仓统计设备数在数据层就无从谈起。
    */
   private LaborResources labor(UUID warehouseId) {
     var r =
@@ -597,8 +623,7 @@ public class WarehouseDetailService {
         byWorkType,
         false,
         "8.1.1.3",
-        "人员花名册与排班没有数据表（工作时段与班次属 8.1.1.3 配置），"
-            + "所以只能报派工与在岗任务，不能报「这个仓有几个人」。",
+        "人员花名册与排班没有数据表（工作时段与班次属 8.1.1.3 配置），" + "所以只能报派工与在岗任务，不能报「这个仓有几个人」。",
         false,
         "8.3.4.2",
         "print_device 表存在但**没有 warehouse_id**：设备是租户级的，设备与仓库之间"
@@ -619,8 +644,7 @@ public class WarehouseDetailService {
     String sqlWhere = where.isEmpty() ? "" : " where " + String.join(" and ", where);
 
     long total =
-        sql.fetchOne(
-                "select count(*) from warehouse_location l" + sqlWhere, binds.toArray())
+        sql.fetchOne("select count(*) from warehouse_location l" + sqlWhere, binds.toArray())
             .get(0, Long.class);
 
     var rows =
@@ -629,7 +653,12 @@ public class WarehouseDetailService {
                 bindsToArray(binds, size, page * size))
             .map(WarehouseDetailService::locationRow);
 
-    return new LocationPage(locationTotals(warehouseId), rows, total, page, size,
+    return new LocationPage(
+        locationTotals(warehouseId),
+        rows,
+        total,
+        page,
+        size,
         "合计不受分页与筛选影响；库位上的数量来自 stock_bucket，与仓库级 inventory_balance 是同一批货的两种视角。");
   }
 
@@ -659,7 +688,8 @@ public class WarehouseDetailService {
     where.add("l.tenant_id = current_setting('app.current_tenant', true)::uuid");
     if (q.type() != null && !q.type().isBlank()) {
       String type = q.type().trim().toUpperCase(Locale.ROOT);
-      if (!LOCATION_TYPES.contains(type)) throw new IllegalArgumentException("不支持的库位类型：" + q.type());
+      if (!LOCATION_TYPES.contains(type))
+        throw new IllegalArgumentException("不支持的库位类型：" + q.type());
       where.add("l.type = ?");
       binds.add(type);
     }
@@ -740,38 +770,61 @@ public class WarehouseDetailService {
   /**
    * 各子模块入口。
    *
-   * <p>蓝图把「各子模块入口」写进了本模块的输出，所以它是交付物本身。
-   * {@code available=false} 的入口 {@code href} 为 null —— 前端据此禁用按钮，
+   * <p>蓝图把「各子模块入口」写进了本模块的输出，所以它是交付物本身。 {@code available=false} 的入口 {@code href} 为 null —— 前端据此禁用按钮，
    * 而不是跳到一个不存在的路由（与 8.1.1.1 交付前禁用详情入口同一条纪律）。
    *
-   * <p>已交付的 href 全部指向**本 worktree 里真实存在的 page.tsx**，不指向蓝图里规划但
-   * 尚未建页的路由。
+   * <p>已交付的 href 全部指向**本 worktree 里真实存在的 page.tsx**，不指向蓝图里规划但 尚未建页的路由。
    */
   public List<DetailEntryPoint> entryPoints() {
     return List.of(
-        new DetailEntryPoint("INVENTORY", "库存明细", "7.1.1.2", true, "/inventory",
-            "按库位 / 批次 / 质量状态查看这一个仓的库存明细与流水。"),
-        new DetailEntryPoint("TRANSFER", "仓间调拨", "7.5.1.1", true, "/warehouse/transfers",
-            "调入与调出本仓的调拨单与在途腿。"),
-        new DetailEntryPoint("RECEIVING", "收货单", "8.2.1.1", true, "/warehouse/receipts",
-            "本仓的收货单、实收明细与差异记录。"),
-        new DetailEntryPoint("LOCATION_TREE", "库位树", "8.1.2.1", false, null,
+        new DetailEntryPoint(
+            "INVENTORY", "库存明细", "7.1.1.2", true, "/inventory", "按库位 / 批次 / 质量状态查看这一个仓的库存明细与流水。"),
+        new DetailEntryPoint(
+            "TRANSFER", "仓间调拨", "7.5.1.1", true, "/warehouse/transfers", "调入与调出本仓的调拨单与在途腿。"),
+        new DetailEntryPoint(
+            "RECEIVING", "收货单", "8.2.1.1", true, "/warehouse/receipts", "本仓的收货单、实收明细与差异记录。"),
+        new DetailEntryPoint(
+            "LOCATION_TREE",
+            "库位树",
+            "8.1.2.1",
+            false,
+            null,
             "warehouse_location 表有库位档案但**没有层级与容量列**（无 parent_id / 承重），"
                 + "「区 → 巷 → 排 → 架 → 层 → 格」这棵树属 8.1.2.1，尚未交付。"),
-        new DetailEntryPoint("LOCATION_ALLOCATION", "库位自动分配", "8.1.2.2", false, null,
+        new DetailEntryPoint(
+            "LOCATION_ALLOCATION",
+            "库位自动分配",
+            "8.1.2.2",
+            false,
+            null,
             "按品类聚类与容量承重匹配推荐库位属 8.1.2.2，尚未交付。"),
-        new DetailEntryPoint("PUTAWAY", "上架任务", "8.2.2.1", false, null,
+        new DetailEntryPoint(
+            "PUTAWAY",
+            "上架任务",
+            "8.2.2.1",
+            false,
+            null,
             "goods_receipt 里已有待检 / 可售分桶，但**上架任务表不存在**，尚未交付。"),
-        new DetailEntryPoint("QUARANTINE", "待检处理", "8.2.2.2", false, null,
-            "待检数量的分桶已落库，但待检单据的处置流程属 8.2.2.2，尚未交付。"),
-        new DetailEntryPoint("PICK_OUTBOUND", "拣货与出库", "8.3", false, null,
+        new DetailEntryPoint(
+            "QUARANTINE", "待检处理", "8.2.2.2", false, null, "待检数量的分桶已落库，但待检单据的处置流程属 8.2.2.2，尚未交付。"),
+        new DetailEntryPoint(
+            "PICK_OUTBOUND",
+            "拣货与出库",
+            "8.3",
+            false,
+            null,
             "8.3.1.1 出库单 / 8.3.2.1 拣货任务 / 8.3.3.1 复核 / 8.3.4.1 发货交接，尚未交付。"),
-        new DetailEntryPoint("ASSEMBLY", "组装作业", "8.4", false, null,
-            "8.4.1.1 组装单 / 8.4.2.1 拆解单，尚未交付。"),
-        new DetailEntryPoint("PICKING_POLICY", "仓库行为参数", "8.1.1.3", false, null,
+        new DetailEntryPoint(
+            "ASSEMBLY", "组装作业", "8.4", false, null, "8.4.1.1 组装单 / 8.4.2.1 拆解单，尚未交付。"),
+        new DetailEntryPoint(
+            "PICKING_POLICY",
+            "仓库行为参数",
+            "8.1.1.3",
+            false,
+            null,
             "批次序列号开关、拣货策略、默认复核比例、是否允许拆零发货、工作时段与班次属仓库配置，尚未交付。"),
-        new DetailEntryPoint("LABOR_EFFICIENCY", "作业效率", "8.5.1.1", true, null,
-            "人效报表与作业排名已交付，可在仓库分析里看本仓的人效。"));
+        new DetailEntryPoint(
+            "LABOR_EFFICIENCY", "作业效率", "8.5.1.1", true, null, "人效报表与作业排名已交付，可在仓库分析里看本仓的人效。"));
   }
 
   // ================================================================ 维护
@@ -781,9 +834,8 @@ public class WarehouseDetailService {
    *
    * <p>应用层校验给出可读错误，DB 层仍有 CHECK 与唯一索引兜底 —— 两层都要在，各挡各的。
    *
-   * <p><b>ARCHIVED 是终态</b>：归档后不能再改任何字段，也不能取消归档。
-   * 这与 8.1.1.1 文件头「ARCHIVED 是终态，本模块没有回退动作（属 8.1.1.2）」是一致的：
-   * 「回退动作」指的是取消归档这件事本身不存在，而不是「归档后还能改地址」。
+   * <p><b>ARCHIVED 是终态</b>：归档后不能再改任何字段，也不能取消归档。 这与 8.1.1.1 文件头「ARCHIVED 是终态，本模块没有回退动作（属
+   * 8.1.1.2）」是一致的： 「回退动作」指的是取消归档这件事本身不存在，而不是「归档后还能改地址」。
    */
   public WarehouseUpdated update(UUID warehouseId, WarehouseUpdateInput input) {
     var current =
@@ -794,8 +846,7 @@ public class WarehouseDetailService {
     if (current == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "仓库不存在");
 
     String status = current.get("status", String.class);
-    if ("ARCHIVED".equals(status))
-      throw new IllegalArgumentException("仓库已归档，不能再修改：归档是终态，没有回退动作");
+    if ("ARCHIVED".equals(status)) throw new IllegalArgumentException("仓库已归档，不能再修改：归档是终态，没有回退动作");
 
     String name = input.name().trim();
     if (name.isEmpty()) throw new IllegalArgumentException("仓库名称不能为空");
@@ -821,18 +872,23 @@ public class WarehouseDetailService {
              where tenant_id = current_setting('app.current_tenant', true)::uuid and id=?
             returning code, name, status, updated_at
             """,
-            name, country, timezone,
-            blankToNull(input.addressLine1()), blankToNull(input.addressLine2()),
-            blankToNull(input.city()), blankToNull(input.region()), blankToNull(input.postalCode()),
-            target, warehouseId);
+            name,
+            country,
+            timezone,
+            blankToNull(input.addressLine1()),
+            blankToNull(input.addressLine2()),
+            blankToNull(input.city()),
+            blankToNull(input.region()),
+            blankToNull(input.postalCode()),
+            target,
+            warehouseId);
     return new WarehouseUpdated(
         warehouseId,
         r.get("code", String.class),
         r.get("name", String.class),
         r.get("status", String.class),
         r.get("updated_at", java.time.OffsetDateTime.class),
-        "归档是终态：归档后本仓不再接受任何修改。编码、仓库类型与货权法人不可改 —— "
-            + "它们分别是仓库标识、记账口径与财务前提，改动会让已落库数据失去指向。");
+        "归档是终态：归档后本仓不再接受任何修改。编码、仓库类型与货权法人不可改 —— " + "它们分别是仓库标识、记账口径与财务前提，改动会让已落库数据失去指向。");
   }
 
   // ================================================================ 辅助
@@ -875,24 +931,19 @@ public class WarehouseDetailService {
   /**
    * 时区必须是 IANA ID，**偏移量在这里被显式拒绝**。
    *
-   * <p>为什么不能只靠 {@code ZoneId.of}：它其实**接受** ISO-8601 偏移量
-   * （{@code ZoneId.of("+08:00")} 返回一个 {@code ZoneOffset}，不抛异常）。
-   * 于是「+08:00」能一路存进库，而这个值不表达夏令时规则 ——
-   * 纽约什么时候切夏令时答不出来，仓库的当地墙上时间也就永远只能按固定偏移算。
-   * 前端 createProblem 已经拦了偏移量，但那只是体验；后端必须自己再拦一次，
-   * 否则绕过界面直接调端点就能写进一个坏时区。
+   * <p>为什么不能只靠 {@code ZoneId.of}：它其实**接受** ISO-8601 偏移量 （{@code ZoneId.of("+08:00")} 返回一个 {@code
+   * ZoneOffset}，不抛异常）。 于是「+08:00」能一路存进库，而这个值不表达夏令时规则 —— 纽约什么时候切夏令时答不出来，仓库的当地墙上时间也就永远只能按固定偏移算。 前端
+   * createProblem 已经拦了偏移量，但那只是体验；后端必须自己再拦一次， 否则绕过界面直接调端点就能写进一个坏时区。
    *
-   * <p>顺带把「无法识别的时区」翻译成 {@link IllegalArgumentException}：
-   * {@code ZoneId.of} 抛的 {@code DateTimeException} 既不是
-   * {@code IllegalArgumentException} 也不是 {@code DateTimeParseException}，
+   * <p>顺带把「无法识别的时区」翻译成 {@link IllegalArgumentException}： {@code ZoneId.of} 抛的 {@code
+   * DateTimeException} 既不是 {@code IllegalArgumentException} 也不是 {@code DateTimeParseException}，
    * 直接冒到 ApiErrorHandler 之外会变成 500 —— 一个用户输错时区得到的服务端错误。
    */
   private static String requireIanaTimezone(String raw) {
     String zone = raw == null ? "" : raw.trim();
     if (zone.isEmpty()) throw new IllegalArgumentException("时区不能为空");
     if (zone.matches("[+-]\\d{1,2}(:\\d{2})?")) {
-      throw new IllegalArgumentException(
-          "时区要填 IANA ID（如 Asia/Shanghai），偏移量不表达夏令时规则：" + zone);
+      throw new IllegalArgumentException("时区要填 IANA ID（如 Asia/Shanghai），偏移量不表达夏令时规则：" + zone);
     }
     try {
       ZoneId.of(zone);

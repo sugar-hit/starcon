@@ -170,7 +170,12 @@ describe('单位表单', () => {
   it('名称与量纲必填', () => {
     const noName: UnitDraft = { ...emptyUnitDraft(), code: '箱', name: '  ' };
     expect(validateUnit(noName, true)).toContain('单位名称不能为空');
-    const badDimension: UnitDraft = { ...emptyUnitDraft(), code: '箱', name: '箱', dimension: 'MASS' };
+    const badDimension: UnitDraft = {
+      ...emptyUnitDraft(),
+      code: '箱',
+      name: '箱',
+      dimension: 'MASS',
+    };
     expect(validateUnit(badDimension, true)).toContain('请选择一个量纲');
   });
 

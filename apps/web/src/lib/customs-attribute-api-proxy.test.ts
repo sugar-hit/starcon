@@ -77,7 +77,7 @@ describe('3.7.1.1 api-proxy 白名单（真 proxy 状态码）', () => {
     });
     // /api/catalog/<...> 的 catch-all 把段原样交给 proxy
     const segments = new URL(url).pathname.split('/').filter(Boolean).slice(2);
-    const res = await proxy(req, { params: { path: segments } } as never);
+    const res = await proxy(req, { params: Promise.resolve({ path: segments }) } as never);
     return res.status;
   }
 
@@ -211,7 +211,7 @@ describe('3.7.1.1 组件真实调用路径都在白名单里', () => {
         headers: { cookie: 'starcon_session=test', origin: 'http://localhost' },
       });
       const segments = url.pathname.split('/').filter(Boolean).slice(2);
-      const res = await proxy(req, { params: { path: segments } } as never);
+      const res = await proxy(req, { params: Promise.resolve({ path: segments }) } as never);
       if (res.status === 404) blocked.push(call);
     }
     expect(blocked, `这些真实调用路径没有登记进白名单：${blocked.join('、')}`).toEqual([]);

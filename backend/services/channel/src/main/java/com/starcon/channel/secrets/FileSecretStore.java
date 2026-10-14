@@ -16,8 +16,7 @@ import org.springframework.stereotype.Component;
  * 文件型密钥管理器落点。
  *
  * <p>生产环境应替换为 Vault / K8s External Secrets 的实现（AGENTS.md：第三方 key 一律走 secret
- * manager）。这个实现保证在替换之前，令牌<b>确实</b>落在数据库之外的文件系统里而不是被
- * 顺手写进某张表 —— 边界是真的，只是落点可换。
+ * manager）。这个实现保证在替换之前，令牌<b>确实</b>落在数据库之外的文件系统里而不是被 顺手写进某张表 —— 边界是真的，只是落点可换。
  *
  * <p>文件权限固定 0600，目录 0700：令牌文件不该被同机器上的其他用户读到。
  */
@@ -69,8 +68,7 @@ public class FileSecretStore implements SecretStore {
   /** 把逻辑路径限制在该目录内：路径来自请求，绝不允许写到目录之外。 */
   private Path resolve(String secretPath) {
     Path file = root.resolve(normalize(secretPath)).normalize();
-    if (!file.startsWith(root))
-      throw new IllegalArgumentException("密钥路径越界：" + secretPath);
+    if (!file.startsWith(root)) throw new IllegalArgumentException("密钥路径越界：" + secretPath);
     return file;
   }
 
@@ -82,7 +80,8 @@ public class FileSecretStore implements SecretStore {
 
   private static void restrict(Path path, boolean directory) {
     try {
-      Set<PosixFilePermission> owner = EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
+      Set<PosixFilePermission> owner =
+          EnumSet.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
       if (directory) owner.add(PosixFilePermission.OWNER_EXECUTE);
       Files.setPosixFilePermissions(path, owner);
     } catch (IOException | UnsupportedOperationException ignored) {

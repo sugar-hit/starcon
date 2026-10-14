@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 /**
  * 3.1.2.4 纯规则单测：单位码字符集、量纲词表、比例校验、换算精度与生效区间判定。
  *
- * <p>这些是不碰数据库就能判定的规则，穷举它们比等集成测试便宜得多——
- * 量纲不匹配要等到真正建换算行才拦，代价是错误信息离操作人十万八千里。
+ * <p>这些是不碰数据库就能判定的规则，穷举它们比等集成测试便宜得多—— 量纲不匹配要等到真正建换算行才拦，代价是错误信息离操作人十万八千里。
  */
 class UnitRulesTest {
 
@@ -67,7 +66,9 @@ class UnitRulesTest {
     // 1 箱 = 3 件，2.5 箱 = 7.5 件。截断会写成 7 件，账面少 0.5 件。
     assertThat(UnitRules.toBaseQuantity(new BigDecimal("2.5"), new BigDecimal("3")))
         .isEqualByComparingTo("7.500000");
-    assertThat(UnitRules.toBaseQuantity(new BigDecimal("2.5"), new BigDecimal("3")).stripTrailingZeros())
+    assertThat(
+            UnitRules.toBaseQuantity(new BigDecimal("2.5"), new BigDecimal("3"))
+                .stripTrailingZeros())
         .isEqualByComparingTo("7.5");
     // 1 箱 = 12 件：最典型的整箱换算。
     assertThat(UnitRules.toBaseQuantity(new BigDecimal("3"), new BigDecimal("12")))

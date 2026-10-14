@@ -47,36 +47,29 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>蓝图对本模块的三条硬要求，在这里各有明确落点：
  *
  * <ul>
- *   <li><b>编号是业务单据的可读标识，不是外键</b>：{@code document_number_issued} 里的
- *       {@code documentType}/{@code documentNo} 只是可读标识，单据本体在各服务自己的库里，
- *       这里不建跨库外键。编号唯一性由 {@code UNIQUE(tenant_id, entity_code, number_text)}
- *       兜底——同一个租户同一实体的同一个编号不可能发放两次。
- *   <li><b>规则冲突要在配置时校验</b>：同一实体上两条启用的主规则（{@code rule_kind='PRIMARY'}）
- *       生效区间不允许重叠。{@link #create} / {@link #update} 都在写入前查一次
- *       {@link #overlaps}，重叠返回 409。可复用子规则（{@code COMPONENT}）不参与该判定——
- *       它只被 NESTED 段引用，结构上不会与谁争同一实体的同一时刻。
- *   <li><b>序号按实体/日期重置</b>：计数器键是
- *       {@code (tenant_id, entity_code, scope_key, reset_key)}。{@code entity_code} 永远是
- *       <b>根规则</b>的实体（所以同一个子规则嵌到两个不同实体下各自独立计数）；
- *       {@code reset_key} 按 {@code NONE/DAILY/MONTHLY/YEARLY} 取 {@code ALL} / 业务日期 /
- *       年月 / 年，换一天或换一月就是一个新桶。取号走
- *       {@code insert … on conflict … returning} 的数据库原子递增，不做应用层读-改-写。
+ *   <li><b>编号是业务单据的可读标识，不是外键</b>：{@code document_number_issued} 里的 {@code documentType}/{@code
+ *       documentNo} 只是可读标识，单据本体在各服务自己的库里， 这里不建跨库外键。编号唯一性由 {@code UNIQUE(tenant_id, entity_code,
+ *       number_text)} 兜底——同一个租户同一实体的同一个编号不可能发放两次。
+ *   <li><b>规则冲突要在配置时校验</b>：同一实体上两条启用的主规则（{@code rule_kind='PRIMARY'}） 生效区间不允许重叠。{@link #create} /
+ *       {@link #update} 都在写入前查一次 {@link #overlaps}，重叠返回 409。可复用子规则（{@code COMPONENT}）不参与该判定—— 它只被
+ *       NESTED 段引用，结构上不会与谁争同一实体的同一时刻。
+ *   <li><b>序号按实体/日期重置</b>：计数器键是 {@code (tenant_id, entity_code, scope_key, reset_key)}。{@code
+ *       entity_code} 永远是 <b>根规则</b>的实体（所以同一个子规则嵌到两个不同实体下各自独立计数）； {@code reset_key} 按 {@code
+ *       NONE/DAILY/MONTHLY/YEARLY} 取 {@code ALL} / 业务日期 / 年月 / 年，换一天或换一月就是一个新桶。取号走 {@code insert …
+ *       on conflict … returning} 的数据库原子递增，不做应用层读-改-写。
  * </ul>
  *
- * <p>预览（{@code /preview}）走同一套渲染逻辑但**不占号**，取号（{@code /next}）才真正递增
- * 计数器并落 {@code document_number_issued}。两个出口共用 {@link #render}，所以预览里看到的
+ * <p>预览（{@code /preview}）走同一套渲染逻辑但**不占号**，取号（{@code /next}）才真正递增 计数器并落 {@code
+ * document_number_issued}。两个出口共用 {@link #render}，所以预览里看到的
  * 组成与取号时算出来的一定是同一个编号——预览与实际不一致是这类系统最难排查的故障之一。
  *
- * <p>多级嵌套：规则由有序的段拼成，{@code NESTED} 段递归展开子规则。环与深度在**配置时**
- * 就拒（{@link #descendsFrom}），渲染时再兜一层 {@link #MAX_DEPTH}。
+ * <p>多级嵌套：规则由有序的段拼成，{@code NESTED} 段递归展开子规则。环与深度在**配置时** 就拒（{@link #descendsFrom}），渲染时再兜一层 {@link
+ * #MAX_DEPTH}。
  */
 @RestController
 @RequestMapping("/identity")
 public class NumberRuleController {
-  /**
-   * 嵌套深度上限。写入时用可达图查环已经能挡住环，这里的上限挡的是"合法但深得离谱"的
-   * 配置（比如 A 嵌 B 嵌 C… 十层），渲染是递归的，不设上限会让一次预览把栈打爆。
-   */
+  /** 嵌套深度上限。写入时用可达图查环已经能挡住环，这里的上限挡的是"合法但深得离谱"的 配置（比如 A 嵌 B 嵌 C… 十层），渲染是递归的，不设上限会让一次预览把栈打爆。 */
   private static final int MAX_DEPTH = 8;
 
   private final DSLContext sql;
@@ -125,8 +118,7 @@ public class NumberRuleController {
   /**
    * 规则的一个组成段。
    *
-   * <p>{@code rendered} 是这一段在样例渲染里的取值（含子规则展开后的整段文本），
-   * 让配置页能逐段看清编号是怎么拼出来的。
+   * <p>{@code rendered} 是这一段在样例渲染里的取值（含子规则展开后的整段文本）， 让配置页能逐段看清编号是怎么拼出来的。
    */
   public record NumberRuleSegmentView(
       UUID id,
@@ -185,8 +177,7 @@ public class NumberRuleController {
   /**
    * 预览结果。
    *
-   * <p>{@code consumed=false} 表示这次预览**没有占用序号**：同一个参数重复预览永远得到同一个
-   * 编号，预览多少次都不该把真实计数推前。
+   * <p>{@code consumed=false} 表示这次预览**没有占用序号**：同一个参数重复预览永远得到同一个 编号，预览多少次都不该把真实计数推前。
    */
   public record NumberPreviewView(
       UUID ruleId,
@@ -241,8 +232,7 @@ public class NumberRuleController {
   /**
    * 冲突检测结果。
    *
-   * <p>配置页在保存前就能看到「这两条规则的生效区间撞了」，而不是等写入时吃 409。
-   * 只列 PRIMARY：COMPONENT 不参与判定。
+   * <p>配置页在保存前就能看到「这两条规则的生效区间撞了」，而不是等写入时吃 409。 只列 PRIMARY：COMPONENT 不参与判定。
    */
   public record NumberRuleConflictView(
       UUID ruleId,
@@ -258,13 +248,16 @@ public class NumberRuleController {
   private static final String RULE_DELETE = "identity.numbering_rule.delete";
 
   /**
-   * 与 {@code BusinessParameterController.call} 同口径：解析会话 → 切到该会话的租户事务 →
-   * 锁会话 → 二次校验租户未切换 → 校验权限码 → 组织变更要求 OWNER。
+   * 与 {@code BusinessParameterController.call} 同口径：解析会话 → 切到该会话的租户事务 → 锁会话 → 二次校验租户未切换 → 校验权限码 →
+   * 组织变更要求 OWNER。
    *
    * <p>租户来自会话成员关系，{@code X-Tenant-Id} 头在这里从头到尾没有出现过。
    */
   private <T> T call(
-      String auth, String permission, boolean mutation, Function<IdentityController.Access, T> work) {
+      String auth,
+      String permission,
+      boolean mutation,
+      Function<IdentityController.Access, T> work) {
     var initial = identity.resolve(auth);
     return tenants.run(
         initial.tenantId(),
@@ -276,7 +269,8 @@ public class NumberRuleController {
           require(a.tenantId().equals(initial.tenantId()), "租户已切换，请重试");
           require(
               a.grants().stream()
-                  .anyMatch(g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
+                  .anyMatch(
+                      g -> g.scopeMode().equals("ALL") && g.permissions().contains(permission)),
               "当前角色没有此操作权限");
           if (mutation) require(a.owner(), "编号规则变更需由当前租户所有者执行");
           return work.apply(a);
@@ -321,7 +315,8 @@ public class NumberRuleController {
         RULE_READ,
         false,
         a ->
-            sql.fetch(
+            sql
+                .fetch(
                     "select code,name,description from document_entity where status='ACTIVE'"
                         + " order by sort_order,code")
                 .stream()
@@ -337,8 +332,7 @@ public class NumberRuleController {
   /**
    * 规则列表，含段与样例编号。
    *
-   * <p>可按实体与种类过滤。不加过滤时返回本租户全部规则（含子规则）——配置页需要把
-   * 可复用的子规则一并列出来，否则用户根本不知道能嵌哪些进去。
+   * <p>可按实体与种类过滤。不加过滤时返回本租户全部规则（含子规则）——配置页需要把 可复用的子规则一并列出来，否则用户根本不知道能嵌哪些进去。
    */
   @GetMapping("/numbering/rules")
   public List<NumberRuleView> rules(
@@ -359,8 +353,7 @@ public class NumberRuleController {
           }
           if (ruleKind != null && !ruleKind.isBlank()) {
             check(
-                List.of("PRIMARY", "COMPONENT").contains(ruleKind),
-                "规则种类只能是 PRIMARY 或 COMPONENT");
+                List.of("PRIMARY", "COMPONENT").contains(ruleKind), "规则种类只能是 PRIMARY 或 COMPONENT");
             condition.add(" and r.rule_kind=?");
             condition.bind(ruleKind);
           }
@@ -395,7 +388,8 @@ public class NumberRuleController {
         RULE_READ,
         false,
         a -> {
-          var row = sql.fetchOne(selectRule() + " where r.tenant_id=? and r.id=?", a.tenantId(), id);
+          var row =
+              sql.fetchOne(selectRule() + " where r.tenant_id=? and r.id=?", a.tenantId(), id);
           if (row == null) notFound();
           return toRule(a.tenantId(), row, segments(a.tenantId(), id));
         });
@@ -435,9 +429,13 @@ public class NumberRuleController {
             boolean hit = false;
             for (Record other : rows) {
               if (other.get("id", UUID.class).equals(row.get("id", UUID.class))) continue;
-              if (!other.get("entity_code", String.class).equals(row.get("entity_code", String.class)))
-                continue;
-              if (overlaps(from, to, other.get("effective_from", OffsetDateTime.class),
+              if (!other
+                  .get("entity_code", String.class)
+                  .equals(row.get("entity_code", String.class))) continue;
+              if (overlaps(
+                  from,
+                  to,
+                  other.get("effective_from", OffsetDateTime.class),
                   other.get("effective_to", OffsetDateTime.class))) {
                 hit = true;
                 break;
@@ -472,7 +470,8 @@ public class NumberRuleController {
             condition.add(" and s.entity_code=?");
             condition.bind(entityCode.trim());
           }
-          return sql.fetch(
+          return sql
+              .fetch(
                   "select s.entity_code,s.scope_key,s.reset_key,s.current_value,s.updated_at"
                       + " from document_number_sequence s"
                       + condition.sql()
@@ -507,7 +506,8 @@ public class NumberRuleController {
             condition.add(" and i.entity_code=?");
             condition.bind(entityCode.trim());
           }
-          return sql.fetch(
+          return sql
+              .fetch(
                   "select i.id,i.entity_code,i.rule_id,r.rule_name,i.number_text,i.sequence_value,"
                       + " i.reset_key,i.document_type,i.document_no,i.actor_name,i.issued_at"
                       + " from document_number_issued i"
@@ -542,8 +542,7 @@ public class NumberRuleController {
   /**
    * 新建规则（含段）。
    *
-   * <p>写入前做三件事，与 {@code 17.5.1.2 规则冲突要在配置时校验} 一一对应：
-   * 段形状校验（与库 CHECK 同口径，报错更可读）、同实体生效区间交叠检查、
+   * <p>写入前做三件事，与 {@code 17.5.1.2 规则冲突要在配置时校验} 一一对应： 段形状校验（与库 CHECK 同口径，报错更可读）、同实体生效区间交叠检查、
    * 嵌套环与深度检查。
    */
   @PostMapping("/numbering/rules")
@@ -558,10 +557,12 @@ public class NumberRuleController {
           var normalized = normalize(input);
           entity(input.entityCode());
           if (normalized.effectiveTo() != null)
-            check(
-                normalized.effectiveTo().isAfter(normalized.effectiveFrom()),
-                "生效结束时间必须晚于生效开始时间");
-          overlaps(a.tenantId(), input.entityCode().trim(), null, normalized.effectiveFrom(),
+            check(normalized.effectiveTo().isAfter(normalized.effectiveFrom()), "生效结束时间必须晚于生效开始时间");
+          overlaps(
+              a.tenantId(),
+              input.entityCode().trim(),
+              null,
+              normalized.effectiveFrom(),
               normalized.effectiveTo());
           UUID id = Ids.next();
           // 生效时间刻意绑在第 8 / 9 位（共 12 位），不在 values 末位：
@@ -598,11 +599,9 @@ public class NumberRuleController {
   /**
    * 更新规则。
    *
-   * <p>实体与种类不允许改：换实体等于换一条规则（子规则被嵌的位置、已发放的编号都对不上），
-   * 换种类会让它突然参与或退出冲突判定。两者不符返回 400。
+   * <p>实体与种类不允许改：换实体等于换一条规则（子规则被嵌的位置、已发放的编号都对不上）， 换种类会让它突然参与或退出冲突判定。两者不符返回 400。
    *
-   * <p>段整体替换（先删后插），而不是逐段 diff：段的 {@code position} 是唯一键，
-   * 中间插入会让两个段短暂同 position，diff 出来的中间态无法落库。
+   * <p>段整体替换（先删后插），而不是逐段 diff：段的 {@code position} 是唯一键， 中间插入会让两个段短暂同 position，diff 出来的中间态无法落库。
    */
   @PutMapping("/numbering/rules/{id}")
   public void update(
@@ -614,8 +613,11 @@ public class NumberRuleController {
         RULE_UPDATE,
         true,
         a -> {
-          var row = sql.fetchOne("select * from document_number_rule where tenant_id=? and id=?",
-              a.tenantId(), id);
+          var row =
+              sql.fetchOne(
+                  "select * from document_number_rule where tenant_id=? and id=?",
+                  a.tenantId(),
+                  id);
           if (row == null) notFound();
           var normalized = normalize(input);
           entity(input.entityCode());
@@ -626,14 +628,16 @@ public class NumberRuleController {
               input.ruleKind().equals(row.get("rule_kind", String.class)),
               "不能改规则种类（主规则 / 子规则），请删除后新建");
           if (normalized.effectiveTo() != null)
-            check(
-                normalized.effectiveTo().isAfter(normalized.effectiveFrom()),
-                "生效结束时间必须晚于生效开始时间");
+            check(normalized.effectiveTo().isAfter(normalized.effectiveFrom()), "生效结束时间必须晚于生效开始时间");
           var status = statusOf(input.status());
           // 停用的规则不参与冲突判定：与 {@code document_number_rule_entity} 部分索引同口径，
           // 否则「停用一条又启用的规则」会因为自己也参与判定而永远放行不了。
           if ("ACTIVE".equals(status))
-            overlaps(a.tenantId(), input.entityCode().trim(), id, normalized.effectiveFrom(),
+            overlaps(
+                a.tenantId(),
+                input.entityCode().trim(),
+                id,
+                normalized.effectiveFrom(),
                 normalized.effectiveTo());
           sql.execute(
               "update document_number_rule set rule_name=?,status=?,timezone=?,"
@@ -664,20 +668,22 @@ public class NumberRuleController {
   /**
    * 删除规则。
    *
-   * <p>被别的规则当子规则引用时返回 409：删掉会让引用方的规则渲染时找不到段，
-   * 整个编号立刻算不出来。已发放过编号的规则同样拒删——编号引用的是规则，
-   * 规则没了，那些编号的来源就查不到了。
+   * <p>被别的规则当子规则引用时返回 409：删掉会让引用方的规则渲染时找不到段， 整个编号立刻算不出来。已发放过编号的规则同样拒删——编号引用的是规则， 规则没了，那些编号的来源就查不到了。
    */
   @DeleteMapping("/numbering/rules/{id}")
   public void delete(
-      @RequestHeader(value = "Authorization", defaultValue = "") String auth, @PathVariable UUID id) {
+      @RequestHeader(value = "Authorization", defaultValue = "") String auth,
+      @PathVariable UUID id) {
     call(
         auth,
         RULE_DELETE,
         true,
         a -> {
-          var row = sql.fetchOne("select * from document_number_rule where tenant_id=? and id=?",
-              a.tenantId(), id);
+          var row =
+              sql.fetchOne(
+                  "select * from document_number_rule where tenant_id=? and id=?",
+                  a.tenantId(),
+                  id);
           if (row == null) notFound();
           var usage =
               sql.fetchOne(
@@ -687,18 +693,16 @@ public class NumberRuleController {
                   a.tenantId(),
                   id);
           var used = usage == null ? null : usage.get("rule_name", String.class);
-          if (used != null)
-            reject("这条子规则已被规则「" + used + "」嵌套引用，请先取消引用再删除");
+          if (used != null) reject("这条子规则已被规则「" + used + "」嵌套引用，请先取消引用再删除");
           var issuedCount =
               sql.fetchOne(
                       "select count(*) as n from document_number_issued where tenant_id=? and rule_id=?",
                       a.tenantId(),
                       id)
                   .get("n", Long.class);
-          check(
-              issuedCount == 0,
-              "这条规则已发放过 " + issuedCount + " 个编号，不能删除；如需停用请改状态为 DISABLED");
-          sql.execute("delete from document_number_rule where tenant_id=? and id=?", a.tenantId(), id);
+          check(issuedCount == 0, "这条规则已发放过 " + issuedCount + " 个编号，不能删除；如需停用请改状态为 DISABLED");
+          sql.execute(
+              "delete from document_number_rule where tenant_id=? and id=?", a.tenantId(), id);
           audit.record(
               a,
               auth,
@@ -715,8 +719,7 @@ public class NumberRuleController {
   /**
    * 预览生成效果（**不占用序号**）。
    *
-   * <p>与取号共用 {@link #render}，区别只在 {@code consume=false}：序号段读当前计数器
-   * 算出「下一个」但不写。重复预览同一个参数永远得到同一个编号。
+   * <p>与取号共用 {@link #render}，区别只在 {@code consume=false}：序号段读当前计数器 算出「下一个」但不写。重复预览同一个参数永远得到同一个编号。
    */
   @PostMapping("/numbering/preview")
   public NumberPreviewView preview(
@@ -754,11 +757,10 @@ public class NumberRuleController {
   /**
    * 取号：真正递增计数器并落一条已发放编号。
    *
-   * <p>这是下游全部单据创建（订单、采购、出库、售后…）的取号入口。递增用
-   * {@code insert … on conflict … returning} 在数据库层完成，并发取号不会撞号。
+   * <p>这是下游全部单据创建（订单、采购、出库、售后…）的取号入口。递增用 {@code insert … on conflict … returning} 在数据库层完成，并发取号不会撞号。
    *
-   * <p>两条规则碰巧渲染出同一个编号时，唯一约束 {@code (tenant_id, entity_code, number_text)}
-   * 会让第二次发放失败——返回 409 而不是产生两个看起来一样的单据号。
+   * <p>两条规则碰巧渲染出同一个编号时，唯一约束 {@code (tenant_id, entity_code, number_text)} 会让第二次发放失败——返回 409
+   * 而不是产生两个看起来一样的单据号。
    */
   @PostMapping("/numbering/rules/{id}/next")
   public NumberIssuedView next(
@@ -773,12 +775,8 @@ public class NumberRuleController {
           var rule =
               sql.fetchOne(selectRule() + " where r.tenant_id=? and r.id=?", a.tenantId(), id);
           if (rule == null) notFound();
-          check(
-              "PRIMARY".equals(rule.get("rule_kind", String.class)),
-              "只有主规则能直接取号；子规则只作为嵌套片段参与拼装");
-          check(
-              "ACTIVE".equals(rule.get("status", String.class)),
-              "规则已停用，不能取号");
+          check("PRIMARY".equals(rule.get("rule_kind", String.class)), "只有主规则能直接取号；子规则只作为嵌套片段参与拼装");
+          check("ACTIVE".equals(rule.get("status", String.class)), "规则已停用，不能取号");
           var date =
               input == null || input.documentDate() == null ? utcNow() : input.documentDate();
           var outcome =
@@ -813,10 +811,7 @@ public class NumberRuleController {
                 actorName(auth),
                 utcNow());
           } catch (DataIntegrityViolationException e) {
-            reject(
-                "编号 "
-                    + outcome.text()
-                    + " 已经发放过（同一实体下编号不能重复）；请检查是否有两条规则渲染出相同编号");
+            reject("编号 " + outcome.text() + " 已经发放过（同一实体下编号不能重复）；请检查是否有两条规则渲染出相同编号");
           }
           audit.record(
               a,
@@ -861,11 +856,10 @@ public class NumberRuleController {
   /**
    * 按段拼装编号，NESTED 段递归展开子规则。
    *
-   * <p>计数器永远用**根规则**的 {@code entityCode}（{@code rootEntity}），
-   * 所以同一个子规则嵌到两个不同实体下时各自独立计数——这正是「按实体重置」。
+   * <p>计数器永远用**根规则**的 {@code entityCode}（{@code rootEntity}）， 所以同一个子规则嵌到两个不同实体下时各自独立计数——这正是「按实体重置」。
    *
-   * <p>{@code consume=false} 时序号段只读不写：读出当前值 +1 就是要发的号，
-   * 桶还不存在就从 {@code sequence_start} 起算。{@code consume=true} 时走原子 upsert。
+   * <p>{@code consume=false} 时序号段只读不写：读出当前值 +1 就是要发的号， 桶还不存在就从 {@code sequence_start} 起算。{@code
+   * consume=true} 时走原子 upsert。
    *
    * <p>{@code path} 是当前递归栈，用于挡环。写入时已经用 {@link #descendsFrom} 查过可达图，
    * 这里再兜一层是防御：数据可以被直接改库，渲染不该因此变成死循环。
@@ -921,9 +915,7 @@ public class NumberRuleController {
                   segment.get("child_rule_id", UUID.class));
           // 见上：引用的子规则不存在属 404。
           // 404 而不是 400：引用的子规则被删掉了，与「法人不存在」同一口径。
-          if (child == null)
-            throw IdentityController.error(
-                HttpStatus.NOT_FOUND, "嵌套的子规则不存在或已被删除");
+          if (child == null) throw IdentityController.error(HttpStatus.NOT_FOUND, "嵌套的子规则不存在或已被删除");
           // 关键：**根实体从外层一路带下来**。子规则自己挂的 entity_code 只是它被复用时的
           // 标签，计数器永远算在**本次取号入口那条规则**的实体上——同一个子规则嵌到订单与
           // 采购两条规则下时，两个实体各有各的计数线，互不推进对方的序号。
@@ -976,15 +968,18 @@ public class NumberRuleController {
    * 取一个序号段的号。
    *
    * <p>消耗式取号走 {@code insert … on conflict … do update set current_value = current_value + 1
-   * returning current_value}：递增与读回在同一条语句里完成，并发请求不会拿到同一个号。
-   * 不消耗式（预览）只读当前值，桶不存在时从 {@code sequence_start} 起算。
+   * returning current_value}：递增与读回在同一条语句里完成，并发请求不会拿到同一个号。 不消耗式（预览）只读当前值，桶不存在时从 {@code
+   * sequence_start} 起算。
    */
   private Plan sequence(
-      UUID tenantId, String rootEntity, Record segment, UUID ruleId, LocalDate date, boolean consume) {
+      UUID tenantId,
+      String rootEntity,
+      Record segment,
+      UUID ruleId,
+      LocalDate date,
+      boolean consume) {
     String scope =
-        "RULE".equals(segment.get("sequence_scope", String.class))
-            ? "RULE:" + ruleId
-            : "ENTITY";
+        "RULE".equals(segment.get("sequence_scope", String.class)) ? "RULE:" + ruleId : "ENTITY";
     String reset = resetKey(segment.get("sequence_reset", String.class), date);
     long start = segment.get("sequence_start", Long.class);
 
@@ -1018,8 +1013,7 @@ public class NumberRuleController {
   /**
    * 重置分桶键。换一天 / 一月 / 一年就是一个新桶，序号自然重新开始。
    *
-   * <p>分桶用的是**业务日期**（请求里传的 documentDate）而不是 {@code now()}：
-   * 补录一张上周的订单时，它应当落进上周的桶里接着编号，而不是插到今天的序号中间。
+   * <p>分桶用的是**业务日期**（请求里传的 documentDate）而不是 {@code now()}： 补录一张上周的订单时，它应当落进上周的桶里接着编号，而不是插到今天的序号中间。
    */
   private static String resetKey(String scope, LocalDate date) {
     return switch (scope) {
@@ -1063,8 +1057,8 @@ public class NumberRuleController {
   /**
    * 两个生效区间是否交叠。
    *
-   * <p>半开区间语义：{@code effective_to = NULL} 表示长期有效，当作无穷远。
-   * 相邻（{@code a.to == b.from}）不算交叠——前一条到点失效、后一条接上生效是正常配置。
+   * <p>半开区间语义：{@code effective_to = NULL} 表示长期有效，当作无穷远。 相邻（{@code a.to ==
+   * b.from}）不算交叠——前一条到点失效、后一条接上生效是正常配置。
    */
   private static boolean overlaps(
       OffsetDateTime aFrom, OffsetDateTime aTo, OffsetDateTime bFrom, OffsetDateTime bTo) {
@@ -1078,9 +1072,8 @@ public class NumberRuleController {
   /**
    * 同实体生效区间交叠检查。命中即 409。
    *
-   * <p>只查 {@code PRIMARY} + {@code ACTIVE}：子规则不参与判定（它不直接给实体发号），
-   * 停用的规则也不参与（否则「停用一条又启用的规则」永远放行不了）。排除 {@code excludeId}
-   * 是为了更新自己时不把自己算成冲突。
+   * <p>只查 {@code PRIMARY} + {@code ACTIVE}：子规则不参与判定（它不直接给实体发号）， 停用的规则也不参与（否则「停用一条又启用的规则」永远放行不了）。排除
+   * {@code excludeId} 是为了更新自己时不把自己算成冲突。
    */
   private void overlaps(
       UUID tenantId, String entityCode, UUID excludeId, OffsetDateTime from, OffsetDateTime to) {
@@ -1093,7 +1086,10 @@ public class NumberRuleController {
                 ? new Object[] {tenantId, entityCode}
                 : new Object[] {tenantId, entityCode, excludeId});
     for (Record row : rows)
-      if (overlaps(from, to, row.get("effective_from", OffsetDateTime.class),
+      if (overlaps(
+          from,
+          to,
+          row.get("effective_from", OffsetDateTime.class),
           row.get("effective_to", OffsetDateTime.class)))
         reject(
             "规则「"
@@ -1114,8 +1110,7 @@ public class NumberRuleController {
   /**
    * {@code from} 向下可达的规则里有没有 {@code target}。
    *
-   * <p>用于写入时挡环：给规则挂一个子规则之前，先问"从这个子规则出发能不能绕回我自己"。
-   * 绕回来了就是环，渲染会无限递归。
+   * <p>用于写入时挡环：给规则挂一个子规则之前，先问"从这个子规则出发能不能绕回我自己"。 绕回来了就是环，渲染会无限递归。
    */
   private boolean descendsFrom(UUID tenantId, UUID from, UUID target) {
     return descendsFrom(tenantId, from, target, new HashSet<>(), 0);
@@ -1213,8 +1208,8 @@ public class NumberRuleController {
   /**
    * 段视图。
    *
-   * <p>{@code rendered} 来自同一次样例渲染的逐段明细：配置页靠它看清编号是怎么一段段拼出来的，
-   * 而不是只看到一个最终字符串。渲染失败时为 null（段确实存在但这次没算出来）。
+   * <p>{@code rendered} 来自同一次样例渲染的逐段明细：配置页靠它看清编号是怎么一段段拼出来的， 而不是只看到一个最终字符串。渲染失败时为
+   * null（段确实存在但这次没算出来）。
    */
   private static NumberRuleSegmentView toSegment(Record r, Map<UUID, String> rendered) {
     return new NumberRuleSegmentView(
@@ -1255,8 +1250,7 @@ public class NumberRuleController {
             tenantId,
             entityCode.trim());
     if (row == null)
-      throw IdentityController.error(
-          HttpStatus.NOT_FOUND, "实体 " + entityCode + " 当前没有生效中的主规则");
+      throw IdentityController.error(HttpStatus.NOT_FOUND, "实体 " + entityCode + " 当前没有生效中的主规则");
     return row;
   }
 
@@ -1264,8 +1258,10 @@ public class NumberRuleController {
   private void writeSegments(UUID tenantId, UUID ruleId, List<NumberRuleSegmentInput> segments) {
     // 先在应用层校验一遍形状与嵌套，报错比库 CHECK 抛出来的可读。
     for (NumberRuleSegmentInput segment : segments) validateSegment(tenantId, ruleId, segment);
-    sql.execute("delete from document_number_rule_segment where tenant_id=? and rule_id=?",
-        tenantId, ruleId);
+    sql.execute(
+        "delete from document_number_rule_segment where tenant_id=? and rule_id=?",
+        tenantId,
+        ruleId);
     for (int i = 0; i < segments.size(); i++) {
       var s = segments.get(i);
       sql.execute(
@@ -1307,9 +1303,7 @@ public class NumberRuleController {
       }
       case "SEQUENCE" -> {
         check(s.sequenceWidth() != null, "SEQUENCE 段必须设置序号宽度");
-        check(
-            s.sequenceWidth() >= 1 && s.sequenceWidth() <= 12,
-            "序号宽度必须在 1 到 12 之间");
+        check(s.sequenceWidth() >= 1 && s.sequenceWidth() <= 12, "序号宽度必须在 1 到 12 之间");
         check(s.sequenceStart() != null && s.sequenceStart() >= 0, "SEQUENCE 段必须设置起始序号");
         check(s.sequenceReset() != null, "SEQUENCE 段必须选择重置口径");
         check(s.sequenceScope() != null, "SEQUENCE 段必须选择计数作用域");
@@ -1324,14 +1318,11 @@ public class NumberRuleController {
                 s.childRuleId());
         // 跨租户的 id 与不存在的 id 在这里不可区分，返回 404 而不是 403（不泄露"存在"）。
         if (child == null)
-          throw IdentityController.error(
-              HttpStatus.NOT_FOUND, "要嵌套的子规则不存在或不属于当前租户");
+          throw IdentityController.error(HttpStatus.NOT_FOUND, "要嵌套的子规则不存在或不属于当前租户");
         check(
             "COMPONENT".equals(child.get("rule_kind", String.class)),
             "只能嵌套子规则（COMPONENT），不能嵌套另一条主规则");
-        check(
-            !descendsFrom(tenantId, s.childRuleId(), ruleId),
-            "嵌套会形成环：这条子规则已经能绕回当前规则");
+        check(!descendsFrom(tenantId, s.childRuleId(), ruleId), "嵌套会形成环：这条子规则已经能绕回当前规则");
       }
       default -> throw new IllegalStateException("未知段类型 " + s.segmentType());
     }
@@ -1348,10 +1339,12 @@ public class NumberRuleController {
   }
 
   /** 输入规范化：时区与生效时间的默认值在这里定，避免每个出口各写一份。 */
-  private record Normalized(String timezone, OffsetDateTime effectiveFrom, OffsetDateTime effectiveTo) {}
+  private record Normalized(
+      String timezone, OffsetDateTime effectiveFrom, OffsetDateTime effectiveTo) {}
 
   private Normalized normalize(NumberRuleInput input) {
-    var timezone = input.timezone() == null || input.timezone().isBlank() ? "UTC" : input.timezone().trim();
+    var timezone =
+        input.timezone() == null || input.timezone().isBlank() ? "UTC" : input.timezone().trim();
     check(zoneOf(timezone), "时区不合法：" + timezone);
     var from = input.effectiveFrom() == null ? utcNow() : input.effectiveFrom();
     return new Normalized(timezone, from, input.effectiveTo());
@@ -1395,7 +1388,8 @@ public class NumberRuleController {
   }
 
   private Map<String, Object> ruleSnapshot(UUID tenantId, UUID id) {
-    var row = sql.fetchOne("select * from document_number_rule where tenant_id=? and id=?", tenantId, id);
+    var row =
+        sql.fetchOne("select * from document_number_rule where tenant_id=? and id=?", tenantId, id);
     if (row == null) return null;
     var snap = new LinkedHashMap<String, Object>();
     snap.put("entityCode", row.get("entity_code", String.class));

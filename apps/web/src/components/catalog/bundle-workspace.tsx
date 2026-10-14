@@ -2,7 +2,17 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Badge, Button, EmptyState, SectionCard, StatCard } from '@starcon/ui';
-import { AlertTriangle, Boxes, Check, Clock, Layers, Loader2, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  Boxes,
+  Check,
+  Clock,
+  Layers,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Trash2,
+} from 'lucide-react';
 import type {
   BundleComponentRow,
   BundleDetail,
@@ -102,8 +112,14 @@ export function BundleWorkspace() {
   const [pageIndex, setPageIndex] = useState(0);
   const [probeAt, setProbeAt] = useState('');
 
-  const [bundleEditor, setBundleEditor] = useState<{ id: string | null; input: BundleInput } | null>(null);
-  const [versionEditor, setVersionEditor] = useState<{ bundleId: string; input: BundleVersionInput } | null>(null);
+  const [bundleEditor, setBundleEditor] = useState<{
+    id: string | null;
+    input: BundleInput;
+  } | null>(null);
+  const [versionEditor, setVersionEditor] = useState<{
+    bundleId: string;
+    input: BundleVersionInput;
+  } | null>(null);
   const [closing, setClosing] = useState<BundleVersionRow | null>(null);
   const [closeAt, setCloseAt] = useState('');
   const [componentDraft, setComponentDraft] = useState<{ skuId: string; quantity: string }[]>([]);
@@ -155,26 +171,37 @@ export function BundleWorkspace() {
     }
   }, []);
 
-  const openBundle = useCallback(async (id: string) => {
-    setActionError('');
-    setNotice('');
-    try {
-      const d = await fetchBundle(id);
-      setDetail(d);
-      const list = await fetchVersions({ keyword: null, status: null, bundleId: id, page: 0, size: 200 });
-      setVersions(list.items);
-      await probeEffective(id, '');
-    } catch (e) {
-      setActionError(errorText(e));
-    }
-  }, [probeEffective]);
+  const openBundle = useCallback(
+    async (id: string) => {
+      setActionError('');
+      setNotice('');
+      try {
+        const d = await fetchBundle(id);
+        setDetail(d);
+        const list = await fetchVersions({
+          keyword: null,
+          status: null,
+          bundleId: id,
+          page: 0,
+          size: 200,
+        });
+        setVersions(list.items);
+        await probeEffective(id, '');
+      } catch (e) {
+        setActionError(errorText(e));
+      }
+    },
+    [probeEffective],
+  );
 
   const openVersion = useCallback(async (id: string) => {
     setActionError('');
     try {
       const d = await fetchVersion(id);
       setVersionDetail(d);
-      setComponentDraft(d.components.map((c) => ({ skuId: c.skuId, quantity: String(c.quantity) })));
+      setComponentDraft(
+        d.components.map((c) => ({ skuId: c.skuId, quantity: String(c.quantity) })),
+      );
     } catch (e) {
       setActionError(errorText(e));
     }
@@ -201,11 +228,14 @@ export function BundleWorkspace() {
     }
     const id = bundleEditor.id;
     const input = bundleEditor.input;
-    await guard(async () => {
-      const saved = await saveBundle(id, input);
-      setBundleEditor(null);
-      if (!id) await openBundle(saved.id);
-    }, id ? '套装已更新（编码建后不可改）' : '套装已建');
+    await guard(
+      async () => {
+        const saved = await saveBundle(id, input);
+        setBundleEditor(null);
+        if (!id) await openBundle(saved.id);
+      },
+      id ? '套装已更新（编码建后不可改）' : '套装已建',
+    );
   }
 
   async function submitVersionEditor() {
@@ -226,12 +256,15 @@ export function BundleWorkspace() {
     };
     const editing = input.version > 0;
     const versionId = detail?.versions.find((v) => v.versionNo === input.versionNo)?.id;
-    await guard(async () => {
-      if (editing && versionId) await updateVersion(versionId, body);
-      else await createVersion(bundleId, body);
-      setVersionEditor(null);
-      await openBundle(bundleId);
-    }, editing ? '草稿版本已更新' : '草稿版本已建（发布后整版冻结）');
+    await guard(
+      async () => {
+        if (editing && versionId) await updateVersion(versionId, body);
+        else await createVersion(bundleId, body);
+        setVersionEditor(null);
+        await openBundle(bundleId);
+      },
+      editing ? '草稿版本已更新' : '草稿版本已建（发布后整版冻结）',
+    );
   }
 
   async function submitComponents() {
@@ -266,18 +299,21 @@ export function BundleWorkspace() {
       return;
     }
     const id = closing.id;
-    await guard(async () => {
-      await closeVersion(id, localInputToInstant(closeAt));
-      setClosing(null);
-      if (detail) await openBundle(detail.bundle.id);
-    }, `已提前停用本版：${localInputToInstant(closeAt)} 起由下一个版本接替`);
+    await guard(
+      async () => {
+        await closeVersion(id, localInputToInstant(closeAt));
+        setClosing(null);
+        if (detail) await openBundle(detail.bundle.id);
+      },
+      `已提前停用本版：${localInputToInstant(closeAt)} 起由下一个版本接替`,
+    );
   }
 
   const totals = overview;
 
   if (loading && !page) {
     return (
-      <div className="flex items-center gap-2 text-muted-foreground text-copy-13">
+      <div className="text-muted-foreground text-copy-13 flex items-center gap-2">
         <Loader2 className="size-4 animate-spin" />
         正在读取套装与版本…
       </div>
@@ -305,12 +341,14 @@ export function BundleWorkspace() {
   return (
     <div className="space-y-4">
       {actionError && (
-        <div className="border-destructive/40 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-copy-13">
+        <div className="border-destructive/40 bg-destructive/5 text-destructive text-copy-13 rounded-md border px-3 py-2">
           {actionError}
         </div>
       )}
       {notice && (
-        <div className="border-border bg-muted/40 rounded-md border px-3 py-2 text-copy-13">{notice}</div>
+        <div className="border-border bg-muted/40 text-copy-13 rounded-md border px-3 py-2">
+          {notice}
+        </div>
       )}
 
       {/* 概览：开放区间是这个模块唯一需要每天盯的数字 */}
@@ -338,13 +376,14 @@ export function BundleWorkspace() {
           />
         </div>
       )}
-      {totals && (
-        <p className="text-muted-foreground text-copy-13">{totals.note}</p>
-      )}
+      {totals && <p className="text-muted-foreground text-copy-13">{totals.note}</p>}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         {/* ------------------------------------------------ 套装列表 */}
-        <SectionCard title="套装" description="虚拟组合（多个 SKU 按数量捆绑销售）· 不持有独立库存，扣的是组件库存">
+        <SectionCard
+          title="套装"
+          description="虚拟组合（多个 SKU 按数量捆绑销售）· 不持有独立库存，扣的是组件库存"
+        >
           <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
               <input
@@ -407,8 +446,12 @@ export function BundleWorkspace() {
             )}
 
             {page && page.totalPages > 1 && (
-              <div className="text-muted-foreground flex items-center justify-end gap-2 text-copy-12">
-                <Button disabled={pageIndex === 0} onClick={() => setPageIndex((p) => p - 1)} size="sm">
+              <div className="text-muted-foreground text-copy-12 flex items-center justify-end gap-2">
+                <Button
+                  disabled={pageIndex === 0}
+                  onClick={() => setPageIndex((p) => p - 1)}
+                  size="sm"
+                >
                   上一页
                 </Button>
                 <span>
@@ -463,7 +506,11 @@ export function BundleWorkspace() {
                     onClick={() =>
                       setBundleEditor({
                         id: detail.bundle.id,
-                        input: { code: detail.bundle.code, note: detail.bundle.note, version: detail.bundle.version },
+                        input: {
+                          code: detail.bundle.code,
+                          note: detail.bundle.note,
+                          version: detail.bundle.version,
+                        },
                       })
                     }
                   >
@@ -482,7 +529,9 @@ export function BundleWorkspace() {
                           ).then(async () => {
                             await openBundle(detail.bundle.id);
                           }),
-                        detail.bundle.status === 'ACTIVE' ? '套装已归档（历史版本照常可读）' : '套装已启用',
+                        detail.bundle.status === 'ACTIVE'
+                          ? '套装已归档（历史版本照常可读）'
+                          : '套装已启用',
                       )
                     }
                   >
@@ -493,15 +542,12 @@ export function BundleWorkspace() {
                   <Button
                     variant="ghost"
                     onClick={() =>
-                      void guard(
-                        async () => {
-                          await deleteBundle(detail.bundle.id, detail.bundle.version);
-                          setDetail(null);
-                          setEffective(null);
-                          setVersions([]);
-                        },
-                        '套装已删除',
-                      )
+                      void guard(async () => {
+                        await deleteBundle(detail.bundle.id, detail.bundle.version);
+                        setDetail(null);
+                        setEffective(null);
+                        setVersions([]);
+                      }, '套装已删除')
                     }
                   >
                     <Trash2 className="mr-2 size-4" />
@@ -526,7 +572,8 @@ export function BundleWorkspace() {
                         <span className="font-medium">{effective.name}</span>
                       </div>
                       <div className="text-muted-foreground text-copy-12">
-                        在 {effective.at} 这一刻生效 · {componentSummary(effective.components, null)}
+                        在 {effective.at} 这一刻生效 ·{' '}
+                        {componentSummary(effective.components, null)}
                       </div>
                       <ul className="text-muted-foreground text-copy-12 space-y-0.5">
                         {effective.components.map((c) => (
@@ -555,7 +602,9 @@ export function BundleWorkspace() {
                   </Field>
                   <Button
                     size="sm"
-                    onClick={() => void probeEffective(detail.bundle.id, localInputToInstant(probeAt))}
+                    onClick={() =>
+                      void probeEffective(detail.bundle.id, localInputToInstant(probeAt))
+                    }
                   >
                     <Clock className="mr-2 size-4" />
                     查询
@@ -584,10 +633,16 @@ export function BundleWorkspace() {
                         </div>
                         <div className="text-muted-foreground text-copy-12">
                           {rangeText(v.effectiveFrom, v.effectiveTo)} · {v.componentCount} 个组件
-                          {v.publishedAt ? ` · ${statusLabel(v.status)}于 ${v.publishedAt.slice(0, 10)}` : ''}
+                          {v.publishedAt
+                            ? ` · ${statusLabel(v.status)}于 ${v.publishedAt.slice(0, 10)}`
+                            : ''}
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          <Button size="sm" variant="secondary" onClick={() => void openVersion(v.id)}>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => void openVersion(v.id)}
+                          >
                             组件清单
                           </Button>
                           {canEditVersion(v) && writable && (
@@ -595,7 +650,10 @@ export function BundleWorkspace() {
                               <Button
                                 size="sm"
                                 onClick={() =>
-                                  setVersionEditor({ bundleId: v.bundleId, input: toVersionInput(v) })
+                                  setVersionEditor({
+                                    bundleId: v.bundleId,
+                                    input: toVersionInput(v),
+                                  })
                                 }
                               >
                                 编辑
@@ -603,7 +661,10 @@ export function BundleWorkspace() {
                               <Button
                                 size="sm"
                                 onClick={() =>
-                                  void guard(() => publishVersion(v.id).then(() => openBundle(v.bundleId)), '已发布：这一版的内容从此冻结')
+                                  void guard(
+                                    () => publishVersion(v.id).then(() => openBundle(v.bundleId)),
+                                    '已发布：这一版的内容从此冻结',
+                                  )
                                 }
                               >
                                 <Check className="mr-2 size-4" />
@@ -615,7 +676,9 @@ export function BundleWorkspace() {
                                 onClick={() =>
                                   void guard(
                                     () =>
-                                      deleteVersion(v.id, v.version).then(() => openBundle(v.bundleId)),
+                                      deleteVersion(v.id, v.version).then(() =>
+                                        openBundle(v.bundleId),
+                                      ),
                                     '草稿版本已删除',
                                   )
                                 }
@@ -684,14 +747,18 @@ export function BundleWorkspace() {
                         value={c.quantity}
                         onChange={(e) =>
                           setComponentDraft((rows) =>
-                            rows.map((r, i) => (i === index ? { ...r, quantity: e.target.value } : r)),
+                            rows.map((r, i) =>
+                              i === index ? { ...r, quantity: e.target.value } : r,
+                            ),
                           )
                         }
                       />
                     </Field>
                     <Button
                       variant="ghost"
-                      onClick={() => setComponentDraft((rows) => rows.filter((_, i) => i !== index))}
+                      onClick={() =>
+                        setComponentDraft((rows) => rows.filter((_, i) => i !== index))
+                      }
                     >
                       移除
                     </Button>
@@ -701,7 +768,9 @@ export function BundleWorkspace() {
                   <Button
                     variant="secondary"
                     disabled={componentDraft.length >= MAX_COMPONENTS_PER_VERSION}
-                    onClick={() => setComponentDraft((rows) => [...rows, { skuId: '', quantity: '1' }])}
+                    onClick={() =>
+                      setComponentDraft((rows) => [...rows, { skuId: '', quantity: '1' }])
+                    }
                   >
                     <Plus className="mr-2 size-4" />
                     添加组件
@@ -712,8 +781,8 @@ export function BundleWorkspace() {
                   </Button>
                 </div>
                 <p className="text-muted-foreground text-copy-12">
-                  整体替换而不是增删式：保存后清单就是提交的那份，不会剩一条「幽灵组件」。
-                  同一个 SKU 只能出现一次，数量必须大于 0。
+                  整体替换而不是增删式：保存后清单就是提交的那份，不会剩一条「幽灵组件」。 同一个
+                  SKU 只能出现一次，数量必须大于 0。
                 </p>
               </>
             ) : (
@@ -747,7 +816,9 @@ export function BundleWorkspace() {
                 disabled={Boolean(bundleEditor.id)}
                 value={bundleEditor.input.code}
                 onChange={(e) =>
-                  setBundleEditor((s) => (s ? { ...s, input: { ...s.input, code: e.target.value } } : s))
+                  setBundleEditor((s) =>
+                    s ? { ...s, input: { ...s.input, code: e.target.value } } : s,
+                  )
                 }
               />
             </Field>
@@ -757,7 +828,9 @@ export function BundleWorkspace() {
                 rows={3}
                 value={bundleEditor.input.note ?? ''}
                 onChange={(e) =>
-                  setBundleEditor((s) => (s ? { ...s, input: { ...s.input, note: e.target.value } } : s))
+                  setBundleEditor((s) =>
+                    s ? { ...s, input: { ...s.input, note: e.target.value } } : s,
+                  )
                 }
               />
             </Field>
@@ -778,7 +851,9 @@ export function BundleWorkspace() {
                 className={control}
                 value={versionEditor.input.versionNo}
                 onChange={(e) =>
-                  setVersionEditor((s) => (s ? { ...s, input: { ...s.input, versionNo: e.target.value } } : s))
+                  setVersionEditor((s) =>
+                    s ? { ...s, input: { ...s.input, versionNo: e.target.value } } : s,
+                  )
                 }
               />
             </Field>
@@ -787,7 +862,9 @@ export function BundleWorkspace() {
                 className={control}
                 value={versionEditor.input.name}
                 onChange={(e) =>
-                  setVersionEditor((s) => (s ? { ...s, input: { ...s.input, name: e.target.value } } : s))
+                  setVersionEditor((s) =>
+                    s ? { ...s, input: { ...s.input, name: e.target.value } } : s,
+                  )
                 }
               />
             </Field>
@@ -821,7 +898,9 @@ export function BundleWorkspace() {
                 rows={2}
                 value={versionEditor.input.note ?? ''}
                 onChange={(e) =>
-                  setVersionEditor((s) => (s ? { ...s, input: { ...s.input, note: e.target.value } } : s))
+                  setVersionEditor((s) =>
+                    s ? { ...s, input: { ...s.input, note: e.target.value } } : s,
+                  )
                 }
               />
             </Field>

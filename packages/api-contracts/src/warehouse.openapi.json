@@ -16,7 +16,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "updateThreshold",
+        "operationId": "put_warehouse_transit_trackings_thresholds_thresholdId",
         "parameters": [
           {
             "name": "Authorization",
@@ -66,7 +66,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "detail",
+        "operationId": "get_warehouse_trade_documents_setId",
         "parameters": [
           {
             "name": "Authorization",
@@ -104,7 +104,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "update",
+        "operationId": "put_warehouse_trade_documents_setId",
         "parameters": [
           {
             "name": "Authorization",
@@ -154,7 +154,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "updateTemplate",
+        "operationId": "put_warehouse_trade_documents_templates_templateId",
         "parameters": [
           {
             "name": "Authorization",
@@ -204,7 +204,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "updateRule",
+        "operationId": "put_warehouse_trade_documents_rules_ruleId",
         "parameters": [
           {
             "name": "Authorization",
@@ -254,7 +254,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "updatePreferenceRule",
+        "operationId": "put_warehouse_trade_documents_preference_rules_ruleId",
         "parameters": [
           {
             "name": "Authorization",
@@ -304,7 +304,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "updateCertification",
+        "operationId": "put_warehouse_trade_documents_certifications_certificationId",
         "parameters": [
           {
             "name": "Authorization",
@@ -354,7 +354,7 @@
         "tags": [
           "warehouse-location-tree-controller"
         ],
-        "operationId": "update_1",
+        "operationId": "put_warehouse_location_trees_warehouseId_locations_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -411,7 +411,7 @@
         "tags": [
           "warehouse-location-tree-controller"
         ],
-        "operationId": "delete",
+        "operationId": "delete_warehouse_location_trees_warehouseId_locations_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -453,7 +453,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "detail_1",
+        "operationId": "get_warehouse_inventory_transfers_orderId",
         "parameters": [
           {
             "name": "Authorization",
@@ -491,7 +491,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "update_2",
+        "operationId": "put_warehouse_inventory_transfers_orderId",
         "parameters": [
           {
             "name": "Authorization",
@@ -541,7 +541,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "serial",
+        "operationId": "get_warehouse_inventory_serials_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -579,7 +579,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "update_3",
+        "operationId": "put_warehouse_inventory_serials_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -627,7 +627,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "delete_1",
+        "operationId": "delete_warehouse_inventory_serials_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -660,7 +660,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "template",
+        "operationId": "get_warehouse_inventory_printing_templates_templateId",
         "parameters": [
           {
             "name": "Authorization",
@@ -698,7 +698,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "updateTemplate_1",
+        "operationId": "put_warehouse_inventory_printing_templates_templateId",
         "parameters": [
           {
             "name": "Authorization",
@@ -748,7 +748,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "updateDevice",
+        "operationId": "put_warehouse_inventory_printing_devices_deviceId",
         "parameters": [
           {
             "name": "Authorization",
@@ -798,7 +798,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "updatePolicy",
+        "operationId": "put_warehouse_inventory_policies_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -846,7 +846,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "deletePolicy",
+        "operationId": "delete_warehouse_inventory_policies_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -879,7 +879,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "owner",
+        "operationId": "get_warehouse_inventory_ownership_owners_ownerId",
         "parameters": [
           {
             "name": "Authorization",
@@ -917,7 +917,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "updateOwner",
+        "operationId": "put_warehouse_inventory_ownership_owners_ownerId",
         "parameters": [
           {
             "name": "Authorization",
@@ -967,7 +967,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "archive",
+        "operationId": "get_warehouse_inventory_lots_lotId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1005,7 +1005,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "update_4",
+        "operationId": "put_warehouse_inventory_lots_lotId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1055,7 +1055,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "detail_2",
+        "operationId": "get_warehouse_inventory_cross_entity_transfers_transferId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1093,7 +1093,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "update_5",
+        "operationId": "put_warehouse_inventory_cross_entity_transfers_transferId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1143,7 +1143,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "detail_3",
+        "operationId": "get_warehouse_goods_receipts_receiptId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1181,7 +1181,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "update_6",
+        "operationId": "put_warehouse_goods_receipts_receiptId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1231,7 +1231,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "detail_4",
+        "operationId": "get_warehouse_first_mile_shipments_shipmentId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1269,7 +1269,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "update_7",
+        "operationId": "put_warehouse_first_mile_shipments_shipmentId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1319,7 +1319,7 @@
         "tags": [
           "warehouse-detail-controller"
         ],
-        "operationId": "detail_5",
+        "operationId": "get_warehouse_facilities_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1357,7 +1357,7 @@
         "tags": [
           "warehouse-detail-controller"
         ],
-        "operationId": "update_8",
+        "operationId": "put_warehouse_facilities_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -1407,7 +1407,7 @@
         "tags": [
           "warehouse-config-controller"
         ],
-        "operationId": "overview",
+        "operationId": "get_warehouse_facilities_id_config",
         "parameters": [
           {
             "name": "Authorization",
@@ -1482,7 +1482,7 @@
         "tags": [
           "warehouse-config-controller"
         ],
-        "operationId": "update_9",
+        "operationId": "put_warehouse_facilities_id_config",
         "parameters": [
           {
             "name": "Authorization",
@@ -1532,7 +1532,7 @@
         "tags": [
           "warehouse-config-controller"
         ],
-        "operationId": "updateShift",
+        "operationId": "put_warehouse_facilities_id_config_shifts_shiftId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1591,7 +1591,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "detail_6",
+        "operationId": "get_warehouse_duty_taxes_estimateId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1629,7 +1629,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "update_10",
+        "operationId": "put_warehouse_duty_taxes_estimateId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1679,7 +1679,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "updateRate",
+        "operationId": "put_warehouse_duty_taxes_rates_rateId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1729,7 +1729,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "detail_7",
+        "operationId": "get_warehouse_customs_declarations_declarationId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1767,7 +1767,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "update_11",
+        "operationId": "put_warehouse_customs_declarations_declarationId",
         "parameters": [
           {
             "name": "Authorization",
@@ -1817,7 +1817,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "page",
+        "operationId": "get_warehouse_transit_trackings",
         "parameters": [
           {
             "name": "Authorization",
@@ -1968,7 +1968,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "create",
+        "operationId": "post_warehouse_transit_trackings",
         "parameters": [
           {
             "name": "Authorization",
@@ -2009,7 +2009,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "confirmReceipt",
+        "operationId": "post_warehouse_transit_trackings_trackingId_receipt",
         "parameters": [
           {
             "name": "Authorization",
@@ -2059,7 +2059,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "recordEvent",
+        "operationId": "post_warehouse_transit_trackings_trackingId_events",
         "parameters": [
           {
             "name": "Authorization",
@@ -2109,7 +2109,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "close",
+        "operationId": "post_warehouse_transit_trackings_trackingId_close",
         "parameters": [
           {
             "name": "Authorization",
@@ -2159,7 +2159,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "evaluateOne",
+        "operationId": "post_warehouse_transit_trackings_trackingId_alerts_evaluate",
         "parameters": [
           {
             "name": "Authorization",
@@ -2202,7 +2202,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "closeAlert",
+        "operationId": "post_warehouse_transit_trackings_alerts_alertId_close",
         "parameters": [
           {
             "name": "Authorization",
@@ -2252,7 +2252,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "acknowledge",
+        "operationId": "post_warehouse_transit_trackings_alerts_alertId_acknowledge",
         "parameters": [
           {
             "name": "Authorization",
@@ -2302,7 +2302,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "evaluateAll",
+        "operationId": "post_warehouse_transit_trackings_alerts_evaluate_all",
         "parameters": [
           {
             "name": "Authorization",
@@ -2336,7 +2336,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "page_1",
+        "operationId": "get_warehouse_trade_documents",
         "parameters": [
           {
             "name": "Authorization",
@@ -2445,7 +2445,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "create_1",
+        "operationId": "post_warehouse_trade_documents",
         "parameters": [
           {
             "name": "Authorization",
@@ -2486,7 +2486,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "withdrawReview",
+        "operationId": "post_warehouse_trade_documents_setId_withdraw_review",
         "parameters": [
           {
             "name": "Authorization",
@@ -2536,7 +2536,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "submit",
+        "operationId": "post_warehouse_trade_documents_setId_submit",
         "parameters": [
           {
             "name": "Authorization",
@@ -2586,7 +2586,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "submitForReview",
+        "operationId": "post_warehouse_trade_documents_setId_submit_for_review",
         "parameters": [
           {
             "name": "Authorization",
@@ -2636,7 +2636,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "sendBack",
+        "operationId": "post_warehouse_trade_documents_setId_send_back",
         "parameters": [
           {
             "name": "Authorization",
@@ -2686,7 +2686,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "review",
+        "operationId": "post_warehouse_trade_documents_setId_review",
         "parameters": [
           {
             "name": "Authorization",
@@ -2736,7 +2736,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "rejectReview",
+        "operationId": "post_warehouse_trade_documents_setId_reject_review",
         "parameters": [
           {
             "name": "Authorization",
@@ -2786,7 +2786,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "documents",
+        "operationId": "get_warehouse_trade_documents_setId_documents",
         "parameters": [
           {
             "name": "Authorization",
@@ -2827,7 +2827,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "generateDocument",
+        "operationId": "post_warehouse_trade_documents_setId_documents",
         "parameters": [
           {
             "name": "Authorization",
@@ -2877,7 +2877,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "confirmPreference",
+        "operationId": "post_warehouse_trade_documents_setId_documents_documentId_preference_confirm",
         "parameters": [
           {
             "name": "Authorization",
@@ -2936,7 +2936,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "claimPreference",
+        "operationId": "post_warehouse_trade_documents_setId_documents_documentId_preference_claim",
         "parameters": [
           {
             "name": "Authorization",
@@ -2995,7 +2995,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "finalizeDocument",
+        "operationId": "post_warehouse_trade_documents_setId_documents_documentId_finalize",
         "parameters": [
           {
             "name": "Authorization",
@@ -3054,7 +3054,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "runCheck",
+        "operationId": "post_warehouse_trade_documents_setId_check",
         "parameters": [
           {
             "name": "Authorization",
@@ -3094,7 +3094,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "cancel",
+        "operationId": "post_warehouse_trade_documents_setId_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -3144,7 +3144,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "acknowledge_1",
+        "operationId": "post_warehouse_trade_documents_setId_acknowledge",
         "parameters": [
           {
             "name": "Authorization",
@@ -3194,7 +3194,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "templates",
+        "operationId": "get_warehouse_trade_documents_templates",
         "parameters": [
           {
             "name": "Authorization",
@@ -3283,7 +3283,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "createTemplate",
+        "operationId": "post_warehouse_trade_documents_templates",
         "parameters": [
           {
             "name": "Authorization",
@@ -3324,7 +3324,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "rules",
+        "operationId": "get_warehouse_trade_documents_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -3421,7 +3421,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "createRule",
+        "operationId": "post_warehouse_trade_documents_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -3462,7 +3462,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "resolveReminder",
+        "operationId": "post_warehouse_trade_documents_reminders_reminderId_resolve",
         "parameters": [
           {
             "name": "Authorization",
@@ -3512,7 +3512,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "preferenceRules",
+        "operationId": "get_warehouse_trade_documents_preference_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -3593,7 +3593,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "createPreferenceRule",
+        "operationId": "post_warehouse_trade_documents_preference_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -3634,7 +3634,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "certifications",
+        "operationId": "get_warehouse_trade_documents_certifications",
         "parameters": [
           {
             "name": "Authorization",
@@ -3724,7 +3724,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "createCertification",
+        "operationId": "post_warehouse_trade_documents_certifications",
         "parameters": [
           {
             "name": "Authorization",
@@ -3765,7 +3765,7 @@
         "tags": [
           "shipment-handover-controller"
         ],
-        "operationId": "page_2",
+        "operationId": "get_warehouse_shipment_handovers",
         "parameters": [
           {
             "name": "Authorization",
@@ -3883,7 +3883,7 @@
         "tags": [
           "shipment-handover-controller"
         ],
-        "operationId": "open",
+        "operationId": "post_warehouse_shipment_handovers",
         "parameters": [
           {
             "name": "Authorization",
@@ -3924,7 +3924,7 @@
         "tags": [
           "shipment-handover-controller"
         ],
-        "operationId": "registerWaybills",
+        "operationId": "post_warehouse_shipment_handovers_id_waybills",
         "parameters": [
           {
             "name": "Authorization",
@@ -3973,7 +3973,7 @@
         "tags": [
           "shipment-handover-controller"
         ],
-        "operationId": "confirm",
+        "operationId": "post_warehouse_shipment_handovers_id_confirm",
         "parameters": [
           {
             "name": "Authorization",
@@ -4021,7 +4021,7 @@
         "tags": [
           "shipment-handover-controller"
         ],
-        "operationId": "cancel_1",
+        "operationId": "post_warehouse_shipment_handovers_id_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -4070,7 +4070,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "page_3",
+        "operationId": "get_warehouse_recount_scans",
         "parameters": [
           {
             "name": "Authorization",
@@ -4189,7 +4189,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "open_1",
+        "operationId": "post_warehouse_recount_scans",
         "parameters": [
           {
             "name": "Authorization",
@@ -4230,7 +4230,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "settle",
+        "operationId": "post_warehouse_recount_scans_id_settle",
         "parameters": [
           {
             "name": "Authorization",
@@ -4269,7 +4269,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "scan",
+        "operationId": "post_warehouse_recount_scans_id_scans",
         "parameters": [
           {
             "name": "Authorization",
@@ -4318,7 +4318,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "openBox",
+        "operationId": "post_warehouse_recount_scans_id_open_box",
         "parameters": [
           {
             "name": "Authorization",
@@ -4367,7 +4367,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "resolveException",
+        "operationId": "post_warehouse_recount_scans_id_exceptions_exceptionId_resolve",
         "parameters": [
           {
             "name": "Authorization",
@@ -4424,7 +4424,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "escalate",
+        "operationId": "post_warehouse_recount_scans_id_escalate",
         "parameters": [
           {
             "name": "Authorization",
@@ -4473,7 +4473,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "complete",
+        "operationId": "post_warehouse_recount_scans_id_complete",
         "parameters": [
           {
             "name": "Authorization",
@@ -4512,7 +4512,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "cancel_2",
+        "operationId": "post_warehouse_recount_scans_id_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -4561,7 +4561,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "rules_1",
+        "operationId": "get_warehouse_recount_scans_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -4635,7 +4635,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "createRule_1",
+        "operationId": "post_warehouse_recount_scans_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -4676,7 +4676,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "retireRule",
+        "operationId": "post_warehouse_recount_scans_rules_id_retire",
         "parameters": [
           {
             "name": "Authorization",
@@ -4725,7 +4725,7 @@
         "tags": [
           "putaway-task-controller"
         ],
-        "operationId": "page_4",
+        "operationId": "get_warehouse_putaway_tasks",
         "parameters": [
           {
             "name": "Authorization",
@@ -4835,7 +4835,7 @@
         "tags": [
           "putaway-task-controller"
         ],
-        "operationId": "create_2",
+        "operationId": "post_warehouse_putaway_tasks",
         "parameters": [
           {
             "name": "Authorization",
@@ -4876,7 +4876,7 @@
         "tags": [
           "putaway-task-controller"
         ],
-        "operationId": "start",
+        "operationId": "post_warehouse_putaway_tasks_id_start",
         "parameters": [
           {
             "name": "Authorization",
@@ -4925,7 +4925,7 @@
         "tags": [
           "putaway-task-controller"
         ],
-        "operationId": "scan_1",
+        "operationId": "post_warehouse_putaway_tasks_id_scan",
         "parameters": [
           {
             "name": "Authorization",
@@ -4975,7 +4975,7 @@
         "tags": [
           "putaway-task-controller"
         ],
-        "operationId": "complete_1",
+        "operationId": "post_warehouse_putaway_tasks_id_complete",
         "parameters": [
           {
             "name": "Authorization",
@@ -5024,7 +5024,7 @@
         "tags": [
           "putaway-task-controller"
         ],
-        "operationId": "cancel_3",
+        "operationId": "post_warehouse_putaway_tasks_id_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -5074,7 +5074,7 @@
         "tags": [
           "putaway-task-controller"
         ],
-        "operationId": "assign",
+        "operationId": "post_warehouse_putaway_tasks_id_assign",
         "parameters": [
           {
             "name": "Authorization",
@@ -5124,7 +5124,7 @@
         "tags": [
           "processing-order-controller"
         ],
-        "operationId": "issue",
+        "operationId": "post_warehouse_processing_orders_issues",
         "parameters": [
           {
             "name": "Authorization",
@@ -5165,7 +5165,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "page_5",
+        "operationId": "get_warehouse_pick_waves",
         "parameters": [
           {
             "name": "Authorization",
@@ -5264,7 +5264,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "create_3",
+        "operationId": "post_warehouse_pick_waves",
         "parameters": [
           {
             "name": "Authorization",
@@ -5305,7 +5305,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "detach",
+        "operationId": "post_warehouse_pick_waves_waveId_tasks_pickTaskId_detach",
         "parameters": [
           {
             "name": "Authorization",
@@ -5354,7 +5354,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "release",
+        "operationId": "post_warehouse_pick_waves_waveId_release",
         "parameters": [
           {
             "name": "Authorization",
@@ -5404,7 +5404,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "complete_2",
+        "operationId": "post_warehouse_pick_waves_waveId_complete",
         "parameters": [
           {
             "name": "Authorization",
@@ -5453,7 +5453,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "cancel_4",
+        "operationId": "post_warehouse_pick_waves_waveId_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -5503,7 +5503,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "rules_2",
+        "operationId": "get_warehouse_pick_waves_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -5541,7 +5541,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "createRule_2",
+        "operationId": "post_warehouse_pick_waves_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -5582,7 +5582,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "retireRule_1",
+        "operationId": "post_warehouse_pick_waves_rules_ruleId_retire",
         "parameters": [
           {
             "name": "Authorization",
@@ -5632,7 +5632,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "page_4",
+        "operationId": "get_warehouse_pick_tasks",
         "parameters": [
           {
             "name": "Authorization",
@@ -5724,7 +5724,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "generate",
+        "operationId": "post_warehouse_pick_tasks",
         "parameters": [
           {
             "name": "Authorization",
@@ -5765,7 +5765,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "reopen",
+        "operationId": "post_warehouse_pick_tasks_id_reopen",
         "parameters": [
           {
             "name": "Authorization",
@@ -5815,7 +5815,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "recordPick",
+        "operationId": "post_warehouse_pick_tasks_id_picks",
         "parameters": [
           {
             "name": "Authorization",
@@ -5865,7 +5865,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "reportException",
+        "operationId": "post_warehouse_pick_tasks_id_exceptions",
         "parameters": [
           {
             "name": "Authorization",
@@ -5915,7 +5915,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "resolveException_1",
+        "operationId": "post_warehouse_pick_tasks_id_exceptions_exceptionId_resolve",
         "parameters": [
           {
             "name": "Authorization",
@@ -5974,7 +5974,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "complete_2",
+        "operationId": "post_warehouse_pick_tasks_id_complete",
         "parameters": [
           {
             "name": "Authorization",
@@ -6014,7 +6014,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "cancel_3",
+        "operationId": "post_warehouse_pick_tasks_id_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -6064,7 +6064,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "assign_1",
+        "operationId": "post_warehouse_pick_tasks_id_assign",
         "parameters": [
           {
             "name": "Authorization",
@@ -6114,7 +6114,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "page_7",
+        "operationId": "get_warehouse_packing_orders",
         "parameters": [
           {
             "name": "Authorization",
@@ -6224,7 +6224,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "open_2",
+        "operationId": "post_warehouse_packing_orders",
         "parameters": [
           {
             "name": "Authorization",
@@ -6265,7 +6265,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "addParcel",
+        "operationId": "post_warehouse_packing_orders_id_parcels",
         "parameters": [
           {
             "name": "Authorization",
@@ -6314,7 +6314,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "measure",
+        "operationId": "post_warehouse_packing_orders_id_parcels_parcelId_measure",
         "parameters": [
           {
             "name": "Authorization",
@@ -6371,7 +6371,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "recordLabel",
+        "operationId": "post_warehouse_packing_orders_id_parcels_parcelId_label",
         "parameters": [
           {
             "name": "Authorization",
@@ -6428,7 +6428,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "addItem",
+        "operationId": "post_warehouse_packing_orders_id_parcels_parcelId_items",
         "parameters": [
           {
             "name": "Authorization",
@@ -6485,7 +6485,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "fail",
+        "operationId": "post_warehouse_packing_orders_id_fail",
         "parameters": [
           {
             "name": "Authorization",
@@ -6534,7 +6534,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "complete_4",
+        "operationId": "post_warehouse_packing_orders_id_complete",
         "parameters": [
           {
             "name": "Authorization",
@@ -6582,7 +6582,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "cancel_6",
+        "operationId": "post_warehouse_packing_orders_id_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -6631,7 +6631,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "materials",
+        "operationId": "get_warehouse_packing_orders_materials",
         "parameters": [
           {
             "name": "Authorization",
@@ -6721,7 +6721,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "createMaterial",
+        "operationId": "post_warehouse_packing_orders_materials",
         "parameters": [
           {
             "name": "Authorization",
@@ -6762,7 +6762,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "retireMaterial",
+        "operationId": "post_warehouse_packing_orders_materials_id_retire",
         "parameters": [
           {
             "name": "Authorization",
@@ -6811,7 +6811,7 @@
         "tags": [
           "warehouse-location-tree-controller"
         ],
-        "operationId": "create_4",
+        "operationId": "post_warehouse_location_trees_warehouseId_locations",
         "parameters": [
           {
             "name": "Authorization",
@@ -6861,7 +6861,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "confirm_1",
+        "operationId": "post_warehouse_location_allocations",
         "parameters": [
           {
             "name": "Authorization",
@@ -6902,7 +6902,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "release_1",
+        "operationId": "post_warehouse_location_allocations_allocationId_release",
         "parameters": [
           {
             "name": "Authorization",
@@ -6942,7 +6942,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "recommend",
+        "operationId": "post_warehouse_location_allocations_recommend",
         "parameters": [
           {
             "name": "Authorization",
@@ -6986,7 +6986,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "tasks",
+        "operationId": "get_warehouse_labor_work_tasks",
         "parameters": [
           {
             "name": "Authorization",
@@ -7077,7 +7077,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "post_warehouse_labor_work_tasks",
         "parameters": [
           {
             "name": "Authorization",
@@ -7118,7 +7118,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "start_1",
+        "operationId": "post_warehouse_labor_work_tasks_taskId_start",
         "parameters": [
           {
             "name": "Authorization",
@@ -7167,7 +7167,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "reportException_1",
+        "operationId": "post_warehouse_labor_work_tasks_taskId_exception",
         "parameters": [
           {
             "name": "Authorization",
@@ -7217,7 +7217,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "complete_3",
+        "operationId": "post_warehouse_labor_work_tasks_taskId_complete",
         "parameters": [
           {
             "name": "Authorization",
@@ -7267,7 +7267,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "assign_2",
+        "operationId": "post_warehouse_labor_work_tasks_taskId_assign",
         "parameters": [
           {
             "name": "Authorization",
@@ -7317,7 +7317,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "confirmSettlement",
+        "operationId": "post_warehouse_inventory_vmi_settlements_settlementId_confirm",
         "parameters": [
           {
             "name": "Authorization",
@@ -7366,7 +7366,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "fulfil",
+        "operationId": "post_warehouse_inventory_vmi_replenishment_signals_signalId_fulfil",
         "parameters": [
           {
             "name": "Authorization",
@@ -7416,7 +7416,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "dispatch",
+        "operationId": "post_warehouse_inventory_vmi_replenishment_signals_signalId_dispatch",
         "parameters": [
           {
             "name": "Authorization",
@@ -7465,7 +7465,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "cancel_4",
+        "operationId": "post_warehouse_inventory_vmi_replenishment_signals_signalId_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -7514,7 +7514,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "acknowledge_2",
+        "operationId": "post_warehouse_inventory_vmi_replenishment_signals_signalId_acknowledge",
         "parameters": [
           {
             "name": "Authorization",
@@ -7563,7 +7563,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "list",
+        "operationId": "get_warehouse_inventory_vmi_agreements",
         "parameters": [
           {
             "name": "Authorization",
@@ -7636,7 +7636,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "post_warehouse_inventory_vmi_agreements",
         "parameters": [
           {
             "name": "Authorization",
@@ -7677,7 +7677,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "suspend",
+        "operationId": "post_warehouse_inventory_vmi_agreements_agreementId_suspend",
         "parameters": [
           {
             "name": "Authorization",
@@ -7726,7 +7726,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "snapshots",
+        "operationId": "get_warehouse_inventory_vmi_agreements_agreementId_snapshots",
         "parameters": [
           {
             "name": "Authorization",
@@ -7793,7 +7793,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "recordSnapshot",
+        "operationId": "post_warehouse_inventory_vmi_agreements_agreementId_snapshots",
         "parameters": [
           {
             "name": "Authorization",
@@ -7843,7 +7843,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "createSettlement",
+        "operationId": "post_warehouse_inventory_vmi_agreements_agreementId_settlements",
         "parameters": [
           {
             "name": "Authorization",
@@ -7893,7 +7893,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "generateSignals",
+        "operationId": "post_warehouse_inventory_vmi_agreements_agreementId_replenishment_signals",
         "parameters": [
           {
             "name": "Authorization",
@@ -7942,7 +7942,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "addLine",
+        "operationId": "post_warehouse_inventory_vmi_agreements_agreementId_lines",
         "parameters": [
           {
             "name": "Authorization",
@@ -7992,7 +7992,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "recordSale",
+        "operationId": "post_warehouse_inventory_vmi_agreements_agreementId_lines_lineId_sales",
         "parameters": [
           {
             "name": "Authorization",
@@ -8051,7 +8051,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "close_1",
+        "operationId": "post_warehouse_inventory_vmi_agreements_agreementId_close",
         "parameters": [
           {
             "name": "Authorization",
@@ -8100,7 +8100,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "activate",
+        "operationId": "post_warehouse_inventory_vmi_agreements_agreementId_activate",
         "parameters": [
           {
             "name": "Authorization",
@@ -8149,7 +8149,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "page_5",
+        "operationId": "get_warehouse_inventory_transfers",
         "parameters": [
           {
             "name": "Authorization",
@@ -8252,7 +8252,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "create_7",
+        "operationId": "post_warehouse_inventory_transfers",
         "parameters": [
           {
             "name": "Authorization",
@@ -8293,7 +8293,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "ship",
+        "operationId": "post_warehouse_inventory_transfers_orderId_ship",
         "parameters": [
           {
             "name": "Authorization",
@@ -8343,7 +8343,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "receive",
+        "operationId": "post_warehouse_inventory_transfers_orderId_receive",
         "parameters": [
           {
             "name": "Authorization",
@@ -8393,7 +8393,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "confirm_2",
+        "operationId": "post_warehouse_inventory_transfers_orderId_confirm",
         "parameters": [
           {
             "name": "Authorization",
@@ -8443,7 +8443,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "close_2",
+        "operationId": "post_warehouse_inventory_transfers_orderId_close",
         "parameters": [
           {
             "name": "Authorization",
@@ -8493,7 +8493,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "stocktakeSheets",
+        "operationId": "get_warehouse_inventory_stocktakes",
         "parameters": [
           {
             "name": "Authorization",
@@ -8566,7 +8566,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "createStocktake",
+        "operationId": "post_warehouse_inventory_stocktakes",
         "parameters": [
           {
             "name": "Authorization",
@@ -8607,7 +8607,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "assignStocktakeTask",
+        "operationId": "post_warehouse_inventory_stocktakes_id_tasks_taskId_assign",
         "parameters": [
           {
             "name": "Authorization",
@@ -8666,7 +8666,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "countStocktakeLine",
+        "operationId": "post_warehouse_inventory_stocktakes_id_lines_lineId_count",
         "parameters": [
           {
             "name": "Authorization",
@@ -8725,7 +8725,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "attribute",
+        "operationId": "post_warehouse_inventory_stocktake_variances_sheets_sheetId_lines_lineId_attribute",
         "parameters": [
           {
             "name": "Authorization",
@@ -8784,7 +8784,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "createAdjustment",
+        "operationId": "post_warehouse_inventory_stocktake_variances_sheets_sheetId_adjustments",
         "parameters": [
           {
             "name": "Authorization",
@@ -8834,7 +8834,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "submit_1",
+        "operationId": "post_warehouse_inventory_stocktake_variances_adjustments_adjustmentId_submit",
         "parameters": [
           {
             "name": "Authorization",
@@ -8884,7 +8884,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "reject",
+        "operationId": "post_warehouse_inventory_stocktake_variances_adjustments_adjustmentId_reject",
         "parameters": [
           {
             "name": "Authorization",
@@ -8934,7 +8934,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "post",
+        "operationId": "post_warehouse_inventory_stocktake_variances_adjustments_adjustmentId_post",
         "parameters": [
           {
             "name": "Authorization",
@@ -8984,7 +8984,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "cancel_5",
+        "operationId": "post_warehouse_inventory_stocktake_variances_adjustments_adjustmentId_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -9034,7 +9034,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "approve",
+        "operationId": "post_warehouse_inventory_stocktake_variances_adjustments_adjustmentId_approve",
         "parameters": [
           {
             "name": "Authorization",
@@ -9084,7 +9084,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "serials",
+        "operationId": "get_warehouse_inventory_serials",
         "parameters": [
           {
             "name": "Authorization",
@@ -9193,7 +9193,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "register",
+        "operationId": "post_warehouse_inventory_serials",
         "parameters": [
           {
             "name": "Authorization",
@@ -9234,7 +9234,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "validate",
+        "operationId": "post_warehouse_inventory_serials_validate_movement",
         "parameters": [
           {
             "name": "Authorization",
@@ -9275,7 +9275,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "move",
+        "operationId": "post_warehouse_inventory_serials_movements",
         "parameters": [
           {
             "name": "Authorization",
@@ -9316,7 +9316,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "importBatch",
+        "operationId": "post_warehouse_inventory_serials_import",
         "parameters": [
           {
             "name": "Authorization",
@@ -9357,7 +9357,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "sellablePolicies",
+        "operationId": "get_warehouse_inventory_sellable_policies",
         "parameters": [
           {
             "name": "Authorization",
@@ -9448,7 +9448,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "createSellablePolicy",
+        "operationId": "post_warehouse_inventory_sellable_policies",
         "parameters": [
           {
             "name": "Authorization",
@@ -9489,7 +9489,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "supersedeSellablePolicy",
+        "operationId": "post_warehouse_inventory_sellable_policies_id_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -9539,7 +9539,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "retireSellablePolicy",
+        "operationId": "post_warehouse_inventory_sellable_policies_id_retire",
         "parameters": [
           {
             "name": "Authorization",
@@ -9587,7 +9587,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "sellableCalculation",
+        "operationId": "post_warehouse_inventory_sellable_policies_calculation",
         "parameters": [
           {
             "name": "Authorization",
@@ -9628,7 +9628,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "dismissSuggestion",
+        "operationId": "post_warehouse_inventory_safety_stock_suggestions_id_dismiss",
         "parameters": [
           {
             "name": "Authorization",
@@ -9676,7 +9676,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "acknowledgeSuggestion",
+        "operationId": "post_warehouse_inventory_safety_stock_suggestions_id_acknowledge",
         "parameters": [
           {
             "name": "Authorization",
@@ -9716,7 +9716,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "sales",
+        "operationId": "get_warehouse_inventory_safety_stock_sales",
         "parameters": [
           {
             "name": "Authorization",
@@ -9782,7 +9782,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "recordSales",
+        "operationId": "post_warehouse_inventory_safety_stock_sales",
         "parameters": [
           {
             "name": "Authorization",
@@ -9823,7 +9823,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "policies",
+        "operationId": "get_warehouse_inventory_safety_stock_policies",
         "parameters": [
           {
             "name": "Authorization",
@@ -9932,7 +9932,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "createPolicy",
+        "operationId": "post_warehouse_inventory_safety_stock_policies",
         "parameters": [
           {
             "name": "Authorization",
@@ -9973,7 +9973,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "versionPolicy",
+        "operationId": "post_warehouse_inventory_safety_stock_policies_id_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -10023,7 +10023,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "retirePolicy",
+        "operationId": "post_warehouse_inventory_safety_stock_policies_id_retire",
         "parameters": [
           {
             "name": "Authorization",
@@ -10071,7 +10071,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "evaluate",
+        "operationId": "post_warehouse_inventory_safety_stock_evaluate",
         "parameters": [
           {
             "name": "Authorization",
@@ -10111,7 +10111,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "resolveAlert",
+        "operationId": "post_warehouse_inventory_safety_stock_alerts_id_resolve",
         "parameters": [
           {
             "name": "Authorization",
@@ -10151,7 +10151,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "acknowledgeAlert",
+        "operationId": "post_warehouse_inventory_safety_stock_alerts_id_acknowledge",
         "parameters": [
           {
             "name": "Authorization",
@@ -10191,7 +10191,7 @@
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "list_1",
+        "operationId": "get_warehouse_inventory_reservations",
         "parameters": [
           {
             "name": "Authorization",
@@ -10327,7 +10327,7 @@
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "create_8",
+        "operationId": "post_warehouse_inventory_reservations",
         "parameters": [
           {
             "name": "Authorization",
@@ -10368,7 +10368,7 @@
         "tags": [
           "reservation-release-controller"
         ],
-        "operationId": "release_2",
+        "operationId": "post_warehouse_inventory_reservations_reservationId_release",
         "parameters": [
           {
             "name": "Authorization",
@@ -10417,7 +10417,7 @@
         "tags": [
           "reservation-release-controller"
         ],
-        "operationId": "expiry",
+        "operationId": "post_warehouse_inventory_reservations_reservationId_expiry",
         "parameters": [
           {
             "name": "Authorization",
@@ -10466,7 +10466,7 @@
         "tags": [
           "reservation-allocation-controller"
         ],
-        "operationId": "allocations",
+        "operationId": "get_warehouse_inventory_reservations_reservationId_allocations",
         "parameters": [
           {
             "name": "Authorization",
@@ -10578,7 +10578,7 @@
         "tags": [
           "reservation-allocation-controller"
         ],
-        "operationId": "allocate",
+        "operationId": "post_warehouse_inventory_reservations_reservationId_allocations",
         "parameters": [
           {
             "name": "Authorization",
@@ -10628,7 +10628,7 @@
         "tags": [
           "reservation-allocation-controller"
         ],
-        "operationId": "consume",
+        "operationId": "post_warehouse_inventory_reservations_reservationId_allocations_allocationId_consume",
         "parameters": [
           {
             "name": "Authorization",
@@ -10686,7 +10686,7 @@
         "tags": [
           "reservation-allocation-controller"
         ],
-        "operationId": "commit",
+        "operationId": "post_warehouse_inventory_reservations_reservationId_allocations_allocationId_commit",
         "parameters": [
           {
             "name": "Authorization",
@@ -10744,7 +10744,7 @@
         "tags": [
           "reservation-release-controller"
         ],
-        "operationId": "expireOverdue",
+        "operationId": "post_warehouse_inventory_reservations_expire_overdue",
         "parameters": [
           {
             "name": "Authorization",
@@ -10784,7 +10784,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "reconciliationRuns",
+        "operationId": "get_warehouse_inventory_reconciliation",
         "parameters": [
           {
             "name": "Authorization",
@@ -10841,7 +10841,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "runReconciliation",
+        "operationId": "post_warehouse_inventory_reconciliation",
         "parameters": [
           {
             "name": "Authorization",
@@ -10882,7 +10882,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "templates_1",
+        "operationId": "get_warehouse_inventory_printing_templates",
         "parameters": [
           {
             "name": "Authorization",
@@ -10947,7 +10947,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "createTemplate_1",
+        "operationId": "post_warehouse_inventory_printing_templates",
         "parameters": [
           {
             "name": "Authorization",
@@ -10988,7 +10988,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "targets",
+        "operationId": "get_warehouse_inventory_printing_targets",
         "parameters": [
           {
             "name": "Authorization",
@@ -11070,7 +11070,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "registerTarget",
+        "operationId": "post_warehouse_inventory_printing_targets",
         "parameters": [
           {
             "name": "Authorization",
@@ -11111,7 +11111,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "rules_3",
+        "operationId": "get_warehouse_inventory_printing_reprint_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -11143,7 +11143,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "upsertRule",
+        "operationId": "post_warehouse_inventory_printing_reprint_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -11184,7 +11184,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "jobs",
+        "operationId": "get_warehouse_inventory_printing_jobs",
         "parameters": [
           {
             "name": "Authorization",
@@ -11257,7 +11257,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "createJob",
+        "operationId": "post_warehouse_inventory_printing_jobs",
         "parameters": [
           {
             "name": "Authorization",
@@ -11298,7 +11298,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "executeJob",
+        "operationId": "post_warehouse_inventory_printing_jobs_jobId_execute",
         "parameters": [
           {
             "name": "Authorization",
@@ -11338,7 +11338,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "cancelJob",
+        "operationId": "post_warehouse_inventory_printing_jobs_jobId_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -11378,7 +11378,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "devices",
+        "operationId": "get_warehouse_inventory_printing_devices",
         "parameters": [
           {
             "name": "Authorization",
@@ -11419,7 +11419,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "createDevice",
+        "operationId": "post_warehouse_inventory_printing_devices",
         "parameters": [
           {
             "name": "Authorization",
@@ -11460,7 +11460,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "policies_1",
+        "operationId": "get_warehouse_inventory_policies",
         "parameters": [
           {
             "name": "Authorization",
@@ -11500,7 +11500,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "createPolicy_1",
+        "operationId": "post_warehouse_inventory_policies",
         "parameters": [
           {
             "name": "Authorization",
@@ -11541,7 +11541,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "recordPlatformObservation",
+        "operationId": "post_warehouse_inventory_platform_observations",
         "parameters": [
           {
             "name": "Authorization",
@@ -11582,7 +11582,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "rules_4",
+        "operationId": "get_warehouse_inventory_ownership_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -11692,7 +11692,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "createRule_3",
+        "operationId": "post_warehouse_inventory_ownership_rules",
         "parameters": [
           {
             "name": "Authorization",
@@ -11733,7 +11733,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "supersedeRule",
+        "operationId": "post_warehouse_inventory_ownership_rules_ruleId_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -11783,7 +11783,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "retireRule_2",
+        "operationId": "post_warehouse_inventory_ownership_rules_ruleId_retire",
         "parameters": [
           {
             "name": "Authorization",
@@ -11832,7 +11832,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "reassign",
+        "operationId": "post_warehouse_inventory_ownership_reassign",
         "parameters": [
           {
             "name": "Authorization",
@@ -11873,7 +11873,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "owners",
+        "operationId": "get_warehouse_inventory_ownership_owners",
         "parameters": [
           {
             "name": "Authorization",
@@ -11963,7 +11963,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "createOwner",
+        "operationId": "post_warehouse_inventory_ownership_owners",
         "parameters": [
           {
             "name": "Authorization",
@@ -12004,7 +12004,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "setOwnerStatus",
+        "operationId": "post_warehouse_inventory_ownership_owners_ownerId_status",
         "parameters": [
           {
             "name": "Authorization",
@@ -12052,7 +12052,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "list_2",
+        "operationId": "get_warehouse_inventory_outbound_orders",
         "parameters": [
           {
             "name": "Authorization",
@@ -12159,7 +12159,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "create_9",
+        "operationId": "post_warehouse_inventory_outbound_orders",
         "parameters": [
           {
             "name": "Authorization",
@@ -12200,7 +12200,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "transition",
+        "operationId": "post_warehouse_inventory_outbound_orders_orderId_transition",
         "parameters": [
           {
             "name": "Authorization",
@@ -12250,7 +12250,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "print",
+        "operationId": "post_warehouse_inventory_outbound_orders_print",
         "parameters": [
           {
             "name": "Authorization",
@@ -12291,7 +12291,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "requestPicking",
+        "operationId": "post_warehouse_inventory_outbound_orders_pick_requests",
         "parameters": [
           {
             "name": "Authorization",
@@ -12332,7 +12332,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "cancel_6",
+        "operationId": "post_warehouse_inventory_outbound_orders_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -12373,7 +12373,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "lots",
+        "operationId": "get_warehouse_inventory_lots",
         "parameters": [
           {
             "name": "Authorization",
@@ -12515,7 +12515,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "create_10",
+        "operationId": "post_warehouse_inventory_lots",
         "parameters": [
           {
             "name": "Authorization",
@@ -12556,7 +12556,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "page_6",
+        "operationId": "get_warehouse_inventory_in_transit",
         "parameters": [
           {
             "name": "Authorization",
@@ -12675,7 +12675,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "register_1",
+        "operationId": "post_warehouse_inventory_in_transit",
         "parameters": [
           {
             "name": "Authorization",
@@ -12716,7 +12716,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "discrepancy",
+        "operationId": "post_warehouse_inventory_in_transit_legId_discrepancy",
         "parameters": [
           {
             "name": "Authorization",
@@ -12766,7 +12766,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "arrive",
+        "operationId": "post_warehouse_inventory_in_transit_legId_arrive",
         "parameters": [
           {
             "name": "Authorization",
@@ -12816,7 +12816,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "assess",
+        "operationId": "post_warehouse_inventory_health_assess",
         "parameters": [
           {
             "name": "Authorization",
@@ -12856,7 +12856,7 @@
         "tags": [
           "inventory-expiry-controller"
         ],
-        "operationId": "upsertPolicy",
+        "operationId": "post_warehouse_inventory_expiry_policy",
         "parameters": [
           {
             "name": "Authorization",
@@ -12897,7 +12897,7 @@
         "tags": [
           "inventory-expiry-controller"
         ],
-        "operationId": "recommend_1",
+        "operationId": "post_warehouse_inventory_expiry_allocation",
         "parameters": [
           {
             "name": "Authorization",
@@ -12938,7 +12938,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "page_7",
+        "operationId": "get_warehouse_inventory_cross_entity_transfers",
         "parameters": [
           {
             "name": "Authorization",
@@ -13059,7 +13059,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "create_11",
+        "operationId": "post_warehouse_inventory_cross_entity_transfers",
         "parameters": [
           {
             "name": "Authorization",
@@ -13100,7 +13100,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "targetConfirm",
+        "operationId": "post_warehouse_inventory_cross_entity_transfers_transferId_target_confirm",
         "parameters": [
           {
             "name": "Authorization",
@@ -13150,7 +13150,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "sourceConfirm",
+        "operationId": "post_warehouse_inventory_cross_entity_transfers_transferId_source_confirm",
         "parameters": [
           {
             "name": "Authorization",
@@ -13200,7 +13200,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "ship_1",
+        "operationId": "post_warehouse_inventory_cross_entity_transfers_transferId_ship",
         "parameters": [
           {
             "name": "Authorization",
@@ -13250,7 +13250,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "receive_1",
+        "operationId": "post_warehouse_inventory_cross_entity_transfers_transferId_receive",
         "parameters": [
           {
             "name": "Authorization",
@@ -13300,7 +13300,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "close_3",
+        "operationId": "post_warehouse_inventory_cross_entity_transfers_transferId_close",
         "parameters": [
           {
             "name": "Authorization",
@@ -13350,7 +13350,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "cancel_7",
+        "operationId": "post_warehouse_inventory_cross_entity_transfers_transferId_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -13400,7 +13400,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "list_3",
+        "operationId": "get_warehouse_inventory_consignments",
         "parameters": [
           {
             "name": "Authorization",
@@ -13473,7 +13473,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "create_12",
+        "operationId": "post_warehouse_inventory_consignments",
         "parameters": [
           {
             "name": "Authorization",
@@ -13514,7 +13514,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "suspend_1",
+        "operationId": "post_warehouse_inventory_consignments_agreementId_suspend",
         "parameters": [
           {
             "name": "Authorization",
@@ -13563,7 +13563,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "createSettlement_1",
+        "operationId": "post_warehouse_inventory_consignments_agreementId_settlements",
         "parameters": [
           {
             "name": "Authorization",
@@ -13613,7 +13613,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "createReturn",
+        "operationId": "post_warehouse_inventory_consignments_agreementId_returns",
         "parameters": [
           {
             "name": "Authorization",
@@ -13663,7 +13663,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "addLine_1",
+        "operationId": "post_warehouse_inventory_consignments_agreementId_lines",
         "parameters": [
           {
             "name": "Authorization",
@@ -13713,7 +13713,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "recordSale_1",
+        "operationId": "post_warehouse_inventory_consignments_agreementId_lines_lineId_sales",
         "parameters": [
           {
             "name": "Authorization",
@@ -13772,7 +13772,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "close_4",
+        "operationId": "post_warehouse_inventory_consignments_agreementId_close",
         "parameters": [
           {
             "name": "Authorization",
@@ -13821,7 +13821,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "activate_1",
+        "operationId": "post_warehouse_inventory_consignments_agreementId_activate",
         "parameters": [
           {
             "name": "Authorization",
@@ -13870,7 +13870,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "confirmSettlement_1",
+        "operationId": "post_warehouse_inventory_consignments_settlements_settlementId_confirm",
         "parameters": [
           {
             "name": "Authorization",
@@ -13919,7 +13919,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "executeReturn",
+        "operationId": "post_warehouse_inventory_consignments_returns_returnId_execute",
         "parameters": [
           {
             "name": "Authorization",
@@ -13968,7 +13968,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "cancelReturn",
+        "operationId": "post_warehouse_inventory_consignments_returns_returnId_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -14017,7 +14017,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "availability",
+        "operationId": "post_warehouse_inventory_availability",
         "parameters": [
           {
             "name": "Authorization",
@@ -14058,7 +14058,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "sales_1",
+        "operationId": "get_warehouse_inventory_allocation_sales",
         "parameters": [
           {
             "name": "Authorization",
@@ -14117,7 +14117,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "recordSales_1",
+        "operationId": "post_warehouse_inventory_allocation_sales",
         "parameters": [
           {
             "name": "Authorization",
@@ -14158,7 +14158,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "run",
+        "operationId": "post_warehouse_inventory_allocation_priority_runs",
         "parameters": [
           {
             "name": "Authorization",
@@ -14202,7 +14202,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "list_4",
+        "operationId": "get_warehouse_inventory_allocation_priority_floors",
         "parameters": [
           {
             "name": "Authorization",
@@ -14286,7 +14286,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "create_13",
+        "operationId": "post_warehouse_inventory_allocation_priority_floors",
         "parameters": [
           {
             "name": "Authorization",
@@ -14327,7 +14327,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "supersede",
+        "operationId": "post_warehouse_inventory_allocation_priority_floors_id_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -14377,7 +14377,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "retire",
+        "operationId": "post_warehouse_inventory_allocation_priority_floors_id_retire",
         "parameters": [
           {
             "name": "Authorization",
@@ -14425,7 +14425,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "calculate",
+        "operationId": "post_warehouse_inventory_allocation_priority_calculation",
         "parameters": [
           {
             "name": "Authorization",
@@ -14469,7 +14469,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "policies_2",
+        "operationId": "get_warehouse_inventory_allocation_policies",
         "parameters": [
           {
             "name": "Authorization",
@@ -14560,7 +14560,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "create_14",
+        "operationId": "post_warehouse_inventory_allocation_policies",
         "parameters": [
           {
             "name": "Authorization",
@@ -14601,7 +14601,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "supersede_1",
+        "operationId": "post_warehouse_inventory_allocation_policies_id_versions",
         "parameters": [
           {
             "name": "Authorization",
@@ -14651,7 +14651,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "retire_1",
+        "operationId": "post_warehouse_inventory_allocation_policies_id_retire",
         "parameters": [
           {
             "name": "Authorization",
@@ -14699,7 +14699,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "runs",
+        "operationId": "get_warehouse_inventory_allocation_policies_runs",
         "parameters": [
           {
             "name": "Authorization",
@@ -14765,7 +14765,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "run_1",
+        "operationId": "post_warehouse_inventory_allocation_policies_runs",
         "parameters": [
           {
             "name": "Authorization",
@@ -14809,7 +14809,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "calculate_1",
+        "operationId": "post_warehouse_inventory_allocation_policies_calculation",
         "parameters": [
           {
             "name": "Authorization",
@@ -14853,7 +14853,7 @@
         "tags": [
           "inventory-aging-controller"
         ],
-        "operationId": "savePolicy",
+        "operationId": "post_warehouse_inventory_aging_policy",
         "parameters": [
           {
             "name": "Authorization",
@@ -14894,7 +14894,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "page_8",
+        "operationId": "get_warehouse_goods_receipts",
         "parameters": [
           {
             "name": "Authorization",
@@ -14990,7 +14990,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "create_15",
+        "operationId": "post_warehouse_goods_receipts",
         "parameters": [
           {
             "name": "Authorization",
@@ -15031,7 +15031,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "receive_2",
+        "operationId": "post_warehouse_goods_receipts_receiptId_receive",
         "parameters": [
           {
             "name": "Authorization",
@@ -15081,7 +15081,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "close_5",
+        "operationId": "post_warehouse_goods_receipts_receiptId_close",
         "parameters": [
           {
             "name": "Authorization",
@@ -15131,7 +15131,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "page_9",
+        "operationId": "get_warehouse_goods_receipt_discrepancies",
         "parameters": [
           {
             "name": "Authorization",
@@ -15258,7 +15258,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "intake",
+        "operationId": "post_warehouse_goods_receipt_discrepancies",
         "parameters": [
           {
             "name": "Authorization",
@@ -15299,7 +15299,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "addEvidence",
+        "operationId": "post_warehouse_goods_receipt_discrepancies_handlingId_evidence",
         "parameters": [
           {
             "name": "Authorization",
@@ -15349,7 +15349,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "decide",
+        "operationId": "post_warehouse_goods_receipt_discrepancies_handlingId_decide",
         "parameters": [
           {
             "name": "Authorization",
@@ -15399,7 +15399,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "close_6",
+        "operationId": "post_warehouse_goods_receipt_discrepancies_handlingId_close",
         "parameters": [
           {
             "name": "Authorization",
@@ -15449,7 +15449,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "claim",
+        "operationId": "post_warehouse_goods_receipt_discrepancies_handlingId_claim",
         "parameters": [
           {
             "name": "Authorization",
@@ -15499,7 +15499,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "withdrawClaim",
+        "operationId": "post_warehouse_goods_receipt_discrepancies_handlingId_claim_withdraw",
         "parameters": [
           {
             "name": "Authorization",
@@ -15549,7 +15549,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "submitClaim",
+        "operationId": "post_warehouse_goods_receipt_discrepancies_handlingId_claim_submit",
         "parameters": [
           {
             "name": "Authorization",
@@ -15599,7 +15599,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "page_10",
+        "operationId": "get_warehouse_first_mile_shipments",
         "parameters": [
           {
             "name": "Authorization",
@@ -15725,7 +15725,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "create_16",
+        "operationId": "post_warehouse_first_mile_shipments",
         "parameters": [
           {
             "name": "Authorization",
@@ -15766,7 +15766,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "dispatch_1",
+        "operationId": "post_warehouse_first_mile_shipments_shipmentId_dispatch",
         "parameters": [
           {
             "name": "Authorization",
@@ -15816,7 +15816,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "confirm_3",
+        "operationId": "post_warehouse_first_mile_shipments_shipmentId_confirm",
         "parameters": [
           {
             "name": "Authorization",
@@ -15866,7 +15866,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "cancel_8",
+        "operationId": "post_warehouse_first_mile_shipments_shipmentId_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -15916,7 +15916,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "list_5",
+        "operationId": "get_warehouse_facilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -16014,7 +16014,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "create_17",
+        "operationId": "post_warehouse_facilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -16055,7 +16055,7 @@
         "tags": [
           "warehouse-config-controller"
         ],
-        "operationId": "createShift",
+        "operationId": "post_warehouse_facilities_id_config_shifts",
         "parameters": [
           {
             "name": "Authorization",
@@ -16105,7 +16105,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "page_11",
+        "operationId": "get_warehouse_duty_taxes",
         "parameters": [
           {
             "name": "Authorization",
@@ -16230,7 +16230,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "create_18",
+        "operationId": "post_warehouse_duty_taxes",
         "parameters": [
           {
             "name": "Authorization",
@@ -16271,7 +16271,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "voidEstimate",
+        "operationId": "post_warehouse_duty_taxes_estimateId_void",
         "parameters": [
           {
             "name": "Authorization",
@@ -16321,7 +16321,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "recalculate",
+        "operationId": "post_warehouse_duty_taxes_estimateId_recalculate",
         "parameters": [
           {
             "name": "Authorization",
@@ -16370,7 +16370,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "payments",
+        "operationId": "get_warehouse_duty_taxes_estimateId_payments",
         "parameters": [
           {
             "name": "Authorization",
@@ -16411,7 +16411,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "recordPayment",
+        "operationId": "post_warehouse_duty_taxes_estimateId_payments",
         "parameters": [
           {
             "name": "Authorization",
@@ -16461,7 +16461,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "lock",
+        "operationId": "post_warehouse_duty_taxes_estimateId_lock",
         "parameters": [
           {
             "name": "Authorization",
@@ -16510,7 +16510,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "rates",
+        "operationId": "get_warehouse_duty_taxes_rates",
         "parameters": [
           {
             "name": "Authorization",
@@ -16627,7 +16627,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "createRate",
+        "operationId": "post_warehouse_duty_taxes_rates",
         "parameters": [
           {
             "name": "Authorization",
@@ -16668,7 +16668,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "page_12",
+        "operationId": "get_warehouse_disassembly_orders",
         "parameters": [
           {
             "name": "Authorization",
@@ -16777,7 +16777,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "create_19",
+        "operationId": "post_warehouse_disassembly_orders",
         "parameters": [
           {
             "name": "Authorization",
@@ -16818,7 +16818,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "execute",
+        "operationId": "post_warehouse_disassembly_orders_id_execute",
         "parameters": [
           {
             "name": "Authorization",
@@ -16867,7 +16867,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "cancel_9",
+        "operationId": "post_warehouse_disassembly_orders_id_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -16917,7 +16917,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "page_13",
+        "operationId": "get_warehouse_customs_declarations",
         "parameters": [
           {
             "name": "Authorization",
@@ -17034,7 +17034,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "create_20",
+        "operationId": "post_warehouse_customs_declarations",
         "parameters": [
           {
             "name": "Authorization",
@@ -17075,7 +17075,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "withdrawReview_1",
+        "operationId": "post_warehouse_customs_declarations_declarationId_withdraw_review",
         "parameters": [
           {
             "name": "Authorization",
@@ -17125,7 +17125,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "submit_2",
+        "operationId": "post_warehouse_customs_declarations_declarationId_submit",
         "parameters": [
           {
             "name": "Authorization",
@@ -17175,7 +17175,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "submitForReview_1",
+        "operationId": "post_warehouse_customs_declarations_declarationId_submit_for_review",
         "parameters": [
           {
             "name": "Authorization",
@@ -17225,7 +17225,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "review_1",
+        "operationId": "post_warehouse_customs_declarations_declarationId_review",
         "parameters": [
           {
             "name": "Authorization",
@@ -17275,7 +17275,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "results",
+        "operationId": "get_warehouse_customs_declarations_declarationId_results",
         "parameters": [
           {
             "name": "Authorization",
@@ -17316,7 +17316,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "recordResult",
+        "operationId": "post_warehouse_customs_declarations_declarationId_results",
         "parameters": [
           {
             "name": "Authorization",
@@ -17366,7 +17366,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "rejectReview_1",
+        "operationId": "post_warehouse_customs_declarations_declarationId_reject_review",
         "parameters": [
           {
             "name": "Authorization",
@@ -17416,7 +17416,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "documents_1",
+        "operationId": "get_warehouse_customs_declarations_declarationId_documents",
         "parameters": [
           {
             "name": "Authorization",
@@ -17457,7 +17457,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "generateDocument_1",
+        "operationId": "post_warehouse_customs_declarations_declarationId_documents",
         "parameters": [
           {
             "name": "Authorization",
@@ -17507,7 +17507,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "finalizeDocument_1",
+        "operationId": "post_warehouse_customs_declarations_declarationId_documents_documentId_finalize",
         "parameters": [
           {
             "name": "Authorization",
@@ -17566,7 +17566,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "cancel_10",
+        "operationId": "post_warehouse_customs_declarations_declarationId_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -17616,7 +17616,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "amend",
+        "operationId": "post_warehouse_customs_declarations_declarationId_amend",
         "parameters": [
           {
             "name": "Authorization",
@@ -17666,7 +17666,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "page_14",
+        "operationId": "get_warehouse_assembly_orders",
         "parameters": [
           {
             "name": "Authorization",
@@ -17775,7 +17775,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "create_21",
+        "operationId": "post_warehouse_assembly_orders",
         "parameters": [
           {
             "name": "Authorization",
@@ -17816,7 +17816,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "issue_1",
+        "operationId": "post_warehouse_assembly_orders_id_issue",
         "parameters": [
           {
             "name": "Authorization",
@@ -17865,7 +17865,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "cancel_11",
+        "operationId": "post_warehouse_assembly_orders_id_cancel",
         "parameters": [
           {
             "name": "Authorization",
@@ -17915,7 +17915,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "warehouses",
+        "operationId": "get_warehouse_warehouses",
         "parameters": [
           {
             "name": "Authorization",
@@ -17949,7 +17949,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "detail_8",
+        "operationId": "get_warehouse_transit_trackings_trackingId",
         "parameters": [
           {
             "name": "Authorization",
@@ -17989,7 +17989,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "thresholds",
+        "operationId": "get_warehouse_transit_trackings_thresholds",
         "parameters": [
           {
             "name": "Authorization",
@@ -18023,7 +18023,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "capabilities",
+        "operationId": "get_warehouse_transit_trackings_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -18054,7 +18054,7 @@
         "tags": [
           "in-transit-tracking-controller"
         ],
-        "operationId": "alerts",
+        "operationId": "get_warehouse_transit_trackings_alerts",
         "parameters": [
           {
             "name": "Authorization",
@@ -18135,7 +18135,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "remindersOf",
+        "operationId": "get_warehouse_trade_documents_setId_reminders",
         "parameters": [
           {
             "name": "Authorization",
@@ -18178,7 +18178,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "events",
+        "operationId": "get_warehouse_trade_documents_setId_events",
         "parameters": [
           {
             "name": "Authorization",
@@ -18221,7 +18221,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "checks",
+        "operationId": "get_warehouse_trade_documents_setId_checks",
         "parameters": [
           {
             "name": "Authorization",
@@ -18264,7 +18264,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "reminders",
+        "operationId": "get_warehouse_trade_documents_reminders",
         "parameters": [
           {
             "name": "Authorization",
@@ -18372,7 +18372,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "preferenceConfirmations",
+        "operationId": "get_warehouse_trade_documents_preference_confirmations",
         "parameters": [
           {
             "name": "Authorization",
@@ -18456,7 +18456,7 @@
         "tags": [
           "trade-document-controller"
         ],
-        "operationId": "capabilities_1",
+        "operationId": "get_warehouse_trade_documents_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -18487,7 +18487,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "skus",
+        "operationId": "get_warehouse_skus",
         "parameters": [
           {
             "name": "Authorization",
@@ -18521,7 +18521,7 @@
         "tags": [
           "shipment-handover-controller"
         ],
-        "operationId": "detail_9",
+        "operationId": "get_warehouse_shipment_handovers_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -18560,7 +18560,7 @@
         "tags": [
           "shipment-handover-controller"
         ],
-        "operationId": "completion",
+        "operationId": "get_warehouse_shipment_handovers_id_completion",
         "parameters": [
           {
             "name": "Authorization",
@@ -18599,7 +18599,7 @@
         "tags": [
           "shipment-handover-controller"
         ],
-        "operationId": "capabilities_2",
+        "operationId": "get_warehouse_shipment_handovers_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -18630,7 +18630,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "detail_10",
+        "operationId": "get_warehouse_recount_scans_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -18669,7 +18669,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "rule",
+        "operationId": "get_warehouse_recount_scans_rules_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -18708,7 +18708,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "capabilities_3",
+        "operationId": "get_warehouse_recount_scans_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -18739,7 +18739,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "qualityStatuses",
+        "operationId": "get_warehouse_quality_statuses",
         "parameters": [
           {
             "name": "Authorization",
@@ -18773,7 +18773,7 @@
         "tags": [
           "putaway-task-controller"
         ],
-        "operationId": "detail_11",
+        "operationId": "get_warehouse_putaway_tasks_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -18813,7 +18813,7 @@
         "tags": [
           "putaway-task-controller"
         ],
-        "operationId": "capabilities_4",
+        "operationId": "get_warehouse_putaway_tasks_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -18844,7 +18844,7 @@
         "tags": [
           "processing-order-controller"
         ],
-        "operationId": "executions",
+        "operationId": "get_warehouse_processing_orders_executions",
         "parameters": [
           {
             "name": "Authorization",
@@ -18904,7 +18904,7 @@
         "tags": [
           "processing-order-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "get_warehouse_processing_orders_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -18935,7 +18935,7 @@
         "tags": [
           "processing-order-controller"
         ],
-        "operationId": "boundary",
+        "operationId": "get_warehouse_processing_orders_boundary",
         "parameters": [
           {
             "name": "Authorization",
@@ -18966,7 +18966,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "detail_12",
+        "operationId": "get_warehouse_pick_waves_waveId",
         "parameters": [
           {
             "name": "Authorization",
@@ -19006,7 +19006,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "get_warehouse_pick_waves_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -19037,7 +19037,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "candidates",
+        "operationId": "get_warehouse_pick_waves_candidates",
         "parameters": [
           {
             "name": "Authorization",
@@ -19077,7 +19077,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "detail_11",
+        "operationId": "get_warehouse_pick_tasks_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -19117,7 +19117,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "get_warehouse_pick_tasks_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -19143,12 +19143,82 @@
         }
       }
     },
+    "/warehouse/parcels/{id}": {
+      "get": {
+        "tags": [
+          "parcel-detail-controller"
+        ],
+        "operationId": "get_warehouse_parcels_id",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParcelDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/parcels/capabilities": {
+      "get": {
+        "tags": [
+          "parcel-detail-controller"
+        ],
+        "operationId": "get_warehouse_parcels_capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParcelDetailCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/packing-orders/{id}": {
       "get": {
         "tags": [
           "packing-controller"
         ],
-        "operationId": "detail_14",
+        "operationId": "get_warehouse_packing_orders_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -19187,7 +19257,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "completion_1",
+        "operationId": "get_warehouse_packing_orders_id_completion",
         "parameters": [
           {
             "name": "Authorization",
@@ -19226,7 +19296,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "material",
+        "operationId": "get_warehouse_packing_orders_materials_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -19265,7 +19335,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "get_warehouse_packing_orders_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -19296,7 +19366,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "lots_1",
+        "operationId": "get_warehouse_lots",
         "parameters": [
           {
             "name": "Authorization",
@@ -19347,7 +19417,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "locations",
+        "operationId": "get_warehouse_locations",
         "parameters": [
           {
             "name": "Authorization",
@@ -19398,7 +19468,7 @@
         "tags": [
           "location-utilization-controller"
         ],
-        "operationId": "report",
+        "operationId": "get_warehouse_location_utilization_warehouseId",
         "parameters": [
           {
             "name": "Authorization",
@@ -19446,7 +19516,7 @@
         "tags": [
           "location-utilization-controller"
         ],
-        "operationId": "detail_12",
+        "operationId": "get_warehouse_location_utilization_warehouseId_locations_locationId",
         "parameters": [
           {
             "name": "Authorization",
@@ -19503,7 +19573,7 @@
         "tags": [
           "location-utilization-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "get_warehouse_location_utilization_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -19534,7 +19604,7 @@
         "tags": [
           "warehouse-location-tree-controller"
         ],
-        "operationId": "tree",
+        "operationId": "get_warehouse_location_trees_warehouseId",
         "parameters": [
           {
             "name": "Authorization",
@@ -19574,7 +19644,7 @@
         "tags": [
           "warehouse-location-tree-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "get_warehouse_location_trees_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -19605,7 +19675,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "list_6",
+        "operationId": "get_warehouse_location_allocations_list",
         "parameters": [
           {
             "name": "Authorization",
@@ -19695,7 +19765,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "get_warehouse_location_allocations_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -19726,7 +19796,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "byReceipt",
+        "operationId": "get_warehouse_location_allocations_by_receipt_receiptId",
         "parameters": [
           {
             "name": "Authorization",
@@ -19769,7 +19839,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "legalEntities",
+        "operationId": "get_warehouse_legal_entities",
         "parameters": [
           {
             "name": "Authorization",
@@ -19803,7 +19873,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "task",
+        "operationId": "get_warehouse_labor_work_tasks_taskId",
         "parameters": [
           {
             "name": "Authorization",
@@ -19843,7 +19913,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "trend",
+        "operationId": "get_warehouse_labor_trend",
         "parameters": [
           {
             "name": "Authorization",
@@ -19916,7 +19986,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "report_1",
+        "operationId": "get_warehouse_labor_report",
         "parameters": [
           {
             "name": "Authorization",
@@ -20000,7 +20070,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "ranking",
+        "operationId": "get_warehouse_labor_ranking",
         "parameters": [
           {
             "name": "Authorization",
@@ -20082,7 +20152,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "get_warehouse_labor_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -20113,7 +20183,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "settlements",
+        "operationId": "get_warehouse_inventory_vmi_settlements",
         "parameters": [
           {
             "name": "Authorization",
@@ -20181,7 +20251,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "settlementDetail",
+        "operationId": "get_warehouse_inventory_vmi_settlements_settlementId",
         "parameters": [
           {
             "name": "Authorization",
@@ -20221,7 +20291,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "signals",
+        "operationId": "get_warehouse_inventory_vmi_replenishment_signals",
         "parameters": [
           {
             "name": "Authorization",
@@ -20297,7 +20367,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "get_warehouse_inventory_vmi_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -20328,7 +20398,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "detail_13",
+        "operationId": "get_warehouse_inventory_vmi_agreements_agreementId",
         "parameters": [
           {
             "name": "Authorization",
@@ -20368,7 +20438,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "waterLevels",
+        "operationId": "get_warehouse_inventory_vmi_agreements_agreementId_water_levels",
         "parameters": [
           {
             "name": "Authorization",
@@ -20408,7 +20478,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "settlementWindow",
+        "operationId": "get_warehouse_inventory_vmi_agreements_agreementId_settlement_window",
         "parameters": [
           {
             "name": "Authorization",
@@ -20448,7 +20518,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "sales_2",
+        "operationId": "get_warehouse_inventory_vmi_agreements_agreementId_sales",
         "parameters": [
           {
             "name": "Authorization",
@@ -20516,7 +20586,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "audit",
+        "operationId": "get_warehouse_inventory_vmi_agreements_agreementId_audit",
         "parameters": [
           {
             "name": "Authorization",
@@ -20568,7 +20638,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "movements",
+        "operationId": "get_warehouse_inventory_transfers_orderId_movements",
         "parameters": [
           {
             "name": "Authorization",
@@ -20652,7 +20722,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "stocktakeSheet",
+        "operationId": "get_warehouse_inventory_stocktakes_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -20692,7 +20762,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "stocktakeTasks",
+        "operationId": "get_warehouse_inventory_stocktakes_id_tasks",
         "parameters": [
           {
             "name": "Authorization",
@@ -20743,7 +20813,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "stocktakeLines",
+        "operationId": "get_warehouse_inventory_stocktakes_id_lines",
         "parameters": [
           {
             "name": "Authorization",
@@ -20819,7 +20889,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "stocktakeCapabilities",
+        "operationId": "get_warehouse_inventory_stocktakes_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -20853,7 +20923,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "report_2",
+        "operationId": "get_warehouse_inventory_stocktake_variances_sheets_sheetId_report",
         "parameters": [
           {
             "name": "Authorization",
@@ -20893,7 +20963,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "lines",
+        "operationId": "get_warehouse_inventory_stocktake_variances_sheets_sheetId_lines",
         "parameters": [
           {
             "name": "Authorization",
@@ -20985,7 +21055,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "audit_1",
+        "operationId": "get_warehouse_inventory_stocktake_variances_sheets_sheetId_audit",
         "parameters": [
           {
             "name": "Authorization",
@@ -21037,7 +21107,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "get_warehouse_inventory_stocktake_variances_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -21068,7 +21138,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "adjustments",
+        "operationId": "get_warehouse_inventory_stocktake_variances_adjustments",
         "parameters": [
           {
             "name": "Authorization",
@@ -21144,7 +21214,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "adjustment",
+        "operationId": "get_warehouse_inventory_stocktake_variances_adjustments_adjustmentId",
         "parameters": [
           {
             "name": "Authorization",
@@ -21184,7 +21254,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "timeline",
+        "operationId": "get_warehouse_inventory_serials_id_movements",
         "parameters": [
           {
             "name": "Authorization",
@@ -21244,7 +21314,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "stats",
+        "operationId": "get_warehouse_inventory_serials_stats",
         "parameters": [
           {
             "name": "Authorization",
@@ -21327,7 +21397,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "vocabularies",
+        "operationId": "get_warehouse_inventory_serial_vocabularies",
         "parameters": [
           {
             "name": "Authorization",
@@ -21358,7 +21428,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "operations",
+        "operationId": "get_warehouse_inventory_serial_operations",
         "parameters": [
           {
             "name": "Authorization",
@@ -21443,7 +21513,7 @@
         "tags": [
           "inventory-serial-controller"
         ],
-        "operationId": "movements_1",
+        "operationId": "get_warehouse_inventory_serial_movements",
         "parameters": [
           {
             "name": "Authorization",
@@ -21554,7 +21624,7 @@
         "tags": [
           "available-quantity-controller"
         ],
-        "operationId": "report_3",
+        "operationId": "get_warehouse_inventory_sellable",
         "parameters": [
           {
             "name": "Authorization",
@@ -21655,7 +21725,7 @@
         "tags": [
           "available-quantity-controller"
         ],
-        "operationId": "skus_1",
+        "operationId": "get_warehouse_inventory_sellable_skus",
         "parameters": [
           {
             "name": "Authorization",
@@ -21784,7 +21854,7 @@
         "tags": [
           "available-quantity-controller"
         ],
-        "operationId": "capabilities_12",
+        "operationId": "get_warehouse_inventory_sellable_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -21815,7 +21885,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "sellablePolicy",
+        "operationId": "get_warehouse_inventory_sellable_policies_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -21855,7 +21925,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "sellablePools",
+        "operationId": "get_warehouse_inventory_sellable_policies_pools",
         "parameters": [
           {
             "name": "Authorization",
@@ -21897,7 +21967,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "sellablePool",
+        "operationId": "get_warehouse_inventory_sellable_policies_pools_poolKey",
         "parameters": [
           {
             "name": "Authorization",
@@ -21944,7 +22014,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "sellableEffective",
+        "operationId": "get_warehouse_inventory_sellable_policies_effective",
         "parameters": [
           {
             "name": "Authorization",
@@ -22000,7 +22070,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "suggestions",
+        "operationId": "get_warehouse_inventory_safety_stock_suggestions",
         "parameters": [
           {
             "name": "Authorization",
@@ -22086,7 +22156,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "policy",
+        "operationId": "get_warehouse_inventory_safety_stock_policies_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -22126,7 +22196,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "effective",
+        "operationId": "get_warehouse_inventory_safety_stock_policies_effective",
         "parameters": [
           {
             "name": "Authorization",
@@ -22191,7 +22261,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "evaluations",
+        "operationId": "get_warehouse_inventory_safety_stock_evaluations",
         "parameters": [
           {
             "name": "Authorization",
@@ -22242,7 +22312,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "capabilities_13",
+        "operationId": "get_warehouse_inventory_safety_stock_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -22273,7 +22343,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "alerts_1",
+        "operationId": "get_warehouse_inventory_safety_stock_alerts",
         "parameters": [
           {
             "name": "Authorization",
@@ -22401,7 +22471,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "alert",
+        "operationId": "get_warehouse_inventory_safety_stock_alerts_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -22441,7 +22511,7 @@
         "tags": [
           "reservation-allocation-controller"
         ],
-        "operationId": "timeline_1",
+        "operationId": "get_warehouse_inventory_reservations_reservationId_timeline",
         "parameters": [
           {
             "name": "Authorization",
@@ -22518,7 +22588,7 @@
         "tags": [
           "reservation-allocation-controller"
         ],
-        "operationId": "capabilities_14",
+        "operationId": "get_warehouse_inventory_reservations_reservationId_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -22561,7 +22631,7 @@
         "tags": [
           "reservation-allocation-controller"
         ],
-        "operationId": "options",
+        "operationId": "get_warehouse_inventory_reservations_reservationId_allocation_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -22601,7 +22671,7 @@
         "tags": [
           "reservation-release-controller"
         ],
-        "operationId": "releaseRecords",
+        "operationId": "get_warehouse_inventory_reservations_release_records",
         "parameters": [
           {
             "name": "Authorization",
@@ -22661,7 +22731,7 @@
         "tags": [
           "reservation-release-controller"
         ],
-        "operationId": "releaseOptions",
+        "operationId": "get_warehouse_inventory_reservations_release_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -22692,7 +22762,7 @@
         "tags": [
           "reservation-release-controller"
         ],
-        "operationId": "releaseCapabilities",
+        "operationId": "get_warehouse_inventory_reservations_release_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -22726,7 +22796,7 @@
         "tags": [
           "reservation-release-controller"
         ],
-        "operationId": "candidates_1",
+        "operationId": "get_warehouse_inventory_reservations_release_candidates",
         "parameters": [
           {
             "name": "Authorization",
@@ -22809,7 +22879,7 @@
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "options_1",
+        "operationId": "get_warehouse_inventory_reservations_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -22840,7 +22910,7 @@
         "tags": [
           "reservation-release-controller"
         ],
-        "operationId": "expiryRuns",
+        "operationId": "get_warehouse_inventory_reservations_expiry_runs",
         "parameters": [
           {
             "name": "Authorization",
@@ -22891,7 +22961,7 @@
         "tags": [
           "reservation-release-controller"
         ],
-        "operationId": "expiryRun",
+        "operationId": "get_warehouse_inventory_reservations_expiry_runs_runId",
         "parameters": [
           {
             "name": "Authorization",
@@ -22931,7 +23001,7 @@
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "capabilities_15",
+        "operationId": "get_warehouse_inventory_reservations_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -22965,7 +23035,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "reconciliationRun",
+        "operationId": "get_warehouse_inventory_reconciliation_runId",
         "parameters": [
           {
             "name": "Authorization",
@@ -23005,7 +23075,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "reconciliationFindings",
+        "operationId": "get_warehouse_inventory_reconciliation_runId_findings",
         "parameters": [
           {
             "name": "Authorization",
@@ -23073,7 +23143,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "target",
+        "operationId": "get_warehouse_inventory_printing_targets_targetId",
         "parameters": [
           {
             "name": "Authorization",
@@ -23113,7 +23183,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "targetHistory",
+        "operationId": "get_warehouse_inventory_printing_targets_targetId_history",
         "parameters": [
           {
             "name": "Authorization",
@@ -23156,7 +23226,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "logs",
+        "operationId": "get_warehouse_inventory_printing_logs",
         "parameters": [
           {
             "name": "Authorization",
@@ -23233,7 +23303,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "jobDetail",
+        "operationId": "get_warehouse_inventory_printing_jobs_jobId",
         "parameters": [
           {
             "name": "Authorization",
@@ -23273,7 +23343,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "content",
+        "operationId": "get_warehouse_inventory_printing_jobs_jobId_items_itemId_content",
         "parameters": [
           {
             "name": "Authorization",
@@ -23335,7 +23405,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "capabilities_16",
+        "operationId": "get_warehouse_inventory_printing_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -23366,7 +23436,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "rule_1",
+        "operationId": "get_warehouse_inventory_ownership_rules_ruleId",
         "parameters": [
           {
             "name": "Authorization",
@@ -23406,7 +23476,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "resolved",
+        "operationId": "get_warehouse_inventory_ownership_resolved",
         "parameters": [
           {
             "name": "Authorization",
@@ -23473,7 +23543,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "report_4",
+        "operationId": "get_warehouse_inventory_ownership_report",
         "parameters": [
           {
             "name": "Authorization",
@@ -23531,7 +23601,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "referenceOptions",
+        "operationId": "get_warehouse_inventory_ownership_reference_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -23562,7 +23632,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "drift",
+        "operationId": "get_warehouse_inventory_ownership_drift",
         "parameters": [
           {
             "name": "Authorization",
@@ -23620,7 +23690,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "capabilities_17",
+        "operationId": "get_warehouse_inventory_ownership_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -23651,7 +23721,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "overview_1",
+        "operationId": "get_warehouse_inventory_overview",
         "parameters": [
           {
             "name": "Authorization",
@@ -23797,7 +23867,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "detail_14",
+        "operationId": "get_warehouse_inventory_outbound_orders_orderId",
         "parameters": [
           {
             "name": "Authorization",
@@ -23837,7 +23907,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "capabilities_18",
+        "operationId": "get_warehouse_inventory_outbound_orders_detail_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -23868,7 +23938,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_19",
+        "operationId": "get_warehouse_inventory_outbound_orders_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -23899,7 +23969,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "movements_2",
+        "operationId": "get_warehouse_inventory_lots_lotId_movements",
         "parameters": [
           {
             "name": "Authorization",
@@ -24022,7 +24092,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "distribution",
+        "operationId": "get_warehouse_inventory_lots_lotId_distribution",
         "parameters": [
           {
             "name": "Authorization",
@@ -24062,7 +24132,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "ledger",
+        "operationId": "get_warehouse_inventory_ledger",
         "parameters": [
           {
             "name": "Authorization",
@@ -24185,7 +24255,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "ledgerDrill",
+        "operationId": "get_warehouse_inventory_ledger_transactionId",
         "parameters": [
           {
             "name": "Authorization",
@@ -24225,7 +24295,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "ledgerRefTypes",
+        "operationId": "get_warehouse_inventory_ledger_ref_types",
         "parameters": [
           {
             "name": "Authorization",
@@ -24259,7 +24329,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_15",
+        "operationId": "get_warehouse_inventory_in_transit_legId",
         "parameters": [
           {
             "name": "Authorization",
@@ -24299,7 +24369,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "netting",
+        "operationId": "get_warehouse_inventory_in_transit_netting",
         "parameters": [
           {
             "name": "Authorization",
@@ -24376,7 +24446,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "alerts_2",
+        "operationId": "get_warehouse_inventory_in_transit_alerts",
         "parameters": [
           {
             "name": "Authorization",
@@ -24407,7 +24477,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "page_15",
+        "operationId": "get_warehouse_inventory_health",
         "parameters": [
           {
             "name": "Authorization",
@@ -24493,7 +24563,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "trend_1",
+        "operationId": "get_warehouse_inventory_health_trend",
         "parameters": [
           {
             "name": "Authorization",
@@ -24551,7 +24621,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "issues",
+        "operationId": "get_warehouse_inventory_health_issues",
         "parameters": [
           {
             "name": "Authorization",
@@ -24611,7 +24681,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "gate",
+        "operationId": "get_warehouse_inventory_health_gate",
         "parameters": [
           {
             "name": "Authorization",
@@ -24677,7 +24747,7 @@
         "tags": [
           "inventory-expiry-controller"
         ],
-        "operationId": "warehouses_1",
+        "operationId": "get_warehouse_inventory_expiry_warehouses",
         "parameters": [
           {
             "name": "Authorization",
@@ -24711,7 +24781,7 @@
         "tags": [
           "inventory-expiry-controller"
         ],
-        "operationId": "policy_1",
+        "operationId": "get_warehouse_inventory_expiry_policy_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -24751,7 +24821,7 @@
         "tags": [
           "inventory-expiry-controller"
         ],
-        "operationId": "policies_3",
+        "operationId": "get_warehouse_inventory_expiry_policies",
         "parameters": [
           {
             "name": "Authorization",
@@ -24846,7 +24916,7 @@
         "tags": [
           "inventory-expiry-controller"
         ],
-        "operationId": "lots_2",
+        "operationId": "get_warehouse_inventory_expiry_lots_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -24889,7 +24959,7 @@
         "tags": [
           "inventory-expiry-controller"
         ],
-        "operationId": "alerts_3",
+        "operationId": "get_warehouse_inventory_expiry_alerts",
         "parameters": [
           {
             "name": "Authorization",
@@ -25002,7 +25072,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "distribution_1",
+        "operationId": "get_warehouse_inventory_distribution",
         "parameters": [
           {
             "name": "Authorization",
@@ -25069,7 +25139,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "distributionSpus",
+        "operationId": "get_warehouse_inventory_distribution_spus",
         "parameters": [
           {
             "name": "Authorization",
@@ -25103,7 +25173,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "settlement",
+        "operationId": "get_warehouse_inventory_cross_entity_transfers_transferId_settlement",
         "parameters": [
           {
             "name": "Authorization",
@@ -25143,7 +25213,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "movements_3",
+        "operationId": "get_warehouse_inventory_cross_entity_transfers_transferId_movements",
         "parameters": [
           {
             "name": "Authorization",
@@ -25227,7 +25297,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_16",
+        "operationId": "get_warehouse_inventory_consignments_agreementId",
         "parameters": [
           {
             "name": "Authorization",
@@ -25267,7 +25337,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "stockView",
+        "operationId": "get_warehouse_inventory_consignments_agreementId_stock_view",
         "parameters": [
           {
             "name": "Authorization",
@@ -25307,7 +25377,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "settlementWindow_1",
+        "operationId": "get_warehouse_inventory_consignments_agreementId_settlement_window",
         "parameters": [
           {
             "name": "Authorization",
@@ -25347,7 +25417,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "sales_3",
+        "operationId": "get_warehouse_inventory_consignments_agreementId_sales",
         "parameters": [
           {
             "name": "Authorization",
@@ -25415,7 +25485,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "audit_2",
+        "operationId": "get_warehouse_inventory_consignments_agreementId_audit",
         "parameters": [
           {
             "name": "Authorization",
@@ -25467,7 +25537,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "settlements_1",
+        "operationId": "get_warehouse_inventory_consignments_settlements",
         "parameters": [
           {
             "name": "Authorization",
@@ -25535,7 +25605,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "settlementDetail_1",
+        "operationId": "get_warehouse_inventory_consignments_settlements_settlementId",
         "parameters": [
           {
             "name": "Authorization",
@@ -25575,7 +25645,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "returns",
+        "operationId": "get_warehouse_inventory_consignments_returns",
         "parameters": [
           {
             "name": "Authorization",
@@ -25643,7 +25713,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "returnDetail",
+        "operationId": "get_warehouse_inventory_consignments_returns_returnId",
         "parameters": [
           {
             "name": "Authorization",
@@ -25683,7 +25753,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_20",
+        "operationId": "get_warehouse_inventory_consignments_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -25714,7 +25784,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_21",
+        "operationId": "get_warehouse_inventory_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -25748,7 +25818,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "buckets",
+        "operationId": "get_warehouse_inventory_buckets",
         "parameters": [
           {
             "name": "Authorization",
@@ -25877,7 +25947,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "bucketActions",
+        "operationId": "get_warehouse_inventory_bucket_actions",
         "parameters": [
           {
             "name": "Authorization",
@@ -25911,7 +25981,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "resolutions",
+        "operationId": "get_warehouse_inventory_allocation_priority_resolutions",
         "parameters": [
           {
             "name": "Authorization",
@@ -25998,7 +26068,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "detail_17",
+        "operationId": "get_warehouse_inventory_allocation_priority_floors_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -26038,7 +26108,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_22",
+        "operationId": "get_warehouse_inventory_allocation_priority_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -26069,7 +26139,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "policy_2",
+        "operationId": "get_warehouse_inventory_allocation_policies_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -26109,7 +26179,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "runDetail",
+        "operationId": "get_warehouse_inventory_allocation_policies_runs_runId",
         "parameters": [
           {
             "name": "Authorization",
@@ -26149,7 +26219,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "effective_1",
+        "operationId": "get_warehouse_inventory_allocation_policies_effective",
         "parameters": [
           {
             "name": "Authorization",
@@ -26214,7 +26284,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_23",
+        "operationId": "get_warehouse_inventory_allocation_policies_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -26245,7 +26315,7 @@
         "tags": [
           "inventory-aging-controller"
         ],
-        "operationId": "slowMoving",
+        "operationId": "get_warehouse_inventory_aging_slow_moving",
         "parameters": [
           {
             "name": "Authorization",
@@ -26358,7 +26428,7 @@
         "tags": [
           "inventory-aging-controller"
         ],
-        "operationId": "policy_3",
+        "operationId": "get_warehouse_inventory_aging_policy_skuId",
         "parameters": [
           {
             "name": "Authorization",
@@ -26398,7 +26468,7 @@
         "tags": [
           "inventory-aging-controller"
         ],
-        "operationId": "policies_4",
+        "operationId": "get_warehouse_inventory_aging_policies",
         "parameters": [
           {
             "name": "Authorization",
@@ -26482,7 +26552,7 @@
         "tags": [
           "inventory-aging-controller"
         ],
-        "operationId": "buckets_1",
+        "operationId": "get_warehouse_inventory_aging_buckets",
         "parameters": [
           {
             "name": "Authorization",
@@ -26556,7 +26626,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "movements_4",
+        "operationId": "get_warehouse_goods_receipts_receiptId_movements",
         "parameters": [
           {
             "name": "Authorization",
@@ -26640,7 +26710,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_24",
+        "operationId": "get_warehouse_goods_receipts_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -26671,7 +26741,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "detail_18",
+        "operationId": "get_warehouse_goods_receipt_discrepancies_handlingId",
         "parameters": [
           {
             "name": "Authorization",
@@ -26711,7 +26781,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_25",
+        "operationId": "get_warehouse_goods_receipt_discrepancies_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -26742,7 +26812,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "transitLegs",
+        "operationId": "get_warehouse_first_mile_shipments_shipmentId_transit_legs",
         "parameters": [
           {
             "name": "Authorization",
@@ -26785,7 +26855,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "sourceCandidates",
+        "operationId": "get_warehouse_first_mile_shipments_source_candidates",
         "parameters": [
           {
             "name": "Authorization",
@@ -26871,7 +26941,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "capabilities_26",
+        "operationId": "get_warehouse_first_mile_shipments_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -26902,7 +26972,7 @@
         "tags": [
           "warehouse-detail-controller"
         ],
-        "operationId": "locations_1",
+        "operationId": "get_warehouse_facilities_id_locations",
         "parameters": [
           {
             "name": "Authorization",
@@ -26994,7 +27064,7 @@
         "tags": [
           "warehouse-detail-controller"
         ],
-        "operationId": "entryPoints",
+        "operationId": "get_warehouse_facilities_id_entrypoints",
         "parameters": [
           {
             "name": "Authorization",
@@ -27037,7 +27107,7 @@
         "tags": [
           "warehouse-config-controller"
         ],
-        "operationId": "options_2",
+        "operationId": "get_warehouse_facilities_id_config_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -27077,7 +27147,7 @@
         "tags": [
           "warehouse-config-controller"
         ],
-        "operationId": "impacts",
+        "operationId": "get_warehouse_facilities_id_config_impacts",
         "parameters": [
           {
             "name": "Authorization",
@@ -27120,7 +27190,7 @@
         "tags": [
           "warehouse-config-controller"
         ],
-        "operationId": "changes",
+        "operationId": "get_warehouse_facilities_id_config_changes",
         "parameters": [
           {
             "name": "Authorization",
@@ -27197,7 +27267,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "options_3",
+        "operationId": "get_warehouse_facilities_options",
         "parameters": [
           {
             "name": "Authorization",
@@ -27228,7 +27298,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_27",
+        "operationId": "get_warehouse_facilities_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -27262,7 +27332,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "variances",
+        "operationId": "get_warehouse_duty_taxes_estimateId_variances",
         "parameters": [
           {
             "name": "Authorization",
@@ -27305,7 +27375,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "lines_1",
+        "operationId": "get_warehouse_duty_taxes_estimateId_lines",
         "parameters": [
           {
             "name": "Authorization",
@@ -27348,7 +27418,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "varianceAnalysis",
+        "operationId": "get_warehouse_duty_taxes_variance_analysis",
         "parameters": [
           {
             "name": "Authorization",
@@ -27405,7 +27475,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "capabilities_28",
+        "operationId": "get_warehouse_duty_taxes_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -27436,7 +27506,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "detail_19",
+        "operationId": "get_warehouse_disassembly_orders_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -27476,7 +27546,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "capabilities_29",
+        "operationId": "get_warehouse_disassembly_orders_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -27507,7 +27577,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "events_1",
+        "operationId": "get_warehouse_customs_declarations_declarationId_events",
         "parameters": [
           {
             "name": "Authorization",
@@ -27550,7 +27620,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "capabilities_30",
+        "operationId": "get_warehouse_customs_declarations_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -27581,7 +27651,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "detail_20",
+        "operationId": "get_warehouse_assembly_orders_id",
         "parameters": [
           {
             "name": "Authorization",
@@ -27621,7 +27691,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "capabilities_31",
+        "operationId": "get_warehouse_assembly_orders_capabilities",
         "parameters": [
           {
             "name": "Authorization",
@@ -27652,7 +27722,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "cancel_12",
+        "operationId": "delete_warehouse_location_allocations_allocationId",
         "parameters": [
           {
             "name": "Authorization",
@@ -27690,76 +27760,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/LocationAllocationSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/parcels/{id}": {
-      "get": {
-        "tags": [
-          "parcel-detail-controller"
-        ],
-        "operationId": "detail_13",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ParcelDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/parcels/capabilities": {
-      "get": {
-        "tags": [
-          "parcel-detail-controller"
-        ],
-        "operationId": "capabilities_7",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ParcelDetailCapabilities"
                 }
               }
             }
@@ -47104,6 +47104,552 @@
           }
         }
       },
+      "ParcelCostAllocation": {
+        "type": "object",
+        "properties": {
+          "allocatableToLine": {
+            "type": "boolean"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "matchedQuantity": {
+            "type": "number"
+          },
+          "unmatchedQuantity": {
+            "type": "number"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "linkedItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unlinkedItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distinctSalesOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distinctSalesOrderLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fallbackLevel": {
+            "type": "string"
+          },
+          "fallbackReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "unmatchedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelUnmatchedItem"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetail": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ParcelDetailHeader"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelDetailItem"
+            }
+          },
+          "label": {
+            "$ref": "#/components/schemas/ParcelDetailLabel"
+          },
+          "costAllocation": {
+            "$ref": "#/components/schemas/ParcelCostAllocation"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelDetailAction"
+            }
+          },
+          "unavailable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelDetailUnavailable"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ParcelDetailAction": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailHeader": {
+        "type": "object",
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelCode": {
+            "type": "string"
+          },
+          "parcelNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "packingOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "packingOrderCode": {
+            "type": "string"
+          },
+          "packingOrderStatus": {
+            "type": "string"
+          },
+          "outboundOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundOrderCode": {
+            "type": "string"
+          },
+          "outboundSourceType": {
+            "type": "string"
+          },
+          "outboundSourceLabel": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "warehouseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseName": {
+            "type": "string",
+            "nullable": true
+          },
+          "materialId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "materialCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "materialName": {
+            "type": "string",
+            "nullable": true
+          },
+          "fillerMaterialId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fillerMaterialName": {
+            "type": "string",
+            "nullable": true
+          },
+          "outerLengthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "outerWidthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "outerHeightCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "measuredGrossWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "tareWeightG": {
+            "type": "number"
+          },
+          "netContentWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "volumeCbm": {
+            "type": "number",
+            "nullable": true
+          },
+          "measured": {
+            "type": "boolean"
+          },
+          "measuredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "measuredBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "volumeDivisorNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailItem": {
+        "type": "object",
+        "properties": {
+          "parcelItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "serialId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "serialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "recountLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundLineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "declarationSource": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "declaredItemName": {
+            "type": "string"
+          },
+          "declaredOriginCountryCode": {
+            "type": "string"
+          },
+          "salesOrderLines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelItemSalesOrderLine"
+            }
+          },
+          "orderLineNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailLabel": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "printJobId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "jobNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "jobStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "jobStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "copies": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "targetType": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "waybillNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "carrierCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "shipToName": {
+            "type": "string",
+            "nullable": true
+          },
+          "shipToAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetPrintCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "firstPrintedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastPrintedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "printCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "labelPrintedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailUnavailable": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelItemSalesOrderLine": {
+        "type": "object",
+        "properties": {
+          "linkId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "salesOrderLineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "salesLineQuantity": {
+            "type": "number"
+          },
+          "matchBasis": {
+            "type": "string"
+          },
+          "matchBasisLabel": {
+            "type": "string"
+          },
+          "strongMatch": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ParcelUnmatchedItem": {
+        "type": "object",
+        "properties": {
+          "parcelItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ParcelCostAllocationPolicy": {
+        "type": "object",
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "lineLevelSupported": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailCapabilities": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelDetailUnavailable"
+            }
+          },
+          "costAllocationPolicy": {
+            "$ref": "#/components/schemas/ParcelCostAllocationPolicy"
+          },
+          "upstreamModules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "downstreamModules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
       "PackingPage": {
         "type": "object",
         "properties": {
@@ -63436,552 +63982,6 @@
           "reason": {
             "type": "string",
             "nullable": true
-          }
-        }
-      },
-      "ParcelCostAllocation": {
-        "type": "object",
-        "properties": {
-          "allocatableToLine": {
-            "type": "boolean"
-          },
-          "totalQuantity": {
-            "type": "number"
-          },
-          "matchedQuantity": {
-            "type": "number"
-          },
-          "unmatchedQuantity": {
-            "type": "number"
-          },
-          "itemCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "linkedItemCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "unlinkedItemCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "distinctSalesOrderCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "distinctSalesOrderLineCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "fallbackLevel": {
-            "type": "string"
-          },
-          "fallbackReason": {
-            "type": "string",
-            "nullable": true
-          },
-          "unmatchedItems": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ParcelUnmatchedItem"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ParcelDetail": {
-        "type": "object",
-        "properties": {
-          "header": {
-            "$ref": "#/components/schemas/ParcelDetailHeader"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ParcelDetailItem"
-            }
-          },
-          "label": {
-            "$ref": "#/components/schemas/ParcelDetailLabel"
-          },
-          "costAllocation": {
-            "$ref": "#/components/schemas/ParcelCostAllocation"
-          },
-          "actions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ParcelDetailAction"
-            }
-          },
-          "unavailable": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ParcelDetailUnavailable"
-            }
-          },
-          "notes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "ParcelDetailAction": {
-        "type": "object",
-        "properties": {
-          "action": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "href": {
-            "type": "string",
-            "nullable": true
-          },
-          "ownerModule": {
-            "type": "string"
-          },
-          "precondition": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ParcelDetailHeader": {
-        "type": "object",
-        "properties": {
-          "parcelId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "parcelCode": {
-            "type": "string"
-          },
-          "parcelNo": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "packingOrderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "packingOrderCode": {
-            "type": "string"
-          },
-          "packingOrderStatus": {
-            "type": "string"
-          },
-          "outboundOrderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "outboundOrderCode": {
-            "type": "string"
-          },
-          "outboundSourceType": {
-            "type": "string"
-          },
-          "outboundSourceLabel": {
-            "type": "string"
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "warehouseCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "warehouseName": {
-            "type": "string",
-            "nullable": true
-          },
-          "materialId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "materialCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "materialName": {
-            "type": "string",
-            "nullable": true
-          },
-          "fillerMaterialId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "fillerMaterialName": {
-            "type": "string",
-            "nullable": true
-          },
-          "outerLengthCm": {
-            "type": "number",
-            "nullable": true
-          },
-          "outerWidthCm": {
-            "type": "number",
-            "nullable": true
-          },
-          "outerHeightCm": {
-            "type": "number",
-            "nullable": true
-          },
-          "measuredGrossWeightG": {
-            "type": "number",
-            "nullable": true
-          },
-          "tareWeightG": {
-            "type": "number"
-          },
-          "netContentWeightG": {
-            "type": "number",
-            "nullable": true
-          },
-          "volumeCbm": {
-            "type": "number",
-            "nullable": true
-          },
-          "measured": {
-            "type": "boolean"
-          },
-          "measuredAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "measuredBy": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "itemCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalQuantity": {
-            "type": "number"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "volumeDivisorNote": {
-            "type": "string"
-          }
-        }
-      },
-      "ParcelDetailItem": {
-        "type": "object",
-        "properties": {
-          "parcelItemId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "itemNo": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "serialId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "serialNumber": {
-            "type": "string",
-            "nullable": true
-          },
-          "recountLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "outboundLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "outboundLineNo": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "declarationSource": {
-            "type": "string"
-          },
-          "hsCode": {
-            "type": "string"
-          },
-          "declaredItemName": {
-            "type": "string"
-          },
-          "declaredOriginCountryCode": {
-            "type": "string"
-          },
-          "salesOrderLines": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ParcelItemSalesOrderLine"
-            }
-          },
-          "orderLineNote": {
-            "type": "string"
-          }
-        }
-      },
-      "ParcelDetailLabel": {
-        "type": "object",
-        "properties": {
-          "available": {
-            "type": "boolean"
-          },
-          "printJobId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "jobNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "jobStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "jobStatusLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "copies": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "targetType": {
-            "type": "string",
-            "nullable": true
-          },
-          "externalRef": {
-            "type": "string",
-            "nullable": true
-          },
-          "waybillNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "carrierCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "shipToName": {
-            "type": "string",
-            "nullable": true
-          },
-          "shipToAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "platformCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "targetPrintCount": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "firstPrintedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "lastPrintedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "printCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "labelPrintedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ParcelDetailUnavailable": {
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string",
-            "nullable": true
-          },
-          "href": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "ParcelItemSalesOrderLine": {
-        "type": "object",
-        "properties": {
-          "linkId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "salesOrderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "salesOrderLineId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "salesOrderNo": {
-            "type": "string"
-          },
-          "salesOrderLineNo": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "allocatedQuantity": {
-            "type": "number"
-          },
-          "salesLineQuantity": {
-            "type": "number"
-          },
-          "matchBasis": {
-            "type": "string"
-          },
-          "matchBasisLabel": {
-            "type": "string"
-          },
-          "strongMatch": {
-            "type": "boolean"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "ParcelUnmatchedItem": {
-        "type": "object",
-        "properties": {
-          "parcelItemId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "itemNo": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "skuName": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "reason": {
-            "type": "string"
-          },
-          "ownerModule": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ParcelCostAllocationPolicy": {
-        "type": "object",
-        "properties": {
-          "basis": {
-            "type": "string"
-          },
-          "lineLevelSupported": {
-            "type": "boolean"
-          },
-          "ownerModule": {
-            "type": "string",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string"
-          }
-        }
-      },
-      "ParcelDetailCapabilities": {
-        "type": "object",
-        "properties": {
-          "sections": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ParcelDetailUnavailable"
-            }
-          },
-          "costAllocationPolicy": {
-            "$ref": "#/components/schemas/ParcelCostAllocationPolicy"
-          },
-          "upstreamModules": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "downstreamModules": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "note": {
-            "type": "string"
           }
         }
       }

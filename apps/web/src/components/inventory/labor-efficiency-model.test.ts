@@ -98,11 +98,16 @@ describe('趋势：空白日要说成「当天无作业」', () => {
   });
 
   it('空白日显式说出来，而不是让它看起来像产量没变', () => {
-    expect(trendPointText({ workDay: '2026-10-05', taskCount: 0, activeOperators: 0, pickedPieces: 0 })).toBe(
-      '2026-10-05：当天无作业',
-    );
     expect(
-      trendPointText({ workDay: '2026-10-06', taskCount: 3, activeOperators: 2, pickedPieces: 120 }),
+      trendPointText({ workDay: '2026-10-05', taskCount: 0, activeOperators: 0, pickedPieces: 0 }),
+    ).toBe('2026-10-05：当天无作业');
+    expect(
+      trendPointText({
+        workDay: '2026-10-06',
+        taskCount: 3,
+        activeOperators: 2,
+        pickedPieces: 120,
+      }),
     ).toBe('2026-10-06：3 张任务 / 2 人 / 拣货 120 件');
   });
 });
@@ -131,10 +136,18 @@ describe('状态色', () => {
 
 describe('校验：界面上先拦住，用户就不用等 422', () => {
   it('建任务必须选类型、选仓库、填来源模块号', () => {
-    expect(createTaskProblem({ workType: '', warehouseId: 'w1', sourceModule: '8.5.1.1' })).toContain('作业类型');
-    expect(createTaskProblem({ workType: 'PICKING', warehouseId: '', sourceModule: '8.5.1.1' })).toContain('仓库');
-    expect(createTaskProblem({ workType: 'PICKING', warehouseId: 'w1', sourceModule: '  ' })).toContain('来源模块号');
-    expect(createTaskProblem({ workType: 'PICKING', warehouseId: 'w1', sourceModule: '8.5.1.1' })).toBeNull();
+    expect(
+      createTaskProblem({ workType: '', warehouseId: 'w1', sourceModule: '8.5.1.1' }),
+    ).toContain('作业类型');
+    expect(
+      createTaskProblem({ workType: 'PICKING', warehouseId: '', sourceModule: '8.5.1.1' }),
+    ).toContain('仓库');
+    expect(
+      createTaskProblem({ workType: 'PICKING', warehouseId: 'w1', sourceModule: '  ' }),
+    ).toContain('来源模块号');
+    expect(
+      createTaskProblem({ workType: 'PICKING', warehouseId: 'w1', sourceModule: '8.5.1.1' }),
+    ).toBeNull();
   });
 
   it('差错件数不得超过作业件数', () => {

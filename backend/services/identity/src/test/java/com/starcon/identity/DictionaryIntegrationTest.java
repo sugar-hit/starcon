@@ -9,7 +9,6 @@ import com.starcon.tenancy.TenantTransactions;
 import java.sql.DriverManager;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -21,32 +20,28 @@ import org.springframework.transaction.support.TransactionTemplate;
  * <p>重点不是「能存进去」，而是蓝图点名的三条硬要求真的成立，外加多租户三断言：
  *
  * <ol>
- *   <li><b>租户级自定义扩展</b>——目录是平台出厂的全局码表，字典项由租户自己建，
- *       同一目录在不同租户下条目数可以不同，且互不可见。
- *   <li><b>不允许修改已被历史数据引用的编码</b>——被引用后 PUT 改编码返回 409；
- *       直接绕过应用连库改也会被 {@code dict_item_update_guard()} 触发器挡下；
- *       名称与说明仍可改。
- *   <li><b>字典项被引用后只能停用不能删除</b>——控制器没有 DELETE 端点（405），
- *       {@code identity_app} 没有 DELETE 权限，外键 RESTRICT，
- *       {@code dict_item_delete_guard()} 触发器挡下所有 DELETE。
+ *   <li><b>租户级自定义扩展</b>——目录是平台出厂的全局码表，字典项由租户自己建， 同一目录在不同租户下条目数可以不同，且互不可见。
+ *   <li><b>不允许修改已被历史数据引用的编码</b>——被引用后 PUT 改编码返回 409； 直接绕过应用连库改也会被 {@code dict_item_update_guard()}
+ *       触发器挡下； 名称与说明仍可改。
+ *   <li><b>字典项被引用后只能停用不能删除</b>——控制器没有 DELETE 端点（405）， {@code identity_app} 没有 DELETE 权限，外键
+ *       RESTRICT， {@code dict_item_delete_guard()} 触发器挡下所有 DELETE。
  * </ol>
  *
- * <p>时间字段全部按值断言：用 {@code Timestamp.valueOf(LocalDateTime)} 绑 timestamptz
- * 会静默偏 −28800 秒，所以 {@code disabledAt} / {@code updatedAt} / {@code changedAt}
- * 都落在"请求前后两个墙钟之间"才算通过。
+ * <p>时间字段全部按值断言：用 {@code Timestamp.valueOf(LocalDateTime)} 绑 timestamptz 会静默偏 −28800 秒，所以 {@code
+ * disabledAt} / {@code updatedAt} / {@code changedAt} 都落在"请求前后两个墙钟之间"才算通过。
  */
 class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
 
   /**
    * 每个用例前清空本模块的数据。
    *
-   * <p>容器与 local-admin 租户在所有测试类之间共享（见 IdentityIntegrationTestBase）。
-   * {@code dict_item} 与 {@code dict_history} 都有行级触发器（删除保护 / 不可篡改），
-   * 普通 DELETE 会被挡下，所以用 TRUNCATE —— 它不触发行级触发器。
+   * <p>容器与 local-admin 租户在所有测试类之间共享（见 IdentityIntegrationTestBase）。 {@code dict_item} 与 {@code
+   * dict_history} 都有行级触发器（删除保护 / 不可篡改）， 普通 DELETE 会被挡下，所以用 TRUNCATE —— 它不触发行级触发器。
    */
   @org.junit.jupiter.api.BeforeEach
   void resetModule() throws Exception {
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
         var s = c.createStatement()) {
       s.execute("truncate dict_history, dict_item_usage, dict_item");
     }
@@ -58,7 +53,8 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
 
   /** 租户外直连（绕过应用连接池与租户上下文），用于触发器级别的断言。 */
   private void asSuperuser(String statement) throws Exception {
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
         var s = c.createStatement()) {
       s.execute(statement);
     }
@@ -74,8 +70,11 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
 
   private JsonNode items(String token, String query) throws Exception {
     return request(
-        token, "GET", "/identity/dict-items" + (query == null || query.isEmpty() ? "" : "?" + query),
-        null, 200);
+        token,
+        "GET",
+        "/identity/dict-items" + (query == null || query.isEmpty() ? "" : "?" + query),
+        null,
+        200);
   }
 
   private JsonNode findItem(JsonNode list, String itemCode) {
@@ -116,7 +115,8 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
   }
 
   private UUID tenantOf(String token) throws Exception {
-    return UUID.fromString(request(token, "GET", "/identity/tenants/current", null, 200).get("tenantId").asText());
+    return UUID.fromString(
+        request(token, "GET", "/identity/tenants/current", null, 200).get("tenantId").asText());
   }
 
   // ------------------------------------------------------------------
@@ -152,7 +152,9 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     var fresh = findCatalog(list, "UNIT_TYPE");
     assertThat(fresh.get("itemCount").asLong()).isNotNegative();
     assertThat(fresh.get("itemCount").asLong())
-        .isEqualTo(fresh.get("activeItemCount").asLong() + countDisabled(items(token, "dictCode=UNIT_TYPE")));
+        .isEqualTo(
+            fresh.get("activeItemCount").asLong()
+                + countDisabled(items(token, "dictCode=UNIT_TYPE")));
   }
 
   /** UNIT_TYPE 下停用项的数量，用来核对 active_item_count 确实只数 ACTIVE。 */
@@ -181,18 +183,20 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
         "POST",
         "/identity/children",
         Map.of(
-            "code", "DC" + tag,
-            "name", "数据字典子租户",
-            "ownerUsername", childUser,
-            "ownerPassword", "test-member-password"),
+            "code",
+            "DC" + tag,
+            "name",
+            "数据字典子租户",
+            "ownerUsername",
+            childUser,
+            "ownerPassword",
+            "test-member-password"),
         200);
     String childToken = loginUser(childUser);
     createItem(childToken, "ORDER_STATUS", "CHILD_ONLY_" + tag, "子租户专属状态");
 
     var childCatalog = findCatalog(catalog(childToken), "ORDER_STATUS");
-    assertThat(childCatalog.get("itemCount").asLong())
-        .as("父租户建的字典项不得计入子租户")
-        .isEqualTo(1);
+    assertThat(childCatalog.get("itemCount").asLong()).as("父租户建的字典项不得计入子租户").isEqualTo(1);
     assertThat(items(childToken, "dictCode=ORDER_STATUS").toString())
         .contains("CHILD_ONLY_" + tag)
         .doesNotContain("PAID_" + tag);
@@ -211,12 +215,7 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
         itemInput("ORDER_STATUS", "paid_" + tag, "已付款"),
         400);
     // 单个字符的编码太短：编码会进单据、报表与导出，太短没有区分度
-    request(
-        token,
-        "POST",
-        "/identity/dict-items",
-        itemInput("ORDER_STATUS", "P", "已付款"),
-        400);
+    request(token, "POST", "/identity/dict-items", itemInput("ORDER_STATUS", "P", "已付款"), 400);
     // 编码含不允许的字符
     request(
         token,
@@ -224,11 +223,13 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
         "/identity/dict-items",
         itemInput("ORDER_STATUS", "PAID-" + tag, "已付款"),
         400);
-    request(token, "POST", "/identity/dict-items", itemInput("NO_SUCH_DICT", "OK_" + tag, "不存在"), 400);
+    request(
+        token, "POST", "/identity/dict-items", itemInput("NO_SUCH_DICT", "OK_" + tag, "不存在"), 400);
 
     createItem(token, "ORDER_STATUS", "PAID_" + tag, "已付款");
     // 同字典下编码唯一，撞码 409 而不是覆盖
-    request(token, "POST", "/identity/dict-items", itemInput("ORDER_STATUS", "PAID_" + tag, "重复"), 409);
+    request(
+        token, "POST", "/identity/dict-items", itemInput("ORDER_STATUS", "PAID_" + tag, "重复"), 409);
     // 不同字典下同一编码互不冲突：唯一约束是 (租户, 字典, 编码)，不是 (租户, 编码)
     createItem(token, "AFTERSALE_REASON", "PAID_" + tag, "售后原因");
     assertThat(items(token, "dictCode=AFTERSALE_REASON").toString()).contains("PAID_" + tag);
@@ -274,8 +275,10 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     }
 
     // 列表口径与详情口径一致：引用统计不是两个各算各的数
-    assertThat(findItem(items(token, "dictCode=ORDER_CANCEL_REASON"), "CANCEL_" + tag)
-            .get("referenceCount").asLong())
+    assertThat(
+            findItem(items(token, "dictCode=ORDER_CANCEL_REASON"), "CANCEL_" + tag)
+                .get("referenceCount")
+                .asLong())
         .isEqualTo(137);
   }
 
@@ -292,9 +295,7 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     var row = request(token, "GET", "/identity/dict-items/" + id, null, 200);
     assertThat(row.get("referenceCount").asLong()).isZero();
     assertThat(row.get("referencingSystems").asLong()).isEqualTo(1);
-    assertThat(row.get("referenced").asBoolean())
-        .as("计数归零只说明当下没人用，历史单据里还留着它，仍算被引用")
-        .isTrue();
+    assertThat(row.get("referenced").asBoolean()).as("计数归零只说明当下没人用，历史单据里还留着它，仍算被引用").isTrue();
 
     // 归零之后编码依然锁死
     var input = itemInput("INVENTORY_ADJUST_REASON", "DAMAGE_" + tag, "报损");
@@ -321,14 +322,14 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
         .andExpect(status().isMethodNotAllowed());
 
     // 防线二：identity_app 没有 DELETE 权限。
-    try (var c = DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
+    try (var c =
+            DriverManager.getConnection(pg().getJdbcUrl(), pg().getUsername(), pg().getPassword());
         var s = c.createStatement();
-        var rs = s.executeQuery(
-            "select has_table_privilege('identity_app','dict_item','DELETE') as can_delete")) {
+        var rs =
+            s.executeQuery(
+                "select has_table_privilege('identity_app','dict_item','DELETE') as can_delete")) {
       rs.next();
-      assertThat(rs.getBoolean("can_delete"))
-          .as("迁移只授予 SELECT/INSERT/UPDATE，不授予 DELETE")
-          .isFalse();
+      assertThat(rs.getBoolean("can_delete")).as("迁移只授予 SELECT/INSERT/UPDATE，不授予 DELETE").isFalse();
     }
 
     // 防线三 + 四：外键 RESTRICT 与删除保护触发器。
@@ -343,8 +344,8 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
         .as("字典项不提供物理删除，触发器必须拒绝")
         .isInstanceOf(Exception.class);
     // 字典项还在
-    assertThat(request(token, "GET", "/identity/dict-items/" + id, null, 200)
-            .get("itemCode").asText())
+    assertThat(
+            request(token, "GET", "/identity/dict-items/" + id, null, 200).get("itemCode").asText())
         .isEqualTo("PAID_" + tag);
   }
 
@@ -359,8 +360,12 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
         .isInstanceOf(Exception.class);
 
     // 正确路径是停用
-    request(token, "POST", "/identity/dict-items/" + id + "/deactivate",
-        Map.of("status", "DISABLED", "reason", "促销季结束"), 200);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + id + "/deactivate",
+        Map.of("status", "DISABLED", "reason", "促销季结束"),
+        200);
     var row = request(token, "GET", "/identity/dict-items/" + id, null, 200);
     assertThat(row.get("status").asText()).isEqualTo("DISABLED");
     assertThat(row.get("disabledReason").asText()).isEqualTo("促销季结束");
@@ -376,14 +381,19 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     recordUsage(token, id, "trade", 12);
 
     OffsetDateTime before = OffsetDateTime.now();
-    request(token, "POST", "/identity/dict-items/" + id + "/deactivate",
-        Map.of("status", "DISABLED", "reason", "该原因已废弃"), 200);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + id + "/deactivate",
+        Map.of("status", "DISABLED", "reason", "该原因已废弃"),
+        200);
     var off = request(token, "GET", "/identity/dict-items/" + id, null, 200);
 
     // 停用时刻按值断言：用 Timestamp.valueOf(LocalDateTime) 绑 timestamptz 会静默偏 −28800 秒
     OffsetDateTime disabledAt = OffsetDateTime.parse(off.get("disabledAt").asText());
     assertThat(disabledAt.toInstant())
-        .isBetween(before.toInstant().minusSeconds(5), OffsetDateTime.now().toInstant().plusSeconds(5));
+        .isBetween(
+            before.toInstant().minusSeconds(5), OffsetDateTime.now().toInstant().plusSeconds(5));
     assertThat(off.get("version").asLong()).isEqualTo(1);
 
     // 停用不影响引用统计：已经发生的历史引用是事实
@@ -393,12 +403,17 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     // 停用的项不进下拉选项，但列表里还看得见
     assertThat(items(token, "dictCode=ORDER_CANCEL_REASON&status=DISABLED").toString())
         .contains("STOCKOUT_" + tag);
-    var options = request(token, "GET", "/identity/dict-items/options/ORDER_CANCEL_REASON", null, 200);
+    var options =
+        request(token, "GET", "/identity/dict-items/options/ORDER_CANCEL_REASON", null, 200);
     assertThat(options.toString()).doesNotContain("STOCKOUT_" + tag);
 
     // 恢复保持同一个 id 与同一份引用台账
-    request(token, "POST", "/identity/dict-items/" + id + "/reactivate",
-        Map.of("status", "ACTIVE", "reason", "误停用，恢复"), 200);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + id + "/reactivate",
+        Map.of("status", "ACTIVE", "reason", "误停用，恢复"),
+        200);
     var on = request(token, "GET", "/identity/dict-items/" + id, null, 200);
     assertThat(on.get("id").asText()).isEqualTo(id.toString());
     assertThat(on.get("status").asText()).isEqualTo("ACTIVE");
@@ -406,12 +421,24 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     assertThat(on.get("version").asLong()).isEqualTo(2);
 
     // 重复停用 409、重复恢复 409，不静默改时刻
-    request(token, "POST", "/identity/dict-items/" + id + "/reactivate",
-        Map.of("status", "ACTIVE", "reason", "再恢复一次"), 409);
-    request(token, "POST", "/identity/dict-items/" + id + "/deactivate",
-        Map.of("status", "DISABLED", "reason", "停用"), 200);
-    request(token, "POST", "/identity/dict-items/" + id + "/deactivate",
-        Map.of("status", "DISABLED", "reason", "再停一次"), 409);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + id + "/reactivate",
+        Map.of("status", "ACTIVE", "reason", "再恢复一次"),
+        409);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + id + "/deactivate",
+        Map.of("status", "DISABLED", "reason", "停用"),
+        200);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + id + "/deactivate",
+        Map.of("status", "DISABLED", "reason", "再停一次"),
+        409);
   }
 
   @Test
@@ -421,17 +448,38 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     UUID id = createItem(token, "SHELF_STATUS", "LISTED_" + tag, "已上架");
 
     // 停用必须带原因
-    request(token, "POST", "/identity/dict-items/" + id + "/deactivate",
-        Map.of("status", "DISABLED", "reason", ""), 400);
-    request(token, "POST", "/identity/dict-items/" + id + "/deactivate", Map.of("status", "DISABLED"), 400);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + id + "/deactivate",
+        Map.of("status", "DISABLED", "reason", ""),
+        400);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + id + "/deactivate",
+        Map.of("status", "DISABLED"),
+        400);
     // 方向不能搞反：停用端点只收 DISABLED
-    request(token, "POST", "/identity/dict-items/" + id + "/deactivate",
-        Map.of("status", "ACTIVE", "reason", "方向反了"), 400);
-    request(token, "POST", "/identity/dict-items/" + id + "/reactivate",
-        Map.of("status", "DISABLED", "reason", "方向反了"), 400);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + id + "/deactivate",
+        Map.of("status", "ACTIVE", "reason", "方向反了"),
+        400);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + id + "/reactivate",
+        Map.of("status", "DISABLED", "reason", "方向反了"),
+        400);
     // 非法状态值
-    request(token, "POST", "/identity/dict-items/" + id + "/deactivate",
-        Map.of("status", "RETIRED", "reason", "非法状态"), 400);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + id + "/deactivate",
+        Map.of("status", "RETIRED", "reason", "非法状态"),
+        400);
   }
 
   // ------------------------------------------------------------------
@@ -446,8 +494,12 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     recordUsage(token, id, "trade", 55);
 
     // 被引用后改编码 → 409
-    request(token, "PUT", "/identity/dict-items/" + id,
-        itemInput("ORDER_CANCEL_REASON", "BUYER_CANCEL_" + tag, "买家取消"), 409);
+    request(
+        token,
+        "PUT",
+        "/identity/dict-items/" + id,
+        itemInput("ORDER_CANCEL_REASON", "BUYER_CANCEL_" + tag, "买家取消"),
+        409);
 
     // 名称与说明仍可改：业务含义变了要能改，承载历史数据的那个字符串不能改
     var edit = new LinkedHashMap<String, Object>();
@@ -468,16 +520,17 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     noCode.put("name", "买家自行取消");
     noCode.put("description", "不传编码");
     request(token, "PUT", "/identity/dict-items/" + id, noCode, 200);
-    assertThat(request(token, "GET", "/identity/dict-items/" + id, null, 200)
-            .get("itemCode").asText())
+    assertThat(
+            request(token, "GET", "/identity/dict-items/" + id, null, 200).get("itemCode").asText())
         .isEqualTo("CANCEL_" + tag);
 
     // 绕过应用直接改编码：触发器必须挡下
-    assertThatCode(() -> asSuperuser("update dict_item set item_code='HACKED' where id='" + id + "'"))
+    assertThatCode(
+            () -> asSuperuser("update dict_item set item_code='HACKED' where id='" + id + "'"))
         .as("dict_item_update_guard() 必须在数据库层拒绝改被引用编码")
         .isInstanceOf(Exception.class);
-    assertThat(request(token, "GET", "/identity/dict-items/" + id, null, 200)
-            .get("itemCode").asText())
+    assertThat(
+            request(token, "GET", "/identity/dict-items/" + id, null, 200).get("itemCode").asText())
         .isEqualTo("CANCEL_" + tag);
   }
 
@@ -488,24 +541,40 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     UUID id = createItem(token, "PRODUCT_TAG", "TEMP_" + tag, "临时标签");
 
     // 未被引用 → 编码可改
-    request(token, "PUT", "/identity/dict-items/" + id,
-        itemInput("PRODUCT_TAG", "KEPT_" + tag, "临时标签"), 200);
-    assertThat(request(token, "GET", "/identity/dict-items/" + id, null, 200)
-            .get("itemCode").asText())
+    request(
+        token,
+        "PUT",
+        "/identity/dict-items/" + id,
+        itemInput("PRODUCT_TAG", "KEPT_" + tag, "临时标签"),
+        200);
+    assertThat(
+            request(token, "GET", "/identity/dict-items/" + id, null, 200).get("itemCode").asText())
         .isEqualTo("KEPT_" + tag);
 
     // 换字典等于换一条记录：会把这个字典项的引用统计切成两半
-    request(token, "PUT", "/identity/dict-items/" + id,
-        itemInput("PRODUCT_CATEGORY", "KEPT_" + tag, "临时标签"), 400);
+    request(
+        token,
+        "PUT",
+        "/identity/dict-items/" + id,
+        itemInput("PRODUCT_CATEGORY", "KEPT_" + tag, "临时标签"),
+        400);
     // 改到同字典下已被占用的编码 → 409
     createItem(token, "PRODUCT_TAG", "TAKEN_" + tag, "已被占用");
-    request(token, "PUT", "/identity/dict-items/" + id,
-        itemInput("PRODUCT_TAG", "TAKEN_" + tag, "临时标签"), 409);
+    request(
+        token,
+        "PUT",
+        "/identity/dict-items/" + id,
+        itemInput("PRODUCT_TAG", "TAKEN_" + tag, "临时标签"),
+        409);
     // 但改成同字典下没被占用的编码是可以的
-    request(token, "PUT", "/identity/dict-items/" + id,
-        itemInput("PRODUCT_TAG", "FREE_" + tag, "临时标签"), 200);
-    assertThat(request(token, "GET", "/identity/dict-items/" + id, null, 200)
-            .get("itemCode").asText())
+    request(
+        token,
+        "PUT",
+        "/identity/dict-items/" + id,
+        itemInput("PRODUCT_TAG", "FREE_" + tag, "临时标签"),
+        200);
+    assertThat(
+            request(token, "GET", "/identity/dict-items/" + id, null, 200).get("itemCode").asText())
         .isEqualTo("FREE_" + tag);
   }
 
@@ -525,8 +594,12 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     edit.put("name", "发错商品");
     edit.put("description", "改名");
     request(token, "PUT", "/identity/dict-items/" + id, edit, 200);
-    request(token, "POST", "/identity/dict-items/" + id + "/deactivate",
-        Map.of("status", "DISABLED", "reason", "改由品质部处理"), 200);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + id + "/deactivate",
+        Map.of("status", "DISABLED", "reason", "改由品质部处理"),
+        200);
 
     var history = request(token, "GET", "/identity/dict-history?itemId=" + id, null, 200);
     assertThat(history).hasSize(3);
@@ -553,7 +626,8 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
             OffsetDateTime.now().plusMinutes(1).toInstant());
 
     // 不可篡改：直连数据库改历史会被触发器挡下
-    assertThatCode(() -> asSuperuser("update dict_history set reason='篡改' where tenant_id is not null"))
+    assertThatCode(
+            () -> asSuperuser("update dict_history set reason='篡改' where tenant_id is not null"))
         .as("dict_history_immutable() 必须拒绝 UPDATE")
         .isInstanceOf(Exception.class);
     assertThatCode(() -> asSuperuser("delete from dict_history"))
@@ -577,13 +651,15 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     // 编码刻意不含彼此的子串（KILOGRAM 含 GRAM），否则 doesNotContain 断言测不出东西
     createItem(token, "UNIT_TYPE", "KILOGRAM_" + tag, "千克");
     UUID off = createItem(token, "UNIT_TYPE", "OUNCE_" + tag, "盎司");
-    request(token, "POST", "/identity/dict-items/" + off + "/deactivate",
-        Map.of("status", "DISABLED", "reason", "暂时不用"), 200);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + off + "/deactivate",
+        Map.of("status", "DISABLED", "reason", "暂时不用"),
+        200);
 
     var options = request(token, "GET", "/identity/dict-items/options/UNIT_TYPE", null, 200);
-    assertThat(options.toString())
-        .contains("KILOGRAM_" + tag)
-        .doesNotContain("OUNCE_" + tag);
+    assertThat(options.toString()).contains("KILOGRAM_" + tag).doesNotContain("OUNCE_" + tag);
     for (JsonNode n : options) assertThat(n.get("status").asText()).isEqualTo("ACTIVE");
 
     // 字典不存在 404：空数组会被调用方渲染成「这个字典没有可选项」，与「字典配错了」是两回事
@@ -597,8 +673,12 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     createItem(token, "ORDER_STATUS", "WAITPAY_" + tag, "待付款");
     createItem(token, "ORDER_STATUS", "PAID_" + tag, "已付款");
     UUID off = createItem(token, "ORDER_STATUS", "CLOSED_" + tag, "已关闭");
-    request(token, "POST", "/identity/dict-items/" + off + "/deactivate",
-        Map.of("status", "DISABLED", "reason", "已归档"), 200);
+    request(
+        token,
+        "POST",
+        "/identity/dict-items/" + off + "/deactivate",
+        Map.of("status", "DISABLED", "reason", "已归档"),
+        200);
 
     // 按编码搜
     assertThat(items(token, "dictCode=ORDER_STATUS&search=waitpay").toString())
@@ -628,8 +708,12 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
 
     UUID parentItem = createItem(owner, "PRODUCT_CATEGORY", "PTC_" + tag, "父租户分类");
     recordUsage(owner, parentItem, "catalog", 21);
-    request(owner, "POST", "/identity/dict-items/" + parentItem + "/deactivate",
-        Map.of("status", "DISABLED", "reason", "父租户停用"), 200);
+    request(
+        owner,
+        "POST",
+        "/identity/dict-items/" + parentItem + "/deactivate",
+        Map.of("status", "DISABLED", "reason", "父租户停用"),
+        200);
 
     // 子租户造一套完全不同的数据
     String childUser = "dict-iso-" + tag.toLowerCase();
@@ -638,10 +722,14 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
         "POST",
         "/identity/children",
         Map.of(
-            "code", "DI" + tag,
-            "name", "数据字典隔离子租户",
-            "ownerUsername", childUser,
-            "ownerPassword", "test-member-password"),
+            "code",
+            "DI" + tag,
+            "name",
+            "数据字典隔离子租户",
+            "ownerUsername",
+            childUser,
+            "ownerPassword",
+            "test-member-password"),
         200);
     String childToken = loginUser(childUser);
     UUID childItem = createItem(childToken, "PRODUCT_CATEGORY", "CTC_" + tag, "子租户分类");
@@ -662,12 +750,24 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     // 父租户拿子租户的 id 直接读必须是 404，不是 403（否则泄露「这个 id 存在」）
     request(owner, "GET", "/identity/dict-items/" + childItem, null, 404);
     request(owner, "GET", "/identity/dict-items/" + childItem + "/usage", null, 404);
-    request(owner, "POST", "/identity/dict-items/" + childItem + "/deactivate",
-        Map.of("status", "DISABLED", "reason", "越权"), 404);
-    request(owner, "POST", "/identity/dict-items/" + childItem + "/usage",
-        Map.of("sourceSystem", "catalog", "usageCount", 1, "note", "越权"), 404);
-    request(owner, "PUT", "/identity/dict-items/" + childItem,
-        itemInput("PRODUCT_CATEGORY", "HACK_" + tag, "越权"), 404);
+    request(
+        owner,
+        "POST",
+        "/identity/dict-items/" + childItem + "/deactivate",
+        Map.of("status", "DISABLED", "reason", "越权"),
+        404);
+    request(
+        owner,
+        "POST",
+        "/identity/dict-items/" + childItem + "/usage",
+        Map.of("sourceSystem", "catalog", "usageCount", 1, "note", "越权"),
+        404);
+    request(
+        owner,
+        "PUT",
+        "/identity/dict-items/" + childItem,
+        itemInput("PRODUCT_CATEGORY", "HACK_" + tag, "越权"),
+        404);
     // 变更历史也隔离
     assertThat(request(owner, "GET", "/identity/dict-history", null, 200).toString())
         .doesNotContain("CTC_" + tag);
@@ -697,9 +797,7 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
             .andReturn()
             .getResponse()
             .getContentAsString();
-    assertThat(forgedChild)
-        .contains("PTC_" + tag)
-        .doesNotContain("CTC_" + tag);
+    assertThat(forgedChild).contains("PTC_" + tag).doesNotContain("CTC_" + tag);
     // 未登录查不到任何字典项
     http.perform(get("/identity/dict-items")).andExpect(status().isUnauthorized());
     http.perform(get("/identity/dict-catalog")).andExpect(status().isUnauthorized());
@@ -723,7 +821,6 @@ class DictionaryIntegrationTest extends IdentityIntegrationTestBase {
     // 事务外（无租户上下文）直查应当为空
     assertThat(sql.fetch("select id from dict_item")).isEmpty();
     assertThat(sql.fetch("select id from dict_item_usage")).isEmpty();
-    assertThat(tx().run(tenantOf(owner), () -> sql.fetch("select id from dict_item")))
-        .isNotEmpty();
+    assertThat(tx().run(tenantOf(owner), () -> sql.fetch("select id from dict_item"))).isNotEmpty();
   }
 }

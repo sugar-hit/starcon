@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component;
 /**
  * SPU 列表导出数据源（上游 3.1.1.1 SPU 列表）。
  *
- * <p>字段与筛选条件**与 3.1.1.1 列表页同源**：导出只是把同一套条件下的另一批行取出来，
- * 不是另立一套口径。排序键同样取自列表页支持的那些列。
+ * <p>字段与筛选条件**与 3.1.1.1 列表页同源**：导出只是把同一套条件下的另一批行取出来， 不是另立一套口径。排序键同样取自列表页支持的那些列。
  */
 @Component
 class SpuExportDataSource extends SqlExportDataSource {
-  private static final List<String> STATUSES = Set.of("DRAFT", "ACTIVE", "INACTIVE", "ARCHIVED").stream().sorted().toList();
+  private static final List<String> STATUSES =
+      Set.of("DRAFT", "ACTIVE", "INACTIVE", "ARCHIVED").stream().sorted().toList();
 
   private static final List<ExportColumn> COLUMNS =
       List.of(
@@ -29,15 +29,9 @@ class SpuExportDataSource extends SqlExportDataSource {
           new ExportColumn(
               "DESCRIPTION", "描述", false, r -> blankToNull(r.get("description", String.class))),
           new ExportColumn(
-              "CREATED_AT",
-              "创建时间",
-              false,
-              r -> instant(r.get("created_at", OffsetDateTime.class))),
+              "CREATED_AT", "创建时间", false, r -> instant(r.get("created_at", OffsetDateTime.class))),
           new ExportColumn(
-              "UPDATED_AT",
-              "更新时间",
-              false,
-              r -> instant(r.get("updated_at", OffsetDateTime.class))),
+              "UPDATED_AT", "更新时间", false, r -> instant(r.get("updated_at", OffsetDateTime.class))),
           new ExportColumn("ID", "SPU ID", false, r -> r.get("id", String.class)));
 
   private static final List<ExportSort> SORTS =
@@ -53,7 +47,8 @@ class SpuExportDataSource extends SqlExportDataSource {
           new ExportFilterInfo("q", "关键字（编码 / 名称）", "TEXT", true, ""),
           new ExportFilterInfo("category", "分类", "TEXT", true, ""),
           new ExportFilterInfo("brand", "品牌", "TEXT", true, ""),
-          new ExportFilterInfo("status", "生命周期状态", "ENUM", true, "取值：" + String.join(" / ", STATUSES)));
+          new ExportFilterInfo(
+              "status", "生命周期状态", "ENUM", true, "取值：" + String.join(" / ", STATUSES)));
 
   SpuExportDataSource(DSLContext sql) {
     super(sql);
@@ -135,9 +130,11 @@ class SpuExportDataSource extends SqlExportDataSource {
               .distinct()
               .toList();
       if (!values.isEmpty()) {
-        for (var v : values)
-          CatalogService.check(STATUSES.contains(v), "无效的生命周期状态：" + v);
-        where.add("s.status in (" + String.join(",", java.util.Collections.nCopies(values.size(), "?")) + ")");
+        for (var v : values) CatalogService.check(STATUSES.contains(v), "无效的生命周期状态：" + v);
+        where.add(
+            "s.status in ("
+                + String.join(",", java.util.Collections.nCopies(values.size(), "?"))
+                + ")");
         binds.addAll(values);
       }
     }

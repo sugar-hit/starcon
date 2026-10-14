@@ -137,10 +137,14 @@ export function matchBasisLabel(link: ParcelItemSalesOrderLine): string {
 }
 
 /** 不可得分段的灰块文案：归谁 + 为什么。 */
-export function unavailableText(
-  item: { label: string; ownerModule: string | null; reason: string },
-): string {
-  return item.ownerModule ? `${item.label} · 归 ${item.ownerModule} 未接入` : `${item.label} · 未接入`;
+export function unavailableText(item: {
+  label: string;
+  ownerModule: string | null;
+  reason: string;
+}): string {
+  return item.ownerModule
+    ? `${item.label} · 归 ${item.ownerModule} 未接入`
+    : `${item.label} · 未接入`;
 }
 
 /** 操作入口：没有 href 的（运费归集在本服务没有页面）只展示归属与前置条件。 */
@@ -149,7 +153,8 @@ export function actionHint(action: {
   ownerModule: string;
   precondition: string;
 }): string {
-  const pre = action.precondition && action.precondition !== '无' ? `前置：${action.precondition}` : '';
+  const pre =
+    action.precondition && action.precondition !== '无' ? `前置：${action.precondition}` : '';
   return `${action.ownerModule}${pre ? ` · ${pre}` : ''}`;
 }
 

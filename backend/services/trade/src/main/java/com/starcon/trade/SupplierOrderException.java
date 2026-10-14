@@ -6,9 +6,8 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 供应商下单失败（未接线 / 平台不可达 / 平台报错）。
  *
- * <p>刻意<b>不是</b> {@code UnsupportedOperationException}：那正是「半成品」的标志物，
- * 而且它会绕过本模块最要紧的一条 —— 调用方要靠这个异常把差异落成
- * {@code ORDER_FAILED} 告警。走 HTTP 异常则 {@code ApiErrorHandler} 会如实返回 503，
+ * <p>刻意<b>不是</b> {@code UnsupportedOperationException}：那正是「半成品」的标志物， 而且它会绕过本模块最要紧的一条 ——
+ * 调用方要靠这个异常把差异落成 {@code ORDER_FAILED} 告警。走 HTTP 异常则 {@code ApiErrorHandler} 会如实返回 503，
  * 界面上看到的是「供应商未接线」，而不是一个空指针或 500。
  */
 public class SupplierOrderException extends RuntimeException {

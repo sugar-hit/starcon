@@ -19,8 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.4.1.1 媒体库的纯规则单测：词表一致性、内容探测、存储键、校验出口。
  *
- * <p>这些是「服务层拒绝时给出的话」与「前端表单校验」共用的同一份实现，
- * 单测钉住边界比在集成测试里绕一圈更快也更全（集成测试只覆盖用得上的那几个）。
+ * <p>这些是「服务层拒绝时给出的话」与「前端表单校验」共用的同一份实现， 单测钉住边界比在集成测试里绕一圈更快也更全（集成测试只覆盖用得上的那几个）。
  */
 class MediaRulesTest {
 
@@ -76,8 +75,7 @@ class MediaRulesTest {
     System.arraycopy("WEBP".getBytes(), 0, webp, 8, 4);
     var error =
         assertThrows(
-            ResponseStatusException.class,
-            () -> MediaRules.probe(webp, "IMAGE", "photo.webp"));
+            ResponseStatusException.class, () -> MediaRules.probe(webp, "IMAGE", "photo.webp"));
     assertThat(error.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     // 原因要能执行：说清为什么不行、要做什么。
     assertThat(error.getMessage()).contains("WEBP").contains("PNG");

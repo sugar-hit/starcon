@@ -18,32 +18,26 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 7.5.1.2 在途库存。
  *
- * <p>蓝图：「跟踪所有在途库存（调拨在途、头程在途、采购在途、FBA 发货在途），
- * 含起止仓、批次、数量、预计到达」；输出「在途库存清单 + 到达预警（逾期未达）」。
+ * <p>蓝图：「跟踪所有在途库存（调拨在途、头程在途、采购在途、FBA 发货在途）， 含起止仓、批次、数量、预计到达」；输出「在途库存清单 + 到达预警（逾期未达）」。
  *
  * <p>六条实现纪律：
  *
  * <ol>
- *   <li><b>只有一张在途事实表</b>。V1 的 {@code inventory_transfer} 就是全服务在途的唯一出处
- *       （7.1.1.1 / 7.2.2.1 / 7.1.3.1 / 7.5.1.1 都按它求和），本模块只做**扩列**不做新表。
- *       蓝图关系段说「在途漏算会导致重复补货」——漏算的根因永远是同一个在途有两套账，
- *       所以头程/采购/FBA 也写进这张表，既有四个读者一行都不用改就自动算进新在途。
- *   <li><b>调拨腿只读</b>。调拨在途由 7.5.1.1 发出时产生，本模块的登记端点显式拒绝
- *       {@code TRANSFER}，否则两处都能写同一批货，在途数会翻倍。
- *   <li><b>逾期是真算的</b>：{@link InTransitOverdueLevel#of} 与 SQL 里的
- *       {@link #overdueLevel(String)} 用同一套阈值，ETA 来自库里的真实时刻，
- *       库里没有任何「已逾期」标记列可被人随手写上。
- *   <li><b>ETA 对调拨腿从调拨单取</b>（{@code coalesce(t.expected_arrive_at, transfer_order.expected_arrive_at)}），
- *       所以 7.5.1.1 既有的单据立刻有 ETA，<b>不需要改它的一行代码</b>。
- *   <li><b>外部腿的落账分两段</b>：FBA 发货登记时就把货从我方仓扣掉（货真的离仓了，
- *       不扣就是虚增在手）；头程/采购登记时不动库存（货还没进我方账），
- *       到达时才入库 —— 否则会在货到之前凭空多出库存。
- *   <li><b>跨服务只带定位键</b>：{@code source_system + source_reference}，
- *       不连 10 物流 / 6 采购 / 4 外部仓的库（它们都未交付），见 V63 文件头第二节。
+ *   <li><b>只有一张在途事实表</b>。V1 的 {@code inventory_transfer} 就是全服务在途的唯一出处 （7.1.1.1 / 7.2.2.1 / 7.1.3.1
+ *       / 7.5.1.1 都按它求和），本模块只做**扩列**不做新表。 蓝图关系段说「在途漏算会导致重复补货」——漏算的根因永远是同一个在途有两套账， 所以头程/采购/FBA
+ *       也写进这张表，既有四个读者一行都不用改就自动算进新在途。
+ *   <li><b>调拨腿只读</b>。调拨在途由 7.5.1.1 发出时产生，本模块的登记端点显式拒绝 {@code TRANSFER}，否则两处都能写同一批货，在途数会翻倍。
+ *   <li><b>逾期是真算的</b>：{@link InTransitOverdueLevel#of} 与 SQL 里的 {@link #overdueLevel(String)}
+ *       用同一套阈值，ETA 来自库里的真实时刻， 库里没有任何「已逾期」标记列可被人随手写上。
+ *   <li><b>ETA 对调拨腿从调拨单取</b>（{@code coalesce(t.expected_arrive_at,
+ *       transfer_order.expected_arrive_at)}）， 所以 7.5.1.1 既有的单据立刻有 ETA，<b>不需要改它的一行代码</b>。
+ *   <li><b>外部腿的落账分两段</b>：FBA 发货登记时就把货从我方仓扣掉（货真的离仓了， 不扣就是虚增在手）；头程/采购登记时不动库存（货还没进我方账）， 到达时才入库 ——
+ *       否则会在货到之前凭空多出库存。
+ *   <li><b>跨服务只带定位键</b>：{@code source_system + source_reference}， 不连 10 物流 / 6 采购 / 4
+ *       外部仓的库（它们都未交付），见 V63 文件头第二节。
  * </ol>
  *
- * <p>状态机只有一处真相：{@link #settle}。到达与差异登记都改完数量后由它统一收尾，
- * 「到达最后一点该是已收还是该还挂着在途」这种边界不写在两个地方。
+ * <p>状态机只有一处真相：{@link #settle}。到达与差异登记都改完数量后由它统一收尾， 「到达最后一点该是已收还是该还挂着在途」这种边界不写在两个地方。
  */
 @Service
 public class InventoryInTransitService {
@@ -72,9 +66,8 @@ public class InventoryInTransitService {
   /**
    * 预计到达的解析式。
    *
-   * <p>调拨腿的 ETA 落在 {@code transfer_order} 上（7.5.1.1 的单头字段），
-   * 在途腿自身没有这一列也照样能算出逾期 —— 这是本模块**不侵入 7.5.1.1** 的关键：
-   * 读侧派生，而不是去改别人的写侧。
+   * <p>调拨腿的 ETA 落在 {@code transfer_order} 上（7.5.1.1 的单头字段）， 在途腿自身没有这一列也照样能算出逾期 —— 这是本模块**不侵入
+   * 7.5.1.1** 的关键： 读侧派生，而不是去改别人的写侧。
    */
   private static String eta(String a) {
     return "coalesce(t" + a + ".expected_arrive_at,tor" + a + ".expected_arrive_at)";
@@ -83,8 +76,7 @@ public class InventoryInTransitService {
   /**
    * 逾期档位的 SQL 表达式 —— 与 {@link InTransitOverdueLevel#of} 同一套阈值。
    *
-   * <p>用 {@code now()} 而不是绑定参数：档位是**查询时刻**的事实，
-   * 绑定一个时刻进来反而会让「列表的逾期档」和「详情/预警的逾期档」在两个时刻各算一次，
+   * <p>用 {@code now()} 而不是绑定参数：档位是**查询时刻**的事实， 绑定一个时刻进来反而会让「列表的逾期档」和「详情/预警的逾期档」在两个时刻各算一次，
    * 用户会看到同一条腿在两个页面上档位不一致。
    *
    * <p>顺序不可交换：先判「已了结」与「无 ETA」，剩下的才按小时数落桶。
@@ -111,9 +103,8 @@ public class InventoryInTransitService {
   /**
    * 在途腿的连接形状。
    *
-   * <p>warehouse / inventory_lot / transfer_order 全部 **left join**：
-   * 头程的起点、FBA 的终点不在本租户仓内，transfer_order 只对调拨腿存在。
-   * 用 inner join 会把这类腿**整条静默丢掉** —— 那正是「在途漏算」最隐蔽的一种。
+   * <p>warehouse / inventory_lot / transfer_order 全部 **left join**： 头程的起点、FBA
+   * 的终点不在本租户仓内，transfer_order 只对调拨腿存在。 用 inner join 会把这类腿**整条静默丢掉** —— 那正是「在途漏算」最隐蔽的一种。
    */
   private static String legFrom(String a) {
     return " from inventory_transfer t"
@@ -237,7 +228,8 @@ public class InventoryInTransitService {
     String sqlWhere = where.isEmpty() ? "" : " where " + String.join(" and ", where);
 
     long total =
-        sql.fetchOne("select count(*)" + legFrom("") + sqlWhere, binds.toArray()).get(0, Long.class);
+        sql.fetchOne("select count(*)" + legFrom("") + sqlWhere, binds.toArray())
+            .get(0, Long.class);
 
     var rows =
         sql.fetch(
@@ -309,8 +301,7 @@ public class InventoryInTransitService {
   /**
    * 类型下拉：四类全列（含当前 0 条的），带真实腿数。
    *
-   * <p>「头程在途 = 0 条」本身就是有用的信息：说明这个租户还没接过头程发运事件，
-   * 而不是这个功能不存在。
+   * <p>「头程在途 = 0 条」本身就是有用的信息：说明这个租户还没接过头程发运事件， 而不是这个功能不存在。
    */
   private List<InTransitOption> kindOptions() {
     var counts = new java.util.HashMap<String, Long>();
@@ -332,7 +323,9 @@ public class InventoryInTransitService {
     var counts = new java.util.HashMap<String, Long>();
     var rows =
         sql.fetch(
-            "select " + overdueLevel("") + " as lvl,count(*) as c"
+            "select "
+                + overdueLevel("")
+                + " as lvl,count(*) as c"
                 + legFrom("")
                 + " where t.status='IN_TRANSIT' group by lvl");
     for (var row : rows) {
@@ -349,8 +342,12 @@ public class InventoryInTransitService {
   private List<InTransitWarehouseOption> warehouseOptions() {
     return sql.fetch(
             "select w.id,w.code,w.name from warehouse w where w.status<>'ARCHIVED' order by w.code")
-        .map(r -> new InTransitWarehouseOption(
-            r.get("id", UUID.class), r.get("code", String.class), r.get("name", String.class)));
+        .map(
+            r ->
+                new InTransitWarehouseOption(
+                    r.get("id", UUID.class),
+                    r.get("code", String.class),
+                    r.get("name", String.class)));
   }
 
   private void conditions(InTransitQuery q, String a, List<String> where, List<Object> binds) {
@@ -382,10 +379,7 @@ public class InventoryInTransitService {
         }
         if (!InTransitOverdueLevel.names().contains(raw.trim().toUpperCase(Locale.ROOT))) {
           throw new IllegalArgumentException(
-              "未知的逾期档位："
-                  + raw
-                  + "，可选："
-                  + String.join("、", InTransitOverdueLevel.names()));
+              "未知的逾期档位：" + raw + "，可选：" + String.join("、", InTransitOverdueLevel.names()));
         }
         levels.add(raw.trim().toUpperCase(Locale.ROOT));
       }
@@ -427,8 +421,7 @@ public class InventoryInTransitService {
   private String order(InTransitQuery q) {
     String sort = q.sort() == null ? "EXPECTED_ARRIVE" : q.sort().toUpperCase(Locale.ROOT);
     if (!SORTS.contains(sort)) {
-      throw new IllegalArgumentException(
-          "不支持的排序键：" + q.sort() + "，可选：" + String.join("、", SORTS));
+      throw new IllegalArgumentException("不支持的排序键：" + q.sort() + "，可选：" + String.join("、", SORTS));
     }
     return switch (sort) {
       case "SHIPPED_AT" -> " order by t.shipped_at desc,t.id";
@@ -493,8 +486,7 @@ public class InventoryInTransitService {
   /**
    * 到达预警（逾期未达）。
    *
-   * <p>完全由「ETA + 此刻 + 仍在途」算出，库里没有可写的逾期标记列：
-   * ETA 改了、货到了，预警立刻跟着变，不存在「忘了取消预警」这种状态。
+   * <p>完全由「ETA + 此刻 + 仍在途」算出，库里没有可写的逾期标记列： ETA 改了、货到了，预警立刻跟着变，不存在「忘了取消预警」这种状态。
    */
   public InTransitAlerts alerts() {
     OffsetDateTime now = OffsetDateTime.now();
@@ -513,8 +505,7 @@ public class InventoryInTransitService {
         list.stream()
             .map(InTransitRow::outstandingQuantity)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
-    return new InTransitAlerts(
-        now, list.size(), qty, list, overdueOptions());
+    return new InTransitAlerts(now, list.size(), qty, list, overdueOptions());
   }
 
   // ================================================================ 补货净额
@@ -522,11 +513,11 @@ public class InventoryInTransitService {
   /**
    * 补货可扣在途净额（按目的仓 × SKU）。
    *
-   * <p>只给数不给建议：需求预测与下单属 6.2.1.1，本模块不越界替它做决定。
-   * 目的地不在本租户仓内的腿（FBA 发往平台仓）**不进这个净额** ——
+   * <p>只给数不给建议：需求预测与下单属 6.2.1.1，本模块不越界替它做决定。 目的地不在本租户仓内的腿（FBA 发往平台仓）**不进这个净额** ——
    * 平台仓的在途不构成本仓的入库缺口，混进去反而会让补货算错方向。
    */
-  public InTransitNettingPage netting(UUID toWarehouseId, UUID skuId, String sort, int page, int size) {
+  public InTransitNettingPage netting(
+      UUID toWarehouseId, UUID skuId, String sort, int page, int size) {
     int pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, size <= 0 ? 50 : size));
     int pageNumber = Math.max(0, page);
     var where = new ArrayList<String>();
@@ -611,31 +602,30 @@ public class InventoryInTransitService {
   /**
    * 登记外部在途腿。
    *
-   * <p>调拨腿（{@code TRANSFER}）显式拒绝：调拨在途由 7.5.1.1 调拨单发出时产生，
-   * 两处都能写同一批货会让在途数翻倍 —— 那正是本模块要防的漏算/重算。
+   * <p>调拨腿（{@code TRANSFER}）显式拒绝：调拨在途由 7.5.1.1 调拨单发出时产生， 两处都能写同一批货会让在途数翻倍 —— 那正是本模块要防的漏算/重算。
    *
-   * <p>幂等：{@code sourceSystem + sourceReference} 上有部分唯一索引，
-   * 上游重复投递同一条发运事件时撞唯一约束（409），不会双记在途。
+   * <p>幂等：{@code sourceSystem + sourceReference} 上有部分唯一索引， 上游重复投递同一条发运事件时撞唯一约束（409），不会双记在途。
    */
   public InTransitSaved register(UUID tenantId, InTransitRegisterRequest request) {
     InTransitKind kind = InTransitKind.parse(required(request.transitKind(), "在途类型"));
     if (kind == InTransitKind.TRANSFER) {
-      throw new IllegalArgumentException(
-          "调拨在途由 7.5.1.1 调拨单的发出动作产生，不能在这里登记（否则在途会被记两次）");
+      throw new IllegalArgumentException("调拨在途由 7.5.1.1 调拨单的发出动作产生，不能在这里登记（否则在途会被记两次）");
     }
     String sourceSystem = required(request.sourceSystem(), "来源系统");
     String sourceReference = required(request.sourceReference(), "来源单据号");
 
     UUID skuId = request.skuId();
     if (skuId == null
-        || sql.fetchOne("select id from sku_ref where tenant_id=? and id=?", tenantId, skuId) == null) {
+        || sql.fetchOne("select id from sku_ref where tenant_id=? and id=?", tenantId, skuId)
+            == null) {
       throw new IllegalArgumentException("SKU 未在本租户登记：" + skuId);
     }
     UUID quality = request.qualityStatusId();
     if (quality == null
         || sql.fetchOne(
                 "select id from inventory_quality_status where tenant_id=? and id=?",
-                tenantId, quality)
+                tenantId,
+                quality)
             == null) {
       throw new IllegalArgumentException("质量状态不存在或无权访问：" + quality);
     }
@@ -651,7 +641,9 @@ public class InventoryInTransitService {
     if (lotId != null
         && sql.fetchOne(
                 "select id from inventory_lot where tenant_id=? and id=? and sku_id=?",
-                tenantId, lotId, skuId)
+                tenantId,
+                lotId,
+                skuId)
             == null) {
       throw new IllegalArgumentException("批次不存在、不属于该 SKU 或无权访问：" + lotId);
     }
@@ -660,19 +652,16 @@ public class InventoryInTransitService {
     String fromName = fit(request.fromWarehouseName(), 200, "起点名称");
     String toName = fit(request.toWarehouseName(), 200, "终点名称");
     if (request.fromWarehouseId() == null && fromName.isBlank()) {
-      throw new IllegalArgumentException(
-          "起点不是本租户的仓库时必须给出可读名称（供应商工厂、平台仓等不在我们系统里）");
+      throw new IllegalArgumentException("起点不是本租户的仓库时必须给出可读名称（供应商工厂、平台仓等不在我们系统里）");
     }
     if (request.toWarehouseId() == null && toName.isBlank()) {
-      throw new IllegalArgumentException(
-          "终点不是本租户的仓库时必须给出可读名称（供应商工厂、平台仓等不在我们系统里）");
+      throw new IllegalArgumentException("终点不是本租户的仓库时必须给出可读名称（供应商工厂、平台仓等不在我们系统里）");
     }
     if (kind == InTransitKind.FBA_OUTBOUND && request.fromWarehouseId() == null) {
       throw new IllegalArgumentException("FBA 发货在途必须指定我方发货仓（登记时要从该仓扣减在手）");
     }
     if (kind != InTransitKind.FBA_OUTBOUND && request.toWarehouseId() == null) {
-      throw new IllegalArgumentException(
-          kind.label() + "必须指定我方收货仓（货最终要进这个仓，缺了它就没有入库落点）");
+      throw new IllegalArgumentException(kind.label() + "必须指定我方收货仓（货最终要进这个仓，缺了它就没有入库落点）");
     }
     if (request.fromWarehouseId() != null
         && request.toWarehouseId() != null
@@ -693,9 +682,7 @@ public class InventoryInTransitService {
     // FBA 发货：货在这一刻真的离仓，所以在途登记的同时就要把在手扣掉。
     // 不扣就是虚增在手，7.1.1.1 的「在手 = 可售 + 待检 + 残次 + 在途」会当场失衡。
     if (kind == InTransitKind.FBA_OUTBOUND) {
-      var balance =
-          balanceId(
-              tenantId, skuId, request.fromWarehouseId(), legalEntity, quality);
+      var balance = balanceId(tenantId, skuId, request.fromWarehouseId(), legalEntity, quality);
       deductSource(balance, qty, shippedAt);
       var txId = UUID.randomUUID();
       sql.execute(
@@ -711,7 +698,11 @@ public class InventoryInTransitService {
       sql.execute(
           "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
               + "reserved_delta) values(?,?,?,?,?,0)",
-          UUID.randomUUID(), tenantId, txId, balance, qty.negate());
+          UUID.randomUUID(),
+          tenantId,
+          txId,
+          balance,
+          qty.negate());
     }
 
     // 占位符与绑定值一一对应：8 个普通列 + ref_id/shipped_at + transit_kind +
@@ -751,24 +742,19 @@ public class InventoryInTransitService {
   /**
    * 收货事件（到货）。
    *
-   * <p>进我方仓的头程/采购在途：到货即入库目的仓（写 RECEIPT 分录），
-   * 一次事件一笔分录，可分批到货 —— 分批到货在跨境头程里是常态，
+   * <p>进我方仓的头程/采购在途：到货即入库目的仓（写 RECEIPT 分录）， 一次事件一笔分录，可分批到货 —— 分批到货在跨境头程里是常态，
    * 只允许「一次全到」会把真实的分批清关场景记成差异。
    *
-   * <p>FBA 发货在途：到货只了结在途腿，**不入库** ——
-   * 那一站的库存是平台仓的观测值（7.1.1.2 的事，尚未交付），本服务没有它的库位。
+   * <p>FBA 发货在途：到货只了结在途腿，**不入库** —— 那一站的库存是平台仓的观测值（7.1.1.2 的事，尚未交付），本服务没有它的库位。
    */
   public InTransitSaved arrive(UUID legId, InTransitArriveRequest request) {
     Record leg = lockLeg(legId);
     requireVersion(leg, request.expectedVersion());
     String kind = leg.get("transit_kind", String.class);
-    if (!InTransitKind.FBA_OUTBOUND.name().equals(kind)
-        && request.locationId() == null) {
-      throw new IllegalArgumentException(
-          "进我方仓的到货必须指定落库库位（货到了哪个库位是收货必须回答的问题）");
+    if (!InTransitKind.FBA_OUTBOUND.name().equals(kind) && request.locationId() == null) {
+      throw new IllegalArgumentException("进我方仓的到货必须指定落库库位（货到了哪个库位是收货必须回答的问题）");
     }
-    OffsetDateTime at =
-        request.occurredAt() == null ? OffsetDateTime.now() : request.occurredAt();
+    OffsetDateTime at = request.occurredAt() == null ? OffsetDateTime.now() : request.occurredAt();
     BigDecimal qty = positive(request.quantity(), "本次到货数量");
 
     UUID tenantId = leg.get("tenant_id", UUID.class);
@@ -777,7 +763,9 @@ public class InventoryInTransitService {
     if (lotId != null
         && sql.fetchOne(
                 "select id from inventory_lot where tenant_id=? and id=? and sku_id=?",
-                tenantId, lotId, leg.get("sku_id", UUID.class))
+                tenantId,
+                lotId,
+                leg.get("sku_id", UUID.class))
             == null) {
       throw new IllegalArgumentException("批次不存在、不属于该 SKU 或无权访问：" + lotId);
     }
@@ -787,8 +775,7 @@ public class InventoryInTransitService {
 
     BigDecimal outstanding = decimal(leg, "quantity");
     if (qty.compareTo(outstanding) > 0) {
-      throw new IllegalArgumentException(
-          "本次到货数量超过该腿未达量（在途 " + outstanding + "，本次 " + qty + "）");
+      throw new IllegalArgumentException("本次到货数量超过该腿未达量（在途 " + outstanding + "，本次 " + qty + "）");
     }
 
     var eventId = UUID.randomUUID();
@@ -828,7 +815,11 @@ public class InventoryInTransitService {
       sql.execute(
           "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
               + "reserved_delta) values(?,?,?,?,?,0)",
-          UUID.randomUUID(), tenantId, txId, balance, qty);
+          UUID.randomUUID(),
+          tenantId,
+          txId,
+          balance,
+          qty);
     }
 
     settle(legId, qty, at, "ARRIVED");
@@ -844,14 +835,12 @@ public class InventoryInTransitService {
     Record leg = lockLeg(legId);
     requireVersion(leg, request.expectedVersion());
     var reason = InTransitReason.parse(required(request.reason(), "差异原因"));
-    OffsetDateTime at =
-        request.occurredAt() == null ? OffsetDateTime.now() : request.occurredAt();
+    OffsetDateTime at = request.occurredAt() == null ? OffsetDateTime.now() : request.occurredAt();
     BigDecimal qty = positive(request.quantity(), "差异数量");
 
     BigDecimal outstanding = decimal(leg, "quantity");
     if (qty.compareTo(outstanding) > 0) {
-      throw new IllegalArgumentException(
-          "差异数量超过该腿未达量（在途 " + outstanding + "，本次差异 " + qty + "）");
+      throw new IllegalArgumentException("差异数量超过该腿未达量（在途 " + outstanding + "，本次差异 " + qty + "）");
     }
 
     var eventId = UUID.randomUUID();
@@ -875,8 +864,7 @@ public class InventoryInTransitService {
   /**
    * 了结一段在途余量 —— 到达与差异登记**只有这一个收尾点**。
    *
-   * <p>整腿了结就转终态（RECEIVED / CANCELLED，各自带 received_at，
-   * V1 的 CHECK 要求非在途状态必须有收货时刻）；部分了结就把余量下调，
+   * <p>整腿了结就转终态（RECEIVED / CANCELLED，各自带 received_at， V1 的 CHECK 要求非在途状态必须有收货时刻）；部分了结就把余量下调，
    * 腿继续挂在途上等下一笔。
    */
   private void settle(UUID legId, BigDecimal qty, OffsetDateTime at, String kind) {
@@ -891,12 +879,17 @@ public class InventoryInTransitService {
       sql.execute(
           "update inventory_transfer set status=?,settled_quantity=settled_quantity+?,"
               + "received_at=cast(? as timestamptz),version=version+1,updated_at=now() where id=?",
-          status, qty, at, legId);
+          status,
+          qty,
+          at,
+          legId);
     } else {
       sql.execute(
           "update inventory_transfer set quantity=?,settled_quantity=settled_quantity+?,"
               + "version=version+1,updated_at=now() where id=?",
-          rest, qty, legId);
+          rest,
+          qty,
+          legId);
     }
   }
 
@@ -922,10 +915,12 @@ public class InventoryInTransitService {
         r.get("legal_entity_code", String.class),
         r.get("from_warehouse_id", UUID.class),
         r.get("from_warehouse_code", String.class),
-        displayName(r.get("from_warehouse_code", String.class), r.get("from_warehouse_name", String.class)),
+        displayName(
+            r.get("from_warehouse_code", String.class), r.get("from_warehouse_name", String.class)),
         r.get("to_warehouse_id", UUID.class),
         r.get("to_warehouse_code", String.class),
-        displayName(r.get("to_warehouse_code", String.class), r.get("to_warehouse_name", String.class)),
+        displayName(
+            r.get("to_warehouse_code", String.class), r.get("to_warehouse_name", String.class)),
         r.get("lot_id", UUID.class),
         r.get("lot_code", String.class),
         outstanding,
@@ -953,19 +948,16 @@ public class InventoryInTransitService {
    *
    * <p>仍在途时 {@code = 已了结 + 未达}；已了结时 {@code = 已了结}。
    *
-   * <p>为什么结案后不能还用「已了结 + 未达」：{@code inventory_transfer} 带着 V1 的
-   * {@code CHECK(quantity>0)}，所以最后一段了结时 {@code quantity} 不能归零，
-   * 它会**留在最后一段的余量上**。把这两列相加就会把那一段算两遍
-   * （分两次了结 30 + 470 的腿会显示原发 970，而它只发了 500）。
-   * 已了结的腿以 {@code settled_quantity} 为准 —— 那个数由到达事件的求和钉死（见 V63 的
-   * {@code guard_in_transit_settled}），是这条腿上全部已了结量，不掺任何残留余量。
+   * <p>为什么结案后不能还用「已了结 + 未达」：{@code inventory_transfer} 带着 V1 的 {@code CHECK(quantity>0)}，所以最后一段了结时
+   * {@code quantity} 不能归零， 它会**留在最后一段的余量上**。把这两列相加就会把那一段算两遍 （分两次了结 30 + 470 的腿会显示原发 970，而它只发了 500）。
+   * 已了结的腿以 {@code settled_quantity} 为准 —— 那个数由到达事件的求和钉死（见 V63 的 {@code
+   * guard_in_transit_settled}），是这条腿上全部已了结量，不掺任何残留余量。
    */
   /**
    * 逾期档位：**已了结的腿一律不报逾期**。
    *
-   * <p>注意不能只看「未达量 &gt; 0」：结案后 {@code quantity} 因 V1 的
-   * {@code CHECK(quantity&gt;0)} 会留在最后一段余量上，它已经不是「还在路上」的量了。
-   * 判据必须是状态，与 SQL 里的 {@link #overdueLevel(String)} 第一条判断同源。
+   * <p>注意不能只看「未达量 &gt; 0」：结案后 {@code quantity} 因 V1 的 {@code CHECK(quantity&gt;0)}
+   * 会留在最后一段余量上，它已经不是「还在路上」的量了。 判据必须是状态，与 SQL 里的 {@link #overdueLevel(String)} 第一条判断同源。
    */
   private static InTransitOverdueLevel level(
       String status, BigDecimal outstanding, OffsetDateTime eta, OffsetDateTime now) {
@@ -984,8 +976,7 @@ public class InventoryInTransitService {
   }
 
   /** 只有 ETA 已过且仍在途才算逾期小时数；其余返回 null 而不是 0（「没逾期」不是「逾期 0 小时」）。 */
-  private static Long overdueHours(
-      BigDecimal outstanding, OffsetDateTime eta, OffsetDateTime now) {
+  private static Long overdueHours(BigDecimal outstanding, OffsetDateTime eta, OffsetDateTime now) {
     if (eta == null || outstanding == null || outstanding.signum() <= 0 || !eta.isBefore(now)) {
       return null;
     }
@@ -995,8 +986,7 @@ public class InventoryInTransitService {
   /**
    * 口径归属说明，逐行返回。
    *
-   * <p>不写这个字段的话同一张表里的三行会被读成三种互相矛盾的口径：
-   * 调拨腿没有已了结量、头程腿登记时不在在手、FBA 腿登记时就已扣手。
+   * <p>不写这个字段的话同一张表里的三行会被读成三种互相矛盾的口径： 调拨腿没有已了结量、头程腿登记时不在在手、FBA 腿登记时就已扣手。
    */
   private String attribution(Record r) {
     String kind = r.get("transit_kind", String.class);
@@ -1009,7 +999,8 @@ public class InventoryInTransitService {
       return "FBA 发货在途：登记时已从我方发货仓扣减在手（货真的离仓了），"
           + "到货只了结本腿、不入库 —— 平台仓库存是外部仓观测值（7.1.1.2，尚未交付），本服务没有它的库位。";
     }
-    return kindName(kind).label() + "：登记时不动在手（货还没进我方账），到货才入库目的仓并写 RECEIPT 分录。"
+    return kindName(kind).label()
+        + "：登记时不动在手（货还没进我方账），到货才入库目的仓并写 RECEIPT 分录。"
         + "起止站里不在本租户仓内的一端用可读名快照（供应商工厂 / 平台仓不属本服务）。";
   }
 
@@ -1052,7 +1043,11 @@ public class InventoryInTransitService {
         sql.fetchOne(
             "select id from inventory_balance where tenant_id=? and sku_id=? and warehouse_id=?"
                 + " and legal_entity_id=? and quality_status_id=?",
-            tenantId, skuId, warehouseId, legalEntityId, qualityStatusId);
+            tenantId,
+            skuId,
+            warehouseId,
+            legalEntityId,
+            qualityStatusId);
     if (found != null) {
       return found.get("id", UUID.class);
     }
@@ -1060,14 +1055,20 @@ public class InventoryInTransitService {
     sql.execute(
         "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
             + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,0,0)",
-        id, tenantId, skuId, warehouseId, legalEntityId, qualityStatusId);
+        id,
+        tenantId,
+        skuId,
+        warehouseId,
+        legalEntityId,
+        qualityStatusId);
     return id;
   }
 
   /** 出库扣减：从库位按可用量依次扣，扣不动就报实账不符（与 7.5.1.1 同一套纪律）。 */
   private void deductSource(UUID balanceId, BigDecimal qty, OffsetDateTime at) {
     Record bal =
-        sql.fetchOne("select on_hand,reserved,available from inventory_balance where id=?", balanceId);
+        sql.fetchOne(
+            "select on_hand,reserved,available from inventory_balance where id=?", balanceId);
     if (bal == null) {
       throw new IllegalArgumentException("发货仓没有这条库存余额，无法发出（货可能还没入库）");
     }
@@ -1085,7 +1086,8 @@ public class InventoryInTransitService {
       sql.execute(
           "update inventory_balance set on_hand=on_hand-?,version=version+1,updated_at=now()"
               + " where id=?",
-          qty, balanceId);
+          qty,
+          balanceId);
       return;
     }
     BigDecimal left = qty;
@@ -1099,7 +1101,9 @@ public class InventoryInTransitService {
           "update stock_bucket set on_hand=on_hand-?,"
               + " last_movement_at=greatest(cast(? as timestamptz),last_movement_at"
               + " + interval '1 microsecond') where id=?",
-          take, at, bucketId);
+          take,
+          at,
+          bucketId);
       left = left.subtract(take);
     }
     if (left.signum() > 0) {
@@ -1108,7 +1112,8 @@ public class InventoryInTransitService {
     sql.execute(
         "update inventory_balance set on_hand=on_hand-?,version=version+1,updated_at=now()"
             + " where id=?",
-        qty, balanceId);
+        qty,
+        balanceId);
   }
 
   /** 入库加计：落既有库位/批次或新建 bucket 行，再抬余额。 */
@@ -1118,13 +1123,17 @@ public class InventoryInTransitService {
         sql.fetchOne(
             "select id from stock_bucket where balance_id=? and location_id=?"
                 + " and lot_id is not distinct from ?",
-            balanceId, locationId, lotId);
+            balanceId,
+            locationId,
+            lotId);
     if (existing != null) {
       sql.execute(
           "update stock_bucket set on_hand=on_hand+?,"
               + " last_movement_at=greatest(cast(? as timestamptz),last_movement_at"
               + " + interval '1 microsecond') where id=?",
-          qty, at, existing.get("id", UUID.class));
+          qty,
+          at,
+          existing.get("id", UUID.class));
     } else {
       Record bal = sql.fetchOne("select * from inventory_balance where id=?", balanceId);
       sql.execute(
@@ -1146,23 +1155,20 @@ public class InventoryInTransitService {
     sql.execute(
         "update inventory_balance set on_hand=on_hand+?,version=version+1,updated_at=now()"
             + " where id=?",
-        qty, balanceId);
+        qty,
+        balanceId);
   }
 
   // ================================================================ 内部工具
 
   private Record lockLeg(UUID legId) {
-    Record leg =
-        sql.fetchOne("select * from inventory_transfer where id=? for update", legId);
+    Record leg = sql.fetchOne("select * from inventory_transfer where id=? for update", legId);
     if (leg == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "在途记录不存在或无权查看");
     }
     if (!"IN_TRANSIT".equals(leg.get("status", String.class))) {
       throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "该在途腿已了结（状态 "
-              + leg.get("status", String.class)
-              + "），不能再登记到达或差异");
+          HttpStatus.CONFLICT, "该在途腿已了结（状态 " + leg.get("status", String.class) + "），不能再登记到达或差异");
     }
     return leg;
   }
@@ -1175,8 +1181,7 @@ public class InventoryInTransitService {
     long actual = leg.get("version", Long.class);
     if (actual != expected) {
       throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "版本不符：当前 " + actual + "，请求 " + expected + "（有人先改了这条在途记录，请刷新后重试）");
+          HttpStatus.CONFLICT, "版本不符：当前 " + actual + "，请求 " + expected + "（有人先改了这条在途记录，请刷新后重试）");
     }
   }
 
@@ -1184,7 +1189,8 @@ public class InventoryInTransitService {
     Record loc =
         sql.fetchOne(
             "select warehouse_id,status from warehouse_location where tenant_id=? and id=?",
-            tenantId, locationId);
+            tenantId,
+            locationId);
     if (loc == null) {
       throw new IllegalArgumentException("库位不存在或无权访问：" + locationId);
     }

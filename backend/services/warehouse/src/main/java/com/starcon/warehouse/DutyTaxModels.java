@@ -12,8 +12,7 @@ import java.util.UUID;
  * <p>蓝图 10-logistics-and-freight.md 10.5.1.3 的输入/输出契约：
  *
  * <ul>
- *   <li>职责：计算与管理进口税费：关税（按 HS 编码税率）、增值税/GST、关税承担方（DDP/DDU）、
- *       到岸成本构成，供成本核算与报价参考。
+ *   <li>职责：计算与管理进口税费：关税（按 HS 编码税率）、增值税/GST、关税承担方（DDP/DDU）、 到岸成本构成，供成本核算与报价参考。
  *   <li>输入：HS 编码税率表；目的国税则；申报价值；贸易条款。
  *   <li>输出：税费估算 + 实际缴纳记录；到岸成本明细。
  * </ul>
@@ -24,21 +23,17 @@ import java.util.UUID;
  * <p>本模块必须自己讲清的四条口径（都随响应返回，不让界面上凭空猜）：
  *
  * <ol>
- *   <li><b>估算与实缴分别留痕，这是蓝图加粗的硬要求</b>：蓝图原文「**税费估算与实际缴纳差异要记录**，
- *       长期差异大说明 HS 归类或税率配置有误」。所以 {@code DutyTaxEstimate}（估算）、{@code DutyTaxPayment}
- *       （实缴）、{@code DutyTaxVariance}（差异）三张表互相不覆盖，且
+ *   <li><b>估算与实缴分别留痕，这是蓝图加粗的硬要求</b>：蓝图原文「**税费估算与实际缴纳差异要记录**， 长期差异大说明 HS 归类或税率配置有误」。所以 {@code
+ *       DutyTaxEstimate}（估算）、{@code DutyTaxPayment} （实缴）、{@code DutyTaxVariance}（差异）三张表互相不覆盖，且
  *       <b>DB 层钉死「有实缴就必须有差异记录」</b>（V90 的 {@code duty_payment_has_variance}）。
  *       只存最终一个数的话，差异永远无法被回答，「HS 归类错了」这个结论就没有证据。
- *   <li><b>税率是按生效期检索的落库数据，不是代码常量</b>：税则会变，用常量记税率等于
- *       「改了税率就改了历史」。每条税率带 {@code effectiveFrom/To}，估算明细把命中的税率值
- *       <b>抄进自己的行里</b>（{@code dutyAdValoremRate} + {@code dutyRatePrefix}），
- *       所以税率表那条将来被改，本行仍能回答「当时按 3.25% 算的」。
- *   <li><b>0% 税率合法，「没匹配到税率」不合法</b>：英国零税率商品、免税供货都是真实的 0% 配置，
- *       所以税率表允许 0；但估算单<b>锁定前</b>必须所有行都匹配到税率
+ *   <li><b>税率是按生效期检索的落库数据，不是代码常量</b>：税则会变，用常量记税率等于 「改了税率就改了历史」。每条税率带 {@code
+ *       effectiveFrom/To}，估算明细把命中的税率值 <b>抄进自己的行里</b>（{@code dutyAdValoremRate} + {@code
+ *       dutyRatePrefix}）， 所以税率表那条将来被改，本行仍能回答「当时按 3.25% 算的」。
+ *   <li><b>0% 税率合法，「没匹配到税率」不合法</b>：英国零税率商品、免税供货都是真实的 0% 配置， 所以税率表允许 0；但估算单<b>锁定前</b>必须所有行都匹配到税率
  *       （V90 的 {@code duty_estimate_lock_completeness}），否则「关税 0 元」就会进报价与成本核算。
- *   <li><b>DDP/DDU 改变的是成本归属，不是税率</b>：DDU 下关税与目的国税费由买方承担，
- *       卖方到岸成本**不得**含它们（V90 的 {@code duty_landed_cost} 钉死）。把 DDU 的税算进
- *       卖方成本，就是在给一个不属于自己的成本记账。
+ *   <li><b>DDP/DDU 改变的是成本归属，不是税率</b>：DDU 下关税与目的国税费由买方承担， 卖方到岸成本**不得**含它们（V90 的 {@code
+ *       duty_landed_cost} 钉死）。把 DDU 的税算进 卖方成本，就是在给一个不属于自己的成本记账。
  * </ol>
  */
 public final class DutyTaxModels {
@@ -69,8 +64,7 @@ public final class DutyTaxModels {
           return k;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的税种：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的税种：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -81,8 +75,8 @@ public final class DutyTaxModels {
   /**
    * 税率适用范围。
    *
-   * <p>不能混在一张「HS 税率表」里硬塞：绝大多数国家的增值税/GST 是<b>按国征收</b>、不按 HS 编码细分，
-   * 把国别增值税硬绑到某个 HS 码上，结果是换一个 HS 码就换了一个增值税率 —— 那是凭空造出来的税率。
+   * <p>不能混在一张「HS 税率表」里硬塞：绝大多数国家的增值税/GST 是<b>按国征收</b>、不按 HS 编码细分， 把国别增值税硬绑到某个 HS 码上，结果是换一个 HS
+   * 码就换了一个增值税率 —— 那是凭空造出来的税率。
    */
   public enum RateScope {
     /** 国别：整个目的国一律适用（增值税/GST 通常是这种）。 */
@@ -126,8 +120,7 @@ public final class DutyTaxModels {
           return b;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的关税承担方：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的关税承担方：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -161,8 +154,7 @@ public final class DutyTaxModels {
           return t;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的贸易条款：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的贸易条款：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -182,8 +174,8 @@ public final class DutyTaxModels {
    * VOID      → 终态
    * </pre>
    *
-   * <p>{@code LOCKED} 之后连承担方都不许改（V90 {@code duty_estimate_lock}）：改了就等于把
-   * DDP 的成本挪成 DDU 的成本，而已发出的报价失去了依据。
+   * <p>{@code LOCKED} 之后连承担方都不许改（V90 {@code duty_estimate_lock}）：改了就等于把 DDP 的成本挪成 DDU
+   * 的成本，而已发出的报价失去了依据。
    */
   public enum EstimateStatus {
     /** 草稿：可以自由改基础与承担方。 */
@@ -211,8 +203,7 @@ public final class DutyTaxModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的估算单状态：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的估算单状态：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -233,9 +224,8 @@ public final class DutyTaxModels {
   /**
    * 税率匹配状态。
    *
-   * <p>{@code NO_MATCH} 是本模块最要紧的一个状态：它意味着「税率表里没有这条 HS 码对应的税率」，
-   * 算出来的税是 0。蓝图那句「长期差异大说明 HS 归类或税率配置有误」在账上最先表现成
-   * {@code NO_MATCH} 的行被锁定进报价 —— 所以 V90 禁止带 {@code NO_MATCH} 锁定。
+   * <p>{@code NO_MATCH} 是本模块最要紧的一个状态：它意味着「税率表里没有这条 HS 码对应的税率」， 算出来的税是 0。蓝图那句「长期差异大说明 HS
+   * 归类或税率配置有误」在账上最先表现成 {@code NO_MATCH} 的行被锁定进报价 —— 所以 V90 禁止带 {@code NO_MATCH} 锁定。
    */
   public enum RateMatchStatus {
     /** 命中了税率（税率值已抄进本行）。 */
@@ -294,8 +284,7 @@ public final class DutyTaxModels {
           return k;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的缴款性质：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的缴款性质：" + raw + "，可选：" + String.join("、", names()));
     }
   }
 
@@ -326,16 +315,14 @@ public final class DutyTaxModels {
           return p;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的付款方：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的付款方：" + raw + "，可选：" + String.join("、", names()));
     }
   }
 
   /**
    * 差异归因（蓝图那句话的落地字段）。
    *
-   * <p>蓝图原文：「长期差异大说明 <b>HS 归类</b>或<b>税率配置</b>有误」—— 所以前两个取值就是
-   * 蓝图点名的两个根因，其余是运维上同样常见的口径差。
+   * <p>蓝图原文：「长期差异大说明 <b>HS 归类</b>或<b>税率配置</b>有误」—— 所以前两个取值就是 蓝图点名的两个根因，其余是运维上同样常见的口径差。
    */
   public enum VarianceCause {
     PENDING("待归因"),
@@ -401,8 +388,7 @@ public final class DutyTaxModels {
           return r;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的差异处理结果：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的差异处理结果：" + raw + "，可选：" + String.join("、", names()));
     }
   }
 
@@ -410,7 +396,12 @@ public final class DutyTaxModels {
 
   /** 一个维度/依赖的声明（与 10.5.1.1 的 {@code CustomsDimension} 同形）。 */
   public record DutyTaxDimension(
-      String value, String label, boolean available, String ownerModule, String href, String note) {}
+      String value,
+      String label,
+      boolean available,
+      String ownerModule,
+      String href,
+      String note) {}
 
   public record DutyTaxTransition(
       String from, String fromLabel, String to, String toLabel, String action, String note) {}
@@ -432,9 +423,8 @@ public final class DutyTaxModels {
   /**
    * 关税与税费能力清单。
    *
-   * <p>未交付依赖逐条声明：3.7.1.1（HS 编码字典）与 16.3.1.1（税号与辖区/税则）在本项目里
-   * **都没有可调用的上游**（product_compliance 服务不存在），因此税率由本租户维护并如实标注
-   * {@code tax_source} —— 不假装存在一个国家海关的官方税率库。
+   * <p>未交付依赖逐条声明：3.7.1.1（HS 编码字典）与 16.3.1.1（税号与辖区/税则）在本项目里 **都没有可调用的上游**（product_compliance
+   * 服务不存在），因此税率由本租户维护并如实标注 {@code tax_source} —— 不假装存在一个国家海关的官方税率库。
    */
   public record DutyTaxCapabilities(
       List<DutyTaxDimension> dependencies,
@@ -596,22 +586,30 @@ public final class DutyTaxModels {
   /**
    * 差异归因汇总行 —— 蓝图那句「长期差异大说明 HS 归类或税率配置有误」的**查询出口**。
    *
-   * <p>{@code dimension} 按维度取不同含义：{@code byCause} 里是归因值，
-   * {@code byHsCode} 里是 HS 编码。某组 HS 码反复出差异，就说明该改归类还是该改税率。
+   * <p>{@code dimension} 按维度取不同含义：{@code byCause} 里是归因值， {@code byHsCode} 里是 HS 编码。某组 HS
+   * 码反复出差异，就说明该改归类还是该改税率。
    */
   public record DutyVarianceCauseSummary(
-      String dimension, String dimensionLabel, int estimateCount, int varianceCount,
-      BigDecimal estimatedAmount, BigDecimal actualAmount, BigDecimal varianceAmount,
+      String dimension,
+      String dimensionLabel,
+      int estimateCount,
+      int varianceCount,
+      BigDecimal estimatedAmount,
+      BigDecimal actualAmount,
+      BigDecimal varianceAmount,
       String topCause) {}
 
   /**
    * 未匹配税率的明细行按 HS 编码汇总 —— 「税率配置有误」的**领先指标**。
    *
-   * <p>它比实缴差异更早出现：税率没配的行一旦被锁定就已经错在报价里了，
-   * 要等海关实缴下来才看得出差异，那时报价早就发出去了。
+   * <p>它比实缴差异更早出现：税率没配的行一旦被锁定就已经错在报价里了， 要等海关实缴下来才看得出差异，那时报价早就发出去了。
    */
   public record DutyUnmatchedRateSummary(
-      String hsCode, int lineCount, int estimateCount, String destinationCountryCodes, int matchingRateCount) {}
+      String hsCode,
+      int lineCount,
+      int estimateCount,
+      String destinationCountryCodes,
+      int matchingRateCount) {}
 
   /** 差异分析（按归因、按 HS 编码、未匹配税率三个维度）。 */
   public record DutyVarianceAnalysis(
@@ -643,7 +641,11 @@ public final class DutyTaxModels {
       int openVarianceCount) {}
 
   public record DutyEstimatePage(
-      List<DutyEstimateRow> rows, DutyEstimateSummary summary, int page, int size, int totalPages) {}
+      List<DutyEstimateRow> rows,
+      DutyEstimateSummary summary,
+      int page,
+      int size,
+      int totalPages) {}
 
   public record DutyEstimateDetail(
       DutyEstimateRow estimate,
@@ -719,9 +721,8 @@ public final class DutyTaxModels {
   /**
    * 记录实缴，<b>并同时写下差异快照与归因</b>。
    *
-   * <p>归因在建差异那一刻就写进去（{@code varianceCause} / {@code varianceResolution}）：
-   * 差异记录是 append-only 的，**不提供事后改归因的端点** —— 已归因的差异是纠错闭环的证据。
-   * 需要重新判定就再录一笔缴款对账出新的快照，纠错过程本身就是证据链。
+   * <p>归因在建差异那一刻就写进去（{@code varianceCause} / {@code varianceResolution}）： 差异记录是 append-only
+   * 的，**不提供事后改归因的端点** —— 已归因的差异是纠错闭环的证据。 需要重新判定就再录一笔缴款对账出新的快照，纠错过程本身就是证据链。
    *
    * <p>{@code declarationLineId} 用来把差异落到具体某一行：不指名时差异只记到税种级。
    */
@@ -761,6 +762,14 @@ public final class DutyTaxModels {
       int size) {}
 
   public record DutyRateQuery(
-      String destinationCountryCode, String taxKind, String rateScope, String hsCodePrefix,
-      Boolean preferentialOnly, LocalDate effectiveOn, String keyword, String sort, int page, int size) {}
+      String destinationCountryCode,
+      String taxKind,
+      String rateScope,
+      String hsCodePrefix,
+      Boolean preferentialOnly,
+      LocalDate effectiveOn,
+      String keyword,
+      String sort,
+      int page,
+      int size) {}
 }

@@ -136,10 +136,7 @@ public class CatalogService {
                                 // 与商品档案页共用，避免两处对「公共值 + SKU 覆写」的理解漂移。
                                 var resolved =
                                     EffectiveValues.resolve(
-                                        a.valueMode(),
-                                        side(common),
-                                        side(sku),
-                                        a.required());
+                                        a.valueMode(), side(common), side(sku), a.required());
                                 return new EffectiveValue(
                                     a.id(),
                                     resolved.overrideState(),
@@ -164,14 +161,13 @@ public class CatalogService {
   /** 把一行 attribute_value 转成解析器的输入；没有这一行就是「没有赋值」。 */
   private EffectiveValues.Raw side(Record row) {
     if (row == null) return new EffectiveValues.Raw(null, List.of());
-    var values =
-        items(row.get("id", UUID.class));
+    var values = items(row.get("id", UUID.class));
     return new EffectiveValues.Raw(row.get("state", String.class), values);
   }
 
   /**
-   * SPU 资料保存。状态不是自由文本：新建固定为 DRAFT，更新时若携带不同状态一律拒绝，
-   * 状态只能经 {@code POST /products/{id}/lifecycle} 按合法矩阵流转。
+   * SPU 资料保存。状态不是自由文本：新建固定为 DRAFT，更新时若携带不同状态一律拒绝， 状态只能经 {@code POST /products/{id}/lifecycle}
+   * 按合法矩阵流转。
    */
   public UUID saveSpu(AccessService.Access access, UUID id, SpuInput input) {
     if (id == null) {
@@ -377,8 +373,8 @@ public class CatalogService {
   /**
    * 属性取值校验：数量、必填、类型与选项归属，四类数据类型的规则都在这里。
    *
-   * <p>包可见且无实例状态，是为了让 3.2.2.2 的 SKU 覆写**走同一份规则**而不是另写一套——
-   * SPU 侧与 SKU 侧对「什么是合法的数值属性值」必须一致，两处各判一次迟早会漂移。
+   * <p>包可见且无实例状态，是为了让 3.2.2.2 的 SKU 覆写**走同一份规则**而不是另写一套—— SPU 侧与 SKU
+   * 侧对「什么是合法的数值属性值」必须一致，两处各判一次迟早会漂移。
    */
   static void validateValues(Attribute a, List<String> values, boolean activation) {
     check(a.multiple() || values.size() <= 1, "属性「" + a.name() + "」只允许一个值");
@@ -507,9 +503,8 @@ public class CatalogService {
    * 写入一侧的属性赋值行：覆盖式（先删后插），{@code INHERIT} 就是"删掉这一行"。
    *
    * <p>{@code sku} 传 {@code null} 写 SPU 公共侧（3.2.2.1），传 SKU id 写覆写侧（3.2.2.2）——
-   * 两侧是同一张表的同一份写入逻辑，所以「显式清空」在两侧的物理形态完全一致：
-   * 一行 {@code state='CLEAR'}，且不带任何 {@code attribute_value_item}
-   * （V1 的 validate_attribute_item 触发器会拒绝给 CLEAR 行写取值）。
+   * 两侧是同一张表的同一份写入逻辑，所以「显式清空」在两侧的物理形态完全一致： 一行 {@code state='CLEAR'}，且不带任何 {@code
+   * attribute_value_item} （V1 的 validate_attribute_item 触发器会拒绝给 CLEAR 行写取值）。
    *
    * <p>包可见：3.2.2.2 的覆写写入复用它，保证覆写与已交付的 SKU 保存路径**逐字同构**。
    */
@@ -556,8 +551,7 @@ public class CatalogService {
   /**
    * 审计 + outbox 事件；aggregate 始终是 SPU。
    *
-   * <p>包可见：3.2.2.2 的 SKU 属性覆写复用它，让覆写事件与已交付的属性 / SKU 变更
-   * 在同一条流上，下游不需要为覆写再开一路订阅。
+   * <p>包可见：3.2.2.2 的 SKU 属性覆写复用它，让覆写事件与已交付的属性 / SKU 变更 在同一条流上，下游不需要为覆写再开一路订阅。
    */
   void event(AccessService.Access access, UUID spu, String action) {
     sql.execute(

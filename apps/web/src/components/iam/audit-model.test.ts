@@ -82,7 +82,10 @@ describe('labels', () => {
 describe('changedFields', () => {
   it('lists only the fields that actually changed', () => {
     const rows = changedFields(
-      detail({ before: { code: 'A', name: '旧名', status: 'ACTIVE' }, after: { code: 'A', name: '新名', status: 'ACTIVE' } }),
+      detail({
+        before: { code: 'A', name: '旧名', status: 'ACTIVE' },
+        after: { code: 'A', name: '新名', status: 'ACTIVE' },
+      }),
     );
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ field: 'name', from: '旧名', to: '新名' });

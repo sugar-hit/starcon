@@ -18,33 +18,27 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 7.5.1.1 调拨单。
  *
- * <p>蓝图：「发起仓库间调拨：选择源仓与目标仓、调拨 SKU 与数量、预计发出与到达时间，
- * 跟踪发出、在途、目标实收」；输出「调拨单（草稿/待发/在途/部分收/已收/差异）；
+ * <p>蓝图：「发起仓库间调拨：选择源仓与目标仓、调拨 SKU 与数量、预计发出与到达时间， 跟踪发出、在途、目标实收」；输出「调拨单（草稿/待发/在途/部分收/已收/差异）；
  * 库存分录（发出转入途、实收转入目标仓）」。
  *
  * <p>五条实现纪律：
  *
  * <ol>
- *   <li><b>调拨不是瞬时</b>（蓝图原文）。本服务**没有**「一次调用同时扣源仓加目标仓」的入口：
- *       {@link #ship} 只减源仓并挂 {@code inventory_transfer} 在途行，{@link #receive} 才是转入目的仓。
- *       「异地收发同一瞬间」被明确否掉了。
+ *   <li><b>调拨不是瞬时</b>（蓝图原文）。本服务**没有**「一次调用同时扣源仓加目标仓」的入口： {@link #ship} 只减源仓并挂 {@code
+ *       inventory_transfer} 在途行，{@link #receive} 才是转入目的仓。 「异地收发同一瞬间」被明确否掉了。
  *   <li><b>在途的归属写在 {@code inventory_transfer} 上</b>，且 {@code quantity} 是**余量**口径
- *       （发出时挂全额，实收时逐次下调，归零即置 RECEIVED）。四个既有模块
- *       （7.1.1.1 / 7.1.2.2 / 7.2.2.1 / 7.1.3.1）统一按
- *       {@code sum(quantity) where status='IN_TRANSIT'} 求在途，分次收货下它们一行都不用改就仍然正确。
- *   <li><b>乐观锁是硬约束</b>：蓝图把 {@code expected_version} 写进了输入契约，
- *       本服务每个写动作都先 {@code select ... for update} 锁单再比版本，不匹配一律 409，
- *       不做「读到什么就写什么」。
- *   <li><b>差异如实记录</b>：结案时把「已发出但永远收不到」的部分记成 {@code SHORTAGE} 事件
- *       并置在途行为 CANCELLED，<b>不</b>自动抹平、也不悄悄挪回源仓。
- *   <li><b>与 7.1.3.1 对齐</b>：调拨出库（TRANSFER_OUT）不是消耗。
- *       {@code InventoryDistributionService} 刻意把它排除在周转天数的出库速度之外，
- *       因为调拨决策正要用那一列算依据。本模块因此<b>不</b>把调拨算作销售/消耗，
- *       只如实记一笔出库分录（见下方 TRANSFER_OUT 的落账说明）。
+ *       （发出时挂全额，实收时逐次下调，归零即置 RECEIVED）。四个既有模块 （7.1.1.1 / 7.1.2.2 / 7.2.2.1 / 7.1.3.1）统一按 {@code
+ *       sum(quantity) where status='IN_TRANSIT'} 求在途，分次收货下它们一行都不用改就仍然正确。
+ *   <li><b>乐观锁是硬约束</b>：蓝图把 {@code expected_version} 写进了输入契约， 本服务每个写动作都先 {@code select ... for
+ *       update} 锁单再比版本，不匹配一律 409， 不做「读到什么就写什么」。
+ *   <li><b>差异如实记录</b>：结案时把「已发出但永远收不到」的部分记成 {@code SHORTAGE} 事件 并置在途行为
+ *       CANCELLED，<b>不</b>自动抹平、也不悄悄挪回源仓。
+ *   <li><b>与 7.1.3.1 对齐</b>：调拨出库（TRANSFER_OUT）不是消耗。 {@code InventoryDistributionService}
+ *       刻意把它排除在周转天数的出库速度之外， 因为调拨决策正要用那一列算依据。本模块因此<b>不</b>把调拨算作销售/消耗， 只如实记一笔出库分录（见下方 TRANSFER_OUT
+ *       的落账说明）。
  * </ol>
  *
- * <p>状态机只有一处真相：{@link #deriveStatus}。发出、实收、结案三个动作都不各自拼状态，
- * 而是改完数量后由它统一算出来 —— 三个地方各写一遍 if 的话，
+ * <p>状态机只有一处真相：{@link #deriveStatus}。发出、实收、结案三个动作都不各自拼状态， 而是改完数量后由它统一算出来 —— 三个地方各写一遍 if 的话，
  * 「收满最后一行到底该是已收还是部分收」这种边界迟早会写错一个。
  */
 @Service
@@ -101,11 +95,10 @@ public class InventoryTransferService {
   /**
    * 每单的数量聚合。
    *
-   * <p>在途那一列是 {@code left join lateral} 到 inventory_transfer 的**余量**求和 ——
-   * 它与 7.1.1.1 / 7.2.2.1 / 7.1.3.1 用的是同一条口径，不同模块不会给出两个在途数。
+   * <p>在途那一列是 {@code left join lateral} 到 inventory_transfer 的**余量**求和 —— 它与 7.1.1.1 / 7.2.2.1 /
+   * 7.1.3.1 用的是同一条口径，不同模块不会给出两个在途数。
    *
-   * <p>lateral 在没有明细行时也返回一行全 0，而不是消失：一张没有明细的调拨单
-   * 不该从列表里「查不到」。
+   * <p>lateral 在没有明细行时也返回一行全 0，而不是消失：一张没有明细的调拨单 不该从列表里「查不到」。
    */
   private static String orderAggJoin(String a) {
     return " left join lateral (select count(*) as line_count,"
@@ -163,7 +156,8 @@ public class InventoryTransferService {
     String sqlWhere = where.isEmpty() ? "" : " where " + String.join(" and ", where);
 
     long total =
-        sql.fetchOne("select count(*)" + orderFrom("") + sqlWhere, binds.toArray()).get(0, Long.class);
+        sql.fetchOne("select count(*)" + orderFrom("") + sqlWhere, binds.toArray())
+            .get(0, Long.class);
 
     var rows =
         sql.fetch(
@@ -237,8 +231,7 @@ public class InventoryTransferService {
    */
   private List<TransferOption> statusOptions() {
     var counts = new java.util.HashMap<String, Long>();
-    for (var row :
-        sql.fetch("select status,count(*) as c from transfer_order group by status")) {
+    for (var row : sql.fetch("select status,count(*) as c from transfer_order group by status")) {
       counts.put(row.get("status", String.class), row.get("c", Long.class));
     }
     var out = new ArrayList<TransferOption>();
@@ -252,12 +245,15 @@ public class InventoryTransferService {
   private List<TransferWarehouseOption> warehouseOptions() {
     return sql.fetch(
             "select w.id,w.code,w.name from warehouse w where w.status<>'ARCHIVED' order by w.code")
-        .map(r -> new TransferWarehouseOption(r.get("id", UUID.class),
-            r.get("code", String.class), r.get("name", String.class)));
+        .map(
+            r ->
+                new TransferWarehouseOption(
+                    r.get("id", UUID.class),
+                    r.get("code", String.class),
+                    r.get("name", String.class)));
   }
 
-  private void conditions(
-      TransferOrderQuery q, String a, List<String> where, List<Object> binds) {
+  private void conditions(TransferOrderQuery q, String a, List<String> where, List<Object> binds) {
     if (q.fromWarehouseId() != null) {
       where.add("o" + a + ".from_warehouse_id=?");
       binds.add(q.fromWarehouseId());
@@ -348,8 +344,7 @@ public class InventoryTransferService {
   private String order(TransferOrderQuery q) {
     String sort = q.sort() == null ? "CREATED_AT" : q.sort().toUpperCase(Locale.ROOT);
     if (!SORTS.contains(sort)) {
-      throw new IllegalArgumentException(
-          "不支持的排序键：" + q.sort() + "，可选：" + String.join("、", SORTS));
+      throw new IllegalArgumentException("不支持的排序键：" + q.sort() + "，可选：" + String.join("、", SORTS));
     }
     return switch (sort) {
       case "UPDATED_AT" -> " order by o.updated_at desc,o.id";
@@ -448,9 +443,8 @@ public class InventoryTransferService {
   /**
    * 一次发出动作覆盖了哪些行、各发多少。
    *
-   * <p><b>刻意从 inventory_entry 派生，而不是读 inventory_transfer</b>：部分收货会把在途行
-   * 拆成「已收的一段 + 未到的剩余」，读在途行只能看到拆完之后的形状，读不出这一趟原本发了多少。
-   * 发出量这个事实本来就该取自 append-only 的分录（迁移 V61 的注释里也是这么写的），
+   * <p><b>刻意从 inventory_entry 派生，而不是读 inventory_transfer</b>：部分收货会把在途行 拆成「已收的一段 +
+   * 未到的剩余」，读在途行只能看到拆完之后的形状，读不出这一趟原本发了多少。 发出量这个事实本来就该取自 append-only 的分录（迁移 V61 的注释里也是这么写的），
    * 台账是权威出处，在途表只是「当前还有多少在路上」的余额行。
    */
   private List<TransferShipmentLineRow> shipmentLines(UUID orderId, UUID shipmentId) {
@@ -464,7 +458,8 @@ public class InventoryTransferService {
                 + " join sku_ref s on s.tenant_id=l.tenant_id and s.id=l.sku_id"
                 + " where t.ref_type='TRANSFER_ORDER' and t.kind='TRANSFER_OUT' and t.ref_id=?"
                 + " group by l.id,s.code order by s.code",
-            orderId, shipmentId)
+            orderId,
+            shipmentId)
         .map(
             r ->
                 new TransferShipmentLineRow(
@@ -493,8 +488,8 @@ public class InventoryTransferService {
   /**
    * 建单（草稿）。
    *
-   * <p>单号由 DB 序列生成（{@code TR-yyyyMMdd-000001}），不在应用层拼 ——
-   * 应用层拼出来的单号并发下必然撞号，而撞号会被 UNIQUE 变成 409，那不该发生。
+   * <p>单号由 DB 序列生成（{@code TR-yyyyMMdd-000001}），不在应用层拼 —— 应用层拼出来的单号并发下必然撞号，而撞号会被 UNIQUE 变成
+   * 409，那不该发生。
    *
    * <p>建单**不动库存**：草稿只是意图。货权在 ship 那一刻才离开发货仓。
    */
@@ -513,7 +508,8 @@ public class InventoryTransferService {
       throw new IllegalArgumentException("调拨必须指定货权法人：这批货算哪个法人的账");
     }
     if (sql.fetchOne(
-            "select id from legal_entity_ref where id=? and tenant_id=?", request.legalEntityId(),
+            "select id from legal_entity_ref where id=? and tenant_id=?",
+            request.legalEntityId(),
             tenantId)
         == null) {
       throw new IllegalArgumentException("货权法人不存在或无权访问：" + request.legalEntityId());
@@ -554,8 +550,7 @@ public class InventoryTransferService {
   /**
    * 改单：仅草稿可改，且整份替换明细。
    *
-   * <p>发出之后一行都不让改：明细行上的在途腿已经指着它（{@code inventory_transfer.line_id}），
-   * 改数量会让在途清单与明细永久对不上。要改请新建单。
+   * <p>发出之后一行都不让改：明细行上的在途腿已经指着它（{@code inventory_transfer.line_id}）， 改数量会让在途清单与明细永久对不上。要改请新建单。
    */
   public TransferOrderSaved update(UUID orderId, TransferOrderUpdateRequest request) {
     Record order = lockOrder(orderId);
@@ -589,7 +584,8 @@ public class InventoryTransferService {
     sql.execute(
         "update transfer_order set status=?,confirmed_at=now(),version=version+1,updated_at=now()"
             + " where id=?",
-        TransferOrderStatus.PENDING_SHIPMENT.name(), orderId);
+        TransferOrderStatus.PENDING_SHIPMENT.name(),
+        orderId);
     return savedOf(orderId);
   }
 
@@ -609,10 +605,10 @@ public class InventoryTransferService {
       if (line.qualityStatusId() == null
           || sql.fetchOne(
                   "select id from inventory_quality_status where id=? and tenant_id=?",
-                  line.qualityStatusId(), tenantId)
+                  line.qualityStatusId(),
+                  tenantId)
               == null) {
-        throw new IllegalArgumentException(
-            "质量状态不存在或无权访问：" + line.qualityStatusId());
+        throw new IllegalArgumentException("质量状态不存在或无权访问：" + line.qualityStatusId());
       }
       var key = line.skuId() + "/" + line.qualityStatusId();
       if (!seen.add(key)) {
@@ -639,8 +635,7 @@ public class InventoryTransferService {
    *
    * <p>可分批发运：同一张单多次调用，每次发一部分行或每行的一部分量。
    *
-   * <p>库位扣减：V2 的守恒触发器要求「改余额必须同时改库位明细」，
-   * 所以扣减按库位逐个扣（{@code available>0} 的库位，按最近变动时间先后）。
+   * <p>库位扣减：V2 的守恒触发器要求「改余额必须同时改库位明细」， 所以扣减按库位逐个扣（{@code available>0} 的库位，按最近变动时间先后）。
    * 余额行尚未分解到库位时（V1 允许的合法状态）只改余额。
    */
   public TransferOrderSaved ship(UUID orderId, TransferShipRequest request) {
@@ -713,7 +708,11 @@ public class InventoryTransferService {
       sql.execute(
           "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
               + "reserved_delta) values(?,?,?,?,?,0)",
-          UUID.randomUUID(), tenantId, transactionId, balanceId, qty.negate());
+          UUID.randomUUID(),
+          tenantId,
+          transactionId,
+          balanceId,
+          qty.negate());
       sql.execute(
           "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,from_warehouse_id,"
               + "to_warehouse_id,quality_status_id,quantity,status,ref_type,ref_id,shipped_at,line_id)"
@@ -732,7 +731,8 @@ public class InventoryTransferService {
       sql.execute(
           "update transfer_order_line set shipped_quantity=shipped_quantity+?,version=version+1,"
               + "updated_at=now() where id=?",
-          qty, l.get("id", UUID.class));
+          qty,
+          l.get("id", UUID.class));
     }
 
     syncStatus(orderId, tenantId);
@@ -742,23 +742,20 @@ public class InventoryTransferService {
   /**
    * 从源仓余额扣减，并同步扣减库位明细。
    *
-   * <p>可用量（{@code on_hand − reserved}）不足直接报错：调走的是**可发**的货，
-   * 动到已预占的数量会把别人的订单掏空，而 {@code available>=0} 那条 CHECK 只是最后一道兜底。
+   * <p>可用量（{@code on_hand − reserved}）不足直接报错：调走的是**可发**的货， 动到已预占的数量会把别人的订单掏空，而 {@code available>=0}
+   * 那条 CHECK 只是最后一道兜底。
    */
   private void deductSource(UUID balanceId, BigDecimal qty, OffsetDateTime at) {
     Record bal =
-        sql.fetchOne("select on_hand,reserved,available from inventory_balance where id=?", balanceId);
+        sql.fetchOne(
+            "select on_hand,reserved,available from inventory_balance where id=?", balanceId);
     if (bal == null) {
       throw new IllegalArgumentException("源仓没有这条库存余额，无法调拨（货可能还没入库）");
     }
     BigDecimal available = decimal(bal, "available");
     if (qty.compareTo(available) > 0) {
       throw new IllegalArgumentException(
-          "源仓可用量不足：可用 "
-              + available
-              + "，本次发出 "
-              + qty
-              + "（已被预占的数量不能调走）");
+          "源仓可用量不足：可用 " + available + "，本次发出 " + qty + "（已被预占的数量不能调走）");
     }
     var buckets =
         sql.fetch(
@@ -770,7 +767,8 @@ public class InventoryTransferService {
       sql.execute(
           "update inventory_balance set on_hand=on_hand-?,version=version+1,updated_at=now()"
               + " where id=?",
-          qty, balanceId);
+          qty,
+          balanceId);
       return;
     }
     BigDecimal left = qty;
@@ -786,7 +784,9 @@ public class InventoryTransferService {
           "update stock_bucket set on_hand=on_hand-?,"
               + " last_movement_at=greatest(cast(? as timestamptz),last_movement_at"
               + " + interval '1 microsecond') where id=?",
-          take, at, bucketId);
+          take,
+          at,
+          bucketId);
       left = left.subtract(take);
     }
     if (left.signum() > 0) {
@@ -795,7 +795,8 @@ public class InventoryTransferService {
     sql.execute(
         "update inventory_balance set on_hand=on_hand-?,version=version+1,updated_at=now()"
             + " where id=?",
-        qty, balanceId);
+        qty,
+        balanceId);
   }
 
   // ================================================================ 实收：转入目的仓 + 冲减在途
@@ -803,12 +804,10 @@ public class InventoryTransferService {
   /**
    * 实收：转入目的仓余额、写 TRANSFER_IN 分录、**逐次冲减在途**。
    *
-   * <p>可分次收货（蓝图：「目的仓分次收货逐笔转入」）。每次调用是一笔独立事件，
-   * 落到同一���目的库位，因此只有一处 {@code locationId}。
+   * <p>可分次收货（蓝图：「目的仓分次收货逐笔转入」）。每次调用是一笔独立事件， 落到同一���目的库位，因此只有一处 {@code locationId}。
    *
-   * <p>在途余量按「先发先收」冲减：{@code inventory_transfer.quantity} 是余量口径，
-   * 归零即置 RECEIVED 并写收货时刻。这让 7.1.1.1 / 7.2.2.1 / 7.1.3.1 的
-   * {@code sum(quantity) where status='IN_TRANSIT'} 在分次收货下依然精确。
+   * <p>在途余量按「先发先收」冲减：{@code inventory_transfer.quantity} 是余量口径， 归零即置 RECEIVED 并写收货时刻。这让 7.1.1.1 /
+   * 7.2.2.1 / 7.1.3.1 的 {@code sum(quantity) where status='IN_TRANSIT'} 在分次收货下依然精确。
    */
   public TransferOrderSaved receive(UUID orderId, TransferReceiveRequest request) {
     Record order = lockOrder(orderId);
@@ -829,8 +828,10 @@ public class InventoryTransferService {
     }
     requireLocation(tenantId, request.locationId(), toWarehouse);
     if (request.lotId() != null
-        && sql.fetchOne("select id from inventory_lot where id=? and tenant_id=?", request.lotId(),
-            tenantId)
+        && sql.fetchOne(
+                "select id from inventory_lot where id=? and tenant_id=?",
+                request.lotId(),
+                tenantId)
             == null) {
       throw new IllegalArgumentException("批次不存在或无权访问：" + request.lotId());
     }
@@ -871,11 +872,7 @@ public class InventoryTransferService {
       BigDecimal outstanding = inTransitOf(l.get("id", UUID.class));
       if (qty.compareTo(outstanding) > 0) {
         throw new IllegalArgumentException(
-            "本次实收数量超过该行仍在途的数量（在途 "
-                + outstanding
-                + "，本次 "
-                + qty
-                + "）");
+            "本次实收数量超过该行仍在途的数量（在途 " + outstanding + "，本次 " + qty + "）");
       }
       UUID balanceId =
           balanceId(
@@ -888,16 +885,25 @@ public class InventoryTransferService {
       sql.execute(
           "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,"
               + "reserved_delta) values(?,?,?,?,?,0)",
-          UUID.randomUUID(), tenantId, transactionId, balanceId, qty);
+          UUID.randomUUID(),
+          tenantId,
+          transactionId,
+          balanceId,
+          qty);
       sql.execute(
           "insert into transfer_receipt_line(id,tenant_id,receipt_id,line_id,quantity)"
               + " values(?,?,?,?,?)",
-          UUID.randomUUID(), tenantId, receiptId, l.get("id", UUID.class), qty);
+          UUID.randomUUID(),
+          tenantId,
+          receiptId,
+          l.get("id", UUID.class),
+          qty);
       consumeInTransit(l.get("id", UUID.class), qty, receivedAt, receiptId);
       sql.execute(
           "update transfer_order_line set received_quantity=received_quantity+?,"
               + "version=version+1,updated_at=now() where id=?",
-          qty, l.get("id", UUID.class));
+          qty,
+          l.get("id", UUID.class));
     }
 
     syncStatus(orderId, tenantId);
@@ -908,14 +914,19 @@ public class InventoryTransferService {
   private void addDestination(
       UUID balanceId, UUID locationId, UUID lotId, BigDecimal qty, OffsetDateTime at) {
     Record existing =
-        sql.fetchOne("select id from stock_bucket where balance_id=? and location_id=? and lot_id is not distinct from ?",
-            balanceId, locationId, lotId);
+        sql.fetchOne(
+            "select id from stock_bucket where balance_id=? and location_id=? and lot_id is not distinct from ?",
+            balanceId,
+            locationId,
+            lotId);
     if (existing != null) {
       sql.execute(
           "update stock_bucket set on_hand=on_hand+?,"
               + " last_movement_at=greatest(cast(? as timestamptz),last_movement_at"
               + " + interval '1 microsecond') where id=?",
-          qty, at, existing.get("id", UUID.class));
+          qty,
+          at,
+          existing.get("id", UUID.class));
     } else {
       Record bal = sql.fetchOne("select * from inventory_balance where id=?", balanceId);
       sql.execute(
@@ -937,7 +948,8 @@ public class InventoryTransferService {
     sql.execute(
         "update inventory_balance set on_hand=on_hand+?,version=version+1,updated_at=now()"
             + " where id=?",
-        qty, balanceId);
+        qty,
+        balanceId);
   }
 
   /**
@@ -951,10 +963,8 @@ public class InventoryTransferService {
    *       了结时刻：RECEIVED 记实收时刻，CANCELLED 记结案了结时刻。
    * </ul>
    *
-   * <p>因此部分收货走「拆行」而不是「改一行的余量」：
-   * <b>原行改成还没到的剩余量，另起一行记已收到的那一段</b>。
-   * 这样 7.1.1.1 / 7.2.2.1 / 7.1.3.1 那条 {@code sum(quantity) where status='IN_TRANSIT'}
-   * 得到的仍是**精确的未达量**，而两条 CHECK 都还成立。
+   * <p>因此部分收货走「拆行」而不是「改一行的余量」： <b>原行改成还没到的剩余量，另起一行记已收到的那一段</b>。 这样 7.1.1.1 / 7.2.2.1 / 7.1.3.1 那条
+   * {@code sum(quantity) where status='IN_TRANSIT'} 得到的仍是**精确的未达量**，而两条 CHECK 都还成立。
    */
   private void consumeInTransit(UUID lineId, BigDecimal qty, OffsetDateTime at, UUID receiptId) {
     BigDecimal left = qty;
@@ -976,7 +986,8 @@ public class InventoryTransferService {
         sql.execute(
             "update inventory_transfer set status='RECEIVED',"
                 + "received_at=cast(? as timestamptz),updated_at=now() where id=?",
-            at, legId);
+            at,
+            legId);
       } else {
         // 原行留下未到的剩余量
         sql.execute(
@@ -989,7 +1000,11 @@ public class InventoryTransferService {
                 + " select ?,tenant_id,sku_id,legal_entity_id,from_warehouse_id,to_warehouse_id,"
                 + "quality_status_id,?,'RECEIVED','TRANSFER_RECEIPT',?,shipped_at,"
                 + "cast(? as timestamptz),line_id from inventory_transfer where id=?",
-            UUID.randomUUID(), take, receiptId, at, legId);
+            UUID.randomUUID(),
+            take,
+            receiptId,
+            at,
+            legId);
       }
       left = left.subtract(take);
     }
@@ -1000,11 +1015,10 @@ public class InventoryTransferService {
   /**
    * 结案：把「已发出但永远收不到」的部分如实记成差异，在途归零。
    *
-   * <p>**不自动抹平**：差异既不会被悄悄挪回源仓，也不会被算成源仓的入库。
-   * 它就是这趟货真的丢了/破损了/被拒收了，原因是必填的 {@code SHORTAGE} 事件。
+   * <p>**不自动抹平**：差异既不会被悄悄挪回源仓，也不会被算成源仓的入库。 它就是这趟货真的丢了/破损了/被拒收了，原因是必填的 {@code SHORTAGE} 事件。
    *
-   * <p>在途行为 CANCELLED 且 quantity 归零：否则这批货会永远挂在在途清单上，
-   * 而 7.1.1.1 的守恒式（在手 = 可售 + 待检 + 残次 + 在途）会把货算成还在路上。
+   * <p>在途行为 CANCELLED 且 quantity 归零：否则这批货会永远挂在在途清单上， 而 7.1.1.1 的守恒式（在手 = 可售 + 待检 + 残次 +
+   * 在途）会把货算成还在路上。
    *
    * <p>没有短少时结案直接落「已收」终态。
    */
@@ -1035,31 +1049,41 @@ public class InventoryTransferService {
         continue;
       }
       if (reason == null || reason.isEmpty()) {
-        throw new IllegalArgumentException(
-            "存在已发出但未实收的货物（差异 " + transit + "），结案必须给出差异原因");
+        throw new IllegalArgumentException("存在已发出但未实收的货物（差异 " + transit + "），结案必须给出差异原因");
       }
       var parsed = TransferDiscrepancyReason.parse(reason);
       var receiptId = UUID.randomUUID();
       sql.execute(
           "insert into transfer_receipt(id,tenant_id,order_id,kind,received_at,actor_id,reason,notes)"
               + " values(?,?,?,'SHORTAGE',cast(? as timestamptz),?,?,?)",
-          receiptId, tenantId, orderId, at, actor, parsed.name(),
+          receiptId,
+          tenantId,
+          orderId,
+          at,
+          actor,
+          parsed.name(),
           fit(request.notes(), 2000, "结案备注"));
       sql.execute(
           "insert into transfer_receipt_line(id,tenant_id,receipt_id,line_id,quantity)"
               + " values(?,?,?,?,?)",
-          UUID.randomUUID(), tenantId, receiptId, l.get("id", UUID.class), transit);
+          UUID.randomUUID(),
+          tenantId,
+          receiptId,
+          l.get("id", UUID.class),
+          transit);
       // 在途归零：状态 CANCELLED。这批货已经不在路上了。
       // V1 的 CHECK 规定非在途状态必须带一个了结时刻，CANCELLED 就记结案时刻。
       sql.execute(
           "update inventory_transfer set status='CANCELLED',"
               + "received_at=cast(? as timestamptz),updated_at=now()"
               + " where line_id=? and status='IN_TRANSIT'",
-          at, l.get("id", UUID.class));
+          at,
+          l.get("id", UUID.class));
       sql.execute(
           "update transfer_order_line set discrepancy_quantity=discrepancy_quantity+?,"
               + "version=version+1,updated_at=now() where id=?",
-          transit, l.get("id", UUID.class));
+          transit,
+          l.get("id", UUID.class));
     }
 
     // 结案备注一律留痕（有没有短少都留）：谁在什么时候把这趟货关掉了本身就是审计事实。
@@ -1068,7 +1092,8 @@ public class InventoryTransferService {
     sql.execute(
         "update transfer_order set notes=coalesce(nullif(?,''),notes),version=version+1,"
             + "updated_at=now() where id=?",
-        fit(request.notes(), 2000, "结案备注"), orderId);
+        fit(request.notes(), 2000, "结案备注"),
+        orderId);
 
     syncStatus(orderId, tenantId);
     return savedOf(orderId);
@@ -1079,8 +1104,7 @@ public class InventoryTransferService {
   /**
    * 依据明细行的真实数量重算单据状态。
    *
-   * <p>发出、实收、结案三个动作都调它 —— 状态不写在各自的 if 里，
-   * 「最后一行收完到底是已收还是部分收」这种边界只需要在这里判断一次。
+   * <p>发出、实收、结案三个动作都调它 —— 状态不写在各自的 if 里， 「最后一行收完到底是已收还是部分收」这种边界只需要在这里判断一次。
    *
    * <p>判定顺序即优先级：终态优先，其次「有无实收」，最后「发没发」。
    */
@@ -1101,7 +1125,9 @@ public class InventoryTransferService {
                 + "  where i.tenant_id=? and i.status='IN_TRANSIT' and i.line_id in"
                 + "   (select id from transfer_order_line where order_id=?)) as transit"
                 + " from transfer_order_line l where l.order_id=?",
-            tenantId, orderId, orderId)) {
+            tenantId,
+            orderId,
+            orderId)) {
       shipped = decimal(r, "shipped");
       received = decimal(r, "received");
       discrepancy = decimal(r, "discrepancy");
@@ -1144,7 +1170,10 @@ public class InventoryTransferService {
     sql.execute(
         "update transfer_order set status=?,shipped_at=cast(? as timestamptz),"
             + "completed_at=cast(? as timestamptz),version=version+1,updated_at=now() where id=?",
-        next.name(), shippedAt, completedAt, orderId);
+        next.name(),
+        shippedAt,
+        completedAt,
+        orderId);
   }
 
   // ================================================================ 校验与工具
@@ -1166,8 +1195,7 @@ public class InventoryTransferService {
     long actual = order.get("version", Long.class);
     if (actual != expected) {
       throw new ResponseStatusException(
-          HttpStatus.CONFLICT,
-          "调拨单已被他人修改（当前版本 " + actual + "，你的版本 " + expected + "），请刷新后重试");
+          HttpStatus.CONFLICT, "调拨单已被他人修改（当前版本 " + actual + "，你的版本 " + expected + "），请刷新后重试");
     }
   }
 
@@ -1187,8 +1215,9 @@ public class InventoryTransferService {
     if (lineId == null) {
       throw new IllegalArgumentException("必须指定调拨明细行");
     }
-    Record line = sql.fetchOne("select * from transfer_order_line where id=? and order_id=?",
-        lineId, orderId);
+    Record line =
+        sql.fetchOne(
+            "select * from transfer_order_line where id=? and order_id=?", lineId, orderId);
     if (line == null) {
       throw new IllegalArgumentException("明细行不属于这张调拨单：" + lineId);
     }
@@ -1196,8 +1225,11 @@ public class InventoryTransferService {
   }
 
   private void requireWarehouse(UUID tenantId, UUID warehouseId, String label) {
-    if (sql.fetchOne("select id from warehouse where id=? and tenant_id=? and status='ACTIVE'",
-        warehouseId, tenantId) == null) {
+    if (sql.fetchOne(
+            "select id from warehouse where id=? and tenant_id=? and status='ACTIVE'",
+            warehouseId,
+            tenantId)
+        == null) {
       throw new IllegalArgumentException(label + "不存在、不属于本租户或已停用：" + warehouseId);
     }
   }
@@ -1205,9 +1237,11 @@ public class InventoryTransferService {
   private void requireLocation(UUID tenantId, UUID locationId, UUID warehouseId) {
     if (sql.fetchOne(
             "select id from warehouse_location where id=? and tenant_id=? and warehouse_id=?",
-            locationId, tenantId, warehouseId) == null) {
-      throw new IllegalArgumentException(
-          "落库库位不存在，或不属于目标仓（收货只能落到目的仓的库位）：" + locationId);
+            locationId,
+            tenantId,
+            warehouseId)
+        == null) {
+      throw new IllegalArgumentException("落库库位不存在，或不属于目标仓（收货只能落到目的仓的库位）：" + locationId);
     }
   }
 
@@ -1247,7 +1281,11 @@ public class InventoryTransferService {
         sql.fetchOne(
             "select id from inventory_balance where tenant_id=? and sku_id=? and warehouse_id=?"
                 + " and legal_entity_id=? and quality_status_id=?",
-            tenantId, skuId, warehouseId, legalEntityId, qualityStatusId);
+            tenantId,
+            skuId,
+            warehouseId,
+            legalEntityId,
+            qualityStatusId);
     if (found != null) {
       return found.get("id", UUID.class);
     }
@@ -1255,7 +1293,12 @@ public class InventoryTransferService {
     sql.execute(
         "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
             + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,0,0)",
-        id, tenantId, skuId, warehouseId, legalEntityId, qualityStatusId);
+        id,
+        tenantId,
+        skuId,
+        warehouseId,
+        legalEntityId,
+        qualityStatusId);
     return id;
   }
 
@@ -1279,9 +1322,8 @@ public class InventoryTransferService {
   /**
    * 读金额/数量。
    *
-   * <p>纯文本 SQL 里的表达式列 jOOQ 拿不到列类型，直接 {@code get(field, BigDecimal.class)}
-   * 可能静默返回 null（批次模块的 {@code days_to_expiry} 就是这么整列变成 null 的）。
-   * 这里收口成不依赖驱动返回类型的读法。
+   * <p>纯文本 SQL 里的表达式列 jOOQ 拿不到列类型，直接 {@code get(field, BigDecimal.class)} 可能静默返回 null（批次模块的 {@code
+   * days_to_expiry} 就是这么整列变成 null 的）。 这里收口成不依赖驱动返回类型的读法。
    */
   private static BigDecimal decimal(Record r, String field) {
     var value = r.get(field);

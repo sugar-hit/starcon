@@ -67,18 +67,18 @@
 
 ## 踩坑记录
 
-| 坑 | 结论 |
-|---|---|
-| `Instant` 绑 timestamptz | 只有 `LocalDateTime` 可用，需显式 `LocalDateTime.ofInstant(i, ZoneOffset.UTC)` 决定转换时区，不能依赖 JVM 默认时区 |
-| jOOQ 不支持显式 SQL 里的类型断言 | `?::uuid is null`、`(?||' days')::interval` 都会 bad grammar → 在 Java 侧分支决定 SQL 片段 |
-| jOOQ 不支持 Java enum 绑定 | `SQLDialectNotSupportedException` → 必须转 `.name()` |
-| `Object[]` 混用 | UUID 会被误判成 `any[]` → 逐参传递，或显式 `new Object[]{...}` 并走正确重载 |
-| `btrim(x) = 3` | PG16 里 `text = integer` 报 42883 → 改 `length(btrim(...)) = 3`；`char(N)` 改 `varchar(N)` |
-| `unnest(ARRAY[...])` | 元素类型推断不稳定 → 统一加 `::text[]` |
-| RLS 策略拼前缀 | `channel_operation()` 返回的已是完整权限码，再拼前缀会导致策略永不命中 |
-| 断言全局列表长度 | 测试容器被本类所有测试共享，断言全局计数会失真 → 按自己的数据过滤 |
-| 两个测试类各自起 PG 容器 | 角色创建会冲突 → 改条件式 `DO $$ ... IF NOT EXISTS` |
-| Flyway 迁移报错难定位 | 报的是字节偏移（如"位置：1473"）无法反推行号 → 起临时 PG 逐条 `psql -f`，秒级定位 |
+| 坑                               | 结论                                                                                                               |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `Instant` 绑 timestamptz         | 只有 `LocalDateTime` 可用，需显式 `LocalDateTime.ofInstant(i, ZoneOffset.UTC)` 决定转换时区，不能依赖 JVM 默认时区 |
+| jOOQ 不支持显式 SQL 里的类型断言 | `?::uuid is null`、`(?                                                                                             |     | ' days')::interval` 都会 bad grammar → 在 Java 侧分支决定 SQL 片段 |
+| jOOQ 不支持 Java enum 绑定       | `SQLDialectNotSupportedException` → 必须转 `.name()`                                                               |
+| `Object[]` 混用                  | UUID 会被误判成 `any[]` → 逐参传递，或显式 `new Object[]{...}` 并走正确重载                                        |
+| `btrim(x) = 3`                   | PG16 里 `text = integer` 报 42883 → 改 `length(btrim(...)) = 3`；`char(N)` 改 `varchar(N)`                         |
+| `unnest(ARRAY[...])`             | 元素类型推断不稳定 → 统一加 `::text[]`                                                                             |
+| RLS 策略拼前缀                   | `channel_operation()` 返回的已是完整权限码，再拼前缀会导致策略永不命中                                             |
+| 断言全局列表长度                 | 测试容器被本类所有测试共享，断言全局计数会失真 → 按自己的数据过滤                                                  |
+| 两个测试类各自起 PG 容器         | 角色创建会冲突 → 改条件式 `DO $$ ... IF NOT EXISTS`                                                                |
+| Flyway 迁移报错难定位            | 报的是字节偏移（如"位置：1473"）无法反推行号 → 起临时 PG 逐条 `psql -f`，秒级定位                                  |
 
 ## 验证结果
 
@@ -92,6 +92,7 @@
 ## 文件清单
 
 新增
+
 - `backend/services/channel/src/main/resources/db/migration/V2__sync_runtime_and_platform_operations.sql`
 - `backend/services/channel/src/main/java/com/starcon/channel/{SyncService,SyncController}.java`
 - `backend/services/channel/src/test/java/com/starcon/channel/SyncRuntimeIntegrationTest.java`
@@ -102,6 +103,7 @@
 - `tests/e2e/iam-recovery.spec.ts`
 
 修改
+
 - `backend/services/identity/src/main/java/com/starcon/identity/AdministrationController.java`（法人端点）
 - `backend/services/identity/src/test/java/com/starcon/identity/IdentityIntegrationTest.java`
   （RLS 表清单纳入 legal_entity / legal_entity_reference，新增 5 个法人测试）
@@ -116,6 +118,7 @@
 **D1–D2 期已收口，下一步进 D3 期（07 库存核算 + 08 仓储作业）。**
 
 遗留项：
+
 - `shop.legal_entity_id` 仍是悬空逻辑引用（跨库不建 FK，遵循 ADR-0004 纪律）。
   channel 侧尚未调用 `/identity/legal-entities/references` 登记引用，
   因此删除保护目前只对已登记的引用生效 —— 接入店铺侧写入时必须补上这一步。

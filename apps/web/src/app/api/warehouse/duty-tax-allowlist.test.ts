@@ -95,7 +95,7 @@ it('源码里真实存在的每个关税税费调用点都被放行并转发', a
 
   for (const path of sites) {
     const segments = path.split('/');
-    const response = await GET(request(path), { params: { path: segments } });
+    const response = await GET(request(path), { params: Promise.resolve({ path: segments }) });
     expect(response.status, `${path} 未被放行`).toBe(200);
     expect(fetcher).toHaveBeenCalledWith(
       expect.stringContaining(':8084/' + path),
@@ -142,7 +142,9 @@ it('明细分资源端点也放行', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   for (const path of [`${BASE}/${ID}/lines`, `${BASE}/${ID}/payments`, `${BASE}/${ID}/variances`]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（后端已交付却拦住 = 界面上点开是空白）`).toBe(200);
   }
 });
@@ -152,7 +154,9 @@ it('建估算走 POST 裸路径也被放行', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const segments = BASE.split('/');
-  const response = await POST(request(BASE, 'POST'), { params: { path: segments } });
+  const response = await POST(request(BASE, 'POST'), {
+    params: Promise.resolve({ path: segments }),
+  });
   expect(response.status, 'POST 税费估算裸路径未被放行').toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8084/' + BASE),
@@ -166,7 +170,9 @@ it('改基础（PUT {id}）与改税率（PUT rates/{rateId}）被放行', async
   vi.stubGlobal('fetch', fetcher);
 
   for (const path of [`${BASE}/${ID}`, `${BASE}/rates/${RATE_ID}`]) {
-    const response = await PUT(request(path, 'PUT'), { params: { path: path.split('/') } });
+    const response = await PUT(request(path, 'PUT'), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `PUT ${path} 未被放行`).toBe(200);
     expect(fetcher).toHaveBeenCalledWith(
       expect.stringContaining(':8084/' + path),
@@ -195,7 +201,9 @@ it('报关单与头程发运单的形状没有被关税税费的白名单吃掉'
     `warehouse/first-mile-shipments/${ID}`,
     `warehouse/first-mile-shipments/${ID}/transit-legs`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（被 duty-taxes 段吃掉了？）`).toBe(200);
   }
 
@@ -204,7 +212,9 @@ it('报关单与头程发运单的形状没有被关税税费的白名单吃掉'
     `warehouse/first-mile-shipments/${ID}/duty-tax`,
     `warehouse/duty-tax`,
   ]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
 });
@@ -220,8 +230,15 @@ it('报关单与头程发运单的形状没有被关税税费的白名单吃掉'
 it('本模块端点落在仓库级外层（不在 inventory/ 之下）', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
-  for (const path of [`${BASE}`, `${BASE}/capabilities`, `${BASE}/rates`, `${BASE}/variance-analysis`]) {
-    const response = await GET(request(path), { params: { path: path.split('/') } });
+  for (const path of [
+    `${BASE}`,
+    `${BASE}/capabilities`,
+    `${BASE}/rates`,
+    `${BASE}/variance-analysis`,
+  ]) {
+    const response = await GET(request(path), {
+      params: Promise.resolve({ path: path.split('/') }),
+    });
     expect(response.status, `${path} 未被放行（可能被并进了内层 inventory/ 组）`).toBe(200);
   }
 });
@@ -243,7 +260,7 @@ it('不存在的关税税费子路径仍然被拒 —— 放行不该存在的�
     `${BASE}/variance_analysis`,
   ]) {
     const segments = path.split('/');
-    const response = await GET(request(path), { params: { path: segments } });
+    const response = await GET(request(path), { params: Promise.resolve({ path: segments }) });
     expect(response.status, `${path} 不应被放行`).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
@@ -262,7 +279,9 @@ it('白名单按路径登记：已登记路径的 DELETE 会被转发，防线�
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
   vi.stubGlobal('fetch', fetcher);
   const path = `${BASE}/${ID}`;
-  const response = await DELETE(request(path, 'DELETE'), { params: { path: path.split('/') } });
+  const response = await DELETE(request(path, 'DELETE'), {
+    params: Promise.resolve({ path: path.split('/') }),
+  });
   expect(response.status).toBe(200);
   expect(fetcher).toHaveBeenCalledWith(
     expect.stringContaining(':8084/' + path),

@@ -90,7 +90,11 @@ export function PartyContactsWorkspace() {
   const [party, setParty] = useState<PartyRow | null>(null);
 
   const [addresses, setAddresses] = useState<PartyAddress[]>([]);
-  const [addressStats, setAddressStats] = useState({ total: 0, defaultCount: 0, unassignedCount: 0 });
+  const [addressStats, setAddressStats] = useState({
+    total: 0,
+    defaultCount: 0,
+    unassignedCount: 0,
+  });
   const [addressQuery, setAddressQuery] = useState<AddressListQuery>({
     keyword: '',
     usage: '',
@@ -113,7 +117,10 @@ export function PartyContactsWorkspace() {
   const [addressForm, setAddressForm] = useState(emptyAddressInput());
   const [editingContact, setEditingContact] = useState<PartyContact | null>(null);
   const [contactForm, setContactForm] = useState(emptyContactInput());
-  const [history, setHistory] = useState<{ address: PartyAddress; versions: PartyAddressVersion[] } | null>(null);
+  const [history, setHistory] = useState<{
+    address: PartyAddress;
+    versions: PartyAddressVersion[];
+  } | null>(null);
 
   // ------------------------------------------------------------ 主体
   const loadParties = useCallback(async () => {
@@ -154,12 +161,9 @@ export function PartyContactsWorkspace() {
     });
   }, []);
 
-  const loadContacts = useCallback(
-    async (id: string, keyword: string, primaryOnly: boolean) => {
-      setContacts(await fetchContacts(id, keyword, primaryOnly));
-    },
-    [],
-  );
+  const loadContacts = useCallback(async (id: string, keyword: string, primaryOnly: boolean) => {
+    setContacts(await fetchContacts(id, keyword, primaryOnly));
+  }, []);
 
   useEffect(() => {
     void loadParties();
@@ -333,14 +337,18 @@ export function PartyContactsWorkspace() {
       <header className="space-y-2">
         <h1 className="text-h-20 font-semibold tracking-tight">地址与联系人</h1>
         <p className="text-copy-13 text-muted-foreground">
-          往来单位的收发货地址与带姓名的联系人。默认收货 / 发货 / 提货地址按<b>用途分别</b>设置
-          ——06 采购取发货与收货地址、10 物流取提货地址；地址内容每改一次会留一版历史，
+          往来单位的收发货地址与带姓名的联系人。默认收货 / 发货 / 提货地址按<b>用途分别</b>设置 ——06
+          采购取发货与收货地址、10 物流取提货地址；地址内容每改一次会留一版历史，
           <b>已发生单据上的地址是冻结快照，不受这里修改的影响</b>。
         </p>
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="地址总数" value={addressStats.total} icon={<MapPin className="h-4 w-4" />} />
+        <StatCard
+          label="地址总数"
+          value={addressStats.total}
+          icon={<MapPin className="h-4 w-4" />}
+        />
         <StatCard
           label="已设默认"
           value={addressStats.defaultCount}
@@ -465,14 +473,18 @@ export function PartyContactsWorkspace() {
                     className={control}
                     value={addressQuery.keyword}
                     placeholder="搜街道或城市"
-                    onChange={(e) => setAddressQuery({ ...addressQuery, keyword: e.target.value, page: 0 })}
+                    onChange={(e) =>
+                      setAddressQuery({ ...addressQuery, keyword: e.target.value, page: 0 })
+                    }
                   />
                 </Field>
                 <Field label="用途">
                   <select
                     className={control}
                     value={addressQuery.usage}
-                    onChange={(e) => setAddressQuery({ ...addressQuery, usage: e.target.value, page: 0 })}
+                    onChange={(e) =>
+                      setAddressQuery({ ...addressQuery, usage: e.target.value, page: 0 })
+                    }
                   >
                     <option value="">全部用途</option>
                     {ADDRESS_USAGES.map((usage) => (
@@ -486,7 +498,9 @@ export function PartyContactsWorkspace() {
                   <select
                     className={control}
                     value={addressQuery.countryCode}
-                    onChange={(e) => setAddressQuery({ ...addressQuery, countryCode: e.target.value, page: 0 })}
+                    onChange={(e) =>
+                      setAddressQuery({ ...addressQuery, countryCode: e.target.value, page: 0 })
+                    }
                   >
                     <option value="">全部国家</option>
                     {ADDRESS_COUNTRIES.map((country) => (
@@ -501,7 +515,11 @@ export function PartyContactsWorkspace() {
                     type="checkbox"
                     checked={addressQuery.includeDeleted}
                     onChange={(e) =>
-                      setAddressQuery({ ...addressQuery, includeDeleted: e.target.checked, page: 0 })
+                      setAddressQuery({
+                        ...addressQuery,
+                        includeDeleted: e.target.checked,
+                        page: 0,
+                      })
                     }
                   />
                 </Field>
@@ -519,14 +537,19 @@ export function PartyContactsWorkspace() {
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-medium">{address.label ?? '未命名地址'}</span>
                         {(address.usages ?? []).map((usage) => (
-                          <Badge key={usage} tone={address.defaultUsages?.includes(usage) ? 'success' : 'info'}>
+                          <Badge
+                            key={usage}
+                            tone={address.defaultUsages?.includes(usage) ? 'success' : 'info'}
+                          >
                             {usageLabel(usage)}
                             {address.defaultUsages?.includes(usage) ? '（默认）' : ''}
                           </Badge>
                         ))}
                         {address.usages?.length === 0 && <Badge tone="warning">未标用途</Badge>}
                         {address.selectionBlockCode && (
-                          <Badge tone="warning">{selectionBlockLabel(address.selectionBlockCode)}</Badge>
+                          <Badge tone="warning">
+                            {selectionBlockLabel(address.selectionBlockCode)}
+                          </Badge>
                         )}
                         <span className="text-muted-foreground ml-auto text-xs">
                           第 {address.latestVersionNo} 版 · 共 {address.versionCount} 版
@@ -556,10 +579,11 @@ export function PartyContactsWorkspace() {
                             >
                               编辑
                             </Button>
-                            {ADDRESS_USAGES.filter(
-                              (usage) => address.usages?.includes(usage.value),
+                            {ADDRESS_USAGES.filter((usage) =>
+                              address.usages?.includes(usage.value),
                             ).map((usage) => {
-                              const isDefault = address.defaultUsages?.includes(usage.value) ?? false;
+                              const isDefault =
+                                address.defaultUsages?.includes(usage.value) ?? false;
                               return (
                                 <Button
                                   key={usage.value}
@@ -577,7 +601,11 @@ export function PartyContactsWorkspace() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => void submitUsages(address, [{ usage: 'SHIP_TO', isDefault: false }])}
+                                onClick={() =>
+                                  void submitUsages(address, [
+                                    { usage: 'SHIP_TO', isDefault: false },
+                                  ])
+                                }
                               >
                                 标为收货地址
                               </Button>
@@ -595,7 +623,9 @@ export function PartyContactsWorkspace() {
                         )}
                       </div>
                       {address.selectionBlockMessage && address.selectionBlockCode && (
-                        <p className="text-muted-foreground text-xs">{address.selectionBlockMessage}</p>
+                        <p className="text-muted-foreground text-xs">
+                          {address.selectionBlockMessage}
+                        </p>
                       )}
                     </div>
                   ))}
@@ -608,7 +638,9 @@ export function PartyContactsWorkspace() {
                     variant="outline"
                     size="sm"
                     disabled={addressQuery.page === 0}
-                    onClick={() => setAddressQuery({ ...addressQuery, page: addressQuery.page - 1 })}
+                    onClick={() =>
+                      setAddressQuery({ ...addressQuery, page: addressQuery.page - 1 })
+                    }
                   >
                     上一页
                   </Button>
@@ -619,7 +651,9 @@ export function PartyContactsWorkspace() {
                     variant="outline"
                     size="sm"
                     disabled={addressQuery.page + 1 >= addressPages}
-                    onClick={() => setAddressQuery({ ...addressQuery, page: addressQuery.page + 1 })}
+                    onClick={() =>
+                      setAddressQuery({ ...addressQuery, page: addressQuery.page + 1 })
+                    }
                   >
                     下一页
                   </Button>
@@ -676,12 +710,15 @@ export function PartyContactsWorkspace() {
                         <span className="font-medium">{contactDisplayName(contact)}</span>
                         {contact.isPrimary && <Badge tone="success">默认联系人</Badge>}
                         {contact.selectionBlockCode && (
-                          <Badge tone="warning">{contactBlockLabel(contact.selectionBlockCode)}</Badge>
+                          <Badge tone="warning">
+                            {contactBlockLabel(contact.selectionBlockCode)}
+                          </Badge>
                         )}
                       </div>
                       <p className="text-muted-foreground mt-1 text-sm">
-                        {[contact.email, contact.phone, contact.mobile].filter(Boolean).join(' · ') ||
-                          '未填联系方式'}
+                        {[contact.email, contact.phone, contact.mobile]
+                          .filter(Boolean)
+                          .join(' · ') || '未填联系方式'}
                       </p>
                       {writable && (
                         <div className="mt-2 flex flex-wrap gap-2">
@@ -772,14 +809,18 @@ export function PartyContactsWorkspace() {
                 <input
                   className={control}
                   value={addressForm.district ?? ''}
-                  onChange={(e) => setAddressForm({ ...addressForm, district: e.target.value || null })}
+                  onChange={(e) =>
+                    setAddressForm({ ...addressForm, district: e.target.value || null })
+                  }
                 />
               </Field>
               <Field label="邮编" hint="可以留空：不少国家没有邮编体系">
                 <input
                   className={control}
                   value={addressForm.postalCode ?? ''}
-                  onChange={(e) => setAddressForm({ ...addressForm, postalCode: e.target.value || null })}
+                  onChange={(e) =>
+                    setAddressForm({ ...addressForm, postalCode: e.target.value || null })
+                  }
                 />
               </Field>
               <Field label="街道地址行 1" hint="必填">
@@ -793,7 +834,9 @@ export function PartyContactsWorkspace() {
                 <input
                   className={control}
                   value={addressForm.streetLine2 ?? ''}
-                  onChange={(e) => setAddressForm({ ...addressForm, streetLine2: e.target.value || null })}
+                  onChange={(e) =>
+                    setAddressForm({ ...addressForm, streetLine2: e.target.value || null })
+                  }
                 />
               </Field>
             </div>
@@ -802,7 +845,9 @@ export function PartyContactsWorkspace() {
                 className={control}
                 value={addressForm.changeNote ?? ''}
                 placeholder="例如：门牌号改了，之前的是仓库大门"
-                onChange={(e) => setAddressForm({ ...addressForm, changeNote: e.target.value || null })}
+                onChange={(e) =>
+                  setAddressForm({ ...addressForm, changeNote: e.target.value || null })
+                }
               />
             </Field>
             <Field label="用途" hint="可以同时标多个：同一个仓既发货又被提货很常见">
@@ -875,14 +920,18 @@ export function PartyContactsWorkspace() {
                 <input
                   className={control}
                   value={contactForm.position ?? ''}
-                  onChange={(e) => setContactForm({ ...contactForm, position: e.target.value || null })}
+                  onChange={(e) =>
+                    setContactForm({ ...contactForm, position: e.target.value || null })
+                  }
                 />
               </Field>
               <Field label="邮箱">
                 <input
                   className={control}
                   value={contactForm.email ?? ''}
-                  onChange={(e) => setContactForm({ ...contactForm, email: e.target.value || null })}
+                  onChange={(e) =>
+                    setContactForm({ ...contactForm, email: e.target.value || null })
+                  }
                 />
               </Field>
               <Field label="电话">
@@ -890,7 +939,9 @@ export function PartyContactsWorkspace() {
                   className={control}
                   value={contactForm.phone ?? ''}
                   placeholder="+86-755-0000-0000"
-                  onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value || null })}
+                  onChange={(e) =>
+                    setContactForm({ ...contactForm, phone: e.target.value || null })
+                  }
                 />
               </Field>
               <Field label="手机号">
@@ -898,7 +949,9 @@ export function PartyContactsWorkspace() {
                   className={control}
                   value={contactForm.mobile ?? ''}
                   placeholder="138-0000-0000"
-                  onChange={(e) => setContactForm({ ...contactForm, mobile: e.target.value || null })}
+                  onChange={(e) =>
+                    setContactForm({ ...contactForm, mobile: e.target.value || null })
+                  }
                 />
               </Field>
             </div>
@@ -916,7 +969,8 @@ export function PartyContactsWorkspace() {
                 onChange={(e) => setContactForm({ ...contactForm, isPrimary: e.target.checked })}
               />
               <span>
-                设为默认联系人（<Phone className="inline h-3 w-3" /> 原来的默认会自动取消）
+                设为默认联系人（
+                <Phone className="inline h-3 w-3" /> 原来的默认会自动取消）
               </span>
             </label>
             <Button size="sm" onClick={submitContact}>
@@ -941,7 +995,10 @@ export function PartyContactsWorkspace() {
               <EmptyState title="没有历史版本" description={addressVersionEmptyHint()} />
             ) : (
               history.versions.map((version) => (
-                <div key={version.versionNo} className="border-control-border rounded-md border p-3">
+                <div
+                  key={version.versionNo}
+                  className="border-control-border rounded-md border p-3"
+                >
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium">第 {version.versionNo} 版</span>
                     {version.current && <Badge tone="success">当前</Badge>}

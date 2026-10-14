@@ -24,16 +24,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 7.1.2.1 库存流水台账：append-only 语义、粒度口径、时间范围、业务/来源类型过滤、
- * 分录下钻、期间净变动汇总，以及租户隔离三断言。
+ * 7.1.2.1 库存流水台账：append-only 语义、粒度口径、时间范围、业务/来源类型过滤、 分录下钻、期间净变动汇总，以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
  * <p>连接池固定为 1 条连接：只有复用同一条连接，才能真正证明归还后不会串租户。
  *
- * <p>夹具写法与 {@link InventoryBucketIntegrationTest} 完全一致（同样的 Testcontainers、
- * 同样的 fake identity server、同样的按租户派生 UUID、同样的 TRUNCATE 清场），
- * 避免两个测试类各写一套风格。
+ * <p>夹具写法与 {@link InventoryBucketIntegrationTest} 完全一致（同样的 Testcontainers、 同样的 fake identity
+ * server、同样的按租户派生 UUID、同样的 TRUNCATE 清场）， 避免两个测试类各写一套风格。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -116,7 +114,9 @@ class InventoryLedgerIntegrationTest {
               other,
               a,
               null,
-              List.of(grant("SELF", List.of("warehouse.inventory.read", "warehouse.inventory.create")))));
+              List.of(
+                  grant(
+                      "SELF", List.of("warehouse.inventory.read", "warehouse.inventory.create")))));
       // 未认证
       identity.start();
     } catch (Exception e) {
@@ -165,24 +165,47 @@ class InventoryLedgerIntegrationTest {
               + " restart identity cascade");
     }
     for (var tenant : List.of(a, b)) {
-      access.run(actorFor(tenant), "warehouse.inventory.read", () -> {
-        sql.execute(
-            "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-            idFor(tenant, 1), tenant, "LE-1", "主体一");
-        sql.execute(
-            "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-            idFor(tenant, 2), tenant, "SKU-1", "商品一");
-        sql.execute(
-            "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-            idFor(tenant, 3), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
-        sql.execute(
-            "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-            idFor(tenant, 4), tenant, "WH-SZ", "深圳仓", "CN", "Asia/Shanghai");
-        sql.execute(
-            "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-            idFor(tenant, 5), tenant, "SELLABLE", "可售", "SELLABLE");
-        return null;
-      });
+      access.run(
+          actorFor(tenant),
+          "warehouse.inventory.read",
+          () -> {
+            sql.execute(
+                "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
+            sql.execute(
+                "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "商品一");
+            sql.execute(
+                "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
+                idFor(tenant, 3),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
+            sql.execute(
+                "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
+                idFor(tenant, 4),
+                tenant,
+                "WH-SZ",
+                "深圳仓",
+                "CN",
+                "Asia/Shanghai");
+            sql.execute(
+                "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
+                idFor(tenant, 5),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
+            return null;
+          });
     }
   }
 
@@ -195,22 +218,30 @@ class InventoryLedgerIntegrationTest {
   /** 一条余额行，返回它的 id。 */
   UUID balance(UUID warehouse, String onHand) {
     var id = UUID.randomUUID();
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
-              + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-          id, a, skuA, warehouse, leA, qSellable, new BigDecimal(onHand));
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
+                  + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
+              id,
+              a,
+              skuA,
+              warehouse,
+              leA,
+              qSellable,
+              new BigDecimal(onHand));
+          return null;
+        });
     return id;
   }
 
   /**
    * 写一笔库存业务（业务单 + 分录）。
    *
-   * <p>occurredAt 用 {@code ?::timestamptz} 绑定：jOOQ 在纯文本语句里无法为 OffsetDateTime
-   * 推断类型，不显式 cast 会被驱动按 varchar 处理、或静默偏 8 小时（AGENTS.md 与
-   * {@code InventoryBucketService.recordBucket} 同一条纪律）。
+   * <p>occurredAt 用 {@code ?::timestamptz} 绑定：jOOQ 在纯文本语句里无法为 OffsetDateTime 推断类型，不显式 cast 会被驱动按
+   * varchar 处理、或静默偏 8 小时（AGENTS.md 与 {@code InventoryBucketService.recordBucket} 同一条纪律）。
    */
   UUID txn(
       String kind,
@@ -222,25 +253,32 @@ class InventoryLedgerIntegrationTest {
       UUID actor) {
     var txId = UUID.randomUUID();
     var refId = UUID.randomUUID();
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id,notes)"
-              + " values(?,?,?,?,?,?::timestamptz,?,?)",
-          txId,
-          a,
-          kind,
-          refType,
-          refId,
-          occurredAt,
-          actor == null ? user : actor,
-          "夹具");
-      sql.execute(
-          "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,reserved_delta)"
-              + " values(?,?,?,?,?,?)",
-          UUID.randomUUID(), a, txId, balanceId, new BigDecimal(onHandDelta),
-          new BigDecimal(reservedDelta));
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id,notes)"
+                  + " values(?,?,?,?,?,?::timestamptz,?,?)",
+              txId,
+              a,
+              kind,
+              refType,
+              refId,
+              occurredAt,
+              actor == null ? user : actor,
+              "夹具");
+          sql.execute(
+              "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,reserved_delta)"
+                  + " values(?,?,?,?,?,?)",
+              UUID.randomUUID(),
+              a,
+              txId,
+              balanceId,
+              new BigDecimal(onHandDelta),
+              new BigDecimal(reservedDelta));
+          return null;
+        });
     return txId;
   }
 
@@ -248,19 +286,34 @@ class InventoryLedgerIntegrationTest {
   UUID multiEntryTxn(String kind, String refType, OffsetDateTime occurredAt, E... entries) {
     var txId = UUID.randomUUID();
     var refId = UUID.randomUUID();
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id,notes)"
-              + " values(?,?,?,?,?,?::timestamptz,?,?)",
-          txId, a, kind, refType, refId, occurredAt, user, "跨仓调拨");
-      for (var e : entries) {
-        sql.execute(
-            "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,reserved_delta)"
-                + " values(?,?,?,?,?,?)",
-            UUID.randomUUID(), a, txId, e.balance, new BigDecimal(e.onHand), new BigDecimal(e.reserved));
-      }
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id,notes)"
+                  + " values(?,?,?,?,?,?::timestamptz,?,?)",
+              txId,
+              a,
+              kind,
+              refType,
+              refId,
+              occurredAt,
+              user,
+              "跨仓调拨");
+          for (var e : entries) {
+            sql.execute(
+                "insert into inventory_entry(id,tenant_id,transaction_id,balance_id,on_hand_delta,reserved_delta)"
+                    + " values(?,?,?,?,?,?)",
+                UUID.randomUUID(),
+                a,
+                txId,
+                e.balance,
+                new BigDecimal(e.onHand),
+                new BigDecimal(e.reserved));
+          }
+          return null;
+        });
     return txId;
   }
 
@@ -289,14 +342,17 @@ class InventoryLedgerIntegrationTest {
     var rows = pageOf(actorA, base()).rows();
     assertThat(rows).hasSize(4);
     // 按发生时间倒序
-    assertThat(rows).extracting(InventoryLedgerRow::kind)
+    assertThat(rows)
+        .extracting(InventoryLedgerRow::kind)
         .containsExactly(
             LedgerKind.RELEASE, LedgerKind.RESERVE, LedgerKind.SHIPMENT, LedgerKind.RECEIPT);
     // 数量列断言的是 numeric(19,4) 的原样字符串：BigDecimal.equals 会把 0 与 0.0000 判成不等，
     // 但页面上的口径就是 4 位小数，写清楚才能发现有人把精度改成 (19,6)。
-    assertThat(rows).extracting(r -> r.onHandDelta().toPlainString())
+    assertThat(rows)
+        .extracting(r -> r.onHandDelta().toPlainString())
         .containsExactly("0.0000", "0.0000", "-15.0000", "40.0000");
-    assertThat(rows).extracting(r -> r.reservedDelta().toPlainString())
+    assertThat(rows)
+        .extracting(r -> r.reservedDelta().toPlainString())
         .containsExactly("-8.0000", "8.0000", "0.0000", "0.0000");
     // 来源单据与操作人都在行上：这是"每笔含来源单据、数量符号、操作人、发生时间"的要求
     assertThat(rows).allMatch(r -> r.refType() != null && r.refId() != null);
@@ -338,8 +394,22 @@ class InventoryLedgerIntegrationTest {
     // 一笔跨两仓的调拨：出库 −50、入库 +50，行上必须是净 0，而不是只算命中仓的那一半
     var sh = balance(whSh, "100");
     var sz = balance(whSz, "0");
-    txn("TRANSFER_OUT", "TRANSFER_ORDER", OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS), sh, "-50", "0", null);
-    txn("TRANSFER_IN", "TRANSFER_ORDER", OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS), sz, "50", "0", null);
+    txn(
+        "TRANSFER_OUT",
+        "TRANSFER_ORDER",
+        OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+        sh,
+        "-50",
+        "0",
+        null);
+    txn(
+        "TRANSFER_IN",
+        "TRANSFER_ORDER",
+        OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+        sz,
+        "50",
+        "0",
+        null);
 
     var byWarehouse = pageOf(actorA, withWarehouse(whSh));
     assertThat(byWarehouse.rows()).hasSize(1);
@@ -387,12 +457,23 @@ class InventoryLedgerIntegrationTest {
   @Test
   void 分录下钻看得到每条分录的定位维度与当前余额() {
     var bal = balance(whSh, "100");
-    var id = txn("RECEIPT", "PURCHASE_ORDER", OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS), bal, "40", "0", null);
+    var id =
+        txn(
+            "RECEIPT",
+            "PURCHASE_ORDER",
+            OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+            bal,
+            "40",
+            "0",
+            null);
     // 余额行当前在手改成 140：下钻显示的"当前在手"应随之变化，且它明确不是历史快照
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute("update inventory_balance set on_hand=140 where id=?", bal);
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute("update inventory_balance set on_hand=140 where id=?", bal);
+          return null;
+        });
 
     var drill = access.run(actorA, "warehouse.inventory.read", () -> service.drill(id));
     assertThat(drill.transaction().transactionId()).isEqualTo(id);
@@ -415,12 +496,22 @@ class InventoryLedgerIntegrationTest {
   @Test
   void 跨租户下钻返回404而不是泄露存在性() throws Exception {
     var bal = balance(whSh, "100");
-    var id = txn("RECEIPT", "PURCHASE_ORDER", OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS), bal, "40", "0", null);
+    var id =
+        txn(
+            "RECEIPT",
+            "PURCHASE_ORDER",
+            OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+            bal,
+            "40",
+            "0",
+            null);
     // 租户 B 直接按 A 的业务单 id 下钻：RLS 下查不到 → 404（403 会泄露"这笔存在"）
-    assertThatThrownBy(() -> access.run(actorB, "warehouse.inventory.read", () -> service.drill(id)))
+    assertThatThrownBy(
+            () -> access.run(actorB, "warehouse.inventory.read", () -> service.drill(id)))
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
         .hasMessageContaining("不存在");
-    http.perform(get("/warehouse/inventory/ledger/{id}", id).header("Authorization", "Bearer tenant-b"))
+    http.perform(
+            get("/warehouse/inventory/ledger/{id}", id).header("Authorization", "Bearer tenant-b"))
         .andExpect(status().isNotFound());
   }
 
@@ -429,21 +520,35 @@ class InventoryLedgerIntegrationTest {
   @Test
   void 流水与分录都不允许UPDATE或DELETE_连运行角色都不行() {
     var bal = balance(whSh, "100");
-    var id = txn("RECEIPT", "PURCHASE_ORDER", OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS), bal, "40", "0", null);
+    var id =
+        txn(
+            "RECEIPT",
+            "PURCHASE_ORDER",
+            OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+            bal,
+            "40",
+            "0",
+            null);
     // 台账只读：试图改一笔历史流水必须被 DB 拒绝（V1 的 append-only 触发器 + REVOKE 双保险）
     assertThatThrownBy(
             () ->
-                access.run(actorA, "warehouse.inventory.read", () -> {
-                  sql.execute("update inventory_transaction set notes='改过' where id=?", id);
-                  return null;
-                }))
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> {
+                      sql.execute("update inventory_transaction set notes='改过' where id=?", id);
+                      return null;
+                    }))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
     assertThatThrownBy(
             () ->
-                access.run(actorA, "warehouse.inventory.read", () -> {
-                  sql.execute("delete from inventory_transaction where id=?", id);
-                  return null;
-                }))
+                access.run(
+                    actorA,
+                    "warehouse.inventory.read",
+                    () -> {
+                      sql.execute("delete from inventory_transaction where id=?", id);
+                      return null;
+                    }))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
     // 原记录永久保留
     var page = pageOf(actorA, base());
@@ -454,14 +559,23 @@ class InventoryLedgerIntegrationTest {
   @Test
   void 没有分录的业务单不能被藏起来_单独报数() {
     var txId = UUID.randomUUID();
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id,notes)"
-              + " values(?,?,?,?,?,?::timestamptz,?,?)",
-          txId, a, "ADJUSTMENT", "STOCKTAKE", UUID.randomUUID(),
-          OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS), user, "写入中断");
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id,notes)"
+                  + " values(?,?,?,?,?,?::timestamptz,?,?)",
+              txId,
+              a,
+              "ADJUSTMENT",
+              "STOCKTAKE",
+              UUID.randomUUID(),
+              OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+              user,
+              "写入中断");
+          return null;
+        });
     var page = pageOf(actorA, base());
     assertThat(page.rows()).hasSize(1);
     assertThat(page.rows().get(0).entryCount()).isZero();
@@ -496,12 +610,14 @@ class InventoryLedgerIntegrationTest {
 
     // 来源单据类型下拉是租户级词表，带笔数
     var refs = access.run(actorA, "warehouse.inventory.read", () -> service.refTypes());
-    assertThat(refs).extracting(InventoryRefType::refType)
+    assertThat(refs)
+        .extracting(InventoryRefType::refType)
         .containsExactly("ORDER", "PURCHASE_ORDER");
     assertThat(refs).extracting(InventoryRefType::transactionCount).containsExactly(2L, 1L);
 
     // 分组统计只报期间真实发生过的类型
-    assertThat(pageOf(actorA, base()).breakdown()).extracting(InventoryLedgerBreakdown::kind)
+    assertThat(pageOf(actorA, base()).breakdown())
+        .extracting(InventoryLedgerBreakdown::kind)
         .containsExactly(LedgerKind.RECEIPT, LedgerKind.RESERVE, LedgerKind.SHIPMENT);
   }
 
@@ -518,7 +634,14 @@ class InventoryLedgerIntegrationTest {
   @Test
   void 关键字能命中SKU与仓库编码() {
     var bal = balance(whSh, "100");
-    txn("RECEIPT", "PURCHASE_ORDER", OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS), bal, "40", "0", null);
+    txn(
+        "RECEIPT",
+        "PURCHASE_ORDER",
+        OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS),
+        bal,
+        "40",
+        "0",
+        null);
     assertThat(pageOf(actorA, withKeyword("SKU-1")).rows()).hasSize(1);
     assertThat(pageOf(actorA, withKeyword("WH-SH")).rows()).hasSize(1);
     assertThat(pageOf(actorA, withKeyword("深圳")).rows()).hasSize(0);
@@ -556,7 +679,18 @@ class InventoryLedgerIntegrationTest {
         () ->
             service.page(
                 new InventoryLedgerQuery(
-                    null, null, null, null, null, null, null, null, pageNumber, size, user, false)));
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    pageNumber,
+                    size,
+                    user,
+                    false)));
   }
 
   // ================================================================ 时间范围与时区
@@ -576,7 +710,8 @@ class InventoryLedgerIntegrationTest {
     // 断言比的是**绝对时刻**而不是墙钟偏移：timestamptz 读回时按会话/JVM 时区呈现，
     // 同一瞬间在 UTC 与 +08:00 下是两个不同的 OffsetDateTime，比较瞬间才是"有没有偏 8 小时"这件事。
     var all = pageOf(actorA, base());
-    assertThat(all.rows()).extracting(r -> r.occurredAt().toInstant())
+    assertThat(all.rows())
+        .extracting(r -> r.occurredAt().toInstant())
         .containsExactly(t2.toInstant(), t1.toInstant(), t0.toInstant());
     assertThat(all.summary().firstOccurredAt().toInstant()).isEqualTo(t0.toInstant());
     assertThat(all.summary().lastOccurredAt().toInstant()).isEqualTo(t2.toInstant());
@@ -614,7 +749,8 @@ class InventoryLedgerIntegrationTest {
     txn("RECEIPT", "PURCHASE_ORDER", sh, bal, "10", "0", null);
     assertThat(pageOf(actorA, withRange(utc, utc.plusHours(1))).rows()).hasSize(1);
     assertThat(pageOf(actorA, withRange(sh, sh.plusHours(1))).rows()).hasSize(1);
-    assertThat(pageOf(actorA, withRange(utc, utc.plusHours(1))).rows().get(0).occurredAt().toInstant())
+    assertThat(
+            pageOf(actorA, withRange(utc, utc.plusHours(1))).rows().get(0).occurredAt().toInstant())
         .isEqualTo(sh.toInstant());
   }
 
@@ -627,11 +763,14 @@ class InventoryLedgerIntegrationTest {
     txn("RECEIPT", "PURCHASE_ORDER", now.minusDays(1), bal, "10", "0", null); // user
     txn("SHIPMENT", "ORDER", now, bal, "-3", "0", other); // 别人
 
-    var self = access.run(
-        actors.get("Bearer self-writer"),
-        "warehouse.inventory.read",
-        () -> service.page(new InventoryLedgerQuery(
-            null, null, null, null, null, null, null, null, null, null, other, true)));
+    var self =
+        access.run(
+            actors.get("Bearer self-writer"),
+            "warehouse.inventory.read",
+            () ->
+                service.page(
+                    new InventoryLedgerQuery(
+                        null, null, null, null, null, null, null, null, null, null, other, true)));
     assertThat(self.rows()).hasSize(1);
     assertThat(self.rows().get(0).actorId()).isEqualTo(other);
     assertThat(self.dataScope()).isEqualTo("SELF");
@@ -651,12 +790,13 @@ class InventoryLedgerIntegrationTest {
     txn("RECEIPT", "PURCHASE_ORDER", t, bal, "40", "0", null);
     txn("SHIPMENT", "ORDER", t.plusHours(4), bal, "-15", "0", null);
 
-    http.perform(get("/warehouse/inventory/ledger")
-            .header("Authorization", "Bearer tenant-a")
-            .param("from", "2026-03-01T00:00:00+08:00")
-            .param("to", "2026-03-02T00:00:00+08:00")
-            .param("kinds", "RECEIPT", "SHIPMENT")
-            .param("warehouseId", whSh.toString()))
+    http.perform(
+            get("/warehouse/inventory/ledger")
+                .header("Authorization", "Bearer tenant-a")
+                .param("from", "2026-03-01T00:00:00+08:00")
+                .param("to", "2026-03-02T00:00:00+08:00")
+                .param("kinds", "RECEIPT", "SHIPMENT")
+                .param("warehouseId", whSh.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rows.length()").value(2))
         .andExpect(jsonPath("$.total").value(2))
@@ -667,18 +807,20 @@ class InventoryLedgerIntegrationTest {
         .andExpect(jsonPath("$.dataScope").value("ALL"));
 
     // 时间格式错（不带偏移）→ 400，不按服务器本地时区猜
-    http.perform(get("/warehouse/inventory/ledger")
-            .header("Authorization", "Bearer tenant-a")
-            .param("from", "2026-03-01T00:00:00"))
+    http.perform(
+            get("/warehouse/inventory/ledger")
+                .header("Authorization", "Bearer tenant-a")
+                .param("from", "2026-03-01T00:00:00"))
         .andExpect(status().isBadRequest());
     // 非法业务类型 → 400
-    http.perform(get("/warehouse/inventory/ledger")
-            .header("Authorization", "Bearer tenant-a")
-            .param("kinds", "NOPE"))
+    http.perform(
+            get("/warehouse/inventory/ledger")
+                .header("Authorization", "Bearer tenant-a")
+                .param("kinds", "NOPE"))
         .andExpect(status().isBadRequest());
 
-    http.perform(get("/warehouse/inventory/ledger/ref-types")
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/ledger/ref-types").header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(2));
   }
@@ -686,8 +828,9 @@ class InventoryLedgerIntegrationTest {
   @Test
   void 未认证401_空租户返回空页而不是报错() throws Exception {
     http.perform(get("/warehouse/inventory/ledger")).andExpect(status().isUnauthorized());
-    http.perform(get("/warehouse/inventory/ledger/{id}", UUID.randomUUID())
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/warehouse/inventory/ledger/{id}", UUID.randomUUID())
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isNotFound());
     // 空态：B 有参照数据但没有任何流水 → 空页 + 零汇总，不是 500 也不是报错
     var empty = pageOf(actorB, base());
@@ -707,18 +850,33 @@ class InventoryLedgerIntegrationTest {
     txn("RECEIPT", "PURCHASE_ORDER", at, bal, "40", "0", null);
     // 租户 B 自己的参照数据存在，但只有它自己的流水对 B 可见
     var balB = UUID.randomUUID();
-    access.run(actorB, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
-              + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-          balB, b, idFor(b, 2), idFor(b, 3), idFor(b, 1), idFor(b, 5), new BigDecimal("7"));
-      sql.execute(
-          "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id,notes)"
-              + " values(?,?,?,?,?,?::timestamptz,?,?)",
-          UUID.randomUUID(), b, "RECEIPT", "PURCHASE_ORDER", UUID.randomUUID(),
-          at, user, "B 的入库");
-      return null;
-    });
+    access.run(
+        actorB,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
+                  + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
+              balB,
+              b,
+              idFor(b, 2),
+              idFor(b, 3),
+              idFor(b, 1),
+              idFor(b, 5),
+              new BigDecimal("7"));
+          sql.execute(
+              "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id,notes)"
+                  + " values(?,?,?,?,?,?::timestamptz,?,?)",
+              UUID.randomUUID(),
+              b,
+              "RECEIPT",
+              "PURCHASE_ORDER",
+              UUID.randomUUID(),
+              at,
+              user,
+              "B 的入库");
+          return null;
+        });
 
     var pageA = pageOf(actorA, base());
     assertThat(pageA.rows()).hasSize(1);
@@ -741,37 +899,55 @@ class InventoryLedgerIntegrationTest {
     var at = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);
     txn("RECEIPT", "PURCHASE_ORDER", at, bal, "40", "0", null);
     var balB = UUID.randomUUID();
-    access.run(actorB, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
-              + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
-          balB, b, idFor(b, 2), idFor(b, 3), idFor(b, 1), idFor(b, 5), new BigDecimal("7"));
-      sql.execute(
-          "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id,notes)"
-              + " values(?,?,?,?,?,?::timestamptz,?,?)",
-          UUID.randomUUID(), b, "RECEIPT", "PURCHASE_ORDER", UUID.randomUUID(),
-          at, user, "B 的入库");
-      return null;
-    });
+    access.run(
+        actorB,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
+                  + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,0)",
+              balB,
+              b,
+              idFor(b, 2),
+              idFor(b, 3),
+              idFor(b, 1),
+              idFor(b, 5),
+              new BigDecimal("7"));
+          sql.execute(
+              "insert into inventory_transaction(id,tenant_id,kind,ref_type,ref_id,occurred_at,actor_id,notes)"
+                  + " values(?,?,?,?,?,?::timestamptz,?,?)",
+              UUID.randomUUID(),
+              b,
+              "RECEIPT",
+              "PURCHASE_ORDER",
+              UUID.randomUUID(),
+              at,
+              user,
+              "B 的入库");
+          return null;
+        });
 
     // 身份是 B 但伪造 X-Tenant-Id 指向 A → 只能看到 B 自己的那一笔
-    http.perform(get("/warehouse/inventory/ledger")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/inventory/ledger")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rows[0].notes").value("B 的入库"))
         .andExpect(jsonPath("$.total").value(1));
     // 反向：身份是 A 伪造 B 也拿不到 B 的数据
-    http.perform(get("/warehouse/inventory/ledger")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/inventory/ledger")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.rows.length()").value(1))
         .andExpect(jsonPath("$.summary.transactionOnHandDelta").value(40));
     // 来源单据类型下拉同样不受伪造头影响
-    http.perform(get("/warehouse/inventory/ledger/ref-types")
-            .header("Authorization", "Bearer tenant-a")
-            .header("X-Tenant-Id", b.toString()))
+    http.perform(
+            get("/warehouse/inventory/ledger/ref-types")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(1));
   }
@@ -795,11 +971,14 @@ class InventoryLedgerIntegrationTest {
       var id = fa.rows().get(0).transactionId();
       assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.drill(id)).entries())
           .hasSize(1);
-      assertThatThrownBy(() -> access.run(actorB, "warehouse.inventory.read", () -> service.drill(id)))
+      assertThatThrownBy(
+              () -> access.run(actorB, "warehouse.inventory.read", () -> service.drill(id)))
           .isInstanceOf(org.springframework.web.server.ResponseStatusException.class);
       // 来源单据类型词表也逐轮隔离
-      assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.refTypes())).hasSize(1);
-      assertThat(access.run(actorB, "warehouse.inventory.read", () -> service.refTypes())).isEmpty();
+      assertThat(access.run(actorA, "warehouse.inventory.read", () -> service.refTypes()))
+          .hasSize(1);
+      assertThat(access.run(actorB, "warehouse.inventory.read", () -> service.refTypes()))
+          .isEmpty();
     }
   }
 
@@ -818,13 +997,35 @@ class InventoryLedgerIntegrationTest {
   static InventoryLedgerQuery withRefTypes(String... refs) {
     var b = base();
     return new InventoryLedgerQuery(
-        b.from(), b.to(), null, null, null, List.of(refs), null, null, null, null, b.actorId(), false);
+        b.from(),
+        b.to(),
+        null,
+        null,
+        null,
+        List.of(refs),
+        null,
+        null,
+        null,
+        null,
+        b.actorId(),
+        false);
   }
 
   static InventoryLedgerQuery withWarehouse(UUID warehouseId) {
     var b = base();
     return new InventoryLedgerQuery(
-        b.from(), b.to(), null, warehouseId, null, null, null, null, null, null, b.actorId(), false);
+        b.from(),
+        b.to(),
+        null,
+        warehouseId,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        b.actorId(),
+        false);
   }
 
   static InventoryLedgerQuery withSku(UUID skuId) {

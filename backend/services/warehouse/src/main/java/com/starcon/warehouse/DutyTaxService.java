@@ -20,39 +20,31 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 10.5.1.3 关税与税费。
  *
- * <p>蓝图：「计算与管理进口税费：关税（按 HS 编码税率）、增值税/GST、关税承担方（DDP/DDU）、
- * 到岸成本构成，供成本核算与报价参考」。输入是「HS 编码税率表；目的国税则；申报价值；贸易条款」，
- * 输出是「税费估算 + 实际缴纳记录；到岸成本明细」。
+ * <p>蓝图：「计算与管理进口税费：关税（按 HS 编码税率）、增值税/GST、关税承担方（DDP/DDU）、 到岸成本构成，供成本核算与报价参考」。输入是「HS
+ * 编码税率表；目的国税则；申报价值；贸易条款」， 输出是「税费估算 + 实际缴纳记录；到岸成本明细」。
  *
  * <p>七条实现纪律：
  *
  * <ol>
- *   <li><b>估算与实缴分别留痕，这是蓝图加粗的硬要求</b>：{@code DutyTaxEstimate}（按税率表算出的
- *       「应该有」）、{@code DutyTaxPayment}（海关实收，append-only）、{@code DutyTaxVariance}（差额 +
- *       归因 + 复核痕迹）三张表互相不覆盖。DB 触发器 {@code duty_payment_has_variance} 钉死
- *       「有实缴就必须有差异记录」，绕过服务层直接写 SQL 同样被挡 ——
+ *   <li><b>估算与实缴分别留痕，这是蓝图加粗的硬要求</b>：{@code DutyTaxEstimate}（按税率表算出的 「应该有」）、{@code
+ *       DutyTaxPayment}（海关实收，append-only）、{@code DutyTaxVariance}（差额 + 归因 + 复核痕迹）三张表互相不覆盖。DB 触发器
+ *       {@code duty_payment_has_variance} 钉死 「有实缴就必须有差异记录」，绕过服务层直接写 SQL 同样被挡 ——
  *       蓝图原文「**税费估算与实际缴纳差异要记录**，长期差异大说明 HS 归类或税率配置有误」。
- *   <li><b>差异是逐次对账的不可变快照</b>：实缴逐次发生，差异也逐次对出来 ——
- *       第 1 次缴款留下「对到第 1 次为止差多少」，第 2 次再留一条新的。
- *       所以归因在建差异那一刻就写进去（由缴款请求携带），**不提供事后改归因的端点**：
- *       已归因的差异是纠错闭环的证据，要重新判定就再录一笔缴款对账出新的快照。
- *   <li><b>税率是按生效期检索的落库数据</b>：税则会变，代码常量记税率等于「改税率就改了历史」。
- *       每条税率带 {@code effective_from/effective_to}，估算明细把命中的税率值<b>抄进自己的行</b>，
- *       所以税率表那条将来被改，本行仍能回答「当时按 3.25% 算的」。
- *   <li><b>0% 税率合法，「没匹配到税率」不合法</b>：英国零税率、免税供货都是真实 0% 配置；
- *       但带 {@code NO_MATCH} 关税行或未配 VAT 税率的行<b>锁不了</b>估算单
- *       （{@code duty_estimate_lock_completeness}）—— 否则「关税 0 元」会直接进报价与成本核算。
- *   <li><b>DDP/DDU 改变成本归属，不改变税率</b>：DDU 下卖方到岸成本不含关税与目的国税费
- *       （{@code duty_landed_cost} 钉死）。关税由谁付不影响税率是多少。
- *   <li><b>逐行算税，不合并成一个总税率</b>：不同 HS 编码税率不同，合并算出来的「总关税」
- *       既无法归因也无法纠错。蓝图那句「差异大说明 HS 归类或税率配置有误」要能落到
+ *   <li><b>差异是逐次对账的不可变快照</b>：实缴逐次发生，差异也逐次对出来 —— 第 1 次缴款留下「对到第 1 次为止差多少」，第 2 次再留一条新的。
+ *       所以归因在建差异那一刻就写进去（由缴款请求携带），**不提供事后改归因的端点**： 已归因的差异是纠错闭环的证据，要重新判定就再录一笔缴款对账出新的快照。
+ *   <li><b>税率是按生效期检索的落库数据</b>：税则会变，代码常量记税率等于「改税率就改了历史」。 每条税率带 {@code
+ *       effective_from/effective_to}，估算明细把命中的税率值<b>抄进自己的行</b>， 所以税率表那条将来被改，本行仍能回答「当时按 3.25% 算的」。
+ *   <li><b>0% 税率合法，「没匹配到税率」不合法</b>：英国零税率、免税供货都是真实 0% 配置； 但带 {@code NO_MATCH} 关税行或未配 VAT
+ *       税率的行<b>锁不了</b>估算单 （{@code duty_estimate_lock_completeness}）—— 否则「关税 0 元」会直接进报价与成本核算。
+ *   <li><b>DDP/DDU 改变成本归属，不改变税率</b>：DDU 下卖方到岸成本不含关税与目的国税费 （{@code duty_landed_cost}
+ *       钉死）。关税由谁付不影响税率是多少。
+ *   <li><b>逐行算税，不合并成一个总税率</b>：不同 HS 编码税率不同，合并算出来的「总关税」 既无法归因也无法纠错。蓝图那句「差异大说明 HS 归类或税率配置有误」要能落到
  *       <b>具体哪一行</b>，就必须是逐行的。
  *   <li><b>未交付依赖显式声明，不建假上游</b>：3.7.1.1（HS 编码字典）与 16.3.1.1（税号与辖区/税则）
- *       在本项目里**没有可调用的上游**（product_compliance 服务不存在，台账记为阻塞），
- *       所以税率由本租户维护并用 {@code taxSource} 如实标注来源；
+ *       在本项目里**没有可调用的上游**（product_compliance 服务不存在，台账记为阻塞）， 所以税率由本租户维护并用 {@code taxSource} 如实标注来源；
  *       外部海关缴款接口同样未交付，缴款由人工回填并以 {@code sourceSystem='MANUAL_ENTRY'} 标注。
- *   <li><b>多租户不可省</b>：所有 SQL 走 RLS，租户由 backend/libraries/tenancy 在事务内设置，
- *       客户端伪造 {@code X-Tenant-Id} 进不来也改不动它。
+ *   <li><b>多租户不可省</b>：所有 SQL 走 RLS，租户由 backend/libraries/tenancy 在事务内设置， 客户端伪造 {@code X-Tenant-Id}
+ *       进不来也改不动它。
  * </ol>
  *
  * <p>状态机只有一处真相：{@link EstimateStatus#allowedNext}。
@@ -66,9 +58,8 @@ public class DutyTaxService {
   /**
    * 结算口径：金额一律 HALF_UP 到<b>分</b>。
    *
-   * <p>海关把关税与进口增值税报到分，所以这一层必须在**算的时候**定死而不是等展示时再定 ——
-   * 「算出来 32.505，展示成 32.51」意味着账上与票上差半分钱，而差的这半分永远对不上。
-   * DB 侧用 {@code round(x,2)} 表达同一口径，延迟约束触发器在提交时复核，两侧漂移即报错。
+   * <p>海关把关税与进口增值税报到分，所以这一层必须在**算的时候**定死而不是等展示时再定 —— 「算出来 32.505，展示成
+   * 32.51」意味着账上与票上差半分钱，而差的这半分永远对不上。 DB 侧用 {@code round(x,2)} 表达同一口径，延迟约束触发器在提交时复核，两侧漂移即报错。
    */
   static final int MONEY_SCALE = 2;
 
@@ -76,11 +67,17 @@ public class DutyTaxService {
       List.of("UPDATED_AT", "CREATED_AT", "ESTIMATED_TAX", "LANDED_COST", "ESTIMATE_CODE");
 
   private static final List<String> RATE_SORTS =
-      List.of("CREATED_AT", "EFFECTIVE_FROM", "AD_VALOREM_RATE", "DESTINATION_COUNTRY", "HS_CODE_PREFIX");
+      List.of(
+          "CREATED_AT",
+          "EFFECTIVE_FROM",
+          "AD_VALOREM_RATE",
+          "DESTINATION_COUNTRY",
+          "HS_CODE_PREFIX");
 
   private static final BigDecimal ZERO6 = BigDecimal.ZERO.setScale(6, RoundingMode.HALF_UP);
   private static final BigDecimal ZERO4 = BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP);
-  private static final BigDecimal ZERO2 = BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+  private static final BigDecimal ZERO2 =
+      BigDecimal.ZERO.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 
   private final DSLContext sql;
 
@@ -91,13 +88,11 @@ public class DutyTaxService {
   // ================================================================ 能力
 
   /**
-   * 关税与税费能力清单：税种、承担方、贸易条款、状态机、归因词表、**未交付依赖逐条声明**
-   * 与四条必须讲清的口径。
+   * 关税与税费能力清单：税种、承担方、贸易条款、状态机、归因词表、**未交付依赖逐条声明** 与四条必须讲清的口径。
    *
-   * <p>本车道对集成头实际查证的结论：3.7.1.1（HS 编码字典）与 16.3.1.1（税号与辖区/税则）被
-   * product_compliance 服务缺失阻塞，未交付；外部海关缴款/税则接口在本项目里没有可调用的系统
-   * 与凭证，未交付。两者都显式 {@code available=false} + 原因 + {@code ownerModule} + {@code href}，
-   * <b>不建占位表、不返回空集冒充成功</b>。
+   * <p>本车道对集成头实际查证的结论：3.7.1.1（HS 编码字典）与 16.3.1.1（税号与辖区/税则）被 product_compliance
+   * 服务缺失阻塞，未交付；外部海关缴款/税则接口在本项目里没有可调用的系统 与凭证，未交付。两者都显式 {@code available=false} + 原因 + {@code
+   * ownerModule} + {@code href}， <b>不建占位表、不返回空集冒充成功</b>。
    */
   public DutyTaxCapabilities capabilities() {
     List<DutyTaxDimension> dependencies =
@@ -291,7 +286,8 @@ public class DutyTaxService {
       args.add(query.effectiveOn());
     }
     if (notBlank(query.keyword())) {
-      where.append(" and (hs_code_prefix ilike ? or treaty_code ilike ? or source_reference ilike ?)");
+      where.append(
+          " and (hs_code_prefix ilike ? or treaty_code ilike ? or source_reference ilike ?)");
       String like = "%" + query.keyword().trim() + "%";
       args.add(like);
       args.add(like);
@@ -299,8 +295,12 @@ public class DutyTaxService {
     }
     int size = pageSize(query.size());
     int pageNo = Math.max(0, query.page());
-    return sql.fetch(
-            "select * from duty_tax_rate" + where + " order by " + rateSortOf(query.sort())
+    return sql
+        .fetch(
+            "select * from duty_tax_rate"
+                + where
+                + " order by "
+                + rateSortOf(query.sort())
                 + " limit ? offset ?",
             concat(args, size, pageNo * size))
         .stream()
@@ -316,7 +316,9 @@ public class DutyTaxService {
     String prefix = normalizePrefix(scope, request.hsCodePrefix());
     BigDecimal adValorem = nonNegative(request.adValoremRate(), "从价税率");
     BigDecimal specific =
-        request.specificRatePerUnit() == null ? ZERO4 : nonNegative(request.specificRatePerUnit(), "从量税率");
+        request.specificRatePerUnit() == null
+            ? ZERO4
+            : nonNegative(request.specificRatePerUnit(), "从量税率");
     boolean preferential = Boolean.TRUE.equals(request.preferential());
     String treaty = fit(request.treatyCode(), 32, "协定代码");
     if (preferential && treaty.isEmpty()) {
@@ -335,9 +337,11 @@ public class DutyTaxService {
     }
     // taxSource 只能取两个合法值：人工查来的，或 16.3.1.1 交付后由它写。
     String taxSource = taxSource(request.taxSource());
-    String sourceSystem = notBlank(request.sourceSystem())
-        ? requireOneOf(request.sourceSystem(), "录入方式", "MANUAL_ENTRY", "TARIFF_FEED", "COMPLIANCE_API")
-        : "MANUAL_ENTRY";
+    String sourceSystem =
+        notBlank(request.sourceSystem())
+            ? requireOneOf(
+                request.sourceSystem(), "录入方式", "MANUAL_ENTRY", "TARIFF_FEED", "COMPLIANCE_API")
+            : "MANUAL_ENTRY";
     UUID id = UUID.randomUUID();
     sql.execute(
         "insert into duty_tax_rate(id,tenant_id,destination_country_code,rate_scope,hs_code_prefix,tax_kind,"
@@ -363,8 +367,7 @@ public class DutyTaxService {
         source,
         fit(request.notes(), 2000, "备注"),
         currentActor());
-    return new DutyRateSaved(
-        id, "ACTIVE", "税率已录入。估算时按目的国 + 税率适用范围 + 生效日取当时生效的税率。");
+    return new DutyRateSaved(id, "ACTIVE", "税率已录入。估算时按目的国 + 税率适用范围 + 生效日取当时生效的税率。");
   }
 
   @Transactional
@@ -400,7 +403,9 @@ public class DutyTaxService {
     }
     LocalDate from = rate.get("effective_from", LocalDate.class);
     LocalDate to =
-        request.effectiveTo() == null ? rate.get("effective_to", LocalDate.class) : request.effectiveTo();
+        request.effectiveTo() == null
+            ? rate.get("effective_to", LocalDate.class)
+            : request.effectiveTo();
     if (to != null && to.isBefore(from)) {
       throw new IllegalArgumentException("失效日期不能早于生效日期");
     }
@@ -417,7 +422,9 @@ public class DutyTaxService {
             + "notes=?,version=version+1,updated_at=now() where id=?",
         adValorem.setScale(6, RoundingMode.HALF_UP),
         specific.setScale(4, RoundingMode.HALF_UP),
-        request.specificUom() == null ? rate.get("specific_uom", String.class) : uom(request.specificUom()),
+        request.specificUom() == null
+            ? rate.get("specific_uom", String.class)
+            : uom(request.specificUom()),
         preferential,
         treaty,
         to,
@@ -425,13 +432,14 @@ public class DutyTaxService {
             ? Boolean.TRUE.equals(rate.get("tax_rate_verified", Boolean.class))
             : request.taxRateVerified(),
         source,
-        request.notes() == null ? rate.get("notes", String.class) : fit(request.notes(), 2000, "备注"),
+        request.notes() == null
+            ? rate.get("notes", String.class)
+            : fit(request.notes(), 2000, "备注"),
         rateId);
     return new DutyRateSaved(
         rateId,
         "ACTIVE",
-        "税率已更新。注意：已算出的估算单明细行里**抄着自己当时用的税率值**，不受本次改动影响 —— "
-            + "那正是「当时按 3.25% 算的」能被回答的原因。");
+        "税率已更新。注意：已算出的估算单明细行里**抄着自己当时用的税率值**，不受本次改动影响 —— " + "那正是「当时按 3.25% 算的」能被回答的原因。");
   }
 
   // ================================================================ 估算单
@@ -455,12 +463,16 @@ public class DutyTaxService {
                 + "   where v.tenant_id=e.tenant_id and v.estimate_id=e.id) variance_total,"
                 + " (select count(*) from duty_tax_estimate_line l where l.tenant_id=e.tenant_id"
                 + "   and l.estimate_id=e.id and (l.rate_match_status<>'MATCHED' or not l.vat_rate_matched)) unmatched"
-                + " from duty_tax_estimate e" + where + " order by " + estimateSortOf(query.sort())
+                + " from duty_tax_estimate e"
+                + where
+                + " order by "
+                + estimateSortOf(query.sort())
                 + " limit ? offset ?",
             concat(args, size, pageNo * size));
     // 总数与汇总都按**同一组 where**算，不受分页影响：报价与成本核算要的是全量口径。
     long total =
-        sql.fetchOne("select count(*) c from duty_tax_estimate e" + where, args.toArray(new Object[0]))
+        sql.fetchOne(
+                "select count(*) c from duty_tax_estimate e" + where, args.toArray(new Object[0]))
             .get("c", Long.class);
     Record sums =
         sql.fetchOne(
@@ -469,7 +481,8 @@ public class DutyTaxService {
                 + " count(*) filter (where e.status='LOCKED') locked,"
                 + " count(*) filter (where e.status='VOID') voided,"
                 + " coalesce(sum(e.estimated_total_tax),0) tax_total"
-                + " from duty_tax_estimate e" + where,
+                + " from duty_tax_estimate e"
+                + where,
             args.toArray(new Object[0]));
     // LEFT JOIN 必须写在 WHERE 之前：把 variance 的 join 接到 where 后面是语法错误。
     // 只取**最新一次对账快照**（append-only，历史快照不重复计入）。
@@ -493,12 +506,17 @@ public class DutyTaxService {
         sql.fetchOne(
                 "select count(*) c from duty_tax_estimate_line l where l.tenant_id=?"
                     + " and (l.rate_match_status<>'MATCHED' or not l.vat_rate_matched)"
-                    + " and l.estimate_id in (select e.id from duty_tax_estimate e" + where + ")",
+                    + " and l.estimate_id in (select e.id from duty_tax_estimate e"
+                    + where
+                    + ")",
                 prepend(tenantId, args))
             .get("c", Integer.class);
     BigDecimal taxTotal = sums.get("tax_total", BigDecimal.class);
     BigDecimal paidTotal = paid.get("paid", BigDecimal.class);
-    int openVariance = paid.get("open_variance", Integer.class) == null ? 0 : paid.get("open_variance", Integer.class);
+    int openVariance =
+        paid.get("open_variance", Integer.class) == null
+            ? 0
+            : paid.get("open_variance", Integer.class);
     return new DutyEstimatePage(
         rows.stream().map(DutyTaxService::estimate).toList(),
         new DutyEstimateSummary(
@@ -540,12 +558,14 @@ public class DutyTaxService {
     }
     if (Boolean.TRUE.equals(query.unmatchedRateOnly())) {
       // 「没配到税率」的估算单必须能被一眼筛出来：它们是最容易把错价发出去的那批。
-      where.append(" and exists (select 1 from duty_tax_estimate_line l where l.tenant_id=e.tenant_id"
-          + " and l.estimate_id=e.id and (l.rate_match_status<>'MATCHED' or not l.vat_rate_matched))");
+      where.append(
+          " and exists (select 1 from duty_tax_estimate_line l where l.tenant_id=e.tenant_id"
+              + " and l.estimate_id=e.id and (l.rate_match_status<>'MATCHED' or not l.vat_rate_matched))");
     }
     if (Boolean.TRUE.equals(query.varianceOnly())) {
-      where.append(" and exists (select 1 from duty_tax_variance v where v.tenant_id=e.tenant_id"
-          + " and v.estimate_id=e.id and v.variance_amount<>0)");
+      where.append(
+          " and exists (select 1 from duty_tax_variance v where v.tenant_id=e.tenant_id"
+              + " and v.estimate_id=e.id and v.variance_amount<>0)");
     }
     if (notBlank(query.keyword())) {
       where.append(" and (e.estimate_code ilike ? or e.declaration_code ilike ?)");
@@ -609,7 +629,8 @@ public class DutyTaxService {
   }
 
   public List<DutyEstimateLineRow> lines(UUID tenantId, UUID estimateId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select * from duty_tax_estimate_line where tenant_id=? and estimate_id=? order by line_no",
             tenantId,
             estimateId)
@@ -619,7 +640,8 @@ public class DutyTaxService {
   }
 
   public List<DutyPaymentRow> payments(UUID tenantId, UUID estimateId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select * from duty_tax_payment where tenant_id=? and estimate_id=?"
                 + " order by tax_kind, payment_sequence, paid_at",
             tenantId,
@@ -630,7 +652,8 @@ public class DutyTaxService {
   }
 
   public List<DutyVarianceRow> variances(UUID tenantId, UUID estimateId) {
-    return sql.fetch(
+    return sql
+        .fetch(
             "select * from duty_tax_variance where tenant_id=? and estimate_id=?"
                 + " order by tax_kind, payment_sequence",
             tenantId,
@@ -643,9 +666,8 @@ public class DutyTaxService {
   /**
    * 建估算单：取报关单的申报价值快照 → 逐行匹配税率 → 算关税与增值税/GST → 算到岸成本。
    *
-   * <p>关税税率按（目的国 + HS 编码<b>最长前缀</b> + 生效日）取<b>当时</b>的税率；
-   * 取不到就落 {@code NO_MATCH} 而不是按 0 税静默算过去 —— 这一行会被禁止锁定，
-   * 必须先补税率或修 HS 归类。
+   * <p>关税税率按（目的国 + HS 编码<b>最长前缀</b> + 生效日）取<b>当时</b>的税率； 取不到就落 {@code NO_MATCH} 而不是按 0 税静默算过去 ——
+   * 这一行会被禁止锁定， 必须先补税率或修 HS 归类。
    */
   @Transactional
   public DutySaved create(UUID tenantId, DutyEstimateCreateRequest request) {
@@ -672,17 +694,23 @@ public class DutyTaxService {
       throw new IllegalArgumentException("报关单没有明细行，无法逐行算税：没有明细就没有按 HS 编码算税的依据");
     }
 
-    String incoterm = Incoterm.parse(request.incoterm() == null ? "DDU" : request.incoterm()).name();
+    String incoterm =
+        Incoterm.parse(request.incoterm() == null ? "DDU" : request.incoterm()).name();
     DutyBearer bearer = dutyBearerOf(request.dutyBearer(), incoterm);
     String country =
         requireCountry(
-            firstNonBlank(request.destinationCountryCode(), declaration.get("destination_country_code", String.class)),
+            firstNonBlank(
+                request.destinationCountryCode(),
+                declaration.get("destination_country_code", String.class)),
             "目的国/地区");
     String currency =
         moneyOrDefault(
-            request.estimateCurrency(), declaration.get("declaration_currency", String.class), "计价币种");
+            request.estimateCurrency(),
+            declaration.get("declaration_currency", String.class),
+            "计价币种");
     String base =
-        moneyOrDefault(request.baseCurrency(), declaration.get("base_currency", String.class), "本位币种");
+        moneyOrDefault(
+            request.baseCurrency(), declaration.get("base_currency", String.class), "本位币种");
     BigDecimal rate =
         request.exchangeRate() == null
             ? positive(declaration.get("exchange_rate", BigDecimal.class), "汇率")
@@ -700,7 +728,8 @@ public class DutyTaxService {
 
     // 计价基础：默认取报关单的申报货值作为完税价格。低报/高报完税价格是真实且常见的申报操作，
     // 所以它可以单独覆盖，而且事后必须能答出「当时按哪个完税价格算的」。
-    BigDecimal goodsValue = amount(request.goodsValue(), declaration.get("declaration_value", BigDecimal.class), "货值");
+    BigDecimal goodsValue =
+        amount(request.goodsValue(), declaration.get("declaration_value", BigDecimal.class), "货值");
     BigDecimal customsValue = amount(request.customsValue(), goodsValue, "完税价格");
     BigDecimal freight = amount(request.freightAmount(), null, "运费");
     BigDecimal insurance = amount(request.insuranceAmount(), null, "保险费");
@@ -752,7 +781,8 @@ public class DutyTaxService {
         "ESTIMATED",
         unmatched == 0
             ? "税费估算已按税率表算出。核对后可锁定，锁定后作为对外报价与到岸成本依据。"
-            : "税费估算已算出，但还有 " + unmatched
+            : "税费估算已算出，但还有 "
+                + unmatched
                 + " 行没配到税率（关税或目的国增值税）。这些行必须先补税率或修 HS 归类，否则锁不了 —— "
                 + "按 0 税锁定的估算单会让报价与成本核算少算税。");
   }
@@ -760,8 +790,7 @@ public class DutyTaxService {
   /**
    * 逐行写明细：匹配税率 → 算关税 → 算增值税 → 按货值比例分摊运费保险与完税价。
    *
-   * <p>分摊按申报货值比例，<b>最后一行吃掉余数</b>，保证「逐行分摊合计 = 单头金额」精确成立 ——
-   * 差一分钱也会让到岸成本明细与单头对不上，而对不上的明细没人敢拿来报价。
+   * <p>分摊按申报货值比例，<b>最后一行吃掉余数</b>，保证「逐行分摊合计 = 单头金额」精确成立 —— 差一分钱也会让到岸成本明细与单头对不上，而对不上的明细没人敢拿来报价。
    */
   private void writeLines(
       UUID tenantId,
@@ -787,9 +816,12 @@ public class DutyTaxService {
       boolean last = index == declLines.size();
       BigDecimal declared = line.get("declared_value", BigDecimal.class);
       // 逐行分摊；最后一行 = 总额 − 已分摊，保证合计精确等于单头金额。
-      BigDecimal lineCustoms = last ? customsValue.subtract(usedCustoms) : share(customsValue, declared, totalValue);
-      BigDecimal lineFreight = last ? freight.subtract(usedFreight) : share(freight, declared, totalValue);
-      BigDecimal lineInsurance = last ? insurance.subtract(usedInsurance) : share(insurance, declared, totalValue);
+      BigDecimal lineCustoms =
+          last ? customsValue.subtract(usedCustoms) : share(customsValue, declared, totalValue);
+      BigDecimal lineFreight =
+          last ? freight.subtract(usedFreight) : share(freight, declared, totalValue);
+      BigDecimal lineInsurance =
+          last ? insurance.subtract(usedInsurance) : share(insurance, declared, totalValue);
       BigDecimal lineOther = last ? other.subtract(usedOther) : share(other, declared, totalValue);
       usedCustoms = usedCustoms.add(lineCustoms);
       usedFreight = usedFreight.add(lineFreight);
@@ -802,7 +834,11 @@ public class DutyTaxService {
       // 关税：按目的国 + HS 编码**最长前缀** + 生效日取当时税率。
       RateMatch dutyRate = matchDutyRate(tenantId, country, hsCode, rateDate, null);
       BigDecimal dutyAmount =
-          round2(dutyRate.adValorem().multiply(lineCustoms).add(dutyRate.specific().multiply(quantity)));
+          round2(
+              dutyRate
+                  .adValorem()
+                  .multiply(lineCustoms)
+                  .add(dutyRate.specific().multiply(quantity)));
 
       // 目的国增值税/GST：按国别税率（绝大多数国家 VAT 不按 HS 细分）。
       RateMatch vatRate = matchCountryRate(tenantId, country, "VAT", rateDate);
@@ -811,16 +847,20 @@ public class DutyTaxService {
       }
       // 进口增值税对关税计征：计税基础 = 完税价格 + 关税 + 运费 + 保险。
       BigDecimal vatBase = lineCustoms.add(dutyAmount).add(lineFreight).add(lineInsurance);
-      BigDecimal vatAmount = vatRate == null ? ZERO2 : round2(vatRate.adValorem().multiply(vatBase));
+      BigDecimal vatAmount =
+          vatRate == null ? ZERO2 : round2(vatRate.adValorem().multiply(vatBase));
       BigDecimal vatRateValue = vatRate == null ? ZERO6 : vatRate.adValorem();
 
       String note =
           dutyRate.status() == RateMatchStatus.NO_MATCH
-              ? "税率表里没有匹配到 " + country + " / HS " + (hsCode.isEmpty() ? "（本行没有 HS 编码）" : hsCode)
-                  + " 在 " + rateDate + " 生效的关税税率：按 0 税估算，必须补税率或修 HS 归类后才能锁定"
-              : (vatRate == null
-                  ? "没配到 " + country + " 的增值税/GST 税率：进口增值税按 0 估算，必须补税率后才能锁定"
-                  : "");
+              ? "税率表里没有匹配到 "
+                  + country
+                  + " / HS "
+                  + (hsCode.isEmpty() ? "（本行没有 HS 编码）" : hsCode)
+                  + " 在 "
+                  + rateDate
+                  + " 生效的关税税率：按 0 税估算，必须补税率或修 HS 归类后才能锁定"
+              : (vatRate == null ? "没配到 " + country + " 的增值税/GST 税率：进口增值税按 0 估算，必须补税率后才能锁定" : "");
 
       sql.execute(
           "insert into duty_tax_estimate_line(id,tenant_id,estimate_id,line_no,declaration_line_id,"
@@ -920,18 +960,27 @@ public class DutyTaxService {
               + "），请刷新后重试");
     }
     String incoterm =
-        request.incoterm() == null ? head.get("incoterm", String.class) : Incoterm.parse(request.incoterm()).name();
+        request.incoterm() == null
+            ? head.get("incoterm", String.class)
+            : Incoterm.parse(request.incoterm()).name();
     DutyBearer bearer =
         request.dutyBearer() == null
             ? DutyBearer.parse(head.get("duty_bearer", String.class))
             : DutyBearer.parse(request.dutyBearer());
     checkBearerAgainstIncoterm(incoterm, bearer);
-    BigDecimal goods = orElse(request.goodsValue(), head.get("goods_value", BigDecimal.class), "货值");
-    BigDecimal customs = orElse(request.customsValue(), head.get("customs_value", BigDecimal.class), "完税价格");
-    BigDecimal freight = orElse(request.freightAmount(), head.get("freight_amount", BigDecimal.class), "运费");
-    BigDecimal insurance = orElse(request.insuranceAmount(), head.get("insurance_amount", BigDecimal.class), "保险费");
-    BigDecimal other = orElse(request.otherChargeAmount(), head.get("other_charge_amount", BigDecimal.class), "其他费用");
-    BigDecimal fx = orElse(request.exchangeRate(), head.get("exchange_rate", BigDecimal.class), "汇率");
+    BigDecimal goods =
+        orElse(request.goodsValue(), head.get("goods_value", BigDecimal.class), "货值");
+    BigDecimal customs =
+        orElse(request.customsValue(), head.get("customs_value", BigDecimal.class), "完税价格");
+    BigDecimal freight =
+        orElse(request.freightAmount(), head.get("freight_amount", BigDecimal.class), "运费");
+    BigDecimal insurance =
+        orElse(request.insuranceAmount(), head.get("insurance_amount", BigDecimal.class), "保险费");
+    BigDecimal other =
+        orElse(
+            request.otherChargeAmount(), head.get("other_charge_amount", BigDecimal.class), "其他费用");
+    BigDecimal fx =
+        orElse(request.exchangeRate(), head.get("exchange_rate", BigDecimal.class), "汇率");
     if (fx.signum() <= 0) {
       throw new IllegalArgumentException("汇率必须大于 0，收到 " + fx);
     }
@@ -970,7 +1019,10 @@ public class DutyTaxService {
     String country = head.get("destination_country_code", String.class);
     LocalDate on = rateDate == null ? LocalDate.now() : rateDate;
     // 明细是可重算的派生结果：整段重写。税率值已抄进行里，重算时按当前税率表整体覆盖。
-    sql.execute("delete from duty_tax_estimate_line where tenant_id=? and estimate_id=?", tenantId, estimateId);
+    sql.execute(
+        "delete from duty_tax_estimate_line where tenant_id=? and estimate_id=?",
+        tenantId,
+        estimateId);
     List<Record> declLines =
         sql.fetch(
             "select l.* from customs_declaration_line l"
@@ -1005,9 +1057,7 @@ public class DutyTaxService {
     return new DutySaved(
         estimateId,
         "ESTIMATED",
-        unmatched == 0
-            ? "已按 " + on + " 生效的税率重算。"
-            : "已重算，但还有 " + unmatched + " 行没配到税率，锁定前必须补齐。");
+        unmatched == 0 ? "已按 " + on + " 生效的税率重算。" : "已重算，但还有 " + unmatched + " 行没配到税率，锁定前必须补齐。");
   }
 
   /**
@@ -1021,20 +1071,21 @@ public class DutyTaxService {
     Record head = requireEstimate(tenantId, estimateId);
     EstimateStatus current = EstimateStatus.parse(head.get("status", String.class));
     if (!EstimateStatus.allowedNext(current).contains(EstimateStatus.LOCKED)) {
-      throw new IllegalArgumentException(
-          "估算单处于「" + current.label() + "」状态，不允许锁定：只有「已估算」可以锁定");
+      throw new IllegalArgumentException("估算单处于「" + current.label() + "」状态，不允许锁定：只有「已估算」可以锁定");
     }
     int unmatchedDuty = lineCount(tenantId, estimateId, " and rate_match_status<>'MATCHED'");
     if (unmatchedDuty > 0) {
       throw new IllegalArgumentException(
-          "还有 " + unmatchedDuty
+          "还有 "
+              + unmatchedDuty
               + " 行没匹配到关税税率，不能锁定：按 0 税锁定的估算单会让报价与到岸成本少算关税，"
               + "而这正是「HS 归类或税率配置有误」在账上最常见的表现。请先补税率表或修正 HS 归类");
     }
     int missingVat = lineCount(tenantId, estimateId, " and not vat_rate_matched");
     if (missingVat > 0) {
       throw new IllegalArgumentException(
-          "还有 " + missingVat
+          "还有 "
+              + missingVat
               + " 行没配到目的国增值税/GST 税率，不能锁定：漏掉进口增值税的到岸成本会系统性偏低。"
               + "请为该目的国补一条国别税率（零税率国家配 0% 即可）");
     }
@@ -1045,10 +1096,7 @@ public class DutyTaxService {
         fit(request.notes(), 2000, "备注"),
         estimateId);
     return new DutySaved(
-        estimateId,
-        "LOCKED",
-        "估算已锁定。锁定后基础、承担方与税率都不再允许改动 —— 要改只能作废重估，"
-            + "这样已发出的报价始终有一份可举证的依据。");
+        estimateId, "LOCKED", "估算已锁定。锁定后基础、承担方与税率都不再允许改动 —— 要改只能作废重估，" + "这样已发出的报价始终有一份可举证的依据。");
   }
 
   /** 作废：终态。之后不能再录缴款与差异（DB 触发器钉死），已有实缴的也不许作废。 */
@@ -1068,8 +1116,7 @@ public class DutyTaxService {
             estimateId);
     if (paid.signum() != 0) {
       throw new IllegalArgumentException(
-          "这张估算单已有实缴记录（合计 " + paid + "），不能作废：钱已经付出去了，"
-              + "作废估算会让「这票货缴了多少税」在账上凭空消失");
+          "这张估算单已有实缴记录（合计 " + paid + "），不能作废：钱已经付出去了，" + "作废估算会让「这票货缴了多少税」在账上凭空消失");
     }
     sql.execute(
         "update duty_tax_estimate set status='VOID',voided_at=now(),void_reason=?,"
@@ -1084,14 +1131,11 @@ public class DutyTaxService {
   /**
    * 记录实际缴纳，并在**同一事务里**写出对应的差异快照。
    *
-   * <p>蓝图原文：「**税费估算与实际缴纳差异要记录**」。这里不是「顺手记一下」——
-   * DB 触发器 {@code duty_payment_has_variance} 在提交时核对：有实缴却没有对应差异记录就报 23514。
-   * 所以「先存实缴、差异以后再补」在这个模块里**做不到**，这正是蓝图要的效果。
+   * <p>蓝图原文：「**税费估算与实际缴纳差异要记录**」。这里不是「顺手记一下」—— DB 触发器 {@code duty_payment_has_variance}
+   * 在提交时核对：有实缴却没有对应差异记录就报 23514。 所以「先存实缴、差异以后再补」在这个模块里**做不到**，这正是蓝图要的效果。
    *
-   * <p>差异快照记的是<b>对到本次缴款为止的累计差额</b>：补缴之后再留一条新的，
-   * 于是「第 1 次缴款时差多少」这个历史瞬间仍然可查（实缴与差异都是 append-only）。
-   * 归因也在这一刻写入（请求里带）—— 已归因的差异不允许事后改写，
-   * 要重新判定就再录一笔缴款对账出新的快照，纠错过程本身就是证据链。
+   * <p>差异快照记的是<b>对到本次缴款为止的累计差额</b>：补缴之后再留一条新的， 于是「第 1 次缴款时差多少」这个历史瞬间仍然可查（实缴与差异都是 append-only）。
+   * 归因也在这一刻写入（请求里带）—— 已归因的差异不允许事后改写， 要重新判定就再录一笔缴款对账出新的快照，纠错过程本身就是证据链。
    */
   @Transactional
   public DutySaved recordPayment(UUID tenantId, UUID estimateId, DutyPaymentCreateRequest request) {
@@ -1108,7 +1152,8 @@ public class DutyTaxService {
     String payer = DutyPayer.parse(request.payer()).name();
     String reference = requireText(request.paymentReference(), "缴款凭证号");
     OffsetDateTime paidAt = request.paidAt() == null ? OffsetDateTime.now() : request.paidAt();
-    String currency = moneyOrDefault(request.currency(), head.get("estimate_currency", String.class), "缴款币种");
+    String currency =
+        moneyOrDefault(request.currency(), head.get("estimate_currency", String.class), "缴款币种");
     int sequence =
         sql.fetchOne(
                 "select coalesce(max(payment_sequence),0)+1 s from duty_tax_payment"
@@ -1136,7 +1181,8 @@ public class DutyTaxService {
         paidAt,
         fit(request.payerName(), 200, "付款方名称"),
         notBlank(request.sourceSystem())
-            ? requireOneOf(request.sourceSystem(), "录入方式", "MANUAL_ENTRY", "CUSTOMS_FEED", "BROKER_API")
+            ? requireOneOf(
+                request.sourceSystem(), "录入方式", "MANUAL_ENTRY", "CUSTOMS_FEED", "BROKER_API")
             : "MANUAL_ENTRY",
         fit(request.sourceReference(), 64, "来源单号"),
         fit(request.notes(), 2000, "备注"),
@@ -1152,12 +1198,14 @@ public class DutyTaxService {
     // 估算为 0 而实缴非 0 时差异率**无意义**（除零），用 rate_calculable=false 如实标记 ——
     // 那正是「税率没配」最典型的表现，比一个随手填的 0 有用得多。
     boolean calculable = estimated.signum() != 0;
-    VarianceCause cause = request.varianceCause() == null
-        ? guessCause(estimated, actual)
-        : VarianceCause.parse(request.varianceCause());
-    VarianceResolution resolution = request.varianceResolution() == null
-        ? VarianceResolution.OPEN
-        : VarianceResolution.parse(request.varianceResolution());
+    VarianceCause cause =
+        request.varianceCause() == null
+            ? guessCause(estimated, actual)
+            : VarianceCause.parse(request.varianceCause());
+    VarianceResolution resolution =
+        request.varianceResolution() == null
+            ? VarianceResolution.OPEN
+            : VarianceResolution.parse(request.varianceResolution());
     // 「已处理」必须有复核痕迹（DB CHECK 也钉这一条）。
     boolean reviewed = resolution != VarianceResolution.OPEN;
     sql.execute(
@@ -1189,9 +1237,20 @@ public class DutyTaxService {
     return new DutySaved(
         estimateId,
         status.name(),
-        "已记录" + kind.label() + "实缴 " + request.paidAmount() + " " + currency
-            + "（第 " + sequence + " 次），并同时留下差异快照：估算 " + estimated
-            + " / 实缴累计 " + actual + " / 差额 " + variance
+        "已记录"
+            + kind.label()
+            + "实缴 "
+            + request.paidAmount()
+            + " "
+            + currency
+            + "（第 "
+            + sequence
+            + " 次），并同时留下差异快照：估算 "
+            + estimated
+            + " / 实缴累计 "
+            + actual
+            + " / 差额 "
+            + variance
             + "。差异必须记录 —— 这是蓝图的硬要求，DB 层也会核对。");
   }
 
@@ -1207,7 +1266,8 @@ public class DutyTaxService {
    *       错在报价里了，要等海关实缴下来才看得出差异，那时报价早就发出去了
    * </ul>
    */
-  public DutyVarianceAnalysis varianceAnalysis(UUID tenantId, String country, LocalDate from, LocalDate to) {
+  public DutyVarianceAnalysis varianceAnalysis(
+      UUID tenantId, String country, LocalDate from, LocalDate to) {
     List<Object> args = new ArrayList<>();
     args.add(tenantId);
     StringBuilder scope = new StringBuilder(" where v.tenant_id=?");
@@ -1235,7 +1295,8 @@ public class DutyTaxService {
         sql.fetchOne(
             "select count(*) c, count(distinct v.estimate_id) estimates,"
                 + " count(*) filter (where v.resolution='OPEN') open_v,"
-                + " coalesce(sum(v.estimated_amount),0) est, coalesce(sum(v.actual_amount),0) act" + head,
+                + " coalesce(sum(v.estimated_amount),0) est, coalesce(sum(v.actual_amount),0) act"
+                + head,
             args.toArray(new Object[0]));
     BigDecimal est = totals.get("est", BigDecimal.class);
     BigDecimal act = totals.get("act", BigDecimal.class);
@@ -1247,7 +1308,8 @@ public class DutyTaxService {
     for (var r :
         sql.fetch(
             "select v.variance_cause c, count(*) n, count(distinct v.estimate_id) e,"
-                + " coalesce(sum(v.estimated_amount),0) est, coalesce(sum(v.actual_amount),0) act" + head
+                + " coalesce(sum(v.estimated_amount),0) est, coalesce(sum(v.actual_amount),0) act"
+                + head
                 + " group by v.variance_cause"
                 + " order by abs(coalesce(sum(v.actual_amount),0) - coalesce(sum(v.estimated_amount),0)) desc"
                 + " limit 50",
@@ -1295,7 +1357,8 @@ public class DutyTaxService {
 
     List<Object> unmatchedArgs = new ArrayList<>();
     unmatchedArgs.add(tenantId);
-    StringBuilder unmatchedWhere = new StringBuilder(" where l.tenant_id=? and l.rate_match_status<>'MATCHED'");
+    StringBuilder unmatchedWhere =
+        new StringBuilder(" where l.tenant_id=? and l.rate_match_status<>'MATCHED'");
     if (notBlank(country)) {
       unmatchedWhere.append(" and e.destination_country_code=?");
       unmatchedArgs.add(country.trim().toUpperCase(Locale.ROOT));
@@ -1342,8 +1405,13 @@ public class DutyTaxService {
 
   /** 命中的税率（{@code id} 为 null 表示没匹配到）。 */
   private record RateMatch(
-      UUID id, BigDecimal adValorem, BigDecimal specific, String prefix, RateMatchStatus status,
-      boolean preferential, String treaty) {}
+      UUID id,
+      BigDecimal adValorem,
+      BigDecimal specific,
+      String prefix,
+      RateMatchStatus status,
+      boolean preferential,
+      String treaty) {}
 
   private static final RateMatch NO_RATE =
       new RateMatch(null, ZERO6, ZERO4, "", RateMatchStatus.NO_MATCH, false, "");
@@ -1351,11 +1419,11 @@ public class DutyTaxService {
   /**
    * 匹配关税税率：目的国 + {@code rate_scope='HS'} + 最长前缀 + 当日生效。
    *
-   * <p>「最长前缀优先」是与海关实际归类一致的：越具体的税率优先于章级税率。
-   * 优惠税率只在明确指定协定时才用 —— FTA 适用性需要业务确认（蓝图 10.5.2.1 原文点名
+   * <p>「最长前缀优先」是与海关实际归类一致的：越具体的税率优先于章级税率。 优惠税率只在明确指定协定时才用 —— FTA 适用性需要业务确认（蓝图 10.5.2.1 原文点名
    * 「实质性改变」等条件要业务确认），所以默认只取非优惠行。
    */
-  private RateMatch matchDutyRate(UUID tenantId, String country, String hsCode, LocalDate on, String treaty) {
+  private RateMatch matchDutyRate(
+      UUID tenantId, String country, String hsCode, LocalDate on, String treaty) {
     if (hsCode == null || hsCode.isBlank()) {
       return NO_RATE;
     }
@@ -1413,7 +1481,9 @@ public class DutyTaxService {
   /** 归因的**自动初判**：只判能从数据本身看出来的，其余一律 PENDING 等人工确认。 */
   private static VarianceCause guessCause(BigDecimal estimated, BigDecimal actual) {
     // 估 0 却真收到了税：最典型就是「税率根本没配」。
-    return estimated.signum() == 0 && actual.signum() != 0 ? VarianceCause.RATE_CONFIG : VarianceCause.PENDING;
+    return estimated.signum() == 0 && actual.signum() != 0
+        ? VarianceCause.RATE_CONFIG
+        : VarianceCause.PENDING;
   }
 
   private UUID estimateLineOf(UUID tenantId, UUID estimateId, UUID declarationLineId) {
@@ -1459,12 +1529,21 @@ public class DutyTaxService {
     BigDecimal duty = orZero(r.get("paid_duty", BigDecimal.class));
     BigDecimal vat = orZero(r.get("paid_vat", BigDecimal.class));
     return estimateOf(
-        r, duty, vat, duty.add(vat), orZero(r.get("variance_total", BigDecimal.class)),
+        r,
+        duty,
+        vat,
+        duty.add(vat),
+        orZero(r.get("variance_total", BigDecimal.class)),
         r.get("unmatched", Integer.class));
   }
 
-  private static DutyEstimateRow estimateOf(Record r, BigDecimal paidDuty, BigDecimal paidVat,
-      BigDecimal paidTotal, BigDecimal varianceTotal, int unmatched) {
+  private static DutyEstimateRow estimateOf(
+      Record r,
+      BigDecimal paidDuty,
+      BigDecimal paidVat,
+      BigDecimal paidTotal,
+      BigDecimal varianceTotal,
+      int unmatched) {
     return new DutyEstimateRow(
         r.get("id", UUID.class),
         r.get("estimate_code", String.class),
@@ -1584,14 +1663,20 @@ public class DutyTaxService {
     for (var to : EstimateStatus.allowedNext(status)) {
       out.add(
           new DutyTaxTransition(
-              status.name(), status.label(), to.name(), to.label(), actionOf(status, to), noteOf(status, to)));
+              status.name(),
+              status.label(),
+              to.name(),
+              to.label(),
+              actionOf(status, to),
+              noteOf(status, to)));
     }
     return out;
   }
 
   private Record requireEstimate(UUID tenantId, UUID estimateId) {
     Record r =
-        sql.fetchOne("select * from duty_tax_estimate where tenant_id=? and id=?", tenantId, estimateId);
+        sql.fetchOne(
+            "select * from duty_tax_estimate where tenant_id=? and id=?", tenantId, estimateId);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "估算单不存在或无权访问：" + estimateId);
     }
@@ -1599,7 +1684,8 @@ public class DutyTaxService {
   }
 
   private Record requireRate(UUID tenantId, UUID rateId) {
-    Record r = sql.fetchOne("select * from duty_tax_rate where tenant_id=? and id=?", tenantId, rateId);
+    Record r =
+        sql.fetchOne("select * from duty_tax_rate where tenant_id=? and id=?", tenantId, rateId);
     if (r == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "税率不存在或无权访问：" + rateId);
     }
@@ -1608,20 +1694,23 @@ public class DutyTaxService {
 
   private int lineCount(UUID tenantId, UUID estimateId, String extra) {
     return sql.fetchOne(
-            "select count(*) c from duty_tax_estimate_line where tenant_id=? and estimate_id=?" + extra,
+            "select count(*) c from duty_tax_estimate_line where tenant_id=? and estimate_id=?"
+                + extra,
             tenantId,
             estimateId)
         .get("c", Integer.class);
   }
 
   private int unmatchedCount(UUID tenantId, UUID estimateId) {
-    return lineCount(tenantId, estimateId, " and (rate_match_status<>'MATCHED' or not vat_rate_matched)");
+    return lineCount(
+        tenantId, estimateId, " and (rate_match_status<>'MATCHED' or not vat_rate_matched)");
   }
 
   private BigDecimal paidTotal(UUID tenantId, UUID estimateId, String taxFilter) {
     return scalar(
         "select coalesce(sum(paid_amount),0) from duty_tax_payment where tenant_id=? and estimate_id=?"
-            + " and tax_kind " + taxFilter,
+            + " and tax_kind "
+            + taxFilter,
         BigDecimal.class,
         tenantId,
         estimateId);
@@ -1642,7 +1731,9 @@ public class DutyTaxService {
     // column 来自本类的固定调用点（estimated_duty_amount / estimated_vat_amount），
     // 绝不接受外部输入，所以不存在 SQL 注入面。
     return scalar(
-        "select coalesce(sum(" + column + "),0) from duty_tax_estimate_line where tenant_id=? and estimate_id=?",
+        "select coalesce(sum("
+            + column
+            + "),0) from duty_tax_estimate_line where tenant_id=? and estimate_id=?",
         BigDecimal.class,
         tenantId,
         estimateId);
@@ -1734,8 +1825,7 @@ public class DutyTaxService {
         return s;
       }
     }
-    throw new IllegalArgumentException(
-        "未知的税率适用范围：" + raw + "，可选：COUNTRY（国别）/ HS（按 HS 编码）");
+    throw new IllegalArgumentException("未知的税率适用范围：" + raw + "，可选：COUNTRY（国别）/ HS（按 HS 编码）");
   }
 
   private static String normalizePrefix(RateScope scope, String raw) {
@@ -1747,20 +1837,17 @@ public class DutyTaxService {
       return "";
     }
     if (!prefix.matches("[0-9]{2,10}")) {
-      throw new IllegalArgumentException(
-          "按 HS 编码的税率必须给 2–10 位数字前缀（如 6109 表示章级税率），收到：" + prefix);
+      throw new IllegalArgumentException("按 HS 编码的税率必须给 2–10 位数字前缀（如 6109 表示章级税率），收到：" + prefix);
     }
     return prefix;
   }
 
   private static void checkBearerAgainstIncoterm(String incoterm, DutyBearer bearer) {
     if (incoterm.equals("DDP") && bearer != DutyBearer.SELLER) {
-      throw new IllegalArgumentException(
-          "DDP（完税后交货）下关税与目的国税费由卖方承担，不能设成" + bearer.label());
+      throw new IllegalArgumentException("DDP（完税后交货）下关税与目的国税费由卖方承担，不能设成" + bearer.label());
     }
     if (incoterm.equals("DDU") && bearer != DutyBearer.BUYER) {
-      throw new IllegalArgumentException(
-          "DDU（未完税交货）下关税与目的国税费由买方承担，不能设成" + bearer.label());
+      throw new IllegalArgumentException("DDU（未完税交货）下关税与目的国税费由买方承担，不能设成" + bearer.label());
     }
   }
 
@@ -1807,9 +1894,7 @@ public class DutyTaxService {
   }
 
   private static String taxSource(String raw) {
-    return notBlank(raw)
-        ? requireOneOf(raw, "税率来源", "MANUAL", "MODULE_16_3_1_1")
-        : "MANUAL";
+    return notBlank(raw) ? requireOneOf(raw, "税率来源", "MANUAL", "MODULE_16_3_1_1") : "MANUAL";
   }
 
   private static String uom(String raw) {

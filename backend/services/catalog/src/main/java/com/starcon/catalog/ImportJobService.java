@@ -20,21 +20,14 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.8.1.1 的导入任务：上传、字段映射、任务与结果查询（五环节里的第 2、3 步与「结果统计」）。
  *
- * <p><b>上传只做「解析 + 落行 + 建任务」，不写任何商品表。</b>
- * 这是蓝图把预校验与执行拆成两个独立环节的直接结果：上传完的任务是 {@code PENDING}，
- * 它的逐行结果还没算出来，此刻页面上还不能说「这一批能不能导」。
- * 真正的写库在 {@link ImportJobExecutor} 的执行阶段。
+ * <p><b>上传只做「解析 + 落行 + 建任务」，不写任何商品表。</b> 这是蓝图把预校验与执行拆成两个独立环节的直接结果：上传完的任务是 {@code PENDING}，
+ * 它的逐行结果还没算出来，此刻页面上还不能说「这一批能不能导」。 真正的写库在 {@link ImportJobExecutor} 的执行阶段。
  *
- * <p><b>为什么解析结果逐行落库而不是把文件留在磁盘上</b>：执行发生在请求之外
- * （另一个线程、可能另一个进程）。把行落库之后，执行只读库，
- * 于是「队列不丢」「换进程不用重新传文件」两件事都自动成立，
- * 而且库里不会出现任何指向本地路径的悬空引用。代价是库里存了一份解析后的副本 ——
- * 它是文本，不是文件，体积与行数同阶。
+ * <p><b>为什么解析结果逐行落库而不是把文件留在磁盘上</b>：执行发生在请求之外 （另一个线程、可能另一个进程）。把行落库之后，执行只读库，
+ * 于是「队列不丢」「换进程不用重新传文件」两件事都自动成立， 而且库里不会出现任何指向本地路径的悬空引用。代价是库里存了一份解析后的副本 —— 它是文本，不是文件，体积与行数同阶。
  *
  * <p><b>互斥在 DB 层</b>：{@code import_job_one_active_per_entity} 部分唯一索引保证
- * 「同一租户同一目标对象同时只有一个活跃任务」。这里把它撞出来的 23505
- * 翻译成 409 并点名当前在跑的任务 ——
- * <b>不是</b>「先查有没有再插」：那种写法在两个并发请求之间有窗口期。
+ * 「同一租户同一目标对象同时只有一个活跃任务」。这里把它撞出来的 23505 翻译成 409 并点名当前在跑的任务 —— <b>不是</b>「先查有没有再插」：那种写法在两个并发请求之间有窗口期。
  */
 @Service
 public class ImportJobService {
@@ -51,10 +44,9 @@ public class ImportJobService {
   /**
    * 解析上传的 CSV，并把「文件有问题」翻译成 400。
    *
-   * <p>{@link ImportCsvParser} 用 {@link IllegalArgumentException} 表达
-   * 「编码认不出 / 表头缺列名 / 超上限」——那是**上传者**的问题（换个文件重传），
-   * 不是服务端的 500。直接放行的话页面上会弹一个没有信息量的「服务器错误」，
-   * 而真实的理由（"表头第 3 列没有列名"）才是运营该看到的。
+   * <p>{@link ImportCsvParser} 用 {@link IllegalArgumentException} 表达 「编码认不出 / 表头缺列名 /
+   * 超上限」——那是**上传者**的问题（换个文件重传）， 不是服务端的 500。直接放行的话页面上会弹一个没有信息量的「服务器错误」， 而真实的理由（"表头第 3
+   * 列没有列名"）才是运营该看到的。
    */
   private static ImportCsvParser.Parsed parseCsv(byte[] content) {
     try {
@@ -72,12 +64,19 @@ public class ImportJobService {
    * @param mapping 可选的字段映射；为空时按列名自动猜一套（见 {@link #autoMapping}）
    */
   public ImportUploadSummary upload(
-      UUID tenantId, UUID templateId, String importMode, Map<String, String> mapping,
-      String fileName, byte[] content) {
+      UUID tenantId,
+      UUID templateId,
+      String importMode,
+      Map<String, String> mapping,
+      String fileName,
+      byte[] content) {
     var templateRow = sql.fetchOne("select * from import_template where id=?", templateId);
     if (templateRow == null) throw notFound("模板不存在或已删除");
-    check(templateRow.get("enabled", Boolean.class), "模板「" + templateRow.get("name", String.class) + "」已停用，请换一个模板");
-    ImportRules.Entity entity = ImportRules.entityOf(templateRow.get("target_entity", String.class));
+    check(
+        templateRow.get("enabled", Boolean.class),
+        "模板「" + templateRow.get("name", String.class) + "」已停用，请换一个模板");
+    ImportRules.Entity entity =
+        ImportRules.entityOf(templateRow.get("target_entity", String.class));
     check(entity != null, "模板的目标对象不合法");
     ImportRules.Mode mode = ImportRules.modeOf(importMode);
     check(mode != null, "导入模式不合法：" + importMode + "（可用：CREATE / UPDATE / MATCH_BY_CODE）");
@@ -89,7 +88,9 @@ public class ImportJobService {
     // 初始映射：显式传入的优先，否则按列名自动猜一套。
     // 自动猜不是「假装映射已完成」：猜不中的列在预校验里会明确报 UNMAPPED_COLUMN。
     Map<String, String> effective =
-        mapping == null || mapping.isEmpty() ? autoMapping(columns, parsed.headers()) : new LinkedHashMap<>(mapping);
+        mapping == null || mapping.isEmpty()
+            ? autoMapping(columns, parsed.headers())
+            : new LinkedHashMap<>(mapping);
     checkTemplateColumnsDeclared(effective, columns);
 
     // 先看一眼有没有同类任务在跑：只是为了让报错**指名道姓**（哪个文件、什么状态），
@@ -98,8 +99,11 @@ public class ImportJobService {
     var running = activeJob(tenantId, entity.name());
     if (running != null)
       throw conflict(
-          "已有同类的「" + entity.name() + "」导入任务在进行中（"
-              + running.get("file_name", String.class) + "，"
+          "已有同类的「"
+              + entity.name()
+              + "」导入任务在进行中（"
+              + running.get("file_name", String.class)
+              + "，"
               + statusLabel(running.get("status", String.class))
               + "）。为避免并发覆盖，同一时间只允许一个同类任务，请等它结束或先取消它");
 
@@ -109,17 +113,26 @@ public class ImportJobService {
           "insert into import_job(id,tenant_id,template_id,target_entity,import_mode,file_name,"
               + "file_format,byte_size,content_sha256,row_count,mapping,status,actor_id)"
               + " values(?,?,?,?,?,?,'CSV',?,?,?,?::jsonb,'PENDING',?)",
-          jobId, tenantId, templateId, entity.name(), mode.name(),
+          jobId,
+          tenantId,
+          templateId,
+          entity.name(),
+          mode.name(),
           fileName == null || fileName.isBlank() ? "import.csv" : fileName.trim(),
-          java.math.BigDecimal.valueOf(content.length), ImportCsvParser.sha256(content),
-          parsed.rows().size(), ImportTemplateService.json(effective), Ids.next());
+          java.math.BigDecimal.valueOf(content.length),
+          ImportCsvParser.sha256(content),
+          parsed.rows().size(),
+          ImportTemplateService.json(effective),
+          Ids.next());
     } catch (DataAccessException e) {
       // 撞的是 import_job_one_active_per_entity —— 并发窗口里由 DB 裁决的那一次。
       // 这里**不能**再查库找是哪个任务：insert 失败已经把当前事务置为 aborted，
       // 任何后续查询都会报 "current transaction is aborted"。
       // 所以消息只能指向「任务列表」让运营自己看，这比让整条事务死掉划算。
       throw conflict(
-          "已有同类的「" + entity.name() + "」导入任务在进行中。为避免并发覆盖，同一时间只允许一个同类任务，"
+          "已有同类的「"
+              + entity.name()
+              + "」导入任务在进行中。为避免并发覆盖，同一时间只允许一个同类任务，"
               + "请在导入任务列表里查看当前任务、等它结束或取消后重试");
     }
 
@@ -131,9 +144,8 @@ public class ImportJobService {
         List<String> row = parsed.rows().get(i);
         for (int c = 0; c < parsed.headers().size(); c++)
           cells.put(parsed.headers().get(c), c < row.size() ? row.get(c) : "");
-        batch.add(new Object[] {
-            Ids.next(), tenantId, jobId, i + 2, ImportTemplateService.json(cells)
-        });
+        batch.add(
+            new Object[] {Ids.next(), tenantId, jobId, i + 2, ImportTemplateService.json(cells)});
       }
       // 逐行 execute 而不是 DSLContext.batch(字符串)：本仓库的写法一律是
       // sql.execute + 显式 ?::jsonb，batch(String, ...) 对 `?::jsonb` 这种
@@ -146,9 +158,13 @@ public class ImportJobService {
     }
 
     return new ImportUploadSummary(
-        jobId, fileName == null ? "import.csv" : fileName.trim(),
-        java.math.BigDecimal.valueOf(content.length), ImportCsvParser.sha256(content),
-        parsed.rows().size(), parsed.headers().size(), parsed.headers());
+        jobId,
+        fileName == null ? "import.csv" : fileName.trim(),
+        java.math.BigDecimal.valueOf(content.length),
+        ImportCsvParser.sha256(content),
+        parsed.rows().size(),
+        parsed.headers().size(),
+        parsed.headers());
   }
 
   // ================================================================ 字段映射（第 3 步）
@@ -156,11 +172,9 @@ public class ImportJobService {
   /**
    * 改本次任务的字段映射。
    *
-   * <p>行里存的是<b>文件原样的表头→单元格</b>，所以映射可以在预校验之前随意改 ——
-   * 改完直接重跑预校验即可，不需要重新上传文件。
+   * <p>行里存的是<b>文件原样的表头→单元格</b>，所以映射可以在预校验之前随意改 —— 改完直接重跑预校验即可，不需要重新上传文件。
    *
-   * <p><b>已经预校验过的任务改映射会把行结论作废</b>（退回 PENDING）：
-   * 上一轮的 valid/invalid 是按旧映射算的，留着它就等于让任务行上的统计
+   * <p><b>已经预校验过的任务改映射会把行结论作废</b>（退回 PENDING）： 上一轮的 valid/invalid 是按旧映射算的，留着它就等于让任务行上的统计
    * 与当前列的含义对不上。重跑预校验会重算，不作废的话用户会拿着旧结论去放行。
    */
   public ImportJobRow setMapping(UUID tenantId, UUID jobId, ImportMappingInput input) {
@@ -172,11 +186,17 @@ public class ImportJobService {
     checkTemplateColumnsDeclared(input.mapping(), columns);
     sql.execute(
         "update import_job set mapping=?::jsonb,status='PENDING' where id=?",
-        ImportTemplateService.json(input.mapping()), jobId);
+        ImportTemplateService.json(input.mapping()),
+        jobId);
     if (input.saveAs() != null && !input.saveAs().isBlank()) {
       new ImportTemplateService(sql)
-          .saveMapping(tenantId, new ImportFieldMappingInput(
-              job.templateId(), input.saveAs().trim(), input.mapping(), "由导入任务 " + jobId + " 保存"));
+          .saveMapping(
+              tenantId,
+              new ImportFieldMappingInput(
+                  job.templateId(),
+                  input.saveAs().trim(),
+                  input.mapping(),
+                  "由导入任务 " + jobId + " 保存"));
     }
     return job(tenantId, jobId);
   }
@@ -184,9 +204,8 @@ public class ImportJobService {
   /**
    * 按列名猜一套映射。
    *
-   * <p>三级匹配：字段键精确 → 列头精确 → 列头忽略大小写。
-   * 猜中就把文件表头写进映射，猜不中就**不写**（于是那一列在预校验里报
-   * 「模板列 X 在文件里找不到对应列」，而不是静默按空值处理）。
+   * <p>三级匹配：字段键精确 → 列头精确 → 列头忽略大小写。 猜中就把文件表头写进映射，猜不中就**不写**（于是那一列在预校验里报 「模板列 X
+   * 在文件里找不到对应列」，而不是静默按空值处理）。
    */
   static Map<String, String> autoMapping(List<ImportTemplateColumn> columns, List<String> headers) {
     Map<String, String> byKey = new LinkedHashMap<>();
@@ -209,8 +228,8 @@ public class ImportJobService {
   /**
    * 请求预校验：立刻返回「已受理」，结果由 {@link ImportJobExecutor} 落库后轮询。
    *
-   * <p>已预校验的任务可以**重跑**（映射没变也允许，比如 3.8.1.2 那边补了规则之后想再看一次）。
-   * 重跑前会清掉上一轮的行结论与错误明细 —— 否则页面上会同时挂着两轮互相矛盾的结论。
+   * <p>已预校验的任务可以**重跑**（映射没变也允许，比如 3.8.1.2 那边补了规则之后想再看一次）。 重跑前会清掉上一轮的行结论与错误明细 ——
+   * 否则页面上会同时挂着两轮互相矛盾的结论。
    */
   public ImportJobRow requestPrevalidate(AccessService.Access actor, UUID jobId) {
     UUID tenantId = actor.tenantId();
@@ -234,7 +253,8 @@ public class ImportJobService {
   public ImportJobRow requestExecute(AccessService.Access actor, UUID jobId) {
     UUID tenantId = actor.tenantId();
     var job = job(tenantId, jobId);
-    check(job.status().equals("PREVALIDATED"),
+    check(
+        job.status().equals("PREVALIDATED"),
         "执行前必须先完成预校验（当前状态「" + statusLabel(job.status()) + "」）。预校验会把有错误的行挑出来，避免半截数据入库");
     sql.execute(
         "update import_job set status='RUNNING',worker_claimed_at=null where id=? and status='PREVALIDATED'",
@@ -244,26 +264,26 @@ public class ImportJobService {
   }
 
   /**
- * 取消任务，释放「同类任务互斥」的槽位。
- *
- * <p><b>取消不是删除已写的数据。</b>已经落库的行由 {@code spu / sku / ...} 自己拥有，
- * 不在本模块的删除权限里（删商品是 3.1.1 的职责，且要过引用检查）。
- * 所以取消只停掉「还没跑的部分」：互斥槽位立刻释放，被取消的行保持原状。
- *
- * <p>正在执行（{@code RUNNING}）的任务取消：执行器每批重新读一次行，
- * 下一批读到的仍是 {@code outcome='VALID'} 的行，所以它不会自动停 ——
- * 因此这里只允许取消 <b>PENDING / PREVALIDATED</b> 两个「还没开跑」的状态，
- * RUNNING 必须等它自己到终态。这样「取消」是一个可预期的动作，而不是一个
- * 取决于线程调度时机的竞态。
- */
-public ImportJobRow cancel(UUID tenantId, UUID jobId) {
+   * 取消任务，释放「同类任务互斥」的槽位。
+   *
+   * <p><b>取消不是删除已写的数据。</b>已经落库的行由 {@code spu / sku / ...} 自己拥有， 不在本模块的删除权限里（删商品是 3.1.1
+   * 的职责，且要过引用检查）。 所以取消只停掉「还没跑的部分」：互斥槽位立刻释放，被取消的行保持原状。
+   *
+   * <p>正在执行（{@code RUNNING}）的任务取消：执行器每批重新读一次行， 下一批读到的仍是 {@code outcome='VALID'} 的行，所以它不会自动停 ——
+   * 因此这里只允许取消 <b>PENDING / PREVALIDATED</b> 两个「还没开跑」的状态， RUNNING 必须等它自己到终态。这样「取消」是一个可预期的动作，而不是一个
+   * 取决于线程调度时机的竞态。
+   */
+  public ImportJobRow cancel(UUID tenantId, UUID jobId) {
     var job = job(tenantId, jobId);
     check(
         job.status().equals("PENDING") || job.status().equals("PREVALIDATED"),
-        "当前状态「" + statusLabel(job.status()) + "」不能取消。只有「已上传」或「预校验完成」"
+        "当前状态「"
+            + statusLabel(job.status())
+            + "」不能取消。只有「已上传」或「预校验完成」"
             + "（还没开始执行）的任务可以取消；正在导入的任务请等它跑完");
     sql.execute(
-        "update import_job set status='CANCELLED' where id=? and status in ('PENDING','PREVALIDATED')", jobId);
+        "update import_job set status='CANCELLED' where id=? and status in ('PENDING','PREVALIDATED')",
+        jobId);
     return job(tenantId, jobId);
   }
 
@@ -271,10 +291,11 @@ public ImportJobRow cancel(UUID tenantId, UUID jobId) {
 
   /** 任务详情。 */
   public ImportJobRow job(UUID tenantId, UUID jobId) {
-    var r = sql.fetchOne(
-        "select j.*,t.name as template_name from import_job j"
-            + " join import_template t on t.tenant_id=j.tenant_id and t.id=j.template_id where j.id=?",
-        jobId);
+    var r =
+        sql.fetchOne(
+            "select j.*,t.name as template_name from import_job j"
+                + " join import_template t on t.tenant_id=j.tenant_id and t.id=j.template_id where j.id=?",
+            jobId);
     if (r == null) throw notFound("导入任务不存在或已删除");
     return jobRow(r);
   }
@@ -291,16 +312,20 @@ public ImportJobRow cancel(UUID tenantId, UUID jobId) {
       where.append(" and j.status=?");
       args.add(status.trim().toUpperCase(Locale.ROOT));
     }
-    long total = sql.fetchOne("select count(*) from import_job j" + where, args.toArray()).get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*) from import_job j" + where, args.toArray())
+            .get(0, Long.class);
     int limit = Math.min(Math.max(size, 1), 100);
     int offset = Math.max(page, 0) * limit;
     args.add(limit);
     args.add(offset);
-    var rows = sql.fetch(
-        "select j.*,t.name as template_name from import_job j"
-            + " join import_template t on t.tenant_id=j.tenant_id and t.id=j.template_id"
-            + where + " order by j.created_at desc,j.id desc limit ? offset ?",
-        args.toArray());
+    var rows =
+        sql.fetch(
+            "select j.*,t.name as template_name from import_job j"
+                + " join import_template t on t.tenant_id=j.tenant_id and t.id=j.template_id"
+                + where
+                + " order by j.created_at desc,j.id desc limit ? offset ?",
+            args.toArray());
     return new ImportJobPage(rows.map(ImportJobService::jobRow), Math.max(page, 0), limit, total);
   }
 
@@ -314,27 +339,38 @@ public ImportJobRow cancel(UUID tenantId, UUID jobId) {
       where.append(" and outcome=?");
       args.add(outcome.trim().toUpperCase(Locale.ROOT));
     }
-    long total = sql.fetchOne("select count(*) from import_job_row" + where, args.toArray()).get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*) from import_job_row" + where, args.toArray())
+            .get(0, Long.class);
     int limit = Math.min(Math.max(size, 1), 200);
     int offset = Math.max(page, 0) * limit;
     args.add(limit);
     args.add(offset);
-    var fetched = sql.fetch(
-        "select * from import_job_row" + where + " order by row_no limit ? offset ?", args.toArray());
+    var fetched =
+        sql.fetch(
+            "select * from import_job_row" + where + " order by row_no limit ? offset ?",
+            args.toArray());
     return new ImportJobRowPage(
-        fetched.map(r -> new ImportJobRowLine(
-            r.get("id", UUID.class), r.get("row_no", Integer.class), r.get("outcome", String.class),
-            r.get("error_count", Integer.class), ImportTemplateService.readJson(r.get("cells")),
-            r.get("spu_id", UUID.class), r.get("sku_id", UUID.class))),
-        Math.max(page, 0), limit, total);
+        fetched.map(
+            r ->
+                new ImportJobRowLine(
+                    r.get("id", UUID.class),
+                    r.get("row_no", Integer.class),
+                    r.get("outcome", String.class),
+                    r.get("error_count", Integer.class),
+                    ImportTemplateService.readJson(r.get("cells")),
+                    r.get("spu_id", UUID.class),
+                    r.get("sku_id", UUID.class))),
+        Math.max(page, 0),
+        limit,
+        total);
   }
 
   /**
    * 逐行错误明细（本模块的预校验交付物）。
    *
-   * <p>3.8.1.2 的「校验报告」页面读的就是这份数据：它要展示逐行校验结果、
-   * 区分「可跳过」与「必须修正」，并在此基础上导出带标注的错误文件。
-   * 所以这里的过滤维度里有 severity，而不只是行号。
+   * <p>3.8.1.2 的「校验报告」页面读的就是这份数据：它要展示逐行校验结果、 区分「可跳过」与「必须修正」，并在此基础上导出带标注的错误文件。 所以这里的过滤维度里有
+   * severity，而不只是行号。
    */
   public ImportRowErrorPage errors(UUID tenantId, UUID jobId, String severity, int page, int size) {
     job(tenantId, jobId);
@@ -345,24 +381,39 @@ public ImportJobRow cancel(UUID tenantId, UUID jobId) {
       where.append(" and severity=?");
       args.add(severity.trim().toUpperCase(Locale.ROOT));
     }
-    long total = sql.fetchOne("select count(*) from import_row_error" + where, args.toArray()).get(0, Long.class);
-    var counts = sql.fetchOne(
-        "select count(*) filter (where severity='ERROR') as errors,"
-            + "count(*) filter (where severity='WARNING') as warnings from import_row_error where job_id=?",
-        jobId);
+    long total =
+        sql.fetchOne("select count(*) from import_row_error" + where, args.toArray())
+            .get(0, Long.class);
+    var counts =
+        sql.fetchOne(
+            "select count(*) filter (where severity='ERROR') as errors,"
+                + "count(*) filter (where severity='WARNING') as warnings from import_row_error where job_id=?",
+            jobId);
     int limit = Math.min(Math.max(size, 1), 200);
     int offset = Math.max(page, 0) * limit;
     args.add(limit);
     args.add(offset);
-    var fetched = sql.fetch(
-        "select * from import_row_error" + where + " order by row_no,severity desc,field_key limit ? offset ?",
-        args.toArray());
+    var fetched =
+        sql.fetch(
+            "select * from import_row_error"
+                + where
+                + " order by row_no,severity desc,field_key limit ? offset ?",
+            args.toArray());
     return new ImportRowErrorPage(
-        fetched.map(r -> new ImportRowErrorLine(
-            r.get("id", UUID.class), r.get("row_no", Integer.class), r.get("field_key", String.class),
-            r.get("code", String.class), r.get("message", String.class), r.get("severity", String.class))),
-        Math.max(page, 0), limit, total,
-        counts.get("errors", Integer.class), counts.get("warnings", Integer.class));
+        fetched.map(
+            r ->
+                new ImportRowErrorLine(
+                    r.get("id", UUID.class),
+                    r.get("row_no", Integer.class),
+                    r.get("field_key", String.class),
+                    r.get("code", String.class),
+                    r.get("message", String.class),
+                    r.get("severity", String.class))),
+        Math.max(page, 0),
+        limit,
+        total,
+        counts.get("errors", Integer.class),
+        counts.get("warnings", Integer.class));
   }
 
   // ================================================================ 供执行器复用的读
@@ -370,27 +421,37 @@ public ImportJobRow cancel(UUID tenantId, UUID jobId) {
   /** 模板列（规则视图）。 */
   List<ImportRules.Column> ruleColumns(UUID tenantId, UUID templateId) {
     return sql.fetch(
-            "select * from import_template_column where template_id=? order by ordinal,field_key", templateId)
-        .map(r -> new ImportRules.Column(
-            r.get("field_key", String.class), r.get("data_type", String.class),
-            r.get("required", Boolean.class), r.get("match_key", Boolean.class)));
+            "select * from import_template_column where template_id=? order by ordinal,field_key",
+            templateId)
+        .map(
+            r ->
+                new ImportRules.Column(
+                    r.get("field_key", String.class), r.get("data_type", String.class),
+                    r.get("required", Boolean.class), r.get("match_key", Boolean.class)));
   }
 
   /** 传输视图的模板列（下载模板、UI 渲染列用）。 */
   List<ImportTemplateColumn> columns(UUID tenantId, UUID templateId) {
     return sql.fetch(
-            "select * from import_template_column where template_id=? order by ordinal,field_key", templateId)
-        .map(r -> new ImportTemplateColumn(
-            r.get("field_key", String.class), r.get("header", String.class), r.get("data_type", String.class),
-            r.get("required", Boolean.class), r.get("match_key", Boolean.class),
-            r.get("sample_value", String.class), r.get("help", String.class), r.get("ordinal", Integer.class)));
+            "select * from import_template_column where template_id=? order by ordinal,field_key",
+            templateId)
+        .map(
+            r ->
+                new ImportTemplateColumn(
+                    r.get("field_key", String.class),
+                    r.get("header", String.class),
+                    r.get("data_type", String.class),
+                    r.get("required", Boolean.class),
+                    r.get("match_key", Boolean.class),
+                    r.get("sample_value", String.class),
+                    r.get("help", String.class),
+                    r.get("ordinal", Integer.class)));
   }
 
   /**
    * 把「文件原样的表头→单元格」按映射解析成「模板字段键→值」。
    *
-   * <p>映射里没有的字段键解析成空串 —— 之后由预校验报「必填缺失」或「这一列在文件里没有」，
-   * 而不是在这里静默丢列。
+   * <p>映射里没有的字段键解析成空串 —— 之后由预校验报「必填缺失」或「这一列在文件里没有」， 而不是在这里静默丢列。
    */
   static Map<String, String> resolveValues(
       List<ImportRules.Column> columns, Map<String, String> mapping, Map<String, String> cells) {
@@ -406,7 +467,10 @@ public ImportJobRow cancel(UUID tenantId, UUID jobId) {
   /** 映射里出现了模板没有的字段键就点名报错（存进去就永远不会生效的那种映射）。 */
   private static void checkTemplateColumnsDeclared(
       Map<String, String> mapping, List<ImportTemplateColumn> columns) {
-    var declared = columns.stream().map(ImportTemplateColumn::fieldKey).collect(java.util.stream.Collectors.toSet());
+    var declared =
+        columns.stream()
+            .map(ImportTemplateColumn::fieldKey)
+            .collect(java.util.stream.Collectors.toSet());
     List<String> unknown = mapping.keySet().stream().filter(k -> !declared.contains(k)).toList();
     check(unknown.isEmpty(), "映射里有该模板不存在的字段：" + String.join("、", unknown));
   }
@@ -420,16 +484,29 @@ public ImportJobRow cancel(UUID tenantId, UUID jobId) {
 
   static ImportJobRow jobRow(Record r) {
     return new ImportJobRow(
-        r.get("id", UUID.class), r.get("template_id", UUID.class), r.get("template_name", String.class),
-        r.get("target_entity", String.class), r.get("import_mode", String.class),
-        r.get("file_name", String.class), r.get("file_format", String.class),
-        r.get("byte_size", java.math.BigDecimal.class), r.get("content_sha256", String.class),
-        r.get("row_count", Integer.class), ImportTemplateService.readJson(r.get("mapping")),
-        r.get("status", String.class), r.get("valid_count", Integer.class), r.get("invalid_count", Integer.class),
-        r.get("applied_count", Integer.class), r.get("failed_count", Integer.class),
-        r.get("skipped_count", Integer.class), r.get("error", String.class), r.get("actor_id", UUID.class),
-        ImportTemplateService.instant(r, "prevalidated_at"), ImportTemplateService.instant(r, "started_at"),
-        ImportTemplateService.instant(r, "finished_at"), ImportTemplateService.instant(r, "created_at"),
+        r.get("id", UUID.class),
+        r.get("template_id", UUID.class),
+        r.get("template_name", String.class),
+        r.get("target_entity", String.class),
+        r.get("import_mode", String.class),
+        r.get("file_name", String.class),
+        r.get("file_format", String.class),
+        r.get("byte_size", java.math.BigDecimal.class),
+        r.get("content_sha256", String.class),
+        r.get("row_count", Integer.class),
+        ImportTemplateService.readJson(r.get("mapping")),
+        r.get("status", String.class),
+        r.get("valid_count", Integer.class),
+        r.get("invalid_count", Integer.class),
+        r.get("applied_count", Integer.class),
+        r.get("failed_count", Integer.class),
+        r.get("skipped_count", Integer.class),
+        r.get("error", String.class),
+        r.get("actor_id", UUID.class),
+        ImportTemplateService.instant(r, "prevalidated_at"),
+        ImportTemplateService.instant(r, "started_at"),
+        ImportTemplateService.instant(r, "finished_at"),
+        ImportTemplateService.instant(r, "created_at"),
         ImportTemplateService.instant(r, "updated_at"));
   }
 

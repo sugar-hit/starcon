@@ -24,17 +24,14 @@ import java.util.UUID;
  * <p>四条本模块必须自己讲清楚的口径（都随响应返回，不让界面上凭空猜）：
  *
  * <ol>
- *   <li><b>人工复核是硬闸，不是建议</b>：蓝图关系段原文「报关数据错误导致的扣货与罚款由卖家承担，
- *       因此必须有人工复核节点」。所以 {@code REVIEWED → SUBMITTED} 是 DB 级触发器钉死的，
- *       绕过服务层直接改状态同样被挡；复核不通过退回草稿后，改完必须<b>重新走复核</b>才能再次提交。
+ *   <li><b>人工复核是硬闸，不是建议</b>：蓝图关系段原文「报关数据错误导致的扣货与罚款由卖家承担， 因此必须有人工复核节点」。所以 {@code REVIEWED →
+ *       SUBMITTED} 是 DB 级触发器钉死的， 绕过服务层直接改状态同样被挡；复核不通过退回草稿后，改完必须<b>重新走复核</b>才能再次提交。
  *   <li><b>货值与汇率是快照</b>：海关事后复核 12 个月前的报关单时要能回答「当时按哪个汇率申报的」，
  *       所以汇率、汇率精度刻度、汇率日期、折算本位币金额四列一起落库并被延迟约束钉死自洽。
- *   <li><b>一票货只报一次关</b>：重复报关是真实法律风险（可能被判申报不实），且账上完全看不出来。
- *       改单走状态机与单据版本链，不靠再造一张单。
- *   <li><b>HS 编码上游未交付</b>：3.7.1.1 被 product_compliance 服务缺失阻塞，因此
- *       {@code hsCode} 接受自由码，并带 {@code hsCodeSource} / {@code hsCodeVerified} 如实记下
- *       「这个码是人工填的还是字典来的」；申报要素留成<b>可后补结构</b>（jsonb 对象 + 齐备性状态机），
- *       上游交付后回填即可，不需要改结构。
+ *   <li><b>一票货只报一次关</b>：重复报关是真实法律风险（可能被判申报不实），且账上完全看不出来。 改单走状态机与单据版本链，不靠再造一张单。
+ *   <li><b>HS 编码上游未交付</b>：3.7.1.1 被 product_compliance 服务缺失阻塞，因此 {@code hsCode} 接受自由码，并带 {@code
+ *       hsCodeSource} / {@code hsCodeVerified} 如实记下 「这个码是人工填的还是字典来的」；申报要素留成<b>可后补结构</b>（jsonb 对象 +
+ *       齐备性状态机）， 上游交付后回填即可，不需要改结构。
  * </ol>
  */
 public final class CustomsDeclarationModels {
@@ -57,8 +54,8 @@ public final class CustomsDeclarationModels {
    * CANCELLED       → 终态
    * </pre>
    *
-   * <p>注意 {@code REVIEWED → SUBMITTED} 是唯一允许的提交路径，而 {@code DRAFT → SUBMITTED}、
-   * {@code PENDING_REVIEW → SUBMITTED}、{@code REJECTED → SUBMITTED} **都不在表内** ——
+   * <p>注意 {@code REVIEWED → SUBMITTED} 是唯一允许的提交路径，而 {@code DRAFT → SUBMITTED}、 {@code
+   * PENDING_REVIEW → SUBMITTED}、{@code REJECTED → SUBMITTED} **都不在表内** ——
    * 这正是蓝图那句「扣货与罚款由卖家承担」对应的闸门，服务层与 DB 层同时钉死。
    */
   public enum DeclarationStatus {
@@ -97,8 +94,7 @@ public final class CustomsDeclarationModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的报关单状态：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的报关单状态：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -154,8 +150,7 @@ public final class CustomsDeclarationModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的贸易方式：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的贸易方式：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -186,8 +181,7 @@ public final class CustomsDeclarationModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的运输方式：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的运输方式：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -198,9 +192,9 @@ public final class CustomsDeclarationModels {
   /**
    * 申报要素齐备性状态机。
    *
-   * <p>与 {@code customs_declaration_line.declaration_element_status} 的 CHECK 逐值对应。
-   * 复核通过时 DB 层逐行检查：只有 {@code MANUAL_COMPLETE} 或 {@code MODULE_3_7_1_1_COMPLETE}
-   * 才放行 —— 因为「申报要素不齐」是被退单与处罚最常见的原因之一。
+   * <p>与 {@code customs_declaration_line.declaration_element_status} 的 CHECK 逐值对应。 复核通过时 DB
+   * 层逐行检查：只有 {@code MANUAL_COMPLETE} 或 {@code MODULE_3_7_1_1_COMPLETE} 才放行 ——
+   * 因为「申报要素不齐」是被退单与处罚最常见的原因之一。
    *
    * <p>{@code MODULE_*} 两种取值现在就可用：结构已经留好，3.7.1.1 交付后由它回填即可。
    */
@@ -230,8 +224,7 @@ public final class CustomsDeclarationModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的申报要素状态：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的申报要素状态：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -264,8 +257,7 @@ public final class CustomsDeclarationModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的单据类型：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的单据类型：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -304,8 +296,7 @@ public final class CustomsDeclarationModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的提交结果：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的提交结果：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -342,8 +333,7 @@ public final class CustomsDeclarationModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的海关结果类型：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的海关结果类型：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -356,8 +346,7 @@ public final class CustomsDeclarationModels {
   /**
    * 维度/依赖的可用性声明（照抄 10.4.1.1 的 {@code FirstMileDimension} 形状，前端同一套渲染）。
    *
-   * <p>{@code available=false} 时前端显式渲染成「不可用 + 归属模块 + 原因」，
-   * 而不是给一个点下去没反应的选项。
+   * <p>{@code available=false} 时前端显式渲染成「不可用 + 归属模块 + 原因」， 而不是给一个点下去没反应的选项。
    */
   public record CustomsDimension(
       String value,
@@ -385,8 +374,7 @@ public final class CustomsDeclarationModels {
   /**
    * 报关单能力清单：贸易方式、运输方式、状态机、**未交付依赖逐条声明**与三条必须讲清的口径。
    *
-   * <p>前端据此渲染来源下拉、单据类型、提示文案 —— 未交付的依赖
-   * <b>显式报不可用并给出归属模块</b>，而不是假装可用。
+   * <p>前端据此渲染来源下拉、单据类型、提示文案 —— 未交付的依赖 <b>显式报不可用并给出归属模块</b>，而不是假装可用。
    */
   public record CustomsCapabilities(
       List<CustomsDimension> dependencies,
@@ -665,7 +653,10 @@ public final class CustomsDeclarationModels {
 
   /** 提交报关行：只能从 REVIEWED 出发（DB 级复核闸）。 */
   public record CustomsSubmitRequest(
-      String submissionReference, String brokerName, String submissionResult, String resultReason) {}
+      String submissionReference,
+      String brokerName,
+      String submissionResult,
+      String resultReason) {}
 
   /** 登记海关结果：放行 / 退单 / 改单。 */
   public record CustomsResultRequest(

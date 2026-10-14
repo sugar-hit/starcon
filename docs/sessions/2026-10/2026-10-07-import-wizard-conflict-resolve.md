@@ -49,24 +49,24 @@
 
 ## 文件清单
 
-| 文件 | 动作 |
-| --- | --- |
-| `apps/web/src/lib/api-proxy.ts` | 手工解冲突：合并两条路由段，保留双方注释块 |
-| `docs/product/capability-blueprint/module-progress.md` | 去重 3 行，恢复 3.8.1.1「已交付」，第 03 卷计数 28→29 |
-| 其余合并内容 | 来自集成头（parties / physical-safety / V27 / V28 / 会话日志），未改动 |
+| 文件                                                   | 动作                                                                   |
+| ------------------------------------------------------ | ---------------------------------------------------------------------- |
+| `apps/web/src/lib/api-proxy.ts`                        | 手工解冲突：合并两条路由段，保留双方注释块                             |
+| `docs/product/capability-blueprint/module-progress.md` | 去重 3 行，恢复 3.8.1.1「已交付」，第 03 卷计数 28→29                  |
+| 其余合并内容                                           | 来自集成头（parties / physical-safety / V27 / V28 / 会话日志），未改动 |
 
 迁移文件 `V29__import_wizard.sql` **未改名、未改动**。
 
 ## 验证
 
-| 命令 | 结果 |
-| --- | --- |
-| 白名单行为脚本（一次性，`.tmp/`） | 24 正例全中 / 7 反例全拒，0 失败 |
-| `backend/./mvnw verify` | **BUILD SUCCESS**，catalog 889 tests / 0 failures（导入向导 59 例：16+24+19） |
-| `pnpm test` | 40 files / **681 tests 全绿** |
-| `pnpm lint` | exit 0（仅 `variant-combination-workspace.tsx` 既有 warning） |
-| `node tools/module-progress/sync.mjs --check` | ✓ 台账与蓝图一致 |
-| `pnpm typecheck` / `next build` | ❌ 红 —— **集成头既有基线问题，非本车道引入** |
+| 命令                                          | 结果                                                                          |
+| --------------------------------------------- | ----------------------------------------------------------------------------- |
+| 白名单行为脚本（一次性，`.tmp/`）             | 24 正例全中 / 7 反例全拒，0 失败                                              |
+| `backend/./mvnw verify`                       | **BUILD SUCCESS**，catalog 889 tests / 0 failures（导入向导 59 例：16+24+19） |
+| `pnpm test`                                   | 40 files / **681 tests 全绿**                                                 |
+| `pnpm lint`                                   | exit 0（仅 `variant-combination-workspace.tsx` 既有 warning）                 |
+| `node tools/module-progress/sync.mjs --check` | ✓ 台账与蓝图一致                                                              |
+| `pnpm typecheck` / `next build`               | ❌ 红 —— **集成头既有基线问题，非本车道引入**                                 |
 
 ### 集成头基线红的确证
 

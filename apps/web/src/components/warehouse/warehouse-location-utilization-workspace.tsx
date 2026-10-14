@@ -140,7 +140,10 @@ export function WarehouseLocationUtilizationWorkspace({ warehouseId }: { warehou
               min={1}
               max={caps?.maxWindowDays ?? 365}
               onChange={(e) =>
-                setFilters({ ...filters, windowDays: Number(e.target.value) || defaultFilters.windowDays })
+                setFilters({
+                  ...filters,
+                  windowDays: Number(e.target.value) || defaultFilters.windowDays,
+                })
               }
             />
           </label>
@@ -167,11 +170,13 @@ export function WarehouseLocationUtilizationWorkspace({ warehouseId }: { warehou
               onChange={(e) => setFilters({ ...filters, type: e.target.value })}
             >
               <option value="">全部</option>
-              {['STORAGE', 'RECEIVING', 'SHIPPING', 'QUARANTINE', 'DEFECTIVE', 'FROZEN'].map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
+              {['STORAGE', 'RECEIVING', 'SHIPPING', 'QUARANTINE', 'DEFECTIVE', 'FROZEN'].map(
+                (t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ),
+              )}
             </select>
           </label>
           <label className="text-sm text-slate-300">
@@ -200,7 +205,8 @@ export function WarehouseLocationUtilizationWorkspace({ warehouseId }: { warehou
           只看可拣库位
         </label>
         <p className="mt-2 text-xs text-slate-500">
-          利用率下限会天然排除「未量容量」与「容量为 0」两类 —— 它们的利用率没有定义。要看这两类请按档位筛。
+          利用率下限会天然排除「未量容量」与「容量为 0」两类 ——
+          它们的利用率没有定义。要看这两类请按档位筛。
         </p>
       </SectionCard>
 
@@ -209,26 +215,26 @@ export function WarehouseLocationUtilizationWorkspace({ warehouseId }: { warehou
       {!loading && totals !== undefined && totals !== null && (
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard label="库位总数" value={totals.locationCount} />
-          <StatCard label="合计容量利用率" value={totalUtilizationText(totals)} />
-          <StatCard label="爆满库位" value={totals.overfullCount} />
-          <StatCard label="空置库位" value={totals.idleCount} />
-          <StatCard label="高位库位" value={totals.highCount} />
-          <StatCard label="低位 / 适中" value={`${totals.lowCount} / ${totals.balancedCount}`} />
-          <StatCard label="容量未量" value={totals.unmeasuredCount} />
-          <StatCard label="窗口出库量" value={totals.outboundQuantity.toFixed(2)} unit="件" />
-          <StatCard
-            label="整体周转率"
-            value={
-              totals.turnoverComputable && totals.turnover !== null
-                ? totals.turnover.toFixed(2)
-                : '无在手量'
-            }
-          />
+            <StatCard label="库位总数" value={totals.locationCount} />
+            <StatCard label="合计容量利用率" value={totalUtilizationText(totals)} />
+            <StatCard label="爆满库位" value={totals.overfullCount} />
+            <StatCard label="空置库位" value={totals.idleCount} />
+            <StatCard label="高位库位" value={totals.highCount} />
+            <StatCard label="低位 / 适中" value={`${totals.lowCount} / ${totals.balancedCount}`} />
+            <StatCard label="容量未量" value={totals.unmeasuredCount} />
+            <StatCard label="窗口出库量" value={totals.outboundQuantity.toFixed(2)} unit="件" />
+            <StatCard
+              label="整体周转率"
+              value={
+                totals.turnoverComputable && totals.turnover !== null
+                  ? totals.turnover.toFixed(2)
+                  : '无在手量'
+              }
+            />
           </div>
           <p className="mt-2 text-xs text-slate-500">
-            爆满 = 在手已超量得容量；高位 = 利用率 ≥ 85% 但未超；容量未量 = 从没量过容量，利用率算不出来。
-            合计利用率只覆盖已量容量的库位，
+            爆满 = 在手已超量得容量；高位 = 利用率 ≥ 85% 但未超；容量未量 =
+            从没量过容量，利用率算不出来。 合计利用率只覆盖已量容量的库位，
             {totalUtilizationText(totals).includes('/')
               ? '本次未给出百分比，因为不是每个库位都量过容量。'
               : '本次所有库位都量过容量。'}
@@ -296,11 +302,7 @@ export function WarehouseLocationUtilizationWorkspace({ warehouseId }: { warehou
                 </thead>
                 <tbody>
                   {rows.map((row) => (
-                    <UtilizationRow
-                      key={row.id}
-                      row={row}
-                      onOpen={() => void openDetail(row.id)}
-                    />
+                    <UtilizationRow key={row.id} row={row} onOpen={() => void openDetail(row.id)} />
                   ))}
                 </tbody>
               </table>
@@ -317,7 +319,7 @@ export function WarehouseLocationUtilizationWorkspace({ warehouseId }: { warehou
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium">{a.kindLabel ?? a.kind}</span>
-                      <span className="rounded border border-current/40 px-1.5 py-0.5 text-xs">
+                      <span className="border-current/40 rounded border px-1.5 py-0.5 text-xs">
                         {a.severityLabel ?? a.severity}
                       </span>
                       {a.locationCode !== null && (
@@ -355,8 +357,8 @@ export function WarehouseLocationUtilizationWorkspace({ warehouseId }: { warehou
                   <dt className="text-slate-400">下游模块</dt>
                   <dd>
                     自动分配（{caps.autoAllocationOwnerModule ?? '未指认'}）
-                    {caps.autoAllocationAvailable ? '：已就绪' : '：未交付'}；
-                    拣货路径（{caps.pickPathOwnerModule ?? '未指认'}）
+                    {caps.autoAllocationAvailable ? '：已就绪' : '：未交付'}； 拣货路径（
+                    {caps.pickPathOwnerModule ?? '未指认'}）
                     {caps.pickPathOptimizationAvailable ? '：已就绪' : '：未交付'}
                   </dd>
                 </div>
@@ -390,7 +392,9 @@ export function WarehouseLocationUtilizationWorkspace({ warehouseId }: { warehou
                       <td className="py-1.5 pr-3">{s.outboundQuantity}</td>
                       <td className="py-1.5 pr-3">{s.locationCount}</td>
                       <td className="py-1.5 pr-3">
-                        {s.shareOfSkuOnHand === null ? '无全仓在手' : `${(s.shareOfSkuOnHand * 100).toFixed(1)}%`}
+                        {s.shareOfSkuOnHand === null
+                          ? '无全仓在手'
+                          : `${(s.shareOfSkuOnHand * 100).toFixed(1)}%`}
                       </td>
                       <td className="py-1.5 pr-3">
                         {s.dwellDays === null ? '无库存记录' : `${s.dwellDays.toFixed(1)} 天`}

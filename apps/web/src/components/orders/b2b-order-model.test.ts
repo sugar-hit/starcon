@@ -73,7 +73,11 @@ describe('阶梯边界', () => {
   });
 
   it('已是最高档时不提示', () => {
-    expect(nextTierHint(quote({ lowestTier: true, nextTierMinQuantity: undefined as unknown as number }))).toBeNull();
+    expect(
+      nextTierHint(
+        quote({ lowestTier: true, nextTierMinQuantity: undefined as unknown as number }),
+      ),
+    ).toBeNull();
   });
 
   it('没有试算结果时不提示', () => {
@@ -171,9 +175,9 @@ describe('账期到期日展示', () => {
 
 describe('查询串', () => {
   it('订单查询串逐项编码并跳过空值', () => {
-    expect(
-      b2bOrderQuery({ status: 'DRAFT', keyword: ' B2B 1 ', page: 0, size: 50 }),
-    ).toBe('?status=DRAFT&keyword=B2B%201&page=0&size=50');
+    expect(b2bOrderQuery({ status: 'DRAFT', keyword: ' B2B 1 ', page: 0, size: 50 })).toBe(
+      '?status=DRAFT&keyword=B2B%201&page=0&size=50',
+    );
     expect(b2bOrderQuery({})).toBe('');
     expect(b2bOrderQuery({ keyword: '   ' })).toBe('');
   });

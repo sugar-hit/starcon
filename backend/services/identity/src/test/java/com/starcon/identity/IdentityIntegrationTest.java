@@ -14,8 +14,8 @@ import org.junit.jupiter.api.*;
 /**
  * identity 服务集成测试（会话、角色成员、部门、法人、子租户）。
  *
- * <p>共享底座（真实 PostgreSQL 16 容器、登录与请求辅助）在 {@link IdentityIntegrationTestBase}；
- * 审计日志的断言在 {@link AuditIntegrationTest}。两者共用同一个容器实例，靠随机编码隔开数据。
+ * <p>共享底座（真实 PostgreSQL 16 容器、登录与请求辅助）在 {@link IdentityIntegrationTestBase}； 审计日志的断言在 {@link
+ * AuditIntegrationTest}。两者共用同一个容器实例，靠随机编码隔开数据。
  */
 class IdentityIntegrationTest extends IdentityIntegrationTestBase {
 
@@ -416,7 +416,8 @@ class IdentityIntegrationTest extends IdentityIntegrationTestBase {
   void legalEntityCrudCarriesBaseCurrencyAndRounding() throws Exception {
     String token = login();
     String code = "LE" + suffix();
-    var created = request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "USD"), 200);
+    var created =
+        request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "USD"), 200);
     UUID id = UUID.fromString(created.asText());
     var listed = request(token, "GET", "/identity/legal-entities", null, 200);
     assertThat(listed.toString()).contains(code);
@@ -439,7 +440,8 @@ class IdentityIntegrationTest extends IdentityIntegrationTestBase {
   void legalEntityIsProtectedWhileBusinessObjectsReferenceIt() throws Exception {
     String token = login();
     String code = "LE" + suffix();
-    var created = request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "USD"), 200);
+    var created =
+        request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "USD"), 200);
     UUID id = UUID.fromString(created.asText());
     UUID shop = UUID.randomUUID();
     request(
@@ -460,12 +462,19 @@ class IdentityIntegrationTest extends IdentityIntegrationTestBase {
   void legalEntityReferenceMustPointAtAnEntityOfTheSameTenant() throws Exception {
     String token = login();
     String code = "LE" + suffix();
-    var created = request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "USD"), 200);
+    var created =
+        request(token, "POST", "/identity/legal-entities", legalEntityInput(code, "USD"), 200);
     request(
         token,
         "POST",
         "/identity/legal-entities/references",
-        Map.of("legalEntityId", UUID.randomUUID(), "source", "channel_shop", "referenceId", UUID.randomUUID()),
+        Map.of(
+            "legalEntityId",
+            UUID.randomUUID(),
+            "source",
+            "channel_shop",
+            "referenceId",
+            UUID.randomUUID()),
         400);
     assertThat(created.asText()).isNotBlank();
   }
@@ -496,14 +505,14 @@ class IdentityIntegrationTest extends IdentityIntegrationTestBase {
                 owner,
                 "POST",
                 "/identity/members",
-                memberInput(
-                    username, null, List.of(Map.of("roleId", role, "scopeMode", "ALL"))),
+                memberInput(username, null, List.of(Map.of("roleId", role, "scopeMode", "ALL"))),
                 200)
             .asText();
     try {
       String finance = loginUser(username);
       request(finance, "GET", "/identity/legal-entities", null, 200);
-      request(finance, "POST", "/identity/legal-entities", legalEntityInput("LE" + tag, "USD"), 403);
+      request(
+          finance, "POST", "/identity/legal-entities", legalEntityInput("LE" + tag, "USD"), 403);
       request(
           finance,
           "PUT",
@@ -527,14 +536,23 @@ class IdentityIntegrationTest extends IdentityIntegrationTestBase {
           "PUT",
           "/identity/roles/" + role,
           Map.of(
-              "code", "FINANCE_" + tag,
-              "name", "Finance",
-              "status", "INACTIVE",
-              "permissions", List.of("identity.legal_entity.read")),
+              "code",
+              "FINANCE_" + tag,
+              "name",
+              "Finance",
+              "status",
+              "INACTIVE",
+              "permissions",
+              List.of("identity.legal_entity.read")),
           200);
       request(finance, "GET", "/identity/legal-entities", null, 403);
     } finally {
-      request(owner, "PUT", "/identity/members/" + member, Map.of("status", "INACTIVE", "assignments", List.of()), 200);
+      request(
+          owner,
+          "PUT",
+          "/identity/members/" + member,
+          Map.of("status", "INACTIVE", "assignments", List.of()),
+          200);
       request(owner, "DELETE", "/identity/roles/" + role, null, 200);
     }
   }
@@ -558,7 +576,12 @@ class IdentityIntegrationTest extends IdentityIntegrationTestBase {
     String token = login(), tag = suffix();
     UUID entity =
         UUID.fromString(
-            request(token, "POST", "/identity/legal-entities", legalEntityInput("LE" + tag, "USD"), 200)
+            request(
+                    token,
+                    "POST",
+                    "/identity/legal-entities",
+                    legalEntityInput("LE" + tag, "USD"),
+                    200)
                 .asText());
     UUID root = createDepartment(token, "ROOT" + tag, "总部" + tag, null);
     UUID mid = createDepartment(token, "MID" + tag, "研发部" + tag, root);
@@ -663,10 +686,14 @@ class IdentityIntegrationTest extends IdentityIntegrationTestBase {
             "POST",
             "/identity/children",
             Map.of(
-                "code", "DC" + tag,
-                "name", "Child",
-                "ownerUsername", childUser,
-                "ownerPassword", "test-member-password"),
+                "code",
+                "DC" + tag,
+                "name",
+                "Child",
+                "ownerUsername",
+                childUser,
+                "ownerPassword",
+                "test-member-password"),
             200)
         .asText();
     String childToken = loginUser(childUser);
@@ -677,9 +704,15 @@ class IdentityIntegrationTest extends IdentityIntegrationTestBase {
         .isNull();
     // 伪造 parentId 指向别的租户：RLS 让它不可见，应用层给出可读业务错误。
     // request() 每次都带随机 X-Tenant-Id，这个头不影响判定。
-    request(owner, "POST", "/identity/departments", departmentInput("X" + tag, "跨租户挂靠", foreign), 400);
+    request(
+        owner, "POST", "/identity/departments", departmentInput("X" + tag, "跨租户挂靠", foreign), 400);
     // 同一个编码在另一个租户可以用
-    request(childToken, "POST", "/identity/departments", departmentInput("X" + tag, "另一租户同编码", null), 200);
+    request(
+        childToken,
+        "POST",
+        "/identity/departments",
+        departmentInput("X" + tag, "另一租户同编码", null),
+        200);
   }
 
   @Test
@@ -707,12 +740,7 @@ class IdentityIntegrationTest extends IdentityIntegrationTestBase {
     var members = request(token, "GET", "/identity/members", null, 200);
     for (JsonNode m : members) {
       if (child.toString().equals(m.get("departmentId").asText())) {
-        request(
-            token,
-            "DELETE",
-            "/identity/members/" + m.get("id").asText(),
-            null,
-            200);
+        request(token, "DELETE", "/identity/members/" + m.get("id").asText(), null, 200);
       }
     }
     request(token, "DELETE", "/identity/departments/" + child, null, 200);
@@ -725,19 +753,20 @@ class IdentityIntegrationTest extends IdentityIntegrationTestBase {
   void departmentCodeIsUniqueWithinTenantAndCrossTenantReferencesAreRejected() throws Exception {
     String token = login(), tag = suffix();
     createDepartment(token, "DUP" + tag, "编码部门" + tag, null);
-    request(token, "POST", "/identity/departments", departmentInput("DUP" + tag, "重名编码", null), 409);
+    request(
+        token, "POST", "/identity/departments", departmentInput("DUP" + tag, "重名编码", null), 409);
     // 所属法人 / 负责人 必须是本租户的行，跨租户引用给出可读业务错误而不是 500
     request(
-            token,
-            "POST",
-            "/identity/departments",
-            departmentInput("LE" + tag, "假法人", null, UUID.randomUUID(), null),
-            400);
+        token,
+        "POST",
+        "/identity/departments",
+        departmentInput("LE" + tag, "假法人", null, UUID.randomUUID(), null),
+        400);
     request(
-            token,
-            "POST",
-            "/identity/departments",
-            departmentInput("LD" + tag, "假负责人", null, null, UUID.randomUUID()),
-            400);
+        token,
+        "POST",
+        "/identity/departments",
+        departmentInput("LD" + tag, "假负责人", null, null, UUID.randomUUID()),
+        400);
   }
 }

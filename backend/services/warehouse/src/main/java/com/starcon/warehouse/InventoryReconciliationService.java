@@ -21,42 +21,35 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 7.1.2.2 账实核对：把「按流水累计的余额」和「当前余额快照」对上，对不上就指出**哪一段**对不上。
  *
- * <p>两个来源都是**现算**的：累计值是 Σ {@code inventory_entry}（append-only 事实表），
- * 快照是 {@code inventory_balance}（可重算的投影）。刻意不建「累计值表」—— 那会引入第二个真相来源，
- * 核对时反而无法判断该信谁（V51 台账迁移已经按同一条理由拒绝过汇总表）。落库的只有
+ * <p>两个来源都是**现算**的：累计值是 Σ {@code inventory_entry}（append-only 事实表）， 快照是 {@code
+ * inventory_balance}（可重算的投影）。刻意不建「累计值表」—— 那会引入第二个真相来源， 核对时反而无法判断该信谁（V51 台账迁移已经按同一条理由拒绝过汇总表）。落库的只有
  * 「这次核对的结论」，它是审计凭据而不是账（V54 已 REVOKE 改删）。
  *
- * <p><b>口径（全模块唯一一套）</b>：期初 + 区间内 + 区间后 = 应当等于快照。
- * 期初这一档不能省：快照只有「现在」这一个值，拿区间内的流水去比它会凭空差出期初量。
- * <b>差异判定覆盖全部历史</b>，不受区间影响 —— 否则换个区间重核一次结论就变了，
- * 那不是核对，那是筛流水。
+ * <p><b>口径（全模块唯一一套）</b>：期初 + 区间内 + 区间后 = 应当等于快照。 期初这一档不能省：快照只有「现在」这一个值，拿区间内的流水去比它会凭空差出期初量。
+ * <b>差异判定覆盖全部历史</b>，不受区间影响 —— 否则换个区间重核一次结论就变了， 那不是核对，那是筛流水。
  *
- * <p><b>可疑定位是本模块真正的产出</b>。返回一个差额数字等于什么都没说，运营要的是
- * 「先去看哪几笔」。四类可疑各自有可计算的信号，且都落到具体的余额行或业务单上：
+ * <p><b>可疑定位是本模块真正的产出</b>。返回一个差额数字等于什么都没说，运营要的是 「先去看哪几笔」。四类可疑各自有可计算的信号，且都落到具体的余额行或业务单上：
  *
  * <ul>
  *   <li>漏记：快照非零，但核对区间里一条能解释它的流水都没有（{@code period_entry_count=0}）。
  *   <li>迟到补记：分录入库时刻比声称的发生时刻晚超过一天（{@code created_at - occurred_at}）。
- *   <li>重复记：同一余额行上，同一操作人、同一类型、同一数量、彼此相隔一分钟内的两笔不同业务。
- *       V1 的 UNIQUE(tenant_id,ref_type,ref_id) 挡住同一来源单据重投，挡不住「同一批货被两张不同的单据各记一次」。
- *   <li>并发丢失：同一余额行在**写入时刻**上撞在一起。丢失更新必须有并发才可能发生，
- *       单写入者的漂移归漏记 —— 两者不混着报。
+ *   <li>重复记：同一余额行上，同一操作人、同一类型、同一数量、彼此相隔一分钟内的两笔不同业务。 V1 的 UNIQUE(tenant_id,ref_type,ref_id)
+ *       挡住同一来源单据重投，挡不住「同一批货被两张不同的单据各记一次」。
+ *   <li>并发丢失：同一余额行在**写入时刻**上撞在一起。丢失更新必须有并发才可能发生， 单写入者的漂移归漏记 —— 两者不混着报。
  * </ul>
  *
- * <p>后三类只在**存在差异的余额行**上扫描。不一致的账才需要解释；对本来平了的行做同样的扫描
- * 只会产出噪音，把真正要看的信号淹掉。
+ * <p>后三类只在**存在差异的余额行**上扫描。不一致的账才需要解释；对本来平了的行做同样的扫描 只会产出噪音，把真正要看的信号淹掉。
  *
  * <p>三条实现纪律：
  *
  * <ul>
- *   <li><b>时间绑定</b>：{@code ?::timestamptz} 集中在最前面的 {@code win} CTE 里，
- *       后面所有 {@code ? } 都是普通绑定。这样 cast 永远不在绑定序列末位 —— 末位 cast 会让
- *       jOOQ 整体错位一格（AGENTS.md 与 7.1.2.1 的同一条纪律）。两个边界都有值时
- *       opening / period / after 三个桶**恰好**把全部历史分完，{@code expected == total} 恒成立。
- *   <li><b>写入逐行 execute</b>，不用 {@code DSLContext.batch(String,...)}：本仓库统一这么写，
- *       原因与 {@code ImportJobService} 相同 —— 纯文本语句上带 {@code ?::cast} 的 batch 绑定不可靠。
- *   <li><b>数量一律 numeric(19,4) + BigDecimal</b>，沿用既有表口径；比较一律 {@code compareTo}，
- *       不用 {@code equals}（后者把 0 与 0.0000 判成不等）。
+ *   <li><b>时间绑定</b>：{@code ?::timestamptz} 集中在最前面的 {@code win} CTE 里， 后面所有 {@code ? } 都是普通绑定。这样
+ *       cast 永远不在绑定序列末位 —— 末位 cast 会让 jOOQ 整体错位一格（AGENTS.md 与 7.1.2.1 的同一条纪律）。两个边界都有值时 opening /
+ *       period / after 三个桶**恰好**把全部历史分完，{@code expected == total} 恒成立。
+ *   <li><b>写入逐行 execute</b>，不用 {@code DSLContext.batch(String,...)}：本仓库统一这么写， 原因与 {@code
+ *       ImportJobService} 相同 —— 纯文本语句上带 {@code ?::cast} 的 batch 绑定不可靠。
+ *   <li><b>数量一律 numeric(19,4) + BigDecimal</b>，沿用既有表口径；比较一律 {@code compareTo}， 不用 {@code
+ *       equals}（后者把 0 与 0.0000 判成不等）。
  * </ul>
  */
 @Service
@@ -68,8 +61,7 @@ public class InventoryReconciliationService {
   /**
    * 并发窗口（秒）：同一余额行在这个间隔内的两次写入视为「撞在一起」。
    *
-   * <p>一分钟是经验值：批量收货本来就会在一分钟内连续写同一行，但那些是顺序写入、各自带分录、
-   * 不会让账对不上；真正要报的是「撞车**且**账对不上」这一组合，见类注释。
+   * <p>一分钟是经验值：批量收货本来就会在一分钟内连续写同一行，但那些是顺序写入、各自带分录、 不会让账对不上；真正要报的是「撞车**且**账对不上」这一组合，见类注释。
    */
   static final long CONCURRENCY_GAP_SECONDS = 60;
 
@@ -93,9 +85,8 @@ public class InventoryReconciliationService {
   /**
    * 核对范围 + 四组定位维度。
    *
-   * <p>四个维表用**内连接**：balance 的外键本来就锁死了这四行，连不上说明数据已经坏了而不是
-   * 「可选维度」，让它炸掉比静默丢一行强（与 7.1.2.1 的 ENTRY_FROM 同一条理由）。
-   * 维度编码在这一层 join 好，差异明细与可疑流水都直接从它取，不必各自再 join 一遍。
+   * <p>四个维表用**内连接**：balance 的外键本来就锁死了这四行，连不上说明数据已经坏了而不是 「可选维度」，让它炸掉比静默丢一行强（与 7.1.2.1 的 ENTRY_FROM
+   * 同一条理由）。 维度编码在这一层 join 好，差异明细与可疑流水都直接从它取，不必各自再 join 一遍。
    */
   private static final String SCOPED_HEAD =
       clause(
@@ -119,9 +110,8 @@ public class InventoryReconciliationService {
   /**
    * 每条余额行的分录累计。
    *
-   * <p>三个时间桶（区间前 / 区间内 / 区间后）各自用 {@code sum(...) filter (where ...)} 表达，
-   * 而不是三条独立查询后在 Java 里加：过滤与聚合在同一次扫描里完成，
-   * 也不会出现「两次查询之间又来了一笔流水」导致加法对不上的经典竞态。
+   * <p>三个时间桶（区间前 / 区间内 / 区间后）各自用 {@code sum(...) filter (where ...)} 表达， 而不是三条独立查询后在 Java
+   * 里加：过滤与聚合在同一次扫描里完成， 也不会出现「两次查询之间又来了一笔流水」导致加法对不上的经典竞态。
    */
   private static final String PER_BALANCE =
       clause(
@@ -186,10 +176,8 @@ public class InventoryReconciliationService {
   /**
    * 落在差异行上、且落在核对区间内的分录。
    *
-   * <p>两个 {@code lag} 窗口分别按「重复签名」（余额行 + 类型 + 数量 + 操作人）与
-   * 「同一余额行」分区取前一笔，一次扫描把迟到补记、重复记、并发丢失三个信号需要的
-   * 全部信息读出来，分类留给 Java。三个信号可以同时命中同一笔（一次重复录入恰好又是迟到补记），
-   * 那就都报 —— 多一条线索比少一条强。
+   * <p>两个 {@code lag} 窗口分别按「重复签名」（余额行 + 类型 + 数量 + 操作人）与 「同一余额行」分区取前一笔，一次扫描把迟到补记、重复记、并发丢失三个信号需要的
+   * 全部信息读出来，分类留给 Java。三个信号可以同时命中同一笔（一次重复录入恰好又是迟到补记）， 那就都报 —— 多一条线索比少一条强。
    */
   private static final String HITS =
       clause(
@@ -222,8 +210,8 @@ public class InventoryReconciliationService {
   /**
    * 用逗号连接 with 子句里的 CTE 片段。
    *
-   * <p>刻意不让调用方手写逗号：少一个逗号的报错是 {@code syntax error at or near per_balance}，
-   *指向的是后面那个 CTE 而不是缺逗号的地方，排查一次要花掉好几分钟。
+   * <p>刻意不让调用方手写逗号：少一个逗号的报错是 {@code syntax error at or near per_balance}， 指向的是后面那个 CTE
+   * 而不是缺逗号的地方，排查一次要花掉好几分钟。
    */
   private static String ctes(String... fragments) {
     return String.join(",", fragments);
@@ -240,8 +228,7 @@ public class InventoryReconciliationService {
   /**
    * 执行一次核对并落库。
    *
-   * <p><b>一次事务</b>：run 与它的 findings 同生共死。半截的核对记录比没有更糟 ——
-   * 有人会拿它当「核过了」的依据。
+   * <p><b>一次事务</b>：run 与它的 findings 同生共死。半截的核对记录比没有更糟 —— 有人会拿它当「核过了」的依据。
    */
   @Transactional
   public ReconciliationResult run(ReconciliationRequest request, UUID actorId) {
@@ -268,14 +255,20 @@ public class InventoryReconciliationService {
     var suspects = suspects(prefix, scoped, discrepancies);
 
     var status =
-        discrepancies.isEmpty()
-            ? ReconciliationStatus.CONSISTENT
-            : ReconciliationStatus.DISCREPANT;
+        discrepancies.isEmpty() ? ReconciliationStatus.CONSISTENT : ReconciliationStatus.DISCREPANT;
     var runId = UUID.randomUUID();
     var run =
         header(
-            runId, scope, scopeKey(scope, request), scopeLabel, window, status, totals,
-            discrepancies.size(), suspects, actorId);
+            runId,
+            scope,
+            scopeKey(scope, request),
+            scopeLabel,
+            window,
+            status,
+            totals,
+            discrepancies.size(),
+            suspects,
+            actorId);
     insertRun(run);
     storeFindings(runId, discrepancies, suspects);
 
@@ -284,14 +277,12 @@ public class InventoryReconciliationService {
 
   /** 核对区间：左闭右开，缺省近 30 天。两个边界都落库，保证这次核对事后可精确复现。 */
   private Window window(ReconciliationRequest request) {
-    var toAt =
-        (request.to() == null ? now() : request.to()).truncatedTo(ChronoUnit.SECONDS);
+    var toAt = (request.to() == null ? now() : request.to()).truncatedTo(ChronoUnit.SECONDS);
     var fromAt =
         (request.from() == null ? toAt.minusDays(DEFAULT_WINDOW_DAYS) : request.from())
             .truncatedTo(ChronoUnit.SECONDS);
     if (!fromAt.isBefore(toAt)) {
-      throw new IllegalArgumentException(
-          "核对区间需为左闭右开且起点早于终点，当前为 " + fromAt + " → " + toAt);
+      throw new IllegalArgumentException("核对区间需为左闭右开且起点早于终点，当前为 " + fromAt + " → " + toAt);
     }
     return new Window(fromAt, toAt);
   }
@@ -348,8 +339,7 @@ public class InventoryReconciliationService {
   /**
    * 范围的中文名。
    *
-   * <p>固化下来是因为维表会被改名/停用：三个月前那次核对的范围仍然要读得懂。
-   * 查不到就是范围本身不存在（RLS 下也包含「不属于本租户」），直接 400 而不是悄悄核全量 ——
+   * <p>固化下来是因为维表会被改名/停用：三个月前那次核对的范围仍然要读得懂。 查不到就是范围本身不存在（RLS 下也包含「不属于本租户」），直接 400 而不是悄悄核全量 ——
    * 悄悄扩大范围会让用户以为核过的是他选的那部分。
    */
   private String scopeLabel(ReconciliationScopeType scope, ReconciliationRequest request) {
@@ -370,8 +360,7 @@ public class InventoryReconciliationService {
   private String refCode(String sqlText, UUID id) {
     var code = sql.fetchOne(sqlText, id);
     if (code == null) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST, "指定的核对范围在当前租户下不存在或无权查看");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "指定的核对范围在当前租户下不存在或无权查看");
     }
     return String.valueOf(code.get(0, String.class));
   }
@@ -438,8 +427,7 @@ public class InventoryReconciliationService {
   /**
    * 差异明细。
    *
-   * <p>排序按差异绝对值倒序：先看错得最多的。返回**全部**差异行（这里不翻页），
-   * 因为它们要一起落库成这次核对的结论；翻页发生在回查时（{@link #findings}），
+   * <p>排序按差异绝对值倒序：先看错得最多的。返回**全部**差异行（这里不翻页）， 因为它们要一起落库成这次核对的结论；翻页发生在回查时（{@link #findings}），
    * 对已经落库的结果做真分页。
    */
   private List<ReconciliationFinding> discrepancies(List<Object> prefix, String scoped) {
@@ -455,8 +443,7 @@ public class InventoryReconciliationService {
   /**
    * 可疑流水定位。
    *
-   * <p>漏记走一条（它看的是「区间内没有分录」的余额行，根本不需要 join 分录），
-   * 后三类共用 {@link #HITS} 一次扫描。三类合计为本次核对的全部可疑线索。
+   * <p>漏记走一条（它看的是「区间内没有分录」的余额行，根本不需要 join 分录）， 后三类共用 {@link #HITS} 一次扫描。三类合计为本次核对的全部可疑线索。
    */
   private List<ReconciliationFinding> suspects(
       List<Object> prefix, String scoped, List<ReconciliationFinding> discrepancies) {
@@ -570,7 +557,13 @@ public class InventoryReconciliationService {
                     + " 才补录，迟了 "
                     + humanSeconds(lateness)
                     + "。跨期补记会让补记之前那几天的账处于无人认领的状态。",
-                self, null, null, lateness, occurredAt, createdAt, bucket));
+                self,
+                null,
+                null,
+                lateness,
+                occurredAt,
+                createdAt,
+                bucket));
       }
       if (sigPrev != null && sigGap != null && sigGap <= CONCURRENCY_GAP_SECONDS) {
         found.add(
@@ -584,7 +577,13 @@ public class InventoryReconciliationService {
                     + humanSeconds(sigGap)
                     + "。V1 的 UNIQUE(tenant_id,ref_type,ref_id) 挡得住同一来源单据重投，"
                     + "挡不住同一批货被两张不同的单据各记一次。",
-                self, sigPrev, sigGap, null, occurredAt, createdAt, bucket));
+                self,
+                sigPrev,
+                sigGap,
+                null,
+                occurredAt,
+                createdAt,
+                bucket));
       }
       if (hitPrev != null && hitGap != null && hitGap <= CONCURRENCY_GAP_SECONDS) {
         found.add(
@@ -598,7 +597,13 @@ public class InventoryReconciliationService {
                     + humanSeconds(hitGap)
                     + " 内写过同一条余额行。并发写入下的丢失更新只能长这个样子，"
                     + "要查这两笔之间有没有乐观锁版本被覆盖。",
-                self, hitPrev, hitGap, null, occurredAt, createdAt, bucket));
+                self,
+                hitPrev,
+                hitGap,
+                null,
+                occurredAt,
+                createdAt,
+                bucket));
       }
     }
     return found;
@@ -757,10 +762,8 @@ public class InventoryReconciliationService {
   /**
    * 可疑区间排名：把可疑发现按时间桶聚起来，回答「是哪**一段**流水可疑」。
    *
-   * <p>在 Java 里聚合而不是再发一条 SQL：发现集合本来就在内存里，回数据库一趟只为排序不划算，
-   * 而且这样「桶」与「发现」用的是同一份对象，不会出现两处口径漂移。
-   * 差异明细**不参与**这个聚合：它的时间跨度是「整条余额行的全部流水」，
-   * 与可疑笔按天分桶不是一个尺度，混进来会算出一个没人能解释的数字。
+   * <p>在 Java 里聚合而不是再发一条 SQL：发现集合本来就在内存里，回数据库一趟只为排序不划算， 而且这样「桶」与「发现」用的是同一份对象，不会出现两处口径漂移。
+   * 差异明细**不参与**这个聚合：它的时间跨度是「整条余额行的全部流水」， 与可疑笔按天分桶不是一个尺度，混进来会算出一个没人能解释的数字。
    */
   private List<ReconciliationSuspectWindow> windows(List<ReconciliationFinding> suspects) {
     var buckets = new java.util.TreeMap<OffsetDateTime, ReconciliationSuspectWindow>();
@@ -778,10 +781,10 @@ public class InventoryReconciliationService {
     out.sort(
         Comparator.comparingInt((ReconciliationSuspectWindow w) -> rank(w.severity()))
             .reversed()
-            .thenComparing(Comparator.comparingLong(ReconciliationSuspectWindow::suspectCount).reversed())
             .thenComparing(
-                Comparator.comparing(
-                        (ReconciliationSuspectWindow w) -> w.onHandDelta().abs())
+                Comparator.comparingLong(ReconciliationSuspectWindow::suspectCount).reversed())
+            .thenComparing(
+                Comparator.comparing((ReconciliationSuspectWindow w) -> w.onHandDelta().abs())
                     .reversed())
             .thenComparing(ReconciliationSuspectWindow::windowStart));
     return out;
@@ -822,10 +825,7 @@ public class InventoryReconciliationService {
     var onHandDiff = totals.expectedOnHand().subtract(totals.snapshotOnHand());
     var reservedDiff = totals.expectedReserved().subtract(totals.snapshotReserved());
     var moments =
-        suspects.stream()
-            .map(ReconciliationFinding::occurredAt)
-            .filter(Objects::nonNull)
-            .toList();
+        suspects.stream().map(ReconciliationFinding::occurredAt).filter(Objects::nonNull).toList();
     return new ReconciliationRun(
         runId,
         scope,
@@ -853,7 +853,15 @@ public class InventoryReconciliationService {
         suspects.size(),
         moments.stream().min(Comparator.naturalOrder()).orElse(null),
         moments.stream().max(Comparator.naturalOrder()).orElse(null),
-        verdict(scopeLabel, window, status, totals, discrepancyCount, suspects, onHandDiff, reservedDiff),
+        verdict(
+            scopeLabel,
+            window,
+            status,
+            totals,
+            discrepancyCount,
+            suspects,
+            onHandDiff,
+            reservedDiff),
         actorId,
         now());
   }
@@ -971,8 +979,8 @@ public class InventoryReconciliationService {
   /**
    * 落库本次核对的全部发现。
    *
-   * <p>逐行 execute：与本仓库其它写入一致（见 {@code ImportJobService}）——
-   * 纯文本语句上带 {@code ?::cast} 的 {@code DSLContext.batch(String,...)} 绑定不可靠。
+   * <p>逐行 execute：与本仓库其它写入一致（见 {@code ImportJobService}）—— 纯文本语句上带 {@code ?::cast} 的 {@code
+   * DSLContext.batch(String,...)} 绑定不可靠。
    */
   private void storeFindings(
       UUID runId, List<ReconciliationFinding> discrepancies, List<ReconciliationFinding> suspects) {
@@ -1048,9 +1056,8 @@ public class InventoryReconciliationService {
   /**
    * 当前租户。
    *
-   * <p>从 RLS 策略的同一个来源取（{@code app.current_tenant}），而不是从任何请求参数取。
-   * 写入的 tenant_id 与 RLS 注入的租户**必须是同一个**，否则 WITH CHECK 会直接拒写 ——
-   * 这比在应用层自查可靠。
+   * <p>从 RLS 策略的同一个来源取（{@code app.current_tenant}），而不是从任何请求参数取。 写入的 tenant_id 与 RLS
+   * 注入的租户**必须是同一个**，否则 WITH CHECK 会直接拒写 —— 这比在应用层自查可靠。
    */
   private UUID currentTenant() {
     var row = sql.fetchOne("select current_setting('app.current_tenant',true)::uuid as t");
@@ -1075,7 +1082,8 @@ public class InventoryReconciliationService {
     }
     String sqlWhere = where.isEmpty() ? "" : " where " + String.join(" and ", where);
     long total =
-        sql.fetchOne("select count(*) from inventory_reconciliation_run" + sqlWhere, binds.toArray())
+        sql.fetchOne(
+                "select count(*) from inventory_reconciliation_run" + sqlWhere, binds.toArray())
             .get(0, Long.class);
     var rows =
         sql.fetch(
@@ -1122,8 +1130,7 @@ public class InventoryReconciliationService {
   /**
    * 某次核对的可疑区间排名。
    *
-   * <p>刻意**不**走分页：区间排名的全部分母就是可疑条目总数，翻页会算出一个
-   * 「只统计了前 N 条」的可疑区间，那就是个没人能用的数字。可疑条目数受本次核对区间约束，
+   * <p>刻意**不**走分页：区间排名的全部分母就是可疑条目总数，翻页会算出一个 「只统计了前 N 条」的可疑区间，那就是个没人能用的数字。可疑条目数受本次核对区间约束，
    * 一次全量读入是可控的。
    */
   public List<ReconciliationSuspectWindow> suspectWindows(UUID runId) {
@@ -1217,8 +1224,7 @@ public class InventoryReconciliationService {
     for (var s : ReconciliationStatus.values()) {
       if (s.name().equalsIgnoreCase(value.trim())) return s;
     }
-    throw new IllegalArgumentException(
-        "未知的核对结论：" + value + "，可选：CONSISTENT、DISCREPANT");
+    throw new IllegalArgumentException("未知的核对结论：" + value + "，可选：CONSISTENT、DISCREPANT");
   }
 
   private static ReconciliationFindingKind parseKind(String value) {
@@ -1234,8 +1240,8 @@ public class InventoryReconciliationService {
   /**
    * 取 numeric 列。
    *
-   * <p>{@code null} 收成 0 而不是留 null：数量为「没有」时页面要显示 0.0000，
-   * 显示空白会被读成「没查到」。零统一用 {@link #ZERO}，避免同一列里混着 scale 不一样的 0。
+   * <p>{@code null} 收成 0 而不是留 null：数量为「没有」时页面要显示 0.0000， 显示空白会被读成「没查到」。零统一用 {@link #ZERO}，避免同一列里混着
+   * scale 不一样的 0。
    */
   private static BigDecimal decimal(Record r, String field) {
     var v = r.get(field, BigDecimal.class);
@@ -1245,9 +1251,9 @@ public class InventoryReconciliationService {
   /**
    * 取时间值。
    *
-   * <p>与 7.1.2.1 同一处理：纯文本语句里 jOOQ 拿不到列类型，返回的可能是
-   * {@link OffsetDateTime}、{@link java.time.Instant} 或 {@link java.sql.Timestamp}，
-   * 直接 {@code get(field, OffsetDateTime.class)} 会在拿到 Instant 时抛 ClassCastException。
+   * <p>与 7.1.2.1 同一处理：纯文本语句里 jOOQ 拿不到列类型，返回的可能是 {@link OffsetDateTime}、{@link java.time.Instant} 或
+   * {@link java.sql.Timestamp}， 直接 {@code get(field, OffsetDateTime.class)} 会在拿到 Instant 时抛
+   * ClassCastException。
    */
   private static OffsetDateTime moment(Record r, String field) {
     Object value = r.get(field);

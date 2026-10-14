@@ -263,7 +263,7 @@ export function DropshipOrderWorkspace() {
         <div className="mb-4 flex flex-wrap items-end gap-3">
           <Field label="状态">
             <select
-              className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
               value={alertStatus}
               onChange={(e) => setAlertStatus(e.target.value)}
             >
@@ -301,7 +301,9 @@ export function DropshipOrderWorkspace() {
                 alert={a}
                 busy={busy === `alert-${a.id}`}
                 onAcknowledge={(note) =>
-                  act(`alert-${a.id}`, () => acknowledgeDropshipAlert(a.id, { resolutionNote: note }))
+                  act(`alert-${a.id}`, () =>
+                    acknowledgeDropshipAlert(a.id, { resolutionNote: note }),
+                  )
                 }
               />
             ))}
@@ -317,7 +319,7 @@ export function DropshipOrderWorkspace() {
         <div className="mb-4 flex flex-wrap items-end gap-3">
           <Field label="状态">
             <select
-              className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -397,9 +399,7 @@ export function DropshipOrderWorkspace() {
                 {/* 收款确认显出主体与依据：这是人工书面确认，不是系统支付状态 */}
                 <div className="text-copy-13 text-muted mt-1">
                   {paymentConfirmed(o) ? (
-                    <>
-                      收款已由成员确认（{o.paymentConfirmedNote}）
-                    </>
+                    <>收款已由成员确认（{o.paymentConfirmedNote}）</>
                   ) : (
                     '收款未确认 —— 未确认前不允许提交给供应商'
                   )}
@@ -497,7 +497,7 @@ export function DropshipOrderWorkspace() {
           description="明细行是「传递商品信息给供应商」的那一份；运单号在本模块只记录，跟踪与妥投判定属下游 9.6.1.3 与 10 物流。"
         >
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-copy-13">
+            <table className="text-copy-13 w-full text-left">
               <thead className="text-muted">
                 <tr>
                   <th className="py-2 pr-3">#</th>
@@ -514,9 +514,7 @@ export function DropshipOrderWorkspace() {
                     <td className="py-2 pr-3">{l.lineNo}</td>
                     <td className="py-2 pr-3">
                       {l.skuName || l.skuRef}
-                      {l.specSnapshot && (
-                        <span className="text-muted"> · {l.specSnapshot}</span>
-                      )}
+                      {l.specSnapshot && <span className="text-muted"> · {l.specSnapshot}</span>}
                     </td>
                     <td className="py-2 pr-3">{qtyText(l.quantity)}</td>
                     <td className="py-2 pr-3">{moneyText(l.sellUnitPrice)}</td>
@@ -636,14 +634,17 @@ export function DropshipOrderWorkspace() {
         ) : (
           <div className="flex flex-col gap-2">
             {(caps?.vendors ?? []).map((v) => {
-              const registered = (endpoints?.items ?? []).find((e) => e.vendorCode === v.vendorCode);
+              const registered = (endpoints?.items ?? []).find(
+                (e) => e.vendorCode === v.vendorCode,
+              );
               const wired = registered?.wired === true || v.wired;
               return (
-                <div key={v.vendorCode} className="border-border flex items-center gap-2 rounded-lg border p-3">
+                <div
+                  key={v.vendorCode}
+                  className="border-border flex items-center gap-2 rounded-lg border p-3"
+                >
                   <span className="text-copy-13 font-medium">{vendorLabel(v.vendorCode)}</span>
-                  <Badge tone={wired ? 'success' : 'warning'}>
-                    {wired ? '已接线' : '未接线'}
-                  </Badge>
+                  <Badge tone={wired ? 'success' : 'warning'}>{wired ? '已接线' : '未接线'}</Badge>
                   <span className="text-copy-13 text-muted">{v.displayName}</span>
                   {!wired && v.wiringRequirement && (
                     <span className="text-copy-13 text-muted">
@@ -660,7 +661,7 @@ export function DropshipOrderWorkspace() {
         <div className="mt-4 grid gap-3 lg:grid-cols-3">
           <Field label="vendor">
             <select
-              className="border-input bg-background h-9 rounded-md border px-2 text-copy-13"
+              className="border-input bg-background text-copy-13 h-9 rounded-md border px-2"
               value={endpoint.vendorCode}
               onChange={(e) => setEndpoint({ ...endpoint, vendorCode: e.target.value })}
             >
@@ -735,7 +736,9 @@ function AlertItem({
         <Badge tone={alert.severity === 'CRITICAL' ? 'danger' : 'warning'}>
           {severityLabel(alert.severity)}
         </Badge>
-        <span className="text-copy-13 font-medium">{alert.alertKindLabel || alertKindLabel(alert.alertKind)}</span>
+        <span className="text-copy-13 font-medium">
+          {alert.alertKindLabel || alertKindLabel(alert.alertKind)}
+        </span>
         <span className="text-copy-13 text-muted">{alert.orderNo}</span>
         <Badge tone="neutral">{alertStatusLabel(alert.status)}</Badge>
       </div>
@@ -751,14 +754,16 @@ function AlertItem({
             onChange={(e) => setNote(e.target.value)}
             className="w-72"
           />
-          <Button size="sm" disabled={busy || !note.trim()} onClick={() => onAcknowledge(note.trim())}>
+          <Button
+            size="sm"
+            disabled={busy || !note.trim()}
+            onClick={() => onAcknowledge(note.trim())}
+          >
             标记已处置
           </Button>
         </div>
       ) : (
-        <div className="text-copy-13 text-muted mt-1">
-          已处置：{alert.resolutionNote || '—'}
-        </div>
+        <div className="text-copy-13 text-muted mt-1">已处置：{alert.resolutionNote || '—'}</div>
       )}
     </li>
   );

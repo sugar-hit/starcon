@@ -3,10 +3,11 @@
 ## 结论
 
 能力蓝图 **3.7.1.1「HS 编码与申报要素」** 收口：后端（`V94__customs_hs_declaration_elements.sql`
-+ `CustomsAttributeController/Service/Rules`）此前已由本分支完成并经复跑验证，
-本轮补齐**前端三件套**（`customs-attribute-model.ts` / `customs-attribute-workspace.tsx` /
-`customs-attribute-model.test.ts`）、api-proxy 白名单、真 proxy 状态码回归、契约重生成、
-台账与 V28 过期注释。
+
+- `CustomsAttributeController/Service/Rules`）此前已由本分支完成并经复跑验证，
+  本轮补齐**前端三件套**（`customs-attribute-model.ts` / `customs-attribute-workspace.tsx` /
+  `customs-attribute-model.test.ts`）、api-proxy 白名单、真 proxy 状态码回归、契约重生成、
+  台账与 V28 过期注释。
 
 蓝图这一格只有一句限定语，但它决定了整个模块的形状：
 「HS 编码错误直接导致申报失败与罚款，**必须允许审核流程而非任意填写**」。
@@ -69,18 +70,18 @@ HS 码错一次就是扣货 + 罚款，而填码的人恰恰是最容易「顺�
 
 ## 文件清单
 
-| 文件 | 动作 |
-| --- | --- |
-| `apps/web/src/components/catalog/customs-attribute-model.ts` | 新增：端点封装 + 审核态 + 阻断原因 + 草稿校验 |
-| `apps/web/src/components/catalog/customs-attribute-workspace.tsx` | 新增：真实工作区（三态 + 二次确认 + 要素高亮） |
-| `apps/web/src/components/catalog/customs-attribute-model.test.ts` | 新增：49 例 |
-| `apps/web/src/lib/customs-attribute-api-proxy.test.ts` | 新增：47 例**真 proxy 状态码**回归（放行 + 反向） |
-| `apps/web/src/lib/api-proxy.ts` | 白名单加 `customs-attributes` 五种形状 + 注释 |
-| `apps/web/src/app/products/sku/[id]/customs/page.tsx` | 新增：路由页（否则工作区不可达） |
-| `packages/api-contracts/src/*` | codegen 重新生成（1318 DTOs） |
-| `backend/.../CustomsAttributeModels.java` 等 4 处 | `CustomsSaved` → `CustomsProfileSaved`（解契约撞名） |
-| `backend/.../V28__physical_safety_attributes.sql` | 只改注释：3.7.1.1 已交付、3.7.1.2 仍未开发 |
-| `docs/product/capability-blueprint/module-progress.md` | 3.7.1.1 一行状态+证据（另 5 行是派生统计） |
+| 文件                                                              | 动作                                                 |
+| ----------------------------------------------------------------- | ---------------------------------------------------- |
+| `apps/web/src/components/catalog/customs-attribute-model.ts`      | 新增：端点封装 + 审核态 + 阻断原因 + 草稿校验        |
+| `apps/web/src/components/catalog/customs-attribute-workspace.tsx` | 新增：真实工作区（三态 + 二次确认 + 要素高亮）       |
+| `apps/web/src/components/catalog/customs-attribute-model.test.ts` | 新增：49 例                                          |
+| `apps/web/src/lib/customs-attribute-api-proxy.test.ts`            | 新增：47 例**真 proxy 状态码**回归（放行 + 反向）    |
+| `apps/web/src/lib/api-proxy.ts`                                   | 白名单加 `customs-attributes` 五种形状 + 注释        |
+| `apps/web/src/app/products/sku/[id]/customs/page.tsx`             | 新增：路由页（否则工作区不可达）                     |
+| `packages/api-contracts/src/*`                                    | codegen 重新生成（1318 DTOs）                        |
+| `backend/.../CustomsAttributeModels.java` 等 4 处                 | `CustomsSaved` → `CustomsProfileSaved`（解契约撞名） |
+| `backend/.../V28__physical_safety_attributes.sql`                 | 只改注释：3.7.1.1 已交付、3.7.1.2 仍未开发           |
+| `docs/product/capability-blueprint/module-progress.md`            | 3.7.1.1 一行状态+证据（另 5 行是派生统计）           |
 
 ## api-proxy 白名单的验证方式
 

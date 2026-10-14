@@ -52,7 +52,13 @@ import {
   shipCrossEntityTransfer,
   type CrossEntityTransferParams,
 } from './legal-entity-transfer-model';
-import { errorText, fetchLegalEntities, fetchQualityStatuses, fetchSkus, fetchWarehouses } from './inventory-model';
+import {
+  errorText,
+  fetchLegalEntities,
+  fetchQualityStatuses,
+  fetchSkus,
+  fetchWarehouses,
+} from './inventory-model';
 import { useIdentity } from '../iam/identity-shell';
 
 /**
@@ -124,9 +130,11 @@ export function LegalEntityTransferWorkspace() {
   const [receiveNotes, setReceiveNotes] = useState('');
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
-  const [confirmOpen, setConfirmOpen] = useState<{ id: string; side: 'SOURCE' | 'TARGET'; version: number } | null>(
-    null,
-  );
+  const [confirmOpen, setConfirmOpen] = useState<{
+    id: string;
+    side: 'SOURCE' | 'TARGET';
+    version: number;
+  } | null>(null);
   const [confirmNotes, setConfirmNotes] = useState('');
 
   const load = useCallback(async () => {
@@ -263,12 +271,12 @@ export function LegalEntityTransferWorkspace() {
       />
 
       {error && (
-        <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
+        <div className="border-destructive/40 bg-destructive/10 rounded-md border p-3 text-sm">
           {error}
         </div>
       )}
       {actionError && (
-        <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
+        <div className="border-destructive/40 bg-destructive/10 rounded-md border p-3 text-sm">
           {actionError}
         </div>
       )}
@@ -302,13 +310,13 @@ export function LegalEntityTransferWorkspace() {
           <div className="flex flex-wrap gap-4">
             {page.currencyAmounts.map((c) => (
               <div key={c.currencyCode} className="rounded-md border px-3 py-2">
-                <div className="text-xs text-muted-foreground">{c.currencyCode}</div>
+                <div className="text-muted-foreground text-xs">{c.currencyCode}</div>
                 <div className="text-lg font-semibold">{money(c.amount, c.currencyCode)}</div>
-                <div className="text-xs text-muted-foreground">{c.count} 张单</div>
+                <div className="text-muted-foreground text-xs">{c.count} 张单</div>
               </div>
             ))}
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mt-3 text-xs">
             整单单币种，但列表跨单，因此金额按币种分行汇总 —— 不同币种直接相加没有意义。
             跨币种换算与汇兑损益属 12 财务职责，本模块不存汇率、也不换算。
           </p>
@@ -385,7 +393,7 @@ export function LegalEntityTransferWorkspace() {
         </div>
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">加载中…</p>
+          <p className="text-muted-foreground text-sm">加载中…</p>
         ) : rows.length === 0 ? (
           <EmptyState
             title="还没有跨法人调拨单"
@@ -404,7 +412,7 @@ export function LegalEntityTransferWorkspace() {
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-sm">{row.transferCode}</span>
-                      <span className="rounded bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                      <span className="bg-primary/10 text-primary rounded px-2 py-0.5 text-xs">
                         {crossEntityStatusLabels[row.status] ?? row.status}
                       </span>
                       {/* 两个法人是本模块的第一视觉要素。 */}
@@ -412,24 +420,26 @@ export function LegalEntityTransferWorkspace() {
                         <Building2 className="h-3.5 w-3.5" />
                         {partiesText(row)}
                       </span>
-                      <span className="text-xs text-muted-foreground">{routeText(row)}</span>
+                      <span className="text-muted-foreground text-xs">{routeText(row)}</span>
                     </div>
                     <div className="flex flex-wrap items-center gap-4 text-sm">
                       <span className="flex items-center gap-1 font-medium">
                         <Scale className="h-3.5 w-3.5" />
                         {money(row.totalAmount, row.currencyCode)}
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        定价口径：{crossEntityValuationLabels[row.valuationBasis] ?? row.valuationBasis}
+                      <span className="text-muted-foreground text-xs">
+                        定价口径：
+                        {crossEntityValuationLabels[row.valuationBasis] ?? row.valuationBasis}
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-muted-foreground text-xs">
                         调拨 {fmt(row.totalQuantity)} · 实收 {fmt(row.receivedQuantity)} · 在途{' '}
                         {fmt(row.inTransitQuantity)} · 差异 {fmt(row.discrepancyQuantity)}
                       </span>
                       {row.settlementStatus && (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-muted-foreground text-xs">
                           凭据 {row.settlementCode}：{' '}
-                          {crossEntitySettlementLabels[row.settlementStatus] ?? row.settlementStatus}
+                          {crossEntitySettlementLabels[row.settlementStatus] ??
+                            row.settlementStatus}
                         </span>
                       )}
                     </div>
@@ -510,9 +520,9 @@ export function LegalEntityTransferWorkspace() {
                   {expanded === row.id && (
                     <div className="border-t p-3">
                       {detailLoading ? (
-                        <p className="text-sm text-muted-foreground">加载详情…</p>
+                        <p className="text-muted-foreground text-sm">加载详情…</p>
                       ) : detailError ? (
-                        <p className="text-sm text-destructive">{detailError}</p>
+                        <p className="text-destructive text-sm">{detailError}</p>
                       ) : detail ? (
                         <DetailBody
                           detail={detail}
@@ -725,15 +735,15 @@ export function LegalEntityTransferWorkspace() {
                 onChange={(e) => setDraftReason(e.target.value)}
               />
             </label>
-            <div className="rounded-md border bg-muted/40 p-2 text-sm">
+            <div className="bg-muted/40 rounded-md border p-2 text-sm">
               金额 = 数量 × 单价 ={' '}
               <span className="font-semibold">{money(draftAmount, draftCurrency)}</span>
-              <span className="ml-2 text-xs text-muted-foreground">
+              <span className="text-muted-foreground ml-2 text-xs">
                 由后端生成列算出并四舍五入到 4 位小数，前端这里只是预览
               </span>
             </div>
             {draftFromEntity && draftToEntity && draftFromEntity === draftToEntity && (
-              <p className="flex items-start gap-1 text-sm text-destructive">
+              <p className="text-destructive flex items-start gap-1 text-sm">
                 <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
                 转出与转入不能是同一个法人 —— 同一法人之间的转移是普通调拨，不需要定价与内部结算。
               </p>
@@ -779,15 +789,10 @@ export function LegalEntityTransferWorkspace() {
       </Modal>
 
       {/* ---------------------------------------------------------- 双方确认 */}
-      <Modal
-        open={confirmOpen !== null}
-        onOpenChange={(open) => !open && setConfirmOpen(null)}
-      >
+      <Modal open={confirmOpen !== null} onOpenChange={(open) => !open && setConfirmOpen(null)}>
         <ModalContent>
           <ModalHeader>
-            <ModalTitle>
-              {confirmOpen?.side === 'SOURCE' ? '转出方确认' : '转入方确认'}
-            </ModalTitle>
+            <ModalTitle>{confirmOpen?.side === 'SOURCE' ? '转出方确认' : '转入方确认'}</ModalTitle>
             <ModalDescription>
               {confirmOpen?.side === 'SOURCE'
                 ? '确认转出价格与明细。确认后单据进入「待转入方确认」，由另一个人签署。'
@@ -883,7 +888,7 @@ function DetailBody({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        <span className="rounded bg-primary/10 px-2 py-0.5 text-xs text-primary">
+        <span className="bg-primary/10 text-primary rounded px-2 py-0.5 text-xs">
           {crossEntityStatusLabels[order.status] ?? order.status}
         </span>
         <span className="font-medium">{partiesText(order)}</span>
@@ -901,7 +906,7 @@ function DetailBody({
         <div className="mb-1 text-sm font-medium">明细与转移定价</div>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b text-left text-xs text-muted-foreground">
+            <tr className="text-muted-foreground border-b text-left text-xs">
               <th className="py-1">SKU</th>
               <th className="py-1">质量状态</th>
               <th className="py-1 text-right">数量</th>
@@ -934,7 +939,7 @@ function DetailBody({
       <div>
         <div className="mb-1 text-sm font-medium">双方确认留痕</div>
         {detail.approvals.length === 0 ? (
-          <p className="text-sm text-muted-foreground">尚未有任何一方确认。</p>
+          <p className="text-muted-foreground text-sm">尚未有任何一方确认。</p>
         ) : (
           <ul className="space-y-1 text-sm">
             {detail.approvals.map((a) => (
@@ -948,12 +953,22 @@ function DetailBody({
           </ul>
         )}
         {writable && order.status === 'DRAFT' && (
-          <Button size="sm" variant="outline" className="mt-2" onClick={() => onConfirm('SOURCE', order.version)}>
+          <Button
+            size="sm"
+            variant="outline"
+            className="mt-2"
+            onClick={() => onConfirm('SOURCE', order.version)}
+          >
             转出方确认
           </Button>
         )}
         {writable && order.status === 'PENDING_TARGET_CONFIRM' && (
-          <Button size="sm" variant="outline" className="mt-2" onClick={() => onConfirm('TARGET', order.version)}>
+          <Button
+            size="sm"
+            variant="outline"
+            className="mt-2"
+            onClick={() => onConfirm('TARGET', order.version)}
+          >
             转入方确认
           </Button>
         )}
@@ -974,25 +989,25 @@ function DetailBody({
               </span>
               （不含税；税额与科目属 12 财务自有权威）
             </div>
-            <div className="font-mono text-xs text-muted-foreground">
+            <div className="text-muted-foreground font-mono text-xs">
               定位键 source_system={detail.settlement.sourceSystem} · reference_id=
               {detail.settlement.referenceId}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-muted-foreground text-xs">
               开具于 {moment(detail.settlement.issuedAt)}
               {detail.settlement.acknowledgedAt &&
                 ` · 转入方确认于 ${moment(detail.settlement.acknowledgedAt)}`}
             </div>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             尚未开具凭据 —— 凭据在**发出**时开具（那时转出方已交付、转入方已确认定价）。
           </p>
         )}
       </div>
 
       {/* 三条口径说明必须显示：不写清楚就会被误读成「货已经归对方了」/「已经接好权限了」。 */}
-      <div className="space-y-1 rounded-md border bg-muted/40 p-2 text-xs text-muted-foreground">
+      <div className="bg-muted/40 text-muted-foreground space-y-1 rounded-md border p-2 text-xs">
         <p>定价口径：{detail.pricingNote}</p>
         <p>货权口径：{detail.ownershipNote}</p>
         <p>授权口径：{detail.authorizationNote}</p>
@@ -1017,7 +1032,7 @@ function DetailBody({
               扣转出法人的库存、货进入在途，并开具内部结算凭据。货权在**实收**时才转到转入方。
             </ModalDescription>
           </ModalHeader>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             共 {fmt(order.totalQuantity)} 件，金额 {money(order.totalAmount, order.currencyCode)}。
             跨法人调拨整单发运：转移定价是整单口径，部分发运会让「一张凭据对应哪几行货」失去唯一答案。
           </p>
@@ -1131,7 +1146,9 @@ function DetailBody({
         <ModalContent>
           <ModalHeader>
             <ModalTitle>作废</ModalTitle>
-            <ModalDescription>仅发运之前可用。已发运的单只能结案，短少如实记为差异。</ModalDescription>
+            <ModalDescription>
+              仅发运之前可用。已发运的单只能结案，短少如实记为差异。
+            </ModalDescription>
           </ModalHeader>
           <label className="block text-sm">
             作废原因（必填）

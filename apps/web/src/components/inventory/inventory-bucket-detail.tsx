@@ -1,7 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowRightLeft, Boxes, MapPin, PackageSearch, RefreshCw, TriangleAlert } from 'lucide-react';
+import {
+  ArrowRightLeft,
+  Boxes,
+  MapPin,
+  PackageSearch,
+  RefreshCw,
+  TriangleAlert,
+} from 'lucide-react';
 import { Button, EmptyState, SectionCard, StatCard } from '@starcon/ui';
 import type {
   BucketAction,
@@ -229,7 +236,7 @@ export function InventoryBucketDetail({
           <label className="space-y-1 text-sm">
             <span className="block font-medium">货权法人</span>
             <select
-              className="w-full rounded-md border border-control-border bg-card px-3 py-2 text-sm"
+              className="border-control-border bg-card w-full rounded-md border px-3 py-2 text-sm"
               value={legalEntityId}
               onChange={(e) => {
                 setLegalEntityId(e.target.value);
@@ -247,7 +254,7 @@ export function InventoryBucketDetail({
           <label className="space-y-1 text-sm">
             <span className="block font-medium">仓库</span>
             <select
-              className="w-full rounded-md border border-control-border bg-card px-3 py-2 text-sm"
+              className="border-control-border bg-card w-full rounded-md border px-3 py-2 text-sm"
               value={warehouseId}
               onChange={(e) => {
                 setWarehouseId(e.target.value);
@@ -265,7 +272,7 @@ export function InventoryBucketDetail({
           <label className="space-y-1 text-sm">
             <span className="block font-medium">库位</span>
             <select
-              className="w-full rounded-md border border-control-border bg-card px-3 py-2 text-sm disabled:bg-muted"
+              className="border-control-border bg-card disabled:bg-muted w-full rounded-md border px-3 py-2 text-sm"
               value={locationId}
               disabled={!warehouseId && locations.length > 1}
               onChange={(e) => {
@@ -284,7 +291,7 @@ export function InventoryBucketDetail({
           <label className="space-y-1 text-sm">
             <span className="block font-medium">SKU</span>
             <select
-              className="w-full rounded-md border border-control-border bg-card px-3 py-2 text-sm"
+              className="border-control-border bg-card w-full rounded-md border px-3 py-2 text-sm"
               value={skuId}
               onChange={(e) => {
                 setSkuId(e.target.value);
@@ -302,7 +309,7 @@ export function InventoryBucketDetail({
           <label className="space-y-1 text-sm">
             <span className="block font-medium">批次</span>
             <select
-              className="w-full rounded-md border border-control-border bg-card px-3 py-2 text-sm"
+              className="border-control-border bg-card w-full rounded-md border px-3 py-2 text-sm"
               value={lotId}
               onChange={(e) => {
                 setLotId(e.target.value);
@@ -321,7 +328,7 @@ export function InventoryBucketDetail({
           <label className="space-y-1 text-sm">
             <span className="block font-medium">质量状态</span>
             <select
-              className="w-full rounded-md border border-control-border bg-card px-3 py-2 text-sm"
+              className="border-control-border bg-card w-full rounded-md border px-3 py-2 text-sm"
               value={qualityStatusId}
               onChange={(e) => {
                 setQualityStatusId(e.target.value);
@@ -339,7 +346,7 @@ export function InventoryBucketDetail({
           <label className="space-y-1 text-sm">
             <span className="block font-medium">关键字</span>
             <input
-              className="w-full rounded-md border border-control-border bg-card px-3 py-2 text-sm"
+              className="border-control-border bg-card w-full rounded-md border px-3 py-2 text-sm"
               value={keyword}
               placeholder="SKU / 仓库 / 库位 / 批次 编码或名称"
               onChange={(e) => {
@@ -351,7 +358,7 @@ export function InventoryBucketDetail({
           <label className="space-y-1 text-sm">
             <span className="block font-medium">排序</span>
             <select
-              className="w-full rounded-md border border-control-border bg-card px-3 py-2 text-sm"
+              className="border-control-border bg-card w-full rounded-md border px-3 py-2 text-sm"
               value={sort}
               onChange={(e) => {
                 setSort(e.target.value);
@@ -381,7 +388,7 @@ export function InventoryBucketDetail({
       </SectionCard>
 
       {error && (
-        <div className="flex items-start gap-3 rounded-md border border-destructive/40 bg-destructive-soft p-4 text-sm text-destructive">
+        <div className="border-destructive/40 bg-destructive-soft text-destructive flex items-start gap-3 rounded-md border p-4 text-sm">
           <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
           <div className="space-y-2">
             <p>{error}</p>
@@ -397,20 +404,24 @@ export function InventoryBucketDetail({
           <StatCard label="明细在手" value={qty(summary.onHand)} polarity="neutral" />
           <StatCard label="明细可用" value={qty(summary.available)} polarity="neutral" />
           <StatCard label="明细预占" value={qty(summary.reserved)} polarity="neutral" />
-          <StatCard label="库位 / 批次" value={`${summary.locationCount} / ${summary.lotCount}`} polarity="neutral" />
+          <StatCard
+            label="库位 / 批次"
+            value={`${summary.locationCount} / ${summary.lotCount}`}
+            polarity="neutral"
+          />
         </div>
       )}
 
       {/* 守恒核对：不成立就当场报，而不是让用户自己把两个数对起来 */}
       {recon && !recon.onHandConserved && (
-        <div className="rounded-md border border-destructive/40 bg-destructive-soft p-4 text-sm text-destructive">
+        <div className="border-destructive/40 bg-destructive-soft text-destructive rounded-md border p-4 text-sm">
           账实不平：涉及 {recon.touchedBalanceCount} 条余额的在手是 {qty(recon.balanceOnHand)}，
           其库位明细汇总是 {qty(recon.bucketOnHand)}。请检查库存写入方，或重新加载。
         </div>
       )}
       {recon && recon.onHandConserved && recon.undecomposedBalanceCount > 0 && (
-        <div className="flex items-start gap-3 rounded-md border border-warning/40 bg-warning-soft p-4 text-sm">
-          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+        <div className="border-warning/40 bg-warning-soft flex items-start gap-3 rounded-md border p-4 text-sm">
+          <MapPin className="text-warning mt-0.5 h-4 w-4 shrink-0" />
           <div className="space-y-1">
             <p className="font-medium">还有 {recon.undecomposedBalanceCount} 条余额未拆到库位</p>
             <p className="text-muted-foreground">
@@ -455,7 +466,7 @@ export function InventoryBucketDetail({
         {loading ? (
           <div className="space-y-2" aria-busy="true" aria-live="polite">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-9 animate-pulse rounded bg-muted" />
+              <div key={i} className="bg-muted h-9 animate-pulse rounded" />
             ))}
             <p className="text-muted-foreground text-sm">正在读取库位明细…</p>
           </div>
@@ -535,24 +546,24 @@ function BucketRowView({
         </td>
         <td className="px-3 py-2">
           <div className="flex flex-wrap items-center gap-1">
-            <span className="rounded bg-muted px-2 py-0.5 text-xs">
+            <span className="bg-muted rounded px-2 py-0.5 text-xs">
               {row.locationCode} · {lotLabel(row.lotCode)}
             </span>
             <span className={`rounded px-2 py-0.5 text-xs ${roleBadge[row.qualityRole] ?? ''}`}>
               {roleLabels[row.qualityRole] ?? row.qualityStatusName}
             </span>
             {row.expired && (
-              <span className="rounded bg-destructive-soft px-2 py-0.5 text-xs text-destructive">
+              <span className="bg-destructive-soft text-destructive rounded px-2 py-0.5 text-xs">
                 已过效期
               </span>
             )}
             {!row.pickable && (
-              <span className="rounded bg-warning-soft px-2 py-0.5 text-xs text-warning">
+              <span className="bg-warning-soft text-warning rounded px-2 py-0.5 text-xs">
                 不可拣
               </span>
             )}
             {row.zeroStock && (
-              <span className="rounded bg-destructive-soft px-2 py-0.5 text-xs text-destructive">
+              <span className="bg-destructive-soft text-destructive rounded px-2 py-0.5 text-xs">
                 零库存
               </span>
             )}
@@ -561,7 +572,7 @@ function BucketRowView({
         <td className="px-3 py-2 text-right tabular-nums">{qty(row.onHand)}</td>
         <td className="px-3 py-2 text-right tabular-nums">{qty(row.reserved)}</td>
         <td className="px-3 py-2 text-right font-medium tabular-nums">{qty(row.available)}</td>
-        <td className="px-3 py-2 text-xs whitespace-nowrap">
+        <td className="whitespace-nowrap px-3 py-2 text-xs">
           <div className="tabular-nums">{new Date(row.lastMovementAt).toLocaleString('zh-CN')}</div>
           <div className="text-muted-foreground">v{row.version}</div>
         </td>
@@ -576,21 +587,20 @@ function BucketRowView({
                 title={actionNote(a)}
                 aria-label={actionNote(a)}
               >
-                {a.action === 'TRANSFER' ? (
-                  <ArrowRightLeft className="h-3.5 w-3.5" />
-                ) : (
-                  a.label
-                )}
+                {a.action === 'TRANSFER' ? <ArrowRightLeft className="h-3.5 w-3.5" /> : a.label}
               </Button>
             ))}
           </div>
         </td>
       </tr>
       {open && (
-        <tr className="border-b bg-muted/30 last:border-0">
+        <tr className="bg-muted/30 border-b last:border-0">
           <td colSpan={9} className="px-3 py-3">
             <div className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
-              <Cell label="库位" value={`${row.locationCode} ${row.locationName}（${pickableNote(row)}）`} />
+              <Cell
+                label="库位"
+                value={`${row.locationCode} ${row.locationName}（${pickableNote(row)}）`}
+              />
               <Cell
                 label="批次"
                 value={

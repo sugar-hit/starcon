@@ -148,8 +148,8 @@ export function SupplierQuoteLedger({ writable }: { writable: boolean }) {
               <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
               <div>
                 <p>
-                  有 {overview.ambiguousQuotes} 条报价在同一 SKU、同一供应商下优先级并列。
-                  系统<b>不会</b>替你随机挑一条 —— 请把要用作默认的那条优先级调小一位。
+                  有 {overview.ambiguousQuotes} 条报价在同一 SKU、同一供应商下优先级并列。 系统
+                  <b>不会</b>替你随机挑一条 —— 请把要用作默认的那条优先级调小一位。
                 </p>
                 <Button
                   size="sm"
@@ -238,7 +238,11 @@ export function SupplierQuoteLedger({ writable }: { writable: boolean }) {
           ) : rows.length === 0 ? (
             <EmptyState
               icon={<TriangleAlert className="h-6 w-6" />}
-              title={query.keyword || query.skuId || query.ambiguousOnly ? '没有匹配的报价' : '还没有录过报价'}
+              title={
+                query.keyword || query.skuId || query.ambiguousOnly
+                  ? '没有匹配的报价'
+                  : '还没有录过报价'
+              }
               description={
                 query.keyword || query.skuId || query.ambiguousOnly
                   ? '换个关键词或清掉筛选再试。'
@@ -314,11 +318,7 @@ export function SupplierQuoteLedger({ writable }: { writable: boolean }) {
                               >
                                 编辑
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => void remove(quote)}
-                              >
+                              <Button size="sm" variant="ghost" onClick={() => void remove(quote)}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
@@ -445,7 +445,10 @@ function QuoteEditor({
   };
 
   return (
-    <SectionCard title={isNew ? '新建报价' : '编辑报价'} description="阶梯价按起订量升序；提交前会自动排序。">
+    <SectionCard
+      title={isNew ? '新建报价' : '编辑报价'}
+      description="阶梯价按起订量升序；提交前会自动排序。"
+    >
       <div className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="供应商 ID" hint="往来单位（3.6.1.1）里被指派了供应商身份的主体">
@@ -612,4 +615,3 @@ function QuoteEditor({
     </SectionCard>
   );
 }
-

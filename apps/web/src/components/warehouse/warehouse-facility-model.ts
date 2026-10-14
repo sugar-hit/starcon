@@ -161,7 +161,9 @@ export function localTimeText(row: WarehouseRow): string {
  */
 export function legalEntityText(row: WarehouseRow): string {
   if (row.legalEntityCode) return `${row.legalEntityCode} · ${row.legalEntityName ?? ''}`.trim();
-  return row.legalEntityCount > 0 ? `未绑定法人（已持有 ${row.legalEntityCount} 个法人的货）` : '未绑定法人';
+  return row.legalEntityCount > 0
+    ? `未绑定法人（已持有 ${row.legalEntityCount} 个法人的货）`
+    : '未绑定法人';
 }
 
 /** 作业量的一句话摘要。已接入的维度给数，未接入的在标题里由调用方单独说明。 */
@@ -225,7 +227,9 @@ export function statusTone(status: string): 'positive' | 'negative' | 'neutral' 
 }
 
 /** 国家下拉只列本租户真实在用的国家；没有数据时如实说「先建一个仓库」。 */
-export function countryOptions(countries: CountryOption[]): Array<{ value: string; label: string }> {
+export function countryOptions(
+  countries: CountryOption[],
+): Array<{ value: string; label: string }> {
   return countries.map((c) => ({ value: c.code, label: c.code }));
 }
 

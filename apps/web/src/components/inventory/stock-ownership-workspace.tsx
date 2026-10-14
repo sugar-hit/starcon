@@ -139,7 +139,9 @@ export function StockOwnershipWorkspace() {
   const ruleList = (rules?.rules ?? []).filter(notNull);
   const reportRows = (report?.rows ?? []).filter(notNull);
   const driftRows = (drift?.rows ?? []).filter(notNull);
-  const amountDim = capabilities?.dimensions?.filter(notNull).find((d) => d.code === 'AMOUNT_VALUATION');
+  const amountDim = capabilities?.dimensions
+    ?.filter(notNull)
+    .find((d) => d.code === 'AMOUNT_VALUATION');
 
   return (
     <div className="space-y-6">
@@ -204,7 +206,11 @@ export function StockOwnershipWorkspace() {
         }
       >
         {resolved === null ? (
-          <EmptyState icon={<Scale className="h-5 w-5" />} title="加载中" description="正在解析货权。" />
+          <EmptyState
+            icon={<Scale className="h-5 w-5" />}
+            title="加载中"
+            description="正在解析货权。"
+          />
         ) : (
           <div className="space-y-2 text-sm">
             <p className="font-medium">{resolvedHeadline(resolved)}</p>
@@ -229,11 +235,17 @@ export function StockOwnershipWorkspace() {
       <SectionCard
         title="按货主拆分的库存"
         description="真实从库存明细聚合。自有与非自有分列 —— 合成一个「库存总量」就等于把最关键的区分抹掉了。"
-        extra={<ScopeFilter options={options} filter={filterParams} onChange={(next) => {
-          setWarehouseFilter(next.warehouseId ?? '');
-          setLegalEntityFilter(next.legalEntityId ?? '');
-          setSkuFilter(next.skuId ?? '');
-        }} />}
+        extra={
+          <ScopeFilter
+            options={options}
+            filter={filterParams}
+            onChange={(next) => {
+              setWarehouseFilter(next.warehouseId ?? '');
+              setLegalEntityFilter(next.legalEntityId ?? '');
+              setSkuFilter(next.skuId ?? '');
+            }}
+          />
+        }
       >
         {reportRows.length === 0 ? (
           <EmptyState
@@ -270,7 +282,9 @@ export function StockOwnershipWorkspace() {
                     </td>
                     <td
                       className={`py-2 text-xs ${
-                        ownerKindTone(row.ownerKind) === 'owned' ? 'text-success' : 'text-muted-foreground'
+                        ownerKindTone(row.ownerKind) === 'owned'
+                          ? 'text-success'
+                          : 'text-muted-foreground'
                       }`}
                     >
                       {ownedAssetText(row.countsAsOwnedAsset)}
@@ -323,7 +337,10 @@ export function StockOwnershipWorkspace() {
               </thead>
               <tbody>
                 {driftRows.map((row) => (
-                  <tr key={`${row.currentOwnerId}-${row.expectedOwnerId ?? 'none'}`} className="border-control-border border-t">
+                  <tr
+                    key={`${row.currentOwnerId}-${row.expectedOwnerId ?? 'none'}`}
+                    className="border-control-border border-t"
+                  >
                     <td className="py-2">{row.currentOwnerName}</td>
                     <td className="py-2">{row.expectedOwnerName ?? '（未配置）'}</td>
                     <td className="py-2 text-right">{row.bucketCount}</td>
@@ -334,7 +351,11 @@ export function StockOwnershipWorkspace() {
                         size="sm"
                         disabled={!writable || saving || !row.expectedOwnerId}
                         onClick={() =>
-                          void doReassign(row.currentOwnerId, row.expectedOwnerId ?? '', filterParams)
+                          void doReassign(
+                            row.currentOwnerId,
+                            row.expectedOwnerId ?? '',
+                            filterParams,
+                          )
                         }
                       >
                         改判
@@ -418,7 +439,9 @@ export function StockOwnershipWorkspace() {
             <tbody>
               {ruleList.map((rule) => (
                 <tr key={rule.id} className="border-control-border border-t">
-                  <td className="py-2 text-xs">{scopeTypeLabels[rule.scopeType] ?? rule.scopeType}</td>
+                  <td className="py-2 text-xs">
+                    {scopeTypeLabels[rule.scopeType] ?? rule.scopeType}
+                  </td>
                   <td className="py-2">{scopeTargetText(rule)}</td>
                   <td className="py-2">{rule.ownerName}</td>
                   <td
@@ -437,7 +460,9 @@ export function StockOwnershipWorkspace() {
                         variant="outline"
                         size="sm"
                         disabled={!writable || saving || rule.effectiveTo !== null}
-                        title={rule.effectiveTo ? '已收口的档不能作为换版对象' : '收口旧档 + 开新档'}
+                        title={
+                          rule.effectiveTo ? '已收口的档不能作为换版对象' : '收口旧档 + 开新档'
+                        }
                         onClick={() => {
                           setSuperseding(rule);
                           setScopeFilter(rule.scopeType);
@@ -521,7 +546,10 @@ export function StockOwnershipWorkspace() {
                       size="sm"
                       disabled={!writable || saving || owner.isDefault}
                       onClick={() =>
-                        void doToggleStatus(owner.id, owner.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE')
+                        void doToggleStatus(
+                          owner.id,
+                          owner.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE',
+                        )
                       }
                     >
                       {owner.status === 'ACTIVE' ? '停用' : '启用'}
@@ -746,7 +774,9 @@ function RuleEditor({
         note: '',
       };
       // 换版 = 收口旧档 + 开新档；没有「就地改」的入口。
-      const saved = superseding ? await supersedeRule(superseding.id, input) : await createRule(input);
+      const saved = superseding
+        ? await supersedeRule(superseding.id, input)
+        : await createRule(input);
       onSaved(saved.message);
       setOpen(false);
       setOwnerId('');
@@ -827,13 +857,18 @@ function RuleEditor({
                 </option>
               ))}
             </select>
-            <Button variant="outline" size="sm" disabled={saving || !ownerId} onClick={() => void submit()}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={saving || !ownerId}
+              onClick={() => void submit()}
+            >
               保存
             </Button>
           </div>
           <p className="text-muted-foreground text-xs">
-            该档自保存时刻起生效，<strong>只对之后写入的库位明细赋权</strong>；库里已有的货不会自动改判，
-            要改判请用上面的「货权漂移 → 改判」。
+            该档自保存时刻起生效，<strong>只对之后写入的库位明细赋权</strong>
+            ；库里已有的货不会自动改判， 要改判请用上面的「货权漂移 → 改判」。
           </p>
           {superseding && (
             <p className="text-muted-foreground text-xs">
@@ -915,7 +950,12 @@ function OwnerEditor({
 
   return (
     <div className="mt-4">
-      <Button variant="outline" size="sm" disabled={!writable || saving} onClick={() => setOpen((v) => !v)}>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={!writable || saving}
+        onClick={() => setOpen((v) => !v)}
+      >
         新建货主
       </Button>
       {open && (
@@ -969,7 +1009,9 @@ function OwnerEditor({
               <input
                 className="border-control-border bg-card rounded-md border px-3 py-2 text-sm"
                 placeholder={
-                  refType === 'LEGAL_ENTITY' ? '法人 id（必填）' : '供应商 id（catalog 逻辑 id，必填）'
+                  refType === 'LEGAL_ENTITY'
+                    ? '法人 id（必填）'
+                    : '供应商 id（catalog 逻辑 id，必填）'
                 }
                 value={refId}
                 onChange={(e) => setRefId(e.target.value)}
@@ -1025,7 +1067,12 @@ function Pager({
       <span className="text-muted-foreground text-xs">
         第 {page + 1} / {pages} 页，共 {total} 条
       </span>
-      <Button variant="outline" size="sm" disabled={page + 1 >= pages} onClick={() => onTurn(page + 1)}>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={page + 1 >= pages}
+        onClick={() => onTurn(page + 1)}
+      >
         下一页
       </Button>
     </div>

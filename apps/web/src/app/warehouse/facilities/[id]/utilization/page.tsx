@@ -17,6 +17,11 @@ import { WarehouseLocationUtilizationWorkspace } from '@/components/warehouse/wa
  * 逐条调整建议（含落地归属模块）、逐 SKU 明细，全部来自 PostgreSQL 16 上真实落库的查询。
  * 加载 / 空 / 错误三态分开渲染。
  */
-export default function WarehouseLocationUtilizationPage({ params }: { params: { id: string } }) {
-  return <WarehouseLocationUtilizationWorkspace warehouseId={params.id} />;
+export default async function WarehouseLocationUtilizationPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = await params;
+  return <WarehouseLocationUtilizationWorkspace warehouseId={resolvedParams.id} />;
 }

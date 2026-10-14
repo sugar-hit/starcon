@@ -9,18 +9,15 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 3.3.1.2 类目属性要求的纯规则：要求形态词表、取值范围按数据类型的合法性、
- * 条件必填的求值。
+ * 3.3.1.2 类目属性要求的纯规则：要求形态词表、取值范围按数据类型的合法性、 条件必填的求值。
  *
  * <p>与 {@link SpecAxisRules} / {@link CategoryTreeRules} / {@link AttributeDictionaryRules} 同一条纪律：
- * **能在保存前判定的，就不要留到录入表单渲染或商品保存时才炸**。
- * 条件必填引用的属性如果不可枚举，那条规则在录入时永远求不出真值——
- * 界面上表现为「字段偶尔不校验」，比一个明确的 400 难排查得多。
+ * **能在保存前判定的，就不要留到录入表单渲染或商品保存时才炸**。 条件必填引用的属性如果不可枚举，那条规则在录入时永远求不出真值—— 界面上表现为「字段偶尔不校验」，比一个明确的 400
+ * 难排查得多。
  *
  * <p>本类不碰数据库，可以在离线单测里穷举，与前端 {@code category-requirements-model.ts} 同口径。
  *
- * <p>类名不叫 {@code CategoryRequirements}：那会被静态导入的 DTO record 撞名
- * （与 {@link SpecAxisRules} 同一个理由）。
+ * <p>类名不叫 {@code CategoryRequirements}：那会被静态导入的 DTO record 撞名 （与 {@link SpecAxisRules} 同一个理由）。
  */
 public final class CategoryAttributeRequirementRules {
   private CategoryAttributeRequirementRules() {}
@@ -36,12 +33,10 @@ public final class CategoryAttributeRequirementRules {
   /**
    * 算子按前置属性数据类型的可用集合。
    *
-   * <p>为什么不能只有一个全局词表：{@code GT} 对 DECIMAL 有意义（5 大于 3），
-   * 对 OPTION / TEXT 就没有——两个选项值之间没有大小。允许写出这种条件，
+   * <p>为什么不能只有一个全局词表：{@code GT} 对 DECIMAL 有意义（5 大于 3）， 对 OPTION / TEXT 就没有——两个选项值之间没有大小。允许写出这种条件，
    * 求值时只会得到「无法比较」，而字段就会一直停在「非必填」，条件形同虚设。
    *
-   * <p>{@code IN}/{@code NOT_IN} 对 DECIMAL 也开放：数值属性写「尺寸在 {1.5, 2.5} 时必填」
-   * 是可求值的有限集合，与数据类型不冲突。
+   * <p>{@code IN}/{@code NOT_IN} 对 DECIMAL 也开放：数值属性写「尺寸在 {1.5, 2.5} 时必填」 是可求值的有限集合，与数据类型不冲突。
    */
   private static final Set<String> ORDERING = Set.of("GT", "GTE", "LT", "LTE");
 
@@ -78,9 +73,8 @@ public final class CategoryAttributeRequirementRules {
   /**
    * 条件算子与前置属性数据类型的相容性。
    *
-   * <p>与 {@link #ORDERING} 同源：排序类算子只对**有大小关系**的数据类型开放。
-   * BOOLEAN 连相等比较都不开放——{@code true/false} 的布尔值是选项而非数值，
-   * 写 {@code GT} 表达不出任何可求值的东西（{@code IN}/{@code EQ} 才是它的正确写法）。
+   * <p>与 {@link #ORDERING} 同源：排序类算子只对**有大小关系**的数据类型开放。 BOOLEAN 连相等比较都不开放——{@code true/false}
+   * 的布尔值是选项而非数值， 写 {@code GT} 表达不出任何可求值的东西（{@code IN}/{@code EQ} 才是它的正确写法）。
    */
   public static String operatorDataTypeProblem(String operator, String dataType) {
     String op = normalizeOperator(operator);
@@ -94,11 +88,11 @@ public final class CategoryAttributeRequirementRules {
   /**
    * 取值范围约束按数据类型的合法性。
    *
-   * <p>与 V11 的 {@code rangeProblem} 同一思路，但本模块多管两类 V11 没有的约束：
-   * 文本长度上限（{@code maxLength}）与自由填写（{@code allowFreeText}）。
+   * <p>与 V11 的 {@code rangeProblem} 同一思路，但本模块多管两类 V11 没有的约束： 文本长度上限（{@code maxLength}）与自由填写（{@code
+   * allowFreeText}）。
    *
-   * <p>给错数据类型配了形态的规则不是「无害的多余字段」，而是**永远匹配不上的死约束**：
-   * 给 OPTION 属性配 minValue，界面上看不出问题，录入时也不会有人能填出一个满足它的值。
+   * <p>给错数据类型配了形态的规则不是「无害的多余字段」，而是**永远匹配不上的死约束**： 给 OPTION 属性配
+   * minValue，界面上看不出问题，录入时也不会有人能填出一个满足它的值。
    *
    * @param dataType 属性定义的数据类型
    * @param minValue 数值下限
@@ -138,24 +132,22 @@ public final class CategoryAttributeRequirementRules {
   /**
    * 条件取值集合的校验：非空 + 不重复。
    *
-   * <p>空集合必须挡住：{@code condition_operator='IN'} 但取值集合为空时，
-   * {@code 实际值 ∈ ∅} 恒为假，这条条件必填**永远不成立**，
+   * <p>空集合必须挡住：{@code condition_operator='IN'} 但取值集合为空时， {@code 实际值 ∈ ∅} 恒为假，这条条件必填**永远不成立**，
    * 等价于把字段悄悄降级成可选——配置的人以为自己加了要求，实际什么都没加。
    *
    * @param conditionRequirement 规则的 requirement
    * @param conditionValues 已填写的条件取值
    */
-  public static String conditionValuesProblem(String conditionRequirement, List<String> conditionValues) {
+  public static String conditionValuesProblem(
+      String conditionRequirement, List<String> conditionValues) {
     boolean conditional = "CONDITIONAL_REQUIRED".equals(normalizeRequirement(conditionRequirement));
     List<String> values = conditionValues == null ? List.of() : conditionValues;
     if (!conditional) {
       if (!values.isEmpty()) return "只有条件必填（CONDITIONAL_REQUIRED）的规则才能配置条件取值";
       return null;
     }
-    if (values.isEmpty())
-      return "条件必填必须给出至少一个条件取值：取值集合为空时条件恒不成立，这条要求等于没配";
-    for (String value : values)
-      if (value == null || value.isBlank()) return "条件取值不能为空";
+    if (values.isEmpty()) return "条件必填必须给出至少一个条件取值：取值集合为空时条件恒不成立，这条要求等于没配";
+    for (String value : values) if (value == null || value.isBlank()) return "条件取值不能为空";
     if (new LinkedHashSet<>(values).size() != values.size()) return "条件取值不可重复";
     return null;
   }
@@ -171,15 +163,13 @@ public final class CategoryAttributeRequirementRules {
   /**
    * 条件求值：给定前置属性的**当前值**，这条条件是否成立。
    *
-   * <p>本方法是「条件必填真正参与校验」的落点，被表单 schema 生成与保存前校验共用——
-   * 两处必须走同一个判定，否则会出现「表单标了必填、校验却放行」的分裂。
+   * <p>本方法是「条件必填真正参与校验」的落点，被表单 schema 生成与保存前校验共用—— 两处必须走同一个判定，否则会出现「表单标了必填、校验却放行」的分裂。
    *
    * <p>三条口径，都是为了让「条件不成立」和「条件无法判断」可区分：
    *
    * <ul>
    *   <li><b>前置属性没有值</b> → 条件不成立（{@code false}）。不是抛错也不是当成真：
-   *       录入时前置字段还没填就是「还不知道」，此时把依赖字段标成必填会逼用户先填前置字段，
-   *       而用户在录 T恤时不一定关心保修期。把未知当假，行为可预期。
+   *       录入时前置字段还没填就是「还不知道」，此时把依赖字段标成必填会逼用户先填前置字段， 而用户在录 T恤时不一定关心保修期。把未知当假，行为可预期。
    *   <li><b>空取值集合</b> → 恒为 {@code false}（配置层已挡住，这里兜底防绕过）。
    *   <li><b>类型不可比</b>（如对 OPTION 用 GT）→ 恒为 {@code false}（同上，配置层是主防线）。
    * </ul>
@@ -196,11 +186,13 @@ public final class CategoryAttributeRequirementRules {
     String actualValue = normalizeConditionValue(actual);
     if (actualValue.isEmpty()) return false;
     String op = normalizeOperator(operator);
-    String type = dependencyType == null ? "" : dependencyType.trim().toUpperCase(java.util.Locale.ROOT);
+    String type =
+        dependencyType == null ? "" : dependencyType.trim().toUpperCase(java.util.Locale.ROOT);
 
     // 条件取值同样去首尾空白：写入侧已经规范化过，但求值侧不该假设调用方都走了那条路——
     // 两侧口径不一致时，一次手误的空格就能让条件永远不成立，而界面上看不出任何异常。
-    List<String> expectedTrimmed = expected.stream().map(CategoryAttributeRequirementRules::normalizeConditionValue).toList();
+    List<String> expectedTrimmed =
+        expected.stream().map(CategoryAttributeRequirementRules::normalizeConditionValue).toList();
 
     if ("IN".equals(op)) return expectedTrimmed.contains(actualValue);
     if ("NOT_IN".equals(op)) return !expectedTrimmed.contains(actualValue);
@@ -229,9 +221,8 @@ public final class CategoryAttributeRequirementRules {
   /**
    * 宽松的数值解析：能解析成 BigDecimal 就返回，解析不出来返回 {@code null}。
    *
-   * <p>用 {@link BigDecimal} 而不是 {@code double}：条件里比的是数值属性与年份，
-   * 浮点误差会让 {@code 0.1+0.2 > 0.3} 这类判定在两台机器上给出不同结果
-   * （AGENTS.md 明令禁止浮点记账，这里是同一条纪律在条件求值上的延伸）。
+   * <p>用 {@link BigDecimal} 而不是 {@code double}：条件里比的是数值属性与年份， 浮点误差会让 {@code 0.1+0.2 > 0.3}
+   * 这类判定在两台机器上给出不同结果 （AGENTS.md 明令禁止浮点记账，这里是同一条纪律在条件求值上的延伸）。
    */
   private static BigDecimal parseNumeric(String value) {
     if (value == null || value.isBlank()) return null;
@@ -245,15 +236,19 @@ public final class CategoryAttributeRequirementRules {
   /**
    * 把一条条件组装成可求值的形状。
    *
-   * <p>与 {@link CategoryAttributeCondition} 分开：本方法只关心**求值需要的四个事实**
-   * （算子 / 取值 / 前置属性类型 / 前置属性名），不关心展示用的属性 id。
+   * <p>与 {@link CategoryAttributeCondition} 分开：本方法只关心**求值需要的四个事实** （算子 / 取值 / 前置属性类型 /
+   * 前置属性名），不关心展示用的属性 id。
    */
   public static ResolvedCondition resolve(
-      CategoryAttributeCondition condition, List<CategoryAttributeConditionValue> values, String dependencyType) {
+      CategoryAttributeCondition condition,
+      List<CategoryAttributeConditionValue> values,
+      String dependencyType) {
     if (condition == null) return null;
     return new ResolvedCondition(
         normalizeOperator(condition.operator()),
-        values == null ? List.of() : values.stream().map(CategoryAttributeConditionValue::value).toList(),
+        values == null
+            ? List.of()
+            : values.stream().map(CategoryAttributeConditionValue::value).toList(),
         dependencyType,
         condition.attributeName());
   }

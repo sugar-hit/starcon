@@ -180,10 +180,14 @@ export function OAuthWizard({
     if (!sessionId) return;
     setBusy(true);
     try {
-      const result = await api<OAuthCompletedView>(`channel/oauth/sessions/${sessionId}/confirm`, 'POST', {
-        shopIds: [...selected],
-        idempotencyKey: newIdempotencyKey(),
-      });
+      const result = await api<OAuthCompletedView>(
+        `channel/oauth/sessions/${sessionId}/confirm`,
+        'POST',
+        {
+          shopIds: [...selected],
+          idempotencyKey: newIdempotencyKey(),
+        },
+      );
       setCompleted(result);
       setStep('done');
       await onDone();
@@ -240,10 +244,10 @@ export function OAuthWizard({
             aria-current={s.id === step ? 'step' : undefined}
             className={
               i === current
-                ? 'bg-primary/10 text-primary rounded-md px-2 py-1 text-copy-12 font-medium'
+                ? 'bg-primary/10 text-primary text-copy-12 rounded-md px-2 py-1 font-medium'
                 : i < current
-                  ? 'text-muted-foreground rounded-md px-2 py-1 text-copy-12'
-                  : 'text-muted-foreground/60 rounded-md px-2 py-1 text-copy-12'
+                  ? 'text-muted-foreground text-copy-12 rounded-md px-2 py-1'
+                  : 'text-muted-foreground/60 text-copy-12 rounded-md px-2 py-1'
             }
           >
             {i < current && <Check className="mr-1 inline h-3 w-3" />}
@@ -255,7 +259,7 @@ export function OAuthWizard({
       {failure && (
         <div
           role="alert"
-          className="border-destructive/30 bg-destructive/5 text-destructive flex items-start gap-2 rounded-md border p-3 text-copy-13"
+          className="border-destructive/30 bg-destructive/5 text-destructive text-copy-13 flex items-start gap-2 rounded-md border p-3"
         >
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{failure}</span>
@@ -292,8 +296,15 @@ export function OAuthWizard({
                 />
               </label>
               <div className="flex items-end">
-                <Button disabled={busy || !platform || !can('channel.connection.create')} onClick={() => void beginAuthorization()}>
-                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
+                <Button
+                  disabled={busy || !platform || !can('channel.connection.create')}
+                  onClick={() => void beginAuthorization()}
+                >
+                  {busy ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ExternalLink className="h-4 w-4" />
+                  )}
                   去平台授权
                 </Button>
               </div>
@@ -327,11 +338,17 @@ export function OAuthWizard({
       {step === 'verify' && (
         <div className="space-y-2">
           <p className="text-copy-13 flex items-center gap-2">
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ShieldCheck className="h-4 w-4" />
+            )}
             {session ? (sessionStatusLabel[session.status] ?? session.status) : '正在校验平台回调…'}
           </p>
           {session && session.grantedScopes && (
-            <p className="text-muted-foreground text-copy-12">平台授予的权限范围：{session.grantedScopes}</p>
+            <p className="text-muted-foreground text-copy-12">
+              平台授予的权限范围：{session.grantedScopes}
+            </p>
           )}
           <Button size="sm" variant="ghost" onClick={() => void cancel()}>
             放弃本次授权
@@ -342,8 +359,11 @@ export function OAuthWizard({
       {step === 'scope' && session && (
         <div className="space-y-3">
           <p className="text-copy-13">
-            账号 <span className="font-medium">{session.authorizedAccountName || session.authorizedAccount}</span> 授权成功，
-            请确认要纳管的店铺范围：
+            账号{' '}
+            <span className="font-medium">
+              {session.authorizedAccountName || session.authorizedAccount}
+            </span>{' '}
+            授权成功， 请确认要纳管的店铺范围：
           </p>
           {candidates.length === 0 ? (
             <p className="text-muted-foreground text-copy-13">该平台没有返回可纳管的店铺。</p>
@@ -351,7 +371,7 @@ export function OAuthWizard({
             <ul className="space-y-1">
               {candidates.map((c) => (
                 <li key={c.id}>
-                  <label className="flex items-center gap-2 text-copy-13">
+                  <label className="text-copy-13 flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={selected.has(c.id)}
@@ -367,7 +387,9 @@ export function OAuthWizard({
                     <Store className="h-4 w-4" />
                     {c.shopName || c.externalShopId}
                     {c.marketplaceCode && <Badge tone="neutral">{c.marketplaceCode}</Badge>}
-                    <span className="text-muted-foreground text-copy-12 break-all">{c.externalShopId}</span>
+                    <span className="text-muted-foreground text-copy-12 break-all">
+                      {c.externalShopId}
+                    </span>
                   </label>
                 </li>
               ))}

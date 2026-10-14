@@ -20,19 +20,27 @@ const destinations = [
     '停用离职成员、转移在办单据与审批责任、回收待办与任务，全程保留历史记录',
   ],
   ['roles', '角色配置', '配置页面操作权限与数据范围'],
-  [
-    'role-assignments',
-    '角色分配',
-    '给成员分配角色，设定生效时间与法人、店铺、仓库、部门作用范围',
-  ],
+  ['role-assignments', '角色分配', '给成员分配角色，设定生效时间与法人、店铺、仓库、部门作用范围'],
   ['departments', '部门管理', '维护成员归属与部门数据范围'],
   ['department-leaders', '部门负责人', '指定各部门负责人、管理范围与审批权限，支持代管与临时授权'],
   ['children', '子租户管理', '创建独立工作空间并指定所有者'],
   ['hierarchy', '层级授权', '显式开通父租户对子租户数据的访问范围与有效期'],
   ['audit', '审计日志', '检索关键操作留痕、变更详情与导出'],
-  ['business-parameters', '业务参数', '配置审单、库存、售后、成本与展示默认值，并按全局/法人/店铺分档生效'],
-  ['dictionary', '数据字典', '维护状态枚举、原因码、分类标签与单位类型，被引用的字典项只能停用不能删除'],
-  ['numbering-rules', '编号规则', '配置单据编号规则（前缀 + 日期 + 序号 + 后缀），序号按实体与日期重置，支持多级嵌套与预览'],
+  [
+    'business-parameters',
+    '业务参数',
+    '配置审单、库存、售后、成本与展示默认值，并按全局/法人/店铺分档生效',
+  ],
+  [
+    'dictionary',
+    '数据字典',
+    '维护状态枚举、原因码、分类标签与单位类型，被引用的字典项只能停用不能删除',
+  ],
+  [
+    'numbering-rules',
+    '编号规则',
+    '配置单据编号规则（前缀 + 日期 + 序号 + 后缀），序号按实体与日期重置，支持多级嵌套与预览',
+  ],
   [
     'approval-flows',
     '审批流定义',
@@ -68,12 +76,12 @@ function visible(session: Access, key: string) {
   // 而 AdministrationKind 里根本没有 'hierarchy'，于是有 tenant.hierarchy.read 的人反而看不到入口。
   if (key === 'hierarchy') return hasPermission(session, 'tenant.hierarchy.read');
   // 部门负责人同样是独立页面权限码，不走 canManage 的页面映射（17.2.1.2）。
-  if (key === 'department-leaders') return hasPermission(session, 'identity.department_leader.read');
+  if (key === 'department-leaders')
+    return hasPermission(session, 'identity.department_leader.read');
   // 离职与停用同样是独立页面权限码，不走 AdministrationPanel 的四类管理（17.2.2.3）。
   if (key === 'offboarding') return hasPermission(session, 'identity.offboarding.read');
   // 角色分配同样是独立页面权限码，与「角色配置」「成员管理」不是一回事（17.3.2.1）。
-  if (key === 'role-assignments')
-    return hasPermission(session, 'identity.assignment.read');
+  if (key === 'role-assignments') return hasPermission(session, 'identity.assignment.read');
   if (key === 'onboarding')
     return session.grants.some(
       (g) => g.scopeMode === 'ALL' && g.permissions.includes('identity.onboarding.read'),
@@ -84,7 +92,7 @@ function visible(session: Access, key: string) {
   // 少了这条会落到 canManage 兜底，而 AdministrationKind 里没有 'operation-log'，
   // 于是有 identity.operation_log.read 的人反而在导航里看不到入口。
   if (key === 'operation-log') return hasPermission(session, 'identity.operation_log.read');
-// 审批流定义（17.4.1.1）是独立页面权限码，不走 AdministrationPanel 的四类管理，
+  // 审批流定义（17.4.1.1）是独立页面权限码，不走 AdministrationPanel 的四类管理，
   // 也不走 canManage 的页面映射 —— AdministrationKind 里没有它，落到 canManage 会把入口藏掉。
   if (key === 'approval-flows') return hasPermission(session, 'identity.approval_flow.read');
   // 审批规则（17.4.1.2）是独立页面权限码：改「这次提交要不要走审批」能绕开 17.4.1.1 配好的流程，
@@ -234,10 +242,14 @@ export function IdentityWorkspace({
                 单开一张卡挂同一个 visible() 权限码。少这张卡页面就没人能进 ——
                 17.1.2.2 的账簿页正是因此长期零入口。 */}
             {visible(session, 'books') && (
-              <Link href="/settings/books" className="bg-card hover:border-brand rounded-lg border p-5">
+              <Link
+                href="/settings/books"
+                className="bg-card hover:border-brand rounded-lg border p-5"
+              >
                 <h2 className="font-semibold">账簿与本位币</h2>
                 <p className="text-muted-foreground mt-2 text-sm">
-                  一个法人可以同时用人民币业务账与美元海外账记账：按业务账 / 法定账分组，指定默认账簿，并登记业务事实的归属账簿
+                  一个法人可以同时用人民币业务账与美元海外账记账：按业务账 /
+                  法定账分组，指定默认账簿，并登记业务事实的归属账簿
                 </p>
               </Link>
             )}

@@ -74,7 +74,12 @@ const candidate = (overrides: Partial<DuplicateCandidateRow> = {}): DuplicateCan
     overlapDimensionCount: 2,
     dimensions: [
       { dimension: 'BARCODE', label: '同条码多 SKU', score: 1, evidence: '撞了 6901234567892' },
-      { dimension: 'SIMILAR_PRODUCT', label: '近似标题+相似图片疑似同品', score: 0.85, evidence: '1 张图' },
+      {
+        dimension: 'SIMILAR_PRODUCT',
+        label: '近似标题+相似图片疑似同品',
+        score: 0.85,
+        evidence: '1 张图',
+      },
     ],
     leftReferenceCount: 2,
     rightReferenceCount: 0,
@@ -181,7 +186,9 @@ describe('范围收窄必须显式警示', () => {
   });
 
   it('收窄过但有候选时也仍然提示范围', () => {
-    const warning = scopeWarning(scan({ scopeApplied: true, scopeBrand: 'Sony', candidateCount: 3 }));
+    const warning = scopeWarning(
+      scan({ scopeApplied: true, scopeBrand: 'Sony', candidateCount: 3 }),
+    );
     expect(warning).toContain('Sony');
     expect(warning).not.toBeNull();
   });
@@ -204,7 +211,11 @@ describe('扫描读数', () => {
 });
 
 describe('决定', () => {
-  const mergeDraft: DecisionDraft = { decision: 'MERGE', primarySkuId: 'sku-left', note: '同一商品' };
+  const mergeDraft: DecisionDraft = {
+    decision: 'MERGE',
+    primarySkuId: 'sku-left',
+    note: '同一商品',
+  };
 
   it('按钮文案不能说成已经合并', () => {
     expect(decisionButtonLabel('MERGE')).toBe('登记合并决定');
@@ -216,7 +227,9 @@ describe('决定', () => {
   it('MERGE 必须指主记录且必须落在候选两侧之内', () => {
     expect(canSubmitDecision(mergeDraft, detail())).toEqual({ ok: true, reason: '' });
     expect(canSubmitDecision({ ...mergeDraft, primarySkuId: '' }, detail()).ok).toBe(false);
-    expect(canSubmitDecision({ ...mergeDraft, primarySkuId: '' }, detail()).reason).toContain('保留哪一条');
+    expect(canSubmitDecision({ ...mergeDraft, primarySkuId: '' }, detail()).reason).toContain(
+      '保留哪一条',
+    );
     const outside = canSubmitDecision({ ...mergeDraft, primarySkuId: 'sku-elsewhere' }, detail());
     expect(outside.ok).toBe(false);
     expect(outside.reason).toContain('两条之一');
@@ -225,12 +238,18 @@ describe('决定', () => {
   });
 
   it('KEEP 不需要主记录，但理由仍限长', () => {
-    expect(canSubmitDecision({ decision: 'KEEP', primarySkuId: '', note: '' }, detail()).ok).toBe(true);
-    expect(canSubmitDecision({ decision: 'KEEP', primarySkuId: '', note: 'x'.repeat(1001) }, detail()).ok)
-      .toBe(false);
+    expect(canSubmitDecision({ decision: 'KEEP', primarySkuId: '', note: '' }, detail()).ok).toBe(
+      true,
+    );
     expect(
-      canSubmitDecision({ decision: 'MERGE', primarySkuId: 'sku-left', note: 'x'.repeat(1001) }, detail())
+      canSubmitDecision({ decision: 'KEEP', primarySkuId: '', note: 'x'.repeat(1001) }, detail())
         .ok,
+    ).toBe(false);
+    expect(
+      canSubmitDecision(
+        { decision: 'MERGE', primarySkuId: 'sku-left', note: 'x'.repeat(1001) },
+        detail(),
+      ).ok,
     ).toBe(false);
   });
 
@@ -244,7 +263,10 @@ describe('决定', () => {
     const existing = { version: 3 } as DuplicateDecisionRow;
     expect(decisionPayload(mergeDraft, existing).expectedVersion).toBe(3);
     // KEEP 不带 primarySkuId：带上会让后端以为要执行合并
-    const keep = decisionPayload({ decision: 'KEEP', primarySkuId: 'sku-left', note: '' }, existing);
+    const keep = decisionPayload(
+      { decision: 'KEEP', primarySkuId: 'sku-left', note: '' },
+      existing,
+    );
     expect(keep).not.toHaveProperty('primarySkuId');
     expect(keep.decision).toBe('KEEP');
   });
@@ -255,10 +277,7 @@ describe('决定', () => {
     // 先断长度再取下标：noUncheckedIndexedAccess 下 options[0] 是 T | undefined，
     // 断言 toHaveLength 不会让 TS 知道它一定存在，所以取值要显式收一下。
     expect(options.map((o) => o.value)).toEqual(['sku-left', 'sku-right']);
-    expect(options.map((o) => o.label)).toEqual([
-      '保留 L-1（左）',
-      '保留 R-1（右）',
-    ]);
+    expect(options.map((o) => o.label)).toEqual(['保留 L-1（左）', '保留 R-1（右）']);
     expect(primaryOptions(null)).toEqual([]);
   });
 
@@ -280,7 +299,11 @@ describe('决定', () => {
 describe('阈值', () => {
   it('默认阈值与后端一致', () => {
     expect(DEFAULT_MIN_SIMILARITY).toBe('0.8000');
-    expect(validateMinSimilarity(DEFAULT_MIN_SIMILARITY)).toEqual({ ok: true, reason: '', value: 0.8 });
+    expect(validateMinSimilarity(DEFAULT_MIN_SIMILARITY)).toEqual({
+      ok: true,
+      reason: '',
+      value: 0.8,
+    });
   });
 
   it('越界与非数字被拒而不是静默夹取', () => {

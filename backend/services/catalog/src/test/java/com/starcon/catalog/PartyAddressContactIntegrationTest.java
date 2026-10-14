@@ -8,8 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.net.httpserver.HttpServer;
 import com.starcon.tenancy.Ids;
+import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.time.Instant;
@@ -28,25 +28,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * 3.6.3.1 地址与联系人的集成测试。
  *
- * <p>真实 PostgreSQL 16（Testcontainers）+ FORCE RLS，且连接池固定 1 条连接：
- * 只有复用同一条连接，才能真正证明归还之后不会串租户。
+ * <p>真实 PostgreSQL 16（Testcontainers）+ FORCE RLS，且连接池固定 1 条连接： 只有复用同一条连接，才能真正证明归还之后不会串租户。
  *
  * <p>本类覆盖三组断言：
  *
  * <ol>
- *   <li><b>冻结快照</b>（{@link #地址改内容后旧版本仍是当时的内容()} 等）：蓝图那条
- *       「单据上的地址是冻结快照，本模块改地址不影响已发生单据」—— 本侧要证明的是
+ *   <li><b>冻结快照</b>（{@link #地址改内容后旧版本仍是当时的内容()} 等）：蓝图那条 「单据上的地址是冻结快照，本模块改地址不影响已发生单据」—— 本侧要证明的是
  *       「旧版本行不会被改写」「能按 version_no 精确取回当时的内容」「时间戳没偏」。
  *   <li><b>默认标记与整体替换</b>：每个用途一个默认、只改标签不产生版本行。
- *   <li><b>租户隔离三断言</b>（{@link #租户隔离三断言覆盖地址与联系人()}），
- *       并且<b>覆盖用途行与版本行</b> —— 那两行才是本模块真正的越权面。
+ *   <li><b>租户隔离三断言</b>（{@link #租户隔离三断言覆盖地址与联系人()}）， 并且<b>覆盖用途行与版本行</b> —— 那两行才是本模块真正的越权面。
  * </ol>
  */
 @Testcontainers
@@ -70,8 +67,13 @@ class PartyAddressContactIntegrationTest {
   static AccessService.Access actor(
       UUID uid, UUID tenant, UUID dept, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), dept,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        dept,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -108,8 +110,7 @@ class PartyAddressContactIntegrationTest {
       // 只有商品读权限：写端点必须 403（地址与联系人沿用商品主数据域权限）。
       actors.put(
           "Bearer reader",
-          actor(
-              user, a, null, List.of(grant("ALL", List.of("catalog.spu.read")))));
+          actor(user, a, null, List.of(grant("ALL", List.of("catalog.spu.read")))));
       identity.start();
     } catch (Exception e) {
       throw new ExceptionInInitializerError(e);
@@ -172,30 +173,40 @@ class PartyAddressContactIntegrationTest {
   UUID party(AccessService.Access who, String prefix) {
     String code = unique(prefix);
     return write(
-            who,
-            () ->
-                parties.save(
-                        who,
+        who,
+        () ->
+            parties
+                .save(
+                    who,
+                    null,
+                    new CatalogModels.PartyInput(
+                        code,
+                        prefix + " 主体",
+                        "ORGANIZATION",
+                        "CN",
+                        "box@" + code.toLowerCase() + ".example",
                         null,
-                        new CatalogModels.PartyInput(
-                            code,
-                            prefix + " 主体",
-                            "ORGANIZATION",
-                            "CN",
-                            "box@" + code.toLowerCase() + ".example",
-                            null,
-                            null,
-                            "ACTIVE",
-                            List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")),
-                            0))
-                    .id());
+                        null,
+                        "ACTIVE",
+                        List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")),
+                        0))
+                .id());
   }
 
   static CatalogModels.PartyAddressInput address(
       String streetLine1, String city, CatalogModels.PartyAddressUsageInput... usages) {
     return new CatalogModels.PartyAddressInput(
-        "CN", "广东省", city, "南山区", "518000", streetLine1, "3 号楼 5 层", "仓库", "首次录入",
-        List.of(usages), 0);
+        "CN",
+        "广东省",
+        city,
+        "南山区",
+        "518000",
+        streetLine1,
+        "3 号楼 5 层",
+        "仓库",
+        "首次录入",
+        List.of(usages),
+        0);
   }
 
   static CatalogModels.PartyAddressUsageInput usage(String value, boolean isDefault) {
@@ -242,7 +253,11 @@ class PartyAddressContactIntegrationTest {
   void 地址改内容后旧版本仍是当时的内容() {
     UUID partyId = party(actor, "SNAP");
     UUID addressId =
-        write(actor, () -> addresses.save(actor, partyId, null, address("老门牌 9 号", "宁波市", usage("SHIP_FROM", true))))
+        write(
+                actor,
+                () ->
+                    addresses.save(
+                        actor, partyId, null, address("老门牌 9 号", "宁波市", usage("SHIP_FROM", true))))
             .id();
     long v1Version = tx(actor, () -> addresses.detail(partyId, addressId)).version();
 
@@ -255,8 +270,17 @@ class PartyAddressContactIntegrationTest {
                 partyId,
                 addressId,
                 new CatalogModels.PartyAddressInput(
-                    "CN", "浙江省", "宁波市", "鄞州区", "315100", "新门牌 88 号", null, "仓库",
-                    "门牌号改了", List.of(usage("SHIP_FROM", true)), v1Version)));
+                    "CN",
+                    "浙江省",
+                    "宁波市",
+                    "鄞州区",
+                    "315100",
+                    "新门牌 88 号",
+                    null,
+                    "仓库",
+                    "门牌号改了",
+                    List.of(usage("SHIP_FROM", true)),
+                    v1Version)));
 
     var versions = tx(actor, () -> addresses.versions(partyId, addressId));
     assertThat(versions).hasSize(2);
@@ -287,10 +311,9 @@ class PartyAddressContactIntegrationTest {
   @Test
   void 取一个不存在的版本会报当前最新是第几版() {
     UUID partyId = party(actor, "VER");
-    UUID addressId = write(actor, () -> addresses.save(actor, partyId, null, address("某路 1 号", "广州市"))).id();
-    var error =
-        catchThrowable(
-            () -> tx(actor, () -> addresses.version(partyId, addressId, 7)));
+    UUID addressId =
+        write(actor, () -> addresses.save(actor, partyId, null, address("某路 1 号", "广州市"))).id();
+    var error = catchThrowable(() -> tx(actor, () -> addresses.version(partyId, addressId, 7)));
     assertThat(error).isInstanceOf(ResponseStatusException.class);
     assertThat(((ResponseStatusException) error).getMessage()).contains("第 7 版").contains("第 1 版");
   }
@@ -298,7 +321,8 @@ class PartyAddressContactIntegrationTest {
   @Test
   void 内容未改的保存不产生新版本而只改标签也不产生() {
     UUID partyId = party(actor, "A3");
-    UUID addressId = write(actor, () -> addresses.save(actor, partyId, null, address("同一条街 8 号", "青岛市"))).id();
+    UUID addressId =
+        write(actor, () -> addresses.save(actor, partyId, null, address("同一条街 8 号", "青岛市"))).id();
     long version = tx(actor, () -> addresses.detail(partyId, addressId)).version();
 
     // 内容一字未改：保存不追加版本（规则 A3）。
@@ -312,8 +336,17 @@ class PartyAddressContactIntegrationTest {
                 partyId,
                 addressId,
                 new CatalogModels.PartyAddressInput(
-                    "CN", "广东省", "青岛市", "南山区", "518000", "同一条街 8 号", "3 号楼 5 层", "仓库",
-                    "点了一下保存", List.of(usage("SHIP_TO", true)), version)));
+                    "CN",
+                    "广东省",
+                    "青岛市",
+                    "南山区",
+                    "518000",
+                    "同一条街 8 号",
+                    "3 号楼 5 层",
+                    "仓库",
+                    "点了一下保存",
+                    List.of(usage("SHIP_TO", true)),
+                    version)));
     var afterNoop = tx(actor, () -> addresses.detail(partyId, addressId));
     assertThat(afterNoop.latestVersionNo()).isEqualTo(1);
     assertThat(afterNoop.versionCount()).isEqualTo(1);
@@ -343,7 +376,11 @@ class PartyAddressContactIntegrationTest {
   void 每个用途各有一个默认地址且设默认会转移() {
     UUID partyId = party(actor, "DEF");
     UUID first =
-        write(actor, () -> addresses.save(actor, partyId, null, address("一号仓路 1 号", "杭州市", usage("PICKUP", true))))
+        write(
+                actor,
+                () ->
+                    addresses.save(
+                        actor, partyId, null, address("一号仓路 1 号", "杭州市", usage("PICKUP", true))))
             .id();
     UUID second =
         write(actor, () -> addresses.save(actor, partyId, null, address("二号仓路 2 号", "苏州市"))).id();
@@ -378,21 +415,24 @@ class PartyAddressContactIntegrationTest {
         actor,
         () ->
             addresses.setDefault(
-                actor, partyId, second, new CatalogModels.PartyAddressDefaultInput("PICKUP", true, v2)));
+                actor,
+                partyId,
+                second,
+                new CatalogModels.PartyAddressDefaultInput("PICKUP", true, v2)));
 
     var defaultPickup = tx(actor, () -> addresses.defaultAddress(partyId, "PICKUP"));
     assertThat(defaultPickup.id()).isEqualTo(second);
     assertThat(tx(actor, () -> addresses.detail(partyId, first)).defaultUsages()).isEmpty();
     // 用途整体替换后第一行应当只剩它自己提交过的用途。
-    assertThat(tx(actor, () -> addresses.detail(partyId, second)).defaultUsages()).containsExactly("PICKUP");
+    assertThat(tx(actor, () -> addresses.detail(partyId, second)).defaultUsages())
+        .containsExactly("PICKUP");
   }
 
   @Test
   void 没有默认地址时报错并说清是哪个用途() {
     UUID partyId = party(actor, "NODEF");
     write(actor, () -> addresses.save(actor, partyId, null, address("某路 5 号", "成都市")));
-    var error =
-        catchThrowable(() -> tx(actor, () -> addresses.defaultAddress(partyId, "SHIP_TO")));
+    var error = catchThrowable(() -> tx(actor, () -> addresses.defaultAddress(partyId, "SHIP_TO")));
     assertThat(error).isInstanceOf(ResponseStatusException.class);
     assertThat(((ResponseStatusException) error).getMessage()).contains("收货地址");
   }
@@ -424,7 +464,11 @@ class PartyAddressContactIntegrationTest {
   void 软删除保留行与版本链且默认标记被清掉() {
     UUID partyId = party(actor, "SOFT");
     UUID addressId =
-        write(actor, () -> addresses.save(actor, partyId, null, address("待删路 6 号", "西安市", usage("SHIP_TO", true))))
+        write(
+                actor,
+                () ->
+                    addresses.save(
+                        actor, partyId, null, address("待删路 6 号", "西安市", usage("SHIP_TO", true))))
             .id();
     // 取消默认后才能删。
     long v = tx(actor, () -> addresses.detail(partyId, addressId)).version();
@@ -432,7 +476,10 @@ class PartyAddressContactIntegrationTest {
         actor,
         () ->
             addresses.setDefault(
-                actor, partyId, addressId, new CatalogModels.PartyAddressDefaultInput("SHIP_TO", false, v)));
+                actor,
+                partyId,
+                addressId,
+                new CatalogModels.PartyAddressDefaultInput("SHIP_TO", false, v)));
     long v2 = tx(actor, () -> addresses.detail(partyId, addressId)).version();
     writeVoid(actor, () -> addresses.delete(actor, partyId, addressId, v2));
 
@@ -443,13 +490,28 @@ class PartyAddressContactIntegrationTest {
     assertThat(detail.defaultUsages()).isEmpty();
     assertThat(tx(actor, () -> addresses.versions(partyId, addressId))).hasSize(1);
     // 列表默认不显示它。
-    assertThat(tx(actor, () -> addresses.list(partyId, new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 20))).items())
+    assertThat(
+            tx(
+                    actor,
+                    () ->
+                        addresses.list(
+                            partyId,
+                            new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 20)))
+                .items())
         .noneMatch(a -> a.id().equals(addressId));
     // includeDeleted 才带得出来。
-    assertThat(tx(actor, () -> addresses.list(partyId, new CatalogModels.PartyAddressQuery(null, null, null, true, 0, 20))).items())
+    assertThat(
+            tx(
+                    actor,
+                    () ->
+                        addresses.list(
+                            partyId,
+                            new CatalogModels.PartyAddressQuery(null, null, null, true, 0, 20)))
+                .items())
         .anyMatch(a -> a.id().equals(addressId));
     // 候选两种模式都不返回它（新单据永远不该选中一个已删的地址）。
-    assertThat(tx(actor, () -> addresses.candidates(partyId, null, null, false))).noneMatch(a -> a.id().equals(addressId));
+    assertThat(tx(actor, () -> addresses.candidates(partyId, null, null, false)))
+        .noneMatch(a -> a.id().equals(addressId));
     assertThat(tx(actor, () -> addresses.candidates(partyId, null, null, true)))
         .noneMatch(a -> a.id().equals(addressId));
   }
@@ -470,7 +532,8 @@ class PartyAddressContactIntegrationTest {
                             partyId,
                             null,
                             new CatalogModels.PartyAddressInput(
-                                "", "广东省", "", "南山区", "518000", "  ", null, null, null, List.of(), 0))));
+                                "", "广东省", "", "南山区", "518000", "  ", null, null, null, List.of(),
+                                0))));
     assertThat(error).isInstanceOf(ResponseStatusException.class);
     assertThat(((ResponseStatusException) error).getMessage()).contains("国家");
   }
@@ -488,7 +551,17 @@ class PartyAddressContactIntegrationTest {
                         partyId,
                         null,
                         new CatalogModels.PartyAddressInput(
-                            "HK", null, "香港", null, null, "中环干诺道 8 号", null, "办事处", null, List.of(), 0)))
+                            "HK",
+                            null,
+                            "香港",
+                            null,
+                            null,
+                            "中环干诺道 8 号",
+                            null,
+                            "办事处",
+                            null,
+                            List.of(),
+                            0)))
             .id();
     assertThat(tx(actor, () -> addresses.detail(partyId, ok)).postalCode()).isNull();
 
@@ -503,8 +576,17 @@ class PartyAddressContactIntegrationTest {
                             partyId,
                             null,
                             new CatalogModels.PartyAddressInput(
-                                "HK", null, "香港", null, "   ", "中环干诺道 8 号", null, "办事处", null,
-                                List.of(), 0))));
+                                "HK",
+                                null,
+                                "香港",
+                                null,
+                                "   ",
+                                "中环干诺道 8 号",
+                                null,
+                                "办事处",
+                                null,
+                                List.of(),
+                                0))));
     assertThat(error).isInstanceOf(ResponseStatusException.class);
     assertThat(((ResponseStatusException) error).getMessage()).contains("邮编");
   }
@@ -515,16 +597,24 @@ class PartyAddressContactIntegrationTest {
     String inactiveCode = unique("INACTIVE");
     UUID inactive =
         write(
-                actor,
-                () ->
-                    parties.save(
-                            actor,
+            actor,
+            () ->
+                parties
+                    .save(
+                        actor,
+                        null,
+                        new CatalogModels.PartyInput(
+                            inactiveCode,
+                            "停用主体",
+                            "ORGANIZATION",
+                            "CN",
+                            "off@" + inactiveCode.toLowerCase() + ".example",
                             null,
-                            new CatalogModels.PartyInput(
-                                inactiveCode, "停用主体", "ORGANIZATION", "CN",
-                                "off@" + inactiveCode.toLowerCase() + ".example", null, null, "INACTIVE",
-                                List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")), 0))
-                        .id());
+                            null,
+                            "INACTIVE",
+                            List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")),
+                            0))
+                    .id());
     UUID addressId =
         write(actor, () -> addresses.save(actor, inactive, null, address("备用路 2 号", "天津市"))).id();
     assertThat(tx(actor, () -> addresses.detail(inactive, addressId)).id()).isEqualTo(addressId);
@@ -533,26 +623,33 @@ class PartyAddressContactIntegrationTest {
     String blackCode = unique("BLACK");
     UUID black =
         write(
-                actor,
-                () ->
-                    parties.save(
-                            actor,
+            actor,
+            () ->
+                parties
+                    .save(
+                        actor,
+                        null,
+                        new CatalogModels.PartyInput(
+                            blackCode,
+                            "拉黑主体",
+                            "ORGANIZATION",
+                            "CN",
+                            "no@" + blackCode.toLowerCase() + ".example",
                             null,
-                            new CatalogModels.PartyInput(
-                                blackCode, "拉黑主体", "ORGANIZATION", "CN",
-                                "no@" + blackCode.toLowerCase() + ".example", null, null, "ACTIVE",
-                                List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")), 0))
-                        .id());
+                            null,
+                            "ACTIVE",
+                            List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")),
+                            0))
+                    .id());
     write(
         actor,
         () ->
             parties.setStatus(
-                actor,
-                black,
-                new CatalogModels.PartyStatusInput("BLACKLISTED", "已被列入制裁名单", 0)));
+                actor, black, new CatalogModels.PartyStatusInput("BLACKLISTED", "已被列入制裁名单", 0)));
     var error =
         catchThrowable(
-            () -> write(actor, () -> addresses.save(actor, black, null, address("黑名单路 1 号", "济南市"))));
+            () ->
+                write(actor, () -> addresses.save(actor, black, null, address("黑名单路 1 号", "济南市"))));
     assertThat(error).isInstanceOf(ResponseStatusException.class);
     assertThat(((ResponseStatusException) error).getMessage()).contains("拉黑");
 
@@ -561,7 +658,8 @@ class PartyAddressContactIntegrationTest {
             tx(
                 actor,
                 () ->
-                    sql.fetchOne("select count(*) from party_address where party_id=?", black).get(0, Long.class)))
+                    sql.fetchOne("select count(*) from party_address where party_id=?", black)
+                        .get(0, Long.class)))
         .isZero();
   }
 
@@ -572,21 +670,31 @@ class PartyAddressContactIntegrationTest {
     String code = unique("BLACKEDIT");
     UUID black =
         write(
-                actor,
-                () ->
-                    parties.save(
-                            actor,
+            actor,
+            () ->
+                parties
+                    .save(
+                        actor,
+                        null,
+                        new CatalogModels.PartyInput(
+                            code,
+                            "可编辑的拉黑主体",
+                            "ORGANIZATION",
+                            "CN",
+                            "be@" + code.toLowerCase() + ".example",
                             null,
-                            new CatalogModels.PartyInput(
-                                code, "可编辑的拉黑主体", "ORGANIZATION", "CN",
-                                "be@" + code.toLowerCase() + ".example", null, null, "ACTIVE",
-                                List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")), 0))
-                        .id());
+                            null,
+                            "ACTIVE",
+                            List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")),
+                            0))
+                    .id());
     UUID addressId =
         write(actor, () -> addresses.save(actor, black, null, address("整理前路 1 号", "福州市"))).id();
     write(
         actor,
-        () -> parties.setStatus(actor, black, new CatalogModels.PartyStatusInput("BLACKLISTED", "纠纷对手方", 0)));
+        () ->
+            parties.setStatus(
+                actor, black, new CatalogModels.PartyStatusInput("BLACKLISTED", "纠纷对手方", 0)));
 
     // 改地址内容：允许，并且照常追加版本（版本链与主体状态无关）。
     UUID edited =
@@ -598,8 +706,17 @@ class PartyAddressContactIntegrationTest {
                         black,
                         addressId,
                         new CatalogModels.PartyAddressInput(
-                            "CN", "福建省", "福州市", "仓山区", "350000", "整理后路 9 号", null, "仓库",
-                            "拉黑后整理地址", List.of(), 0)))
+                            "CN",
+                            "福建省",
+                            "福州市",
+                            "仓山区",
+                            "350000",
+                            "整理后路 9 号",
+                            null,
+                            "仓库",
+                            "拉黑后整理地址",
+                            List.of(),
+                            0)))
             .id();
     assertThat(edited).isEqualTo(addressId);
     assertThat(tx(actor, () -> addresses.versions(black, addressId))).hasSize(2);
@@ -610,8 +727,18 @@ class PartyAddressContactIntegrationTest {
   @Test
   void 联系人建档往返一致且默认只有一个() {
     UUID partyId = party(actor, "CONTACT");
-    UUID first = write(actor, () -> contacts.save(actor, partyId, null, contact("张三", "zhangsan@example.com", true))).id();
-    UUID second = write(actor, () -> contacts.save(actor, partyId, null, contact("李四", "lisi@example.com", false))).id();
+    UUID first =
+        write(
+                actor,
+                () ->
+                    contacts.save(
+                        actor, partyId, null, contact("张三", "zhangsan@example.com", true)))
+            .id();
+    UUID second =
+        write(
+                actor,
+                () -> contacts.save(actor, partyId, null, contact("李四", "lisi@example.com", false)))
+            .id();
 
     var detail = tx(actor, () -> contacts.detail(partyId, first));
     assertThat(detail.name()).isEqualTo("张三");
@@ -624,7 +751,9 @@ class PartyAddressContactIntegrationTest {
         .isCloseTo(Instant.now(), within(5, ChronoUnit.MINUTES));
 
     // 第二个不能也成默认：整体设默认时前一个被取消。
-    write(actor, () -> contacts.save(actor, partyId, second, contact("李四", "lisi@example.com", true)));
+    write(
+        actor,
+        () -> contacts.save(actor, partyId, second, contact("李四", "lisi@example.com", true)));
     assertThat(tx(actor, () -> contacts.detail(partyId, first)).isPrimary()).isFalse();
     assertThat(tx(actor, () -> contacts.detail(partyId, second)).isPrimary()).isTrue();
     // 默认联系人端点返回的是那一个。
@@ -635,7 +764,8 @@ class PartyAddressContactIntegrationTest {
                 actor,
                 () ->
                     sql.fetchOne(
-                            "select count(*) from party_contact where party_id=? and is_primary", partyId)
+                            "select count(*) from party_contact where party_id=? and is_primary",
+                            partyId)
                         .get(0, Long.class)))
         .isEqualTo(1L);
   }
@@ -676,12 +806,19 @@ class PartyAddressContactIntegrationTest {
   @Test
   void 删除默认联系人被拒而删非默认真落库() {
     UUID partyId = party(actor, "CDEL");
-    UUID primary = write(actor, () -> contacts.save(actor, partyId, null, contact("默认联系人", "a@example.com", true))).id();
-    UUID other = write(actor, () -> contacts.save(actor, partyId, null, contact("备用联系人", "b@example.com", false))).id();
+    UUID primary =
+        write(
+                actor,
+                () -> contacts.save(actor, partyId, null, contact("默认联系人", "a@example.com", true)))
+            .id();
+    UUID other =
+        write(
+                actor,
+                () -> contacts.save(actor, partyId, null, contact("备用联系人", "b@example.com", false)))
+            .id();
 
     var error =
-        catchThrowable(
-            () -> writeVoid(actor, () -> contacts.delete(actor, partyId, primary, 0)));
+        catchThrowable(() -> writeVoid(actor, () -> contacts.delete(actor, partyId, primary, 0)));
     assertThat(error).isInstanceOf(ResponseStatusException.class);
     assertThat(((ResponseStatusException) error).getMessage()).contains("默认联系人");
 
@@ -692,21 +829,29 @@ class PartyAddressContactIntegrationTest {
             tx(
                 actor,
                 () ->
-                    sql.fetchOne("select count(*) from party_contact where id=?", other).get(0, Long.class)))
+                    sql.fetchOne("select count(*) from party_contact where id=?", other)
+                        .get(0, Long.class)))
         .isZero();
   }
 
   @Test
   void 取消默认联系人之后可以删除它() {
     UUID partyId = party(actor, "CUNSET");
-    UUID id = write(actor, () -> contacts.save(actor, partyId, null, contact("唯一联系人", "c@example.com", true))).id();
+    UUID id =
+        write(
+                actor,
+                () -> contacts.save(actor, partyId, null, contact("唯一联系人", "c@example.com", true)))
+            .id();
     long v = tx(actor, () -> contacts.detail(partyId, id)).version();
-    write(actor, () -> contacts.setPrimary(actor, partyId, id, new CatalogModels.PartyContactPrimaryInput(false, v)));
+    write(
+        actor,
+        () ->
+            contacts.setPrimary(
+                actor, partyId, id, new CatalogModels.PartyContactPrimaryInput(false, v)));
     long v2 = tx(actor, () -> contacts.detail(partyId, id)).version();
     writeVoid(actor, () -> contacts.delete(actor, partyId, id, v2));
     assertThat(tx(actor, () -> contacts.list(partyId, null, null))).isEmpty();
-    var error =
-        catchThrowable(() -> tx(actor, () -> contacts.primary(partyId)));
+    var error = catchThrowable(() -> tx(actor, () -> contacts.primary(partyId)));
     assertThat(error).isInstanceOf(ResponseStatusException.class);
     assertThat(((ResponseStatusException) error).getMessage()).contains("还没有默认联系人");
   }
@@ -716,16 +861,24 @@ class PartyAddressContactIntegrationTest {
     String code = unique("CBLACK");
     UUID black =
         write(
-                actor,
-                () ->
-                    parties.save(
-                            actor,
+            actor,
+            () ->
+                parties
+                    .save(
+                        actor,
+                        null,
+                        new CatalogModels.PartyInput(
+                            code,
+                            "拉黑联系人主体",
+                            "ORGANIZATION",
+                            "CN",
+                            "cb@" + code.toLowerCase() + ".example",
                             null,
-                            new CatalogModels.PartyInput(
-                                code, "拉黑联系人主体", "ORGANIZATION", "CN",
-                                "cb@" + code.toLowerCase() + ".example", null, null, "ACTIVE",
-                                List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")), 0))
-                        .id());
+                            null,
+                            "ACTIVE",
+                            List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")),
+                            0))
+                    .id());
     write(
         actor,
         () ->
@@ -733,7 +886,12 @@ class PartyAddressContactIntegrationTest {
                 actor, black, new CatalogModels.PartyStatusInput("BLACKLISTED", "纠纷对手方", 0)));
     var error =
         catchThrowable(
-            () -> write(actor, () -> contacts.save(actor, black, null, contact("新增联系人", "n@example.com", false))));
+            () ->
+                write(
+                    actor,
+                    () ->
+                        contacts.save(
+                            actor, black, null, contact("新增联系人", "n@example.com", false))));
     assertThat(error).isInstanceOf(ResponseStatusException.class);
     assertThat(((ResponseStatusException) error).getMessage()).contains("拉黑");
   }
@@ -743,19 +901,35 @@ class PartyAddressContactIntegrationTest {
   @Test
   void 关键词通配符被转义而不是变成匹配全部() {
     UUID partyId = party(actor, "LIKE");
-    write(actor, () -> addresses.save(actor, partyId, null, address("正常路 1 号", "南通市", usage("SHIP_TO", true))));
+    write(
+        actor,
+        () ->
+            addresses.save(
+                actor, partyId, null, address("正常路 1 号", "南通市", usage("SHIP_TO", true))));
     write(actor, () -> addresses.save(actor, partyId, null, address("百分路 2 号", "南通市")));
 
-    var all = tx(actor, () -> addresses.list(partyId, new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 20)));
+    var all =
+        tx(
+            actor,
+            () ->
+                addresses.list(
+                    partyId, new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 20)));
     assertThat(all.items()).hasSize(2);
     // 搜 % 本该匹配不到任何东西（转义后是字面量 %），而不是「匹配全部」。
     var percent =
         tx(
             actor,
-            () -> addresses.list(partyId, new CatalogModels.PartyAddressQuery("%", null, null, null, 0, 20)));
+            () ->
+                addresses.list(
+                    partyId, new CatalogModels.PartyAddressQuery("%", null, null, null, 0, 20)));
     assertThat(percent.items()).isEmpty();
     // 搜城市能命中两条（关键词覆盖城市）。
-    var byCity = tx(actor, () -> addresses.list(partyId, new CatalogModels.PartyAddressQuery("南通", null, null, null, 0, 20)));
+    var byCity =
+        tx(
+            actor,
+            () ->
+                addresses.list(
+                    partyId, new CatalogModels.PartyAddressQuery("南通", null, null, null, 0, 20)));
     assertThat(byCity.items()).hasSize(2);
   }
 
@@ -772,17 +946,26 @@ class PartyAddressContactIntegrationTest {
                   partyId,
                   null,
                   address(
-                      "分页路 " + index + " 号", "扬州市",
+                      "分页路 " + index + " 号",
+                      "扬州市",
                       usage(index == 1 ? "SHIP_TO" : "PICKUP", true))));
     }
     var firstPage =
-        tx(actor, () -> addresses.list(partyId, new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 2)));
+        tx(
+            actor,
+            () ->
+                addresses.list(
+                    partyId, new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 2)));
     assertThat(firstPage.items()).hasSize(2);
     assertThat(firstPage.total()).isEqualTo(5);
     // 一个主体每个用途只有一个默认：1 条 SHIP_TO 默认 + 1 条 PICKUP 默认（后建的把先前的挤掉了）。
     assertThat(firstPage.defaultCount()).isEqualTo(2);
     var secondPage =
-        tx(actor, () -> addresses.list(partyId, new CatalogModels.PartyAddressQuery(null, null, null, null, 1, 2)));
+        tx(
+            actor,
+            () ->
+                addresses.list(
+                    partyId, new CatalogModels.PartyAddressQuery(null, null, null, null, 1, 2)));
     assertThat(secondPage.items()).hasSize(2);
     // 两页不重叠。
     assertThat(
@@ -791,7 +974,13 @@ class PartyAddressContactIntegrationTest {
                 secondPage.items().stream().map(CatalogModels.PartyAddress::id).toList()))
         .isTrue();
     // 筛出 1 条时统计仍是全量的 5 条。
-    var filtered = tx(actor, () -> addresses.list(partyId, new CatalogModels.PartyAddressQuery(null, "SHIP_TO", null, null, 0, 20)));
+    var filtered =
+        tx(
+            actor,
+            () ->
+                addresses.list(
+                    partyId,
+                    new CatalogModels.PartyAddressQuery(null, "SHIP_TO", null, null, 0, 20)));
     assertThat(filtered.items()).hasSize(1);
     assertThat(filtered.total()).isEqualTo(1);
     assertThat(filtered.defaultCount()).isEqualTo(2);
@@ -800,9 +989,18 @@ class PartyAddressContactIntegrationTest {
   @Test
   void 未标用途的地址被单独计数() {
     UUID partyId = party(actor, "UNASSIGNED");
-    write(actor, () -> addresses.save(actor, partyId, null, address("有用途 1 号", "金华市", usage("SHIP_TO", false))));
+    write(
+        actor,
+        () ->
+            addresses.save(
+                actor, partyId, null, address("有用途 1 号", "金华市", usage("SHIP_TO", false))));
     write(actor, () -> addresses.save(actor, partyId, null, address("没用途 2 号", "金华市")));
-    var page = tx(actor, () -> addresses.list(partyId, new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 20)));
+    var page =
+        tx(
+            actor,
+            () ->
+                addresses.list(
+                    partyId, new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 20)));
     assertThat(page.total()).isEqualTo(2);
     assertThat(page.unassignedCount()).isEqualTo(1);
     assertThat(page.defaultCount()).isZero();
@@ -814,18 +1012,46 @@ class PartyAddressContactIntegrationTest {
   void 四张表都开了FORCERLS且默认地址在DB层唯一() {
     for (String table :
         List.of("party_address", "party_address_usage", "party_address_version", "party_contact")) {
-      assertThat(tx(actor, () -> sql.fetchOne("select relrowsecurity,relforcerowsecurity from pg_class where relname=?", table)))
+      assertThat(
+              tx(
+                  actor,
+                  () ->
+                      sql.fetchOne(
+                          "select relrowsecurity,relforcerowsecurity from pg_class where relname=?",
+                          table)))
           .as(table + " 必须同时 ENABLE 与 FORCE RLS")
           .isNotNull();
-      var flags = tx(actor, () -> sql.fetchOne("select relrowsecurity as r,relforcerowsecurity as f from pg_class where relname=?", table));
-      assertThat(Boolean.TRUE.equals(flags.get("r", Boolean.class))).as(table + " RLS enabled").isTrue();
-      assertThat(Boolean.TRUE.equals(flags.get("f", Boolean.class))).as(table + " RLS forced").isTrue();
+      var flags =
+          tx(
+              actor,
+              () ->
+                  sql.fetchOne(
+                      "select relrowsecurity as r,relforcerowsecurity as f from pg_class where relname=?",
+                      table));
+      assertThat(Boolean.TRUE.equals(flags.get("r", Boolean.class)))
+          .as(table + " RLS enabled")
+          .isTrue();
+      assertThat(Boolean.TRUE.equals(flags.get("f", Boolean.class)))
+          .as(table + " RLS forced")
+          .isTrue();
     }
 
     // 「一个主体一个默认提货地址」在 DB 层就是唯一的：绕过服务层直写也会撞。
     UUID partyId = party(actor, "DBUNIQ");
-    UUID first = write(actor, () -> addresses.save(actor, partyId, null, address("甲仓 1 号", "扬州市", usage("PICKUP", true)))).id();
-    UUID second = write(actor, () -> addresses.save(actor, partyId, null, address("乙仓 2 号", "扬州市", usage("PICKUP", false)))).id();
+    UUID first =
+        write(
+                actor,
+                () ->
+                    addresses.save(
+                        actor, partyId, null, address("甲仓 1 号", "扬州市", usage("PICKUP", true))))
+            .id();
+    UUID second =
+        write(
+                actor,
+                () ->
+                    addresses.save(
+                        actor, partyId, null, address("乙仓 2 号", "扬州市", usage("PICKUP", false))))
+            .id();
     assertThat(
             catchThrowable(
                 () ->
@@ -835,7 +1061,10 @@ class PartyAddressContactIntegrationTest {
                             sql.execute(
                                 "insert into party_address_usage(id,tenant_id,party_id,address_id,usage,is_default)"
                                     + " values(?,?,?,?,'PICKUP',true)",
-                                Ids.next(), a, partyId, second))))
+                                Ids.next(),
+                                a,
+                                partyId,
+                                second))))
         .as("第二个默认提货地址必须被 DB 拒绝")
         .isNotNull();
     assertThat(tx(actor, () -> addresses.defaultAddress(partyId, "PICKUP")).id()).isEqualTo(first);
@@ -846,16 +1075,19 @@ class PartyAddressContactIntegrationTest {
   /**
    * 租户隔离三断言，<b>并且覆盖用途行与版本行</b>。
    *
-   * <p>只测地址本体等于没测：版本行与用途行才是本模块真正的越权面 ——
-   * 「A 读到自己的地址时把 B 的提货地址用途与历史版本一起读出来」会直接让 A 的
-   * 10 物流单填上 B 的仓库地址。
+   * <p>只测地址本体等于没测：版本行与用途行才是本模块真正的越权面 —— 「A 读到自己的地址时把 B 的提货地址用途与历史版本一起读出来」会直接让 A 的 10 物流单填上 B 的仓库地址。
    */
   @Test
   void 租户隔离三断言覆盖地址与联系人() throws Exception {
     UUID myParty = party(actor, "MINE");
     UUID theirParty = party(actorB, "THEIRS");
     UUID myAddress =
-        write(actor, () -> addresses.save(actor, myParty, null, address("我方仓库路 1 号", "福州市", usage("PICKUP", true)))).id();
+        write(
+                actor,
+                () ->
+                    addresses.save(
+                        actor, myParty, null, address("我方仓库路 1 号", "福州市", usage("PICKUP", true))))
+            .id();
     long myVersion =
         write(
                 actor,
@@ -865,17 +1097,61 @@ class PartyAddressContactIntegrationTest {
                         myParty,
                         myAddress,
                         new CatalogModels.PartyAddressInput(
-                            "CN", "福建省", "福州市", "仓山区", "350000", "我方仓库路 2 号", null, "仓库",
-                            "改了门牌", List.of(usage("PICKUP", true)), 0)))
+                            "CN",
+                            "福建省",
+                            "福州市",
+                            "仓山区",
+                            "350000",
+                            "我方仓库路 2 号",
+                            null,
+                            "仓库",
+                            "改了门牌",
+                            List.of(usage("PICKUP", true)),
+                            0)))
             .version();
     UUID theirAddress =
-        write(actorB, () -> addresses.save(actorB, theirParty, null, address("对方仓库路 1 号", "长沙市", usage("PICKUP", true)))).id();
-    UUID myContact = write(actor, () -> contacts.save(actor, myParty, null, contact("我方对接人", "mine@example.com", true))).id();
-    UUID theirContact = write(actorB, () -> contacts.save(actorB, theirParty, null, contact("对方对接人", "theirs@example.com", true))).id();
+        write(
+                actorB,
+                () ->
+                    addresses.save(
+                        actorB,
+                        theirParty,
+                        null,
+                        address("对方仓库路 1 号", "长沙市", usage("PICKUP", true))))
+            .id();
+    UUID myContact =
+        write(
+                actor,
+                () ->
+                    contacts.save(actor, myParty, null, contact("我方对接人", "mine@example.com", true)))
+            .id();
+    UUID theirContact =
+        write(
+                actorB,
+                () ->
+                    contacts.save(
+                        actorB, theirParty, null, contact("对方对接人", "theirs@example.com", true)))
+            .id();
 
     // 两边都必须真的有数据 —— 否则下面的断言就是空的。
-    assertThat(tx(actor, () -> addresses.list(myParty, new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 20))).items()).hasSize(1);
-    assertThat(tx(actorB, () -> addresses.list(theirParty, new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 20))).items()).hasSize(1);
+    assertThat(
+            tx(
+                    actor,
+                    () ->
+                        addresses.list(
+                            myParty,
+                            new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 20)))
+                .items())
+        .hasSize(1);
+    assertThat(
+            tx(
+                    actorB,
+                    () ->
+                        addresses.list(
+                            theirParty,
+                            new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 20)))
+                .items())
+        .hasSize(1);
     assertThat(tx(actor, () -> contacts.list(myParty, null, null))).hasSize(1);
     assertThat(tx(actorB, () -> contacts.list(theirParty, null, null))).hasSize(1);
 
@@ -889,37 +1165,63 @@ class PartyAddressContactIntegrationTest {
     assertThatThrownBy(() -> tx(actor, () -> addresses.defaultAddress(theirParty, "PICKUP")))
         .isInstanceOf(ResponseStatusException.class);
     // 写路径同样挡：不能改对方的地址、不能删对方的联系人。
-    assertThatThrownBy(() -> writeVoid(actor, () -> addresses.delete(actor, theirParty, theirAddress, 0)))
+    assertThatThrownBy(
+            () -> writeVoid(actor, () -> addresses.delete(actor, theirParty, theirAddress, 0)))
         .isInstanceOf(ResponseStatusException.class);
-    assertThatThrownBy(() -> writeVoid(actor, () -> contacts.delete(actor, theirParty, theirContact, 0)))
+    assertThatThrownBy(
+            () -> writeVoid(actor, () -> contacts.delete(actor, theirParty, theirContact, 0)))
         .isInstanceOf(ResponseStatusException.class);
     // 对方的数据没被动过。
-    assertThat(tx(actorB, () -> addresses.detail(theirParty, theirAddress)).streetLine1()).isEqualTo("对方仓库路 1 号");
-    assertThat(tx(actorB, () -> contacts.detail(theirParty, theirContact)).name()).isEqualTo("对方对接人");
+    assertThat(tx(actorB, () -> addresses.detail(theirParty, theirAddress)).streetLine1())
+        .isEqualTo("对方仓库路 1 号");
+    assertThat(tx(actorB, () -> contacts.detail(theirParty, theirContact)).name())
+        .isEqualTo("对方对接人");
     // 自己的版本链仍然完整（我的版本号推进没有被对方影响）。
     assertThat(tx(actor, () -> addresses.versions(myParty, myAddress))).hasSize(2);
 
     // 2) 伪造 X-Tenant-Id 头无效：租户只来自已认证成员关系。
-    http.perform(get("/catalog/parties/{party}/addresses", myParty).header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
+    http.perform(
+            get("/catalog/parties/{party}/addresses", myParty)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
-    http.perform(get("/catalog/parties/{party}/contacts", myParty).header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
+    http.perform(
+            get("/catalog/parties/{party}/contacts", myParty)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
     // 伪造头下写入仍落在 B 自己名下，而不是伪造的 A。
     String code = unique("FORGED");
     UUID forgedParty =
         write(
+            actorB,
+            () ->
+                parties
+                    .save(
+                        actorB,
+                        null,
+                        new CatalogModels.PartyInput(
+                            code,
+                            "伪造头下的主体",
+                            "ORGANIZATION",
+                            "CN",
+                            "f@" + code.toLowerCase() + ".example",
+                            null,
+                            null,
+                            "ACTIVE",
+                            List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")),
+                            0))
+                    .id());
+    UUID forgedAddress =
+        write(
                 actorB,
                 () ->
-                    parties.save(
-                            actorB,
-                            null,
-                            new CatalogModels.PartyInput(
-                                code, "伪造头下的主体", "ORGANIZATION", "CN",
-                                "f@" + code.toLowerCase() + ".example", null, null, "ACTIVE",
-                                List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")), 0))
-                        .id());
-    UUID forgedAddress =
-        write(actorB, () -> addresses.save(actorB, forgedParty, null, address("伪造头下的地址 1 号", "沈阳市", usage("PICKUP", true)))).id();
+                    addresses.save(
+                        actorB,
+                        forgedParty,
+                        null,
+                        address("伪造头下的地址 1 号", "沈阳市", usage("PICKUP", true))))
+            .id();
     // 断言**行确实落在 B 名下**（不只断言 A 看不见）。
     assertThat(
             tx(
@@ -930,50 +1232,98 @@ class PartyAddressContactIntegrationTest {
         .isEqualTo(b);
     assertThatThrownBy(() -> tx(actor, () -> addresses.detail(forgedParty, forgedAddress)))
         .isInstanceOf(ResponseStatusException.class);
-    assertThat(tx(actorB, () -> addresses.detail(forgedParty, forgedAddress)).id()).isEqualTo(forgedAddress);
+    assertThat(tx(actorB, () -> addresses.detail(forgedParty, forgedAddress)).id())
+        .isEqualTo(forgedAddress);
     // 版本行也落在 B 名下。
     assertThat(
             tx(
                 actorB,
                 () ->
-                    sql.fetchOne("select tenant_id from party_address_version where address_id=?", forgedAddress)
+                    sql.fetchOne(
+                            "select tenant_id from party_address_version where address_id=?",
+                            forgedAddress)
                         .get(0, UUID.class)))
         .isEqualTo(b);
 
     // 3) 连接池归还后不串租户（单连接反复交替），逐轮断言地址 / 用途 / 版本 / 联系人都不串。
     for (int i = 0; i < 5; i++) {
       var myAddresses =
-          tx(actor, () -> addresses.list(myParty, new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 200)))
-              .items().stream().map(CatalogModels.PartyAddress::id).toList();
+          tx(
+                  actor,
+                  () ->
+                      addresses.list(
+                          myParty,
+                          new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 200)))
+              .items()
+              .stream()
+              .map(CatalogModels.PartyAddress::id)
+              .toList();
       var theirAddresses =
-          tx(actorB, () -> addresses.list(theirParty, new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 200)))
-              .items().stream().map(CatalogModels.PartyAddress::id).toList();
+          tx(
+                  actorB,
+                  () ->
+                      addresses.list(
+                          theirParty,
+                          new CatalogModels.PartyAddressQuery(null, null, null, null, 0, 200)))
+              .items()
+              .stream()
+              .map(CatalogModels.PartyAddress::id)
+              .toList();
       assertThat(java.util.Collections.disjoint(myAddresses, theirAddresses)).isTrue();
-      var myContacts = tx(actor, () -> contacts.list(myParty, null, null)).stream().map(CatalogModels.PartyContact::id).toList();
-      var theirContacts = tx(actorB, () -> contacts.list(theirParty, null, null)).stream().map(CatalogModels.PartyContact::id).toList();
+      var myContacts =
+          tx(actor, () -> contacts.list(myParty, null, null)).stream()
+              .map(CatalogModels.PartyContact::id)
+              .toList();
+      var theirContacts =
+          tx(actorB, () -> contacts.list(theirParty, null, null)).stream()
+              .map(CatalogModels.PartyContact::id)
+              .toList();
       assertThat(java.util.Collections.disjoint(myContacts, theirContacts)).isTrue();
       // 用途行与版本行同样不相交 —— 这才是本模块真正的越权面。
       var myUsageRows =
           tx(actor, () -> sql.fetch("select id from party_address_usage where party_id=?", myParty))
-              .stream().map(r -> r.get("id", UUID.class)).toList();
+              .stream()
+              .map(r -> r.get("id", UUID.class))
+              .toList();
       var theirUsageRows =
-          tx(actorB, () -> sql.fetch("select id from party_address_usage where party_id=?", theirParty))
-              .stream().map(r -> r.get("id", UUID.class)).toList();
+          tx(
+                  actorB,
+                  () ->
+                      sql.fetch("select id from party_address_usage where party_id=?", theirParty))
+              .stream()
+              .map(r -> r.get("id", UUID.class))
+              .toList();
       assertThat(myUsageRows).isNotEmpty();
       assertThat(theirUsageRows).isNotEmpty();
       assertThat(java.util.Collections.disjoint(myUsageRows, theirUsageRows)).isTrue();
-      var myVersions = tx(actor, () -> sql.fetch("select id from party_address_version where party_id=?", myParty))
-          .stream().map(r -> r.get("id", UUID.class)).toList();
-      var theirVersions = tx(actorB, () -> sql.fetch("select id from party_address_version where party_id=?", theirParty))
-          .stream().map(r -> r.get("id", UUID.class)).toList();
+      var myVersions =
+          tx(
+                  actor,
+                  () -> sql.fetch("select id from party_address_version where party_id=?", myParty))
+              .stream()
+              .map(r -> r.get("id", UUID.class))
+              .toList();
+      var theirVersions =
+          tx(
+                  actorB,
+                  () ->
+                      sql.fetch(
+                          "select id from party_address_version where party_id=?", theirParty))
+              .stream()
+              .map(r -> r.get("id", UUID.class))
+              .toList();
       assertThat(myVersions).isNotEmpty();
       assertThat(theirVersions).isNotEmpty();
       assertThat(java.util.Collections.disjoint(myVersions, theirVersions)).isTrue();
       // 候选列表也不相交。
-      var myCandidates = tx(actor, () -> addresses.candidates(myParty, "PICKUP", null, true))
-          .stream().map(CatalogModels.PartyAddress::id).toList();
-      var theirCandidates = tx(actorB, () -> addresses.candidates(theirParty, "PICKUP", null, true))
-          .stream().map(CatalogModels.PartyAddress::id).toList();
+      var myCandidates =
+          tx(actor, () -> addresses.candidates(myParty, "PICKUP", null, true)).stream()
+              .map(CatalogModels.PartyAddress::id)
+              .toList();
+      var theirCandidates =
+          tx(actorB, () -> addresses.candidates(theirParty, "PICKUP", null, true)).stream()
+              .map(CatalogModels.PartyAddress::id)
+              .toList();
       assertThat(java.util.Collections.disjoint(myCandidates, theirCandidates)).isTrue();
       assertThat(myVersion).isPositive();
     }
@@ -986,87 +1336,147 @@ class PartyAddressContactIntegrationTest {
     String code = unique("HTTP");
     UUID partyId =
         write(
-                actor,
-                () ->
-                    parties.save(
-                            actor,
+            actor,
+            () ->
+                parties
+                    .save(
+                        actor,
+                        null,
+                        new CatalogModels.PartyInput(
+                            code,
+                            "HTTP 主体",
+                            "ORGANIZATION",
+                            "DE",
+                            "http@x.example",
                             null,
-                            new CatalogModels.PartyInput(
-                                code,
-                                "HTTP 主体",
-                                "ORGANIZATION",
-                                "DE",
-                                "http@x.example",
-                                null,
-                                null,
-                                "ACTIVE",
-                                List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")),
-                                0))
-                        .id());
+                            null,
+                            "ACTIVE",
+                            List.of(new CatalogModels.PartyRoleInput("SUPPLIER", "ACTIVE", "")),
+                            0))
+                    .id());
 
     var body =
         JSON.writeValueAsBytes(
             Map.of(
-                "countryCode", "DE", "stateProvince", "Bayern", "city", "München", "district", "Schwabing",
-                "postalCode", "80802", "streetLine1", "Leopoldstraße 1", "label", "仓库",
-                "changeNote", "首次录入",
-                "usages", List.of(Map.of("usage", "PICKUP", "isDefault", true)), "version", 0));
+                "countryCode",
+                "DE",
+                "stateProvince",
+                "Bayern",
+                "city",
+                "München",
+                "district",
+                "Schwabing",
+                "postalCode",
+                "80802",
+                "streetLine1",
+                "Leopoldstraße 1",
+                "label",
+                "仓库",
+                "changeNote",
+                "首次录入",
+                "usages",
+                List.of(Map.of("usage", "PICKUP", "isDefault", true)),
+                "version",
+                0));
     var created =
-        http.perform(post("/catalog/parties/{party}/addresses", partyId)
-                        .header("Authorization", "Bearer tenant-a").contentType("application/json").content(body))
+        http.perform(
+                post("/catalog/parties/{party}/addresses", partyId)
+                    .header("Authorization", "Bearer tenant-a")
+                    .contentType("application/json")
+                    .content(body))
             .andExpect(status().isOk())
-            .andReturn().getResponse().getContentAsString();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
     UUID addressId = UUID.fromString(JSON.readTree(created).get("id").asText());
     assertThat(JSON.readTree(created).get("latestVersionNo").asInt()).isEqualTo(1);
 
-    http.perform(get("/catalog/parties/{party}/addresses", partyId).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/parties/{party}/addresses", partyId)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.items").isArray())
         .andExpect(jsonPath("$.total").value(1));
-    http.perform(get("/catalog/parties/{party}/addresses/defaults", partyId)
-            .param("usage", "PICKUP").header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/parties/{party}/addresses/defaults", partyId)
+                .param("usage", "PICKUP")
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(addressId.toString()))
         .andExpect(jsonPath("$.usageSummary").value("提货地址（默认）"));
-    http.perform(get("/catalog/parties/{party}/addresses/candidates", partyId)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/parties/{party}/addresses/candidates", partyId)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].id").value(addressId.toString()));
-    http.perform(get("/catalog/parties/{party}/addresses/{address}/versions", partyId, addressId)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/parties/{party}/addresses/{address}/versions", partyId, addressId)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].versionNo").value(1));
-    http.perform(get("/catalog/parties/{party}/addresses/{address}/versions/1", partyId, addressId)
-            .header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/parties/{party}/addresses/{address}/versions/1", partyId, addressId)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.streetLine1").value("Leopoldstraße 1"));
 
     // 联系人链路。
     var contactBody =
         JSON.writeValueAsBytes(
-            Map.of("name", "Müller", "position", "Einkauf", "email", "mueller@example.de",
-                "phone", "+49 89 0000", "mobile", "0170 0000", "isPrimary", true, "note", "对接人", "version", 0));
+            Map.of(
+                "name",
+                "Müller",
+                "position",
+                "Einkauf",
+                "email",
+                "mueller@example.de",
+                "phone",
+                "+49 89 0000",
+                "mobile",
+                "0170 0000",
+                "isPrimary",
+                true,
+                "note",
+                "对接人",
+                "version",
+                0));
     var contactCreated =
-        http.perform(post("/catalog/parties/{party}/contacts", partyId)
-                        .header("Authorization", "Bearer tenant-a").contentType("application/json").content(contactBody))
+        http.perform(
+                post("/catalog/parties/{party}/contacts", partyId)
+                    .header("Authorization", "Bearer tenant-a")
+                    .contentType("application/json")
+                    .content(contactBody))
             .andExpect(status().isOk())
-            .andReturn().getResponse().getContentAsString();
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
     UUID contactId = UUID.fromString(JSON.readTree(contactCreated).get("id").asText());
-    http.perform(get("/catalog/parties/{party}/contacts/default", partyId).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/parties/{party}/contacts/default", partyId)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(contactId.toString()));
-    http.perform(get("/catalog/parties/{party}/contacts", partyId).header("Authorization", "Bearer tenant-a"))
+    http.perform(
+            get("/catalog/parties/{party}/contacts", partyId)
+                .header("Authorization", "Bearer tenant-a"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].name").value("Müller"));
 
     // 写 403 / 读放行 / 缺 token 401。
-    http.perform(post("/catalog/parties/{party}/contacts", partyId)
-            .header("Authorization", "Bearer reader").contentType("application/json").content(contactBody))
+    http.perform(
+            post("/catalog/parties/{party}/contacts", partyId)
+                .header("Authorization", "Bearer reader")
+                .contentType("application/json")
+                .content(contactBody))
         .andExpect(status().isForbidden());
-    http.perform(get("/catalog/parties/{party}/contacts", partyId).header("Authorization", "Bearer reader"))
+    http.perform(
+            get("/catalog/parties/{party}/contacts", partyId)
+                .header("Authorization", "Bearer reader"))
         .andExpect(status().isOk());
-    http.perform(get("/catalog/parties/{party}/contacts", partyId)).andExpect(status().isUnauthorized());
+    http.perform(get("/catalog/parties/{party}/contacts", partyId))
+        .andExpect(status().isUnauthorized());
     // 读端点缺 token 同样 401。
-    http.perform(get("/catalog/parties/{party}/addresses", partyId)).andExpect(status().isUnauthorized());
+    http.perform(get("/catalog/parties/{party}/addresses", partyId))
+        .andExpect(status().isUnauthorized());
   }
 }

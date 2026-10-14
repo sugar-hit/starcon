@@ -12,8 +12,7 @@ import org.junit.jupiter.api.*;
 /**
  * 3.9.1.1 重复 SKU 识别的<b>纯规则</b>单测：归一化、相似度与四条判定线。
  *
- * <p>相似度是本模块最容易「看起来在算、其实是常数」的地方，所以这里不用「不抛异常」当断言，
- * 而是把<b>算得出来的具体数值</b>钉死：中文二元组切词、编辑距离、Jaccard 的交并比、
+ * <p>相似度是本模块最容易「看起来在算、其实是常数」的地方，所以这里不用「不抛异常」当断言， 而是把<b>算得出来的具体数值</b>钉死：中文二元组切词、编辑距离、Jaccard 的交并比、
  * 加权混合的舍入位置，任何一处被改成拍脑袋的常数或调错权重都会在这里变红。
  */
 class DuplicateRulesTest {
@@ -108,11 +107,14 @@ class DuplicateRulesTest {
 
   @Test
   void 图片与规格组合相似度() {
-    assertThat(imageSimilarity(Set.of("h1", "h2"), Set.of("h2", "h3"))).isEqualByComparingTo("0.3333");
+    assertThat(imageSimilarity(Set.of("h1", "h2"), Set.of("h2", "h3")))
+        .isEqualByComparingTo("0.3333");
     assertThat(imageSimilarity(Set.of("h1"), Set.of("h1"))).isEqualByComparingTo("1.0000");
-    assertThat(variantSimilarity("COLOR=红|SIZE=大", "COLOR=红|SIZE=大")).isEqualByComparingTo("1.0000");
+    assertThat(variantSimilarity("COLOR=红|SIZE=大", "COLOR=红|SIZE=大"))
+        .isEqualByComparingTo("1.0000");
     // 顺序不同但内容相同：签名按轴编码排序过，所以两者本来就该相同。
-    assertThat(variantSimilarity("COLOR=红|SIZE=大", "SIZE=大|COLOR=红")).isGreaterThan(new BigDecimal("0.90"));
+    assertThat(variantSimilarity("COLOR=红|SIZE=大", "SIZE=大|COLOR=红"))
+        .isGreaterThan(new BigDecimal("0.90"));
     // 只有一个轴值相同 → Jaccard = 1/3。
     assertThat(variantSimilarity("COLOR=红", "COLOR=红|SIZE=大")).isEqualByComparingTo("0.5000");
     assertThat(variantSimilarity("", "COLOR=红")).isEqualByComparingTo("0.0000");
@@ -131,7 +133,8 @@ class DuplicateRulesTest {
     // 证据里必须写明撞的是哪个条码值，否则页面只给一个孤零零的 1.0000。
     assertThat(signal.evidence()).contains("6901234567892");
     // 归一化后相等也算（大小写/空白差异来自人工录入）。
-    assertThat(barcodeSignal(Set.of(" abc-1 "), Set.of("ABC-1"), DEFAULT_MIN_SIMILARITY)).isNotNull();
+    assertThat(barcodeSignal(Set.of(" abc-1 "), Set.of("ABC-1"), DEFAULT_MIN_SIMILARITY))
+        .isNotNull();
   }
 
   @Test
@@ -150,8 +153,7 @@ class DuplicateRulesTest {
 
   @Test
   void 规格组合线_相同得满分_任一侧无轴值不命中() {
-    var same =
-        variantSignal("COLOR=红|SIZE=大", "COLOR=红|SIZE=大", DEFAULT_MIN_SIMILARITY);
+    var same = variantSignal("COLOR=红|SIZE=大", "COLOR=红|SIZE=大", DEFAULT_MIN_SIMILARITY);
     assertThat(same).isNotNull();
     assertThat(same.dimension()).isEqualTo(Dimension.VARIANT_COMBINATION);
     assertThat(same.score()).isEqualByComparingTo("1.0000");
@@ -166,34 +168,57 @@ class DuplicateRulesTest {
   void 跨SPU线_三个坐标全同才算且品牌空不算相等() {
     var hit =
         crossSpuSignal(
-            "spu-a", "spu-b", "无线耳机", "无线耳机", "Sony", "sony", "数码", "数码",
-            DEFAULT_MIN_SIMILARITY);
+            "spu-a", "spu-b", "无线耳机", "无线耳机", "Sony", "sony", "数码", "数码", DEFAULT_MIN_SIMILARITY);
     assertThat(hit).isNotNull();
     assertThat(hit.dimension()).isEqualTo(Dimension.CROSS_SPU);
     assertThat(hit.score()).isEqualByComparingTo("1.0000");
 
     // 同一 SPU 内不判（那是规格组合那一维的事）
     assertThat(
-            crossSpuSignal("spu-a", "spu-a", "无线耳机", "无线耳机", "Sony", "Sony", "数码", "数码",
+            crossSpuSignal(
+                "spu-a",
+                "spu-a",
+                "无线耳机",
+                "无线耳机",
+                "Sony",
+                "Sony",
+                "数码",
+                "数码",
                 DEFAULT_MIN_SIMILARITY))
         .isNull();
     // 品牌为空不算「品牌相同」
     assertThat(
-            crossSpuSignal("spu-a", "spu-b", "无线耳机", "无线耳机", "", "Sony", "数码", "数码",
-                DEFAULT_MIN_SIMILARITY))
+            crossSpuSignal(
+                "spu-a", "spu-b", "无线耳机", "无线耳机", "", "Sony", "数码", "数码", DEFAULT_MIN_SIMILARITY))
         .isNull();
     assertThat(
-            crossSpuSignal("spu-a", "spu-b", "无线耳机", "无线耳机", "Sony", "", "数码", "数码",
-                DEFAULT_MIN_SIMILARITY))
+            crossSpuSignal(
+                "spu-a", "spu-b", "无线耳机", "无线耳机", "Sony", "", "数码", "数码", DEFAULT_MIN_SIMILARITY))
         .isNull();
     // 类目不同不算
     assertThat(
-            crossSpuSignal("spu-a", "spu-b", "无线耳机", "无线耳机", "Sony", "Sony", "数码", "服饰",
+            crossSpuSignal(
+                "spu-a",
+                "spu-b",
+                "无线耳机",
+                "无线耳机",
+                "Sony",
+                "Sony",
+                "数码",
+                "服饰",
                 DEFAULT_MIN_SIMILARITY))
         .isNull();
     // 标题只是近似不算（近似那条线归 SIMILAR_PRODUCT，要连图片一起看）
     assertThat(
-            crossSpuSignal("spu-a", "spu-b", "无线耳机", "无线耳机 Pro", "Sony", "Sony", "数码", "数码",
+            crossSpuSignal(
+                "spu-a",
+                "spu-b",
+                "无线耳机",
+                "无线耳机 Pro",
+                "Sony",
+                "Sony",
+                "数码",
+                "数码",
                 DEFAULT_MIN_SIMILARITY))
         .isNull();
   }
@@ -202,8 +227,7 @@ class DuplicateRulesTest {
   void 近似同品线_标题与图片两条证据缺一不可() {
     var hit =
         similarProductSignal(
-            "红色无线耳机", "红色无线耳机 Pro", Set.of("h1", "h2"), Set.of("h2", "h3"),
-            DEFAULT_MIN_SIMILARITY);
+            "红色无线耳机", "红色无线耳机 Pro", Set.of("h1", "h2"), Set.of("h2", "h3"), DEFAULT_MIN_SIMILARITY);
     // 标题 0.8333（二元组 5/6，编辑距离 1-3/9=0.6667，取大者）× 0.7
     // + 图片 0.3333（{h2} 1/3）× 0.3 = 0.6833 —— 低于默认阈值 0.8，
     // 所以这一对<b>不成候选</b>：证据不够强就不该占用人工确认的时间。
@@ -218,13 +242,13 @@ class DuplicateRulesTest {
     assertThat(strong.score()).isEqualByComparingTo("0.8500");
     // 没有共享图片 → 一律不命中（哪怕标题完全相同：白底通用主图满地都是）
     assertThat(
-            similarProductSignal("红色无线耳机", "红色无线耳机", Set.of("h1"), Set.of("h9"),
-                DEFAULT_MIN_SIMILARITY))
+            similarProductSignal(
+                "红色无线耳机", "红色无线耳机", Set.of("h1"), Set.of("h9"), DEFAULT_MIN_SIMILARITY))
         .isNull();
     // 标题差太远 → 不命中（图片不能单独当同品证据）
     assertThat(
-            similarProductSignal("婴儿纸尿裤L码", "宠物狗粮5kg", Set.of("h1"), Set.of("h1"),
-                DEFAULT_MIN_SIMILARITY))
+            similarProductSignal(
+                "婴儿纸尿裤L码", "宠物狗粮5kg", Set.of("h1"), Set.of("h1"), DEFAULT_MIN_SIMILARITY))
         .isNull();
     // 权重是可验证的：0.7 与 0.3 写死在两个常量里，这里按同一公式反算一遍。
     assertThat(strong.evidence()).contains("1 张相同素材");
@@ -236,9 +260,7 @@ class DuplicateRulesTest {
     var other = new LinkedHashSet<>(Set.of("h2", "h9", "h8"));
     // 标题 0.8333、图片 1/5（两侧各 3 张，只有 1 张重合）→ 0.7×0.8333 + 0.3×0.2000 = 0.6433：
     // 0.8 阈值下不命中，0.6 阈值下命中。
-    assertThat(
-            similarProductSignal("红色无线耳机", "红色无线耳机 Pro", weak, other,
-                DEFAULT_MIN_SIMILARITY))
+    assertThat(similarProductSignal("红色无线耳机", "红色无线耳机 Pro", weak, other, DEFAULT_MIN_SIMILARITY))
         .isNull();
     var relaxed =
         similarProductSignal("红色无线耳机", "红色无线耳机 Pro", weak, other, new BigDecimal("0.6000"));
@@ -252,13 +274,14 @@ class DuplicateRulesTest {
   void 候选取最大得分_重叠维度数与信号条数一致_维度按固定顺序() {
     var barcode = barcodeSignal(Set.of("x"), Set.of("x"), DEFAULT_MIN_SIMILARITY);
     var similar =
-        similarProductSignal("红色无线耳机", "红色无线耳机", Set.of("h1"), Set.of("h1"),
-            DEFAULT_MIN_SIMILARITY);
+        similarProductSignal(
+            "红色无线耳机", "红色无线耳机", Set.of("h1"), Set.of("h1"), DEFAULT_MIN_SIMILARITY);
     // 传进去的顺序是「近似 → 条码」，装配后必须按词表顺序（条码在前）返回。
     var candidate = candidate(List.of(similar, barcode));
 
     assertThat(candidate.overlapDimensionCount()).isEqualTo(2);
-    assertThat(candidate.signals()).extracting(Signal::dimension)
+    assertThat(candidate.signals())
+        .extracting(Signal::dimension)
         .containsExactly(Dimension.BARCODE, Dimension.SIMILAR_PRODUCT);
     // 总体相似度取最大值（1.0000），不是加权平均 —— 否则条码撞了会被稀释成 0.9x。
     assertThat(candidate.similarity()).isEqualByComparingTo("1.0000");
@@ -273,8 +296,7 @@ class DuplicateRulesTest {
     for (Dimension d : Dimension.values()) assertThat(d.label()).isNotBlank();
     assertThat(dimensionByName("barcode")).isEqualTo(Dimension.BARCODE);
     assertThat(dimensionByName(" CROSS_SPU ")).isEqualTo(Dimension.CROSS_SPU);
-    assertThatThrownBy(() -> dimensionByName("NOPE"))
-        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> dimensionByName("NOPE")).isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test

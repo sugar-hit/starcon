@@ -52,9 +52,7 @@ export function fetchCapabilities(): Promise<AllocationCapabilities> {
 }
 
 export function fetchPolicies(params: PolicyListParams): Promise<AllocationPolicyPage> {
-  return api<AllocationPolicyPage>(
-    `warehouse/inventory/allocation-policies${query(params)}`,
-  );
+  return api<AllocationPolicyPage>(`warehouse/inventory/allocation-policies${query(params)}`);
 }
 
 export function fetchPolicy(id: string): Promise<AllocationPolicyDetail> {
@@ -89,7 +87,11 @@ export function supersedePolicy(
 }
 
 export function retirePolicy(id: string): Promise<AllocationPolicySaved> {
-  return api<AllocationPolicySaved>(`warehouse/inventory/allocation-policies/${id}/retire`, 'POST', {});
+  return api<AllocationPolicySaved>(
+    `warehouse/inventory/allocation-policies/${id}/retire`,
+    'POST',
+    {},
+  );
 }
 
 // ------------------------------------------------------------ 销量登记
@@ -127,11 +129,10 @@ export function previewAllocation(input: {
   referenceId?: string;
   scopeType?: string;
 }): Promise<AllocationResult[]> {
-  return api<AllocationResult[]>(
-    'warehouse/inventory/allocation-policies/calculation',
-    'POST',
-    { ...input, persist: false },
-  );
+  return api<AllocationResult[]>('warehouse/inventory/allocation-policies/calculation', 'POST', {
+    ...input,
+    persist: false,
+  });
 }
 
 /** 分摊并落库。走**另一个端点**而不是靠 persist 布尔切换：落库写的是不可改的批次，要 update 权限。 */

@@ -19,35 +19,27 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * 8.3.1.1 出库单列表：来源、SKU 行数、件数、七态、发货仓、承运渠道，以及三项批量操作
- * （生成拣货任务 / 打印 / 取消）。
+ * 8.3.1.1 出库单列表：来源、SKU 行数、件数、七态、发货仓、承运渠道，以及三项批量操作 （生成拣货任务 / 打印 / 取消）。
  *
- * <p>蓝图原话：「出库作业主列表：来源（销售/采购退货/调拨/加工出库）、SKU 行数、件数、状态
- * （待拣/拣货中/待复核/待打包/待发货/已发货/取消）、发货仓、承运渠道。」输入：「筛选条件
- * （仓库、来源、状态、时间）；用户数据范围。」输出：「分页列表 + 批量操作（生成拣货任务、
- * 打印、取消）。」
+ * <p>蓝图原话：「出库作业主列表：来源（销售/采购退货/调拨/加工出库）、SKU 行数、件数、状态 （待拣/拣货中/待复核/待打包/待发货/已发货/取消）、发货仓、承运渠道。」输入：「筛选条件
+ * （仓库、来源、状态、时间）；用户数据范围。」输出：「分页列表 + 批量操作（生成拣货任务、 打印、取消）。」
  *
- * <p><b>出库单是履约动作的载体，不是订单的影子</b>（蓝图点名的那条关系）。一订单可多出库单
- * （分仓/分批），所以：外部单号存字符串、刻意不建唯一索引；调拨来源反而是真外键，因为
+ * <p><b>出库单是履约动作的载体，不是订单的影子</b>（蓝图点名的那条关系）。一订单可多出库单 （分仓/分批），所以：外部单号存字符串、刻意不建唯一索引；调拨来源反而是真外键，因为
  * 7.5.1.1 已交付且同服务。
  *
  * <p><b>状态机只有一处真相，两处强制</b>：{@link OutboundOrderStatus#transitionsFrom()} 是
- * 转换矩阵（用来生成可读的拒绝理由与前端选项），V72 的 {@code outbound_order_status_guard}
- * 触发器是同一张白名单的 DB 实现。绕过服务层拿到连接也过不去触发器；集成测试里有一条
- * 断言专门比对两者没有分叉。
+ * 转换矩阵（用来生成可读的拒绝理由与前端选项），V72 的 {@code outbound_order_status_guard} 触发器是同一张白名单的 DB
+ * 实现。绕过服务层拿到连接也过不去触发器；集成测试里有一条 断言专门比对两者没有分叉。
  *
- * <p><b>SKU 行数与件数现算，不存列</b>：存列就一定会与明细漂移，而列表上这两个数恰恰是
- * 作业员最先会对着明细核对的。V72 建了 {@code outbound_order_line(tenant_id,order_id)}
- * 索引给这个聚合用。
+ * <p><b>SKU 行数与件数现算，不存列</b>：存列就一定会与明细漂移，而列表上这两个数恰恰是 作业员最先会对着明细核对的。V72 建了 {@code
+ * outbound_order_line(tenant_id,order_id)} 索引给这个聚合用。
  *
- * <p><b>「生成拣货任务」只做到交接请求为止</b>：蓝图把 8.3.2.1 列为下游，而它拥有拣货任务
- * 表、拣货明细（实际库位/批次/序列号）与异常上报。本模块不建那张表、也不假装它存在 ——
- * 它做的是真实的三件事：校验待拣状态、落一行 {@code outbound_pick_request}、把状态从待拣
- * 推到拣货中。8.3.2.1 交付后按 (tenant_id, order_id) 接手。
+ * <p><b>「生成拣货任务」只做到交接请求为止</b>：蓝图把 8.3.2.1 列为下游，而它拥有拣货任务 表、拣货明细（实际库位/批次/序列号）与异常上报。本模块不建那张表、也不假装它存在
+ * —— 它做的是真实的三件事：校验待拣状态、落一行 {@code outbound_pick_request}、把状态从待拣 推到拣货中。8.3.2.1 交付后按 (tenant_id,
+ * order_id) 接手。
  *
- * <p><b>时间绑定纪律</b>：时间筛选条件排在 WHERE 的最前面，{@code ?::timestamptz} 后面一定
- * 还跟着别的绑定（cast 不落在绑定序列末位，与 7.1.2.2 / 7.4.2.1 同一条）。写入用
- * {@link OffsetDateTime} 绑定，不用 {@code Timestamp.valueOf} —— 后者按 JVM 本地时区解释
+ * <p><b>时间绑定纪律</b>：时间筛选条件排在 WHERE 的最前面，{@code ?::timestamptz} 后面一定 还跟着别的绑定（cast 不落在绑定序列末位，与 7.1.2.2
+ * / 7.4.2.1 同一条）。写入用 {@link OffsetDateTime} 绑定，不用 {@code Timestamp.valueOf} —— 后者按 JVM 本地时区解释
  * 裸本地时间，在东八区会静默偏 −28800s。
  */
 @Service
@@ -98,8 +90,7 @@ public class OutboundOrderService {
   // ============================================================ 能力
 
   /**
-   * 能力声明：四类来源、七态状态与转换矩阵、筛选维度、两种打印文档，以及四条必须如实讲
-   * 清楚的说明。
+   * 能力声明：四类来源、七态状态与转换矩阵、筛选维度、两种打印文档，以及四条必须如实讲 清楚的说明。
    *
    * <p>前端据此渲染选项与提示，而不是把状态机硬编码在界面上 —— 规则改了就该只改一处。
    */
@@ -156,7 +147,9 @@ public class OutboundOrderService {
         "用户数据范围按已认证身份的授权生效（不接受任何请求参数）：命中的授权里有 ALL 就看全租户，"
             + "有 DEPARTMENT 看本租户全量（出库单没有部门维度，与 7.1.2.2 同一套退化口径），"
             + "否则按 SELF 收窄到本人创建的出库单。当前请求的数据范围："
-            + (InventoryController.selfOnly(actor, "warehouse.inventory.read") ? "SELF（仅本人创建）" : "ALL/DEPARTMENT（全租户）"),
+            + (InventoryController.selfOnly(actor, "warehouse.inventory.read")
+                ? "SELF（仅本人创建）"
+                : "ALL/DEPARTMENT（全租户）"),
         "**打印只有出库单与拣货单两种**，都只包含本模块自己持有的数据。面单/箱唛/标签打印属于"
             + "8.3.4.2（并行车道），这里不列也不实现 —— 放一种就是抢它的表与端点。");
   }
@@ -172,14 +165,11 @@ public class OutboundOrderService {
   /**
    * 出库单分页列表。
    *
-   * <p>四个筛选维度（仓库、来源、状态、时间）全部真的落在 SQL 的 WHERE 上，
-   * {@code keyword} 跨单号/外部单号/调拨单号/仓库名/承运渠道五处匹配。
+   * <p>四个筛选维度（仓库、来源、状态、时间）全部真的落在 SQL 的 WHERE 上， {@code keyword} 跨单号/外部单号/调拨单号/仓库名/承运渠道五处匹配。
    *
-   * <p>时间条件**排在最前面**：{@code ?::timestamptz} 后面一定还跟着别的绑定，
-   * cast 不落在绑定序列末位（与 7.1.2.2 / 7.4.2.1 同一条纪律）。
+   * <p>时间条件**排在最前面**：{@code ?::timestamptz} 后面一定还跟着别的绑定， cast 不落在绑定序列末位（与 7.1.2.2 / 7.4.2.1 同一条纪律）。
    *
-   * <p>排序固定为创建时间倒序 —— 作业台永远先看最新的一批，允许前端随意改排序会让人
-   * 漏看压在后面的旧单。
+   * <p>排序固定为创建时间倒序 —— 作业台永远先看最新的一批，允许前端随意改排序会让人 漏看压在后面的旧单。
    */
   public OutboundOrderPage list(
       List<UUID> warehouseIds,
@@ -240,11 +230,17 @@ public class OutboundOrderService {
         sql.fetchOne("select count(*) " + FROM + sqlWhere, binds.toArray()).get(0, Long.class);
     var rows =
         sql.fetch(
-            "select " + SUMMARY_COLUMNS + FROM  + sqlWhere
+            "select "
+                + SUMMARY_COLUMNS
+                + FROM
+                + sqlWhere
                 + " order by o.created_at desc, o.id desc limit ? offset ?",
             append(binds, limit, (long) offset).toArray());
     return new OutboundOrderPage(
-        rows.stream().map(OutboundOrderService::summary).toList(), total, Math.max(0, pageNo), limit);
+        rows.stream().map(OutboundOrderService::summary).toList(),
+        total,
+        Math.max(0, pageNo),
+        limit);
   }
 
   private static String inClause(String column, int n) {
@@ -289,20 +285,15 @@ public class OutboundOrderService {
   /**
    * 建立出库单（待拣）。
    *
-   * <p>建单这件事本身不在蓝图给 8.3.1.1 的职责清单里，但它是这张列表唯一诚实的数据来源：
-   * 不建单，列表永远是空的，而空列表撑不起任何一条能力。蓝图把 9 订单履约列为上游，
-   * 而它尚未交付 —— 与其等一个没有上游的单据进来，不如把「履约动作的载体」这件事本身
-   * 落地，并如实声明：由本模块建单不代表 9 订单已交付，销售来源仍只存外部单号。
+   * <p>建单这件事本身不在蓝图给 8.3.1.1 的职责清单里，但它是这张列表唯一诚实的数据来源： 不建单，列表永远是空的，而空列表撑不起任何一条能力。蓝图把 9 订单履约列为上游，
+   * 而它尚未交付 —— 与其等一个没有上游的单据进来，不如把「履约动作的载体」这件事本身 落地，并如实声明：由本模块建单不代表 9 订单已交付，销售来源仍只存外部单号。
    *
    * <p>三条硬校验：
    *
    * <ul>
-   *   <li>明细至少一行且 SKU 不重复（库里也有 UNIQUE(tenant_id,order_id,sku_id) 兜底）——
-   *       零行单据在台账上看起来像「处理过了」，那比报错危险得多。
-   *   <li>调拨来源必须真的对得上：发货仓 = 调拨单 from_warehouse_id，且每个明细 SKU 都在
-   *       该调拨单的明细里。发一个调拨单上没有的 SKU，在业务上不可能成立。
-   *   <li>SKU 名称读 {@code sku_ref} 冻结，不接受调用方自填 —— 自填商品名等于允许台账
-   *       上的货名与商品中心各说各话。
+   *   <li>明细至少一行且 SKU 不重复（库里也有 UNIQUE(tenant_id,order_id,sku_id) 兜底）—— 零行单据在台账上看起来像「处理过了」，那比报错危险得多。
+   *   <li>调拨来源必须真的对得上：发货仓 = 调拨单 from_warehouse_id，且每个明细 SKU 都在 该调拨单的明细里。发一个调拨单上没有的 SKU，在业务上不可能成立。
+   *   <li>SKU 名称读 {@code sku_ref} 冻结，不接受调用方自填 —— 自填商品名等于允许台账 上的货名与商品中心各说各话。
    * </ul>
    */
   @Transactional
@@ -377,7 +368,8 @@ public class OutboundOrderService {
     var skus =
         sql.fetch(
             "select id,code,name from sku_ref where tenant_id = ? and id in ("
-                + String.join(",", java.util.Collections.nCopies(lines.size(), "?")) + ")",
+                + String.join(",", java.util.Collections.nCopies(lines.size(), "?"))
+                + ")",
             skuBinds.toArray());
     if (skus.size() != lines.size()) {
       throw bad("明细里有 " + (lines.size() - skus.size()) + " 个 SKU 在当前租户不存在。");
@@ -386,8 +378,11 @@ public class OutboundOrderService {
     for (var s : skus) names.put(s.get("id", UUID.class), s);
 
     OffsetDateTime now = OffsetDateTime.now();
-    String code = "OB-" + CODE_DAY.format(now) + "-"
-        + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
+    String code =
+        "OB-"
+            + CODE_DAY.format(now)
+            + "-"
+            + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
     UUID orderId = UUID.randomUUID();
     String carrier = input.carrierCode() == null ? "" : input.carrierCode().trim();
 
@@ -424,8 +419,12 @@ public class OutboundOrderService {
           sku.get("name", String.class),
           line.quantity().setScale(6, java.math.RoundingMode.HALF_UP),
           now);
-      note.append(currentLine).append(". ").append(sku.get("code", String.class)).append(" × ")
-          .append(line.quantity().stripTrailingZeros().toPlainString()).append("；");
+      note.append(currentLine)
+          .append(". ")
+          .append(sku.get("code", String.class))
+          .append(" × ")
+          .append(line.quantity().stripTrailingZeros().toPlainString())
+          .append("；");
     }
 
     event(
@@ -435,17 +434,26 @@ public class OutboundOrderService {
         OutboundOrderStatus.PENDING_PICKING,
         actorId,
         now,
-        "建单：" + source.label()
-            + (externalRef != null ? " · 外部单号 " + externalRef : " · 调拨单 " + input.sourceTransferOrderId())
-            + " · 发货仓 " + warehouse.get("code", String.class)
-            + " · " + lines.size() + " 个 SKU（" + note + "）"
+        "建单："
+            + source.label()
+            + (externalRef != null
+                ? " · 外部单号 " + externalRef
+                : " · 调拨单 " + input.sourceTransferOrderId())
+            + " · 发货仓 "
+            + warehouse.get("code", String.class)
+            + " · "
+            + lines.size()
+            + " 个 SKU（"
+            + note
+            + "）"
             + (notBlank(input.note()) ? " · 备注 " + input.note().trim() : ""));
 
     return requireSummary(orderId);
   }
 
   /** 调拨来源的三条对齐校验：单存在、发货仓对得上、明细 SKU 在调拨单里。 */
-  private void verifyTransferSource(UUID transferId, UUID warehouseId, List<OutboundOrderLineInput> lines) {
+  private void verifyTransferSource(
+      UUID transferId, UUID warehouseId, List<OutboundOrderLineInput> lines) {
     var transfer =
         sql.fetchOne(
             "select id,order_code,from_warehouse_id from transfer_order where tenant_id = ? and id = ?",
@@ -455,10 +463,7 @@ public class OutboundOrderService {
       throw notFound("调拨单", transferId);
     }
     if (!transfer.get("from_warehouse_id", UUID.class).equals(warehouseId)) {
-      throw bad(
-          "调拨出库的发货仓必须是调拨单的发出仓：调拨单 "
-              + transfer.get("order_code", String.class)
-              + " 从另一个仓发出。");
+      throw bad("调拨出库的发货仓必须是调拨单的发出仓：调拨单 " + transfer.get("order_code", String.class) + " 从另一个仓发出。");
     }
     var onTransfer =
         sql.fetch(
@@ -469,7 +474,12 @@ public class OutboundOrderService {
     for (var r : onTransfer) allowed.add(r.get("sku_id", UUID.class));
     for (var line : lines) {
       if (!allowed.contains(line.skuId())) {
-        throw bad("SKU " + line.skuId() + " 不在调拨单 " + transfer.get("order_code", String.class) + " 的明细里。");
+        throw bad(
+            "SKU "
+                + line.skuId()
+                + " 不在调拨单 "
+                + transfer.get("order_code", String.class)
+                + " 的明细里。");
       }
     }
   }
@@ -479,13 +489,10 @@ public class OutboundOrderService {
   /**
    * 批量生成拣货任务（交接给 8.3.2.1）。
    *
-   * <p>逐单独立处理：一单不合规不影响其它单，成功与失败都逐条列出。
-   * 「批量操作」最危险的地方就是「部分成功」被当成「全部成功」，所以失败单必须带着
-   * 可读原因回来。
+   * <p>逐单独立处理：一单不合规不影响其它单，成功与失败都逐条列出。 「批量操作」最危险的地方就是「部分成功」被当成「全部成功」，所以失败单必须带着 可读原因回来。
    *
-   * <p>每张成功单做三件事：校验当前是待拣 → 落一行 {@code outbound_pick_request}（含行数与
-   * 件数快照）→ 把状态推进到拣货中并留审计。第二单开始若遇到同一张单会被 UNIQUE 挡住，
-   * 服务层先查一次并给 409 风格的失败原因。
+   * <p>每张成功单做三件事：校验当前是待拣 → 落一行 {@code outbound_pick_request}（含行数与 件数快照）→
+   * 把状态推进到拣货中并留审计。第二单开始若遇到同一张单会被 UNIQUE 挡住， 服务层先查一次并给 409 风格的失败原因。
    */
   @Transactional
   public OutboundPickRequestResult requestPicking(List<UUID> orderIds, String note, UUID actorId) {
@@ -501,10 +508,10 @@ public class OutboundOrderService {
         // 报「当前状态是拣货中」会让用户以为要去改状态，而真正要做的是「别再发一次」。
         boolean requested =
             sql.fetchOne(
-                    "select count(*) from outbound_pick_request where tenant_id = ? and order_id = ?",
-                    tenant(),
-                    id)
-                .get(0, Integer.class)
+                        "select count(*) from outbound_pick_request where tenant_id = ? and order_id = ?",
+                        tenant(),
+                        id)
+                    .get(0, Integer.class)
                 > 0;
         if (requested) {
           failures.add(failure(id, head, "这张出库单已经生成过拣货任务了（一张单只交接一次）。"));
@@ -512,8 +519,10 @@ public class OutboundOrderService {
         }
         if (!OutboundOrderStatus.PENDING_PICKING.name().equals(status)) {
           failures.add(
-              failure(id, head, "只有待拣的出库单能生成拣货任务，当前状态是 "
-                  + OutboundOrderStatus.valueOf(status).label() + "。"));
+              failure(
+                  id,
+                  head,
+                  "只有待拣的出库单能生成拣货任务，当前状态是 " + OutboundOrderStatus.valueOf(status).label() + "。"));
           continue;
         }
         // 聚合先算：数量为 0 时还不能动状态，否则会把单子推进到一个交接不存在的状态。
@@ -564,13 +573,20 @@ public class OutboundOrderService {
             OutboundOrderStatus.PICKING,
             actorId,
             now,
-            "生成拣货任务：待拣 → 拣货中 · " + lineCount + " 个 SKU / " + pieces.toPlainString()
+            "生成拣货任务：待拣 → 拣货中 · "
+                + lineCount
+                + " 个 SKU / "
+                + pieces.toPlainString()
                 + " 件 · 交接给 8.3.2.1"
                 + (notBlank(note) ? " · 说明 " + note.trim() : ""));
         orders.add(requireSummary(id));
       } catch (ResponseStatusException e) {
         // 单张失败不中断整批：批量操作里最忌讳的是「一半成功被当成全部成功」。
-        var head = sql.fetchOne("select order_code from outbound_order where tenant_id = ? and id = ?", tenant(), id);
+        var head =
+            sql.fetchOne(
+                "select order_code from outbound_order where tenant_id = ? and id = ?",
+                tenant(),
+                id);
         failures.add(
             new OutboundBulkFailure(
                 id, head == null ? null : head.get("order_code", String.class), e.getReason()));
@@ -584,9 +600,8 @@ public class OutboundOrderService {
   /**
    * 批量打印：返回**真正要印的内容**，而不是一个「已提交打印」的空壳。
    *
-   * <p>两种文档（出库单 / 拣货单）都由本模块自己的数据拼出，每行明细都来自
-   * {@code outbound_order_line}。同时逐单留一条 PRINTED 审计 —— 谁在什么时候印了哪张单
-   * 是发货纠纷里第一个要回答的问题。
+   * <p>两种文档（出库单 / 拣货单）都由本模块自己的数据拼出，每行明细都来自 {@code outbound_order_line}。同时逐单留一条 PRINTED 审计 ——
+   * 谁在什么时候印了哪张单 是发货纠纷里第一个要回答的问题。
    *
    * <p>刻意不含面单/箱唛/标签：那是 8.3.4.2 的范围（并行车道），放一种就是抢它的端点。
    */
@@ -595,7 +610,9 @@ public class OutboundOrderService {
     List<UUID> ids = batch(orderIds, "打印");
     OutboundPrintDocument document;
     try {
-      document = OutboundPrintDocument.valueOf(documentName == null ? "" : documentName.trim().toUpperCase(Locale.ROOT));
+      document =
+          OutboundPrintDocument.valueOf(
+              documentName == null ? "" : documentName.trim().toUpperCase(Locale.ROOT));
     } catch (IllegalArgumentException e) {
       throw bad("未知的打印文档类型：" + documentName + "。可选：" + documentNames());
     }
@@ -650,8 +667,13 @@ public class OutboundOrderService {
           status,
           actorId,
           now,
-          "打印" + document.label() + "：" + lines.size() + " 行明细 / "
-              + scale(head.get("total_piece_count", BigDecimal.class)).toPlainString() + " 件");
+          "打印"
+              + document.label()
+              + "："
+              + lines.size()
+              + " 行明细 / "
+              + scale(head.get("total_piece_count", BigDecimal.class)).toPlainString()
+              + " 件");
     }
     return new OutboundPrintResult(document.name(), document.label(), now, orders.size(), orders);
   }
@@ -661,8 +683,7 @@ public class OutboundOrderService {
   /**
    * 批量取消。逐单独立处理，失败带可读原因。
    *
-   * <p>已发货的单一律取消不了 —— 货已经交出去了，这不是一个能靠改状态挽回的操作，
-   * DB 触发器与 CHECK 各挡一次。
+   * <p>已发货的单一律取消不了 —— 货已经交出去了，这不是一个能靠改状态挽回的操作， DB 触发器与 CHECK 各挡一次。
    */
   @Transactional
   public OutboundCancelResult cancel(List<UUID> orderIds, String reason, UUID actorId) {
@@ -680,8 +701,12 @@ public class OutboundOrderService {
         var status = OutboundOrderStatus.valueOf(head.get("status", String.class));
         if (!status.canTransitionTo(OutboundOrderStatus.CANCELLED)) {
           failures.add(
-              failure(id, head, status.terminal() ? "出库单已" + status.label() + "，不能取消。"
-                  : "不允许的状态流转：" + status.label() + " → 取消。"));
+              failure(
+                  id,
+                  head,
+                  status.terminal()
+                      ? "出库单已" + status.label() + "，不能取消。"
+                      : "不允许的状态流转：" + status.label() + " → 取消。"));
           continue;
         }
         int moved =
@@ -708,7 +733,11 @@ public class OutboundOrderService {
             "取消出库单：" + status.label() + " → 取消 · 原因：" + why);
         orders.add(requireSummary(id));
       } catch (ResponseStatusException e) {
-        var head = sql.fetchOne("select order_code from outbound_order where tenant_id = ? and id = ?", tenant(), id);
+        var head =
+            sql.fetchOne(
+                "select order_code from outbound_order where tenant_id = ? and id = ?",
+                tenant(),
+                id);
         failures.add(
             new OutboundBulkFailure(
                 id, head == null ? null : head.get("order_code", String.class), e.getReason()));
@@ -722,20 +751,17 @@ public class OutboundOrderService {
   /**
    * 状态推进（单张）。
    *
-   * <p>本模块是 {@code outbound_order.status} 的所有者，所以这张主表的状态机由本端点驱动。
-   * 合法性只有一处定义（{@link OutboundOrderStatus#transitionsFrom()}），非法跃迁在这里
-   * 就被 409 挡掉，V72 的触发器在 DB 层再挡一次。
+   * <p>本模块是 {@code outbound_order.status} 的所有者，所以这张主表的状态机由本端点驱动。 合法性只有一处定义（{@link
+   * OutboundOrderStatus#transitionsFrom()}），非法跃迁在这里 就被 409 挡掉，V72 的触发器在 DB 层再挡一次。
    *
-   * <p><b>它不等于下游模块的工作</b>：把单子推到「待打包」不代表打过包，推到「已发货」
-   * 不代表承运商已揽收。8.3.2.1 / 8.3.3.x / 8.3.4.1 交付后，它们的端点会在完成各自实体
-   * 的同时调用同一套状态机；在此之前，本端点是唯一能把状态往前推的地方，而每一次推进
-   * 都留下操作人、时刻与说明。
+   * <p><b>它不等于下游模块的工作</b>：把单子推到「待打包」不代表打过包，推到「已发货」 不代表承运商已揽收。8.3.2.1 / 8.3.3.x / 8.3.4.1
+   * 交付后，它们的端点会在完成各自实体 的同时调用同一套状态机；在此之前，本端点是唯一能把状态往前推的地方，而每一次推进 都留下操作人、时刻与说明。
    *
-   * <p>「已发货」额外要求承运渠道（{@code requiresCarrier}）—— 没有承运商就发不出货，
-   * DB 的 CHECK 与触发器也各挡一次。
+   * <p>「已发货」额外要求承运渠道（{@code requiresCarrier}）—— 没有承运商就发不出货， DB 的 CHECK 与触发器也各挡一次。
    */
   @Transactional
-  public OutboundOrderSummary transition(UUID orderId, OutboundTransitionInput input, UUID actorId) {
+  public OutboundOrderSummary transition(
+      UUID orderId, OutboundTransitionInput input, UUID actorId) {
     if (input == null) {
       throw bad("请求体不能为空");
     }
@@ -755,7 +781,11 @@ public class OutboundOrderService {
       throw conflict(
           from.terminal()
               ? "出库单已" + from.label() + "，终态不能再流转。"
-              : "不允许的状态流转：" + from.label() + " → " + to.label() + "。"
+              : "不允许的状态流转："
+                  + from.label()
+                  + " → "
+                  + to.label()
+                  + "。"
                   + (from.transitionsFrom().isEmpty() ? "" : "合法去向：" + nextLabels(from) + "。"));
     }
     var rule = from.transitionTo(to);
@@ -773,9 +803,7 @@ public class OutboundOrderService {
     OffsetDateTime now = OffsetDateTime.now();
     String carrier = head.get("carrier_code", String.class);
     if (rule.requiresCarrier() && (carrier == null || carrier.isBlank())) {
-      throw bad(
-          "推进到已发货必须先有承运渠道：没有承运商就发不出货。本模块不提供在这里改承运渠道的入口，"
-              + "因为发货交接归 8.3.4.1。");
+      throw bad("推进到已发货必须先有承运渠道：没有承运商就发不出货。本模块不提供在这里改承运渠道的入口，" + "因为发货交接归 8.3.4.1。");
     }
 
     int moved;
@@ -849,8 +877,7 @@ public class OutboundOrderService {
   /**
    * 按 id 取一行出库单摘要（批量操作返回体用）。
    *
-   * <p>与 {@link #list} 共用同一段 SELECT 与同一个映射，所以列表页看到的和操作后回读的
-   * 必然是同一份形状 —— 不另写一份 SQL 免得两处漂移。
+   * <p>与 {@link #list} 共用同一段 SELECT 与同一个映射，所以列表页看到的和操作后回读的 必然是同一份形状 —— 不另写一份 SQL 免得两处漂移。
    */
   private OutboundOrderSummary requireSummary(UUID orderId) {
     var rows =
@@ -881,7 +908,8 @@ public class OutboundOrderService {
   }
 
   private static OutboundBulkFailure failure(UUID id, Record head, String reason) {
-    return new OutboundBulkFailure(id, head == null ? null : head.get("order_code", String.class), reason);
+    return new OutboundBulkFailure(
+        id, head == null ? null : head.get("order_code", String.class), reason);
   }
 
   private OutboundSourceType source(String raw) {
@@ -919,7 +947,8 @@ public class OutboundOrderService {
   }
 
   private UUID tenant() {
-    return sql.fetchOne("select current_setting('app.current_tenant',true)::uuid as t").get("t", UUID.class);
+    return sql.fetchOne("select current_setting('app.current_tenant',true)::uuid as t")
+        .get("t", UUID.class);
   }
 
   private static List<Object> append(List<Object> binds, Object... more) {
@@ -935,9 +964,9 @@ public class OutboundOrderService {
   /**
    * 读 timestamptz 列。
    *
-   * <p>jOOQ 视驱动返回的类型可能是 {@link OffsetDateTime}、{@link java.time.Instant}
-   * 或 {@link java.sql.Timestamp}，直接 {@code get(field, OffsetDateTime.class)} 会在拿到
-   * Instant 时抛 ClassCastException（与 7.1.2.2 同一处收口）。
+   * <p>jOOQ 视驱动返回的类型可能是 {@link OffsetDateTime}、{@link java.time.Instant} 或 {@link
+   * java.sql.Timestamp}，直接 {@code get(field, OffsetDateTime.class)} 会在拿到 Instant 时抛
+   * ClassCastException（与 7.1.2.2 同一处收口）。
    */
   private static OffsetDateTime moment(Record r, String field) {
     Object value = r.get(field);

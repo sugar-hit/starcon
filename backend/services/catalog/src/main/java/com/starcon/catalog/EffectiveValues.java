@@ -6,17 +6,15 @@ import java.util.Locale;
 /**
  * 属性「有效值」的解析规则：SPU 公共值经过 SKU 覆写之后真正生效的那组值。
  *
- * <p>3.1.2.2 的属性区展示的是**有效值**，不是原始存的值——同一个属性在 SPU 上有公共值、在 SKU 上
- * 可能被覆写或被清空，直接把两行原始值并排摆出来，运营没法判断这个 SKU 实际是什么参数。
- * 3.2.2.2（SKU 属性覆写）尚未开发，所以规则在这里落成可单测的纯函数，详情端点与既有商品档案页
- * 共用同一份实现，避免两处对「有效值」的理解漂移。
+ * <p>3.1.2.2 的属性区展示的是**有效值**，不是原始存的值——同一个属性在 SPU 上有公共值、在 SKU 上 可能被覆写或被清空，直接把两行原始值并排摆出来，运营没法判断这个 SKU
+ * 实际是什么参数。 3.2.2.2（SKU 属性覆写）尚未开发，所以规则在这里落成可单测的纯函数，详情端点与既有商品档案页 共用同一份实现，避免两处对「有效值」的理解漂移。
  *
  * <p>为什么不用一条 SQL 的 COALESCE 搞定：这里必须区分三件 COALESCE 分不开的事——
  * <b>赋值</b>（SET）、<b>显式清空</b>（CLEAR）和<b>根本没有这一行</b>。前者取值，后两者都取不到值，
- * 但语义完全相反：清空是操作人主动抹掉的（不该退回公共值），没这一行才是继承。把它压成一个
- * COALESCE 会让「SKU 清空了某个公共属性」悄悄变回公共值，看起来像没清过。
+ * 但语义完全相反：清空是操作人主动抹掉的（不该退回公共值），没这一行才是继承。把它压成一个 COALESCE 会让「SKU 清空了某个公共属性」悄悄变回公共值，看起来像没清过。
  *
  * <p>取值模式（{@code attribute_definition.value_mode}）决定继承是否成立：
+ *
  * <ul>
  *   <li>{@code COMMON_LOCKED} 公共固定：SKU 侧不允许有赋值行（V1 的 {@code validate_value_owner}
  *       触发器已经拒绝），因此永远取公共值。
@@ -29,6 +27,7 @@ public final class EffectiveValues {
 
   /** SPU 公共侧的取值模式。 */
   public static final String COMMON_LOCKED = "COMMON_LOCKED";
+
   public static final String COMMON_DEFAULT = "COMMON_DEFAULT";
   public static final String SKU_ONLY = "SKU_ONLY";
 
@@ -37,10 +36,7 @@ public final class EffectiveValues {
 
   private static final List<String> NONE = List.of();
 
-  /**
-   * 有效值的来源。区分「谁的值在生效」与「为什么没有值」，两者都要显示：
-   * 只说"没值"的话，运营无法分辨是自己漏填了还是这条属性本来就不适用。
-   */
+  /** 有效值的来源。区分「谁的值在生效」与「为什么没有值」，两者都要显示： 只说"没值"的话，运营无法分辨是自己漏填了还是这条属性本来就不适用。 */
   public enum Source {
     /** SKU 显式赋值，覆盖了公共值。 */
     SKU_OVERRIDE("SKU 覆写"),
@@ -66,8 +62,7 @@ public final class EffectiveValues {
     }
 
     static Source parse(String value) {
-      for (Source s : values())
-        if (s.name().equals(value)) return s;
+      for (Source s : values()) if (s.name().equals(value)) return s;
       throw new IllegalArgumentException("未知的有效值来源：" + value);
     }
   }

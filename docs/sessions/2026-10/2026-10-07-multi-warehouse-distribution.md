@@ -46,11 +46,11 @@
 
 ### 5. 三个蓝图没说清、按实测 schema 补上的边界（全部有记录，不是臆造）
 
-| 缺口 | 实测情况 | 本模块的做法 |
-| --- | --- | --- |
-| 仓库性质 | `warehouse`（V1）**没有**任何 type/kind 列，本地仓/海外仓/FBA/三方仓这个分类不存在于数据里 | V55 加 `kind` 受控列（`DEFAULT 'LOCAL'` 兼容存量）。warehouse 是本服务**自有**主数据，补自己域里的属性不越界 |
-| SPU 维度 | `sku_ref`（V1）**没有** spu 列；`spu` 权威在 catalog（`sku.spu_id`），但跨服务不能 JOIN 也不能复制档案 | V55 在 `sku_ref` 加**可空** `spu_id` 引用登记（与该表既有的 id/code/name 快照同一性质）。存量行为 NULL 是**如实**（确实不知道），覆盖缺口由 `skuScope.unregisteredSpuCount` 在响应里报出 |
-| 上游 10 外部仓观测 | **未交付**（仓库里没有任何 observation 类表） | warehouse 侧自建观测表 + 观测录入端点作为真实数据来源。10 号卷的采集器交付后调它即可；在此之前可人工录入。页面上的平台数量永远来自真实落库的行 |
+| 缺口               | 实测情况                                                                                               | 本模块的做法                                                                                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 仓库性质           | `warehouse`（V1）**没有**任何 type/kind 列，本地仓/海外仓/FBA/三方仓这个分类不存在于数据里             | V55 加 `kind` 受控列（`DEFAULT 'LOCAL'` 兼容存量）。warehouse 是本服务**自有**主数据，补自己域里的属性不越界                                                                             |
+| SPU 维度           | `sku_ref`（V1）**没有** spu 列；`spu` 权威在 catalog（`sku.spu_id`），但跨服务不能 JOIN 也不能复制档案 | V55 在 `sku_ref` 加**可空** `spu_id` 引用登记（与该表既有的 id/code/name 快照同一性质）。存量行为 NULL 是**如实**（确实不知道），覆盖缺口由 `skuScope.unregisteredSpuCount` 在响应里报出 |
+| 上游 10 外部仓观测 | **未交付**（仓库里没有任何 observation 类表）                                                          | warehouse 侧自建观测表 + 观测录入端点作为真实数据来源。10 号卷的采集器交付后调它即可；在此之前可人工录入。页面上的平台数量永远来自真实落库的行                                           |
 
 ## 关键 trade-off
 
@@ -90,13 +90,13 @@
 
 ### 后端（warehouse 服务）
 
-| 文件 | 说明 |
-| --- | --- |
-| `services/warehouse/src/main/resources/db/migration/V55__warehouse_multi_warehouse_distribution.sql` | 新建。三件事 + 四条 DB 级强制 + RLS/GRANT |
-| `services/warehouse/src/main/java/com/starcon/warehouse/DistributionModels.java` | 新建。DTO 全部带 `Distribution` / `MultiWarehouse` / `PlatformObservation` 前缀避重名 |
-| `services/warehouse/src/main/java/com/starcon/warehouse/InventoryDistributionService.java` | 新建。jOOQ 显式 SQL 聚合，无 JPA |
-| `services/warehouse/src/main/java/com/starcon/warehouse/InventoryController.java` | 改。+3 端点、+1 构造参数 |
-| `services/warehouse/src/test/java/com/starcon/warehouse/InventoryDistributionIntegrationTest.java` | 新建。37 例，Testcontainers PG16，池压到 1 |
+| 文件                                                                                                 | 说明                                                                                  |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `services/warehouse/src/main/resources/db/migration/V55__warehouse_multi_warehouse_distribution.sql` | 新建。三件事 + 四条 DB 级强制 + RLS/GRANT                                             |
+| `services/warehouse/src/main/java/com/starcon/warehouse/DistributionModels.java`                     | 新建。DTO 全部带 `Distribution` / `MultiWarehouse` / `PlatformObservation` 前缀避重名 |
+| `services/warehouse/src/main/java/com/starcon/warehouse/InventoryDistributionService.java`           | 新建。jOOQ 显式 SQL 聚合，无 JPA                                                      |
+| `services/warehouse/src/main/java/com/starcon/warehouse/InventoryController.java`                    | 改。+3 端点、+1 构造参数                                                              |
+| `services/warehouse/src/test/java/com/starcon/warehouse/InventoryDistributionIntegrationTest.java`   | 新建。37 例，Testcontainers PG16，池压到 1                                            |
 
 ### 契约（codegen 产物，未手改）
 
@@ -105,13 +105,13 @@
 
 ### 前端
 
-| 文件 | 说明 |
-| --- | --- |
-| `apps/web/src/components/inventory/inventory-distribution.tsx` | 新建。矩阵页（两个区块分区展示） |
-| `apps/web/src/app/inventory/distribution/page.tsx` | 新建。独立路由，接 `?skuId=` 定位参数 |
-| `apps/web/src/components/inventory/inventory-model.ts` | 改。+fetch/展示口径 helpers |
-| `apps/web/src/components/inventory/inventory-model.test.ts` | 改。+6 例 |
-| `apps/web/src/components/inventory/inventory-workspace.tsx` | 改。+第五个页签 |
+| 文件                                                           | 说明                                  |
+| -------------------------------------------------------------- | ------------------------------------- |
+| `apps/web/src/components/inventory/inventory-distribution.tsx` | 新建。矩阵页（两个区块分区展示）      |
+| `apps/web/src/app/inventory/distribution/page.tsx`             | 新建。独立路由，接 `?skuId=` 定位参数 |
+| `apps/web/src/components/inventory/inventory-model.ts`         | 改。+fetch/展示口径 helpers           |
+| `apps/web/src/components/inventory/inventory-model.test.ts`    | 改。+6 例                             |
+| `apps/web/src/components/inventory/inventory-workspace.tsx`    | 改。+第五个页签                       |
 
 ### 文档
 
@@ -121,11 +121,11 @@
 
 ## 端点
 
-| 方法 | 路径 | 权限 | 说明 |
-| --- | --- | --- | --- |
-| GET | `/warehouse/inventory/distribution` | `warehouse.inventory.read` | 多仓对照矩阵。`skuId` 与 `spuId` 互斥必居其一 |
-| GET | `/warehouse/inventory/distribution/spus` | `warehouse.inventory.read` | SPU 下拉 |
-| POST | `/warehouse/inventory/platform-observations` | `warehouse.inventory.update` | 录入平台仓观测 |
+| 方法 | 路径                                         | 权限                         | 说明                                          |
+| ---- | -------------------------------------------- | ---------------------------- | --------------------------------------------- |
+| GET  | `/warehouse/inventory/distribution`          | `warehouse.inventory.read`   | 多仓对照矩阵。`skuId` 与 `spuId` 互斥必居其一 |
+| GET  | `/warehouse/inventory/distribution/spus`     | `warehouse.inventory.read`   | SPU 下拉                                      |
+| POST | `/warehouse/inventory/platform-observations` | `warehouse.inventory.update` | 录入平台仓观测                                |
 
 ## 验证
 

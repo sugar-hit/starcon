@@ -155,7 +155,11 @@ export function generateCustomsDocument(id: string, input: CustomsGenerateDocume
   return api<CustomsSaved>(`${BASE}/${encodeURIComponent(id)}/documents`, 'POST', input);
 }
 
-export function finalizeCustomsDocument(id: string, documentId: string, input: CustomsFinalizeDocumentRequest) {
+export function finalizeCustomsDocument(
+  id: string,
+  documentId: string,
+  input: CustomsFinalizeDocumentRequest,
+) {
   return api<CustomsSaved>(
     `${BASE}/${encodeURIComponent(id)}/documents/${encodeURIComponent(documentId)}/finalize`,
     'POST',
@@ -317,7 +321,10 @@ export const declarationSortOptions = [
 /** 数值展示。数量与金额来自 NUMERIC，后端给的是 number，这里只做展示格式化。 */
 export function fmt(value: number | null | undefined, digits = 2): string {
   if (value === null || value === undefined || !Number.isFinite(value)) return '—';
-  return value.toLocaleString('zh-CN', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  return value.toLocaleString('zh-CN', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
 }
 
 export function money(value: number | null | undefined, currency?: string | null): string {

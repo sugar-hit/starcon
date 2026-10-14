@@ -162,9 +162,9 @@ describe('image-process-model', () => {
       const base = { ...emptyRecipeInput(), code: 'AMZ-MAIN', name: '亚马逊主图' };
       expect(recipeProblem(base)).toBeNull();
       // 去背景 + jpeg 且没开白底
-      expect(
-        recipeProblem({ ...base, removeBackground: true, targetFormat: 'jpeg' }),
-      ).toContain('白底');
+      expect(recipeProblem({ ...base, removeBackground: true, targetFormat: 'jpeg' })).toContain(
+        '白底',
+      );
       // 编码非法
       expect(recipeProblem({ ...base, code: '_x' })).toContain('英文字母');
       // 只给宽不给高

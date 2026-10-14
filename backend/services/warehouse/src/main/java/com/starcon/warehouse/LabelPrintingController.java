@@ -10,7 +10,6 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,13 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 8.3.4.2 面单与标签打印。
  *
- * <p>蓝图：「打印面单、装箱单、SKU 条码、库位标签、箱唛，支持批量打印、模板配置、打印次数记录
- * （平台对重复打印有要求）。」输出：「打印任务记录 + 打印内容（PDF/指令流）；打印日志。」
+ * <p>蓝图：「打印面单、装箱单、SKU 条码、库位标签、箱唛，支持批量打印、模板配置、打印次数记录 （平台对重复打印有要求）。」输出：「打印任务记录 + 打印内容（PDF/指令流）；打印日志。」
  *
- * <p>命名空间 {@code /warehouse/inventory/printing/...}，权限码
- * {@code warehouse.inventory.read} / {@code .create} / {@code .update} / {@code .delete}。
- * 刻意独立成 {@code LabelPrintingController} 而不是并进 {@code InventoryController}：
- * 那是 7.1.x 的文件，并行车道各改各的才不会撞。
+ * <p>命名空间 {@code /warehouse/inventory/printing/...}，权限码 {@code warehouse.inventory.read} / {@code
+ * .create} / {@code .update} / {@code .delete}。 刻意独立成 {@code LabelPrintingController} 而不是并进 {@code
+ * InventoryController}： 那是 7.1.x 的文件，并行车道各改各的才不会撞。
  *
  * <p><b>下载端点吐的是落库的渲染内容，不是现算的</b>：{@code /jobs/{jobId}/items/{itemId}/content}
  * 返回打印那一刻的字节并附上校验和，所以「日志里的凭据」与「下载到的内容」永远一致。
@@ -55,10 +52,7 @@ public class LabelPrintingController {
 
   // ------------------------------------------------------------ 能力
 
-  /**
-   * 能力声明：五种打印对象的渲染形态与必填字段、重复打印判据的三段区间与强制重打口径，
-   * 以及「面单数据来自调用方」这一事实。
-   */
+  /** 能力声明：五种打印对象的渲染形态与必填字段、重复打印判据的三段区间与强制重打口径， 以及「面单数据来自调用方」这一事实。 */
   @GetMapping("/inventory/printing/capabilities")
   public LabelPrintCapabilities capabilities(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth) {
@@ -98,8 +92,7 @@ public class LabelPrintingController {
       @RequestParam(required = false) String keyword,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "50") int size) {
-    return call(auth, "inventory.read",
-        a -> printing.templates(objectType, keyword, page, size));
+    return call(auth, "inventory.read", a -> printing.templates(objectType, keyword, page, size));
   }
 
   @GetMapping("/inventory/printing/templates/{templateId}")
@@ -129,8 +122,7 @@ public class LabelPrintingController {
   /**
    * 打印对象列表，行上带<b>「下一次打印的判定」</b>。
    *
-   * <p>判定前置到列表：现场最需要的判断是「现在按打印会不会超限」，等点了打印才被拒，
-   * 标签纸已经进机器了。
+   * <p>判定前置到列表：现场最需要的判断是「现在按打印会不会超限」，等点了打印才被拒， 标签纸已经进机器了。
    */
   @GetMapping("/inventory/printing/targets")
   public LabelPrintTargetPage targets(
@@ -141,7 +133,9 @@ public class LabelPrintingController {
       @RequestParam(required = false) Integer minPrintCount,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "50") int size) {
-    return call(auth, "inventory.read",
+    return call(
+        auth,
+        "inventory.read",
         a -> printing.targets(objectType, externalRef, keyword, minPrintCount, page, size));
   }
 
@@ -193,21 +187,20 @@ public class LabelPrintingController {
       @RequestParam(required = false) String keyword,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "50") int size) {
-    return call(auth, "inventory.read", a -> printing.jobs(status, objectType, keyword, page, size));
+    return call(
+        auth, "inventory.read", a -> printing.jobs(status, objectType, keyword, page, size));
   }
 
   /**
    * 建打印任务（批量：一次给多个对象）。
    *
-   * <p>建单时就判一次重复打印并把结论落在任务上；超限且未强制重打则<b>整单被拒</b>，
-   * 并逐条列出是哪些对象超了限。
+   * <p>建单时就判一次重复打印并把结论落在任务上；超限且未强制重打则<b>整单被拒</b>， 并逐条列出是哪些对象超了限。
    */
   @PostMapping("/inventory/printing/jobs")
   public LabelPrintJob createJob(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @Valid @RequestBody LabelPrintJobRequest request) {
-    return call(auth, "inventory.create",
-        a -> printing.createJob(request, a.userId()));
+    return call(auth, "inventory.create", a -> printing.createJob(request, a.userId()));
   }
 
   @GetMapping("/inventory/printing/jobs/{jobId}")
@@ -220,15 +213,13 @@ public class LabelPrintingController {
   /**
    * 执行打印：真正累加权威次数并落打印凭据。
    *
-   * <p>返回的不只是任务状态，还有逐份的打印凭据（{@code printSequence} 是第几次）与
-   * 打印后的权威次数 —— 界面据此说清「第几次、告警了几条」，而不是只回一句「成功」。
+   * <p>返回的不只是任务状态，还有逐份的打印凭据（{@code printSequence} 是第几次）与 打印后的权威次数 —— 界面据此说清「第几次、告警了几条」，而不是只回一句「成功」。
    */
   @PostMapping("/inventory/printing/jobs/{jobId}/execute")
   public LabelPrintExecution executeJob(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID jobId) {
-    return call(auth, "inventory.create",
-        a -> printing.executeJob(jobId, a.userId()));
+    return call(auth, "inventory.create", a -> printing.executeJob(jobId, a.userId()));
   }
 
   @PostMapping("/inventory/printing/jobs/{jobId}/cancel")
@@ -242,8 +233,7 @@ public class LabelPrintingController {
    * 下载打印内容：按落库的 {@code content_format} 原样吐字节。
    *
    * <p>ZPL → {@code text/vnd.zpl}（热敏机直接吃指令流）；HTML → {@code text/html}
-   * （浏览器排版打印）。<b>不是</b>现算的：返回的就是当初打印时落库并校验过的那一份，
-   * 所以日志里的凭据永远指向下载到的内容。
+   * （浏览器排版打印）。<b>不是</b>现算的：返回的就是当初打印时落库并校验过的那一份， 所以日志里的凭据永远指向下载到的内容。
    */
   @GetMapping("/inventory/printing/jobs/{jobId}/items/{itemId}/content")
   public ResponseEntity<byte[]> content(
@@ -251,17 +241,22 @@ public class LabelPrintingController {
       @PathVariable UUID jobId,
       @PathVariable UUID itemId,
       @RequestParam(required = false) PrintContentFormat format) {
-    return call(auth, "inventory.read", a -> {
-      var actual = printing.itemFormat(jobId, itemId);
-      var rendered = printing.renderedContent(jobId, itemId, format);
-      var bytes = rendered.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-      var headers = new HttpHeaders();
-      headers.setContentType(MediaType.parseMediaType(actual.contentType()));
-      headers.setContentDisposition(ContentDisposition.attachment()
-          .filename("label-" + itemId + "." + actual.extension()).build());
-      headers.setCacheControl("no-store");
-      return ResponseEntity.ok().headers(headers).body(bytes);
-    });
+    return call(
+        auth,
+        "inventory.read",
+        a -> {
+          var actual = printing.itemFormat(jobId, itemId);
+          var rendered = printing.renderedContent(jobId, itemId, format);
+          var bytes = rendered.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+          var headers = new HttpHeaders();
+          headers.setContentType(MediaType.parseMediaType(actual.contentType()));
+          headers.setContentDisposition(
+              ContentDisposition.attachment()
+                  .filename("label-" + itemId + "." + actual.extension())
+                  .build());
+          headers.setCacheControl("no-store");
+          return ResponseEntity.ok().headers(headers).body(bytes);
+        });
   }
 
   // ------------------------------------------------------------ 打印日志
@@ -274,7 +269,7 @@ public class LabelPrintingController {
       @RequestParam(required = false) Boolean warningOnly,
       @RequestParam(required = false, defaultValue = "0") int page,
       @RequestParam(required = false, defaultValue = "50") int size) {
-    return call(auth, "inventory.read",
-        a -> printing.logs(jobId, targetId, warningOnly, page, size));
+    return call(
+        auth, "inventory.read", a -> printing.logs(jobId, targetId, warningOnly, page, size));
   }
 }

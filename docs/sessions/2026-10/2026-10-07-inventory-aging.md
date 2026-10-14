@@ -10,7 +10,8 @@
 库龄 = 今天 − 入库日，是随日历每天变化的派生量。落表意味着要么每天重算全量，
 要么承认表里存的是**昨天**的库龄——而呆滞处置要求这个数字是今天的。
 所以本模块不建「库龄结果表」，全部在查询时从 `stock_bucket`（批次粒度事实）
-+ `inventory_lot` 实时算出。
+
+- `inventory_lot` 实时算出。
 
 **Trade-off**：无法对历史某天的库龄做回溯对比。若将来要「上月 vs 本月呆滞增量」，
 需要在 finance/catalog 侧先有快照或时序事实，那是另一个模块的决策。
@@ -88,6 +89,7 @@
 ## 文件清单
 
 新增
+
 - `backend/services/warehouse/src/main/resources/db/migration/V65__warehouse_inventory_aging_policy.sql`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryAgingModels.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/InventoryAgingService.java`
@@ -99,6 +101,7 @@
 - `apps/web/src/components/inventory/inventory-aging-model.test.ts`
 
 改动
+
 - `apps/web/src/lib/api-proxy.ts`（白名单登记 aging 分支）
 - `packages/ui/src/lib/task-pages.ts`（`/inventory/aging` 的 `implemented` 置 true）
 - `packages/api-contracts/src/catalog.ts`、`warehouse.openapi.json`（codegen 产物，未手改）

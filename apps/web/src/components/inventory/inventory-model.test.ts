@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   actionNote,
   bucketPlacement,
@@ -320,8 +320,7 @@ describe('7.1.1.2 库存明细 · 行展示口径', () => {
 });
 
 describe('7.1.1.1 → 7.1.1.2 下钻契约', () => {
-  const href =
-    '/inventory?skuId=s1&warehouseId=w1&legalEntityId=l1&qualityStatusId=q1';
+  const href = '/inventory?skuId=s1&warehouseId=w1&legalEntityId=l1&qualityStatusId=q1';
 
   it('解析后端给的 detailHref，取出四个行级维度', () => {
     expect(parseDetailHref(href)).toEqual({
@@ -499,10 +498,17 @@ describe('账实核对的前端口径', () => {
     expect(windowLabel(start, null)).toBe('2026-10-03');
   });
 
-  it('桶标签按本地时区取日：+08:00 的凌晨不会被折算成前一天', () => {
-    expect(windowLabel('2026-10-03T00:30:00+08:00', '2026-10-04T00:30:00+08:00')).toBe(
-      '2026-10-03 ~ 2026-10-04',
-    );
+  it.each([
+    ['Asia/Shanghai', '2026-10-03 ~ 2026-10-04'],
+    ['UTC', '2026-10-02 ~ 2026-10-03'],
+    ['America/New_York', '2026-10-02 ~ 2026-10-03'],
+  ])('bucket dates follow the local timezone %s', (timezone, expected) => {
+    vi.stubEnv('TZ', timezone);
+    try {
+      expect(windowLabel('2026-10-03T00:30:00+08:00', '2026-10-04T00:30:00+08:00')).toBe(expected);
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it('无法解析的时间原样返回，不编一个日期出来', () => {
@@ -612,7 +618,12 @@ describe('7.1.3.1 多仓分布：自有账本量与平台观测量必须分区',
   it('周转天数算不出时显示「—」而不是 0', () => {
     // 0 会被读成「瞬间卖完」；空值加原因才是"没算出来"
     const t = turnoverText(
-      ownRow({ turnoverComputable: false, turnoverDays: null, turnoverBasis: 'NONE', turnoverNote: '没有发货出库记录' }),
+      ownRow({
+        turnoverComputable: false,
+        turnoverDays: null,
+        turnoverBasis: 'NONE',
+        turnoverNote: '没有发货出库记录',
+      }),
     );
     expect(t.value).toBe('—');
     expect(t.basis).toBe(turnoverBasisLabels.NONE);
@@ -624,7 +635,10 @@ describe('7.1.3.1 多仓分布：自有账本量与平台观测量必须分区',
     expect(turnoverBasisLabels.PLATFORM_OBSERVATION_DIFF).toBe('平台观测差分');
     const own = turnoverText(ownRow());
     const fba = turnoverText(
-      platformRow({ turnoverBasis: 'PLATFORM_OBSERVATION_DIFF', turnoverNote: '观测快照差分，与自有仓口径不可直接比较' }),
+      platformRow({
+        turnoverBasis: 'PLATFORM_OBSERVATION_DIFF',
+        turnoverNote: '观测快照差分，与自有仓口径不可直接比较',
+      }),
     );
     expect(own.basis).not.toBe(fba.basis);
     expect(own.value).toBe('12.5 天');

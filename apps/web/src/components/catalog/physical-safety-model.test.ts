@@ -77,9 +77,7 @@ describe('规则 R1 体积与体积重', () => {
   });
 
   it('缺一维时明确说缺哪一维而不是给 0', () => {
-    const text = volumeText(
-      profile({ volumeCm3: null, hasVolume: false, heightMm: null }),
-    );
+    const text = volumeText(profile({ volumeCm3: null, hasVolume: false, heightMm: null }));
     expect(text).toContain('缺');
     expect(text).toContain('高');
     expect(text).not.toContain('0 cm³');
@@ -207,7 +205,9 @@ describe('草稿与请求体互转', () => {
   });
 
   it('未采集时安全属性版本记为 0', () => {
-    expect(draftFrom(profile({ safetyCollected: false, safetyVersion: null })).safetyVersion).toBe(0);
+    expect(draftFrom(profile({ safetyCollected: false, safetyVersion: null })).safetyVersion).toBe(
+      0,
+    );
   });
 
   it('空串转成 null 而不是 0', () => {

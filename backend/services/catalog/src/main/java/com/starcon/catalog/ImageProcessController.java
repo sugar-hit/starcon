@@ -13,14 +13,13 @@ import org.springframework.web.bind.annotation.*;
  * 3.4.1.2 图片处理：处理配方（目标平台规格）、异步处理任务、进度与产物。
  *
  * <p>路由挂在 {@code /catalog/media/processing} 之下——与 3.4.1.1 的 {@code /catalog/media}
- * 同前缀，因为处理的输入就是素材、产物也就是素材的新版本。
- * 台账里的 {@code /products/media} 是**前端页面路径**（与 {@code BrandController} 头部同一说明）。
+ * 同前缀，因为处理的输入就是素材、产物也就是素材的新版本。 台账里的 {@code /products/media} 是**前端页面路径**（与 {@code BrandController}
+ * 头部同一说明）。
  *
- * <p>权限沿用素材域：读 {@code catalog.assets.read}，写 {@code catalog.assets.update}。
- * 不新造词表——新词表要改 identity 服务的迁移，属于另一个服务的写入所有权。
+ * <p>权限沿用素材域：读 {@code catalog.assets.read}，写 {@code catalog.assets.update}。 不新造词表——新词表要改 identity
+ * 服务的迁移，属于另一个服务的写入所有权。
  *
- * <p><b>提交接口是「已受理」语义而不是「已完成」</b>：它写完任务与条目就返回
- * （蓝图要求长批量不阻塞页面），进度从任务详情查。
+ * <p><b>提交接口是「已受理」语义而不是「已完成」</b>：它写完任务与条目就返回 （蓝图要求长批量不阻塞页面），进度从任务详情查。
  */
 @RestController
 @RequestMapping("/catalog/media/processing")
@@ -83,10 +82,7 @@ public class ImageProcessController {
     return call(auth, "assets.update", a -> service.saveRecipe(a, id, input));
   }
 
-  /**
-   * 删除配方。仍被任务引用时返回 400 并说明被几个任务引用——
-   * 要清理请改用停用（停用后不能再用它新建任务，历史任务与产物照常可读）。
-   */
+  /** 删除配方。仍被任务引用时返回 400 并说明被几个任务引用—— 要清理请改用停用（停用后不能再用它新建任务，历史任务与产物照常可读）。 */
   @DeleteMapping("/recipes/{id}")
   public Map<String, Boolean> deleteRecipe(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -129,9 +125,7 @@ public class ImageProcessController {
   /**
    * 提交处理任务（异步）。
    *
-   * <p>返回即代表「已受理」：任务与条目已落库，像素加工在线程池里跑。
-   * 页面应该轮询任务详情看进度，而不是等这个请求返回结果——
-   * 蓝图要求「长批量不阻塞页面」，所以这里绝不做同步处理。
+   * <p>返回即代表「已受理」：任务与条目已落库，像素加工在线程池里跑。 页面应该轮询任务详情看进度，而不是等这个请求返回结果—— 蓝图要求「长批量不阻塞页面」，所以这里绝不做同步处理。
    */
   @PostMapping("/jobs")
   public MediaProcessJob submit(
@@ -156,10 +150,7 @@ public class ImageProcessController {
     return call(auth, "assets.read", a -> service.items(jobId));
   }
 
-  /**
-   * 请求取消任务。**不阻塞**：只置标志位，工作线程在条目之间检查。
-   * 已在加工的那一张会做完（像素处理没有中间态），剩下条目置「已取消」。
-   */
+  /** 请求取消任务。**不阻塞**：只置标志位，工作线程在条目之间检查。 已在加工的那一张会做完（像素处理没有中间态），剩下条目置「已取消」。 */
   @PostMapping("/jobs/{jobId}/cancel")
   public MediaProcessJob cancel(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,

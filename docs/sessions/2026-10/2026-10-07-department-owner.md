@@ -57,14 +57,17 @@ V6 遗留的 `department.leader_membership_id` 降级为触发器维护的镜像
 ## 文件清单
 
 迁移
+
 - `backend/services/identity/src/main/resources/db/migration/V44__department_leader.sql`
 
 后端
+
 - `backend/services/identity/src/main/java/com/starcon/identity/AdministrationController.java`
   （17.2.1.2 段落：记录 + 7 个端点 + 快照/审计）
 - `backend/services/identity/src/test/java/com/starcon/identity/DepartmentLeaderIntegrationTest.java`
 
 前端
+
 - `apps/web/src/app/org/department-leaders/page.tsx`
 - `apps/web/src/components/iam/department-leader-workspace.tsx`
 - `apps/web/src/components/iam/department-leader-model.ts`
@@ -75,9 +78,11 @@ V6 遗留的 `department.leader_membership_id` 降级为触发器维护的镜像
 - `apps/web/src/app/api/iam/[...path]/route.test.ts`（白名单正反用例）
 
 契约（codegen 产物，勿手改）
+
 - `packages/api-contracts/src/catalog.ts` 及四份 openapi 快照
 
 台账
+
 - `docs/product/capability-blueprint/module-progress.md`（仅 17.2.1.2 一行 + sync 重算的计数）
 
 ## 验证

@@ -14,19 +14,20 @@ import org.junit.jupiter.api.Test;
  * 3.9.2.2 判定规则的纯函数测试。
  *
  * <p>重点钉死三件在实现里最容易做错的事：
+ *
  * <ol>
  *   <li><b>未知不等于零</b>（Z1）：缺观测必须是 INCOMPLETE，绝不能折成 CANDIDATE。
- *   <li><b>违反优先于未知</b>：已观测到"有订单"的主体一定 NOT_ZOMBIE，
- *       不能因为另一个维度缺观测就标成"无法判定"。
- *   <li><b>过期不沿用旧值</b>（Z7）：过期观测与没有观测同样判 UNKNOWN，
- *       但两者在明细里必须**可区分**（stale=true + 有 observedAt）。
+ *   <li><b>违反优先于未知</b>：已观测到"有订单"的主体一定 NOT_ZOMBIE， 不能因为另一个维度缺观测就标成"无法判定"。
+ *   <li><b>过期不沿用旧值</b>（Z7）：过期观测与没有观测同样判 UNKNOWN， 但两者在明细里必须**可区分**（stale=true + 有 observedAt）。
  * </ol>
  */
 class ZombieCandidateRulesTest {
 
-  private static final OffsetDateTime NOW = OffsetDateTime.of(2026, 3, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+  private static final OffsetDateTime NOW =
+      OffsetDateTime.of(2026, 3, 1, 0, 0, 0, 0, ZoneOffset.UTC);
 
-  private static ZombieCandidateRules.Config config(int inactiveDays, int staleDays, boolean... dims) {
+  private static ZombieCandidateRules.Config config(
+      int inactiveDays, int staleDays, boolean... dims) {
     var required = new EnumMap<ZombieMetric, Boolean>(ZombieMetric.class);
     var ordered = ZombieMetric.ordered();
     for (var metric : ordered) required.put(metric, false);
@@ -56,8 +57,7 @@ class ZombieCandidateRulesTest {
   @Test
   void 只看时间维度时超出阈值即候选() {
     var result =
-        ZombieCandidateRules.evaluate(
-            config(365, 90), "ACTIVE", NOW.minusDays(400), NOW, obs());
+        ZombieCandidateRules.evaluate(config(365, 90), "ACTIVE", NOW.minusDays(400), NOW, obs());
     assertThat(result.verdict()).isEqualTo(ZombieVerdict.CANDIDATE);
     assertThat(result.reasons()).anyMatch(r -> r.contains("400"));
   }
@@ -65,8 +65,7 @@ class ZombieCandidateRulesTest {
   @Test
   void 仍在维护期内的主数据不是候选() {
     var result =
-        ZombieCandidateRules.evaluate(
-            config(365, 90), "ACTIVE", NOW.minusDays(10), NOW, obs());
+        ZombieCandidateRules.evaluate(config(365, 90), "ACTIVE", NOW.minusDays(10), NOW, obs());
     assertThat(result.verdict()).isEqualTo(ZombieVerdict.NOT_ZOMBIE);
   }
 
@@ -74,8 +73,7 @@ class ZombieCandidateRulesTest {
   void 恰好等于阈值仍是维护期内() {
     // 边界：days_since > inactiveDays 才算超期，等于不算。
     var result =
-        ZombieCandidateRules.evaluate(
-            config(365, 90), "ACTIVE", NOW.minusDays(365), NOW, obs());
+        ZombieCandidateRules.evaluate(config(365, 90), "ACTIVE", NOW.minusDays(365), NOW, obs());
     assertThat(result.verdict()).isEqualTo(ZombieVerdict.NOT_ZOMBIE);
   }
 
@@ -104,7 +102,10 @@ class ZombieCandidateRulesTest {
     // order 关闭（缺观测无所谓）、inventory 开启且观测为 0 → 候选。
     var result =
         ZombieCandidateRules.evaluate(
-            config(365, 90, false, true), "ACTIVE", NOW.minusDays(400), NOW,
+            config(365, 90, false, true),
+            "ACTIVE",
+            NOW.minusDays(400),
+            NOW,
             obs(missing(), at(BigDecimal.ZERO, 1)));
     assertThat(result.verdict()).isEqualTo(ZombieVerdict.CANDIDATE);
     assertThat(result.dimensions().get(0).state())
@@ -119,7 +120,10 @@ class ZombieCandidateRulesTest {
   void 已观测到非零时判在用_即使另一维度缺观测() {
     var result =
         ZombieCandidateRules.evaluate(
-            config(365, 90, true, true), "ACTIVE", NOW.minusDays(400), NOW,
+            config(365, 90, true, true),
+            "ACTIVE",
+            NOW.minusDays(400),
+            NOW,
             obs(at(new BigDecimal("3"), 1), missing()));
     assertThat(result.verdict()).isEqualTo(ZombieVerdict.NOT_ZOMBIE);
   }
@@ -128,7 +132,10 @@ class ZombieCandidateRulesTest {
   void 全部启用维度观测到零时判候选() {
     var result =
         ZombieCandidateRules.evaluate(
-            config(365, 90, true, true, true, true), "ACTIVE", NOW.minusDays(400), NOW,
+            config(365, 90, true, true, true, true),
+            "ACTIVE",
+            NOW.minusDays(400),
+            NOW,
             obs(
                 at(BigDecimal.ZERO, 1), at(new BigDecimal("0.000000"), 1),
                 at(BigDecimal.ZERO, 1), at(new BigDecimal("0"), 1)));
@@ -151,7 +158,8 @@ class ZombieCandidateRulesTest {
     assertThat(dimension.observedAt()).isNotNull();
     assertThat(dimension.value()).isEqualByComparingTo(BigDecimal.ZERO);
 
-    var never = ZombieCandidateRules.evaluate(rule, "ACTIVE", NOW.minusDays(400), NOW, obs(missing()));
+    var never =
+        ZombieCandidateRules.evaluate(rule, "ACTIVE", NOW.minusDays(400), NOW, obs(missing()));
     var neverDimension = never.dimensions().get(0);
     assertThat(neverDimension.stale()).isFalse();
     assertThat(neverDimension.observedAt()).isNull();
@@ -172,7 +180,11 @@ class ZombieCandidateRulesTest {
   void 已经停用的主体不是候选() {
     var result =
         ZombieCandidateRules.evaluate(
-            config(365, 90, true), "INACTIVE", NOW.minusDays(400), NOW, obs(at(BigDecimal.ZERO, 1)));
+            config(365, 90, true),
+            "INACTIVE",
+            NOW.minusDays(400),
+            NOW,
+            obs(at(BigDecimal.ZERO, 1)));
     assertThat(result.verdict()).isEqualTo(ZombieVerdict.NOT_ZOMBIE);
     assertThat(result.reasons()).anyMatch(r -> r.contains("不是活跃状态"));
   }
@@ -219,8 +231,7 @@ class ZombieCandidateRulesTest {
     for (var metric : ZombieMetric.values()) assertThat(defaults.requires(metric)).isFalse();
     // 全关时判定退化成"只看时间"，必须是候选而不是恒定的 INCOMPLETE。
     assertThat(
-            ZombieCandidateRules.evaluate(
-                    defaults, "ACTIVE", NOW.minusDays(400), NOW, obs())
+            ZombieCandidateRules.evaluate(defaults, "ACTIVE", NOW.minusDays(400), NOW, obs())
                 .verdict())
         .isEqualTo(ZombieVerdict.CANDIDATE);
   }

@@ -14,14 +14,14 @@
 
 **依赖自检结论**（10 分钟内查完，不是照蓝图「上游 =」假定的）：
 
-| 蓝图要的东西 | 集成头实际状态 |
-| --- | --- |
-| `warehouse` 表 | ✅ V1 已有（code/name/country_code/timezone/default_legal_entity_id/status） |
-| 仓库类型 | ⚠️ V55 有 `warehouse.kind`，但只有四种，**蓝图点名的监管仓没有落点** |
-| 法人（上游 17） | ✅ identity `V5__legal_entity.sql` + warehouse 侧引用登记 `legal_entity_ref` |
-| 库存量 | ✅ `inventory_balance` / `stock_bucket` / `platform_stock_observation`（V55） |
-| 作业量 | ✅ 本服务已有真实作业单据：`stocktake_task`、`transfer_order`、`inventory_entry` |
-| 收货/出库/组装作业 | ❌ 8.2/8.3/8.4 未交付 → capabilities 显式报 `available=false` |
+| 蓝图要的东西       | 集成头实际状态                                                                   |
+| ------------------ | -------------------------------------------------------------------------------- |
+| `warehouse` 表     | ✅ V1 已有（code/name/country_code/timezone/default_legal_entity_id/status）     |
+| 仓库类型           | ⚠️ V55 有 `warehouse.kind`，但只有四种，**蓝图点名的监管仓没有落点**             |
+| 法人（上游 17）    | ✅ identity `V5__legal_entity.sql` + warehouse 侧引用登记 `legal_entity_ref`     |
+| 库存量             | ✅ `inventory_balance` / `stock_bucket` / `platform_stock_observation`（V55）    |
+| 作业量             | ✅ 本服务已有真实作业单据：`stocktake_task`、`transfer_order`、`inventory_entry` |
+| 收货/出库/组装作业 | ❌ 8.2/8.3/8.4 未交付 → capabilities 显式报 `available=false`                    |
 
 ## 关键 trade-off
 
@@ -41,12 +41,12 @@
 
 蓝图五类 → 现有四类的映射逐条对齐，只新增一个值：
 
-| 蓝图 | `warehouse.kind` |
-| --- | --- |
-| 自营 | `LOCAL`（已有） |
-| 三方仓 | `THIRD_PARTY`（已有） |
-| 海外仓 | `OVERSEAS`（已有） |
-| 平台仓 | `PLATFORM_FBA`（已有） |
+| 蓝图       | `warehouse.kind`           |
+| ---------- | -------------------------- |
+| 自营       | `LOCAL`（已有）            |
+| 三方仓     | `THIRD_PARTY`（已有）      |
+| 海外仓     | `OVERSEAS`（已有）         |
+| 平台仓     | `PLATFORM_FBA`（已有）     |
 | **监管仓** | **`BONDED`（本迁移新增）** |
 
 为什么监管仓算**自有账本**而不是平台仓观测值：保税仓的货是本租户自有货，只是处于海关监管、
@@ -82,14 +82,14 @@ warehouse 服务既有端点（7.1.x / 7.2.x / 7.4.x / 7.5.x）全部共用 `war
 
 口径 = 本服务真实存在的作业单据：
 
-| 维度 | 来源 | 已交付 |
-| --- | --- | --- |
-| 盘点任务 | `stocktake_task` × `stocktake_sheet`（按仓范围 + 按该仓库位范围都算） | ✅ 7.4.2.1 |
-| 仓间调拨 | `transfer_order`（调入 / 调出分别计数） | ✅ 7.5.1.1 |
-| 库存变动 | `inventory_entry` 带符号分录条数 | ✅ 7.1.2.1 |
-| 收货作业 | `goods_receipt` 表不存在 | ❌ 8.2 |
-| 拣货与出库 | `outbound_order` / `pick_task` 表不存在 | ❌ 8.3 |
-| 组装作业 | `assembly_order` 表不存在 | ❌ 8.4 |
+| 维度       | 来源                                                                  | 已交付     |
+| ---------- | --------------------------------------------------------------------- | ---------- |
+| 盘点任务   | `stocktake_task` × `stocktake_sheet`（按仓范围 + 按该仓库位范围都算） | ✅ 7.4.2.1 |
+| 仓间调拨   | `transfer_order`（调入 / 调出分别计数）                               | ✅ 7.5.1.1 |
+| 库存变动   | `inventory_entry` 带符号分录条数                                      | ✅ 7.1.2.1 |
+| 收货作业   | `goods_receipt` 表不存在                                              | ❌ 8.2     |
+| 拣货与出库 | `outbound_order` / `pick_task` 表不存在                               | ❌ 8.3     |
+| 组装作业   | `assembly_order` 表不存在                                             | ❌ 8.4     |
 
 后三个在 `/warehouse/facilities/capabilities` 里 `available=false` + `ownerModule` + 具体原因，
 前端据此禁用并说明。**没有**把它们算成 0 冒充「这个仓不作业」—— 0 条收货作业与
@@ -172,10 +172,12 @@ identity 的 V69 是**纯 INSERT**（`page_resource` / `permission` / `role_perm
 ## 文件清单
 
 **迁移**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V69__warehouse_list_facilities.sql`
 - `backend/services/identity/src/main/resources/db/migration/V69__warehouse_facilities_page_permissions.sql`
 
 **后端**
+
 - `WarehouseFacilityModels.java` — 传输模型、`WarehouseKind`（含 `platformObserved()`）、
   `WorkVolumeCapability`（`available` + `ownerModule` + `note`）
 - `WarehouseFacilityService.java` — jOOQ 显式 SQL：列表（四个标量子查询聚合，不 join 展开）、
@@ -184,6 +186,7 @@ identity 的 V69 是**纯 INSERT**（`page_resource` / `permission` / `role_perm
   `/facilities/options`、`/facilities/capabilities`
 
 **测试**
+
 - `WarehouseFacilityIntegrationTest.java` 29 例（Testcontainers PG16、连接池=1、
   租户隔离三断言实跑、平台仓不相加、时区双向折算、五类词表、排序白名单、
   默认仓唯一、平台仓记自有账本被 DB 拒）
@@ -191,12 +194,14 @@ identity 的 V69 是**纯 INSERT**（`page_resource` / `permission` / `role_perm
 - `route.test.ts` 新增 2 例（四个调用形状放行 + 详情/改删形状**刻意不放行**）
 
 **前端**
+
 - `apps/web/src/app/warehouse/facilities/page.tsx` — 真实工作区，不是 `DomainPlaceholder`
 - `apps/web/src/components/warehouse/warehouse-facility-model.ts` / `.test.ts`
 - `apps/web/src/components/warehouse/warehouse-facility-workspace.tsx`
 - `apps/web/src/components/warehouse/api.ts`
 
 **共享文件（只加自己的，不动别人的分支）**
+
 - `apps/web/src/lib/api-proxy.ts` — warehouse pattern 追加 `facilities(?:\/(?:options|capabilities))?`
 - `packages/ui/src/lib/task-pages.ts` — 追加 `/warehouse/facilities` 一条任务页
 

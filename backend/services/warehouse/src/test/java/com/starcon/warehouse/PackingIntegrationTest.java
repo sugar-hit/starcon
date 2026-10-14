@@ -32,9 +32,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 8.3.3.2 打包与称重的集成测试。
  *
- * <p>真 PostgreSQL 16 + Testcontainers，<b>池容量 1</b>（只有复用同一条连接才能证明连接池
- * 归还后不串租户）。多租户三断言逐条实跑：两租户互不可见、伪造 tenant header 无效、
- * 连接池归还后不串租户。
+ * <p>真 PostgreSQL 16 + Testcontainers，<b>池容量 1</b>（只有复用同一条连接才能证明连接池 归还后不串租户）。多租户三断言逐条实跑：两租户互不可见、伪造
+ * tenant header 无效、 连接池归还后不串租户。
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -55,8 +54,13 @@ class PackingIntegrationTest {
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), null,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        null,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -66,7 +70,8 @@ class PackingIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
@@ -81,7 +86,8 @@ class PackingIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -154,21 +160,37 @@ class PackingIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             for (int i = 2; i <= 10; i++) {
               sql.execute(
                   "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                  idFor(tenant, i), tenant, "SKU-" + (i - 1), "商品" + (i - 1));
+                  idFor(tenant, i),
+                  tenant,
+                  "SKU-" + (i - 1),
+                  "商品" + (i - 1));
             }
             sql.execute(
                 "insert into inventory_quality_status(id,tenant_id,code,name,role) values(?,?,?,?,?)",
-                idFor(tenant, 9), tenant, "SELLABLE", "可售", "SELLABLE");
+                idFor(tenant, 9),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,kind,country_code,timezone,"
                     + "default_legal_entity_id,status) values(?,?,?,?,?,?,?,?,?)",
-                idFor(tenant, 11), tenant, "WH-" + (tenant.equals(a) ? "A" : "B"), "本租仓库",
-                "LOCAL", tenant.equals(a) ? "CN" : "US", WAREHOUSE_ZONE.getId(),
-                idFor(tenant, 1), "ACTIVE");
+                idFor(tenant, 11),
+                tenant,
+                "WH-" + (tenant.equals(a) ? "A" : "B"),
+                "本租仓库",
+                "LOCAL",
+                tenant.equals(a) ? "CN" : "US",
+                WAREHOUSE_ZONE.getId(),
+                idFor(tenant, 1),
+                "ACTIVE");
             return null;
           });
     }
@@ -204,17 +226,24 @@ class PackingIntegrationTest {
     return as(
         tenant,
         () -> {
-          var existing = sql.fetchOne(
-              "select id from warehouse_location where tenant_id"
-                  + " = current_setting('app.current_tenant', true)::uuid"
-                  + " and warehouse_id=? and code=?",
-              wh(tenant), code);
+          var existing =
+              sql.fetchOne(
+                  "select id from warehouse_location where tenant_id"
+                      + " = current_setting('app.current_tenant', true)::uuid"
+                      + " and warehouse_id=? and code=?",
+                  wh(tenant),
+                  code);
           if (existing != null) return existing.get("id", UUID.class);
           UUID id = UUID.randomUUID();
           sql.execute(
               "insert into warehouse_location(id,tenant_id,warehouse_id,code,name,type,status,"
                   + "pickable) values(?,?,?,?,?,?,'ACTIVE',true)",
-              id, tenant, wh(tenant), code, code + " 位", type);
+              id,
+              tenant,
+              wh(tenant),
+              code,
+              code + " 位",
+              type);
           return id;
         });
   }
@@ -223,36 +252,52 @@ class PackingIntegrationTest {
     as(
         tenant,
         () -> {
-          var existing = sql.fetchOne(
-              "select id from inventory_balance where tenant_id"
-                  + " = current_setting('app.current_tenant', true)::uuid"
-                  + " and sku_id=? and warehouse_id=?",
-              skuId, wh(tenant));
+          var existing =
+              sql.fetchOne(
+                  "select id from inventory_balance where tenant_id"
+                      + " = current_setting('app.current_tenant', true)::uuid"
+                      + " and sku_id=? and warehouse_id=?",
+                  skuId,
+                  wh(tenant));
           UUID balance;
           if (existing != null) {
             balance = existing.get("id", UUID.class);
             sql.execute(
                 "update inventory_balance set on_hand=on_hand+cast(? as numeric),"
                     + "reserved=reserved+cast(? as numeric) where id=?",
-                onHand, onHand, balance);
+                onHand,
+                onHand,
+                balance);
           } else {
             balance = UUID.randomUUID();
             sql.execute(
                 "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
                     + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,cast(? as numeric),"
                     + "cast(? as numeric))",
-                balance, tenant, skuId, wh(tenant), idFor(tenant, 1), sellable(tenant), onHand, onHand);
+                balance,
+                tenant,
+                skuId,
+                wh(tenant),
+                idFor(tenant, 1),
+                sellable(tenant),
+                onHand,
+                onHand);
           }
-          var bucketRow = sql.fetchOne(
-              "select id from stock_bucket where tenant_id"
-                  + " = current_setting('app.current_tenant', true)::uuid"
-                  + " and sku_id=? and warehouse_id=? and location_id=?",
-              skuId, wh(tenant), loc);
+          var bucketRow =
+              sql.fetchOne(
+                  "select id from stock_bucket where tenant_id"
+                      + " = current_setting('app.current_tenant', true)::uuid"
+                      + " and sku_id=? and warehouse_id=? and location_id=?",
+                  skuId,
+                  wh(tenant),
+                  loc);
           if (bucketRow != null) {
             sql.execute(
                 "update stock_bucket set on_hand=on_hand+cast(? as numeric),"
                     + "reserved=reserved+cast(? as numeric),last_movement_at=?::timestamptz where id=?",
-                onHand, onHand, OffsetDateTime.now().plusSeconds(1),
+                onHand,
+                onHand,
+                OffsetDateTime.now().plusSeconds(1),
                 bucketRow.get("id", UUID.class));
           } else {
             sql.execute(
@@ -260,8 +305,17 @@ class PackingIntegrationTest {
                     + "location_id,lot_id,quality_status_id,balance_id,on_hand,reserved,"
                     + "last_movement_at) values(?,?,?,?,?,?,null,?,?,cast(? as numeric),"
                     + "cast(? as numeric),?::timestamptz)",
-                UUID.randomUUID(), tenant, idFor(tenant, 1), skuId, wh(tenant), loc,
-                sellable(tenant), balance, onHand, onHand, OffsetDateTime.now());
+                UUID.randomUUID(),
+                tenant,
+                idFor(tenant, 1),
+                skuId,
+                wh(tenant),
+                loc,
+                sellable(tenant),
+                balance,
+                onHand,
+                onHand,
+                OffsetDateTime.now());
           }
           return null;
         });
@@ -275,7 +329,11 @@ class PackingIntegrationTest {
           sql.execute(
               "insert into inventory_serial(id,tenant_id,serial_number,sku_id,status,"
                   + "current_location_id) values(?,?,?,?,'IN_STOCK',?)",
-              id, tenant, number, skuId, loc);
+              id,
+              tenant,
+              number,
+              skuId,
+              loc);
           return id;
         });
   }
@@ -303,7 +361,12 @@ class PackingIntegrationTest {
               "insert into outbound_order(id,tenant_id,order_code,source_type,source_external_ref,"
                   + "warehouse_id,carrier_code,status,created_by_user_id)"
                   + " values(?,?,?,'SALES',?,?,'SF','PENDING_PICKING',?)",
-              orderId, tenant, code, "SO-" + code, wh(tenant), user);
+              orderId,
+              tenant,
+              code,
+              "SO-" + code,
+              wh(tenant),
+              user);
           BigDecimal total = BigDecimal.ZERO;
           int lineNo = 0;
           for (UUID skuId : skuIds) {
@@ -311,32 +374,46 @@ class PackingIntegrationTest {
             sql.execute(
                 "insert into outbound_order_line(id,tenant_id,order_id,line_no,sku_id,sku_code,"
                     + "sku_name,quantity) values(?,?,?,?,?,?,?,cast(? as numeric))",
-                UUID.randomUUID(), tenant, orderId, lineNo, skuId,
-                codes.get(skuId), "商品" + lineNo, quantity);
+                UUID.randomUUID(),
+                tenant,
+                orderId,
+                lineNo,
+                skuId,
+                codes.get(skuId),
+                "商品" + lineNo,
+                quantity);
             total = total.add(new BigDecimal(quantity));
           }
           sql.execute(
               "insert into outbound_pick_request(id,tenant_id,order_id,line_count,"
                   + "total_piece_count,requested_by_user_id,requested_at)"
                   + " values(?,?,?,?,cast(? as numeric),?,?::timestamptz)",
-              UUID.randomUUID(), tenant, orderId, skuIds.length, total, user, OffsetDateTime.now());
+              UUID.randomUUID(),
+              tenant,
+              orderId,
+              skuIds.length,
+              total,
+              user,
+              OffsetDateTime.now());
           sql.execute(
               "update outbound_order set status='PICKING' where tenant_id=? and id=?",
-              tenant, orderId);
+              tenant,
+              orderId);
           return orderId;
         });
   }
 
-  /**
-   * 打包区暂存库位：8.3.2.1 要求「拣完的货必须有一个明确去处」。
-   * 打包不碰库存 —— 货还在这个 SHIPPING 库位里，这正是「打包只读」的物理前提。
-   */
+  /** 打包区暂存库位：8.3.2.1 要求「拣完的货必须有一个明确去处」。 打包不碰库存 —— 货还在这个 SHIPPING 库位里，这正是「打包只读」的物理前提。 */
   void ensureStaging(UUID tenant) {
-    if (as(tenant, () -> sql.fetchOne(
-            "select 1 as ok from warehouse_location where tenant_id"
-                + " = current_setting('app.current_tenant', true)::uuid"
-                + " and warehouse_id=? and type='SHIPPING' limit 1",
-            wh(tenant))) == null) {
+    if (as(
+            tenant,
+            () ->
+                sql.fetchOne(
+                    "select 1 as ok from warehouse_location where tenant_id"
+                        + " = current_setting('app.current_tenant', true)::uuid"
+                        + " and warehouse_id=? and type='SHIPPING' limit 1",
+                    wh(tenant)))
+        == null) {
       location(tenant, "OUT", "SHIPPING");
     }
   }
@@ -354,9 +431,7 @@ class PackingIntegrationTest {
     var lines = asWrite(tenant, () -> pickTasks.detail(task).lines());
     asWrite(
         tenant,
-        () ->
-            pickTasks.assign(
-                task, new PickTaskModels.PickTaskAssignInput(user, null), user));
+        () -> pickTasks.assign(task, new PickTaskModels.PickTaskAssignInput(user, null), user));
     for (int i = 0; i < lines.size(); i++) {
       var line = lines.get(i);
       List<UUID> lineSerials = serials == null ? null : serials.getOrDefault(i, List.of());
@@ -366,8 +441,13 @@ class PackingIntegrationTest {
               pickTasks.recordPick(
                   task,
                   new PickTaskModels.PickTaskPickInput(
-                      line.id(), line.sourceLocationId(), null, line.plannedQuantity(),
-                      lineSerials, null, null),
+                      line.id(),
+                      line.sourceLocationId(),
+                      null,
+                      line.plannedQuantity(),
+                      lineSerials,
+                      null,
+                      null),
                   user));
     }
     asWrite(tenant, () -> pickTasks.complete(task, user));
@@ -377,10 +457,9 @@ class PackingIntegrationTest {
   UUID passedRecount(UUID tenant, UUID orderId, Map<Integer, List<String>> scansByIndex) {
     var session =
         asWrite(
-                tenant,
-                () ->
-                    recounts.open(
-                        new RecountModels.RecountOpenInput(orderId, null, user, null), user));
+            tenant,
+            () ->
+                recounts.open(new RecountModels.RecountOpenInput(orderId, null, user, null), user));
     int i = 0;
     for (var line : asWrite(tenant, () -> recounts.detail(session.id().toString()).lines())) {
       List<String> values = scansByIndex == null ? null : scansByIndex.getOrDefault(i, List.of());
@@ -393,8 +472,7 @@ class PackingIntegrationTest {
               () ->
                   recounts.scan(
                       session.id().toString(),
-                      new RecountModels.RecountScanInput(
-                          "BARCODE", line.skuCode(), null, null),
+                      new RecountModels.RecountScanInput("BARCODE", line.skuCode(), null, null),
                       user));
         }
       } else {
@@ -420,8 +498,17 @@ class PackingIntegrationTest {
         tenant,
         () ->
             service.createMaterial(
-                new PackingMaterialInput(code, "纸箱 " + code, "PACKAGING", "CARTON", wh(tenant),
-                    "30", "20", "10", tare, max),
+                new PackingMaterialInput(
+                    code,
+                    "纸箱 " + code,
+                    "PACKAGING",
+                    "CARTON",
+                    wh(tenant),
+                    "30",
+                    "20",
+                    "10",
+                    tare,
+                    max),
                 user));
   }
 
@@ -430,16 +517,23 @@ class PackingIntegrationTest {
         tenant,
         () ->
             service.createMaterial(
-                new PackingMaterialInput(code, "气泡柱 " + code, "CUSHIONING", "BUBBLE",
-                    wh(tenant), "30", "20", "10", "0", "0"),
+                new PackingMaterialInput(
+                    code,
+                    "气泡柱 " + code,
+                    "CUSHIONING",
+                    "BUBBLE",
+                    wh(tenant),
+                    "30",
+                    "20",
+                    "10",
+                    "0",
+                    "0"),
                 user));
   }
 
   PackingCreated openOrder(UUID tenant, UUID recountSessionId) {
     return asWrite(
-        tenant,
-        () ->
-            service.open(new PackingOpenInput(recountSessionId, user, null), user));
+        tenant, () -> service.open(new PackingOpenInput(recountSessionId, user, null), user));
   }
 
   ParcelRow addParcel(UUID tenant, UUID orderId, UUID materialId, UUID fillerId) {
@@ -447,13 +541,11 @@ class PackingIntegrationTest {
         tenant,
         () ->
             service.addParcel(
-                orderId.toString(),
-                new ParcelAddInput(materialId, fillerId, null, null),
-                user));
+                orderId.toString(), new ParcelAddInput(materialId, fillerId, null, null), user));
   }
 
-  ParcelItemRow addItem(UUID tenant, UUID orderId, UUID parcelId, UUID lineId, String qty,
-      UUID serialId) {
+  ParcelItemRow addItem(
+      UUID tenant, UUID orderId, UUID parcelId, UUID lineId, String qty, UUID serialId) {
     return asWrite(
         tenant,
         () ->
@@ -464,8 +556,8 @@ class PackingIntegrationTest {
                 user));
   }
 
-  ParcelRow measure(UUID tenant, UUID orderId, UUID parcelId, String gross, String l, String w,
-      String h) {
+  ParcelRow measure(
+      UUID tenant, UUID orderId, UUID parcelId, String gross, String l, String w, String h) {
     return asWrite(
         tenant,
         () ->
@@ -477,11 +569,15 @@ class PackingIntegrationTest {
   }
 
   /** 一路走到「可以结算」：开单 + 一箱 + 装齐 + 称重。 */
-  record Ready(UUID orderId, UUID sessionId, PackingCreated packing, UUID parcelId,
-               PackingMaterialRow material) {}
+  record Ready(
+      UUID orderId,
+      UUID sessionId,
+      PackingCreated packing,
+      UUID parcelId,
+      PackingMaterialRow material) {}
 
-  Ready ready(UUID tenant, String code, String quantity, Map<Integer, List<String>> scans,
-      UUID... skuIds) {
+  Ready ready(
+      UUID tenant, String code, String quantity, Map<Integer, List<String>> scans, UUID... skuIds) {
     UUID loc = location(tenant, "A-1", "STORAGE");
     for (UUID skuId : skuIds) bucket(tenant, loc, skuId, "100");
     UUID orderId = outbound(tenant, code, quantity, skuIds);
@@ -514,25 +610,26 @@ class PackingIntegrationTest {
 
   long balanceOnHand(UUID tenant, UUID skuId) {
     return as(
-            tenant,
-            () ->
-                sql.fetchOne(
-                        "select on_hand from inventory_balance where tenant_id"
-                            + " = current_setting('app.current_tenant', true)::uuid"
-                            + " and sku_id=? and warehouse_id=?",
-                        skuId, wh(tenant))
-                    .get("on_hand", BigDecimal.class)
-                    .longValue());
+        tenant,
+        () ->
+            sql.fetchOne(
+                    "select on_hand from inventory_balance where tenant_id"
+                        + " = current_setting('app.current_tenant', true)::uuid"
+                        + " and sku_id=? and warehouse_id=?",
+                    skuId,
+                    wh(tenant))
+                .get("on_hand", BigDecimal.class)
+                .longValue());
   }
 
   long inventoryEntryCount(UUID tenant) {
     return as(
-            tenant,
-            () ->
-                sql.fetchOne(
-                        "select count(*) as c from inventory_entry where tenant_id"
-                            + " = current_setting('app.current_tenant', true)::uuid")
-                    .get("c", Long.class));
+        tenant,
+        () ->
+            sql.fetchOne(
+                    "select count(*) as c from inventory_entry where tenant_id"
+                        + " = current_setting('app.current_tenant', true)::uuid")
+                .get("c", Long.class));
   }
 
   /** 用超级用户直连跑一段 SQL —— 用来证明「绕开服务层也过不去」。 */
@@ -558,7 +655,8 @@ class PackingIntegrationTest {
     assertThat(caps.volumetricWeightBasis()).contains("10 物流").contains("除数");
     // 3.7.2 属 catalog，未接入就显式报 false，而不是编一份物理属性。
     assertThat(caps.declaredInformationBasis()).contains("catalog");
-    assertThat(caps.unavailable()).extracting(UnavailableLink::ownerModule)
+    assertThat(caps.unavailable())
+        .extracting(UnavailableLink::ownerModule)
         .contains("3.7.2.1", "8.3.4.1", "10", "8.3.4.2");
     // 打包是只读记录动作：一件货都不搬。
     assertThat(caps.touchesInventory()).isFalse();
@@ -577,15 +675,47 @@ class PackingIntegrationTest {
     assertThat(box.tareWeightG()).isEqualTo("200");
 
     // 填充物不进净重口径：给填充物填自重当场拒。
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.createMaterial(
-        new PackingMaterialInput("F-1", "填充", "CUSHIONING", "BUBBLE", wh(a), "30", "20", "10",
-            "50", "0"), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.createMaterial(
+                                new PackingMaterialInput(
+                                    "F-1",
+                                    "填充",
+                                    "CUSHIONING",
+                                    "BUBBLE",
+                                    wh(a),
+                                    "30",
+                                    "20",
+                                    "10",
+                                    "50",
+                                    "0"),
+                                user))))
         .hasMessageContaining("tareWeightG");
 
     // 三边必填：包材外形是实测的上界，没有外形就守不住「选错包材」。
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.createMaterial(
-        new PackingMaterialInput("C-X", "空外形", "PACKAGING", "CARTON", wh(a), null, "20", "10",
-            "100", "0"), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.createMaterial(
+                                new PackingMaterialInput(
+                                    "C-X",
+                                    "空外形",
+                                    "PACKAGING",
+                                    "CARTON",
+                                    wh(a),
+                                    null,
+                                    "20",
+                                    "10",
+                                    "100",
+                                    "0"),
+                                user))))
         .hasMessageContaining("outerLengthCm");
 
     // 真分页 + 真筛选
@@ -597,10 +727,21 @@ class PackingIntegrationTest {
         .isEqualTo(1);
 
     // 停用不能复活，且必须写原因
-    asWrite(a, () -> service.retireMaterial(box.id().toString(),
-        new PackingMaterialRetireInput("换新箱型"), user));
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.retireMaterial(box.id().toString(),
-        new PackingMaterialRetireInput("再停一次"), user))))
+    asWrite(
+        a,
+        () ->
+            service.retireMaterial(
+                box.id().toString(), new PackingMaterialRetireInput("换新箱型"), user));
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.retireMaterial(
+                                box.id().toString(),
+                                new PackingMaterialRetireInput("再停一次"),
+                                user))))
         .hasMessageContaining("已经是停用状态");
     var detail = as(a, () -> service.material(box.id().toString()));
     assertThat(detail.material().status()).isEqualTo("RETIRED");
@@ -617,8 +758,14 @@ class PackingIntegrationTest {
     finishPicking(a, orderId, null);
 
     // 还没复核通过时开不了打包单
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.open(
-        new PackingOpenInput(UUID.randomUUID(), user, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.open(
+                                new PackingOpenInput(UUID.randomUUID(), user, null), user))))
         .hasMessageContaining("不存在");
     assertThat(outboundStatus(a, orderId)).isEqualTo("PENDING_RECHECK");
 
@@ -632,8 +779,7 @@ class PackingIntegrationTest {
     assertThat(packing.packingBasis()).contains("复核单").contains("体积重不在本模块算");
 
     // 一张复核单只装一次
-    assertThat(catchThrowable(() -> openOrder(a, sessionId)))
-        .hasMessageContaining("已经有一张打包单");
+    assertThat(catchThrowable(() -> openOrder(a, sessionId))).hasMessageContaining("已经有一张打包单");
   }
 
   @Test
@@ -657,11 +803,18 @@ class PackingIntegrationTest {
     assertThat(report.packable()).isFalse();
     assertThat(report.blockingReasons())
         .anySatisfy(r -> assertThat(r).contains("实装 2 件与复核基线 4 件不相等"));
-    assertThat(report.blockingReasons())
-        .noneSatisfy(r -> assertThat(r).contains("一件明细都没有"));
+    assertThat(report.blockingReasons()).noneSatisfy(r -> assertThat(r).contains("一件明细都没有"));
     assertThat(report.shortfallQuantity()).isEqualTo("2");
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.complete(
-        packing.id().toString(), new PackingCompleteInput(null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.complete(
+                                packing.id().toString(),
+                                new PackingCompleteInput(null, null),
+                                user))))
         .hasMessageContaining("还不能完成");
   }
 
@@ -672,13 +825,29 @@ class PackingIntegrationTest {
     var r = ready(a, "OB-ROLE", "2", null, sku(a, 1));
     var f = filler(a, "F-R");
     // 把填充物当包材用 → 拒
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.addParcel(
-        r.packing().id().toString(), new ParcelAddInput(f.id(), null, null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.addParcel(
+                                r.packing().id().toString(),
+                                new ParcelAddInput(f.id(), null, null, null),
+                                user))))
         .hasMessageContaining("填充物");
     // 把包材当填充物用 → 拒
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.addParcel(
-        r.packing().id().toString(),
-        new ParcelAddInput(r.material().id(), r.material().id(), null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.addParcel(
+                                r.packing().id().toString(),
+                                new ParcelAddInput(
+                                    r.material().id(), r.material().id(), null, null),
+                                user))))
         .hasMessageContaining("填充物");
   }
 
@@ -687,13 +856,15 @@ class PackingIntegrationTest {
     var r = ready(a, "OB-TRACE", "2", null, sku(a, 1));
     var lines = baseline(a, r.packing().id());
     // 基线应发 2 件：一个包裹装 2 件可以，再装 1 件就超发了
-    assertThat(catchThrowable(() -> addItem(a, r.packing().id(), r.parcelId(), lines.get(0).id(),
-        "1", null)))
+    assertThat(
+            catchThrowable(
+                () -> addItem(a, r.packing().id(), r.parcelId(), lines.get(0).id(), "1", null)))
         .hasMessageContaining("超装");
 
     // 明细必须指回复核基线行：凭空来的 id 直接拒
-    assertThat(catchThrowable(() -> addItem(a, r.packing().id(), r.parcelId(),
-        UUID.randomUUID(), "1", null)))
+    assertThat(
+            catchThrowable(
+                () -> addItem(a, r.packing().id(), r.parcelId(), UUID.randomUUID(), "1", null)))
         .hasMessageContaining("不存在");
 
     // 详情里能看到「哪些 SKU、多少件」—— 蓝图点名要的那份可追溯性
@@ -770,9 +941,17 @@ class PackingIntegrationTest {
     assertThat(catchThrowable(() -> measure(a, id, r.parcelId(), "100", "30", "20", "10")))
         .hasMessageContaining("秤没归零");
     // 三边必填：没量尺寸就没有体积，交给 10 物流的产出缺一半
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.measure(id.toString(),
-        r.parcelId().toString(),
-        new ParcelMeasureInput("1200", "30", null, "10", null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.measure(
+                                id.toString(),
+                                r.parcelId().toString(),
+                                new ParcelMeasureInput("1200", "30", null, "10", null, null),
+                                user))))
         .hasMessageContaining("outerWidthCm");
   }
 
@@ -781,36 +960,72 @@ class PackingIntegrationTest {
     var r = ready(a, "OB-TZ", "2", null, sku(a, 1));
     // 东八区 2026-03-01 08:00 应该是 2026-03-01T00:00Z ——
     // 走 Timestamp.valueOf(LocalDateTime) 会静默偏 −28800s，把早班记录写成前一天下午。
-    var read = asWrite(a, () -> service.measure(r.packing().id().toString(),
-        r.parcelId().toString(),
-        new ParcelMeasureInput("1200", "30", "20", "10", "2026-03-01T08:00:00+08:00", null), user));
+    var read =
+        asWrite(
+            a,
+            () ->
+                service.measure(
+                    r.packing().id().toString(),
+                    r.parcelId().toString(),
+                    new ParcelMeasureInput(
+                        "1200", "30", "20", "10", "2026-03-01T08:00:00+08:00", null),
+                    user));
     OffsetDateTime stored = read.measuredAt();
-    assertThat(stored.toInstant()).isEqualTo(OffsetDateTime.parse("2026-03-01T08:00:00+08:00").toInstant());
+    assertThat(stored.toInstant())
+        .isEqualTo(OffsetDateTime.parse("2026-03-01T08:00:00+08:00").toInstant());
     // 写回 DB 的值也要对（不只是在内存里对）
-    OffsetDateTime inDb = as(a, () -> sql.fetchOne(
-        "select measured_at from parcel where tenant_id"
-            + " = current_setting('app.current_tenant', true)::uuid and id=?",
-        r.parcelId()).get("measured_at", OffsetDateTime.class));
-    assertThat(inDb.toInstant()).isEqualTo(OffsetDateTime.parse("2026-03-01T08:00:00+08:00").toInstant());
+    OffsetDateTime inDb =
+        as(
+            a,
+            () ->
+                sql.fetchOne(
+                        "select measured_at from parcel where tenant_id"
+                            + " = current_setting('app.current_tenant', true)::uuid and id=?",
+                        r.parcelId())
+                    .get("measured_at", OffsetDateTime.class));
+    assertThat(inDb.toInstant())
+        .isEqualTo(OffsetDateTime.parse("2026-03-01T08:00:00+08:00").toInstant());
   }
 
   @Test
   void labelPrintIsReferencedNotReRendered() {
     var r = ready(a, "OB-LABEL", "2", null, sku(a, 1));
     UUID job = printJob(a);
-    var parcel = asWrite(a, () -> service.recordLabel(r.packing().id().toString(),
-        r.parcelId().toString(), new ParcelLabelInput(job, null, null), user));
+    var parcel =
+        asWrite(
+            a,
+            () ->
+                service.recordLabel(
+                    r.packing().id().toString(),
+                    r.parcelId().toString(),
+                    new ParcelLabelInput(job, null, null),
+                    user));
     assertThat(parcel.labelPrintJobId()).isEqualTo(job);
     assertThat(parcel.labelPrintCount()).isEqualTo(1);
     // 再印一次是 +1（次数只增不减，权威在 8.3.4.2 的 label_print_log）
-    var again = asWrite(a, () -> service.recordLabel(r.packing().id().toString(),
-        r.parcelId().toString(), new ParcelLabelInput(job, null, null), user));
+    var again =
+        asWrite(
+            a,
+            () ->
+                service.recordLabel(
+                    r.packing().id().toString(),
+                    r.parcelId().toString(),
+                    new ParcelLabelInput(job, null, null),
+                    user));
     assertThat(again.labelPrintCount()).isEqualTo(2);
     // 引用一个别的租户的打印任务 → 404
     UUID foreign = printJob(b);
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.recordLabel(
-        r.packing().id().toString(), r.parcelId().toString(),
-        new ParcelLabelInput(foreign, null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.recordLabel(
+                                r.packing().id().toString(),
+                                r.parcelId().toString(),
+                                new ParcelLabelInput(foreign, null, null),
+                                user))))
         .hasMessageContaining("不存在");
   }
 
@@ -823,11 +1038,17 @@ class PackingIntegrationTest {
           sql.execute(
               "insert into print_template(id,tenant_id,code,name,object_type,paper_size)"
                   + " values(?,?,?,?,'SHIPPING_LABEL','A4')",
-              templateId, tenant, "T-" + templateId.toString().substring(0, 6), "面单模板");
+              templateId,
+              tenant,
+              "T-" + templateId.toString().substring(0, 6),
+              "面单模板");
           UUID id = UUID.randomUUID();
           sql.execute(
               "insert into print_job(id,tenant_id,job_no,template_id,status) values(?,?,?,?,'DRAFT')",
-              id, tenant, "PJ-" + id.toString().substring(0, 6), templateId);
+              id,
+              tenant,
+              "PJ-" + id.toString().substring(0, 6),
+              templateId);
           return id;
         });
   }
@@ -837,13 +1058,11 @@ class PackingIntegrationTest {
   /**
    * 申报快照：本服务真读得到的只有报关明细（V85，同服务）；读不到就如实说读不到。
    *
-   * <p>蓝图输入写的「3.7.2 物理属性」属 catalog，本服务跨服务读不到 —— 所以这里断言的是
-   * <b>没有编</b>：本租户没有这个 SKU 的报关明细时，HS 编码与申报品名恒为空，
-   * 来源恒为 NOT_FOUND，且标签里点名 catalog 才是归属方。
+   * <p>蓝图输入写的「3.7.2 物理属性」属 catalog，本服务跨服务读不到 —— 所以这里断言的是 <b>没有编</b>：本租户没有这个 SKU 的报关明细时，HS
+   * 编码与申报品名恒为空， 来源恒为 NOT_FOUND，且标签里点名 catalog 才是归属方。
    *
-   * <p>正向的 CUSTOMS_DECLARATION_LINE 分支要造一条真报关明细，而 V85 的报关明细要求它的
-   * 来源发运行已有<b>在途腿</b>（7.5.1.2 的发货分录守卫），那属于本车道之外的链路；
-   * 那条分支与本测试走的是同一个 SELECT，缺口在此显式记下而不是假装覆盖了。
+   * <p>正向的 CUSTOMS_DECLARATION_LINE 分支要造一条真报关明细，而 V85 的报关明细要求它的 来源发运行已有<b>在途腿</b>（7.5.1.2
+   * 的发货分录守卫），那属于本车道之外的链路； 那条分支与本测试走的是同一个 SELECT，缺口在此显式记下而不是假装覆盖了。
    */
   @Test
   void declarationSnapshotSaysNotFoundRatherThanInventingHsCode() {
@@ -883,8 +1102,12 @@ class PackingIntegrationTest {
     assertThat(report.packable()).isTrue();
     assertThat(report.blockingReasons()).isEmpty();
 
-    var done = asWrite(a, () -> service.complete(r.packing().id().toString(),
-        new PackingCompleteInput(null, null), user));
+    var done =
+        asWrite(
+            a,
+            () ->
+                service.complete(
+                    r.packing().id().toString(), new PackingCompleteInput(null, null), user));
     assertThat(done.status()).isEqualTo("PACKED");
     assertThat(done.completedAt()).isNotNull();
     // 交给 8.3.4.1「待发货」，**不是已发货**（运单号与承运渠道是下游的事）
@@ -894,18 +1117,34 @@ class PackingIntegrationTest {
     assertThat(inventoryEntryCount(a)).isEqualTo(entriesBefore);
 
     var detail = as(a, () -> service.detail(r.packing().id().toString()));
-    assertThat(detail.timeline()).extracting(PackingEventRow::eventType)
+    assertThat(detail.timeline())
+        .extracting(PackingEventRow::eventType)
         .contains("OPENED", "PACKAGE_ADDED", "ITEM_ADDED", "MEASURED", "PACKED");
     // 详情显式报出四段「不由本模块负责」的相邻能力
-    assertThat(detail.unavailable()).extracting(UnavailableLink::ownerModule)
+    assertThat(detail.unavailable())
+        .extracting(UnavailableLink::ownerModule)
         .contains("8.3.4.1", "10", "3.7.2.1");
 
     // 终态不可再动
-    assertThat(catchThrowable(() -> addItem(a, r.packing().id(), r.parcelId(),
-        baseline(a, r.packing().id()).get(0).id(), "1", null)))
+    assertThat(
+            catchThrowable(
+                () ->
+                    addItem(
+                        a,
+                        r.packing().id(),
+                        r.parcelId(),
+                        baseline(a, r.packing().id()).get(0).id(),
+                        "1",
+                        null)))
         .hasMessageContaining("不能再装明细");
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.cancel(r.packing().id().toString(),
-        new PackingCancelInput("反悔"), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.cancel(
+                                r.packing().id().toString(), new PackingCancelInput("反悔"), user))))
         .hasMessageContaining("不能再取消");
   }
 
@@ -931,22 +1170,35 @@ class PackingIntegrationTest {
   void failSendsOutboundBackToRecheckAndCancelLeavesInventoryAlone() {
     var r = ready(a, "OB-FAIL", "2", null, sku(a, 1));
     long onHandBefore = balanceOnHand(a, sku(a, 1));
-    var failed = asWrite(a, () -> service.fail(r.packing().id().toString(),
-        new PackingFailInput("装箱时发现少一件"), user));
+    var failed =
+        asWrite(
+            a,
+            () ->
+                service.fail(r.packing().id().toString(), new PackingFailInput("装箱时发现少一件"), user));
     assertThat(failed.status()).isEqualTo("FAILED");
     // V72 留的返工边：打包发现缺件 → 退回复核
     assertThat(outboundStatus(a, r.orderId())).isEqualTo("PENDING_RECHECK");
     assertThat(balanceOnHand(a, sku(a, 1))).isEqualTo(onHandBefore);
     // 失败必须写原因（在还开着的单上验：已失败的单会先撞状态冲突）
     var r0 = ready(a, "OB-FAIL0", "2", null, sku(a, 1));
-    assertThat(catchThrowable(() -> asWrite(a, () -> service.fail(
-        r0.packing().id().toString(), new PackingFailInput(" "), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        a,
+                        () ->
+                            service.fail(
+                                r0.packing().id().toString(), new PackingFailInput(" "), user))))
         .hasMessageContaining("原因");
 
     var r2 = ready(a, "OB-CANCEL", "2", null, sku(a, 1));
     long onHandBeforeCancel = balanceOnHand(a, sku(a, 1));
-    var cancelled = asWrite(a, () -> service.cancel(r2.packing().id().toString(),
-        new PackingCancelInput("客户改地址，重新打包"), user));
+    var cancelled =
+        asWrite(
+            a,
+            () ->
+                service.cancel(
+                    r2.packing().id().toString(), new PackingCancelInput("客户改地址，重新打包"), user));
     assertThat(cancelled.status()).isEqualTo("CANCELLED");
     // 取消不动库存，也不改出库单状态（货还在打包区等着重打）
     assertThat(outboundStatus(a, r2.orderId())).isEqualTo("PENDING_PACKING");
@@ -957,14 +1209,23 @@ class PackingIntegrationTest {
   void databaseRefusesToPackAnOrderWithAnEmptyParcelEvenWhenTheServiceIsBypassed()
       throws Exception {
     var r2 = ready(a, "OB-BYPASS2", "2", null, sku(a, 1));
-    asWrite(a, () -> service.addParcel(r2.packing().id().toString(),
-        new ParcelAddInput(r2.material().id(), null, null, null), user));
+    asWrite(
+        a,
+        () ->
+            service.addParcel(
+                r2.packing().id().toString(),
+                new ParcelAddInput(r2.material().id(), null, null, null),
+                user));
     try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword())) {
       c.setAutoCommit(false);
       try (var s = c.createStatement()) {
         s.execute("select set_config('app.current_tenant','" + a + "',false)");
-        s.execute("update packing_order set status='PACKED',completed_at=now(),packer_user_id='"
-            + user + "' where id='" + r2.packing().id() + "'");
+        s.execute(
+            "update packing_order set status='PACKED',completed_at=now(),packer_user_id='"
+                + user
+                + "' where id='"
+                + r2.packing().id()
+                + "'");
         c.commit();
       } catch (Exception e) {
         c.rollback();
@@ -981,14 +1242,19 @@ class PackingIntegrationTest {
         as(
             a,
             () ->
-                sql.fetch(
+                sql
+                    .fetch(
                         "select relname, relrowsecurity, relforcerowsecurity from pg_class"
                             + " where relname in ('packing_material','packing_order','parcel',"
                             + "'parcel_item','packing_event') order by relname")
                     .stream()
-                    .map(r -> r.get("relname", String.class) + ":"
-                        + r.get("relrowsecurity", Boolean.class) + "/"
-                        + r.get("relforcerowsecurity", Boolean.class))
+                    .map(
+                        r ->
+                            r.get("relname", String.class)
+                                + ":"
+                                + r.get("relrowsecurity", Boolean.class)
+                                + "/"
+                                + r.get("relforcerowsecurity", Boolean.class))
                     .toList());
     assertThat(forced).hasSize(5);
     assertThat(forced).allSatisfy(row -> assertThat(row).endsWith("true/true"));
@@ -1006,23 +1272,35 @@ class PackingIntegrationTest {
     assertThat(page.summary().unmeasuredParcels()).isZero();
     assertThat(page.summary().packedQuantity()).isEqualTo("3");
 
-    var filtered = as(a, () -> service.page(null, null, null, "OPEN", null, "OB-L1",
-        "STARTED_AT", 0, 50));
+    var filtered =
+        as(a, () -> service.page(null, null, null, "OPEN", null, "OB-L1", "STARTED_AT", 0, 50));
     assertThat(filtered.total()).isEqualTo(1);
     assertThat(filtered.items().get(0).outboundOrderCode()).isEqualTo("OB-L1");
     assertThat(filtered.summary().totalOrders()).isEqualTo(2);
 
-    assertThat(catchThrowable(() -> as(a, () -> service.page(null, null, null, "BOGUS", null,
-        null, "STARTED_AT", 0, 50))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    as(
+                        a,
+                        () ->
+                            service.page(
+                                null, null, null, "BOGUS", null, null, "STARTED_AT", 0, 50))))
         .hasMessageContaining("status");
-    assertThat(catchThrowable(() -> as(a, () -> service.page(null, null, null, null, null, null,
-        "DROPME", 0, 50))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    as(a, () -> service.page(null, null, null, null, null, null, "DROPME", 0, 50))))
         .hasMessageContaining("sort");
     // 真分页
-    assertThat(as(a, () -> service.page(null, null, null, null, null, null, "STARTED_AT", 0, 1))
-            .items()).hasSize(1);
-    assertThat(as(a, () -> service.page(null, null, null, null, null, null, "STARTED_AT", 1, 1))
-            .items()).hasSize(1);
+    assertThat(
+            as(a, () -> service.page(null, null, null, null, null, null, "STARTED_AT", 0, 1))
+                .items())
+        .hasSize(1);
+    assertThat(
+            as(a, () -> service.page(null, null, null, null, null, null, "STARTED_AT", 1, 1))
+                .items())
+        .hasSize(1);
   }
 
   // ================================================================ 多租户三断言
@@ -1036,12 +1314,28 @@ class PackingIntegrationTest {
     assertThat(catchThrowable(() -> as(b, () -> service.detail(ra.packing().id().toString()))))
         .hasMessageContaining("不存在");
     // B 在 A 的打包单上建包裹 → 404（写路径同样隔离）
-    assertThat(catchThrowable(() -> asWrite(b, () -> service.addParcel(
-        ra.packing().id().toString(), new ParcelAddInput(ra.material().id(), null, null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        b,
+                        () ->
+                            service.addParcel(
+                                ra.packing().id().toString(),
+                                new ParcelAddInput(ra.material().id(), null, null, null),
+                                user))))
         .hasMessageContaining("不存在");
     // B 完成 A 的打包单 → 404
-    assertThat(catchThrowable(() -> asWrite(b, () -> service.complete(
-        ra.packing().id().toString(), new PackingCompleteInput(null, null), user))))
+    assertThat(
+            catchThrowable(
+                () ->
+                    asWrite(
+                        b,
+                        () ->
+                            service.complete(
+                                ra.packing().id().toString(),
+                                new PackingCompleteInput(null, null),
+                                user))))
         .hasMessageContaining("不存在");
     // B 也看不到 A 的包材
     assertThat(catchThrowable(() -> as(b, () -> service.material(ra.material().id().toString()))))
@@ -1051,8 +1345,7 @@ class PackingIntegrationTest {
     assertThat(bList.total()).isEqualTo(1);
     assertThat(bList.items().get(0).id()).isEqualTo(rb.packing().id());
     // B 开不了 A 的复核单的打包单
-    assertThat(catchThrowable(() -> openOrder(b, ra.sessionId())))
-        .hasMessageContaining("不存在");
+    assertThat(catchThrowable(() -> openOrder(b, ra.sessionId()))).hasMessageContaining("不存在");
   }
 
   @Test
@@ -1071,9 +1364,9 @@ class PackingIntegrationTest {
 
     // 带上真实身份但伪造租户头：看到的仍然只有 A 自己那一张
     http.perform(
-                get("/warehouse/packing-orders")
-                    .header("Authorization", "Bearer tenant-a")
-                    .header("X-Tenant-Id", b.toString()))
+            get("/warehouse/packing-orders")
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b.toString()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.total").value(1))
         .andExpect(jsonPath("$.items[0].packingCode").value(r.packing().packingCode()));
@@ -1085,15 +1378,24 @@ class PackingIntegrationTest {
     var rb = ready(b, "OB-POOL-B", "2", null, sku(b, 1));
     // A → B → A 三轮：连接池只有 1 条连接，每次归还后都可能被下一个人拿到。
     for (int round = 0; round < 3; round++) {
-      assertThat(as(a, () -> service.page(null, null, null, null, null, null, "PACKING_CODE",
-                  0, 50)).items().get(0).id()).isEqualTo(ra.packing().id());
-      assertThat(as(b, () -> service.page(null, null, null, null, null, null, "PACKING_CODE",
-                  0, 50)).items().get(0).id()).isEqualTo(rb.packing().id());
+      assertThat(
+              as(a, () -> service.page(null, null, null, null, null, null, "PACKING_CODE", 0, 50))
+                  .items()
+                  .get(0)
+                  .id())
+          .isEqualTo(ra.packing().id());
+      assertThat(
+              as(b, () -> service.page(null, null, null, null, null, null, "PACKING_CODE", 0, 50))
+                  .items()
+                  .get(0)
+                  .id())
+          .isEqualTo(rb.packing().id());
       assertThat(as(a, () -> service.detail(ra.packing().id().toString())).order().packingCode())
           .isEqualTo(ra.packing().packingCode());
       assertThat(as(b, () -> service.detail(rb.packing().id().toString())).order().packingCode())
           .isEqualTo(rb.packing().packingCode());
-      assertThat(as(a, () -> service.materials(null, "CUSHIONING", null, null, null, 0, 50)).total())
+      assertThat(
+              as(a, () -> service.materials(null, "CUSHIONING", null, null, null, 0, 50)).total())
           .isZero();
     }
   }

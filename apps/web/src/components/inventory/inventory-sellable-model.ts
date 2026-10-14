@@ -177,10 +177,7 @@ export function sliceTone(slice: AvailableQuantitySlice): 'counted' | 'excluded'
  */
 export function sliceBalanced(totals: AvailableQuantityTotals | null | undefined): boolean {
   if (!totals) return true;
-  const sum = orderedSlices(totals.slices).reduce(
-    (acc, s) => acc + Number(s.amount ?? 0),
-    0,
-  );
+  const sum = orderedSlices(totals.slices).reduce((acc, s) => acc + Number(s.amount ?? 0), 0);
   const available = Number(totals.available ?? 0);
   // 容差取 1e-6：NUMERIC(19,4) 的四舍五入残渣不该被当成口径坏了
   return Math.abs(sum - available) < 1e-6 && totals.sliceBalanced;

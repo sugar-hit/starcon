@@ -49,11 +49,11 @@ PG 的部分唯一索引跨不了两张表（范围键在 policy、仓在挂仓�
 
 ### 4. 三环上游未交付 → capabilities 逐条显式报出
 
-| 环 | 状态 | 本模块的做法 |
-| --- | --- | --- |
-| 日均销量（13 销量域） | 未交付 | 登记进来（`safety_stock_sales`，带 `source_system` 标来源），照 7.8.1.1 的 `allocation_shop_sales` 先例 |
-| 分类 → SKU 展开（catalog） | 跨服务不可读 | 评估请求随 SKU 清单带分类上下文；清单为空时**只扫 SKU 档**，其余计入 `policies_not_scannable` 并如实报出 |
-| 6.2.1.2 补货建议 | 未交付、属 06 采购域 | 建议落库、`external_purchase_reference` 留空，不建外键/视图/跨库写 |
+| 环                         | 状态                 | 本模块的做法                                                                                             |
+| -------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------- |
+| 日均销量（13 销量域）      | 未交付               | 登记进来（`safety_stock_sales`，带 `source_system` 标来源），照 7.8.1.1 的 `allocation_shop_sales` 先例  |
+| 分类 → SKU 展开（catalog） | 跨服务不可读         | 评估请求随 SKU 清单带分类上下文；清单为空时**只扫 SKU 档**，其余计入 `policies_not_scannable` 并如实报出 |
+| 6.2.1.2 补货建议           | 未交付、属 06 采购域 | 建议落库、`external_purchase_reference` 留空，不建外键/视图/跨库写                                       |
 
 四个 `*Available` 布尔位让「哪一环没通」成为**可读字段**，而不是让人从 404 或空数组里猜。
 
@@ -98,6 +98,7 @@ capabilities 与 `policiesNotScannable` 两处都写清楚了。
 ## 文件清单
 
 **新增**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V114__warehouse_safety_stock.sql`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/SafetyStockModels.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/SafetyStockService.java`
@@ -109,6 +110,7 @@ capabilities 与 `policiesNotScannable` 两处都写清楚了。
 - `apps/web/src/app/inventory/safety-stock/page.tsx`
 
 **改动**
+
 - `apps/web/src/lib/api-proxy.ts` —— 追加 `safety-stock` 单支（单处 243 字符纯插入，零删除）
 - `docs/product/capability-blueprint/module-progress.md` —— 仅 7.2.2.2 那一行的状态与证据两格
 - `packages/api-contracts/**` —— codegen 产物，手改即破坏契约

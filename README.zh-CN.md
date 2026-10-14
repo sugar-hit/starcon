@@ -2,16 +2,18 @@
 
 <div align="center">
 
+<img src="apps/web/public/logo-mark-brand.svg" alt="starcon logo" width="88" height="88">
+
 # starcon
 
 ### 让跨境电商的商品、订单与库存，在同一个业务系统中协同。
 
 面向多平台经营企业的 SaaS ERP · Java 微服务 · 多租户数据隔离
 
-[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue)](LICENSE)
-[![Java 21](https://img.shields.io/badge/Java-21-orange)](backend/pom.xml)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black)](apps/web/package.json)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6)](apps/web/tsconfig.json)
+[![License: PolyForm Noncommercial](docs/design/readme/license.svg)](LICENSE)
+[![Java 21](docs/design/readme/java.svg)](backend/pom.xml)
+[![Next.js](docs/design/readme/next.svg)](apps/web/package.json)
+[![TypeScript](docs/design/readme/typescript.svg)](apps/web/tsconfig.json)
 
 [快速体验](#快速体验) · [项目亮点](#项目亮点) · [实现进度](#实现进度) · [系统架构](#系统架构) · [使用许可](#使用许可)
 
@@ -57,7 +59,7 @@
 
 ### 环境要求
 
-- Node.js **≥ 20.11.0**，pnpm **9**（仓库固定 `pnpm@9.0.0`）。
+- Node.js **≥ 22.12.0**，pnpm **9**（仓库固定 `pnpm@9.0.0`）。
 - Docker Desktop 或可用的 Docker Engine + Compose，用于运行 PostgreSQL 和后端服务。
 - 仅在宿主机直接构建后端时需要 **JDK 21**；容器启动方式自带 Java 工具链。
 
@@ -106,28 +108,13 @@ pnpm --filter @starcon/web dev
 
 ## 系统架构
 
-```mermaid
-flowchart TB
-    Browser[浏览器工作区] --> Web[Next.js · TypeScript]
-    Web --> Identity[identity · 身份与授权]
-    Web --> Catalog[catalog · 商品]
-    Web --> Channel[channel · 渠道]
-    Web --> Trade[trade · 订单]
-    Web --> Warehouse[warehouse · 仓储]
-    Web --> CRM[crm · 客服]
-    Identity --> IDB[(identity DB)]
-    Catalog --> CDB[(catalog DB)]
-    Channel --> CHDB[(channel DB)]
-    Warehouse --> WDB[(warehouse DB)]
-    Trade --> TDB[(trade DB)]
-    CRM --> CRDB[(crm DB)]
-```
+![starcon service architecture](docs/design/readme/architecture.svg)
 
 图中展示当前服务与数据所有权。业务服务还通过授权接口核验身份和权限；跨服务调用不直接读写对方数据库。完整边界见 [ADR-0004](docs/decisions/0004-java-spring-boot-microservices.md)。
 
 | 层次 | 技术选择                                                          |
 | ---- | ----------------------------------------------------------------- |
-| 前端 | Next.js 14、React 18、TypeScript 严格模式、Tailwind CSS、Radix UI |
+| 前端 | Next.js 15、React 18、TypeScript 严格模式、Tailwind CSS、Radix UI |
 | 后端 | Java 21、Spring Boot、Maven Wrapper、jOOQ                         |
 | 数据 | PostgreSQL 16、Flyway SQL 迁移、Row-Level Security                |
 | 契约 | SpringDoc OpenAPI、TypeScript 代码生成                            |

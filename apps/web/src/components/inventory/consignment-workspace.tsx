@@ -189,7 +189,8 @@ export function ConsignmentWorkspace() {
     void guard(async () => {
       if (!detail || !saleLineId) throw new Error('请先选择一条寄售明细行。');
       if (!saleQty || Number(saleQty) <= 0) throw new Error('售出数量必须大于 0。');
-      if (!saleRef.trim()) throw new Error('请填写销售事实引用（订单行号），它保证重复推送不会重复计应付。');
+      if (!saleRef.trim())
+        throw new Error('请填写销售事实引用（订单行号），它保证重复推送不会重复计应付。');
       await recordConsignmentSale(detail.agreement.id, saleLineId, {
         soldQuantity: saleQty,
         saleRef: saleRef.trim(),
@@ -214,7 +215,9 @@ export function ConsignmentWorkspace() {
       const w = await fetchSettlementWindow(detail.agreement.id);
       setPeriodStart(w.periodStart);
       setPeriodEnd(w.periodEnd);
-      setNotice(`已按结算周期「${w.settlementCycleLabel}」填入 ${w.periodStart} 至 ${w.periodEnd}。`);
+      setNotice(
+        `已按结算周期「${w.settlementCycleLabel}」填入 ${w.periodStart} 至 ${w.periodEnd}。`,
+      );
     });
 
   const submitReturn = () =>
@@ -274,7 +277,8 @@ export function ConsignmentWorkspace() {
             <p className="font-medium">{capabilities.payableBasis}</p>
             <p className="text-muted-foreground">{capabilities.ownershipNote}</p>
             <p className="text-muted-foreground">
-              采购入库成本口径：<span className="font-medium">不可算</span> —— {capabilities.costBasisNote}
+              采购入库成本口径：<span className="font-medium">不可算</span> ——{' '}
+              {capabilities.costBasisNote}
             </p>
             <p className="text-muted-foreground">{capabilities.saleFactNote}</p>
             <p className="text-muted-foreground">{capabilities.payableHandoffNote}</p>
@@ -430,7 +434,9 @@ export function ConsignmentWorkspace() {
               <p>{payableBasisNote(view)}</p>
               <p className="text-muted-foreground">
                 货主口径：{view.ownershipNote} 自有货值：
-                <span className="font-medium">{formatAmount(view.ownedAssetValue, view.currency)}</span>
+                <span className="font-medium">
+                  {formatAmount(view.ownedAssetValue, view.currency)}
+                </span>
                 （该口径不适用于寄售货，不是 0）。
               </p>
               {zeroRemainingLines(view) > 0 && (
@@ -448,7 +454,7 @@ export function ConsignmentWorkspace() {
             </div>
 
             {/* 寄售明细 */}
-            <div className="mt-4 border-control-border border-t">
+            <div className="border-control-border mt-4 border-t">
               <div className="grid grid-cols-6 gap-2 border-b px-2 py-1 text-xs font-medium">
                 <span>SKU</span>
                 <span>仓库</span>
@@ -568,7 +574,11 @@ export function ConsignmentWorkspace() {
                 />
               </FormField>
               <FormField id="period-end" label="结算结束日">
-                <Input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
+                <Input
+                  type="date"
+                  value={periodEnd}
+                  onChange={(e) => setPeriodEnd(e.target.value)}
+                />
               </FormField>
               <Button variant="outline" size="sm" disabled={saving} onClick={prefillWindow}>
                 按结算周期填入
@@ -611,7 +621,9 @@ export function ConsignmentWorkspace() {
                         onClick={() =>
                           void guard(async () => {
                             await confirmConsignmentSettlement(s.id);
-                            await afterMutation('结算触发单已确认，应付正式交 12 应付，单据已冻结。');
+                            await afterMutation(
+                              '结算触发单已确认，应付正式交 12 应付，单据已冻结。',
+                            );
                           })
                         }
                       >
@@ -639,7 +651,9 @@ export function ConsignmentWorkspace() {
           {/* ---------------- 未售退货与期末清理 ---------------- */}
           <SectionCard title="未售退货与期末清理">
             {!writableAgreement ? (
-              <p className="text-muted-foreground text-sm">协议已关闭或无写权限，不能再建清理单。</p>
+              <p className="text-muted-foreground text-sm">
+                协议已关闭或无写权限，不能再建清理单。
+              </p>
             ) : (
               <div className="flex flex-wrap items-end gap-2">
                 <FormField id="return-kind" label="性质">
@@ -772,7 +786,10 @@ export function ConsignmentWorkspace() {
             ) : (
               <div className="space-y-1">
                 {audit.map((e) => (
-                  <div key={e.id} className="border-control-border flex flex-wrap items-center gap-2 border-b py-1.5 text-sm">
+                  <div
+                    key={e.id}
+                    className="border-control-border flex flex-wrap items-center gap-2 border-b py-1.5 text-sm"
+                  >
                     <ScrollText className="text-muted-foreground h-3.5 w-3.5" />
                     <span className="font-medium">{auditLabel(e.eventType)}</span>
                     <span className="text-muted-foreground text-xs">{e.detail}</span>

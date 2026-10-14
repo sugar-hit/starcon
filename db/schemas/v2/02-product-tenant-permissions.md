@@ -17,36 +17,36 @@
 
 示例：SPU `TSHIRT-001`，颜色红/蓝、尺码 M/L，可配置 4 种组合；只生产其中 3 种就只建 3 个 SKU，不自动生成所有笛卡尔积。
 
-| SPU | SKU | 规格 | 例示条码 |
-| --- | --- | --- | --- |
-| TSHIRT-001 | TSHIRT-RED-M | 红 / M | 单独分配 |
-| TSHIRT-001 | TSHIRT-RED-L | 红 / L | 单独分配 |
+| SPU        | SKU           | 规格   | 例示条码 |
+| ---------- | ------------- | ------ | -------- |
+| TSHIRT-001 | TSHIRT-RED-M  | 红 / M | 单独分配 |
+| TSHIRT-001 | TSHIRT-RED-L  | 红 / L | 单独分配 |
 | TSHIRT-001 | TSHIRT-BLUE-M | 蓝 / M | 单独分配 |
 
 ### 商品相关实体及约束
 
 各租户业务表均遵守公共 UUID、tenant_id、复合 FK、审计时间约定。下面只列业务字段；`?` 为可空。
 
-| 表 | 关键字段 | 关系 / 约束 |
-| --- | --- | --- |
-| spu | code, name, brand_id?, primary_category_id?, description?, status | UNIQUE(tenant_id,code)；基础稿 category_id 统一为 primary_category_id；不得保存 stock 或单一销售 price |
-| spu_translation | spu_id, locale, name, description? | UNIQUE(tenant_id,spu_id,locale) |
-| spu_category_link | spu_id, category_id | 辅助内部分类，多对多；主分类在 spu 上，不重复作为独立真相；平台类目在 channel |
-| sku | spu_id, code, name, base_uom_id, kind, tracking_mode, variant_signature, status | UNIQUE(tenant_id,code)、UNIQUE(tenant_id,spu_id,variant_signature)；spu_id 复合 FK |
-| sku_translation | sku_id, locale, display_name | UNIQUE(tenant_id,sku_id,locale)；允许本地化展示规格名，规格身份仍由 option_id 决定 |
-| attribute_definition | code, name, data_type, usage, unit_dimension?, status | 类型 TEXT/DECIMAL/BOOLEAN/DATE/OPTION；用途 VARIANT/DESCRIPTIVE；引用后不允许直接改类型或用途 |
-| attribute_option | attribute_id, code, label, status | UNIQUE(tenant_id,attribute_id,code)；停用保留历史值 |
-| category_attribute_rule | category_id, attribute_id, target_level, required, position | UNIQUE(tenant_id,category_id,attribute_id,target_level)；target=SPU/SKU；一期不隐式继承类目祖先规则，显式配置有效模板 |
-| spu_variant_axis | spu_id, attribute_id, position | 一个 SPU 同轴仅一次；只有 VARIANT + OPTION 可作为轴 |
-| spu_variant_option | spu_id, attribute_id, option_id | 选项必须来自对应属性且属于 SPU 允许集 |
-| sku_variant_value | sku_id, spu_id, attribute_id, option_id | 每 SKU 每轴一个值；同时约束 SKU 所属 SPU 和 SPU 允许选项 |
+| 表                                        | 关键字段                                                                                                          | 关系 / 约束                                                                                                                                        |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| spu                                       | code, name, brand_id?, primary_category_id?, description?, status                                                 | UNIQUE(tenant_id,code)；基础稿 category_id 统一为 primary_category_id；不得保存 stock 或单一销售 price                                             |
+| spu_translation                           | spu_id, locale, name, description?                                                                                | UNIQUE(tenant_id,spu_id,locale)                                                                                                                    |
+| spu_category_link                         | spu_id, category_id                                                                                               | 辅助内部分类，多对多；主分类在 spu 上，不重复作为独立真相；平台类目在 channel                                                                      |
+| sku                                       | spu_id, code, name, base_uom_id, kind, tracking_mode, variant_signature, status                                   | UNIQUE(tenant_id,code)、UNIQUE(tenant_id,spu_id,variant_signature)；spu_id 复合 FK                                                                 |
+| sku_translation                           | sku_id, locale, display_name                                                                                      | UNIQUE(tenant_id,sku_id,locale)；允许本地化展示规格名，规格身份仍由 option_id 决定                                                                 |
+| attribute_definition                      | code, name, data_type, usage, unit_dimension?, status                                                             | 类型 TEXT/DECIMAL/BOOLEAN/DATE/OPTION；用途 VARIANT/DESCRIPTIVE；引用后不允许直接改类型或用途                                                      |
+| attribute_option                          | attribute_id, code, label, status                                                                                 | UNIQUE(tenant_id,attribute_id,code)；停用保留历史值                                                                                                |
+| category_attribute_rule                   | category_id, attribute_id, target_level, required, position                                                       | UNIQUE(tenant_id,category_id,attribute_id,target_level)；target=SPU/SKU；一期不隐式继承类目祖先规则，显式配置有效模板                              |
+| spu_variant_axis                          | spu_id, attribute_id, position                                                                                    | 一个 SPU 同轴仅一次；只有 VARIANT + OPTION 可作为轴                                                                                                |
+| spu_variant_option                        | spu_id, attribute_id, option_id                                                                                   | 选项必须来自对应属性且属于 SPU 允许集                                                                                                              |
+| sku_variant_value                         | sku_id, spu_id, attribute_id, option_id                                                                           | 每 SKU 每轴一个值；同时约束 SKU 所属 SPU 和 SPU 允许选项                                                                                           |
 | spu_attribute_value / sku_attribute_value | owner_id, attribute_id, value_type, text_value?, decimal_value?, boolean_value?, date_value?, option_id?, uom_id? | 每 owner 每属性一个值；CHECK 恰好一个类型值非空；通过(tenant,attribute_id,value_type)复合 FK 固定类型；option 复合 FK 确认归属，应用校验用途与量纲 |
-| sku_identifier | sku_id, scheme, value, is_primary | 内部认可标识唯一；GTIN/自有条码与平台 seller_sku 分开；同 SKU/scheme 至多一个 primary |
-| sku_physical_spec | sku_id, net_weight_kg?, length_mm?, width_mm?, height_mm? | 每 SKU 一行，正值检查；表示裸品尺寸；销售包装在 sku_packaging，渠道要求校验时再强制齐全 |
-| sku_packaging | sku_id, code, units_per_package, dimensions, gross_weight_kg | 单件/内盒/外箱等包装；包装改变运输参数，不自动创造新销售 SKU |
-| spu_media / sku_media | spu_id 或 sku_id, file_id, media_type, position, is_primary, alt_text? | 两张明确关联表，业务归 catalog；文件属 support；每主体至多一张主图，读文件先校验商品授权 |
-| sku_customs_profile | sku_id, destination_country, origin_country, hs_code, declaration_name, revision, status | HS 编码按目的地而非全球唯一；每 SKU/目的地一个生效版本；报关单冻结当时快照 |
-| bundle_version / bundle_component | bundle_sku_id, revision / component_sku_id, quantity | 虚拟组合的销售 SKU 同样归属 SPU；一期只允许库存型组件，发布版本不可改 |
+| sku_identifier                            | sku_id, scheme, value, is_primary                                                                                 | 内部认可标识唯一；GTIN/自有条码与平台 seller_sku 分开；同 SKU/scheme 至多一个 primary                                                              |
+| sku_physical_spec                         | sku_id, net_weight_kg?, length_mm?, width_mm?, height_mm?                                                         | 每 SKU 一行，正值检查；表示裸品尺寸；销售包装在 sku_packaging，渠道要求校验时再强制齐全                                                            |
+| sku_packaging                             | sku_id, code, units_per_package, dimensions, gross_weight_kg                                                      | 单件/内盒/外箱等包装；包装改变运输参数，不自动创造新销售 SKU                                                                                       |
+| spu_media / sku_media                     | spu_id 或 sku_id, file_id, media_type, position, is_primary, alt_text?                                            | 两张明确关联表，业务归 catalog；文件属 support；每主体至多一张主图，读文件先校验商品授权                                                           |
+| sku_customs_profile                       | sku_id, destination_country, origin_country, hs_code, declaration_name, revision, status                          | HS 编码按目的地而非全球唯一；每 SKU/目的地一个生效版本；报关单冻结当时快照                                                                         |
+| bundle_version / bundle_component         | bundle_sku_id, revision / component_sku_id, quantity                                                              | 虚拟组合的销售 SKU 同样归属 SPU；一期只允许库存型组件，发布版本不可改                                                                              |
 
 描述属性值表仅服务商品可配置参数，不承载价格、数量、库存状态或所有业务字段。“材质=棉”是 SPU 描述属性，“颜色=红”若用于区分 SKU 就是规格值，两者不复制维护。类目规则变更先标记待完善，不删除已有 SKU；新增必填规则只在新建/编辑/激活校验时执行，历史订单照旧。
 
@@ -66,13 +66,13 @@ SKU 激活前：完整覆盖 SPU 规格轴、组合唯一、基础单位有效�
 
 **设计默认：父子关系不自动授予业务数据权限。** 父租户管理员管理下级租户生命周期与获得下级业务读写是两个权限。父级用户需要访问某子租户时，在目标子租户有明确成员身份及角色；同一个 app_user 可持有多个 membership，切换目标租户执行操作。此默认等待业务评审，不能把“有子租户”推导成父级可任意读写所有后代。
 
-| 表 | 字段 | 约束 / 用途 |
-| --- | --- | --- |
-| tenant | parent_tenant_id?, hierarchy_version bigint | 根 parent=NULL；自引用 FK，不能自身为父；代码全局唯一；仍无 tenant_id 列 |
-| tenant_closure | ancestor_tenant_id, descendant_tenant_id, depth int | PK(ancestor,descendant)；depth>=0；每节点 self/self/0；两个 FK→tenant；非自关联 depth>0；parent 为事实，closure 为可重建查询索引 |
-| tenant_hierarchy_event | id, subject_tenant_id, old_parent_id?, new_parent_id?, actor_user_id, reason, occurred_at | 控制平面审计，树创建/变更留痕；非普通业务表，专用授权访问，无租户数据绕过入口 |
-| tenant_catalog_publication | tenant_id(发布方), target_tenant_id, spu_id, publication_version, status | catalog 内发布记录；只能对允许的目标发布脱敏商品版本；目标 ID 为跨服务逻辑引用 |
-| catalog_import_mapping | tenant_id(接收方), source_tenant_id, source_spu_id, source_sku_id, local_spu_id, local_sku_id, source_version | 接收方本地复合 FK，来源逻辑引用；UNIQUE(tenant,source_tenant,source_sku_id)；本地 SKU 有独立 ID |
+| 表                         | 字段                                                                                                          | 约束 / 用途                                                                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| tenant                     | parent_tenant_id?, hierarchy_version bigint                                                                   | 根 parent=NULL；自引用 FK，不能自身为父；代码全局唯一；仍无 tenant_id 列                                                         |
+| tenant_closure             | ancestor_tenant_id, descendant_tenant_id, depth int                                                           | PK(ancestor,descendant)；depth>=0；每节点 self/self/0；两个 FK→tenant；非自关联 depth>0；parent 为事实，closure 为可重建查询索引 |
+| tenant_hierarchy_event     | id, subject_tenant_id, old_parent_id?, new_parent_id?, actor_user_id, reason, occurred_at                     | 控制平面审计，树创建/变更留痕；非普通业务表，专用授权访问，无租户数据绕过入口                                                    |
+| tenant_catalog_publication | tenant_id(发布方), target_tenant_id, spu_id, publication_version, status                                      | catalog 内发布记录；只能对允许的目标发布脱敏商品版本；目标 ID 为跨服务逻辑引用                                                   |
+| catalog_import_mapping     | tenant_id(接收方), source_tenant_id, source_spu_id, source_sku_id, local_spu_id, local_sku_id, source_version | 接收方本地复合 FK，来源逻辑引用；UNIQUE(tenant,source_tenant,source_sku_id)；本地 SKU 有独立 ID                                  |
 
 identity 控制平面查询 tenant/closure 必须按当前身份可管理/可进入的节点过滤；不能向任一成员返回全租户树。closure 没有普通 tenant_id 是明确例外，不能给全部服务开放直接查询。创建子租户需 parent 的 tenant.child.create 权限，验证父链有效，串行化更新树与 closure，并在同事务创建子租户首个管理员成员、角色、审计和 outbox。
 
@@ -107,25 +107,25 @@ flowchart LR
 
 ### 权限实体
 
-| 实体 | 字段与约束 |
-| --- | --- |
-| page_resource | code PK, parent_code?, name, route_pattern?, status, sort_order；全局发布码表，page code 稳定，路由变化不改变授权标识；目录节点无业务 CRUD |
-| permission | code PK, page_code FK, action, description, status；UNIQUE(page_code,action)；每条是“页面资源 × 操作” |
-| role | tenant_id, code, name, description?, status, is_system；租户内 code 唯一；角色停用立即失效 |
-| role_permission | tenant_id, role_id, permission_code；唯一；缺记录就是不允许，不额外保存 bool=false 行 |
-| role_assignment | tenant_id, membership_id, role_id, scope_mode；角色及成员必须同租户；多角色取满足完整授权条件的 assignment 的并集 |
-| role_assignment_scope | assignment_id, dimension, resource_id；原数据范围设计保留，ALL 仅代表本目标租户全范围，绝不包括子租户 |
+| 实体                  | 字段与约束                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| page_resource         | code PK, parent_code?, name, route_pattern?, status, sort_order；全局发布码表，page code 稳定，路由变化不改变授权标识；目录节点无业务 CRUD |
+| permission            | code PK, page_code FK, action, description, status；UNIQUE(page_code,action)；每条是“页面资源 × 操作”                                      |
+| role                  | tenant_id, code, name, description?, status, is_system；租户内 code 唯一；角色停用立即失效                                                 |
+| role_permission       | tenant_id, role_id, permission_code；唯一；缺记录就是不允许，不额外保存 bool=false 行                                                      |
+| role_assignment       | tenant_id, membership_id, role_id, scope_mode；角色及成员必须同租户；多角色取满足完整授权条件的 assignment 的并集                          |
+| role_assignment_scope | assignment_id, dimension, resource_id；原数据范围设计保留，ALL 仅代表本目标租户全范围，绝不包括子租户                                      |
 
 permission 示例：`catalog.spu.read`、`catalog.spu.create`、`catalog.spu.update`、`catalog.spu.delete`；SKU 页面单独为 `catalog.sku.*`。不沿用过于宽泛的 `.write`。create/update/delete 通常需要同角色 read 才能通过配置校验；没有 read 时页面与列表不显示，直接接口调用也不能绕过。
 
-| 页面资源 | 查看 R | 新增 C | 修改 U | 删除 D | 扩展动作 |
-| --- | --- | --- | --- | --- | --- |
-| 商品 SPU | spu.read | spu.create | spu.update | spu.delete | spu.import / export / activate / archive |
-| 商品 SKU | sku.read | sku.create | sku.update | sku.delete | sku.import / export / activate / archive |
-| 销售订单 | order.read | order.create | order.update | order.delete | order.approve / cancel / export |
-| 库存查询/作业 | inventory.read | 仅支持的作业创建 | 不直接编辑余额 | 不支持删除流水 | inventory.reserve / release / adjust |
-| 角色管理 | role.read | role.create | role.update | role.delete | role.assign / permission.grant |
-| 子租户管理 | tenant.child.read | tenant.child.create | tenant.child.update | 不支持直接硬删除 | tenant.child.suspend / close |
+| 页面资源      | 查看 R            | 新增 C              | 修改 U              | 删除 D           | 扩展动作                                 |
+| ------------- | ----------------- | ------------------- | ------------------- | ---------------- | ---------------------------------------- |
+| 商品 SPU      | spu.read          | spu.create          | spu.update          | spu.delete       | spu.import / export / activate / archive |
+| 商品 SKU      | sku.read          | sku.create          | sku.update          | sku.delete       | sku.import / export / activate / archive |
+| 销售订单      | order.read        | order.create        | order.update        | order.delete     | order.approve / cancel / export          |
+| 库存查询/作业 | inventory.read    | 仅支持的作业创建    | 不直接编辑余额      | 不支持删除流水   | inventory.reserve / release / adjust     |
+| 角色管理      | role.read         | role.create         | role.update         | role.delete      | role.assign / permission.grant           |
+| 子租户管理    | tenant.child.read | tenant.child.create | tenant.child.update | 不支持直接硬删除 | tenant.child.suspend / close             |
 
 表内短码实际带完整域前缀，注册表是唯一事实来源。UI 展示每页权限矩阵（行=页面，列=查/增/改/删/扩展动作），不支持的动作显示禁用而非自动创建 permission。前端页面树与后端资源码可映射，但菜单名、URL、按钮显示都不是后端权限依据。
 
@@ -145,13 +145,13 @@ permission 示例：`catalog.spu.read`、`catalog.spu.create`、`catalog.spu.upd
 
 以下为建议初始模板，实际可按租户配置，不代表已授予任何账号。
 
-| 角色 | SPU 页面 | SKU 页面 | 订单页面 | 角色管理 |
-| --- | --- | --- | --- | --- |
-| 商品管理员 | CRUD + 上下架 | CRUD + 上下架 | 无 | 无 |
-| 商品编辑 | CRU | CRU | 无 | 无 |
-| 订单运营 | R | R | CRU + 取消 | 无 |
-| 审计员 | R | R | R | R（成员信息最小化） |
-| 租户 Owner | 当前租户已启用能力的管理权限 | 同左 | 同左 | 可管理授权；仍受业务状态约束 |
+| 角色       | SPU 页面                     | SKU 页面      | 订单页面   | 角色管理                     |
+| ---------- | ---------------------------- | ------------- | ---------- | ---------------------------- |
+| 商品管理员 | CRUD + 上下架                | CRUD + 上下架 | 无         | 无                           |
+| 商品编辑   | CRU                          | CRU           | 无         | 无                           |
+| 订单运营   | R                            | R             | CRU + 取消 | 无                           |
+| 审计员     | R                            | R             | R          | R（成员信息最小化）          |
+| 租户 Owner | 当前租户已启用能力的管理权限 | 同左          | 同左       | 可管理授权；仍受业务状态约束 |
 
 金额成本、供应商报价、客户敏感资料若同屏显示，需单独字段/资源读取权限及后端响应裁剪，不能仅隐藏前端列。export 单独授权，遵守相同字段和数据范围；导入逐行验证，不能绕过普通 create/update 权限。
 

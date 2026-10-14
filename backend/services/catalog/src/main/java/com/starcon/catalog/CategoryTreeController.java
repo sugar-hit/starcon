@@ -10,16 +10,14 @@ import java.util.function.Function;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 3.3.1.1 分类树管理：多棵独立的分类树、多级层级、拖拽、防环、启用停用、
- * SPU 主分类与辅助分类、多语言分类名。
+ * 3.3.1.1 分类树管理：多棵独立的分类树、多级层级、拖拽、防环、启用停用、 SPU 主分类与辅助分类、多语言分类名。
  *
- * <p>路由挂在 {@code /catalog/categories} 之下，**不挂 {@code /products}**：分类树是租户级的
- * 全局配置（所有商品共用同一批类目），而 {@code /catalog/products/{id}} 是单个商品的档案页。
- * 蓝图台账里的 {@code /products/categories} 是**前端页面路径**，与 {@code /products/attributes}、
- * {@code /products/sku/spec-axis} 同一性质——后端前缀一律不带 products。
+ * <p>路由挂在 {@code /catalog/categories} 之下，**不挂 {@code /products}**：分类树是租户级的 全局配置（所有商品共用同一批类目），而
+ * {@code /catalog/products/{id}} 是单个商品的档案页。 蓝图台账里的 {@code /products/categories} 是**前端页面路径**，与
+ * {@code /products/attributes}、 {@code /products/sku/spec-axis} 同一性质——后端前缀一律不带 products。
  *
- * <p>权限沿用商品主数据域：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}。
- * 分类是 SPU 的主数据，不新造权限词表（新词表要改 identity 服务的迁移，属于另一个服务的写入所有权）。
+ * <p>权限沿用商品主数据域：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}。 分类是 SPU 的主数据，不新造权限词表（新词表要改
+ * identity 服务的迁移，属于另一个服务的写入所有权）。
  */
 @RestController
 @RequestMapping("/catalog/categories")
@@ -89,8 +87,7 @@ public class CategoryTreeController {
   /**
    * 一棵树的完整结构：节点 + 路径串 + 每个节点的商品数统计。
    *
-   * <p>{@code includeDisabled=false}（默认）时停用类目不进结果，它的子孙也不再返回——
-   * 停用一个中间类目却把子类目留着，界面上会出现一条没有父亲的孤儿子树。
+   * <p>{@code includeDisabled=false}（默认）时停用类目不进结果，它的子孙也不再返回—— 停用一个中间类目却把子类目留着，界面上会出现一条没有父亲的孤儿子树。
    */
   @GetMapping("/trees/{treeId}/nodes")
   public List<CategoryNode> nodes(
@@ -115,17 +112,13 @@ public class CategoryTreeController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID id,
       @Valid @RequestBody CategoryInput input) {
-    return call(
-        auth,
-        "spu.update",
-        a -> service.save(a, service.treeOf(id).id(), id, input));
+    return call(auth, "spu.update", a -> service.save(a, service.treeOf(id).id(), id, input));
   }
 
   /**
    * 拖拽落点：改父节点与同级位置。
    *
-   * <p>与保存分成两个端点：拖拽只该改层级与顺序，不该顺带提交名称与启用状态
-   * （那两个字段可能正被别人编辑）。成环的落点会被拒绝——服务层给可读原因，DB 触发器兜底。
+   * <p>与保存分成两个端点：拖拽只该改层级与顺序，不该顺带提交名称与启用状态 （那两个字段可能正被别人编辑）。成环的落点会被拒绝——服务层给可读原因，DB 触发器兜底。
    */
   @PutMapping("/nodes/{id}/move")
   public CategorySaved moveNode(

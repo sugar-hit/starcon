@@ -18,13 +18,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.1.2.4 单位与换算：单位字典 CRUD、换算版本区间不重叠、按生效日期取版本、
- * 基础数量换算、**单据冻结快照不被后续改比例影响**，以及租户隔离三断言。
+ * 3.1.2.4 单位与换算：单位字典 CRUD、换算版本区间不重叠、按生效日期取版本、 基础数量换算、**单据冻结快照不被后续改比例影响**，以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
  *
@@ -150,10 +148,13 @@ class UnitConversionIntegrationTest {
   }
 
   void run(AccessService.Access who, String permission, Runnable work) {
-    access.run(who, permission, () -> {
-      work.run();
-      return null;
-    });
+    access.run(
+        who,
+        permission,
+        () -> {
+          work.run();
+          return null;
+        });
   }
 
   // ------------------------------------------------------------ 夹具
@@ -163,11 +164,10 @@ class UnitConversionIntegrationTest {
   /**
    * 建 SPU + SKU，基础单位可指定。
    *
-   * <p>基础单位会**先登记进单位字典**：量纲校验要求两侧都已登记，基础单位没进字典时
-   * 建换算会被显式拒绝（这正是 dimensionMismatchIsRejectedWithUnregisteredBaseUnit 覆盖的行为）。
+   * <p>基础单位会**先登记进单位字典**：量纲校验要求两侧都已登记，基础单位没进字典时 建换算会被显式拒绝（这正是
+   * dimensionMismatchIsRejectedWithUnregisteredBaseUnit 覆盖的行为）。
    *
-   * <p>基础单位同时决定量纲：baseUnit=件（COUNT）时千克不可换算；
-   * baseUnit=千克（WEIGHT）时同量纲单位可换算。
+   * <p>基础单位同时决定量纲：baseUnit=件（COUNT）时千克不可换算； baseUnit=千克（WEIGHT）时同量纲单位可换算。
    */
   Fixture fixture(String prefix, String baseUnit) {
     ensureUnit(baseUnit, "COUNT");
@@ -219,7 +219,8 @@ class UnitConversionIntegrationTest {
 
   /** 幂等登记单位：单位编码租户内唯一，多个用例共用「件」时只能建一次。 */
   void ensureUnit(String code, String dimension) {
-    boolean exists = tx(actor, () -> sql.fetchOne("select id from unit_of_measure where code=?", code) != null);
+    boolean exists =
+        tx(actor, () -> sql.fetchOne("select id from unit_of_measure where code=?", code) != null);
     if (!exists) saveUnit(code, code, dimension);
   }
 
@@ -229,20 +230,21 @@ class UnitConversionIntegrationTest {
   }
 
   UUID saveUnit(String code, String name, String dimension) {
-    return call(actor, "catalog.sku.update", () -> units.saveUnit(actor, null, unitInput(code, name, dimension, 0, true)))
+    return call(
+            actor,
+            "catalog.sku.update",
+            () -> units.saveUnit(actor, null, unitInput(code, name, dimension, 0, true)))
         .id();
   }
 
   UnitOfMeasureInput unitInput(
       String code, String name, String dimension, int scale, boolean enabled) {
-    return new UnitOfMeasureInput(
-        code, name, dimension, scale, true, true, true, enabled, 0);
+    return new UnitOfMeasureInput(code, name, dimension, scale, true, true, true, enabled, 0);
   }
 
   UnitOfMeasureInput unitInput(
       String code, String name, String dimension, int scale, boolean enabled, long version) {
-    return new UnitOfMeasureInput(
-        code, name, dimension, scale, true, true, true, enabled, version);
+    return new UnitOfMeasureInput(code, name, dimension, scale, true, true, true, enabled, version);
   }
 
   // ------------------------------------------------------------ 单位字典
@@ -254,12 +256,14 @@ class UnitConversionIntegrationTest {
         call(
             actor,
             "catalog.sku.update",
-            () ->
-                units.saveUnit(
-                    actor, null, unitInput(code, "箱", "PACKAGE", 0, true)));
+            () -> units.saveUnit(actor, null, unitInput(code, "箱", "PACKAGE", 0, true)));
     assertThat(saved.version()).isZero();
 
-    var listed = tx(actor, units::units).stream().filter(u -> u.id().equals(saved.id())).findFirst().orElseThrow();
+    var listed =
+        tx(actor, units::units).stream()
+            .filter(u -> u.id().equals(saved.id()))
+            .findFirst()
+            .orElseThrow();
     assertThat(listed.code()).isEqualTo(code);
     assertThat(listed.name()).isEqualTo("箱");
     assertThat(listed.dimensionLabel()).isEqualTo("包装");
@@ -272,7 +276,12 @@ class UnitConversionIntegrationTest {
             "catalog.sku.update",
             () -> units.saveUnit(actor, saved.id(), unitInput(code, "外箱", "PACKAGE", 2, true, 0)));
     assertThat(updated.version()).isEqualTo(1);
-    assertThat(tx(actor, units::units).stream().filter(u -> u.id().equals(saved.id())).findFirst().orElseThrow().name())
+    assertThat(
+            tx(actor, units::units).stream()
+                .filter(u -> u.id().equals(saved.id()))
+                .findFirst()
+                .orElseThrow()
+                .name())
         .isEqualTo("外箱");
 
     // 旧 version → 409
@@ -281,9 +290,12 @@ class UnitConversionIntegrationTest {
                 call(
                     actor,
                     "catalog.sku.update",
-                    () -> units.saveUnit(actor, saved.id(), unitInput(code, "再改", "PACKAGE", 2, true, 0))))
+                    () ->
+                        units.saveUnit(
+                            actor, saved.id(), unitInput(code, "再改", "PACKAGE", 2, true, 0))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
   }
 
   @Test
@@ -291,7 +303,11 @@ class UnitConversionIntegrationTest {
     String code = uniqueCode("件");
     saveUnit(code, "件", "COUNT");
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.update", () -> units.saveUnit(actor, null, unitInput(code, "件", "COUNT", 0, true))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () -> units.saveUnit(actor, null, unitInput(code, "件", "COUNT", 0, true))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("已存在");
     // 中文单位码合法：真实数据里就是 '件' / '箱'。
@@ -304,26 +320,52 @@ class UnitConversionIntegrationTest {
     UUID id = saveUnit(code, "千克", "WEIGHT");
     // 换算行与快照按编码引用单位，改码会让它们指向不存在的定义。
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.update", () -> units.saveUnit(actor, id, unitInput(code + "X", "千克", "WEIGHT", 0, true, 0))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        units.saveUnit(
+                            actor, id, unitInput(code + "X", "千克", "WEIGHT", 0, true, 0))))
         .hasMessageContaining("单位编码建后不可修改");
     // 改量纲会让既有换算在守卫触发器下次写入时突然报量纲不匹配。
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.update", () -> units.saveUnit(actor, id, unitInput(code, "千克", "VOLUME", 0, true, 0))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () -> units.saveUnit(actor, id, unitInput(code, "千克", "VOLUME", 0, true, 0))))
         .hasMessageContaining("量纲建后不可修改");
   }
 
   @Test
   void unitRejectsUnknownDimensionAndIllegalCode() {
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.update", () -> units.saveUnit(actor, null, unitInput(uniqueCode("X"), "怪", "MASS", 0, true))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        units.saveUnit(
+                            actor, null, unitInput(uniqueCode("X"), "怪", "MASS", 0, true))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("量纲只能是");
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.update", () -> units.saveUnit(actor, null, unitInput("件 件", "空格", "COUNT", 0, true))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () -> units.saveUnit(actor, null, unitInput("件 件", "空格", "COUNT", 0, true))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("只能使用");
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.update", () -> units.saveUnit(actor, null, unitInput(uniqueCode("Y"), "精度", "COUNT", 9, true))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        units.saveUnit(
+                            actor, null, unitInput(uniqueCode("Y"), "精度", "COUNT", 9, true))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("0~6");
   }
@@ -337,10 +379,23 @@ class UnitConversionIntegrationTest {
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("12"), "2024-01-01", null)));
-    var row = tx(actor, () -> sql.fetchOne("select id,version from unit_of_measure where code=?", box));
+        () ->
+            units.addConversion(
+                actor,
+                f.skuId(),
+                new UnitConversionInput(
+                    box, "PURCHASE", new BigDecimal("12"), "2024-01-01", null)));
+    var row =
+        tx(actor, () -> sql.fetchOne("select id,version from unit_of_measure where code=?", box));
     // 被换算引用时不能删：应提示停用。
-    assertThatThrownBy(() -> run(actor, "catalog.sku.update", () -> units.deleteUnit(actor, row.get("id", UUID.class), row.get("version", Long.class))))
+    assertThatThrownBy(
+            () ->
+                run(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        units.deleteUnit(
+                            actor, row.get("id", UUID.class), row.get("version", Long.class))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不能删除")
         .hasMessageContaining("停用");
@@ -356,25 +411,57 @@ class UnitConversionIntegrationTest {
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("10"), "2018-01-01", "2023-12-31")));
+        () ->
+            units.addConversion(
+                actor,
+                f.skuId(),
+                new UnitConversionInput(
+                    box, "PURCHASE", new BigDecimal("10"), "2018-01-01", "2023-12-31")));
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("12"), "2024-01-01", null)));
+        () ->
+            units.addConversion(
+                actor,
+                f.skuId(),
+                new UnitConversionInput(
+                    box, "PURCHASE", new BigDecimal("12"), "2024-01-01", null)));
 
     // 2023 走 10，2024 走 12：同一时刻只有一个版本生效。
-    var in2023 = tx(actor, () -> units.convert(new UnitConvertInput(f.skuId(), new BigDecimal("2"), box, "PURCHASE", "2023-06-01")));
+    var in2023 =
+        tx(
+            actor,
+            () ->
+                units.convert(
+                    new UnitConvertInput(
+                        f.skuId(), new BigDecimal("2"), box, "PURCHASE", "2023-06-01")));
     assertThat(in2023.quantityPerBase()).isEqualByComparingTo("10");
     assertThat(in2023.baseQuantity()).isEqualByComparingTo("20.000000");
-    var in2024 = tx(actor, () -> units.convert(new UnitConvertInput(f.skuId(), new BigDecimal("2"), box, "PURCHASE", "2024-06-01")));
+    var in2024 =
+        tx(
+            actor,
+            () ->
+                units.convert(
+                    new UnitConvertInput(
+                        f.skuId(), new BigDecimal("2"), box, "PURCHASE", "2024-06-01")));
     assertThat(in2024.quantityPerBase()).isEqualByComparingTo("12");
     assertThat(in2024.baseQuantity()).isEqualByComparingTo("24.000000");
 
     // 区间重叠 → 409 并列出冲突区间
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.update", () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("15"), "2024-06-01", null))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        units.addConversion(
+                            actor,
+                            f.skuId(),
+                            new UnitConversionInput(
+                                box, "PURCHASE", new BigDecimal("15"), "2024-06-01", null))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409))
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409))
         .hasMessageContaining("重叠");
   }
 
@@ -386,11 +473,22 @@ class UnitConversionIntegrationTest {
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("10"), "2024-01-01", "2024-12-31")));
+        () ->
+            units.addConversion(
+                actor,
+                f.skuId(),
+                new UnitConversionInput(
+                    box, "PURCHASE", new BigDecimal("10"), "2024-01-01", "2024-12-31")));
     // 2023 无生效版本：必须报错，不回退到"最近的一版"——
     // 静默回退会让一张按过期比例生成的采购单看起来完全正常。
     assertThatThrownBy(
-            () -> tx(actor, () -> units.convert(new UnitConvertInput(f.skuId(), new BigDecimal("1"), box, "PURCHASE", "2023-06-01"))))
+            () ->
+                tx(
+                    actor,
+                    () ->
+                        units.convert(
+                            new UnitConvertInput(
+                                f.skuId(), new BigDecimal("1"), box, "PURCHASE", "2023-06-01"))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("没有生效的");
   }
@@ -402,7 +500,16 @@ class UnitConversionIntegrationTest {
     String kg = uniqueCode("KG");
     saveUnit(kg, "千克", "WEIGHT");
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.update", () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(kg, "PURCHASE", new BigDecimal("2"), "2024-01-01", null))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        units.addConversion(
+                            actor,
+                            f.skuId(),
+                            new UnitConversionInput(
+                                kg, "PURCHASE", new BigDecimal("2"), "2024-01-01", null))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("量纲不匹配");
   }
@@ -415,7 +522,16 @@ class UnitConversionIntegrationTest {
     String box = uniqueCode("BOX");
     saveUnit(box, "箱", "COUNT");
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.update", () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("2"), "2024-01-01", null))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        units.addConversion(
+                            actor,
+                            f.skuId(),
+                            new UnitConversionInput(
+                                box, "PURCHASE", new BigDecimal("2"), "2024-01-01", null))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("尚未登记到单位字典");
   }
@@ -426,14 +542,35 @@ class UnitConversionIntegrationTest {
     String ghost = uniqueCode("GHOST");
     // 未登记的单位不能建换算：量纲无从校验。
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.update", () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(ghost, "PURCHASE", new BigDecimal("2"), "2024-01-01", null))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        units.addConversion(
+                            actor,
+                            f.skuId(),
+                            new UnitConversionInput(
+                                ghost, "PURCHASE", new BigDecimal("2"), "2024-01-01", null))))
         .hasMessageContaining("尚未登记");
     // 停用单位也不能新建换算。
     String box = uniqueCode("BOX");
     UUID id = saveUnit(box, "箱", "COUNT");
-    call(actor, "catalog.sku.update", () -> units.saveUnit(actor, id, unitInput(box, "箱", "COUNT", 0, false, 0)));
+    call(
+        actor,
+        "catalog.sku.update",
+        () -> units.saveUnit(actor, id, unitInput(box, "箱", "COUNT", 0, false, 0)));
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.update", () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("2"), "2024-01-01", null))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        units.addConversion(
+                            actor,
+                            f.skuId(),
+                            new UnitConversionInput(
+                                box, "PURCHASE", new BigDecimal("2"), "2024-01-01", null))))
         .hasMessageContaining("已停用");
   }
 
@@ -441,18 +578,41 @@ class UnitConversionIntegrationTest {
   void baseUnitItselfCannotHaveAConversionRow() {
     var f = fixture("BASE", "件");
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.update", () -> units.addConversion(actor, f.skuId(), new UnitConversionInput("件", "PURCHASE", new BigDecimal("1"), "2024-01-01", null))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        units.addConversion(
+                            actor,
+                            f.skuId(),
+                            new UnitConversionInput(
+                                "件", "PURCHASE", new BigDecimal("1"), "2024-01-01", null))))
         .hasMessageContaining("不需要换算行");
     // BASE 角色也不该占换算行。
     assertThatThrownBy(
-            () -> call(actor, "catalog.sku.update", () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(uniqueCode("X"), "BASE", new BigDecimal("1"), "2024-01-01", null))))
+            () ->
+                call(
+                    actor,
+                    "catalog.sku.update",
+                    () ->
+                        units.addConversion(
+                            actor,
+                            f.skuId(),
+                            new UnitConversionInput(
+                                uniqueCode("X"), "BASE", new BigDecimal("1"), "2024-01-01", null))))
         .hasMessageContaining("换算角色");
   }
 
   @Test
   void baseUnitConvertUsesRatioOneWithoutConversionRow() {
     var f = fixture("R1", "件");
-    var result = tx(actor, () -> units.convert(new UnitConvertInput(f.skuId(), new BigDecimal("7"), "件", null, null)));
+    var result =
+        tx(
+            actor,
+            () ->
+                units.convert(
+                    new UnitConvertInput(f.skuId(), new BigDecimal("7"), "件", null, null)));
     assertThat(result.role()).isEqualTo("BASE");
     assertThat(result.quantityPerBase()).isEqualByComparingTo("1");
     assertThat(result.baseQuantity()).isEqualByComparingTo("7");
@@ -470,7 +630,12 @@ class UnitConversionIntegrationTest {
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("10"), "2024-01-01", "2025-12-31")));
+        () ->
+            units.addConversion(
+                actor,
+                f.skuId(),
+                new UnitConversionInput(
+                    box, "PURCHASE", new BigDecimal("10"), "2024-01-01", "2025-12-31")));
     // 生成一张业务时间为 2024-06-01 的采购单，冻结当时比例 10。
     // 冻结取的是**单据业务时间**命中的版本，不是「今天」的那一版。
     var snapshot =
@@ -484,7 +649,9 @@ class UnitConversionIntegrationTest {
                         "PURCHASE",
                         "PO-" + UUID.randomUUID().toString().substring(0, 8),
                         "2024-06-01T08:30:00Z",
-                        List.of(new UnitSnapshotLineInput(1, f.skuId(), box, "PURCHASE", new BigDecimal("3"))))));
+                        List.of(
+                            new UnitSnapshotLineInput(
+                                1, f.skuId(), box, "PURCHASE", new BigDecimal("3"))))));
     assertThat(snapshot.createdCount()).isEqualTo(1);
     var line = snapshot.lines().get(0);
     assertThat(line.quantityPerBase()).isEqualByComparingTo("10");
@@ -495,7 +662,12 @@ class UnitConversionIntegrationTest {
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("20"), "2026-01-01", null)));
+        () ->
+            units.addConversion(
+                actor,
+                f.skuId(),
+                new UnitConversionInput(
+                    box, "PURCHASE", new BigDecimal("20"), "2026-01-01", null)));
 
     // 已冻结的单据不受影响：比例与结果都还在快照行上。
     var reread = tx(actor, () -> units.snapshot(snapshot.documentRef(), "PURCHASE"));
@@ -503,10 +675,22 @@ class UnitConversionIntegrationTest {
     assertThat(frozen.quantityPerBase()).isEqualByComparingTo("10");
     assertThat(frozen.baseQuantity()).isEqualByComparingTo("30.000000");
     // 同一张单据按业务时间重算，命中���是 10 而不是新版的 20。
-    var historical = tx(actor, () -> units.convert(new UnitConvertInput(f.skuId(), new BigDecimal("3"), box, "PURCHASE", "2024-06-01")));
+    var historical =
+        tx(
+            actor,
+            () ->
+                units.convert(
+                    new UnitConvertInput(
+                        f.skuId(), new BigDecimal("3"), box, "PURCHASE", "2024-06-01")));
     assertThat(historical.quantityPerBase()).isEqualByComparingTo("10");
     // 而 2026 的新单据走新比例。
-    var newResult = tx(actor, () -> units.convert(new UnitConvertInput(f.skuId(), new BigDecimal("3"), box, "PURCHASE", "2026-06-01")));
+    var newResult =
+        tx(
+            actor,
+            () ->
+                units.convert(
+                    new UnitConvertInput(
+                        f.skuId(), new BigDecimal("3"), box, "PURCHASE", "2026-06-01")));
     assertThat(newResult.quantityPerBase()).isEqualByComparingTo("20");
     assertThat(newResult.baseQuantity()).isEqualByComparingTo("60.000000");
   }
@@ -519,7 +703,12 @@ class UnitConversionIntegrationTest {
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("10"), "2024-01-01", null)));
+        () ->
+            units.addConversion(
+                actor,
+                f.skuId(),
+                new UnitConversionInput(
+                    box, "PURCHASE", new BigDecimal("10"), "2024-01-01", null)));
     var snapshot =
         call(
             actor,
@@ -531,7 +720,9 @@ class UnitConversionIntegrationTest {
                         "PURCHASE",
                         "PO-" + UUID.randomUUID().toString().substring(0, 8),
                         "2024-06-01T08:30:00Z",
-                        List.of(new UnitSnapshotLineInput(1, f.skuId(), box, "PURCHASE", new BigDecimal("2"))))));
+                        List.of(
+                            new UnitSnapshotLineInput(
+                                1, f.skuId(), box, "PURCHASE", new BigDecimal("2"))))));
     // 快照不可变由**两层**独立保证，两层都要断言：
     //   1) GRANT：运行时角色 catalog_app 只有 SELECT/INSERT，没有 UPDATE/DELETE ——
     //      权限层先挡下，驱动报 permission denied。
@@ -564,7 +755,8 @@ class UnitConversionIntegrationTest {
     var owner = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
     try {
       var statement =
-          owner.prepareStatement("update sku_unit_conversion_snapshot set quantity_per_base=999 where id=?");
+          owner.prepareStatement(
+              "update sku_unit_conversion_snapshot set quantity_per_base=999 where id=?");
       statement.setObject(1, snapshot.id());
       assertThatThrownBy(statement::executeUpdate)
           .isInstanceOf(java.sql.SQLException.class)
@@ -574,8 +766,13 @@ class UnitConversionIntegrationTest {
     }
     // 比例确实没被改掉。
     var stillTen =
-        tx(actor, () -> sql.fetchOne("select quantity_per_base from sku_unit_conversion_snapshot where id=?", snapshot.id())
-            .get("quantity_per_base", BigDecimal.class));
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                        "select quantity_per_base from sku_unit_conversion_snapshot where id=?",
+                        snapshot.id())
+                    .get("quantity_per_base", BigDecimal.class));
     assertThat(stillTen).isEqualByComparingTo("10.000000");
   }
 
@@ -587,19 +784,35 @@ class UnitConversionIntegrationTest {
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("10"), "2024-01-01", null)));
+        () ->
+            units.addConversion(
+                actor,
+                f.skuId(),
+                new UnitConversionInput(
+                    box, "PURCHASE", new BigDecimal("10"), "2024-01-01", null)));
     String ref = "PO-" + UUID.randomUUID().toString().substring(0, 8);
     var input =
         new UnitSnapshotInput(
-            "PURCHASE", ref, null, List.of(new UnitSnapshotLineInput(1, f.skuId(), box, "PURCHASE", new BigDecimal("2"))));
+            "PURCHASE",
+            ref,
+            null,
+            List.of(new UnitSnapshotLineInput(1, f.skuId(), box, "PURCHASE", new BigDecimal("2"))));
     var first = call(actor, "catalog.sku.update", () -> units.freeze(actor, input));
     assertThat(first.createdCount()).isEqualTo(1);
     // 重跑生成：命中已有行，返回原行，不重复计数。
     var second = call(actor, "catalog.sku.update", () -> units.freeze(actor, input));
     assertThat(second.createdCount()).isZero();
     assertThat(second.reusedCount()).isEqualTo(1);
-    assertThat(second.lines().get(0).baseQuantity()).isEqualByComparingTo(first.lines().get(0).baseQuantity());
-    long count = tx(actor, () -> sql.fetchOne("select count(*) from sku_unit_conversion_snapshot where document_ref=?", ref).get(0, Long.class));
+    assertThat(second.lines().get(0).baseQuantity())
+        .isEqualByComparingTo(first.lines().get(0).baseQuantity());
+    long count =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                        "select count(*) from sku_unit_conversion_snapshot where document_ref=?",
+                        ref)
+                    .get(0, Long.class));
     assertThat(count).isEqualTo(1);
   }
 
@@ -611,7 +824,12 @@ class UnitConversionIntegrationTest {
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("10"), "2024-01-01", "2024-12-31")));
+        () ->
+            units.addConversion(
+                actor,
+                f.skuId(),
+                new UnitConversionInput(
+                    box, "PURCHASE", new BigDecimal("10"), "2024-01-01", "2024-12-31")));
     String ref = "PO-" + UUID.randomUUID().toString().substring(0, 8);
     String other = uniqueCode("OTHER");
     // 第二行的单位没有任何换算版本 → 整单拒绝，避免半张单据冻结了比例。
@@ -630,11 +848,20 @@ class UnitConversionIntegrationTest {
                                 // 而第二行的单位没有任何版本 → 整单拒绝。
                                 "2024-06-01T08:30:00Z",
                                 List.of(
-                                    new UnitSnapshotLineInput(1, f.skuId(), box, "PURCHASE", new BigDecimal("2")),
-                                    new UnitSnapshotLineInput(2, f.skuId(), other, "PURCHASE", new BigDecimal("2")))))))
+                                    new UnitSnapshotLineInput(
+                                        1, f.skuId(), box, "PURCHASE", new BigDecimal("2")),
+                                    new UnitSnapshotLineInput(
+                                        2, f.skuId(), other, "PURCHASE", new BigDecimal("2")))))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("没有生效的");
-    long count = tx(actor, () -> sql.fetchOne("select count(*) from sku_unit_conversion_snapshot where document_ref=?", ref).get(0, Long.class));
+    long count =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                        "select count(*) from sku_unit_conversion_snapshot where document_ref=?",
+                        ref)
+                    .get(0, Long.class));
     assertThat(count).isZero();
   }
 
@@ -646,7 +873,12 @@ class UnitConversionIntegrationTest {
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("10"), "2024-01-01", null)));
+        () ->
+            units.addConversion(
+                actor,
+                f.skuId(),
+                new UnitConversionInput(
+                    box, "PURCHASE", new BigDecimal("10"), "2024-01-01", null)));
     String occurredAt = "2024-06-01T08:30:00Z";
     call(
         actor,
@@ -658,7 +890,9 @@ class UnitConversionIntegrationTest {
                     "PURCHASE",
                     "PO-" + UUID.randomUUID().toString().substring(0, 8),
                     occurredAt,
-                    List.of(new UnitSnapshotLineInput(1, f.skuId(), box, "PURCHASE", new BigDecimal("2"))))));
+                    List.of(
+                        new UnitSnapshotLineInput(
+                            1, f.skuId(), box, "PURCHASE", new BigDecimal("2"))))));
     // 业务时间写回必须精确等于传入的 ISO 串（timestamptz 不被时区偏移改写）。
     var readBack =
         tx(
@@ -690,15 +924,26 @@ class UnitConversionIntegrationTest {
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("10"), "2018-01-01", "2023-12-31")));
+        () ->
+            units.addConversion(
+                actor,
+                f.skuId(),
+                new UnitConversionInput(
+                    box, "PURCHASE", new BigDecimal("10"), "2018-01-01", "2023-12-31")));
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("12"), "2024-01-01", null)));
+        () ->
+            units.addConversion(
+                actor,
+                f.skuId(),
+                new UnitConversionInput(
+                    box, "PURCHASE", new BigDecimal("12"), "2024-01-01", null)));
     var panel = tx(actor, () -> units.panel(f.skuId()));
     assertThat(panel.baseUnit()).isEqualTo("件");
     assertThat(panel.baseUnitRegistered()).isTrue();
-    var group = panel.groups().stream().filter(g -> g.unitCode().equals(box)).findFirst().orElseThrow();
+    var group =
+        panel.groups().stream().filter(g -> g.unitCode().equals(box)).findFirst().orElseThrow();
     // 同一单位同一角色的版本聚成一组，而不是平铺成长列表。
     assertThat(group.versions()).hasSize(2);
     // 版本按生效起始日倒序，当前生效的是 2024 版。
@@ -716,7 +961,12 @@ class UnitConversionIntegrationTest {
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, f.skuId(), new UnitConversionInput(box, "PURCHASE", new BigDecimal("10"), "2024-01-01", null)));
+        () ->
+            units.addConversion(
+                actor,
+                f.skuId(),
+                new UnitConversionInput(
+                    box, "PURCHASE", new BigDecimal("10"), "2024-01-01", null)));
     // 造一个基础单位未登记的 SKU：治理缺口指标必须把它算进去。
     fixtureWithUnregisteredBase("OV-ORPHAN", uniqueCode("孤儿"));
     var overview = tx(actor, units::overview);
@@ -738,8 +988,18 @@ class UnitConversionIntegrationTest {
     call(
         actor,
         "catalog.sku.update",
-        () -> units.addConversion(actor, mine.skuId(), new UnitConversionInput(myBox, "PURCHASE", new BigDecimal("12"), "2024-01-01", null)));
-    UUID myUnitId = tx(actor, () -> sql.fetchOne("select id from unit_of_measure where code=?", myBox).get("id", UUID.class));
+        () ->
+            units.addConversion(
+                actor,
+                mine.skuId(),
+                new UnitConversionInput(
+                    myBox, "PURCHASE", new BigDecimal("12"), "2024-01-01", null)));
+    UUID myUnitId =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne("select id from unit_of_measure where code=?", myBox)
+                    .get("id", UUID.class));
 
     // B 租户造自己的数据（它的单位字典与 A 租户完全隔离）
     access.run(
@@ -759,9 +1019,32 @@ class UnitConversionIntegrationTest {
         actorB,
         "catalog.sku.create",
         () -> {
-          UUID spu = catalog.saveSpu(actorB, null, new SpuInput("ISO-B-" + UUID.randomUUID().toString().substring(0, 8), "B 租户商品", "", "品牌", "家居", "DRAFT", 0));
+          UUID spu =
+              catalog.saveSpu(
+                  actorB,
+                  null,
+                  new SpuInput(
+                      "ISO-B-" + UUID.randomUUID().toString().substring(0, 8),
+                      "B 租户商品",
+                      "",
+                      "品牌",
+                      "家居",
+                      "DRAFT",
+                      0));
           long version = catalog.detail(spu).product().version();
-          UUID sku = catalog.saveSku(actorB, spu, null, new SkuInput("ISO-B-" + UUID.randomUUID().toString().substring(0, 8), "B SKU", "", "件", "ACTIVE", List.of(), version));
+          UUID sku =
+              catalog.saveSku(
+                  actorB,
+                  spu,
+                  null,
+                  new SkuInput(
+                      "ISO-B-" + UUID.randomUUID().toString().substring(0, 8),
+                      "B SKU",
+                      "",
+                      "件",
+                      "ACTIVE",
+                      List.of(),
+                      version));
           theirs[0] = sku;
           return null;
         });
@@ -773,13 +1056,34 @@ class UnitConversionIntegrationTest {
     // B 看不到 A 的 SKU 面板
     assertThatThrownBy(() -> tx(actorB, () -> units.panel(mine.skuId())))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     // B 拿 A 的 SKU 去建换算 → 404
     assertThatThrownBy(
-            () -> call(actorB, "catalog.sku.update", () -> units.addConversion(actorB, mine.skuId(), new UnitConversionInput(myBox, "SALE", new BigDecimal("3"), "2024-01-01", null))))
+            () ->
+                call(
+                    actorB,
+                    "catalog.sku.update",
+                    () ->
+                        units.addConversion(
+                            actorB,
+                            mine.skuId(),
+                            new UnitConversionInput(
+                                myBox, "SALE", new BigDecimal("3"), "2024-01-01", null))))
         .isInstanceOf(ResponseStatusException.class);
     // B 拿 A 的 SKU 换算 → 404
-    assertThatThrownBy(() -> tx(actorB, () -> units.convert(new UnitConvertInput(mine.skuId(), new BigDecimal("1"), myBox, "PURCHASE", "2024-06-01"))))
+    assertThatThrownBy(
+            () ->
+                tx(
+                    actorB,
+                    () ->
+                        units.convert(
+                            new UnitConvertInput(
+                                mine.skuId(),
+                                new BigDecimal("1"),
+                                myBox,
+                                "PURCHASE",
+                                "2024-06-01"))))
         .isInstanceOf(ResponseStatusException.class);
     // A 的换算仍在
     assertThat(tx(actor, () -> units.panel(mine.skuId())).groups()).isNotEmpty();
@@ -801,7 +1105,8 @@ class UnitConversionIntegrationTest {
                 .header("Authorization", "Bearer tenant-b")
                 .header("X-Tenant-Id", a)
                 .contentType("application/json")
-                .content("{\"unitCode\":\"箱\",\"role\":\"SALE\",\"quantityPerBase\":3,\"effectiveFrom\":\"2024-01-01\"}"))
+                .content(
+                    "{\"unitCode\":\"箱\",\"role\":\"SALE\",\"quantityPerBase\":3,\"effectiveFrom\":\"2024-01-01\"}"))
         .andExpect(status().isNotFound());
 
     // 3) 连接池归还后不串租户（单连接反复交替）
@@ -820,7 +1125,10 @@ class UnitConversionIntegrationTest {
             post("/catalog/unit-conversion/units")
                 .header("Authorization", "Bearer reader")
                 .contentType("application/json")
-                .content("{\"code\":\"" + code + "\",\"name\":\"只读\",\"dimension\":\"COUNT\",\"scale\":0}"))
+                .content(
+                    "{\"code\":\""
+                        + code
+                        + "\",\"name\":\"只读\",\"dimension\":\"COUNT\",\"scale\":0}"))
         .andExpect(status().isForbidden());
   }
 

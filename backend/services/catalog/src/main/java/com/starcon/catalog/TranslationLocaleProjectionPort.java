@@ -6,19 +6,15 @@ import java.util.UUID;
 /**
  * 「店铺启用站点 → 需要哪些语言」的读取端口。
  *
- * <p>蓝图 3.4.3.1 把这条写成了硬要求：「**需要哪些语言由店铺启用站点推导，不靠人肉记忆。**」
- * 但站点是 <b>02 渠道</b>的事实（{@code shop} / {@code shop_marketplace} /
- * {@code marketplace.default_locale} 都在 channel 服务里），
- * catalog 禁止跨服务 SQL 访问（AGENTS.md 模块边界纪律）。
+ * <p>蓝图 3.4.3.1 把这条写成了硬要求：「**需要哪些语言由店铺启用站点推导，不靠人肉记忆。**」 但站点是 <b>02 渠道</b>的事实（{@code shop} / {@code
+ * shop_marketplace} / {@code marketplace.default_locale} 都在 channel 服务里）， catalog 禁止跨服务 SQL
+ * 访问（AGENTS.md 模块边界纪律）。
  *
- * <p>所以这里只定义端口：02 渠道落地后用真实适配器替换实现即可，
- * 推导语言清单的页面与合并视图无需改动。
+ * <p>所以这里只定义端口：02 渠道落地后用真实适配器替换实现即可， 推导语言清单的页面与合并视图无需改动。
  *
- * <p><b>未接入时取不到就是取不到。</b>{@link UnwiredTranslationLocaleProjectionPort} 显式声明未接入，
- * 接口返回 {@code available=false} 并写明归 02 渠道，而不是回 0 或空数组：
- * 回 0 会被读成「这个租户没有店铺站点所以没有语言需求」，
- * 空数组会被读成「不需要做多语言」——两者都是编造出来的事实，
- * 而错误的方向恰恰是本模块最危险的方向（让人以为不用做多语言）。
+ * <p><b>未接入时取不到就是取不到。</b>{@link UnwiredTranslationLocaleProjectionPort} 显式声明未接入， 接口返回 {@code
+ * available=false} 并写明归 02 渠道，而不是回 0 或空数组： 回 0 会被读成「这个租户没有店铺站点所以没有语言需求」，
+ * 空数组会被读成「不需要做多语言」——两者都是编造出来的事实， 而错误的方向恰恰是本模块最危险的方向（让人以为不用做多语言）。
  */
 public interface TranslationLocaleProjectionPort {
 
@@ -30,8 +26,7 @@ public interface TranslationLocaleProjectionPort {
    * @param shopCount 用到这种语言的**启用店铺数**（0 表示站点在用但没有启用店铺）
    * @param marketplaceCount 用到这种语言的**启用站点数**
    */
-  record DerivedLocale(
-      String locale, String localeName, int shopCount, int marketplaceCount) {}
+  record DerivedLocale(String locale, String localeName, int shopCount, int marketplaceCount) {}
 
   /**
    * 站点推导结果。

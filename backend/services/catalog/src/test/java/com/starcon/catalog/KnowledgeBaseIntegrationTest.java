@@ -28,29 +28,22 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 11.4.2.2 客服知识库与话术：真实落库往返、多语言版本、<b>平台规则版本挂钩与待复核自动生成</b>、
- * 引用记录 append-only、命中率口径，以及<b>租户隔离三断言</b>。
+ * 11.4.2.2 客服知识库与话术：真实落库往返、多语言版本、<b>平台规则版本挂钩与待复核自动生成</b>、 引用记录 append-only、命中率口径，以及<b>租户隔离三断言</b>。
  *
- * <p><b>真实 PostgreSQL 16 + 强制 RLS</b>：话术、译文、规则版本、挂钩、待复核任务、引用记录
- * 全部真的落库，不使用任何内存替身。连接池固定为 1 条连接：只有复用同一条连接，
- * 才能真正证明归还后不会串租户。
+ * <p><b>真实 PostgreSQL 16 + 强制 RLS</b>：话术、译文、规则版本、挂钩、待复核任务、引用记录 全部真的落库，不使用任何内存替身。连接池固定为 1
+ * 条连接：只有复用同一条连接， 才能真正证明归还后不会串租户。
  *
  * <p><b>本文件最重要的六个断言</b>：
  *
  * <ol>
  *   <li>{@link #规则版本被接替时自动给挂在它上面的话术生成待复核任务()}：蓝图点名的
- *       「<b>平台政策变化时能定位哪些话术需要更新</b>」的落地点。这里断言的是<b>自动</b>生成
- *       （只改一次 status，不调任何生成接口），且任务行带上了<b>是哪一版接替的它</b>。
- *   <li>{@link #命中率按启用话术条数算且被驳回不计入()}：规则 R2~R4 的字面兑现。
- *       分母只算启用的，被驳回与放弃引用都不计入分子。
- *   <li>{@link #多语言版本是真实表行而不是json挂一列()}：蓝图硬要求「多语言版本」
- *       必须能落地成真实表行 —— 直接查库数行数，不看接口返回。
- *   <li>{@link #引用记录appendOnly连直连SQL也改不动()}：命中率的全部可信度来自明细行
- *       是唯一真相，DB 层触发器 + REVOKE 双重兜底。
- *   <li>{@link #译文占位符与源语言不一致时被DB级触发器拒绝()}：绕过服务层直接插库也
- *       不许写出裸 {@code {buyer_name}}。
- *   <li>{@link #租户隔离三断言覆盖六张表()}：话术库最敏感的是<b>成本与承诺</b> ——
- *       A 读到 B 的退换货承诺会让 A 对买家做出自己没权限许的承诺。
+ *       「<b>平台政策变化时能定位哪些话术需要更新</b>」的落地点。这里断言的是<b>自动</b>生成 （只改一次
+ *       status，不调任何生成接口），且任务行带上了<b>是哪一版接替的它</b>。
+ *   <li>{@link #命中率按启用话术条数算且被驳回不计入()}：规则 R2~R4 的字面兑现。 分母只算启用的，被驳回与放弃引用都不计入分子。
+ *   <li>{@link #多语言版本是真实表行而不是json挂一列()}：蓝图硬要求「多语言版本」 必须能落地成真实表行 —— 直接查库数行数，不看接口返回。
+ *   <li>{@link #引用记录appendOnly连直连SQL也改不动()}：命中率的全部可信度来自明细行 是唯一真相，DB 层触发器 + REVOKE 双重兜底。
+ *   <li>{@link #译文占位符与源语言不一致时被DB级触发器拒绝()}：绕过服务层直接插库也 不许写出裸 {@code {buyer_name}}。
+ *   <li>{@link #租户隔离三断言覆盖六张表()}：话术库最敏感的是<b>成本与承诺</b> —— A 读到 B 的退换货承诺会让 A 对买家做出自己没权限许的承诺。
  * </ol>
  */
 @SpringBootTest
@@ -60,8 +53,10 @@ class KnowledgeBaseIntegrationTest {
   static final UUID a = UUID.randomUUID(), b = UUID.randomUUID(), user = UUID.randomUUID();
   static HttpServer identity;
   static final ObjectMapper JSON = new ObjectMapper();
-  static final Map<String, AccessService.Access> actors = new java.util.concurrent.ConcurrentHashMap<>();
+  static final Map<String, AccessService.Access> actors =
+      new java.util.concurrent.ConcurrentHashMap<>();
   static final AtomicInteger SEQ = new AtomicInteger();
+
   /** 素材域权限（catalog.assets 是 identity V3 的「素材与翻译」词表，本模块沿用不新造）。 */
   static final List<String> allPermissions =
       java.util.stream.Stream.of("assets")
@@ -74,8 +69,13 @@ class KnowledgeBaseIntegrationTest {
   static AccessService.Access actor(
       UUID uid, UUID tenant, UUID dept, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), dept,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        dept,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -175,8 +175,8 @@ class KnowledgeBaseIntegrationTest {
   KnowledgeEntryInput entryInput(String code, String title, String type) {
     // **正文带一个占位符**：这样后面想加译文的用例可以直接复用这个夹具，
     // 译文里带上同一个占位符即可 —— 否则会撞上「译文多出占位符」的校验（那是预期的行为）。
-    return new KnowledgeEntryInput(code, title, type,
-        "您好 {buyer_name}，请在订单页提交退换货申请。", "zh-CN", "退,退货", true, 0L);
+    return new KnowledgeEntryInput(
+        code, title, type, "您好 {buyer_name}，请在订单页提交退换货申请。", "zh-CN", "退,退货", true, 0L);
   }
 
   UUID entry(AccessService.Access who, String prefix) {
@@ -191,8 +191,7 @@ class KnowledgeBaseIntegrationTest {
                 kb.createRuleVersion(
                     who,
                     new RuleVersionInput(
-                        "AMAZON", policyKey, label, "退货政策 " + label,
-                        "退货运费改为买家承担", from, null)))
+                        "AMAZON", policyKey, label, "退货政策 " + label, "退货运费改为买家承担", from, null)))
         .id();
   }
 
@@ -208,9 +207,7 @@ class KnowledgeBaseIntegrationTest {
     UUID oldRule = rule(actor, "AMAZON_RETURN_POLICY", "2026-01", at(1));
     UUID newRule = rule(actor, "AMAZON_RETURN_POLICY", "2026-03", at(3));
     // 话术挂到**旧版**规则上
-    write(
-        actor,
-        () -> kb.bindEntry(actor, entryId, new RuleBindingInput(oldRule, "自发货订单适用")));
+    write(actor, () -> kb.bindEntry(actor, entryId, new RuleBindingInput(oldRule, "自发货订单适用")));
 
     // 挂钩本身可查：这条话术依据哪一版政策
     assertThat(tx(actor, () -> kb.bindingsOf(entryId)))
@@ -230,8 +227,13 @@ class KnowledgeBaseIntegrationTest {
                 actor,
                 oldRule,
                 new RuleVersionInput(
-                    "AMAZON", "AMAZON_RETURN_POLICY", "2026-01",
-                    "退货政策 2026-01", "退货运费由卖家承担", at(1), null),
+                    "AMAZON",
+                    "AMAZON_RETURN_POLICY",
+                    "2026-01",
+                    "退货政策 2026-01",
+                    "退货运费由卖家承担",
+                    at(1),
+                    null),
                 "ACTIVE"));
 
     // 改**新版**为 ACTIVE：此刻旧版还生效中 → 必须 409（一个政策同时只能有一版生效）
@@ -244,8 +246,13 @@ class KnowledgeBaseIntegrationTest {
                             actor,
                             newRule,
                             new RuleVersionInput(
-                                "AMAZON", "AMAZON_RETURN_POLICY", "2026-03",
-                                "退货政策 2026-03", "退货运费改为买家承担", at(3), null),
+                                "AMAZON",
+                                "AMAZON_RETURN_POLICY",
+                                "2026-03",
+                                "退货政策 2026-03",
+                                "退货运费改为买家承担",
+                                at(3),
+                                null),
                             "ACTIVE")))
         .isInstanceOf(ResponseStatusException.class)
         .as("一个政策同时只能有一版生效，否则「这条话术依据的是哪版政策」无法回答");
@@ -258,16 +265,19 @@ class KnowledgeBaseIntegrationTest {
                 actor,
                 oldRule,
                 new RuleVersionInput(
-                    "AMAZON", "AMAZON_RETURN_POLICY", "2026-01",
-                    "退货政策 2026-01", "退货运费由卖家承担", at(1), null),
+                    "AMAZON",
+                    "AMAZON_RETURN_POLICY",
+                    "2026-01",
+                    "退货政策 2026-01",
+                    "退货运费由卖家承担",
+                    at(1),
+                    null),
                 "SUPERSEDED"));
 
     // 待复核任务**自动生成**，且带上了接替它的那一版
     var tasks = tx(actor, () -> kb.listReviewTasks(null, "PENDING", null, 0, 50));
-    var mine = tasks.items().stream()
-        .filter(t -> t.entryId().equals(entryId))
-        .findFirst()
-        .orElseThrow();
+    var mine =
+        tasks.items().stream().filter(t -> t.entryId().equals(entryId)).findFirst().orElseThrow();
     assertThat(mine.ruleVersionId()).isEqualTo(oldRule);
     assertThat(mine.supersedingRuleId()).isEqualTo(newRule);
     assertThat(mine.supersedingRuleLabel()).isEqualTo("2026-03");
@@ -282,9 +292,7 @@ class KnowledgeBaseIntegrationTest {
     UUID oldRule = rule(actor, "DUP_POLICY", "v1", at(1));
     UUID newRule = rule(actor, "DUP_POLICY", "v2", at(3));
     write(actor, () -> kb.bindEntry(actor, entryId, new RuleBindingInput(oldRule, "")));
-    var input =
-        new RuleVersionInput(
-            "AMAZON", "DUP_POLICY", "v1", "标题 v1", "变更说明", at(1), null);
+    var input = new RuleVersionInput("AMAZON", "DUP_POLICY", "v1", "标题 v1", "变更说明", at(1), null);
     write(actor, () -> kb.updateRuleVersion(actor, oldRule, input, "SUPERSEDED"));
     // 改回草稿再标记接替：UNIQUE(tenant,entry,rule_version) 保证不会多出第二条
     write(actor, () -> kb.updateRuleVersion(actor, oldRule, input, "DRAFT"));
@@ -333,8 +341,7 @@ class KnowledgeBaseIntegrationTest {
             kb.updateRuleVersion(
                 actor,
                 oldRule,
-                new RuleVersionInput(
-                    "AMAZON", "TRACE_POLICY", "v1", "标题", "改版说明", at(1), null),
+                new RuleVersionInput("AMAZON", "TRACE_POLICY", "v1", "标题", "改版说明", at(1), null),
                 "SUPERSEDED"));
     UUID taskId =
         tx(actor, () -> kb.listReviewTasks(null, "PENDING", null, 0, 50)).items().stream()
@@ -343,13 +350,18 @@ class KnowledgeBaseIntegrationTest {
             .orElseThrow()
             .id();
 
-    var claiming = write(actor, () -> kb.updateReviewTask(actor, taskId,
-        new ReviewTaskUpdateInput("REVIEWING", "我来看")));
+    var claiming =
+        write(
+            actor,
+            () ->
+                kb.updateReviewTask(actor, taskId, new ReviewTaskUpdateInput("REVIEWING", "我来看")));
     assertThat(claiming.reviewStatus()).isEqualTo("REVIEWING");
     assertThat(claiming.assignedTo()).isEqualTo(user.toString());
 
-    var done = write(actor, () -> kb.updateReviewTask(actor, taskId,
-        new ReviewTaskUpdateInput("DONE", "已按新规则改写")));
+    var done =
+        write(
+            actor,
+            () -> kb.updateReviewTask(actor, taskId, new ReviewTaskUpdateInput("DONE", "已按新规则改写")));
     assertThat(done.reviewStatus()).isEqualTo("DONE");
     assertThat(done.reviewedBy()).isEqualTo(user.toString());
     assertThat(done.reviewedAt()).isNotNull();
@@ -387,8 +399,10 @@ class KnowledgeBaseIntegrationTest {
     assertThat(tx(actor, () -> kb.reviewTaskRowPublic(taskId)).reviewStatus()).isEqualTo("DONE");
     assertThat(tx(actor, () -> kb.overview()).reviewDone()).isPositive();
     // 待办列表里再也查不到它
-    assertThat(tx(actor, () -> kb.listReviewTasks(null, "PENDING", null, 0, 200)).items().stream()
-            .map(ReviewTaskRow::id).toList())
+    assertThat(
+            tx(actor, () -> kb.listReviewTasks(null, "PENDING", null, 0, 200)).items().stream()
+                .map(ReviewTaskRow::id)
+                .toList())
         .doesNotContain(taskId);
   }
 
@@ -422,8 +436,12 @@ class KnowledgeBaseIntegrationTest {
                         entryId,
                         null,
                         new EntryTranslationInput(
-                            "zh-CN", "退货政策中文话术", "您好 {buyer_name}，订单 {order_no} 可在 30 天内退货。",
-                            "MANUAL", "REVIEWED", 0L)))
+                            "zh-CN",
+                            "退货政策中文话术",
+                            "您好 {buyer_name}，订单 {order_no} 可在 30 天内退货。",
+                            "MANUAL",
+                            "REVIEWED",
+                            0L)))
             .id();
     var ja =
         write(
@@ -434,20 +452,24 @@ class KnowledgeBaseIntegrationTest {
                         entryId,
                         null,
                         new EntryTranslationInput(
-                            "ja-JP", "退货政策日文话术", "{buyer_name} 様、{order_no} は 30 日以内にご返品いただけます。",
-                            "AI", "DRAFT", 0L)))
+                            "ja-JP",
+                            "退货政策日文话术",
+                            "{buyer_name} 様、{order_no} は 30 日以内にご返品いただけます。",
+                            "AI",
+                            "DRAFT",
+                            0L)))
             .id();
 
     // **直接查库数行数**：接口能返回数组不代表落成了行（挂一列 json 也能返回数组）
     long rows =
         tx(
-                actor,
-                () ->
-                    sql.fetchOne(
-                            "select count(*) from kb_entry_translation where tenant_id=? and entry_id=?",
-                            a,
-                            entryId)
-                        .get(0, Long.class));
+            actor,
+            () ->
+                sql.fetchOne(
+                        "select count(*) from kb_entry_translation where tenant_id=? and entry_id=?",
+                        a,
+                        entryId)
+                    .get(0, Long.class));
     assertThat(rows).isEqualTo(2);
     assertThat(tx(actor, () -> kb.translations(entryId)))
         .extracting(EntryTranslation::locale)
@@ -465,20 +487,33 @@ class KnowledgeBaseIntegrationTest {
         actor,
         () ->
             kb.saveTranslation(
-                actor, entryId, null,
+                actor,
+                entryId,
+                null,
                 new EntryTranslationInput(
                     "en-US", "t", "Hi {buyer_name}, your order ships today.", "AI", "DRAFT", 0L)));
-    var coverage = tx(actor, () -> kb.translationCoverage(entryId, List.of("zh-CN", "en-US", "de-DE")));
+    var coverage =
+        tx(actor, () -> kb.translationCoverage(entryId, List.of("zh-CN", "en-US", "de-DE")));
     assertThat(coverage.sourceLocale()).isEqualTo("zh-CN");
-    var en = coverage.locales().stream().filter(l -> l.locale().equals("en-US")).findFirst().orElseThrow();
+    var en =
+        coverage.locales().stream()
+            .filter(l -> l.locale().equals("en-US"))
+            .findFirst()
+            .orElseThrow();
     assertThat(en.translated()).isTrue();
     assertThat(en.reviewed()).isFalse();
-    assertThat(en.usable())
-        .as("AI 预填的草稿不能算「能直接发给买家」—— 占位符被改写是最典型的失败模式")
-        .isFalse();
-    var de = coverage.locales().stream().filter(l -> l.locale().equals("de-DE")).findFirst().orElseThrow();
+    assertThat(en.usable()).as("AI 预填的草稿不能算「能直接发给买家」—— 占位符被改写是最典型的失败模式").isFalse();
+    var de =
+        coverage.locales().stream()
+            .filter(l -> l.locale().equals("de-DE"))
+            .findFirst()
+            .orElseThrow();
     assertThat(de.translated()).isFalse();
-    var zh = coverage.locales().stream().filter(l -> l.locale().equals("zh-CN")).findFirst().orElseThrow();
+    var zh =
+        coverage.locales().stream()
+            .filter(l -> l.locale().equals("zh-CN"))
+            .findFirst()
+            .orElseThrow();
     assertThat(zh.usable()).as("源语言永远可用（直接用正文）").isTrue();
   }
 
@@ -511,7 +546,12 @@ class KnowledgeBaseIntegrationTest {
                             entryId,
                             null,
                             new EntryTranslationInput(
-                                "en-US", "t", "Hi buyer_name, your order is shipped.", "MANUAL", "DRAFT", 0L))))
+                                "en-US",
+                                "t",
+                                "Hi buyer_name, your order is shipped.",
+                                "MANUAL",
+                                "DRAFT",
+                                0L))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("order_no")
         .hasMessageContaining("漏抄");
@@ -525,8 +565,12 @@ class KnowledgeBaseIntegrationTest {
                             entryId,
                             null,
                             new EntryTranslationInput(
-                                "en-US", "t", "Hi {buyer_name}, order {order_no} track {tracking_no}.",
-                                "MANUAL", "DRAFT", 0L))))
+                                "en-US",
+                                "t",
+                                "Hi {buyer_name}, order {order_no} track {tracking_no}.",
+                                "MANUAL",
+                                "DRAFT",
+                                0L))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("tracking_no");
   }
@@ -559,8 +603,14 @@ class KnowledgeBaseIntegrationTest {
                         actor,
                         null,
                         new KnowledgeEntryInput(
-                            unique("KB-DBPH"), "触发器话术", "FAQ",
-                            "您好 {buyer_name}，订单 {order_no} 已发出。", "zh-CN", "", true, 0L)))
+                            unique("KB-DBPH"),
+                            "触发器话术",
+                            "FAQ",
+                            "您好 {buyer_name}，订单 {order_no} 已发出。",
+                            "zh-CN",
+                            "",
+                            true,
+                            0L)))
             .id();
     // **绕过服务层直接插库**：服务层的校验被漏掉时，DB 层仍不许写出裸占位符
     assertThatThrownBy(
@@ -577,11 +627,10 @@ class KnowledgeBaseIntegrationTest {
         .isInstanceOf(Exception.class);
     long rows =
         tx(
-                actor,
-                () ->
-                    sql.fetchOne(
-                            "select count(*) from kb_entry_translation where entry_id=?", entryId)
-                        .get(0, Long.class));
+            actor,
+            () ->
+                sql.fetchOne("select count(*) from kb_entry_translation where entry_id=?", entryId)
+                    .get(0, Long.class));
     assertThat(rows).isZero();
   }
 
@@ -595,15 +644,24 @@ class KnowledgeBaseIntegrationTest {
                         actor,
                         null,
                         new KnowledgeEntryInput(
-                            unique("KB-BODY"), "改正文", "FAQ",
-                            "您好 {buyer_name}，订单已发出。", "zh-CN", "", true, 0L)))
+                            unique("KB-BODY"),
+                            "改正文",
+                            "FAQ",
+                            "您好 {buyer_name}，订单已发出。",
+                            "zh-CN",
+                            "",
+                            true,
+                            0L)))
             .id();
     write(
         actor,
         () ->
             kb.saveTranslation(
-                actor, entryId, null,
-                new EntryTranslationInput("en-US", "t", "Hi {buyer_name}, shipped.", "MANUAL", "REVIEWED", 0L)));
+                actor,
+                entryId,
+                null,
+                new EntryTranslationInput(
+                    "en-US", "t", "Hi {buyer_name}, shipped.", "MANUAL", "REVIEWED", 0L)));
     // 改措辞没问题（占位符集合没变）
     assertThat(
             write(
@@ -613,8 +671,14 @@ class KnowledgeBaseIntegrationTest {
                             actor,
                             entryId,
                             new KnowledgeEntryInput(
-                                unique("KB-BODY"), "改正文", "FAQ",
-                                "您好 {buyer_name}，您的订单已发出。", "zh-CN", "", true, 0L)))
+                                unique("KB-BODY"),
+                                "改正文",
+                                "FAQ",
+                                "您好 {buyer_name}，您的订单已发出。",
+                                "zh-CN",
+                                "",
+                                true,
+                                0L)))
                 .id())
         .isEqualTo(entryId);
     // 但增删占位符会让已有译文失配 —— 必须在 DB 层拦下
@@ -637,8 +701,12 @@ class KnowledgeBaseIntegrationTest {
   @Test
   void 引用记录真的落库且页面上查得到() {
     UUID entryId = entry(actor, "KB-USAGE");
-    var used = write(actor, () -> kb.recordUsage(actor, entryId,
-        new UsageInput("RESOLVED", null, "conv-8899", "买家接受了")));
+    var used =
+        write(
+            actor,
+            () ->
+                kb.recordUsage(
+                    actor, entryId, new UsageInput("RESOLVED", null, "conv-8899", "买家接受了")));
     assertThat(used.countsAsHit()).isTrue();
     assertThat(used.outcomeLabel()).isEqualTo("一次解决");
     assertThat(used.agentId()).isEqualTo(user.toString());
@@ -646,8 +714,9 @@ class KnowledgeBaseIntegrationTest {
     // 直接查库确认行真的存在（不是内存计数）
     long rows =
         tx(
-                actor,
-                () -> sql.fetchOne("select count(*) from kb_usage where entry_id=?", entryId)
+            actor,
+            () ->
+                sql.fetchOne("select count(*) from kb_usage where entry_id=?", entryId)
                     .get(0, Long.class));
     assertThat(rows).isEqualTo(1);
 
@@ -664,12 +733,14 @@ class KnowledgeBaseIntegrationTest {
     UUID entryB = entry(actor, "KB-XB");
     var t =
         write(
-                actor,
-                () ->
-                    kb.saveTranslation(
-                        actor, entryB, null,
-                        new EntryTranslationInput(
-                            "en-US", "t", "Hi {buyer_name}, shipped.", "MANUAL", "DRAFT", 0L)));
+            actor,
+            () ->
+                kb.saveTranslation(
+                    actor,
+                    entryB,
+                    null,
+                    new EntryTranslationInput(
+                        "en-US", "t", "Hi {buyer_name}, shipped.", "MANUAL", "DRAFT", 0L)));
     // 否则「引用的是哪一版译文」会说谎（页面上的语言标签是别的条目的）
     assertThatThrownBy(
             () ->
@@ -689,8 +760,7 @@ class KnowledgeBaseIntegrationTest {
             () ->
                 write(
                     actor,
-                    () ->
-                        kb.recordUsage(actor, entryId, new UsageInput("WHATEVER", null, "", ""))))
+                    () -> kb.recordUsage(actor, entryId, new UsageInput("WHATEVER", null, "", ""))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("RESOLVED");
   }
@@ -698,8 +768,13 @@ class KnowledgeBaseIntegrationTest {
   @Test
   void 引用记录appendOnly连直连SQL也改不动() {
     UUID entryId = entry(actor, "KB-IMMUT");
-    UUID usageId = write(actor, () -> kb.recordUsage(actor, entryId,
-            new UsageInput("RESOLVED", null, "conv-immutable", ""))).id();
+    UUID usageId =
+        write(
+                actor,
+                () ->
+                    kb.recordUsage(
+                        actor, entryId, new UsageInput("RESOLVED", null, "conv-immutable", "")))
+            .id();
     // 触发器 + REVOKE 双重兜底：改一行 outcome 就等于把统计往想要的数字上掰
     assertThatThrownBy(
             () ->
@@ -745,8 +820,14 @@ class KnowledgeBaseIntegrationTest {
     // 排行榜默认按被引用次数倒序：被引用过的那条必须在没被用过的之前
     var rates = tx(actor, () -> kb.hitRates(null, 500));
     assertThat(rates).isNotEmpty();
-    long hitCount = rates.stream().filter(r -> r.entryId().equals(hit)).findFirst().orElseThrow().usageCount();
-    long neverCount = rates.stream().filter(r -> r.entryId().equals(never)).findFirst().orElseThrow().usageCount();
+    long hitCount =
+        rates.stream().filter(r -> r.entryId().equals(hit)).findFirst().orElseThrow().usageCount();
+    long neverCount =
+        rates.stream()
+            .filter(r -> r.entryId().equals(never))
+            .findFirst()
+            .orElseThrow()
+            .usageCount();
     assertThat(hitCount).isGreaterThan(neverCount);
     // 「最少被使用」排序把没用过的顶到最前
     assertThat(tx(actor, () -> kb.hitRates("LEAST_USED", 500)).get(0).usageCount()).isZero();
@@ -797,7 +878,13 @@ class KnowledgeBaseIntegrationTest {
                             actor,
                             entryId,
                             new KnowledgeEntryInput(
-                                unique("KB-LOCK"), "改名二", "FAQ", "正文", "zh-CN", "", true,
+                                unique("KB-LOCK"),
+                                "改名二",
+                                "FAQ",
+                                "正文",
+                                "zh-CN",
+                                "",
+                                true,
                                 current))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("他人改动");
@@ -835,7 +922,8 @@ class KnowledgeBaseIntegrationTest {
     UUID ruleId = rule(actor, "ONCE_POLICY", "v1", at(1));
     write(actor, () -> kb.bindEntry(actor, entryId, new RuleBindingInput(ruleId, "")));
     assertThatThrownBy(
-            () -> write(actor, () -> kb.bindEntry(actor, entryId, new RuleBindingInput(ruleId, ""))))
+            () ->
+                write(actor, () -> kb.bindEntry(actor, entryId, new RuleBindingInput(ruleId, ""))))
         .isInstanceOf(ResponseStatusException.class);
     assertThat(tx(actor, () -> kb.bindingsOf(entryId))).hasSize(1);
   }
@@ -843,9 +931,14 @@ class KnowledgeBaseIntegrationTest {
   @Test
   void 列表分页筛选与关键词都真的生效() {
     String code = unique("KB-SEARCH");
-    write(actor, () -> kb.saveEntry(actor, null,
-        new KnowledgeEntryInput(code, "可搜索的退换货话术", "RETURN_EX",
-            "换货需要买家承担来回运费。", "zh-CN", "换货", true, 0L)));
+    write(
+        actor,
+        () ->
+            kb.saveEntry(
+                actor,
+                null,
+                new KnowledgeEntryInput(
+                    code, "可搜索的退换货话术", "RETURN_EX", "换货需要买家承担来回运费。", "zh-CN", "换货", true, 0L)));
     // 关键词搜编码
     assertThat(tx(actor, () -> kb.listEntries(code, null, null, null, 0, 20)).total()).isEqualTo(1);
     // 关键词搜正文（不是只看标题）
@@ -867,13 +960,15 @@ class KnowledgeBaseIntegrationTest {
   @Test
   void 写端点对只有读权限的身份必须403() throws Exception {
     UUID entryId = entry(actor, "KB-PERM");
-    http.perform(post("/catalog/kb/entries")
-            .header("Authorization", "Bearer reader")
-            .contentType("application/json")
-            .content(JSON.writeValueAsString(entryInput(unique("KB-NO"), "越权创建", "FAQ"))))
+    http.perform(
+            post("/catalog/kb/entries")
+                .header("Authorization", "Bearer reader")
+                .contentType("application/json")
+                .content(JSON.writeValueAsString(entryInput(unique("KB-NO"), "越权创建", "FAQ"))))
         .andExpect(status().isForbidden());
-    http.perform(put("/catalog/kb/entries/" + entryId + "/enabled?enabled=false")
-            .header("Authorization", "Bearer reader"))
+    http.perform(
+            put("/catalog/kb/entries/" + entryId + "/enabled?enabled=false")
+                .header("Authorization", "Bearer reader"))
         .andExpect(status().isForbidden());
     // 读放行
     http.perform(get("/catalog/kb/entries").header("Authorization", "Bearer reader"))
@@ -906,8 +1001,7 @@ class KnowledgeBaseIntegrationTest {
   /**
    * 租户隔离三断言，<b>并且覆盖全部六张表</b>。
    *
-   * <p>只测话术条目等于没测：<b>规则版本与待复核任务才是本模块真正的越权面</b> ——
-   * A 读到 B 的「平台政策已改版、这些话术要复核」会让 A 按别的平台的规则改自己的话术，
+   * <p>只测话术条目等于没测：<b>规则版本与待复核任务才是本模块真正的越权面</b> —— A 读到 B 的「平台政策已改版、这些话术要复核」会让 A 按别的平台的规则改自己的话术，
    * 而这条错误在买家收到答复之前<b>不会以任何形式暴露</b>。
    */
   @Test
@@ -918,10 +1012,18 @@ class KnowledgeBaseIntegrationTest {
     UUID theirRule = rule(actorB, "ISO_POLICY", "v1", at(1));
     write(actor, () -> kb.bindEntry(actor, myEntry, new RuleBindingInput(myRule, "")));
     write(actorB, () -> kb.bindEntry(actorB, theirEntry, new RuleBindingInput(theirRule, "")));
-    UUID myUsage = write(actor, () -> kb.recordUsage(actor, myEntry,
-        new UsageInput("RESOLVED", null, "iso-a", ""))).id();
-    UUID theirUsage = write(actorB, () -> kb.recordUsage(actorB, theirEntry,
-        new UsageInput("RESOLVED", null, "iso-b", ""))).id();
+    UUID myUsage =
+        write(
+                actor,
+                () -> kb.recordUsage(actor, myEntry, new UsageInput("RESOLVED", null, "iso-a", "")))
+            .id();
+    UUID theirUsage =
+        write(
+                actorB,
+                () ->
+                    kb.recordUsage(
+                        actorB, theirEntry, new UsageInput("RESOLVED", null, "iso-b", "")))
+            .id();
 
     // 两边都必须真的有行 —— 否则下面的断言就是空的
     assertThat(tx(actor, () -> kb.detail(myEntry)).id()).isEqualTo(myEntry);
@@ -939,7 +1041,9 @@ class KnowledgeBaseIntegrationTest {
         .isInstanceOf(ResponseStatusException.class);
     // A 不能把话术挂到 B 的规则上
     assertThatThrownBy(
-            () -> write(actor, () -> kb.bindEntry(actor, myEntry, new RuleBindingInput(theirRule, ""))))
+            () ->
+                write(
+                    actor, () -> kb.bindEntry(actor, myEntry, new RuleBindingInput(theirRule, ""))))
         .isInstanceOf(ResponseStatusException.class);
     // A 不能删除或修改 B 的规则版本
     assertThatThrownBy(
@@ -948,54 +1052,83 @@ class KnowledgeBaseIntegrationTest {
                     actor,
                     () ->
                         kb.updateRuleVersion(
-                            actor, theirRule,
+                            actor,
+                            theirRule,
                             new RuleVersionInput(
                                 "AMAZON", "ISO_POLICY", "v1", "改了", "x", at(1), null),
                             "SUPERSEDED")))
         .isInstanceOf(ResponseStatusException.class);
     // A 不能删除 B 的话术
     long theirVersion = tx(actorB, () -> kb.detail(theirEntry)).version();
-    assertThatThrownBy(() -> writeVoid(actor, () -> kb.deleteEntry(actor, theirEntry, theirVersion)))
+    assertThatThrownBy(
+            () -> writeVoid(actor, () -> kb.deleteEntry(actor, theirEntry, theirVersion)))
         .isInstanceOf(ResponseStatusException.class);
     // 引用记录行也读不到对方的（直接查库）
-    assertThat(tx(actor, () -> sql.fetchOne(
-            "select count(*) from kb_usage where tenant_id=? and id=?", a, theirUsage))
-        .get(0, Long.class)).isZero();
+    assertThat(
+            tx(
+                    actor,
+                    () ->
+                        sql.fetchOne(
+                            "select count(*) from kb_usage where tenant_id=? and id=?",
+                            a,
+                            theirUsage))
+                .get(0, Long.class))
+        .isZero();
 
     // 2) 伪造 X-Tenant-Id 头无效：租户只来自已认证成员关系
-    http.perform(get("/catalog/kb/entries/" + theirEntry)
-            .header("Authorization", "Bearer tenant-a").header("X-Tenant-Id", b))
+    http.perform(
+            get("/catalog/kb/entries/" + theirEntry)
+                .header("Authorization", "Bearer tenant-a")
+                .header("X-Tenant-Id", b))
         .andExpect(status().isNotFound());
-    http.perform(get("/catalog/kb/entries/" + myEntry)
-            .header("Authorization", "Bearer tenant-b").header("X-Tenant-Id", a))
+    http.perform(
+            get("/catalog/kb/entries/" + myEntry)
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a))
         .andExpect(status().isNotFound());
     // 伪造头下写入仍落在 B 自己名下 —— 断言**行确实落在 B 名下**，不只断言 A 看不见
-    UUID forged = write(actorB, () -> kb.recordUsage(actorB, theirEntry,
-        new UsageInput("RESOLVED", null, "iso-forged", ""))).id();
+    UUID forged =
+        write(
+                actorB,
+                () ->
+                    kb.recordUsage(
+                        actorB, theirEntry, new UsageInput("RESOLVED", null, "iso-forged", "")))
+            .id();
     assertThatThrownBy(() -> tx(actor, () -> kb.usageRowPublic(forged)))
         .as("伪造 tenant 头下写的行，A 依然读不到")
         .isInstanceOf(ResponseStatusException.class);
-    assertThat(tx(actorB, () -> sql.fetchOne("select tenant_id from kb_usage where id=?", forged)
-            .get(0, UUID.class))).isEqualTo(b);
+    assertThat(
+            tx(
+                actorB,
+                () ->
+                    sql.fetchOne("select tenant_id from kb_usage where id=?", forged)
+                        .get(0, UUID.class)))
+        .isEqualTo(b);
 
     // 3) 连接池归还后不串租户（单连接反复交替），逐轮断言集合互不相交
     for (int i = 0; i < 5; i++) {
       var mine =
           tx(actor, () -> kb.listEntries(null, null, null, null, 0, 200)).items().stream()
-              .map(KnowledgeEntryRow::id).collect(java.util.stream.Collectors.toSet());
+              .map(KnowledgeEntryRow::id)
+              .collect(java.util.stream.Collectors.toSet());
       var theirs =
           tx(actorB, () -> kb.listEntries(null, null, null, null, 0, 200)).items().stream()
-              .map(KnowledgeEntryRow::id).collect(java.util.stream.Collectors.toSet());
+              .map(KnowledgeEntryRow::id)
+              .collect(java.util.stream.Collectors.toSet());
       assertThat(mine).isNotEmpty();
       assertThat(theirs).isNotEmpty();
       assertThat(java.util.Collections.disjoint(mine, theirs))
           .as("第 " + i + " 轮：话术集合串租户了")
           .isTrue();
       // 规则版本与待复核任务这两个越权面同样逐轮断言
-      var myRules = tx(actor, () -> kb.listRuleVersions(null, null, null, 0, 200)).items().stream()
-          .map(RuleVersionRow::id).collect(java.util.stream.Collectors.toSet());
-      var theirRules = tx(actorB, () -> kb.listRuleVersions(null, null, null, 0, 200)).items().stream()
-          .map(RuleVersionRow::id).collect(java.util.stream.Collectors.toSet());
+      var myRules =
+          tx(actor, () -> kb.listRuleVersions(null, null, null, 0, 200)).items().stream()
+              .map(RuleVersionRow::id)
+              .collect(java.util.stream.Collectors.toSet());
+      var theirRules =
+          tx(actorB, () -> kb.listRuleVersions(null, null, null, 0, 200)).items().stream()
+              .map(RuleVersionRow::id)
+              .collect(java.util.stream.Collectors.toSet());
       assertThat(java.util.Collections.disjoint(myRules, theirRules))
           .as("第 " + i + " 轮：规则版本集合串租户了")
           .isTrue();
@@ -1008,8 +1141,12 @@ class KnowledgeBaseIntegrationTest {
   void 六张表都强制RLS() {
     for (String table :
         List.of(
-            "kb_rule_version", "kb_entry", "kb_entry_translation",
-            "kb_entry_rule", "kb_review_task", "kb_usage")) {
+            "kb_rule_version",
+            "kb_entry",
+            "kb_entry_translation",
+            "kb_entry_rule",
+            "kb_review_task",
+            "kb_usage")) {
       var row =
           tx(
               actor,
@@ -1038,8 +1175,12 @@ class KnowledgeBaseIntegrationTest {
   void 每张业务表的tenant_id都是NOT_NULL() {
     for (String table :
         List.of(
-            "kb_rule_version", "kb_entry", "kb_entry_translation",
-            "kb_entry_rule", "kb_review_task", "kb_usage")) {
+            "kb_rule_version",
+            "kb_entry",
+            "kb_entry_translation",
+            "kb_entry_rule",
+            "kb_review_task",
+            "kb_usage")) {
       var row =
           tx(
               actor,
@@ -1048,9 +1189,7 @@ class KnowledgeBaseIntegrationTest {
                       "select is_nullable from information_schema.columns"
                           + " where table_name=? and column_name='tenant_id'",
                       table));
-      assertThat(row.get(0, String.class))
-          .as(table + ".tenant_id 必须 NOT NULL")
-          .isEqualTo("NO");
+      assertThat(row.get(0, String.class)).as(table + ".tenant_id 必须 NOT NULL").isEqualTo("NO");
     }
   }
 
@@ -1059,33 +1198,48 @@ class KnowledgeBaseIntegrationTest {
     // 引用记录 append-only 的两条触发器
     for (String trigger : List.of("refuse_kb_usage_update", "refuse_kb_usage_delete")) {
       long exists =
-          tx(actor, () -> sql.fetchOne(
-              "select count(*) from pg_trigger where tgname=?", trigger).get(0, Long.class));
+          tx(
+              actor,
+              () ->
+                  sql.fetchOne("select count(*) from pg_trigger where tgname=?", trigger)
+                      .get(0, Long.class));
       assertThat(exists).as(trigger).isEqualTo(1);
     }
     // 复核任务留痕触发器
     long reviewGuard =
-        tx(actor, () -> sql.fetchOne(
-            "select count(*) from pg_trigger where tgname='refuse_kb_review_task_delete'")
-            .get(0, Long.class));
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                        "select count(*) from pg_trigger where tgname='refuse_kb_review_task_delete'")
+                    .get(0, Long.class));
     assertThat(reviewGuard).isEqualTo(1);
     // 规则接替自动生成待复核任务的触发器
     long spawn =
-        tx(actor, () -> sql.fetchOne(
-            "select count(*) from pg_trigger where tgname='spawn_kb_review_tasks_on_supersede'")
-            .get(0, Long.class));
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                        "select count(*) from pg_trigger where tgname='spawn_kb_review_tasks_on_supersede'")
+                    .get(0, Long.class));
     assertThat(spawn).isEqualTo(1);
     // 译文占位符守卫
     long guard =
-        tx(actor, () -> sql.fetchOne(
-            "select count(*) from pg_trigger where tgname='guard_kb_translation_body'")
-            .get(0, Long.class));
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                        "select count(*) from pg_trigger where tgname='guard_kb_translation_body'")
+                    .get(0, Long.class));
     assertThat(guard).isEqualTo(1);
     // 一个政策同时只能有一版生效
     long singleActive =
-        tx(actor, () -> sql.fetchOne(
-            "select count(*) from pg_trigger where tgname='guard_kb_rule_single_active'")
-            .get(0, Long.class));
+        tx(
+            actor,
+            () ->
+                sql.fetchOne(
+                        "select count(*) from pg_trigger where tgname='guard_kb_rule_single_active'")
+                    .get(0, Long.class));
     assertThat(singleActive).isEqualTo(1);
     // kb_usage 只授 SELECT/INSERT（append-only 的 REVOKE 纵深）
     var privileges =
@@ -1135,20 +1289,25 @@ class KnowledgeBaseIntegrationTest {
     // **断言写回的值**，不是只断言没抛异常
     assertThat(stored.toInstant())
         .isEqualTo(OffsetDateTime.of(2026, 3, 1, 0, 0, 0, 0, ZoneOffset.ofHours(8)).toInstant());
-    assertThat(stored.getHour()).isEqualTo(0);
+    assertThat(stored.withOffsetSameInstant(ZoneOffset.ofHours(8)).getHour()).isEqualTo(0);
     // 接口读出的也是同一时刻。2026-03-01T00:00+08:00 归一到 UTC 就是 **前一天 16:00** ——
     // 这里断言的真实 UTC 值（2026-02-28T16:00Z）恰好就是「有没有踩 -28800s 陷阱」的判据：
     // 若绑定时误用 Timestamp.valueOf(LocalDateTime)，读回的就是 2026-03-01T00:00Z（差 8 小时）。
-    assertThat(tx(actor, () -> kb.listRuleVersions("TIME_POLICY", null, null, 0, 20))
-            .items().get(0).effectiveFrom())
+    assertThat(
+            tx(actor, () -> kb.listRuleVersions("TIME_POLICY", null, null, 0, 20))
+                .items()
+                .get(0)
+                .effectiveFrom())
         .isEqualTo("2026-02-28T16:00:00Z");
   }
 
   @Test
   void 引用记录的时间戳往返不丢精度() {
     UUID entryId = entry(actor, "KB-TS");
-    var used = write(actor, () -> kb.recordUsage(actor, entryId,
-        new UsageInput("RESOLVED", null, "ts-conv", "")));
+    var used =
+        write(
+            actor,
+            () -> kb.recordUsage(actor, entryId, new UsageInput("RESOLVED", null, "ts-conv", "")));
     assertThat(used.createdAt()).isNotNull();
     var stored =
         tx(

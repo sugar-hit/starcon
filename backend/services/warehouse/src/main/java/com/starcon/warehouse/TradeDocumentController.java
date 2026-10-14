@@ -19,20 +19,18 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 10.5.2.1 贸易单证。
  *
- * <p>命名空间 {@code /warehouse/trade-documents}：与 10.5.1.1 报关单（{@code /warehouse/customs-declarations}）、
- * 10.5.1.3 关税（{@code /warehouse/duty-taxes}）、10.4.1.1 头程发运单（{@code /warehouse/first-mile-shipments}）
- * 同一 {@code /warehouse} 前缀，浏览器只经 /api/warehouse 代理访问。**刻意不进 {@code inventory/}**：
- * 那是 8.2 现场作业的语义，把「8.2 现场作业」与「10 物流贸易单证」混在一个前缀里会让两边都读不懂。
+ * <p>命名空间 {@code /warehouse/trade-documents}：与 10.5.1.1 报关单（{@code
+ * /warehouse/customs-declarations}）、 10.5.1.3 关税（{@code /warehouse/duty-taxes}）、10.4.1.1
+ * 头程发运单（{@code /warehouse/first-mile-shipments}） 同一 {@code /warehouse} 前缀，浏览器只经 /api/warehouse
+ * 代理访问。**刻意不进 {@code inventory/}**： 那是 8.2 现场作业的语义，把「8.2 现场作业」与「10 物流贸易单证」混在一个前缀里会让两边都读不懂。
  *
- * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}，全部写动作挂
- * {@code warehouse.inventory.update} —— 提交下游那一刻备证资料就出去了，权限等级与调拨发货同档。
+ * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}，全部写动作挂 {@code
+ * warehouse.inventory.update} —— 提交下游那一刻备证资料就出去了，权限等级与调拨发货同档。
  *
- * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
- * 客户端伪造的 {@code X-Tenant-Id} 进不来也改不动它。
+ * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code app.current_tenant}，由
+ * RLS 在数据库层强制隔离。 客户端伪造的 {@code X-Tenant-Id} 进不来也改不动它。
  *
- * <p>动作端点是 **POST**：复核、跑校验、主张优惠、业务确认、提交、接收登记都是
- * 「发生一次业务事件」，用 PUT 会被 HTTP 语义读成「把单据设置成某个状态」。
+ * <p>动作端点是 **POST**：复核、跑校验、主张优惠、业务确认、提交、接收登记都是 「发生一次业务事件」，用 PUT 会被 HTTP 语义读成「把单据设置成某个状态」。
  */
 @RestController
 @RequestMapping("/warehouse/trade-documents")
@@ -55,11 +53,9 @@ public class TradeDocumentController {
   // ================================================================ 能力
 
   /**
-   * 贸易单证能力：单证类型、要求级别、确认状态、校验结论、状态机、
-   * **未交付依赖逐条声明**与四条必须讲清的口径。
+   * 贸易单证能力：单证类型、要求级别、确认状态、校验结论、状态机、 **未交付依赖逐条声明**与四条必须讲清的口径。
    *
-   * <p>前端据此渲染各下拉与提示 —— 16 合规与外部报关行/目的仓对接**显式报不可用并给出归属模块**，
-   * 而不是给一个点下去没反应的选项。
+   * <p>前端据此渲染各下拉与提示 —— 16 合规与外部报关行/目的仓对接**显式报不可用并给出归属模块**， 而不是给一个点下去没反应的选项。
    */
   @GetMapping("/capabilities")
   public TradeDocumentCapabilities capabilities(
@@ -87,7 +83,14 @@ public class TradeDocumentController {
         a ->
             tradeDocuments.rules(
                 new TradeDocumentService.RuleQuery(
-                    countryCode, documentKind, requirementLevel, status, keyword, sort, page, size)));
+                    countryCode,
+                    documentKind,
+                    requirementLevel,
+                    status,
+                    keyword,
+                    sort,
+                    page,
+                    size)));
   }
 
   @PostMapping("/rules")
@@ -97,7 +100,8 @@ public class TradeDocumentController {
     return call(
         auth,
         "inventory.update",
-        a -> tradeDocuments.createRule(a.tenantId(), request == null ? emptyRuleCreate() : request));
+        a ->
+            tradeDocuments.createRule(a.tenantId(), request == null ? emptyRuleCreate() : request));
   }
 
   @PutMapping("/rules/{ruleId}")
@@ -288,7 +292,15 @@ public class TradeDocumentController {
         a ->
             tradeDocuments.reminderPage(
                 new TradeDocumentService.ReminderQuery(
-                    setId, status, severity, reminderType, documentKind, keyword, sort, page, size)));
+                    setId,
+                    status,
+                    severity,
+                    reminderType,
+                    documentKind,
+                    keyword,
+                    sort,
+                    page,
+                    size)));
   }
 
   /** 处理 / 忽略一条缺失提醒。必须写说明：静默消失的提醒等于没提醒过。 */
@@ -338,8 +350,7 @@ public class TradeDocumentController {
   }
 
   /**
-   * 单证包详情：头 + 单证（含被改版取代的历史版本）+ 完整性校验历史 + 缺失提醒 + 事件时间线
-   * + 当前状态的合法下一步。
+   * 单证包详情：头 + 单证（含被改版取代的历史版本）+ 完整性校验历史 + 缺失提醒 + 事件时间线 + 当前状态的合法下一步。
    *
    * <p>跨租户在 RLS 下查不到 → 404（403 会泄露「这套单证存在」）。
    */
@@ -456,7 +467,9 @@ public class TradeDocumentController {
     return call(
         auth,
         "inventory.update",
-        a -> tradeDocuments.review(setId, request == null ? new TradeSetReviewRequest("") : request));
+        a ->
+            tradeDocuments.review(
+                setId, request == null ? new TradeSetReviewRequest("") : request));
   }
 
   /** 复核退回：必须给原因。改完必须重新走复核才能再次提交。 */
@@ -530,14 +543,13 @@ public class TradeDocumentController {
             throw new IllegalArgumentException("单证不存在或不属于这套单证包：" + documentId);
           }
           return tradeDocuments.finalizeDocument(
-              setId, documentId, request == null ? new TradeDocumentFinalizeRequest("", "") : request);
+              setId,
+              documentId,
+              request == null ? new TradeDocumentFinalizeRequest("", "") : request);
         });
   }
 
-  /**
-   * 登记 FTA 优惠主张。**只登记主张，不判定成立** —— 登记后状态停在「待业务确认」，
-   * 直到业务来确认为止。系统不代替业务判断「实质性改变」是否成立。
-   */
+  /** 登记 FTA 优惠主张。**只登记主张，不判定成立** —— 登记后状态停在「待业务确认」， 直到业务来确认为止。系统不代替业务判断「实质性改变」是否成立。 */
   @PostMapping("/{setId}/documents/{documentId}/preference-claim")
   public TradeDocumentSaved claimPreference(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -558,10 +570,7 @@ public class TradeDocumentController {
         });
   }
 
-  /**
-   * 业务确认（或确认不成立）。这是**唯一**能把优惠从「待确认」推进去的入口，
-   * 且只做三件事：收下确认人与依据、把规则版本钉在单证上、记事件。
-   */
+  /** 业务确认（或确认不成立）。这是**唯一**能把优惠从「待确认」推进去的入口， 且只做三件事：收下确认人与依据、把规则版本钉在单证上、记事件。 */
   @PostMapping("/{setId}/documents/{documentId}/preference-confirm")
   public TradeDocumentSaved confirmPreference(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -585,8 +594,7 @@ public class TradeDocumentController {
   /**
    * 提交报关行 / 目的仓：已复核通过 → 已提交。
    *
-   * <p>三道闸由 DB 触发器钉死，绕过服务层直接改状态同样被挡：人工复核通过、
-   * 完整性校验必须 PASS 且无阻断级提醒、优惠主张已获业务确认。
+   * <p>三道闸由 DB 触发器钉死，绕过服务层直接改状态同样被挡：人工复核通过、 完整性校验必须 PASS 且无阻断级提醒、优惠主张已获业务确认。
    */
   @PostMapping("/{setId}/submit")
   public TradeSaved submit(
@@ -596,7 +604,9 @@ public class TradeDocumentController {
     return call(
         auth,
         "inventory.update",
-        a -> tradeDocuments.submit(setId, request == null ? new TradeSetSubmitRequest("", "") : request));
+        a ->
+            tradeDocuments.submit(
+                setId, request == null ? new TradeSetSubmitRequest("", "") : request));
   }
 
   /** 登记下游接收：已提交 → 已接收（终态）。 */
@@ -622,7 +632,9 @@ public class TradeDocumentController {
     return call(
         auth,
         "inventory.update",
-        a -> tradeDocuments.sendBack(setId, request == null ? new TradeSetSendBackRequest("") : request));
+        a ->
+            tradeDocuments.sendBack(
+                setId, request == null ? new TradeSetSendBackRequest("") : request));
   }
 
   /** 取消：必须给原因。备证资料已生成过，取消后无法追责。 */
@@ -634,7 +646,9 @@ public class TradeDocumentController {
     return call(
         auth,
         "inventory.update",
-        a -> tradeDocuments.cancel(setId, request == null ? new TradeSetCancelRequest("") : request));
+        a ->
+            tradeDocuments.cancel(
+                setId, request == null ? new TradeSetCancelRequest("") : request));
   }
 
   // 空请求体落到这里：{@code @Valid} 对 null 不生效，必须由服务层报出可读错误
@@ -695,7 +709,8 @@ public class TradeDocumentController {
 
   private static TradeDocumentCreateRequest emptyDocumentCreate() {
     return new TradeDocumentCreateRequest(
-        // documentKind, templateId, documentNo, currency, quantityTotal, packageCount, content, notes
+        // documentKind, templateId, documentNo, currency, quantityTotal, packageCount, content,
+        // notes
         null, null, null, null, null, null, java.util.Map.of(), null);
   }
 

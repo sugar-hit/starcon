@@ -18,25 +18,22 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 7.2.2.2 安全库存：阈值配置、日均销量登记、评估生成预警、预警流转与补货建议。
  *
- * <p>命名空间 {@code /warehouse/inventory/safety-stock}：与 catalog 的 {@code /catalog}、
- * channel 的 {@code /channel} 同一套约定，每个服务暴露自己的前缀，浏览器只经 /api/warehouse 代理访问。
+ * <p>命名空间 {@code /warehouse/inventory/safety-stock}：与 catalog 的 {@code /catalog}、 channel 的 {@code
+ * /channel} 同一套约定，每个服务暴露自己的前缀，浏览器只经 /api/warehouse 代理访问。
  *
- * <p>权限码前缀 {@code warehouse.}，复用 V8 已注册的 {@code warehouse.inventory.read} /
- * {@code warehouse.inventory.update} —— **刻意不新起权限码**：identity 只注册了
- * {@code warehouse.inventory} 与 {@code warehouse.facilities} 两个页面资源，
- * 用一个没注册的码会让连 OWNER 都 403。
+ * <p>权限码前缀 {@code warehouse.}，复用 V8 已注册的 {@code warehouse.inventory.read} / {@code
+ * warehouse.inventory.update} —— **刻意不新起权限码**：identity 只注册了 {@code warehouse.inventory} 与 {@code
+ * warehouse.facilities} 两个页面资源， 用一个没注册的码会让连 OWNER 都 403。
  *
  * <ul>
  *   <li>读（配置/销量/预警/建议/评估/能力声明）用 {@code inventory.read}；
- *   <li>写（新建与换版阈值、作废、登记销量、发起评估、认领与处置预警、采纳与忽略建议）
- *       用 {@code inventory.update}。
+ *   <li>写（新建与换版阈值、作废、登记销量、发起评估、认领与处置预警、采纳与忽略建议） 用 {@code inventory.update}。
  * </ul>
  *
- * <p><b>为什么「发起评估」是 update 而不是 read</b>：它有副作用（落评估批次 + 生成预警 + 建建议），
- * 挂在读权限上会让「看一眼库存健不健康」变成一个写动作。
+ * <p><b>为什么「发起评估」是 update 而不是 read</b>：它有副作用（落评估批次 + 生成预警 + 建建议）， 挂在读权限上会让「看一眼库存健不健康」变成一个写动作。
  *
- * <p>刻意**不提供 DELETE**：阈值作废走 retire（关区间），预警与建议都要留档复盘。
- * 删除防线在服务端（无 DELETE 端点 → 405）+ V114 的 REVOKE DELETE + append-only 触发器。
+ * <p>刻意**不提供 DELETE**：阈值作废走 retire（关区间），预警与建议都要留档复盘。 删除防线在服务端（无 DELETE 端点 → 405）+ V114 的 REVOKE
+ * DELETE + append-only 触发器。
  */
 @RestController
 @RequestMapping("/warehouse/inventory/safety-stock")
@@ -50,10 +47,7 @@ public class SafetyStockController {
     this.safetyStock = safetyStock;
   }
 
-  /**
-   * 统一入口：先向 identity 确认身份与权限（租户**不**来自任何客户端头），
-   * 再在一个事务里绑定 RLS 租户上下文执行查询。
-   */
+  /** 统一入口：先向 identity 确认身份与权限（租户**不**来自任何客户端头）， 再在一个事务里绑定 RLS 租户上下文执行查询。 */
   private <T> T call(String bearer, String permission, Function<AccessService.Access, T> work) {
     var actor = access.require(bearer, "warehouse." + permission);
     return access.run(actor, "warehouse." + permission, () -> work.apply(actor));
@@ -62,8 +56,8 @@ public class SafetyStockController {
   // ============================================================ 能力声明
 
   /**
-   * 能力声明：三种范围档、三档预警级别、两种预警类型、三种预警状态、两种仓种类、建议状态，
-   * 以及四条**必须如实报出**的边界（销量需登记 / 分类展开需调用方给 / 6.2.1.2 未交付 / 工作台未交付）。
+   * 能力声明：三种范围档、三档预警级别、两种预警类型、三种预警状态、两种仓种类、建议状态， 以及四条**必须如实报出**的边界（销量需登记 / 分类展开需调用方给 / 6.2.1.2 未交付 /
+   * 工作台未交付）。
    *
    * <p>前端据此渲染选项与提示，而不是把规则硬编码在界面上。
    */
@@ -94,15 +88,21 @@ public class SafetyStockController {
         a ->
             safetyStock.page(
                 new SafetyStockQuery(
-                    scopeType, categoryId, skuId, alertSeverity, warehouseId, effectiveOnly,
-                    keyword, page, size)));
+                    scopeType,
+                    categoryId,
+                    skuId,
+                    alertSeverity,
+                    warehouseId,
+                    effectiveOnly,
+                    keyword,
+                    page,
+                    size)));
   }
 
   /**
    * 生效值解析：SKU &gt; CATEGORY &gt; DEFAULT 优先级，命中即止。
    *
-   * <p>回退到兜底档是**如实报出**的状态（usedFallback）；连兜底档都没配时如实报「未配置」，
-   * 而不是静默按阈值 0 处理 —— 那会让「没人受保护」显示成「库存健康」。
+   * <p>回退到兜底档是**如实报出**的状态（usedFallback）；连兜底档都没配时如实报「未配置」， 而不是静默按阈值 0 处理 —— 那会让「没人受保护」显示成「库存健康」。
    */
   @GetMapping("/policies/effective")
   public SafetyStockPolicyEffective effective(
@@ -128,8 +128,8 @@ public class SafetyStockController {
   /**
    * 新建一档阈值。
    *
-   * <p>权限码是 {@code warehouse.inventory.update} 而不是 read：阈值与预警级别是经营决策，
-   * 配错了直接断货或积压 —— 把「改预警依据」挂在读权限上，那道闸门等于没有。
+   * <p>权限码是 {@code warehouse.inventory.update} 而不是 read：阈值与预警级别是经营决策， 配错了直接断货或积压 ——
+   * 把「改预警依据」挂在读权限上，那道闸门等于没有。
    */
   @PostMapping("/policies")
   public SafetyStockPolicySaved createPolicy(
@@ -141,8 +141,7 @@ public class SafetyStockController {
   /**
    * 换版：收口当前在效的那一档，再开新档。
    *
-   * <p>刻意不给「改这一档」的 PUT —— 阈值内容写定后不可改（V114 触发器在 DB 层挡住），
-   * 改阈值只能通过收口 + 新开，历史那一档因此永远是「当时那条预警依据长什么样」的凭据。
+   * <p>刻意不给「改这一档」的 PUT —— 阈值内容写定后不可改（V114 触发器在 DB 层挡住）， 改阈值只能通过收口 + 新开，历史那一档因此永远是「当时那条预警依据长什么样」的凭据。
    */
   @PostMapping("/policies/{id}/versions")
   public SafetyStockPolicySaved versionPolicy(
@@ -166,9 +165,8 @@ public class SafetyStockController {
   /**
    * 登记一条 SKU 日均销量。
    *
-   * <p>13 销量域未交付、库存流水没有渠道维度，日均销量**无法自动派生**，因此登记进来
-   * （与 7.8.1.1 的 allocation_shop_sales 同一纪律）。同一来源同一 SKU 的登记区间不得重叠：
-   * DB 触发器会拒绝并报出冲突的那一段。
+   * <p>13 销量域未交付、库存流水没有渠道维度，日均销量**无法自动派生**，因此登记进来 （与 7.8.1.1 的 allocation_shop_sales 同一纪律）。同一来源同一
+   * SKU 的登记区间不得重叠： DB 触发器会拒绝并报出冲突的那一段。
    */
   @PostMapping("/sales")
   public SafetyStockSalesSaved recordSales(
@@ -195,8 +193,8 @@ public class SafetyStockController {
    *
    * <p>用 POST：它有副作用，不是查询。权限码是 update —— 「看一眼库存健不健康」在这里是写动作。
    *
-   * <p>请求体带 SKU 清单及分类上下文（分类 → SKU 的展开在 catalog 服务，本服务跨库读不到）。
-   * 清单为空时只扫 SKU 档，其余档计入 policiesNotScannable 并在响应里如实报出。
+   * <p>请求体带 SKU 清单及分类上下文（分类 → SKU 的展开在 catalog 服务，本服务跨库读不到）。 清单为空时只扫 SKU 档，其余档计入
+   * policiesNotScannable 并在响应里如实报出。
    */
   @PostMapping("/evaluate")
   public SafetyStockEvaluationRow evaluate(
@@ -239,8 +237,17 @@ public class SafetyStockController {
         a ->
             safetyStock.alerts(
                 new SafetyStockAlertQuery(
-                    warehouseId, skuId, alertType, severity, status, policyId, evaluationId,
-                    platformRiskOnly, keyword, page, size)));
+                    warehouseId,
+                    skuId,
+                    alertType,
+                    severity,
+                    status,
+                    policyId,
+                    evaluationId,
+                    platformRiskOnly,
+                    keyword,
+                    page,
+                    size)));
   }
 
   /** 预警详情（含关联的补货建议，可能为 null）。跨租户在 RLS 下查不到 → 404。 */
@@ -272,8 +279,7 @@ public class SafetyStockController {
   /**
    * 补货建议列表（真分页）。
    *
-   * <p>{@code unquantifiedOnly=true} 只看「算不出量」的那些 —— 它们最容易被忽略，
-   * 而拿 0 兜底会变成「不用补货」。
+   * <p>{@code unquantifiedOnly=true} 只看「算不出量」的那些 —— 它们最容易被忽略， 而拿 0 兜底会变成「不用补货」。
    */
   @GetMapping("/suggestions")
   public SafetyStockSuggestionPage suggestions(

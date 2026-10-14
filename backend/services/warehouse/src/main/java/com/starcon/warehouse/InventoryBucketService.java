@@ -19,25 +19,21 @@ import org.springframework.stereotype.Service;
 /**
  * 7.1.1.2 库存明细：bucket 级的最细粒度视图。
  *
- * <p>蓝图原话：「bucket 是库存的最小事实单位，界面上必须能看到『在哪个货位、什么批次、
- * 什么质量状态』，否则无法解释差异。」所以一行 = 法人货权 × SKU × 仓库 × 库位 × 批次 × 质量状态。
+ * <p>蓝图原话：「bucket 是库存的最小事实单位，界面上必须能看到『在哪个货位、什么批次、 什么质量状态』，否则无法解释差异。」所以一行 = 法人货权 × SKU × 仓库 × 库位 ×
+ * 批次 × 质量状态。
  *
  * <p><b>与 7.1.1.1 的分层关系</b>（本模块最重要的设计约束）：
  *
  * <ul>
- *   <li>{@code inventory_balance} 是**仓库级**的可用量决策单位，键不含库位，
- *       这一点由 V1 迁移文件头写死，不在本模块改动。
+ *   <li>{@code inventory_balance} 是**仓库级**的可用量决策单位，键不含库位， 这一点由 V1 迁移文件头写死，不在本模块改动。
  *   <li>{@code stock_bucket} 是**库位 × 批次**粒度的事实表（V2 迁移），是本模块的读对象。
- *   <li>两者的关系由 V2 的复合外键 + 延迟约束触发器在 DB 层强制：
- *       Σ bucket == balance，行归属的仓/SKU/法人/质量状态逐列等于它的 balance 行。
+ *   <li>两者的关系由 V2 的复合外键 + 延迟约束触发器在 DB 层强制： Σ bucket == balance，行归属的仓/SKU/法人/质量状态逐列等于它的 balance 行。
  * </ul>
  *
- * <p>因此本服务**不写**任何库存数量 —— 它是纯读视图。所有写入口属于 7.1.2.1 流水、
- * 7.4.1.1 调整、7.5.1.1 调拨（尚未交付）。写方的并发基础（{@code version} 乐观锁、
- * {@code last_movement_at} 业务时间）已在 V2 建好，本模块读出来供下游对齐。
+ * <p>因此本服务**不写**任何库存数量 —— 它是纯读视图。所有写入口属于 7.1.2.1 流水、 7.4.1.1 调整、7.5.1.1 调拨（尚未交付）。写方的并发基础（{@code
+ * version} 乐观锁、 {@code last_movement_at} 业务时间）已在 V2 建好，本模块读出来供下游对齐。
  *
- * <p>汇总口径全部来自迁移文件头，Java 侧只做求和，不二次推导：
- * available 只由生成列 {@code on_hand - reserved} 聚合而来。
+ * <p>汇总口径全部来自迁移文件头，Java 侧只做求和，不二次推导： available 只由生成列 {@code on_hand - reserved} 聚合而来。
  */
 @Service
 public class InventoryBucketService {
@@ -79,19 +75,16 @@ public class InventoryBucketService {
   /**
    * 本模块提供的行内操作入口。
    *
-   * <p>蓝图要求明细行带「发起调整 / 发起调拨 / 查看流水」三个入口。调整与调拨落在尚未交付的
-   * 模块（7.4.1.1 / 7.5.1.1），所以这里的做法是：
+   * <p>蓝图要求明细行带「发起调整 / 发起调拨 / 查看流水」三个入口。调整与调拨落在尚未交付的 模块（7.4.1.1 / 7.5.1.1），所以这里的做法是：
    *
    * <ul>
    *   <li>href 照给 —— 它是带 bucket 定位参数的**路由契约**，不是死链；
    *   <li>{@code available=false} + note 说明为什么现在点不了（目标模块未交付）。
    * </ul>
    *
-   * <p>「查看流水」（7.1.2.1）已交付，因此 available=true：那三个入口里只有它现在点得动，
-   * 再标成"未交付"就是在页面上说一个假状态。
+   * <p>「查看流水」（7.1.2.1）已交付，因此 available=true：那三个入口里只有它现在点得动， 再标成"未交付"就是在页面上说一个假状态。
    *
-   * <p>这么做的理由与 7.1.1.1 拒绝建占位页一致：给一个必然 404 的按钮，比不给更糟 ——
-   * 用户会以为系统坏了。但完全不给入口又违背蓝图对「行内操作入口」的要求，
+   * <p>这么做的理由与 7.1.1.1 拒绝建占位页一致：给一个必然 404 的按钮，比不给更糟 —— 用户会以为系统坏了。但完全不给入口又违背蓝图对「行内操作入口」的要求，
    * 所以契约给全、可用性如实标注。目标模块交付时只要改这里的 available。
    */
   public List<BucketAction> actions() {
@@ -126,7 +119,8 @@ public class InventoryBucketService {
     conditions(query, Scope.BUCKET, where, binds);
     String sqlWhere = where.isEmpty() ? "" : " where " + String.join(" and ", where);
 
-    long total = sql.fetchOne("select count(*)" + FROM + sqlWhere, binds.toArray()).get(0, Long.class);
+    long total =
+        sql.fetchOne("select count(*)" + FROM + sqlWhere, binds.toArray()).get(0, Long.class);
 
     var rows =
         sql.fetch(
@@ -157,10 +151,7 @@ public class InventoryBucketService {
         size);
   }
 
-  /**
-   * bucket 合计。合计来自**同一条 FROM** 再聚合一次，而不是把当前页在 Java 里加起来：
-   * 后者算的是"这一页的和"，翻页时合计会变，核对线也就无从复核。
-   */
+  /** bucket 合计。合计来自**同一条 FROM** 再聚合一次，而不是把当前页在 Java 里加起来： 后者算的是"这一页的和"，翻页时合计会变，核对线也就无从复核。 */
   private BucketSummary summary(String sqlWhere, List<Object> binds) {
     Record r =
         sql.fetchOne(
@@ -199,10 +190,9 @@ public class InventoryBucketService {
    *
    * <ul>
    *   <li><b>命中范围</b> = 当前筛选命中到的 bucket 所归属的 balance 行（{@code touchedBalanceCount}）。
-   *   <li><b>待核对数</b> = 这些 balance 行**全部** bucket 的汇总，**不受行筛选影响**。
-   *       所以按单个库位筛选时，对比的两边都是同一个 balance 的全量，不会假报差异。
-   *   <li><b>未分解</b> = balance 级筛选范围内、但一条 bucket 都没有的 balance 行。
-   *       这些行是合法状态（还没拆到库位），必须与"差异"分开显示。
+   *   <li><b>待核对数</b> = 这些 balance 行**全部** bucket 的汇总，**不受行筛选影响**。 所以按单个库位筛选时，对比的两边都是同一个 balance
+   *       的全量，不会假报差异。
+   *   <li><b>未分解</b> = balance 级筛选范围内、但一条 bucket 都没有的 balance 行。 这些行是合法状态（还没拆到库位），必须与"差异"分开显示。
    * </ul>
    */
   private BucketReconciliation reconciliation(BucketDetailQuery query) {
@@ -258,8 +248,7 @@ public class InventoryBucketService {
   /**
    * 符合 balance 级筛选、但一条 bucket 都没有的 balance 行数。
    *
-   * <p>用 balance 级条件（不含库位 / 批次 / 可拣），否则"筛了一个空库位"会被算成
-   * 一整片未分解 —— 那是筛选条件造成的，不是账有问题。
+   * <p>用 balance 级条件（不含库位 / 批次 / 可拣），否则"筛了一个空库位"会被算成 一整片未分解 —— 那是筛选条件造成的，不是账有问题。
    */
   private long undecomposed(BucketDetailQuery query) {
     var where = new ArrayList<String>();
@@ -318,7 +307,9 @@ public class InventoryBucketService {
       // 那两个条件留在 BUCKET 分支里加，否则会生成引用不存在别名的 SQL。
       where.add(
           "(s.code ilike ? or s.name ilike ? or w.code ilike ? or w.name ilike ?"
-              + (scope == Scope.BUCKET ? " or loc.code ilike ? or loc.name ilike ? or lot.lot_code ilike ?" : "")
+              + (scope == Scope.BUCKET
+                  ? " or loc.code ilike ? or loc.name ilike ? or lot.lot_code ilike ?"
+                  : "")
               + " or le.code ilike ? or le.name ilike ? or q.name ilike ?)");
       String k = "%" + query.keyword().trim() + "%";
       int hits = scope == Scope.BUCKET ? 10 : 7;
@@ -465,13 +456,10 @@ public class InventoryBucketService {
   /**
    * 建一条 bucket（仅供库存业务写入方与集成测试夹具使用）。
    *
-   * <p>蓝图把 bucket 的写入口划给 7.1.2.1 流水 / 7.4.1.1 调整 / 7.5.1.1 调拨，
-   * 那三个模块尚未交付，所以本模块**不暴露任何 HTTP 写端点**。
-   * 这里的方法是同服务内的最小写入原语：balance 与 bucket 在同一个事务里改，
-   * 由 V2 的延迟约束触发器在提交前核对守恒。
+   * <p>蓝图把 bucket 的写入口划给 7.1.2.1 流水 / 7.4.1.1 调整 / 7.5.1.1 调拨， 那三个模块尚未交付，所以本模块**不暴露任何 HTTP 写端点**。
+   * 这里的方法是同服务内的最小写入原语：balance 与 bucket 在同一个事务里改， 由 V2 的延迟约束触发器在提交前核对守恒。
    *
-   * <p>{@code lastMovementAt} 必须由调用方给出（库存业务的发生时间，**业务时间**）：
-   * DB 触发器会拒绝"改了数量但没给新时间"的写入，所以这里不接受 null。
+   * <p>{@code lastMovementAt} 必须由调用方给出（库存业务的发生时间，**业务时间**）： DB 触发器会拒绝"改了数量但没给新时间"的写入，所以这里不接受 null。
    */
   public UUID recordBucket(
       UUID balanceId,
@@ -486,7 +474,9 @@ public class InventoryBucketService {
         sql.fetchOne(
             "select b.id,b.on_hand,b.reserved,b.balance_id from stock_bucket b"
                 + " where b.balance_id=? and b.location_id=? and b.lot_id is not distinct from ?",
-            balanceId, locationId, lotId);
+            balanceId,
+            locationId,
+            lotId);
     if (existing == null) {
       // timestamptz 必须显式 ?::timestamptz：jOOQ 把 OffsetDateTime 绑到 timestamptz
       // 时不带类型信息，靠推断会出现静默的时区偏移。
@@ -496,14 +486,25 @@ public class InventoryBucketService {
               + " select ?,bal.tenant_id,bal.legal_entity_id,bal.sku_id,bal.warehouse_id,?,?,"
               + "bal.quality_status_id,bal.id,?,0,?::timestamptz"
               + " from inventory_balance bal where bal.id=?",
-          Ids.next(), locationId, lotId, onHand, lastMovementAt, balanceId);
+          Ids.next(),
+          locationId,
+          lotId,
+          onHand,
+          lastMovementAt,
+          balanceId);
     } else {
       sql.execute(
           "update stock_bucket set on_hand=?,last_movement_at=?::timestamptz where id=?",
-          onHand, lastMovementAt, existing.get("id", UUID.class));
+          onHand,
+          lastMovementAt,
+          existing.get("id", UUID.class));
     }
-    return sql.fetchOne("select id from stock_bucket where balance_id=? and location_id=?"
-            + " and lot_id is not distinct from ?", balanceId, locationId, lotId)
+    return sql.fetchOne(
+            "select id from stock_bucket where balance_id=? and location_id=?"
+                + " and lot_id is not distinct from ?",
+            balanceId,
+            locationId,
+            lotId)
         .get(0, UUID.class);
   }
 

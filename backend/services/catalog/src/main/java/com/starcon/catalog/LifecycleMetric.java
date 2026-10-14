@@ -1,8 +1,8 @@
 package com.starcon.catalog;
 
 /**
- * 批量规则可引用的指标。每个指标显式标注事实归属：catalog 自己的表可以真实求值，
- * 归属其他服务的指标必须经 {@link LifecycleProjectionPort} 读取，未接入则拒绝执行。
+ * 批量规则可引用的指标。每个指标显式标注事实归属：catalog 自己的表可以真实求值， 归属其他服务的指标必须经 {@link LifecycleProjectionPort}
+ * 读取，未接入则拒绝执行。
  */
 public enum LifecycleMetric {
   /** SKU 总数。归属 catalog 自身权威数据。 */

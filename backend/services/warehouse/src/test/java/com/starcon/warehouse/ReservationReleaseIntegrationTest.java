@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,17 +31,15 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 7.2.1.3 释放与过期。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p>本测试钉住十件「错了会出人命（超卖）或误导人」的事：
  *
  * <ol>
  *   <li><b>恢复量与释放量分两个数</b>：需求 12、只圈到 10 的货整笔释放时，
- *       restoredQuantity=10（真的还回可用池）、releasedDemandQuantity=12（需求侧放弃）。
- *       合并成一个数就会让可用量凭空多 2。
- *   <li><b>时间逐字写回</b>：发生时刻、过期时刻都按传入值比对 {@link Instant}，
- *       不是「没抛异常」。用 {@code Timestamp.valueOf(LocalDateTime)} 绑定会静默偏 −28800s。
+ *       restoredQuantity=10（真的还回可用池）、releasedDemandQuantity=12（需求侧放弃）。 合并成一个数就会让可用量凭空多 2。
+ *   <li><b>时间逐字写回</b>：发生时刻、过期时刻都按传入值比对 {@link Instant}， 不是「没抛异常」。用 {@code
+ *       Timestamp.valueOf(LocalDateTime)} 绑定会静默偏 −28800s。
  *   <li><b>承诺后不自动过期</b>：COMMITTED 的预占、以及名下还有 COMMITTED 分配的预占，
  *       批量清理都必须跳过（蓝图红线；跳一半会造出「预占已终结、货还占着且再也放不掉」）。
  *   <li><b>幂等</b>：同键同参回放、同键异参 409、终态再释放回放 —— 货只被还一次。
@@ -95,11 +92,11 @@ class ReservationReleaseIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
-        s.execute(
-            "create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
+        s.execute("create role warehouse_app login password 'test-only' nosuperuser nobypassrls");
       }
       identity = HttpServer.create(new InetSocketAddress(0), 0);
       identity.createContext(
@@ -111,7 +108,8 @@ class ReservationReleaseIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -177,25 +175,47 @@ class ReservationReleaseIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             sql.execute(
                 "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 3), tenant, "SKU-" + (tenant.equals(a) ? "A" : "B"), "商品一");
+                idFor(tenant, 3),
+                tenant,
+                "SKU-" + (tenant.equals(a) ? "A" : "B"),
+                "商品一");
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,country_code,timezone)"
                     + " values(?,?,?,?,?,?)",
-                idFor(tenant, 5), tenant, "WH-1", "主仓", "CN", "Asia/Shanghai");
+                idFor(tenant, 5),
+                tenant,
+                "WH-1",
+                "主仓",
+                "CN",
+                "Asia/Shanghai");
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 6), tenant, idFor(tenant, 5), "L-01", "货位一");
+                idFor(tenant, 6),
+                tenant,
+                idFor(tenant, 5),
+                "L-01",
+                "货位一");
             sql.execute(
                 "insert into warehouse_location(id,tenant_id,warehouse_id,code,name)"
                     + " values(?,?,?,?,?)",
-                idFor(tenant, 7), tenant, idFor(tenant, 5), "L-02", "货位二");
+                idFor(tenant, 7),
+                tenant,
+                idFor(tenant, 5),
+                "L-02",
+                "货位二");
             sql.execute(
                 "insert into inventory_lot(id,tenant_id,sku_id,lot_code,received_on) values(?,?,?,?,?)",
-                idFor(tenant, 8), tenant, idFor(tenant, 3), "LOT-A",
+                idFor(tenant, 8),
+                tenant,
+                idFor(tenant, 3),
+                "LOT-A",
                 java.time.LocalDate.parse("2026-10-01"));
             return null;
           });
@@ -264,7 +284,8 @@ class ReservationReleaseIntegrationTest {
   }
 
   static ReservationReleaseInput qty(String quantity) {
-    return new ReservationReleaseInput(null, new BigDecimal(quantity), "SPLIT_REDUCTION", "拆单减少", null, null, null);
+    return new ReservationReleaseInput(
+        null, new BigDecimal(quantity), "SPLIT_REDUCTION", "拆单减少", null, null, null);
   }
 
   ReservationReleaseCandidatePage candidates(OffsetDateTime evaluatedAt) {
@@ -286,8 +307,8 @@ class ReservationReleaseIntegrationTest {
   /**
    * 断言写回的时间值。
    *
-   * <p>比的是 {@link java.time.Instant} 而不是 {@code OffsetDateTime.equals}：后者同时比瞬时与偏移量，
-   * 而 jOOQ 读回的是会话时区的偏移量，与传入的偏移量不同时刻字面不等、但**表示的是同一时刻**。
+   * <p>比的是 {@link java.time.Instant} 而不是 {@code OffsetDateTime.equals}：后者同时比瞬时与偏移量， 而 jOOQ
+   * 读回的是会话时区的偏移量，与传入的偏移量不同时刻字面不等、但**表示的是同一时刻**。
    */
   static void assertInstant(OffsetDateTime actual, OffsetDateTime expected) {
     assertThat(actual).as("时间值必须逐字写回").isNotNull();
@@ -297,10 +318,9 @@ class ReservationReleaseIntegrationTest {
   /**
    * 取出 PostgreSQL 报回来的**服务端**错误文案。
    *
-   * <p>jOOQ / Spring 的异常 message 只有「bad SQL grammar [update ...]」，
-   * 触发器里 {@code RAISE EXCEPTION '...'} 的中文文案在 {@link org.postgresql.util.PSQLException}
-   * 的 server error message 里。只断言异常类型会漏掉「报错到底说的是哪件事」——
-   * 而本模块的守卫区分得正是哪件事被拒。
+   * <p>jOOQ / Spring 的异常 message 只有「bad SQL grammar [update ...]」， 触发器里 {@code RAISE EXCEPTION
+   * '...'} 的中文文案在 {@link org.postgresql.util.PSQLException} 的 server error message
+   * 里。只断言异常类型会漏掉「报错到底说的是哪件事」—— 而本模块的守卫区分得正是哪件事被拒。
    */
   static String dbMessage(Throwable thrown) {
     for (Throwable c = thrown; c != null; c = c.getCause()) {
@@ -313,7 +333,8 @@ class ReservationReleaseIntegrationTest {
     return String.valueOf(thrown.getMessage());
   }
 
-  static void assertRejectedByDb(org.assertj.core.api.ThrowableAssert.ThrowingCallable call, String expected) {
+  static void assertRejectedByDb(
+      org.assertj.core.api.ThrowableAssert.ThrowingCallable call, String expected) {
     var thrown = org.assertj.core.api.Assertions.catchThrowable(call);
     assertThat(thrown).as("预期被 DB 层拒绝").isInstanceOf(DataAccessException.class);
     assertThat(dbMessage(thrown)).as("DB 报错必须指到具体是哪条守卫").contains(expected);
@@ -330,7 +351,10 @@ class ReservationReleaseIntegrationTest {
 
     OffsetDateTime releasedAt = at("2026-10-14T11:30:00+08:00");
     var outcome =
-        release(id, new ReservationReleaseInput(null, null, "ORDER_CANCELLED", "订单 SO-1 取消", releasedAt, "K1", null));
+        release(
+            id,
+            new ReservationReleaseInput(
+                null, null, "ORDER_CANCELLED", "订单 SO-1 取消", releasedAt, "K1", null));
 
     assertThat(outcome.replayed()).isFalse();
     assertThat(outcome.terminal()).isTrue();
@@ -395,7 +419,10 @@ class ReservationReleaseIntegrationTest {
       assertInstant(row.get("occurred_at", OffsetDateTime.class), releasedAt);
     }
     var reservationLevel =
-        entries.stream().filter(e -> e.get("allocation_id", UUID.class) == null).findFirst().orElseThrow();
+        entries.stream()
+            .filter(e -> e.get("allocation_id", UUID.class) == null)
+            .findFirst()
+            .orElseThrow();
     assertThat(reservationLevel.get("from_status", String.class)).isEqualTo("HELD");
     assertThat(reservationLevel.get("to_status", String.class)).isEqualTo("RELEASED");
     assertThat(reservationLevel.get("quantity", BigDecimal.class)).isEqualByComparingTo("20");
@@ -488,9 +515,7 @@ class ReservationReleaseIntegrationTest {
                         + " current_setting('app.current_tenant', true)::uuid"
                         + " and reservation_id = ?",
                     id));
-    assertThat(entries.get(0, Long.class))
-        .as("部分释放不得写分录：只有真的进了终态的分配才写")
-        .isEqualTo(1L);
+    assertThat(entries.get(0, Long.class)).as("部分释放不得写分录：只有真的进了终态的分配才写").isEqualTo(1L);
 
     var record =
         asA(
@@ -516,7 +541,8 @@ class ReservationReleaseIntegrationTest {
             () ->
                 release(
                     id,
-                    new ReservationReleaseInput(null, new BigDecimal("5"), "MANUAL", null, null, null, true)))
+                    new ReservationReleaseInput(
+                        null, new BigDecimal("5"), "MANUAL", null, null, null, true)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不能终结整笔预占");
   }
@@ -605,7 +631,12 @@ class ReservationReleaseIntegrationTest {
                     id,
                     new ReservationReleaseInput(
                         List.of(new ReservationReleaseAllocationInput(null, new BigDecimal("1"))),
-                        null, "MANUAL", null, null, null, null)))
+                        null,
+                        "MANUAL",
+                        null,
+                        null,
+                        null,
+                        null)))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("allocationId");
   }
@@ -627,7 +658,12 @@ class ReservationReleaseIntegrationTest {
                         List.of(
                             new ReservationReleaseAllocationInput(
                                 otherAllocation.allocationId(), new BigDecimal("1"))),
-                        null, "MANUAL", null, null, null, null)))
+                        null,
+                        "MANUAL",
+                        null,
+                        null,
+                        null,
+                        null)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不存在或无权操作");
 
@@ -657,7 +693,12 @@ class ReservationReleaseIntegrationTest {
                         List.of(
                             new ReservationReleaseAllocationInput(
                                 one.allocationId(), new BigDecimal("99"))),
-                        null, "MANUAL", null, null, null, null)))
+                        null,
+                        "MANUAL",
+                        null,
+                        null,
+                        null,
+                        null)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("凭空造出可用量");
   }
@@ -764,15 +805,16 @@ class ReservationReleaseIntegrationTest {
     var pool = Executors.newFixedThreadPool(2);
     try {
       var futures =
+          List.of(pool.submit(() -> release(id, full())), pool.submit(() -> release(id, full())));
+      var results =
           List.of(
-              pool.submit(() -> release(id, full())),
-              pool.submit(() -> release(id, full())));
-      var results = List.of(futures.get(0).get(30, TimeUnit.SECONDS), futures.get(1).get(30, TimeUnit.SECONDS));
+              futures.get(0).get(30, TimeUnit.SECONDS), futures.get(1).get(30, TimeUnit.SECONDS));
       // 一条真的释放、一条被判为重放：连接池只有 1 条连接时两者必然串行，
       // 真正防重复的是「状态谓词 + 终态不可复活」，这一条断言读的就是那个效果。
       assertThat(results.stream().filter(r -> !r.replayed())).hasSize(1);
       assertThat(results.stream().filter(ReservationReleaseOutcome::replayed)).hasSize(1);
-      assertThat(results.get(0).restoredQuantity()).isEqualByComparingTo(results.get(1).restoredQuantity());
+      assertThat(results.get(0).restoredQuantity())
+          .isEqualByComparingTo(results.get(1).restoredQuantity());
     } finally {
       pool.shutdownNow();
     }
@@ -796,8 +838,7 @@ class ReservationReleaseIntegrationTest {
     allocate(id, locationOne, "12", at("2026-10-14T01:10:00+08:00"));
     OffsetDateTime evaluatedAt = at("2026-10-14T02:00:00+08:00");
 
-    var run =
-        sweep(new ReservationReleaseRunRequest(true, evaluatedAt, 50, "先看看", null));
+    var run = sweep(new ReservationReleaseRunRequest(true, evaluatedAt, 50, "先看看", null));
 
     assertThat(run.dryRun()).isTrue();
     assertThat(run.candidateCount()).isEqualTo(1);
@@ -906,10 +947,16 @@ class ReservationReleaseIntegrationTest {
         "update",
         () ->
             allocations.commit(
-                a, id, one.allocationId(), new ReservationAllocationModels.ReservationAllocationTransitionInput(null, null, "承诺")));
+                a,
+                id,
+                one.allocationId(),
+                new ReservationAllocationModels.ReservationAllocationTransitionInput(
+                    null, null, "承诺")));
 
     var run =
-        sweep(new ReservationReleaseRunRequest(false, at("2026-10-14T02:00:00+08:00"), 50, null, null));
+        sweep(
+            new ReservationReleaseRunRequest(
+                false, at("2026-10-14T02:00:00+08:00"), 50, null, null));
 
     // 蓝图红线：已承诺发货的货被 TTL 收走就是超卖
     assertThat(run.candidateCount()).isZero();
@@ -933,11 +980,16 @@ class ReservationReleaseIntegrationTest {
         "update",
         () ->
             allocations.commit(
-                a, id, committed.allocationId(),
-                new ReservationAllocationModels.ReservationAllocationTransitionInput(null, null, "承诺")));
+                a,
+                id,
+                committed.allocationId(),
+                new ReservationAllocationModels.ReservationAllocationTransitionInput(
+                    null, null, "承诺")));
 
     var run =
-        sweep(new ReservationReleaseRunRequest(false, at("2026-10-14T02:00:00+08:00"), 50, null, null));
+        sweep(
+            new ReservationReleaseRunRequest(
+                false, at("2026-10-14T02:00:00+08:00"), 50, null, null));
 
     assertThat(run.candidateCount()).isEqualTo(1);
     assertThat(run.processedCount()).isZero();
@@ -1003,8 +1055,7 @@ class ReservationReleaseIntegrationTest {
 
     var page = candidates(at("2026-10-14T02:00:00+08:00"));
     assertThat(page.summary().totalHeldCount()).isEqualTo(2);
-    assertThat(page.summary().unmanagedHeldCount())
-        .as("「登记时忘了传过期时刻」只能靠这个数被发现").isEqualTo(1);
+    assertThat(page.summary().unmanagedHeldCount()).as("「登记时忘了传过期时刻」只能靠这个数被发现").isEqualTo(1);
     assertThat(page.summary().overdueCount()).isEqualTo(1);
   }
 
@@ -1015,7 +1066,9 @@ class ReservationReleaseIntegrationTest {
       allocate(id, locationOne, "10", at("2026-10-14T01:10:00+08:00"));
     }
     var run =
-        sweep(new ReservationReleaseRunRequest(false, at("2026-10-14T02:00:00+08:00"), 2, null, null));
+        sweep(
+            new ReservationReleaseRunRequest(
+                false, at("2026-10-14T02:00:00+08:00"), 2, null, null));
 
     assertThat(run.candidateCount()).as("候选总数不受单批上限影响，否则看不出被截断").isEqualTo(3);
     assertThat(run.processedCount()).isEqualTo(2);
@@ -1037,19 +1090,19 @@ class ReservationReleaseIntegrationTest {
     assertThat(second.processedCount()).isEqualTo(1);
 
     // 不带键重跑：扫不到候选，天然无副作用
-    var third = sweep(new ReservationReleaseRunRequest(false, at("2026-10-14T03:00:00+08:00"), 50, null, null));
+    var third =
+        sweep(
+            new ReservationReleaseRunRequest(
+                false, at("2026-10-14T03:00:00+08:00"), 50, null, null));
     assertThat(third.processedCount()).isZero();
     assertThat(third.candidateCount()).isZero();
   }
 
   @Test
   void 单批上限越界被拒() {
-    assertThatThrownBy(
-            () ->
-                sweep(new ReservationReleaseRunRequest(false, null, 0, null, null)))
+    assertThatThrownBy(() -> sweep(new ReservationReleaseRunRequest(false, null, 0, null, null)))
         .isInstanceOf(IllegalArgumentException.class);
-    assertThatThrownBy(
-            () -> sweep(new ReservationReleaseRunRequest(false, null, 5000, null, null)))
+    assertThatThrownBy(() -> sweep(new ReservationReleaseRunRequest(false, null, 5000, null, null)))
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -1095,11 +1148,10 @@ class ReservationReleaseIntegrationTest {
     var outcome =
         asA(
             "update",
-            () -> service.setExpiry(a, id, new ReservationReleaseExpiryInput(expiresAt, null, null)));
+            () ->
+                service.setExpiry(a, id, new ReservationReleaseExpiryInput(expiresAt, null, null)));
     assertInstant(outcome.expiresAt(), expiresAt);
-    assertThat(outcome.overdueSeconds())
-        .as("给 0 会把「未超时」与「超时 0 秒」混成同一个数")
-        .isNull();
+    assertThat(outcome.overdueSeconds()).as("给 0 会把「未超时」与「超时 0 秒」混成同一个数").isNull();
   }
 
   @Test
@@ -1114,9 +1166,12 @@ class ReservationReleaseIntegrationTest {
     assertThat(outcome.message()).contains("不再参与");
 
     var run =
-        sweep(new ReservationReleaseRunRequest(false, at("2026-10-14T05:00:00+08:00"), 50, null, null));
+        sweep(
+            new ReservationReleaseRunRequest(
+                false, at("2026-10-14T05:00:00+08:00"), 50, null, null));
     assertThat(run.candidateCount()).isZero();
-    assertThat(candidates(at("2026-10-14T05:00:00+08:00")).summary().unmanagedHeldCount()).isEqualTo(1);
+    assertThat(candidates(at("2026-10-14T05:00:00+08:00")).summary().unmanagedHeldCount())
+        .isEqualTo(1);
   }
 
   @Test
@@ -1127,8 +1182,11 @@ class ReservationReleaseIntegrationTest {
         "update",
         () ->
             allocations.commit(
-                a, id, one.allocationId(),
-                new ReservationAllocationModels.ReservationAllocationTransitionInput(null, null, "承诺")));
+                a,
+                id,
+                one.allocationId(),
+                new ReservationAllocationModels.ReservationAllocationTransitionInput(
+                    null, null, "承诺")));
 
     assertThatThrownBy(
             () ->
@@ -1136,7 +1194,8 @@ class ReservationReleaseIntegrationTest {
                     "update",
                     () ->
                         service.setExpiry(
-                            a, id,
+                            a,
+                            id,
                             new ReservationReleaseExpiryInput(
                                 at("2026-10-15T00:00:00+08:00"), null, null))))
         .isInstanceOf(ResponseStatusException.class)
@@ -1179,7 +1238,10 @@ class ReservationReleaseIntegrationTest {
   void 运行凭据同样appendOnly() {
     UUID id = reserve("20", at("2026-10-14T01:00:00+08:00"));
     allocate(id, locationOne, "12", at("2026-10-14T01:10:00+08:00"));
-    var run = sweep(new ReservationReleaseRunRequest(true, at("2026-10-14T02:00:00+08:00"), 50, null, null));
+    var run =
+        sweep(
+            new ReservationReleaseRunRequest(
+                true, at("2026-10-14T02:00:00+08:00"), 50, null, null));
 
     assertRejectedByDb(
         () ->
@@ -1213,7 +1275,8 @@ class ReservationReleaseIntegrationTest {
                             + " values(?::uuid,current_setting('app.current_tenant', true)::uuid,?::uuid,"
                             + "'RELEASE','MANUAL',true,'HELD','RELEASED',1,5::numeric,5::numeric,"
                             + "now()::timestamptz)",
-                        UUID.randomUUID(), id)),
+                        UUID.randomUUID(),
+                        id)),
         "凭据必须与事实一致");
   }
 
@@ -1290,7 +1353,8 @@ class ReservationReleaseIntegrationTest {
   void 运行历史与下拉项可读() {
     UUID id = reserve("20", at("2026-10-14T01:00:00+08:00"));
     allocate(id, locationOne, "12", at("2026-10-14T01:10:00+08:00"));
-    sweep(new ReservationReleaseRunRequest(false, at("2026-10-14T02:00:00+08:00"), 50, "夜间清理", null));
+    sweep(
+        new ReservationReleaseRunRequest(false, at("2026-10-14T02:00:00+08:00"), 50, "夜间清理", null));
 
     var page = asA("read", () -> service.runs(a, 0, 20));
     assertThat(page.rows()).hasSize(1);
@@ -1357,7 +1421,14 @@ class ReservationReleaseIntegrationTest {
                 .contentType("application/json")
                 .content("{\"expiresAt\":\"2026-10-20T00:00:00+08:00\"}"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.expiresAt").value("2026-10-20T00:00:00+08:00"));
+        .andExpect(
+            result -> {
+              String value =
+                  com.jayway.jsonpath.JsonPath.read(
+                      result.getResponse().getContentAsString(), "$.expiresAt");
+              assertThat(OffsetDateTime.parse(value).toInstant())
+                  .isEqualTo(OffsetDateTime.parse("2026-10-20T00:00:00+08:00").toInstant());
+            });
 
     http.perform(
             get("/warehouse/inventory/reservations/release-capabilities")
@@ -1392,15 +1463,23 @@ class ReservationReleaseIntegrationTest {
                     .create(
                         b,
                         new ReservationModels.ReservationCreateInput(
-                            "TRADE", "SALES_ORDER", UUID.randomUUID(), "SO-B",
-                            idFor(b, 1), idFor(b, 3), new BigDecimal("10"), null,
-                            at("2026-10-13T00:00:00+08:00"), null))
+                            "TRADE",
+                            "SALES_ORDER",
+                            UUID.randomUUID(),
+                            "SO-B",
+                            idFor(b, 1),
+                            idFor(b, 3),
+                            new BigDecimal("10"),
+                            null,
+                            at("2026-10-13T00:00:00+08:00"),
+                            null))
                     .id());
     asB(
         "update",
         () ->
             allocations.allocate(
-                b, theirs,
+                b,
+                theirs,
                 new ReservationAllocationModels.ReservationAllocationCreateInput(
                     idFor(b, 5), idFor(b, 6), idFor(b, 8), new BigDecimal("10"), null, null)));
 
@@ -1410,25 +1489,29 @@ class ReservationReleaseIntegrationTest {
             "read",
             () ->
                 service.candidates(
-                    b, new ReservationReleaseQuery(null, null, null, 0, 50, at("2026-10-14T02:00:00+08:00"))));
-    assertThat(theirCandidates.rows()).extracting(ReservationReleaseCandidateRow::reservationId)
+                    b,
+                    new ReservationReleaseQuery(
+                        null, null, null, 0, 50, at("2026-10-14T02:00:00+08:00"))));
+    assertThat(theirCandidates.rows())
+        .extracting(ReservationReleaseCandidateRow::reservationId)
         .containsExactly(theirs)
         .doesNotContain(mine);
     assertThat(theirCandidates.summary().overdueCount()).isEqualTo(1);
 
     // B 拿着 A 的预占 id 释放 → 404（给 403 等于确认「这条存在、只是不归你管」）
-    assertThatThrownBy(
-            () ->
-                asB(
-                    "update",
-                    () -> service.release(b, mine, user, full())))
+    assertThatThrownBy(() -> asB("update", () -> service.release(b, mine, user, full())))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不存在或无权查看");
 
     // B 的清理动不到 A 的预占
     asB(
         "update",
-        () -> service.expireRun(b, user, new ReservationReleaseRunRequest(false, at("2026-10-14T05:00:00+08:00"), 50, null, null)));
+        () ->
+            service.expireRun(
+                b,
+                user,
+                new ReservationReleaseRunRequest(
+                    false, at("2026-10-14T05:00:00+08:00"), 50, null, null)));
     var mineAfter =
         asA(
             "read",
@@ -1490,8 +1573,7 @@ class ReservationReleaseIntegrationTest {
     // 池只有 1 条连接：交替跑两个租户，若上下文没随连接归还而重置，
     // 第二段的查询会读到第一段的数据（或直接被 RLS 拒掉）。
     for (int i = 0; i < 3; i++) {
-      var mineRecords =
-          asA("read", () -> service.records(a, null, 0, 50));
+      var mineRecords = asA("read", () -> service.records(a, null, 0, 50));
       assertThat(mineRecords.rows()).hasSize(1);
       assertThat(mineRecords.rows().get(0).reservationId()).isEqualTo(mine);
 
@@ -1504,7 +1586,8 @@ class ReservationReleaseIntegrationTest {
               () ->
                   service.candidates(
                       b,
-                      new ReservationReleaseQuery(null, null, null, 0, 50, at("2026-10-14T02:00:00+08:00"))));
+                      new ReservationReleaseQuery(
+                          null, null, null, 0, 50, at("2026-10-14T02:00:00+08:00"))));
       assertThat(theirCandidates.rows()).isEmpty();
 
       var mineCandidatesAgain =
@@ -1513,7 +1596,8 @@ class ReservationReleaseIntegrationTest {
               () ->
                   service.candidates(
                       a,
-                      new ReservationReleaseQuery(null, null, null, 0, 50, at("2026-10-14T02:00:00+08:00"))));
+                      new ReservationReleaseQuery(
+                          null, null, null, 0, 50, at("2026-10-14T02:00:00+08:00"))));
       assertThat(mineCandidatesAgain.summary().terminalReleasedCount()).isEqualTo(1);
     }
   }

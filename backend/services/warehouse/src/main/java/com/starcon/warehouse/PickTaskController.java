@@ -18,10 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
  * 8.3.2.1 拣货任务入口。
  *
  * <p>命名空间 {@code /warehouse/pick-tasks}。<b>刻意不挂在 {@code outbound-orders} 之下</b>：
- * 出库单是履约单据（8.3.1.x），拣货任务是现场作业工单，两者的生命周期不一样
- * ——单据取消后工单还在，单据在「待复核」时工单已结束。挂在一条枝下会让
- * 「拣货任务」在契约上看起来像出库单的一个子资源，而实际上它横跨 8.3.2.1 与
- * 8.3.2.2（波次未交付，但合并拣货同样作用在这张任务上）。
+ * 出库单是履约单据（8.3.1.x），拣货任务是现场作业工单，两者的生命周期不一样 ——单据取消后工单还在，单据在「待复核」时工单已结束。挂在一条枝下会让
+ * 「拣货任务」在契约上看起来像出库单的一个子资源，而实际上它横跨 8.3.2.1 与 8.3.2.2（波次未交付，但合并拣货同样作用在这张任务上）。
  *
  * <p>十个形状，刻意逐个列出、不做通配：
  *
@@ -39,19 +37,15 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>{@code POST /{id}/cancel} 取消（<b>不动库存</b>）
  * </ul>
  *
- * <p>刻意<b>没有</b> PUT / DELETE：拣货明细与实拣记录是事实（V110 的 append-only
- * 守卫会直接拒），已完成的任务是交给复核的凭据。要更正就「重开 + 补拣」，
+ * <p>刻意<b>没有</b> PUT / DELETE：拣货明细与实拣记录是事实（V110 的 append-only 守卫会直接拒），已完成的任务是交给复核的凭据。要更正就「重开 + 补拣」，
  * 要放弃就取消留原因。
  *
- * <p>权限码<b>复用</b> {@code warehouse.inventory.read} / {@code warehouse.inventory.update}，
- * 不新起 {@code warehouse.picking.*}：identity 只注册了 {@code warehouse.inventory} 与
- * {@code warehouse.facilities} 两个页面资源的权限码（V8 / V69 / V77），用一个
- * <b>没有被注册</b>的码会让连 OWNER 都 403 —— 8.1.2.1 车道就踩过这个坑并在台账里
- * 记了原因。拣货属「出入库作业」这同一族，与 8.2.1.1 收货单、8.3.1.1 出库单、
- * 8.3.4.1 首程发货四个兄弟模块用同一个前缀。
+ * <p>权限码<b>复用</b> {@code warehouse.inventory.read} / {@code warehouse.inventory.update}， 不新起 {@code
+ * warehouse.picking.*}：identity 只注册了 {@code warehouse.inventory} 与 {@code warehouse.facilities}
+ * 两个页面资源的权限码（V8 / V69 / V77），用一个 <b>没有被注册</b>的码会让连 OWNER 都 403 —— 8.1.2.1 车道就踩过这个坑并在台账里
+ * 记了原因。拣货属「出入库作业」这同一族，与 8.2.1.1 收货单、8.3.1.1 出库单、 8.3.4.1 首程发货四个兄弟模块用同一个前缀。
  *
- * <p>写权限单列：登记实拣会真的把货从一个库位搬到打包区、预占跟着走，
- * 不是读权限能带过去的。
+ * <p>写权限单列：登记实拣会真的把货从一个库位搬到打包区、预占跟着走， 不是读权限能带过去的。
  */
 @RestController
 @RequestMapping("/warehouse/pick-tasks")
@@ -72,11 +66,9 @@ public class PickTaskController {
   }
 
   /**
-   * 能力声明：路径优化口径、库存动作边界（<b>balance 不变、预占不释放</b>）、
-   * 与 8.5.2.1 那两条建议的对应关系，以及上游下游的可用性。
+   * 能力声明：路径优化口径、库存动作边界（<b>balance 不变、预占不释放</b>）、 与 8.5.2.1 那两条建议的对应关系，以及上游下游的可用性。
    *
-   * <p>存在的理由与既有 warehouse 模块一致：把「哪些输入真有依据」「哪条不能填默认值」
-   * 显式报出来，而不是让调用方从 400 或空数组里猜。
+   * <p>存在的理由与既有 warehouse 模块一致：把「哪些输入真有依据」「哪条不能填默认值」 显式报出来，而不是让调用方从 400 或空数组里猜。
    */
   @GetMapping("/capabilities")
   public PickTaskCapabilities capabilities(
@@ -87,8 +79,7 @@ public class PickTaskController {
   /**
    * 生成拣货任务：读 8.3.1.1 的交接请求 + 库存分配结果，按库位层级路径排出拣货顺序。
    *
-   * <p><b>不动库存</b>：货还在原库位、预占不变。实拣在 {@code /picks} 里才发生。
-   * 没有交接请求就没有任务 —— 凭空生成一张拣货任务在账上说不通。
+   * <p><b>不动库存</b>：货还在原库位、预占不变。实拣在 {@code /picks} 里才发生。 没有交接请求就没有任务 —— 凭空生成一张拣货任务在账上说不通。
    */
   @PostMapping
   public PickTaskCreated generate(
@@ -111,8 +102,7 @@ public class PickTaskController {
     return call(
         auth,
         "inventory.read",
-        a ->
-            pickTasks.page(warehouseId, status, assigneeUserId, keyword, sort, page, size));
+        a -> pickTasks.page(warehouseId, status, assigneeUserId, keyword, sort, page, size));
   }
 
   /** 详情：路径计划段 + 实拣（实际库位/批次/序列号）+ 异常 + 时间线 + 路径报告。 */
@@ -133,11 +123,9 @@ public class PickTaskController {
   }
 
   /**
-   * 登记实拣：把货从<b>实际</b>取货库位搬到打包区（on_hand 与 reserved 一起走，
-   * balance 层净变化为 0，所以不写 inventory_entry）。
+   * 登记实拣：把货从<b>实际</b>取货库位搬到打包区（on_hand 与 reserved 一起走， balance 层净变化为 0，所以不写 inventory_entry）。
    *
-   * <p>实际库位允许与计划不同：分配是建议，现场是事实。真正被拒的是「那个库位上
-   * 根本没有这件货」与「拣超过本段计划」。
+   * <p>实际库位允许与计划不同：分配是建议，现场是事实。真正被拒的是「那个库位上 根本没有这件货」与「拣超过本段计划」。
    */
   @PostMapping("/{id}/picks")
   public PickTaskPickRow recordPick(
@@ -164,14 +152,15 @@ public class PickTaskController {
       @PathVariable UUID exceptionId,
       @Valid @RequestBody PickTaskResolveInput input) {
     return call(
-        auth, "inventory.update", a -> pickTasks.resolveException(id, exceptionId, input, a.userId()));
+        auth,
+        "inventory.update",
+        a -> pickTasks.resolveException(id, exceptionId, input, a.userId()));
   }
 
   /**
    * 完成拣货：出库单只推到「待复核」（8.3.3.1）。
    *
-   * <p>没有「强制完成」：一个 9/10 的任务强行提交，复核看到的仍然是缺件，
-   * 而缺件的原因（本该缺货、还是有人漏拣）在那一刻已经分不清。
+   * <p>没有「强制完成」：一个 9/10 的任务强行提交，复核看到的仍然是缺件， 而缺件的原因（本该缺货、还是有人漏拣）在那一刻已经分不清。
    */
   @PostMapping("/{id}/complete")
   public PickTaskDetail complete(

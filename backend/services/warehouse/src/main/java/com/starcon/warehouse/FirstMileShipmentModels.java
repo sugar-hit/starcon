@@ -24,13 +24,10 @@ import java.util.UUID;
  *
  * <ol>
  *   <li><b>货权与成本的关键节点</b>：{@code incoterm}（成本转嫁方式）与 {@code riskBearer}
- *       （风险承担方）从「已发出」那一刻起决定利润口径，因此**入库、进契约、可查询**，
- *       不是页面上写死的展示项。DB 层钉死 EXW 只能配 BUYER、DDP 只能配 SELLER。
- *   <li><b>发出不动在手</b>：头程货在发出前**根本没进过我方库存账**（它来自供应商或本租户
- *       另一张收货单，不是从在手扣出来的）。所以发出只登记在途腿，<b>不扣在手</b>；
+ *       （风险承担方）从「已发出」那一刻起决定利润口径，因此**入库、进契约、可查询**， 不是页面上写死的展示项。DB 层钉死 EXW 只能配 BUYER、DDP 只能配 SELLER。
+ *   <li><b>发出不动在手</b>：头程货在发出前**根本没进过我方库存账**（它来自供应商或本租户 另一张收货单，不是从在手扣出来的）。所以发出只登记在途腿，<b>不扣在手</b>；
  *       到货入库由 7.5.1.2 的 arrive 负责。不说清的话「发出后在手没少」会被读成账丢货。
- *   <li><b>已发出是终态</b>：在途腿已在 7.5.1.2 名下，回退状态会让货权记录与在途对不上。
- *       要改这批货走 7.5.1.2 的差异登记，不是抹掉发运单。
+ *   <li><b>已发出是终态</b>：在途腿已在 7.5.1.2 名下，回退状态会让货权记录与在途对不上。 要改这批货走 7.5.1.2 的差异登记，不是抹掉发运单。
  * </ol>
  */
 public final class FirstMileShipmentModels {
@@ -39,14 +36,12 @@ public final class FirstMileShipmentModels {
   /**
    * 发运单状态词表。与 {@code first_mile_shipment.status} 的 CHECK 逐值对应。
    *
-   * <p>合法转换只有这一张表（{@link #allowedNext} 是唯一真相，服务层与前端共用）：
-   * {@code DRAFT → DRAFT / CONFIRMED / CANCELLED}、
-   * {@code CONFIRMED → CONFIRMED / DISPATCHED / CANCELLED}、
-   * {@code DISPATCHED} 与 {@code CANCELLED} 为终态。
+   * <p>合法转换只有这一张表（{@link #allowedNext} 是唯一真相，服务层与前端共用）： {@code DRAFT → DRAFT / CONFIRMED /
+   * CANCELLED}、 {@code CONFIRMED → CONFIRMED / DISPATCHED / CANCELLED}、 {@code DISPATCHED} 与 {@code
+   * CANCELLED} 为终态。
    *
    * <p>两个<b>自环</b>（DRAFT→DRAFT、CONFIRMED→CONFIRMED）不是状态变更，而是**改单**：
-   * 改单整份替换明细但状态不变。前端据此判断「这张单还能不能编辑」——
-   * 少了自环，草稿单会被误判成不可改，而草稿恰恰是最该能改的那一张。
+   * 改单整份替换明细但状态不变。前端据此判断「这张单还能不能编辑」—— 少了自环，草稿单会被误判成不可改，而草稿恰恰是最该能改的那一张。
    */
   public enum ShipmentStatus {
     /** 草稿：可自由改单，不动任何账。 */
@@ -74,8 +69,7 @@ public final class FirstMileShipmentModels {
           return s;
         }
       }
-      throw new IllegalArgumentException(
-          "未知的头程发运单状态：" + raw + "，可选：" + String.join("、", names()));
+      throw new IllegalArgumentException("未知的头程发运单状态：" + raw + "，可选：" + String.join("、", names()));
     }
 
     public static List<String> names() {
@@ -96,12 +90,10 @@ public final class FirstMileShipmentModels {
   /**
    * 货物来源词表。
    *
-   * <p>{@code GOODS_RECEIPT} 指 8.2.1.1 收货单（已交付，迁移 V70），建单时会真去校验
-   * 来源收货单存在、属于本租户，且每一行指明的实收批次真的属于那张收货单。
+   * <p>{@code GOODS_RECEIPT} 指 8.2.1.1 收货单（已交付，迁移 V70），建单时会真去校验 来源收货单存在、属于本租户，且每一行指明的实收批次真的属于那张收货单。
    *
-   * <p>{@code SUPPLIER_PURCHASE} 指 6 采购（**6.1–6.6 全部 36 个模块未交付**），
-   * 在 {@link FirstMileCapabilities} 里显式 {@code available=false} 并给出原因，
-   * **不建占位表、不返回空集冒充成功**，create 直接拒绝该来源。
+   * <p>{@code SUPPLIER_PURCHASE} 指 6 采购（**6.1–6.6 全部 36 个模块未交付**）， 在 {@link FirstMileCapabilities}
+   * 里显式 {@code available=false} 并给出原因， **不建占位表、不返回空集冒充成功**，create 直接拒绝该来源。
    */
   public enum ShipmentSourceType {
     /** 8.2.1.1 收货单。已交付，可真实验证来源单据与批次存在。 */
@@ -181,8 +173,7 @@ public final class FirstMileShipmentModels {
   /**
    * 国际贸易术语词表。与 {@code first_mile_shipment.incoterm} 的 CHECK 逐值对应。
    *
-   * <p>这是**成本转嫁方式**的权威词表：不同术语下运费、保险、关税由谁付、
-   * 报价口径完全不同，直接决定 12 财务与 13 利润的「真实成本」。
+   * <p>这是**成本转嫁方式**的权威词表：不同术语下运费、保险、关税由谁付、 报价口径完全不同，直接决定 12 财务与 13 利润的「真实成本」。
    */
   public enum Incoterm {
     EXW("EXW 工厂交货", "SELLER_TO_BUYER_AT_SELLER_PREMISES"),
@@ -231,9 +222,8 @@ public final class FirstMileShipmentModels {
   /**
    * 风险承担方词表。
    *
-   * <p>与 {@link Incoterm} 配对使用。DB 层钉死两条真实约束：
-   * {@code EXW} 只能配 {@code BUYER}（风险在卖方场所即转移），
-   * {@code DDP} 只能配 {@code SELLER}（卖方负责到目的地）。
+   * <p>与 {@link Incoterm} 配对使用。DB 层钉死两条真实约束： {@code EXW} 只能配 {@code BUYER}（风险在卖方场所即转移）， {@code DDP}
+   * 只能配 {@code SELLER}（卖方负责到目的地）。
    */
   public enum RiskBearer {
     SELLER("卖方承担"),
@@ -267,14 +257,12 @@ public final class FirstMileShipmentModels {
   /**
    * 维度接入情况。
    *
-   * <p>沿用仓库既有约定（8.2.1.1 {@code ReceiptSourceCapability}、7.5.1.2 capabilities）：
-   * {@code available=false} 时 {@code href} 仍然给出 —— 它是**路由契约**而不是死链，
-   * 指明这件事落在哪个模块、上游交付后直接可用；{@code note} 说明当前为什么不可用，
-   * 避免界面上出现点下去没反应或 404 的按钮。
+   * <p>沿用仓库既有约定（8.2.1.1 {@code ReceiptSourceCapability}、7.5.1.2 capabilities）： {@code
+   * available=false} 时 {@code href} 仍然给出 —— 它是**路由契约**而不是死链， 指明这件事落在哪个模块、上游交付后直接可用；{@code note}
+   * 说明当前为什么不可用， 避免界面上出现点下去没反应或 404 的按钮。
    *
-   * <p>名字刻意带 {@code FirstMile} 前缀：7.1.1.2 已经有一个 {@code DimensionCapability}，
-   * 而四个服务的 schema 被 codegen 拍平进同一命名空间，**重名会被静默覆盖且没有任何警告**
-   * （AGENTS.md 契约纪律）。本类型照抄那套形状，但必须换一个自己的名字。
+   * <p>名字刻意带 {@code FirstMile} 前缀：7.1.1.2 已经有一个 {@code DimensionCapability}， 而四个服务的 schema 被
+   * codegen 拍平进同一命名空间，**重名会被静默覆盖且没有任何警告** （AGENTS.md 契约纪律）。本类型照抄那套形状，但必须换一个自己的名字。
    */
   public record FirstMileDimension(
       String value,
@@ -300,11 +288,9 @@ public final class FirstMileShipmentModels {
   public record RiskBearerOption(String value, String label) {}
 
   /**
-   * 头程发运能力：来源维度接入情况、四态状态机、运输方式与贸易术语词表、
-   * **未交付依赖的逐条声明**，以及四条必须如实讲清楚的口径说明。
+   * 头程发运能力：来源维度接入情况、四态状态机、运输方式与贸易术语词表、 **未交付依赖的逐条声明**，以及四条必须如实讲清楚的口径说明。
    *
-   * <p>前端据此渲染来源下拉、运输方式选择、货权/风险选择与提示，
-   * 而不是把规则硬编码在界面上 —— 规则改了就该只改一处。
+   * <p>前端据此渲染来源下拉、运输方式选择、货权/风险选择与提示， 而不是把规则硬编码在界面上 —— 规则改了就该只改一处。
    */
   public record FirstMileCapabilities(
       List<FirstMileDimension> sources,
@@ -506,9 +492,8 @@ public final class FirstMileShipmentModels {
   /**
    * 可发批次候选项（8.2.1.1 逐次实收行）。
    *
-   * <p>{@code shippableQuantity} = 实收量 − 已被其他发运单发走的量。头程发运的输入是
-   * 「选择货物与批次」，而批次挂在**逐次实收**上（同一 SKU 分三车到货可以是三个批次），
-   * 所以候选项必须精确到实收行，而不是精确到 SKU。
+   * <p>{@code shippableQuantity} = 实收量 − 已被其他发运单发走的量。头程发运的输入是 「选择货物与批次」，而批次挂在**逐次实收**上（同一 SKU
+   * 分三车到货可以是三个批次）， 所以候选项必须精确到实收行，而不是精确到 SKU。
    */
   public record SourceCandidateRow(
       UUID receiptEventLineId,
@@ -571,8 +556,7 @@ public final class FirstMileShipmentModels {
   /**
    * 建单/改单的一条明细。
    *
-   * <p>{@code sourceReceiptEventLineId} 指明「哪一次实收的哪一批货」——
-   * 收到货但没登记过实收的货**发不走**（没有实物批次就没有可追的货权线索）。
+   * <p>{@code sourceReceiptEventLineId} 指明「哪一次实收的哪一批货」—— 收到货但没登记过实收的货**发不走**（没有实物批次就没有可追的货权线索）。
    */
   public record FirstMileLineRequest(
       UUID skuId,
@@ -625,8 +609,7 @@ public final class FirstMileShipmentModels {
   /**
    * 发出请求：**货权转移与转在途就在这一刻发生**。
    *
-   * <p>{@code lines} 给出时逐行给实际发出量（允许部分发运）；不给时全部按计划量发出。
-   * 两种都是真实行为，界面上必须显示每行实际发出量，不允许「发了多少」不可见。
+   * <p>{@code lines} 给出时逐行给实际发出量（允许部分发运）；不给时全部按计划量发出。 两种都是真实行为，界面上必须显示每行实际发出量，不允许「发了多少」不可见。
    *
    * <p>{@code shippedAt} 不给时取单上的 {@code departAt}，再不给才取当前时刻。
    */
@@ -640,8 +623,7 @@ public final class FirstMileShipmentModels {
   public record FirstMileDispatchLineRequest(UUID lineId, BigDecimal shippedQuantity) {}
 
   /** 取消请求：必须给原因（货权与在途都会因取消而变）。 */
-  public record FirstMileCancelRequest(
-      Long expectedVersion, String reason, String notes) {}
+  public record FirstMileCancelRequest(Long expectedVersion, String reason, String notes) {}
 
   /** 建单/改单/确认/发出/取消后的回读结果（响应是「库里真实存了什么」）。 */
   public record FirstMileSaved(

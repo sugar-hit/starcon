@@ -145,13 +145,13 @@ describe('「还没回执」不是「回执是 0」', () => {
 
   it('hasSupplierAck 只在真的回执后为真', () => {
     expect(hasSupplierAck(order())).toBe(false);
-    expect(hasSupplierAck(order({ actualPurchaseAmount: 26, actualSupplierShippingAmount: 2 }))).toBe(
-      true,
-    );
+    expect(
+      hasSupplierAck(order({ actualPurchaseAmount: 26, actualSupplierShippingAmount: 2 })),
+    ).toBe(true);
     // 0 是有效回执
-    expect(hasSupplierAck(order({ actualPurchaseAmount: 0, actualSupplierShippingAmount: 0 }))).toBe(
-      true,
-    );
+    expect(
+      hasSupplierAck(order({ actualPurchaseAmount: 0, actualSupplierShippingAmount: 0 })),
+    ).toBe(true);
   });
 });
 
@@ -168,7 +168,9 @@ describe('偏离冻结价的金额', () => {
   });
 
   it('比预计便宜显示负偏离额', () => {
-    expect(costDrift(order({ actualPurchaseAmount: 15, actualSupplierShippingAmount: 0 }))).toBe(-5);
+    expect(costDrift(order({ actualPurchaseAmount: 15, actualSupplierShippingAmount: 0 }))).toBe(
+      -5,
+    );
     expect(driftText(-5)).toBe('-5.00');
     expect(driftText(0)).toBe('0.00');
   });
@@ -221,7 +223,11 @@ describe('告警工作台', () => {
   it('只数未处置的严重告警', () => {
     const rows = [
       alert({ severity: 'CRITICAL', status: 'OPEN' }),
-      alert({ id: '66666666-6666-6666-6666-666666666666', severity: 'CRITICAL', status: 'RESOLVED' }),
+      alert({
+        id: '66666666-6666-6666-6666-666666666666',
+        severity: 'CRITICAL',
+        status: 'RESOLVED',
+      }),
       alert({ id: '77777777-7777-7777-7777-777777777777', severity: 'WARNING', status: 'OPEN' }),
     ];
     expect(openCriticalAlertCount(rows)).toBe(1);
@@ -234,7 +240,12 @@ describe('告警工作台', () => {
 
 describe('未接线的 vendor 说人话', () => {
   const vendors = [
-    { vendorCode: 'MANUAL_ENTRY', displayName: '人工录入（已接线）', wired: true, wiringRequirement: '' },
+    {
+      vendorCode: 'MANUAL_ENTRY',
+      displayName: '人工录入（已接线）',
+      wired: true,
+      wiringRequirement: '',
+    },
     {
       vendorCode: 'ALIBABA_1688',
       displayName: '1688 开放平台（未接线）',

@@ -64,7 +64,10 @@ export function createFloor(input: AllocationFloorInput): Promise<AllocationFloo
 }
 
 /** 换版 = 收口旧档 + 开新档。没有「就地改」的入口。 */
-export function supersedeFloor(id: string, input: AllocationFloorInput): Promise<AllocationFloorSaved> {
+export function supersedeFloor(
+  id: string,
+  input: AllocationFloorInput,
+): Promise<AllocationFloorSaved> {
   return api<AllocationFloorSaved>(
     `warehouse/inventory/allocation-priority/floors/${id}/versions`,
     'POST',
@@ -128,9 +131,7 @@ export function fetchResolutions(params: {
   page?: number;
   size?: number;
 }): Promise<ResolutionPage> {
-  return api<ResolutionPage>(
-    `warehouse/inventory/allocation-priority/resolutions${query(params)}`,
-  );
+  return api<ResolutionPage>(`warehouse/inventory/allocation-priority/resolutions${query(params)}`);
 }
 
 function query(params: object): string {
@@ -252,9 +253,7 @@ export function floorStatusTone(status: string | null | undefined): string {
 
 /** 被压低一行的色调。只有真的被压低才需要被看见。 */
 export function suppressionTone(line: { suppressed: boolean | null }): string {
-  return line.suppressed
-    ? 'text-rose-600 dark:text-rose-400'
-    : 'text-muted-foreground';
+  return line.suppressed ? 'text-rose-600 dark:text-rose-400' : 'text-muted-foreground';
 }
 
 /**

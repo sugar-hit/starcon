@@ -22,13 +22,13 @@
 
 台账 `module-progress.md` 实查：
 
-| 上游（蓝图关系段写的两处） | 台账状态 | 实际归属 | 本模块怎么处理 |
-| --- | --- | --- | --- |
-| 7.1.3.1 多仓分布 | **已交付**（warehouse V55） | warehouse 服务的独立数据库 | 不跨库读（AGENTS.md 模块边界纪律）。落成本服务 `fulfillment_platform_stock_snapshot`，每行强制带 `stock_source`（MODULE_7_1_3_1 / TENANT_MAINTAINED）与 `collected_at` |
-| 2.1.1.2 平台能力矩阵 | **已交付**（channel V1 的 `platform.capabilities` 已有 `multi_channel_delivery` 字段） | channel 服务的独立数据库 | 同上，落成 `fulfillment_mcf_authorization`，带 `authorization_source`（MODULE_2_1_1_2 / TENANT_MAINTAINED） |
-| 10.1.2.1 运费计算器（成本口径） | **未开发** | — | 成本与时效参数落 `fulfillment_path_cost_profile`，由租户维护。**不从代码常量取任何金额** |
-| 9.1.1.2 订单行（决策对象） | **未开发** | — | 只存 `orderRef` / `orderLineRef` 逻辑引用，不校验订单存在性（与 trade V1「不替后续车道猜表结构」同纪律） |
-| 9.3.3.1 履约请求（下游） | **未开发** | — | 决策可确认落库但尚未下发；在 capabilities 里**显式报出不可用** |
+| 上游（蓝图关系段写的两处）      | 台账状态                                                                               | 实际归属                   | 本模块怎么处理                                                                                                                                                         |
+| ------------------------------- | -------------------------------------------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 7.1.3.1 多仓分布                | **已交付**（warehouse V55）                                                            | warehouse 服务的独立数据库 | 不跨库读（AGENTS.md 模块边界纪律）。落成本服务 `fulfillment_platform_stock_snapshot`，每行强制带 `stock_source`（MODULE_7_1_3_1 / TENANT_MAINTAINED）与 `collected_at` |
+| 2.1.1.2 平台能力矩阵            | **已交付**（channel V1 的 `platform.capabilities` 已有 `multi_channel_delivery` 字段） | channel 服务的独立数据库   | 同上，落成 `fulfillment_mcf_authorization`，带 `authorization_source`（MODULE_2_1_1_2 / TENANT_MAINTAINED）                                                            |
+| 10.1.2.1 运费计算器（成本口径） | **未开发**                                                                             | —                          | 成本与时效参数落 `fulfillment_path_cost_profile`，由租户维护。**不从代码常量取任何金额**                                                                               |
+| 9.1.1.2 订单行（决策对象）      | **未开发**                                                                             | —                          | 只存 `orderRef` / `orderLineRef` 逻辑引用，不校验订单存在性（与 trade V1「不替后续车道猜表结构」同纪律）                                                               |
+| 9.3.3.1 履约请求（下游）        | **未开发**                                                                             | —                          | 决策可确认落库但尚未下发；在 capabilities 里**显式报出不可用**                                                                                                         |
 
 16 合规与渠道侧正式接口到位后的接法：**由同步器按同一形状往这三张表写，并把来源枚举改成 MODULE_***，
 本模块的表结构与判定逻辑**不需要改动**。这句话也写进了 capabilities 响应与迁移文件头。
@@ -99,9 +99,11 @@
 ## 五、文件清单
 
 **迁移**
+
 - `backend/services/trade/src/main/resources/db/migration/V92__trade_fulfillment_routing.sql`（新增，七表 + RLS/GRANT + 五条 DB 不变量）
 
 **后端**
+
 - `backend/services/trade/src/main/java/com/starcon/trade/FulfillmentRoutingModels.java`（新增）
 - `backend/services/trade/src/main/java/com/starcon/trade/FulfillmentRoutingService.java`（新增）
 - `backend/services/trade/src/main/java/com/starcon/trade/FulfillmentRoutingController.java`（新增，13 端点）
@@ -113,9 +115,11 @@
 - `tools/codegen/catalog-contracts.py`（改：服务清单新增 trade）
 
 **契约（codegen 产物，禁止手改）**
+
 - `packages/api-contracts/src/catalog.ts`、`packages/api-contracts/src/trade.openapi.json`
 
 **前端**
+
 - `apps/web/src/app/orders/fulfillment/routing/page.tsx`（新增）
 - `apps/web/src/components/orders/fulfillment-routing-workspace.tsx`（新增）
 - `apps/web/src/components/orders/fulfillment-routing-model.ts` + `.test.ts`（新增，7 例）
@@ -124,6 +128,7 @@
 - `apps/web/src/lib/api-proxy.ts`（改：trade/ 白名单首次放行）
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md`（仅本车道那一行的状态与证据；汇总额由 sync 生成）
 
 ## 六、两处「刻意不做」及理由

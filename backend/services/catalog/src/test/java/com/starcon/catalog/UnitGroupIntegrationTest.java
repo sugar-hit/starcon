@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.*;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.*;
@@ -24,8 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.3.3.1 计量单位（字典视角）：单位组 CRUD、组成员整体替换、组内换算版本区间不重叠、
- * 按 asOf 取版本、换算查询的七个拒绝原因码、**量纲守卫在 DB 层真的会拦**，
+ * 3.3.3.1 计量单位（字典视角）：单位组 CRUD、组成员整体替换、组内换算版本区间不重叠、 按 asOf 取版本、换算查询的七个拒绝原因码、**量纲守卫在 DB 层真的会拦**，
  * 以及租户隔离三断言。
  *
  * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。
@@ -168,24 +166,26 @@ class UnitGroupIntegrationTest {
         tx(
             actor,
             () ->
-                sql.fetchOne("select id from unit_of_measure where tenant_id=? and code=?",
-                    actor.tenantId(), code) != null);
+                sql.fetchOne(
+                        "select id from unit_of_measure where tenant_id=? and code=?",
+                        actor.tenantId(),
+                        code)
+                    != null);
     if (!exists) saveUnit(code, dimension);
   }
 
   /** 单位字典的写入所有者是 UnitConversionService（V8），本模块只读它——夹具也走同一个写入口。 */
   UUID saveUnit(String code, String dimension) {
     return call(
-            actor,
-            "catalog.sku.update",
-            () ->
-                units.saveUnit(
-                        actor,
-                        null,
-                        new UnitOfMeasureInput(
-                            code, code, dimension, 0, true, true, true, true, 0))
-                    .id())
-        ;
+        actor,
+        "catalog.sku.update",
+        () ->
+            units
+                .saveUnit(
+                    actor,
+                    null,
+                    new UnitOfMeasureInput(code, code, dimension, 0, true, true, true, true, 0))
+                .id());
   }
 
   /** 组编码租户内唯一。 */
@@ -201,8 +201,7 @@ class UnitGroupIntegrationTest {
     return new UnitGroupInput(code, name, dimension, baseUnit, "", true, memberInputs, 0);
   }
 
-  UUID saveGroup(
-      String code, String dimension, String baseUnit, List<String> members) {
+  UUID saveGroup(String code, String dimension, String baseUnit, List<String> members) {
     return call(
             actor,
             "catalog.spu.update",
@@ -210,8 +209,7 @@ class UnitGroupIntegrationTest {
         .id();
   }
 
-  UnitGroupConversionInput conversionInput(
-      String unitCode, String ratio, String from, String to) {
+  UnitGroupConversionInput conversionInput(String unitCode, String ratio, String from, String to) {
     return new UnitGroupConversionInput(unitCode, new BigDecimal(ratio), from, to, "");
   }
 
@@ -233,7 +231,10 @@ class UnitGroupIntegrationTest {
             actor,
             "catalog.spu.update",
             () ->
-                groups.addConversion(actor, groupId, conversionInput(entry.getKey(), entry.getValue(), "2024-01-01", null)));
+                groups.addConversion(
+                    actor,
+                    groupId,
+                    conversionInput(entry.getKey(), entry.getValue(), "2024-01-01", null)));
     }
   }
 
@@ -257,14 +258,22 @@ class UnitGroupIntegrationTest {
                 actor,
                 groupId,
                 new UnitGroupInput(
-                    tx(actor, () -> sql.fetchOne("select code from unit_group where id=?", groupId).get("code", String.class)),
+                    tx(
+                        actor,
+                        () ->
+                            sql.fetchOne("select code from unit_group where id=?", groupId)
+                                .get("code", String.class)),
                     "重量组",
                     "WEIGHT",
                     gram,
                     "",
                     true,
                     List.of(new UnitGroupMemberInput(gram, 0), new UnitGroupMemberInput(kilo, 1)),
-                    tx(actor, () -> sql.fetchOne("select version from unit_group where id=?", groupId).get("version", Long.class)))));
+                    tx(
+                        actor,
+                        () ->
+                            sql.fetchOne("select version from unit_group where id=?", groupId)
+                                .get("version", Long.class)))));
     long before = tx(actor, groups::overview).incompleteGroupCount();
     ensureConversions(groupId, gram, Map.of(kilo, "1000"));
     // 补上换算版本后这个组不再计入缺口（用"严格变小"而不是 -1：
@@ -290,8 +299,12 @@ class UnitGroupIntegrationTest {
     assertThat(detail.group().allMembersConvertible()).isFalse();
     assertThat(detail.members()).hasSize(2);
     assertThat(detail.members().stream().filter(UnitGroupMember::base).count()).isEqualTo(1);
-    assertThat(detail.members().stream().filter(m -> m.unitCode().equals(kilo)).findFirst().orElseThrow()
-            .currentQuantityPerBase())
+    assertThat(
+            detail.members().stream()
+                .filter(m -> m.unitCode().equals(kilo))
+                .findFirst()
+                .orElseThrow()
+                .currentQuantityPerBase())
         .isNull();
 
     ensureConversions(groupId, gram, Map.of(kilo, "1000"));
@@ -323,22 +336,17 @@ class UnitGroupIntegrationTest {
 
     // 按成员单位名搜得到这个组：运营手里只有一个单位（「千克」），要问的是它在哪个组里。
     assertThat(
-            tx(actor, () -> groups.list(new UnitGroupQuery(kilo, null, null, 0, 20))).items()
+            tx(actor, () -> groups.list(new UnitGroupQuery(kilo, null, null, 0, 20)))
+                .items()
                 .stream()
                 .anyMatch(r -> r.id().equals(groupId)))
         .isTrue();
     // 按不存在的关键词搜不到。
-    assertThat(
-            tx(actor, () -> groups.list(new UnitGroupQuery("不存在的组", null, null, 0, 20))).items())
+    assertThat(tx(actor, () -> groups.list(new UnitGroupQuery("不存在的组", null, null, 0, 20))).items())
         .noneMatch(r -> r.id().equals(groupId));
     // LIKE 通配符必须被转义：搜「%」时它是用户要找的那一个字，不是通配符。
     // 不转义的话这条搜索会几乎匹配全表。
-    var escaped =
-        tx(
-            actor,
-            () ->
-                groups.list(
-                    new UnitGroupQuery("%", null, null, 0, 200)));
+    var escaped = tx(actor, () -> groups.list(new UnitGroupQuery("%", null, null, 0, 200)));
     assertThat(escaped.items()).noneMatch(r -> r.id().equals(groupId));
   }
 
@@ -353,15 +361,26 @@ class UnitGroupIntegrationTest {
     UUID groupId = saveGroup(uniqueGroup("重量组"), "WEIGHT", gram, List.of(gram, kilo));
     ensureConversions(groupId, gram, Map.of(kilo, "1000"));
 
-    var code = tx(actor, () -> sql.fetchOne("select code from unit_group where id=?", groupId).get("code", String.class));
-    long version = tx(actor, () -> sql.fetchOne("select version from unit_group where id=?", groupId).get("version", Long.class));
+    var code =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne("select code from unit_group where id=?", groupId)
+                    .get("code", String.class));
+    long version =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne("select version from unit_group where id=?", groupId)
+                    .get("version", Long.class));
 
     // 当前仍开放生效的换算版本删不掉：删了等于静默把千克变成不可换算。
     var kiloVersions =
         tx(
             actor,
             () ->
-                sql.fetch(
+                sql
+                    .fetch(
                         "select id from unit_group_conversion where tenant_id=? and group_id=? and unit_code=?",
                         actor.tenantId(),
                         groupId,
@@ -372,7 +391,11 @@ class UnitGroupIntegrationTest {
     assertThat(kiloVersions).isNotEmpty();
     for (UUID versionId : kiloVersions) {
       assertThatThrownBy(
-              () -> call(actor, "catalog.spu.update", () -> groups.deleteConversion(actor, groupId, versionId)))
+              () ->
+                  call(
+                      actor,
+                      "catalog.spu.update",
+                      () -> groups.deleteConversion(actor, groupId, versionId)))
           .isInstanceOf(ResponseStatusException.class)
           .hasMessageContaining("不能删除当前仍生效");
     }
@@ -381,7 +404,9 @@ class UnitGroupIntegrationTest {
     call(
         actor,
         "catalog.spu.update",
-        () -> groups.addConversion(actor, groupId, conversionInput(kilo, "1000", "2023-01-01", "2023-12-31")));
+        () ->
+            groups.addConversion(
+                actor, groupId, conversionInput(kilo, "1000", "2023-01-01", "2023-12-31")));
     UUID historical =
         tx(
             actor,
@@ -398,7 +423,8 @@ class UnitGroupIntegrationTest {
             tx(
                 actor,
                 () ->
-                    sql.fetch(
+                    sql
+                        .fetch(
                             "select id from unit_group_conversion where tenant_id=? and group_id=? and unit_code=?",
                             actor.tenantId(),
                             groupId,
@@ -425,7 +451,8 @@ class UnitGroupIntegrationTest {
                         gram,
                         "备注",
                         true,
-                        List.of(new UnitGroupMemberInput(ton, 0), new UnitGroupMemberInput(gram, 1)),
+                        List.of(
+                            new UnitGroupMemberInput(ton, 0), new UnitGroupMemberInput(gram, 1)),
                         version)));
     assertThat(saved.memberCount()).isEqualTo(2);
     var detail = tx(actor, () -> groups.detail(groupId, null));
@@ -459,14 +486,24 @@ class UnitGroupIntegrationTest {
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("必须在本组成员里");
 
-    long version = tx(actor, () -> sql.fetchOne("select version from unit_group where id=?", groupId).get("version", Long.class));
+    long version =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne("select version from unit_group where id=?", groupId)
+                    .get("version", Long.class));
     // 改编码 → 400：下游按编码引用换算关系。
     assertThatThrownBy(
             () ->
                 call(
                     actor,
                     "catalog.spu.update",
-                    () -> groups.save(actor, groupId, groupInput(uniqueGroup("改了"), "重量组", "WEIGHT", gram, List.of(gram, kilo)))))
+                    () ->
+                        groups.save(
+                            actor,
+                            groupId,
+                            groupInput(
+                                uniqueGroup("改了"), "重量组", "WEIGHT", gram, List.of(gram, kilo)))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("编码建后不可修改");
 
@@ -480,7 +517,15 @@ class UnitGroupIntegrationTest {
                         groups.save(
                             actor,
                             groupId,
-                            new UnitGroupInput(code, "重量组", "LENGTH", gram, "", true, List.of(new UnitGroupMemberInput(gram, 0)), version))))
+                            new UnitGroupInput(
+                                code,
+                                "重量组",
+                                "LENGTH",
+                                gram,
+                                "",
+                                true,
+                                List.of(new UnitGroupMemberInput(gram, 0)),
+                                version))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("量纲建后不可修改");
 
@@ -494,9 +539,18 @@ class UnitGroupIntegrationTest {
                         groups.save(
                             actor,
                             groupId,
-                            new UnitGroupInput(code, "重量组", "WEIGHT", gram, "", true, List.of(new UnitGroupMemberInput(gram, 0)), version + 5))))
+                            new UnitGroupInput(
+                                code,
+                                "重量组",
+                                "WEIGHT",
+                                gram,
+                                "",
+                                true,
+                                List.of(new UnitGroupMemberInput(gram, 0)),
+                                version + 5))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409));
   }
 
   @Test
@@ -511,7 +565,12 @@ class UnitGroupIntegrationTest {
                 call(
                     actor,
                     "catalog.spu.update",
-                    () -> groups.save(actor, null, groupInput(uniqueGroup("重量组"), "重量组", "WEIGHT", gram, List.of(gram, piece)))))
+                    () ->
+                        groups.save(
+                            actor,
+                            null,
+                            groupInput(
+                                uniqueGroup("重量组"), "重量组", "WEIGHT", gram, List.of(gram, piece)))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("量纲不匹配")
         .hasMessageContaining("件");
@@ -531,23 +590,30 @@ class UnitGroupIntegrationTest {
     call(
         actor,
         "catalog.spu.update",
-        () -> groups.addConversion(actor, groupId, conversionInput(kilo, "1000", "2024-01-01", null)));
+        () ->
+            groups.addConversion(
+                actor, groupId, conversionInput(kilo, "1000", "2024-01-01", null)));
     // 区间重叠 → 409，并列出冲突区间。
     assertThatThrownBy(
             () ->
                 call(
                     actor,
                     "catalog.spu.update",
-                    () -> groups.addConversion(actor, groupId, conversionInput(kilo, "1000", "2025-01-01", null))))
+                    () ->
+                        groups.addConversion(
+                            actor, groupId, conversionInput(kilo, "1000", "2025-01-01", null))))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409))
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(409))
         .hasMessageContaining("生效区间与已有版本重叠");
 
     // 不重叠的区间（2000 年前）→ 成功。
     call(
         actor,
         "catalog.spu.update",
-        () -> groups.addConversion(actor, groupId, conversionInput(kilo, "1000", "2000-01-01", "2023-12-31")));
+        () ->
+            groups.addConversion(
+                actor, groupId, conversionInput(kilo, "1000", "2000-01-01", "2023-12-31")));
     // 详情里两版都在，按生效起始日倒序。
     var detail = tx(actor, () -> groups.detail(groupId, null));
     assertThat(detail.conversions()).hasSize(2);
@@ -559,7 +625,9 @@ class UnitGroupIntegrationTest {
                 call(
                     actor,
                     "catalog.spu.update",
-                    () -> groups.addConversion(actor, groupId, conversionInput(kilo, "0", "2026-01-01", null))))
+                    () ->
+                        groups.addConversion(
+                            actor, groupId, conversionInput(kilo, "0", "2026-01-01", null))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("必须大于 0");
 
@@ -569,7 +637,9 @@ class UnitGroupIntegrationTest {
                 call(
                     actor,
                     "catalog.spu.update",
-                    () -> groups.addConversion(actor, groupId, conversionInput(gram, "1", "2026-01-01", null))))
+                    () ->
+                        groups.addConversion(
+                            actor, groupId, conversionInput(gram, "1", "2026-01-01", null))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不需要换算版本");
 
@@ -581,7 +651,9 @@ class UnitGroupIntegrationTest {
                 call(
                     actor,
                     "catalog.spu.update",
-                    () -> groups.addConversion(actor, groupId, conversionInput(ton, "1000", "2026-01-01", null))))
+                    () ->
+                        groups.addConversion(
+                            actor, groupId, conversionInput(ton, "1000", "2026-01-01", null))))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不是单位组")
         .hasMessageContaining("成员");
@@ -679,7 +751,11 @@ class UnitGroupIntegrationTest {
 
     // 1 吨 → 克 = 1 × 1000000 ÷ 1 = 1000000。
     var result =
-        tx(actor, () -> groups.convert(new UnitGroupConvertInput(ton, gram, new BigDecimal("1"), "2026-06-01")));
+        tx(
+            actor,
+            () ->
+                groups.convert(
+                    new UnitGroupConvertInput(ton, gram, new BigDecimal("1"), "2026-06-01")));
     assertThat(result.denied()).isFalse();
     assertThat(result.convertedQuantity()).isEqualByComparingTo(new BigDecimal("1000000.000000"));
     assertThat(result.groupId()).isEqualTo(groupId);
@@ -688,7 +764,11 @@ class UnitGroupIntegrationTest {
 
     // 2 磅这种链式：这里用 2 吨 → 千克 = 2 × 1000000 ÷ 1000 = 2000。
     var chain =
-        tx(actor, () -> groups.convert(new UnitGroupConvertInput(ton, kilo, new BigDecimal("2"), "2026-06-01")));
+        tx(
+            actor,
+            () ->
+                groups.convert(
+                    new UnitGroupConvertInput(ton, kilo, new BigDecimal("2"), "2026-06-01")));
     assertThat(chain.denied()).isFalse();
     assertThat(chain.convertedQuantity()).isEqualByComparingTo(new BigDecimal("2000.000000"));
   }
@@ -705,20 +785,33 @@ class UnitGroupIntegrationTest {
     ensureConversions(groupId, gram, Map.of(kilo, "1000"));
 
     // 同单位 → SELF_CONVERSION（不是错误，是"无需换算"）。
-    var self = tx(actor, () -> groups.convert(new UnitGroupConvertInput(kilo, kilo, new BigDecimal("1"), "2026-06-01")));
+    var self =
+        tx(
+            actor,
+            () ->
+                groups.convert(
+                    new UnitGroupConvertInput(kilo, kilo, new BigDecimal("1"), "2026-06-01")));
     assertThat(self.denied()).isTrue();
     assertThat(self.denyCode()).isEqualTo(UnitGroupRules.DENY_SELF_CONVERSION);
 
     // 未登记单位 → UNIT_UNREGISTERED。
     var unregistered =
-        tx(actor, () -> groups.convert(new UnitGroupConvertInput("不存在的单位", kilo, new BigDecimal("1"), "2026-06-01")));
+        tx(
+            actor,
+            () ->
+                groups.convert(
+                    new UnitGroupConvertInput("不存在的单位", kilo, new BigDecimal("1"), "2026-06-01")));
     assertThat(unregistered.denied()).isTrue();
     assertThat(unregistered.denyCode()).isEqualTo(UnitGroupRules.DENY_UNIT_UNREGISTERED);
 
     // 量纲不匹配（件 COUNT vs 千克 WEIGHT）→ DIMENSION_MISMATCH，蓝图点名的硬约束。
     // 注意这条在「同一个组」之前就给出答案：用户问的正是「为什么换不了」。
     var mismatch =
-        tx(actor, () -> groups.convert(new UnitGroupConvertInput(piece, kilo, new BigDecimal("1"), "2026-06-01")));
+        tx(
+            actor,
+            () ->
+                groups.convert(
+                    new UnitGroupConvertInput(piece, kilo, new BigDecimal("1"), "2026-06-01")));
     assertThat(mismatch.denied()).isTrue();
     assertThat(mismatch.denyCode()).isEqualTo(UnitGroupRules.DENY_DIMENSION_MISMATCH);
     assertThat(mismatch.denyMessage()).contains("量纲不匹配").contains("件").contains("千克");
@@ -741,19 +834,34 @@ class UnitGroupIntegrationTest {
 
     // 毫克与千克同量纲但不同组 → NOT_SAME_GROUP。
     var notSame =
-        tx(actor, () -> groups.convert(new UnitGroupConvertInput(mg, kilo, new BigDecimal("1"), "2026-06-01")));
+        tx(
+            actor,
+            () ->
+                groups.convert(
+                    new UnitGroupConvertInput(mg, kilo, new BigDecimal("1"), "2026-06-01")));
     assertThat(notSame.denied()).isTrue();
     assertThat(notSame.denyCode()).isEqualTo(UnitGroupRules.DENY_NOT_SAME_GROUP);
 
     // 组内换算版本从 2024-01-01 起生效：查 2023 年没有生效版本 → NO_EFFECTIVE_VERSION，
     // 绝不能回退到"最近的一版"（那会让一张按过期比例生成的采购单看起来完全正常）。
     var noVersion =
-        tx(actor, () -> groups.convert(new UnitGroupConvertInput(kilo, gram, new BigDecimal("1"), "2023-06-01")));
+        tx(
+            actor,
+            () ->
+                groups.convert(
+                    new UnitGroupConvertInput(kilo, gram, new BigDecimal("1"), "2023-06-01")));
     assertThat(noVersion.denied()).isTrue();
     assertThat(noVersion.denyCode()).isEqualTo(UnitGroupRules.DENY_NO_EFFECTIVE_VERSION);
     assertThat(noVersion.denyMessage()).contains("取最近一版");
     // 生效期内正常换算。
-    assertThat(tx(actor, () -> groups.convert(new UnitGroupConvertInput(kilo, gram, new BigDecimal("1"), "2024-06-01"))).denied())
+    assertThat(
+            tx(
+                    actor,
+                    () ->
+                        groups.convert(
+                            new UnitGroupConvertInput(
+                                kilo, gram, new BigDecimal("1"), "2024-06-01")))
+                .denied())
         .isFalse();
   }
 
@@ -767,15 +875,29 @@ class UnitGroupIntegrationTest {
     ensureConversions(groupId, gram, Map.of(kilo, "1000"));
 
     // 停用组 → GROUP_DISABLED（而不是笼统的 NOT_SAME_GROUP，运营才不会去错地方找）。
-    long version = tx(actor, () -> sql.fetchOne("select version from unit_group where id=?", groupId).get("version", Long.class));
+    long version =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne("select version from unit_group where id=?", groupId)
+                    .get("version", Long.class));
     call(actor, "catalog.spu.update", () -> groups.setEnabled(actor, groupId, false, version));
     var disabledGroup =
-        tx(actor, () -> groups.convert(new UnitGroupConvertInput(kilo, gram, new BigDecimal("1"), "2026-06-01")));
+        tx(
+            actor,
+            () ->
+                groups.convert(
+                    new UnitGroupConvertInput(kilo, gram, new BigDecimal("1"), "2026-06-01")));
     assertThat(disabledGroup.denied()).isTrue();
     assertThat(disabledGroup.denyCode()).isEqualTo(UnitGroupRules.DENY_GROUP_DISABLED);
 
     // 恢复组，停用其中一个单位 → UNIT_DISABLED。
-    long restored = tx(actor, () -> sql.fetchOne("select version from unit_group where id=?", groupId).get("version", Long.class));
+    long restored =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne("select version from unit_group where id=?", groupId)
+                    .get("version", Long.class));
     call(actor, "catalog.spu.update", () -> groups.setEnabled(actor, groupId, true, restored));
     // 单位字典的写入所有者是 UnitConversionService，停用它也要走那个入口。
     call(
@@ -787,13 +909,21 @@ class UnitGroupIntegrationTest {
                 unitId(kilo),
                 new UnitOfMeasureInput(kilo, kilo, "WEIGHT", 0, true, true, true, false, 0)));
     var disabledUnit =
-        tx(actor, () -> groups.convert(new UnitGroupConvertInput(kilo, gram, new BigDecimal("1"), "2026-06-01")));
+        tx(
+            actor,
+            () ->
+                groups.convert(
+                    new UnitGroupConvertInput(kilo, gram, new BigDecimal("1"), "2026-06-01")));
     assertThat(disabledUnit.denied()).isTrue();
     assertThat(disabledUnit.denyCode()).isEqualTo(UnitGroupRules.DENY_UNIT_DISABLED);
   }
 
   private UUID unitId(String code) {
-    return tx(actor, () -> sql.fetchOne("select id from unit_of_measure where code=?", code).get("id", UUID.class));
+    return tx(
+        actor,
+        () ->
+            sql.fetchOne("select id from unit_of_measure where code=?", code)
+                .get("id", UUID.class));
   }
 
   @Test
@@ -804,14 +934,34 @@ class UnitGroupIntegrationTest {
     saveUnit(kilo, "WEIGHT");
     UUID groupId = saveGroup(uniqueGroup("重量组"), "WEIGHT", gram, List.of(gram, kilo));
     // 两版：2000-01-01 ~ 2023-12-31 是 1000；2024-01-01 起是 1001（运营改过装箱比）。
-    call(actor, "catalog.spu.update", () -> groups.addConversion(actor, groupId, conversionInput(kilo, "1000", "2000-01-01", "2023-12-31")));
-    call(actor, "catalog.spu.update", () -> groups.addConversion(actor, groupId, conversionInput(kilo, "1001", "2024-01-01", null)));
+    call(
+        actor,
+        "catalog.spu.update",
+        () ->
+            groups.addConversion(
+                actor, groupId, conversionInput(kilo, "1000", "2000-01-01", "2023-12-31")));
+    call(
+        actor,
+        "catalog.spu.update",
+        () ->
+            groups.addConversion(
+                actor, groupId, conversionInput(kilo, "1001", "2024-01-01", null)));
 
-    var oldVersion = tx(actor, () -> groups.convert(new UnitGroupConvertInput(kilo, gram, new BigDecimal("1"), "2023-06-01")));
+    var oldVersion =
+        tx(
+            actor,
+            () ->
+                groups.convert(
+                    new UnitGroupConvertInput(kilo, gram, new BigDecimal("1"), "2023-06-01")));
     assertThat(oldVersion.denied()).isFalse();
     assertThat(oldVersion.convertedQuantity()).isEqualByComparingTo(new BigDecimal("1000.000000"));
 
-    var newVersion = tx(actor, () -> groups.convert(new UnitGroupConvertInput(kilo, gram, new BigDecimal("1"), "2024-06-01")));
+    var newVersion =
+        tx(
+            actor,
+            () ->
+                groups.convert(
+                    new UnitGroupConvertInput(kilo, gram, new BigDecimal("1"), "2024-06-01")));
     assertThat(newVersion.denied()).isFalse();
     assertThat(newVersion.convertedQuantity()).isEqualByComparingTo(new BigDecimal("1001.000000"));
   }
@@ -824,10 +974,16 @@ class UnitGroupIntegrationTest {
     saveUnit(kilo, "WEIGHT");
     UUID groupId = saveGroup(uniqueGroup("重量组"), "WEIGHT", gram, List.of(gram, kilo));
     ensureConversions(groupId, gram, Map.of(kilo, "1000"));
-    long version = tx(actor, () -> sql.fetchOne("select version from unit_group where id=?", groupId).get("version", Long.class));
+    long version =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne("select version from unit_group where id=?", groupId)
+                    .get("version", Long.class));
 
     // 有换算版本 → 400，提示改为停用。
-    assertThatThrownBy(() -> call(actor, "catalog.spu.update", () -> groups.delete(actor, groupId, version)))
+    assertThatThrownBy(
+            () -> call(actor, "catalog.spu.update", () -> groups.delete(actor, groupId, version)))
         .isInstanceOf(ResponseStatusException.class)
         .hasMessageContaining("不能删除")
         .hasMessageContaining("停用");
@@ -836,12 +992,18 @@ class UnitGroupIntegrationTest {
     String oz = uniqueCode("盎司");
     saveUnit(oz, "WEIGHT");
     UUID empty = saveGroup(uniqueGroup("空组"), "WEIGHT", oz, List.of(oz));
-    long emptyVersion = tx(actor, () -> sql.fetchOne("select version from unit_group where id=?", empty).get("version", Long.class));
+    long emptyVersion =
+        tx(
+            actor,
+            () ->
+                sql.fetchOne("select version from unit_group where id=?", empty)
+                    .get("version", Long.class));
     call(actor, "catalog.spu.update", () -> groups.delete(actor, empty, emptyVersion));
     // 删掉的组取不回来了（404），而不是变一个空详情。
     assertThatThrownBy(() -> tx(actor, () -> groups.detail(empty, null)))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
   }
 
   // ------------------------------------------------------------ 量纲守卫（DB 层）
@@ -928,34 +1090,33 @@ class UnitGroupIntegrationTest {
               units.saveUnit(
                   actorB,
                   null,
-                  new UnitOfMeasureInput(
-                      bGram, bGram, "WEIGHT", 0, true, true, true, true, 0));
+                  new UnitOfMeasureInput(bGram, bGram, "WEIGHT", 0, true, true, true, true, 0));
               units.saveUnit(
                   actorB,
                   null,
-                  new UnitOfMeasureInput(
-                      bKilo, bKilo, "WEIGHT", 0, true, true, true, true, 0));
-              return groups.save(
+                  new UnitOfMeasureInput(bKilo, bKilo, "WEIGHT", 0, true, true, true, true, 0));
+              return groups
+                  .save(
                       actorB,
                       null,
                       groupInput(
-                          uniqueGroup("B重量组"),
-                          "B重量组",
-                          "WEIGHT",
-                          bGram,
-                          List.of(bGram, bKilo)))
+                          uniqueGroup("B重量组"), "B重量组", "WEIGHT", bGram, List.of(bGram, bKilo)))
                   .id();
             });
 
     // 1) 两租户互不可见
     // B 的列表里看不到 A 的组。
-    assertThat(tx(actorB, () -> groups.list(new UnitGroupQuery(null, null, null, 0, 200))).items().stream()
-            .map(UnitGroupRow::id))
+    assertThat(
+            tx(actorB, () -> groups.list(new UnitGroupQuery(null, null, null, 0, 200)))
+                .items()
+                .stream()
+                .map(UnitGroupRow::id))
         .doesNotContain(myGroupId);
     // B 拿 A 的组 id 取详情 → 404。
     assertThatThrownBy(() -> tx(actorB, () -> groups.detail(myGroupId, null)))
         .isInstanceOf(ResponseStatusException.class)
-        .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
+        .satisfies(
+            e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(404));
     // B 拿 A 的组去改 → 404。
     assertThatThrownBy(
             () ->
@@ -988,8 +1149,12 @@ class UnitGroupIntegrationTest {
                 .header("X-Tenant-Id", a)
                 .contentType("application/json")
                 .content(
-                    "{\"code\":\"" + myCode + "\",\"name\":\"B 伪造\",\"dimension\":\"WEIGHT\","
-                        + "\"baseUnitCode\":\"" + gram + "\",\"enabled\":true,\"members\":[]}"))
+                    "{\"code\":\""
+                        + myCode
+                        + "\",\"name\":\"B 伪造\",\"dimension\":\"WEIGHT\","
+                        + "\"baseUnitCode\":\""
+                        + gram
+                        + "\",\"enabled\":true,\"members\":[]}"))
         .andExpect(status().isNotFound());
 
     // 3) 连接池归还后不串租户（单连接反复交替）。

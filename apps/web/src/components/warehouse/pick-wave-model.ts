@@ -94,7 +94,9 @@ export function retirePickWaveRule(ruleId: string, input: PickWaveRuleRetireInpu
 }
 
 export function fetchPickWaveCandidates(warehouseId: string) {
-  return api<PickWaveCandidatePage>(`${base}/candidates?warehouseId=${encodeURIComponent(warehouseId)}`);
+  return api<PickWaveCandidatePage>(
+    `${base}/candidates?warehouseId=${encodeURIComponent(warehouseId)}`,
+  );
 }
 
 /**
@@ -207,7 +209,11 @@ export function canCancel(status: PickWaveStatus): boolean {
  * 交给下游复核，而复核是<b>按出库单逐张</b>做的 —— 少一张没拣完就报完成，
  * 下游拿到的凭据是假的。
  */
-export function canComplete(status: PickWaveStatus, terminalTaskCount: number, taskCount: number): boolean {
+export function canComplete(
+  status: PickWaveStatus,
+  terminalTaskCount: number,
+  taskCount: number,
+): boolean {
   return status === 'PICKING' && taskCount > 0 && terminalTaskCount === taskCount;
 }
 
@@ -278,8 +284,10 @@ export function groupVerdict(group: {
   unruledCount: number;
 }): string {
   if (group.openWaveId) {
-    return `已有未完波次 ${group.openWaveCode}：同库区同承运渠道同时只能走一个波次，`
-      + `${group.waitingCount} 张在等它收工`;
+    return (
+      `已有未完波次 ${group.openWaveCode}：同库区同承运渠道同时只能走一个波次，` +
+      `${group.waitingCount} 张在等它收工`
+    );
   }
   if (group.eligibleCount === 0 && group.unruledCount > 0) {
     return `${group.unruledCount} 张出库单没有任何生效规则认领：请先配置合并规则（承运渠道 / 库区 / 时段 / 订单数上限）`;

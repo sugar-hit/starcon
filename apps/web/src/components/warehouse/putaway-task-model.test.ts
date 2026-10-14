@@ -86,9 +86,9 @@ describe('查询串', () => {
   });
 
   it('按出现的顺序拼，跳过空值', () => {
-    expect(
-      putawayTaskQuery({ status: 'PENDING', keyword: 'PUT-1', page: 0, size: 20 }),
-    ).toBe('?status=PENDING&keyword=PUT-1&page=0&size=20');
+    expect(putawayTaskQuery({ status: 'PENDING', keyword: 'PUT-1', page: 0, size: 20 })).toBe(
+      '?status=PENDING&keyword=PUT-1&page=0&size=20',
+    );
   });
 
   it('空白关键字不算条件（否则会发一个恒真的模糊搜）', () => {

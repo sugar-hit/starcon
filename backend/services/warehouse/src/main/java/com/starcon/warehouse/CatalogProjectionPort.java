@@ -6,14 +6,11 @@ import java.util.UUID;
 /**
  * 7.1.1.1 总览需要的**跨服务**筛选维度读取端口（类目 / 品牌属 catalog，店铺属 channel）。
  *
- * <p>warehouse 是库存的唯一所有者，但**不是**商品档案与店铺的档案所有者：类目与品牌属
- * 03 商品主数据，店铺属 02 渠道与店铺。蓝图要求总览「支持按类目/品牌/店铺筛选」，
- * 所以这三个维度必须真读上游 —— 但既不能跨库 JOIN，也不能在 warehouse 里复制一份
- * 权威类目/品牌/店铺表（那会出现两份"类目"各说各话，正是模块边界纪律要避免的）。
+ * <p>warehouse 是库存的唯一所有者，但**不是**商品档案与店铺的档案所有者：类目与品牌属 03 商品主数据，店铺属 02 渠道与店铺。蓝图要求总览「支持按类目/品牌/店铺筛选」，
+ * 所以这三个维度必须真读上游 —— 但既不能跨库 JOIN，也不能在 warehouse 里复制一份 权威类目/品牌/店铺表（那会出现两份"类目"各说各话，正是模块边界纪律要避免的）。
  *
  * <p>上游未接入前，本端口不提供任何假数据：取不到就是取不到，由 {@link UnwiredCatalogProjectionPort}
- * 显式声明未接入，依赖它的筛选条件被**显式拒绝（422）**，而不是返回空列表假装
- * 「按这个类目筛不出任何 SKU」—— 那会让用户误判成真的没有库存。
+ * 显式声明未接入，依赖它的筛选条件被**显式拒绝（422）**，而不是返回空列表假装 「按这个类目筛不出任何 SKU」—— 那会让用户误判成真的没有库存。
  *
  * <p>本端口只读，warehouse 不通过它写任何上游数据。
  */
@@ -61,8 +58,7 @@ public interface CatalogProjectionPort {
    *
    * @param skuIds 本租户内参与筛选的 SKU（来自 warehouse 自己的余额行，不是全量 SKU）
    * @param dimension 目标维度
-   * @return 该维度下命中的 SKU 标识集合；未接入的实现**必须**抛
-   *     {@link DimensionUnavailableException}，不得返回空集合冒充"都不命中"
+   * @return 该维度下命中的 SKU 标识集合；未接入的实现**必须**抛 {@link DimensionUnavailableException}，不得返回空集合冒充"都不命中"
    */
   java.util.Set<UUID> resolve(java.util.List<UUID> skuIds, Dimension dimension);
 

@@ -12,16 +12,14 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 3.6.3.1 往来单位联系人：带姓名的那个人是谁、怎么联系到他、谁是默认联系人。
  *
- * <p>路由挂在 {@code /catalog/parties/{id}/contacts} 之下：联系人的归属就是往来单位，
- * 没有主体的联系人是无意义的（V31 的复合外键挡住「跨主体挂联系人」）。
- * 与 {@link PartyController} 的 {@code /roles} 同一形状。
+ * <p>路由挂在 {@code /catalog/parties/{id}/contacts} 之下：联系人的归属就是往来单位， 没有主体的联系人是无意义的（V31
+ * 的复合外键挡住「跨主体挂联系人」）。 与 {@link PartyController} 的 {@code /roles} 同一形状。
  *
- * <p>与主体自己的对外通道（{@code party.email / phone / website}）分工见
- * {@code V31__party_addresses_contacts.sql} 第零节：那边回答「怎么找到这个主体」，
- * 这里回答「跟这个主体对接的那个人是谁」。
+ * <p>与主体自己的对外通道（{@code party.email / phone / website}）分工见 {@code V31__party_addresses_contacts.sql}
+ * 第零节：那边回答「怎么找到这个主体」， 这里回答「跟这个主体对接的那个人是谁」。
  *
- * <p>权限沿用商品主数据域：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}。
- * 租户一律来自已认证成员关系，<b>不读 {@code X-Tenant-Id} 头</b>。
+ * <p>权限沿用商品主数据域：读 {@code catalog.spu.read}，写 {@code catalog.spu.update}。 租户一律来自已认证成员关系，<b>不读 {@code
+ * X-Tenant-Id} 头</b>。
  */
 @RestController
 @RequestMapping("/catalog/parties/{id}/contacts")
@@ -87,8 +85,7 @@ public class PartyContactController {
   /**
    * 新建联系人。
    *
-   * <p>邮箱 / 电话 / 手机至少给一项（规则 C1）：三项都空的联系人在 06 采购问交期、
-   * 10 物流约提货、11 售后约退货三处都用不了，而它看上去和真联系人完全一样 ——
+   * <p>邮箱 / 电话 / 手机至少给一项（规则 C1）：三项都空的联系人在 06 采购问交期、 10 物流约提货、11 售后约退货三处都用不了，而它看上去和真联系人完全一样 ——
    * 被拒的应该是建这一行，而不是等它变成僵尸之后再清理。
    */
   @PostMapping
@@ -102,8 +99,8 @@ public class PartyContactController {
   /**
    * 改联系人：姓名、职务、联系方式与备注。
    *
-   * <p>{@code isPrimary} 在这里是**首次设定**用的；日常「换默认签字人」走
-   * {@code PUT /{id}/primary} —— 那是一次明确的动作，不该混在编辑别的字段里顺手发生。
+   * <p>{@code isPrimary} 在这里是**首次设定**用的；日常「换默认签字人」走 {@code PUT /{id}/primary} ——
+   * 那是一次明确的动作，不该混在编辑别的字段里顺手发生。
    */
   @PutMapping("/{contactId}")
   public PartyContactSaved update(
@@ -127,8 +124,7 @@ public class PartyContactController {
   /**
    * 删除联系人（<b>物理删除</b>这一行）。
    *
-   * <p>与地址不同：联系人是「当前正在对接的那个人」的当前事实，没有回溯需求 ——
-   * 已发生单据里的联系人姓名与电话是单据自己的冻结快照（与 V27 第七节对 06/11/12 的约定同源）。
+   * <p>与地址不同：联系人是「当前正在对接的那个人」的当前事实，没有回溯需求 —— 已发生单据里的联系人姓名与电话是单据自己的冻结快照（与 V27 第七节对 06/11/12 的约定同源）。
    * 删除前必须先改默认（规则 C2）。
    */
   @DeleteMapping("/{contactId}")

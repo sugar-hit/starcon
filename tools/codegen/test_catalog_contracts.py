@@ -214,3 +214,25 @@ class CollisionGateSubprocess(unittest.TestCase):
 
 if __name__=='__main__':
     unittest.main()
+
+
+class OperationIdNormalization(unittest.TestCase):
+    def test_discovery_suffixes_do_not_change_route_identifiers(self):
+        first = {'paths': {'/warehouse/tasks/{id}': {'get': {'operationId': 'detail_2'}},
+                           '/warehouse/tasks': {'get': {'operationId': 'page_8'}}}}
+        second = {'paths': {'/warehouse/tasks': {'get': {'operationId': 'page_2'}},
+                            '/warehouse/tasks/{id}': {'get': {'operationId': 'detail_9'}}}}
+        self.assertEqual(cc.normalize_operation_ids(first), cc.normalize_operation_ids(second))
+        self.assertEqual(first['paths']['/warehouse/tasks/{id}']['get']['operationId'],
+                         'get_warehouse_tasks_id')
+
+    def test_methods_on_the_same_path_have_distinct_identifiers(self):
+        data = {'paths': {'/tasks': {'get': {}, 'post': {}, 'parameters': []}}}
+        cc.normalize_operation_ids(data)
+        self.assertNotEqual(data['paths']['/tasks']['get']['operationId'],
+                            data['paths']['/tasks']['post']['operationId'])
+        self.assertEqual(data['paths']['/tasks']['parameters'], [])
+
+    def test_normalized_path_collision_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'Operation ID collision'):
+            cc.normalize_operation_ids({'paths': {'/a-b': {'get': {}}, '/a_b': {'get': {}}}})

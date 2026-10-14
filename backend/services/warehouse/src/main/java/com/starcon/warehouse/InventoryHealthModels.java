@@ -9,31 +9,26 @@ import java.util.UUID;
 /**
  * 7.6.2.1 库存健康的传输模型。
  *
- * <p>蓝图原话：「库存健康度诊断：周转率、缺货率、超储率、呆滞占比、库存准确率、负库存发生次数，
- * 按仓库与类目打分并给出改进建议」「输出：健康度评分卡 + 趋势 + 问题清单与建议」
+ * <p>蓝图原话：「库存健康度诊断：周转率、缺货率、超储率、呆滞占比、库存准确率、负库存发生次数， 按仓库与类目打分并给出改进建议」「输出：健康度评分卡 + 趋势 + 问题清单与建议」
  * 「**库存准确率是硬指标**，低于阈值应阻断结算与对账——账不准时报表全是错的」。
  *
  * <p><b>本模块最重要的一条纪律：算不出来的指标必须如实标记为不可用，而不是拿别的数据凑一个数。</b>
- * 六个指标在本仓库当前能算的是两个（准确率、负库存发生次数），其余四个依赖尚未交付的上游。
- * 用库存自身数据拼一个假的周转率，比不给指标危害大得多 —— 它会被当真去调补货，
+ * 六个指标在本仓库当前能算的是两个（准确率、负库存发生次数），其余四个依赖尚未交付的上游。 用库存自身数据拼一个假的周转率，比不给指标危害大得多 —— 它会被当真去调补货，
  * 而真正的缺口一个也没被修掉。所以 {@link InventoryHealthMetric} 有三个状态而不是一个值：
  *
  * <ul>
  *   <li>{@code AVAILABLE}：有真实数据源，取值可追溯到具体的核对批次 / 盘点单。
- *   <li>{@code UNAVAILABLE}：口径定死了，但上游模块未交付（{@code blockedByModule} 记着是谁）。
- *       交付后自动转成 AVAILABLE，不需要改表结构。
- *   <li>{@code NO_DATA}：上游已交付，但这个租户在这个窗口内没有可算的样本
- *       （没核过账、没盘点）。这与 UNAVAILABLE 是两回事，运营该做的动作也不同。
+ *   <li>{@code UNAVAILABLE}：口径定死了，但上游模块未交付（{@code blockedByModule} 记着是谁）。 交付后自动转成
+ *       AVAILABLE，不需要改表结构。
+ *   <li>{@code NO_DATA}：上游已交付，但这个租户在这个窗口内没有可算的样本 （没核过账、没盘点）。这与 UNAVAILABLE 是两回事，运营该做的动作也不同。
  * </ul>
  *
- * <p><b>评分口径</b>：分数只对 {@code AVAILABLE} 的指标加权，并同时给出
- * {@code availableMetricCount} / {@code totalMetricCount}。六个指标里只算得出一个时，
- * 那个分数必须让人一眼看出它不是"整体健康度"，而是"已覆盖维度上的健康度" ——
- * 否则一个 100 分会被当成"这个仓没问题"而掩盖另外五个维度根本没测。
+ * <p><b>评分口径</b>：分数只对 {@code AVAILABLE} 的指标加权，并同时给出 {@code availableMetricCount} / {@code
+ * totalMetricCount}。六个指标里只算得出一个时， 那个分数必须让人一眼看出它不是"整体健康度"，而是"已覆盖维度上的健康度" —— 否则一个 100
+ * 分会被当成"这个仓没问题"而掩盖另外五个维度根本没测。
  *
- * <p><b>扣分项可追溯</b>：每个 {@link InventoryHealthIssue} 都带 {@code evidence}，
- * 指向具体的核对批次 id / 盘点单号 / 仓编码。打分不是为了给一个好看的数字，
- * 而是让运营知道**先去看哪几行**。
+ * <p><b>扣分项可追溯</b>：每个 {@link InventoryHealthIssue} 都带 {@code evidence}， 指向具体的核对批次 id / 盘点单号 /
+ * 仓编码。打分不是为了给一个好看的数字， 而是让运营知道**先去看哪几行**。
  */
 public final class InventoryHealthModels {
 
@@ -78,19 +73,16 @@ public final class InventoryHealthModels {
   /**
    * 蓝图点名的六个指标。
    *
-   * <p>每个枚举值都带一条 {@code basis}：它要么说清数据从哪来，要么说清为什么算不了。
-   * 这条字符串会原样落进 API 响应，运营看的是它而不是猜。
+   * <p>每个枚举值都带一条 {@code basis}：它要么说清数据从哪来，要么说清为什么算不了。 这条字符串会原样落进 API 响应，运营看的是它而不是猜。
    */
   public enum HealthMetricType {
     TURNOVER(
         "周转率",
-        "依赖销售聚合（销售成本 ÷ 平均库存）。13 销量未交付，且 warehouse 不持有销售事实、"
-            + "跨服务不得查它的表，因此本服务算不出真实周转率。",
+        "依赖销售聚合（销售成本 ÷ 平均库存）。13 销量未交付，且 warehouse 不持有销售事实、" + "跨服务不得查它的表，因此本服务算不出真实周转率。",
         "13"),
     STOCKOUT_RATE(
         "缺货率",
-        "缺货率的分母是「有需求却没货的次数」，需求必须来自销售/订单事实。13 销量与"
-            + "9 订单均未交付；用「当前在库为 0」当分母会把从没卖过的 SKU 全算成缺货，是假指标。",
+        "缺货率的分母是「有需求却没货的次数」，需求必须来自销售/订单事实。13 销量与" + "9 订单均未交付；用「当前在库为 0」当分母会把从没卖过的 SKU 全算成缺货，是假指标。",
         "13"),
     OVERSTOCK_RATE(
         "超储率",
@@ -106,8 +98,7 @@ public final class InventoryHealthModels {
         "7.6.1"),
     ACCURACY(
         "库存准确率",
-        "数据源：7.1.2.2 账实核对的差异行占比（口径 A），以及 7.4.2.1 盘点单的"
-            + "账面数=实盘数行占比（口径 B）。两者都真实可算，是本模块的硬指标。",
+        "数据源：7.1.2.2 账实核对的差异行占比（口径 A），以及 7.4.2.1 盘点单的" + "账面数=实盘数行占比（口径 B）。两者都真实可算，是本模块的硬指标。",
         null),
     NEGATIVE_STOCK(
         "负库存发生次数",
@@ -202,9 +193,8 @@ public final class InventoryHealthModels {
   /**
    * 单个指标的一行。
    *
-   * <p>{@code value} 与 {@code availability} 必须配套（DB 侧 CHECK 已钉死）：
-   * 不是 AVAILABLE 就没有值。{@code source} 说明这个值取自哪张表，
-   * {@code numerator}/{@code denominator} 跟着值一起给，否则事后没人能算出这个分数是怎么来的。
+   * <p>{@code value} 与 {@code availability} 必须配套（DB 侧 CHECK 已钉死）： 不是 AVAILABLE 就没有值。{@code source}
+   * 说明这个值取自哪张表， {@code numerator}/{@code denominator} 跟着值一起给，否则事后没人能算出这个分数是怎么来的。
    */
   public record InventoryHealthMetric(
       HealthMetricType metricType,
@@ -246,8 +236,7 @@ public final class InventoryHealthModels {
   /**
    * 一条问题。
    *
-   * <p>{@code evidence} 是可追溯性的落点：每条问题都要指出"先去看哪一行"，
-   * 而不是只给一句评价。
+   * <p>{@code evidence} 是可追溯性的落点：每条问题都要指出"先去看哪一行"， 而不是只给一句评价。
    */
   public record InventoryHealthIssue(
       HealthIssueSeverity severity,
@@ -265,8 +254,8 @@ public final class InventoryHealthModels {
   /**
    * 趋势上的一点：某时点的准确率。
    *
-   * <p>两个来源各自成序列，不混：核对口径按 {@code inventory_reconciliation_run.created_at}，
-   * 盘点口径按 {@code stocktake_sheet.frozen_at}。混成一条线会让人以为「盘了一次就等于核了一次」。
+   * <p>两个来源各自成序列，不混：核对口径按 {@code inventory_reconciliation_run.created_at}， 盘点口径按 {@code
+   * stocktake_sheet.frozen_at}。混成一条线会让人以为「盘了一次就等于核了一次」。
    */
   public record InventoryHealthTrendPoint(
       String source,
@@ -288,10 +277,8 @@ public final class InventoryHealthModels {
   /**
    * 准确率红线判定结果。
    *
-   * <p><b>本记录只是判定，不是执行。</b>蓝图说低于阈值「应阻断结算与对账」，
-   * 真正的阻断由 12 财务结算与 7.1.2.2 对账各自在自己的边界内执行；
-   * warehouse 无权替它们阻断，也不应该知道它们的单据状态。
-   * 本服务提供的是一个**可查询、可复现、带证据**的判定，接口边界见类注释。
+   * <p><b>本记录只是判定，不是执行。</b>蓝图说低于阈值「应阻断结算与对账」， 真正的阻断由 12 财务结算与 7.1.2.2 对账各自在自己的边界内执行； warehouse
+   * 无权替它们阻断，也不应该知道它们的单据状态。 本服务提供的是一个**可查询、可复现、带证据**的判定，接口边界见类注释。
    */
   public record InventoryHealthGate(
       HealthScopeType scopeType,
@@ -310,5 +297,7 @@ public final class InventoryHealthModels {
 
   /** 评估执行结果：新落库的评分卡 + 判定。 */
   public record InventoryHealthAssessed(
-      InventoryHealthScorecard tenant, List<InventoryHealthScorecard> warehouses, InventoryHealthGate gate) {}
+      InventoryHealthScorecard tenant,
+      List<InventoryHealthScorecard> warehouses,
+      InventoryHealthGate gate) {}
 }

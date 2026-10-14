@@ -20,7 +20,7 @@
    （它同时要按 V7 编码方案分配 code 与 barcode）。作废草稿 = 物理删除占用行；留一行"已释放"会继续占着唯一索引。
 
 3. **冲突输出结构化，不压成布尔值。** `CombinationConflict` 带 `reasonCode / signature / occurrenceIndexes /
-   existingSkuId / existingDraftId`，服务端在 409 的 ProblemDetail 上挂 `conflicts`，前端 `ApiError` 新增 `body` 字段承接。
+existingSkuId / existingDraftId`，服务端在 409 的 ProblemDetail 上挂 `conflicts`，前端 `ApiError` 新增 `body` 字段承接。
    十类 reasonCode：批次内重复 / 已被草稿占用 / 与既有 SKU 相同 / 组合不完整 / 空组合 / 同组合内轴重复 /
    轴不属于本 SPU / 轴停用 / 取值不属该轴 / 取值停用（另有取值不合法、轴数超限、轴编码缺失、SPU 未绑轴）。
 
@@ -35,13 +35,13 @@
 
 ## DB 层硬约束（绕过应用层仍生效）
 
-| 约束 | 挡住的洞 |
-| --- | --- |
-| `UNIQUE(tenant_id,spu_id,signature)` | 同 SPU 重复组合（本体） |
-| `guard_variant_combination_against_sku`（BEFORE INSERT，23505） | 占用表与 `sku` 表同签名并存——V1 的唯一约束只管 sku 表内部 |
-| `guard_variant_combination_lines`（DEFERRABLE INITIALLY DEFERRED） | `signature` 自报、与真实轴值不符；`axis_count` 与明细行数不符 |
-| `guard_variant_combination_value`（BEFORE INSERT/UPDATE，23514） | 轴不属于本 SPU、轴或取值已停用、`axis_code` 自报 |
-| `spu_variant_combination_value` PK 含 `spec_axis_id` + UNIQUE 含 `axis_code` | 一个组合里同一条轴出现两次 |
+| 约束                                                                         | 挡住的洞                                                      |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `UNIQUE(tenant_id,spu_id,signature)`                                         | 同 SPU 重复组合（本体）                                       |
+| `guard_variant_combination_against_sku`（BEFORE INSERT，23505）              | 占用表与 `sku` 表同签名并存——V1 的唯一约束只管 sku 表内部     |
+| `guard_variant_combination_lines`（DEFERRABLE INITIALLY DEFERRED）           | `signature` 自报、与真实轴值不符；`axis_count` 与明细行数不符 |
+| `guard_variant_combination_value`（BEFORE INSERT/UPDATE，23514）             | 轴不属于本 SPU、轴或取值已停用、`axis_code` 自报              |
+| `spu_variant_combination_value` PK 含 `spec_axis_id` + UNIQUE 含 `axis_code` | 一个组合里同一条轴出现两次                                    |
 
 ## 关键 trade-off
 
@@ -56,6 +56,7 @@
 ## 文件清单
 
 新增
+
 - `backend/services/catalog/src/main/resources/db/migration/V10__variant_combination_uniqueness.sql`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/CombinationRules.java`
 - `backend/services/catalog/src/main/java/com/starcon/catalog/VariantCombinationService.java`
@@ -68,6 +69,7 @@
 - `apps/web/src/app/products/sku/variant-combination/page.tsx`
 
 改动
+
 - `CatalogModels.java`（3.1.3.2 的 16 个 DTO record）、`ApiErrorHandler.java`（结构化 409）
 - `apps/web/src/lib/api.ts`（`ApiError.body`）、`apps/web/src/lib/api-proxy.ts`（allowlist）
 - `apps/web/src/components/catalog/sku-list-workspace.tsx`（入口）、`apps/web/src/app/api/catalog/[...path]/route.test.ts`
@@ -83,8 +85,8 @@
 ## 后续待办
 
 1. **3.1.2.1 落 SKU 时把预留行兑现为 ACTIVE**：目前预留 X 之后仍可能新建一个签名文本相同的 SKU
-  （`guard_variant_combination_against_sku` 只在**占用侧**设防）。兑现时应给台账加 `sku_id` / 状态，
-  并在写 `sku` 时按预留签名校验——这是跨表唯一性的最后一环，需要 3.1.2.1 与本表的 owner 一起定。
+   （`guard_variant_combination_against_sku` 只在**占用侧**设防）。兑现时应给台账加 `sku_id` / 状态，
+   并在写 `sku` 时按预留签名校验——这是跨表唯一性的最后一环，需要 3.1.2.1 与本表的 owner 一起定。
 2. 类目规则（V9 `category_spec_axis`）里的 `required=true` 轴，与本模块"每条已绑定轴都必须取到值"的口径重合。
    目前组合校验以 `spu_spec_axis` 的实际绑定为准；若将来要求"类目必绑轴齐了才允许生成草稿"，
    应在 `generateDraft` 里加前置判定，而不是改 `validate`（那是唯一性的职责）。

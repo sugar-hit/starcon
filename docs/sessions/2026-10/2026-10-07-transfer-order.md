@@ -83,19 +83,23 @@ balance 未分解到库位时（V1 允许的合法状态）只改余额。
 ## 文件清单
 
 **迁移**
+
 - `backend/services/warehouse/src/main/resources/db/migration/V61__warehouse_transfer_order.sql`
 
 **后端**
+
 - `.../java/com/starcon/warehouse/InventoryTransferModels.java`（DTO 一律带 `TransferOrder`/`Transfer` 前缀）
 - `.../java/com/starcon/warehouse/InventoryTransferService.java`（jOOQ 显式 SQL；`deriveStatus` 是状态机唯一真相）
 - `.../java/com/starcon/warehouse/InventoryTransferController.java`（8 个端点）
 - `.../test/java/com/starcon/warehouse/InventoryTransferIntegrationTest.java`（20 例）
 
 **契约（codegen 产物，禁止手改）**
+
 - `packages/api-contracts/src/warehouse.openapi.json`
 - `packages/api-contracts/src/catalog.ts`（新增 22 个类型，消失 0 个）
 
 **前端**
+
 - `apps/web/src/app/inventory/transfers/page.tsx`
 - `apps/web/src/components/inventory/inventory-transfer.tsx`
 - `apps/web/src/components/inventory/inventory-transfer-model.ts`
@@ -104,6 +108,7 @@ balance 未分解到库位时（V1 允许的合法状态）只改余额。
 - `apps/web/src/app/api/warehouse/[...path]/route.test.ts`（把新路由逐条钉住）
 
 **台账与会话**
+
 - `docs/product/capability-blueprint/module-progress.md`（只改 7.5.1.1 的状态与证据两格）
 - `docs/sessions/2026-10/2026-10-07-transfer-order.md`
 

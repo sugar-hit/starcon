@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.UUID;
 import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,24 +18,20 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * 3.4.3.1 多语言内容的批量操作：补齐待翻占位、批量采纳 AI 建议、批量标记已校对。
  *
- * <p><b>同步执行，没有「排队中」这种自欺欺人的状态</b>（与 {@code TitleService} 的标题生成、
- * {@code DescriptionRenderService} 的批量填充同一判断）：三件事都是几百行的短事务，
- * 做成异步只会让运营为几百毫秒去盯进度条。所以
- * {@code status} 只有 SUCCEEDED / PARTIAL / FAILED 三态。
+ * <p><b>同步执行，没有「排队中」这种自欺欺人的状态</b>（与 {@code TitleService} 的标题生成、 {@code DescriptionRenderService}
+ * 的批量填充同一判断）：三件事都是几百行的短事务， 做成异步只会让运营为几百毫秒去盯进度条。所以 {@code status} 只有 SUCCEEDED / PARTIAL / FAILED
+ * 三态。
  *
- * <p><b>失败与跳过是一等公民，逐条落库而不是只回一个计数。</b>
- * 「这批 50 个商品的德语，有 8 个因为已有译文被跳过」要能逐条回答——
- * 逐行 list 才有 {@code translation_batch_item}，批次的三个计数只是它的汇总。
+ * <p><b>失败与跳过是一等公民，逐条落库而不是只回一个计数。</b> 「这批 50 个商品的德语，有 8 个因为已有译文被跳过」要能逐条回答—— 逐行 list 才有 {@code
+ * translation_batch_item}，批次的三个计数只是它的汇总。
  *
  * <p>三件事的语义各不相同，所以拒绝理由也各不相同：
  *
  * <ul>
- *   <li>{@code CREATE_PENDING}：只在**还没有任何译文行**时补占位。已有译文（不管什么状态）
- *       一律跳过——把一条已翻好的德语译文重建成待翻会抹掉工作成果。
- *   <li>{@code ADOPT_SUGGESTIONS}：按 {@code batchRef} 找待处置建议逐条采纳。
- *       没有建议的 (商品, 语言) 组合拒收并写明「18 还没交这语言的建议」。
- *   <li>{@code MARK_REVIEWED}：只把**已翻**的行标成已校对。待翻的拒收（正文都没有，
- *       无从校对）；已校对的跳过（不需要重复校对）。
+ *   <li>{@code CREATE_PENDING}：只在**还没有任何译文行**时补占位。已有译文（不管什么状态） 一律跳过——把一条已翻好的德语译文重建成待翻会抹掉工作成果。
+ *   <li>{@code ADOPT_SUGGESTIONS}：按 {@code batchRef} 找待处置建议逐条采纳。 没有建议的 (商品, 语言) 组合拒收并写明「18
+ *       还没交这语言的建议」。
+ *   <li>{@code MARK_REVIEWED}：只把**已翻**的行标成已校对。待翻的拒收（正文都没有， 无从校对）；已校对的跳过（不需要重复校对）。
  * </ul>
  */
 @Service
@@ -54,8 +49,7 @@ public class TranslationBatchService {
   /**
    * 执行一次批量操作。
    *
-   * <p>提交时选中的商品数写进 {@code item_count}（不用 count）：列表页要显示 N/N，
-   * 而 count 会随待翻占位行被补出来而变化。
+   * <p>提交时选中的商品数写进 {@code item_count}（不用 count）：列表页要显示 N/N， 而 count 会随待翻占位行被补出来而变化。
    */
   public TranslationBatchDetail run(AccessService.Access actor, TranslationBatchInput input) {
     String action = MediaRules.normalizeUpper(input.action());
@@ -75,8 +69,8 @@ public class TranslationBatchService {
       String reason =
           switch (action) {
             case "CREATE_PENDING" -> "选中的商品在指定语言下都已有译文行，没有需要补的「待翻」占位";
-            case "ADOPT_SUGGESTIONS" -> "没有找到待处置的翻译建议：18 AI 翻译还没交这一批，"
-                + "或者 batchRef 写错了（已交的建议请在建议列表里核对 batch_ref）";
+            case "ADOPT_SUGGESTIONS" ->
+                "没有找到待处置的翻译建议：18 AI 翻译还没交这一批，" + "或者 batchRef 写错了（已交的建议请在建议列表里核对 batch_ref）";
             default -> "选中的商品在指定语言下都没有「已翻」的译文，没有需要标校对的行";
           };
       throw TranslationService.conflict(reason);
@@ -91,7 +85,8 @@ public class TranslationBatchService {
       else skipped++;
     }
     int total = planned.size();
-    String status = rejected == 0 && skipped == 0 ? "SUCCEEDED" : succeeded == 0 ? "FAILED" : "PARTIAL";
+    String status =
+        rejected == 0 && skipped == 0 ? "SUCCEEDED" : succeeded == 0 ? "FAILED" : "PARTIAL";
 
     // 先写批次再写逐条结果：translation_batch_item 有指向批次的复合外键，
     // 反过来写会当场撞 FK，而 counts 是 plan() 早就算出来的，不需要先执行。
@@ -127,8 +122,15 @@ public class TranslationBatchService {
       sql.execute(
           "insert into translation_batch_item(id,tenant_id,batch_id,target_type,spu_id,sku_id,locale,"
               + "outcome,reason) values(?,?,?,?,?,?,?,?,?)",
-          Ids.next(), actor.tenantId(), batchId, type, item.spuId(), item.skuId(), item.locale(),
-          outcome, reason);
+          Ids.next(),
+          actor.tenantId(),
+          batchId,
+          type,
+          item.spuId(),
+          item.skuId(),
+          item.locale(),
+          outcome,
+          reason);
     }
     translations.audit(actor, batchId, "TranslationBatch:" + action + ":" + status);
     return detail(batchId);
@@ -137,8 +139,8 @@ public class TranslationBatchService {
   // ============================================================ 计划：把提交展开成逐条 (商品, 语言)
 
   /** 一条待执行项。{@code actionable=false} 时 {@code reason} 是给人看的中文原因。 */
-  private record Item(UUID spuId, UUID skuId, String locale, boolean actionable, boolean rejected,
-      String reason) {}
+  private record Item(
+      UUID spuId, UUID skuId, String locale, boolean actionable, boolean rejected, String reason) {}
 
   private List<Item> plan(
       AccessService.Access actor,
@@ -153,15 +155,18 @@ public class TranslationBatchService {
     // ADOPT_SUGGESTIONS 按 batchRef 找建议，不看 targetIds：
     // 18 交来一批建议时运营手上通常只有 batchRef，商品清单可能还没筛。
     if ("ADOPT_SUGGESTIONS".equals(action)) {
-      check(!batchRef.isEmpty(),
-          "批量采纳 AI 建议必须给 batchRef：那 18 AI 翻译一次交回的一批建议用 batch_ref 归组，"
-              + "不给就没法确定「这一批」是哪几条");
+      check(
+          !batchRef.isEmpty(),
+          "批量采纳 AI 建议必须给 batchRef：那 18 AI 翻译一次交回的一批建议用 batch_ref 归组，" + "不给就没法确定「这一批」是哪几条");
       List<Record> rows =
           sql.fetch(
-              "select " + column + " as subject,locale from translation_suggestion"
+              "select "
+                  + column
+                  + " as subject,locale from translation_suggestion"
                   + " where tenant_id=? and status='PENDING' and batch_ref=?"
                   + " order by created_at,id",
-              actor.tenantId(), batchRef);
+              actor.tenantId(),
+              batchRef);
       if (rows.isEmpty()) return List.of();
       List<Item> out = new ArrayList<>(rows.size());
       for (Record r : rows) {
@@ -170,7 +175,9 @@ public class TranslationBatchService {
         // 商品可能已被删（FK 会级联删建议，但这一行可能是刚被删的竞态）。
         boolean exists =
             sql.fetchOne(
-                    "select 1 from " + productTable + " where tenant_id=? and id=?", actor.tenantId(), subject)
+                    "select 1 from " + productTable + " where tenant_id=? and id=?",
+                    actor.tenantId(),
+                    subject)
                 != null;
         out.add(
             new Item(
@@ -179,14 +186,14 @@ public class TranslationBatchService {
                 locale,
                 exists,
                 !exists,
-                exists ? "" : "建议指向的商品已不存在（FK 级联删除这一行时刚好撞上并发），"
-                    + "请让 18 AI 翻译跳过这个商品后重新提交"));
+                exists ? "" : "建议指向的商品已不存在（FK 级联删除这一行时刚好撞上并发），" + "请让 18 AI 翻译跳过这个商品后重新提交"));
       }
       return out;
     }
 
     List<String> rawIds = input.targetIds() == null ? List.of() : input.targetIds();
-    check(TranslationRules.itemsSizeProblem(rawIds.size()) == null,
+    check(
+        TranslationRules.itemsSizeProblem(rawIds.size()) == null,
         TranslationRules.itemsSizeProblem(rawIds.size()));
     List<UUID> ids = new ArrayList<>();
     for (String raw : rawIds) ids.add(TranslationService.requireUuid(raw, "targetIds"));
@@ -196,25 +203,26 @@ public class TranslationBatchService {
     List<String> locales = new ArrayList<>(translations.normalizeLocales(input.locales()));
     if (locales.isEmpty()) locales = new ArrayList<>(translations.requiredLocales());
     if ("CREATE_PENDING".equals(action))
-      check(TranslationRules.batchLocalesSizeProblem(locales.size()) == null,
+      check(
+          TranslationRules.batchLocalesSizeProblem(locales.size()) == null,
           TranslationRules.batchLocalesSizeProblem(locales.size()));
 
     if ("CREATE_PENDING".equals(action) && locales.isEmpty())
       throw TranslationService.conflict(
-          "租户还没有登记任何语言需求，所以推不出「要补哪些语言的待翻占位」。"
-              + "请先在「语言需求」里登记租户实际需要的语言，或在这次提交里显式指定 locales");
+          "租户还没有登记任何语言需求，所以推不出「要补哪些语言的待翻占位」。" + "请先在「语言需求」里登记租户实际需要的语言，或在这次提交里显式指定 locales");
     if ("MARK_REVIEWED".equals(action) && locales.isEmpty())
       throw TranslationService.conflict(
-          "租户还没有登记任何语言需求，所以推不出「哪些语言的译文可以标校对」。"
-              + "请先在「语言需求」里登记租户实际需要的语言，或在这次提交里显式指定 locales");
+          "租户还没有登记任何语言需求，所以推不出「哪些语言的译文可以标校对」。" + "请先在「语言需求」里登记租户实际需要的语言，或在这次提交里显式指定 locales");
 
     Set<String> productIds = new LinkedHashSet<>();
     for (Record r :
         sql.fetch(
-            "select id from " + productTable + " where tenant_id=? and id in ("
-                + placeholders(distinct.size()) + ")",
-            concat(actor.tenantId(), distinct)))
-      productIds.add(r.get("id", UUID.class).toString());
+            "select id from "
+                + productTable
+                + " where tenant_id=? and id in ("
+                + placeholders(distinct.size())
+                + ")",
+            concat(actor.tenantId(), distinct))) productIds.add(r.get("id", UUID.class).toString());
 
     List<Item> out = new ArrayList<>();
     for (String rawId : rawIds) {
@@ -222,50 +230,95 @@ public class TranslationBatchService {
       for (String locale : locales) {
         var existing =
             sql.fetchOne(
-                "select status from " + table + " where tenant_id=? and " + column + "=? and locale=?",
-                actor.tenantId(), id, locale);
+                "select status from "
+                    + table
+                    + " where tenant_id=? and "
+                    + column
+                    + "=? and locale=?",
+                actor.tenantId(),
+                id,
+                locale);
         if ("CREATE_PENDING".equals(action)) {
           if (existing != null) {
             String current = existing.get("status", String.class);
-            out.add(new Item(
-                "SPU".equals(type) ? id : null,
-                "SKU".equals(type) ? id : null,
-                locale,
-                false,
-                false,
-                "已经有「" + TranslationRules.statusLabel(current) + "」的译文行："
-                    + "重建待翻占位会抹掉已有工作。要重新开始请先删掉那一行"));
+            out.add(
+                new Item(
+                    "SPU".equals(type) ? id : null,
+                    "SKU".equals(type) ? id : null,
+                    locale,
+                    false,
+                    false,
+                    "已经有「"
+                        + TranslationRules.statusLabel(current)
+                        + "」的译文行："
+                        + "重建待翻占位会抹掉已有工作。要重新开始请先删掉那一行"));
           } else if (!productIds.contains(rawId)) {
-            out.add(new Item(
-                "SPU".equals(type) ? id : null, "SKU".equals(type) ? id : null, locale, false, true,
-                "商品不存在或不属于当前租户"));
+            out.add(
+                new Item(
+                    "SPU".equals(type) ? id : null,
+                    "SKU".equals(type) ? id : null,
+                    locale,
+                    false,
+                    true,
+                    "商品不存在或不属于当前租户"));
           } else {
-            out.add(new Item(
-                "SPU".equals(type) ? id : null, "SKU".equals(type) ? id : null, locale, true, false, ""));
+            out.add(
+                new Item(
+                    "SPU".equals(type) ? id : null,
+                    "SKU".equals(type) ? id : null,
+                    locale,
+                    true,
+                    false,
+                    ""));
           }
         } else {
           if (existing == null)
-            out.add(new Item(
-                "SPU".equals(type) ? id : null, "SKU".equals(type) ? id : null, locale, false, true,
-                "这个商品在语言「" + locale + "」下还没有译文行：没有文本就无从校对，"
-                    + "请先补齐待翻占位并填入译文"));
+            out.add(
+                new Item(
+                    "SPU".equals(type) ? id : null,
+                    "SKU".equals(type) ? id : null,
+                    locale,
+                    false,
+                    true,
+                    "这个商品在语言「" + locale + "」下还没有译文行：没有文本就无从校对，" + "请先补齐待翻占位并填入译文"));
           else {
             String current = existing.get("status", String.class);
             if ("REVIEWED".equals(current))
-              out.add(new Item(
-                  "SPU".equals(type) ? id : null, "SKU".equals(type) ? id : null, locale, false, false,
-                  "已经是「已校对」，不需要重复标校对"));
+              out.add(
+                  new Item(
+                      "SPU".equals(type) ? id : null,
+                      "SKU".equals(type) ? id : null,
+                      locale,
+                      false,
+                      false,
+                      "已经是「已校对」，不需要重复标校对"));
             else if (!"TRANSLATED".equals(current))
-              out.add(new Item(
-                  "SPU".equals(type) ? id : null, "SKU".equals(type) ? id : null, locale, false, true,
-                  "当前是「" + TranslationRules.statusLabel(current) + "」：待翻没有正文，无从校对"));
+              out.add(
+                  new Item(
+                      "SPU".equals(type) ? id : null,
+                      "SKU".equals(type) ? id : null,
+                      locale,
+                      false,
+                      true,
+                      "当前是「" + TranslationRules.statusLabel(current) + "」：待翻没有正文，无从校对"));
             else if (!productIds.contains(rawId))
-              out.add(new Item(
-                  "SPU".equals(type) ? id : null, "SKU".equals(type) ? id : null, locale, false, true,
-                  "商品不存在或不属于当前租户"));
+              out.add(
+                  new Item(
+                      "SPU".equals(type) ? id : null,
+                      "SKU".equals(type) ? id : null,
+                      locale,
+                      false,
+                      true,
+                      "商品不存在或不属于当前租户"));
             else
-              out.add(new Item(
-                  "SPU".equals(type) ? id : null, "SKU".equals(type) ? id : null, locale, true, false, ""));
+              out.add(
+                  new Item(
+                      "SPU".equals(type) ? id : null,
+                      "SKU".equals(type) ? id : null,
+                      locale,
+                      true,
+                      false,
+                      ""));
           }
         }
       }
@@ -275,8 +328,7 @@ public class TranslationBatchService {
 
   // ============================================================ 执行
 
-  private void apply(
-      AccessService.Access actor, String action, String type, Item item) {
+  private void apply(AccessService.Access actor, String action, String type, Item item) {
     String table = TranslationService.tableOf(type);
     String column = TranslationService.subjectColumnOf(type);
     UUID subject = item.spuId() != null ? item.spuId() : item.skuId();
@@ -285,30 +337,46 @@ public class TranslationBatchService {
       var row =
           sql.fetchOne(
               "select id from translation_suggestion where tenant_id=? and status='PENDING'"
-                  + " and " + column + "=? and locale=? order by created_at,id limit 1",
-              actor.tenantId(), subject, item.locale());
+                  + " and "
+                  + column
+                  + "=? and locale=? order by created_at,id limit 1",
+              actor.tenantId(),
+              subject,
+              item.locale());
       if (row == null)
-        throw TranslationService.conflict(
-            "这条建议刚被别人处置了（语言「" + item.locale() + "」）：请刷新后重试");
+        throw TranslationService.conflict("这条建议刚被别人处置了（语言「" + item.locale() + "」）：请刷新后重试");
       translations.adoptSuggestion(actor, row.get("id", UUID.class));
       return;
     }
     if ("CREATE_PENDING".equals(action)) {
       sql.execute(
-          "insert into " + table + "(id,tenant_id," + column + ",locale,name,description,origin,status,"
+          "insert into "
+              + table
+              + "(id,tenant_id,"
+              + column
+              + ",locale,name,description,origin,status,"
               + "version) values(?,?,?,?,'','','MANUAL','PENDING',0)",
-          Ids.next(), actor.tenantId(), subject, item.locale());
+          Ids.next(),
+          actor.tenantId(),
+          subject,
+          item.locale());
       return;
     }
     int affected =
         sql.execute(
-            "update " + table + " set status='REVIEWED',reviewed_by=?,reviewed_at=?::timestamptz,"
-                + "version=version+1,updated_at=now() where tenant_id=? and " + column
+            "update "
+                + table
+                + " set status='REVIEWED',reviewed_by=?,reviewed_at=?::timestamptz,"
+                + "version=version+1,updated_at=now() where tenant_id=? and "
+                + column
                 + "=? and locale=? and status='TRANSLATED'",
-            actor.userId(), now, actor.tenantId(), subject, item.locale());
+            actor.userId(),
+            now,
+            actor.tenantId(),
+            subject,
+            item.locale());
     if (affected != 1)
-      throw TranslationService.conflict(
-          "这条译文刚被别人改过（语言「" + item.locale() + "」）：请刷新后重试");
+      throw TranslationService.conflict("这条译文刚被别人改过（语言「" + item.locale() + "」）：请刷新后重试");
   }
 
   // ============================================================ 批次查询
@@ -350,17 +418,23 @@ public class TranslationBatchService {
     pageBinds.add((long) page * size);
     var rows =
         sql.fetch(
-            "select * from translation_batch" + where
+            "select * from translation_batch"
+                + where
                 + " order by created_at desc,id desc limit ? offset ?",
             pageBinds.toArray());
     List<TranslationBatchRow> items = new ArrayList<>(rows.size());
     for (Record r : rows) items.add(toBatch(r));
-    return new TranslationBatchPage(items, page, size, total, (int) Math.ceil(total / (double) size));
+    return new TranslationBatchPage(
+        items, page, size, total, (int) Math.ceil(total / (double) size));
   }
 
   /** 批次详情：批次 + 逐条结果（含目标编码，页面逐条核对用）。 */
   public TranslationBatchDetail detail(UUID batchId) {
-    var row = sql.fetchOne("select * from translation_batch where tenant_id=? and id=?", currentTenantId(), batchId);
+    var row =
+        sql.fetchOne(
+            "select * from translation_batch where tenant_id=? and id=?",
+            currentTenantId(),
+            batchId);
     if (row == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "批量操作批次不存在");
     var items =
         sql.fetch(
@@ -370,16 +444,22 @@ public class TranslationBatchService {
                 + " left join spu sp on sp.tenant_id=i.tenant_id and sp.id=i.spu_id"
                 + " left join sku sk on sk.tenant_id=i.tenant_id and sk.id=i.sku_id"
                 + " where i.tenant_id=? and i.batch_id=? order by i.outcome desc,i.id",
-            currentTenantId(), batchId);
+            currentTenantId(),
+            batchId);
     List<TranslationBatchItemRow> out = new ArrayList<>(items.size());
     for (Record r : items) out.add(toBatchItem(r));
     TranslationBatchRow batch = toBatch(row);
     return new TranslationBatchDetail(
         batch,
         out,
-        TranslationRules.batchActionLabel(batch.action()) + "：成功 "
-            + batch.succeededCount() + " 条、跳过 " + batch.skippedCount() + " 条、未执行 "
-            + batch.rejectedCount() + " 条。逐条原因在下面，不是一个汇总数字——"
+        TranslationRules.batchActionLabel(batch.action())
+            + "：成功 "
+            + batch.succeededCount()
+            + " 条、跳过 "
+            + batch.skippedCount()
+            + " 条、未执行 "
+            + batch.rejectedCount()
+            + " 条。逐条原因在下面，不是一个汇总数字——"
             + "「哪几个没成」是批量操作唯一有用的输出。");
   }
 

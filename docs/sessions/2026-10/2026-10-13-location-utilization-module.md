@@ -13,10 +13,10 @@
 
 本模块是**纯分析/报表**，三样输入全在既有事实表里：
 
-| 输入 | 真相来源 |
-| --- | --- |
-| 容量 | `warehouse_location.capacity numeric(19,6)`（8.1.2.1 的 V105 补的列） |
-| 占用 | `stock_bucket`（V2） |
+| 输入     | 真相来源                                                                        |
+| -------- | ------------------------------------------------------------------------------- |
+| 容量     | `warehouse_location.capacity numeric(19,6)`（8.1.2.1 的 V105 补的列）           |
+| 占用     | `stock_bucket`（V2）                                                            |
 | 出库频次 | `inventory_transaction(kind='SHIPMENT')` + `inventory_entry`（V1，append-only） |
 
 建议是**读时派生**的：存一张「建议表」只会让它比它描述的库存更先过期。
@@ -42,11 +42,11 @@
 
 ### 3. 三处分母边界一律 null
 
-| 情形 | 结论 | 为什么不是别的值 |
-| --- | --- | --- |
-| 容量未量（`capacity IS NULL`） | `capacityUtilization = null` | 缺的是**知识**；给 0 会被读成「量过，是空的」 |
-| 容量量出来是 0 | `capacityUtilization = null` + `capacityZero=true` | 缺的是**定义**（除数是 0）；给 0 会被读成「一个都没放」，给 100% 是替物理事实编数 |
-| 在手为 0 | `turnover = null` + `turnoverComputable=false` | 出库 0 ÷ 在手 0 是**除以零**；给 0 会说「周转很慢」，而事实是「压根没货」 |
+| 情形                           | 结论                                               | 为什么不是别的值                                                                  |
+| ------------------------------ | -------------------------------------------------- | --------------------------------------------------------------------------------- |
+| 容量未量（`capacity IS NULL`） | `capacityUtilization = null`                       | 缺的是**知识**；给 0 会被读成「量过，是空的」                                     |
+| 容量量出来是 0                 | `capacityUtilization = null` + `capacityZero=true` | 缺的是**定义**（除数是 0）；给 0 会被读成「一个都没放」，给 100% 是替物理事实编数 |
+| 在手为 0                       | `turnover = null` + `turnoverComputable=false`     | 出库 0 ÷ 在手 0 是**除以零**；给 0 会说「周转很慢」，而事实是「压根没货」         |
 
 合计利用率另有第四道：**仅在全部库位都量过容量且容量和 > 0 时**才给，
 否则给 `utilizationComputable=false`，界面显示「仅覆盖 N/M 个库位」。
@@ -80,6 +80,7 @@ springdoc 用**简单类名**做 `components.schemas` 的键，重名会被**静
 ## 文件清单
 
 **后端（新增，未动任何既有文件）**
+
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/LocationUtilizationModels.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/LocationUtilizationService.java`
 - `backend/services/warehouse/src/main/java/com/starcon/warehouse/LocationUtilizationController.java`
@@ -88,21 +89,25 @@ springdoc 用**简单类名**做 `components.schemas` 的键，重名会被**静
 **迁移**：无（V109 留空，理由见上）
 
 **契约（codegen 产物，非手改）**
+
 - `packages/api-contracts/src/contracts/warehouse.ts`（+9 类型，纯新增）
 - `packages/api-contracts/src/warehouse.openapi.json`
 
 **前端（新增）**
+
 - `apps/web/src/app/warehouse/facilities/[id]/utilization/page.tsx`
 - `apps/web/src/components/warehouse/warehouse-location-utilization-workspace.tsx`
 - `apps/web/src/components/warehouse/warehouse-location-utilization-model.ts`
 - `apps/web/src/components/warehouse/warehouse-location-utilization-model.test.ts`（19 例）
 
 **前端（共享文件，仅追加）**
+
 - `apps/web/src/lib/api-proxy.ts`：只追加 `location-utilization` 一个顶层分支；
   `location-trees` 分支**逐字节未变**（脚本比对 old/new 子串相同，插入点之前 6883 字符整段相同）
 - `apps/web/src/app/api/warehouse/[...path]/route.test.ts`：追加 3 例
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md`：只改第 305 行（8.5.2.1）的状态与证据两格
 
 ## 后续待办

@@ -16,6 +16,7 @@ import { WarehouseDetailWorkspace } from '@/components/warehouse/warehouse-detai
  * 作业人员与设备、各子模块入口，以及基础信息与地址的维护，全部来自 PostgreSQL 16 上
  * 真实落库的聚合查询。
  */
-export default function WarehouseDetailPage({ params }: { params: { id: string } }) {
-  return <WarehouseDetailWorkspace warehouseId={params.id} />;
+export default async function WarehouseDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  return <WarehouseDetailWorkspace warehouseId={resolvedParams.id} />;
 }

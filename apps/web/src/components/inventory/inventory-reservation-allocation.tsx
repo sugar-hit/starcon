@@ -60,7 +60,11 @@ import { useIdentity } from '../iam/identity-shell';
  * <p>错误态分两种：整体拉取失败显示错误条并保留重试；单条写动作失败只在动作处提示，
  * 不把整页换成错误态 —— 否则一次「承诺失败」会把用户正在看的明细整个顶掉。
  */
-export function InventoryReservationAllocationWorkspace({ reservationId }: { reservationId: string }) {
+export function InventoryReservationAllocationWorkspace({
+  reservationId,
+}: {
+  reservationId: string;
+}) {
   const { session } = useIdentity();
   const readable = session.permissions.includes('warehouse.inventory.read');
   const writable = session.permissions.includes('warehouse.inventory.update');
@@ -133,7 +137,16 @@ export function InventoryReservationAllocationWorkspace({ reservationId }: { res
     } finally {
       setLoading(false);
     }
-  }, [readable, reservationId, statusFilter, keyword, bucketFilter, sort, pageNumber, timelineTransition]);
+  }, [
+    readable,
+    reservationId,
+    statusFilter,
+    keyword,
+    bucketFilter,
+    sort,
+    pageNumber,
+    timelineTransition,
+  ]);
 
   useEffect(() => {
     void load();
@@ -244,7 +257,7 @@ export function InventoryReservationAllocationWorkspace({ reservationId }: { res
 
       {/* 预占抬头：需求量 / 已分配 / 未分配 / 剩余量，两个「欠」问题分列 */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <StatCard label="需求量" value={header ? qty(header.requestedQuantity) : '—'}/>
+        <StatCard label="需求量" value={header ? qty(header.requestedQuantity) : '—'} />
         <StatCard
           label="已分配量"
           value={header ? qty(header.allocatedQuantity) : '—'}
@@ -274,16 +287,16 @@ export function InventoryReservationAllocationWorkspace({ reservationId }: { res
             合计为整笔预占的全量分配，不随下方筛选与分页变化。
           </p>
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            <StatCard label="预占中" value={String(countOf(summary, 'HELD'))}/>
-            <StatCard label="已承诺" value={String(countOf(summary, 'COMMITTED'))}/>
-            <StatCard label="已消耗" value={String(countOf(summary, 'CONSUMED'))}/>
-            <StatCard label="已释放" value={String(countOf(summary, 'RELEASED'))}/>
-            <StatCard label="已过期" value={String(countOf(summary, 'EXPIRED'))}/>
-            <StatCard label="分配行数" value={String(summary.totalCount)}/>
-            <StatCard label="bucket 数" value={String(summary.bucketCount)}/>
-            <StatCard label="已消耗量" value={qty(summary.consumedQuantity)}/>
-            <StatCard label="已释放量" value={qty(summary.releasedQuantity)}/>
-            <StatCard label="未出库量" value={qty(summary.remainingQuantity)}/>
+            <StatCard label="预占中" value={String(countOf(summary, 'HELD'))} />
+            <StatCard label="已承诺" value={String(countOf(summary, 'COMMITTED'))} />
+            <StatCard label="已消耗" value={String(countOf(summary, 'CONSUMED'))} />
+            <StatCard label="已释放" value={String(countOf(summary, 'RELEASED'))} />
+            <StatCard label="已过期" value={String(countOf(summary, 'EXPIRED'))} />
+            <StatCard label="分配行数" value={String(summary.totalCount)} />
+            <StatCard label="bucket 数" value={String(summary.bucketCount)} />
+            <StatCard label="已消耗量" value={qty(summary.consumedQuantity)} />
+            <StatCard label="已释放量" value={qty(summary.releasedQuantity)} />
+            <StatCard label="未出库量" value={qty(summary.remainingQuantity)} />
           </div>
           <p className="text-muted-foreground mt-3 text-xs">{UNALLOCATED_NOTE}</p>
         </SectionCard>
@@ -561,12 +574,15 @@ export function InventoryReservationAllocationWorkspace({ reservationId }: { res
                   key={entry.id}
                   className="border-border/60 flex flex-wrap items-baseline gap-2 border-b pb-2 text-sm"
                 >
-                  <span className="text-muted-foreground tabular-nums text-xs">
+                  <span className="text-muted-foreground text-xs tabular-nums">
                     {new Date(entry.occurredAt).toLocaleString('zh-CN', { hour12: false })}
                   </span>
                   <Badge tone="neutral">{allocationLevelLabel(entry.level)}</Badge>
                   <span className="font-medium">
-                    {allocationTransitionLabel(entry.transition, entry.transitionLabel ?? undefined)}
+                    {allocationTransitionLabel(
+                      entry.transition,
+                      entry.transitionLabel ?? undefined,
+                    )}
                   </span>
                   <span className="text-muted-foreground">
                     {entryFromLabel(entry.fromStatus)} →{' '}

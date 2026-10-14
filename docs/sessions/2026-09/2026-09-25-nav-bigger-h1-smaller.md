@@ -6,23 +6,23 @@
 
 ## 改动
 
-| 元素 | 之前 | 现在 |
-|---|---|---|
-| Nav item | text-copy-13 (13px) | **text-copy-14 (14px)** |
+| 元素          | 之前                             | 现在                               |
+| ------------- | -------------------------------- | ---------------------------------- |
+| Nav item      | text-copy-13 (13px)              | **text-copy-14 (14px)**            |
 | PageHeader h1 | text-[18px] (18px) font-semibold | **text-h-16 (16px) font-semibold** |
 
 ## 当前 typography 完整图
 
-| 元素 | 字号 |
-|---|---|
-| StatCard value (KPI hero) | 24px |
-| **PageHeader h1** | **16px** ← 比 h-14 CardTitle 大 |
-| SectionCard title | 16px |
-| CardTitle (banner hero) | 16px |
-| CardTitle (typical) | 14px |
-| **Nav item** | **14px** ← 跟正文一致 |
-| Body / Description | 13-14px |
-| Eyebrow / Segmented | 12px |
+| 元素                      | 字号                            |
+| ------------------------- | ------------------------------- |
+| StatCard value (KPI hero) | 24px                            |
+| **PageHeader h1**         | **16px** ← 比 h-14 CardTitle 大 |
+| SectionCard title         | 16px                            |
+| CardTitle (banner hero)   | 16px                            |
+| CardTitle (typical)       | 14px                            |
+| **Nav item**              | **14px** ← 跟正文一致           |
+| Body / Description        | 13-14px                         |
+| Eyebrow / Segmented       | 12px                            |
 
 ## 提交
 

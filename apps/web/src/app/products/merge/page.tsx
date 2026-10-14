@@ -31,10 +31,10 @@ export default function SkuMergePage() {
       <header className="space-y-1">
         <h1 className="text-copy-20 font-semibold">SKU 合并</h1>
         <p className="text-muted-foreground text-copy-13">
-          执行重复 SKU / 商品的归并：把重复记录<strong>并到主记录</strong>，
-          迁移<strong>当前引用</strong>（条码、素材、报价、套装、BOM、包装、安全属性、单位换算），
-          原记录<strong>标记合并并停用</strong>而不是物理删除。
-          历史订单行<strong>冻结当时 SKU 快照</strong>，不随合并回溯改写。
+          执行重复 SKU / 商品的归并：把重复记录<strong>并到主记录</strong>， 迁移
+          <strong>当前引用</strong>（条码、素材、报价、套装、BOM、包装、安全属性、单位换算），
+          原记录<strong>标记合并并停用</strong>而不是物理删除。 历史订单行
+          <strong>冻结当时 SKU 快照</strong>，不随合并回溯改写。
         </p>
       </header>
 

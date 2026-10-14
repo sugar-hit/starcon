@@ -71,16 +71,16 @@ BOM 用错一版是**领错料、算错成本，而错在仓库里撤不回来**
 
 ## 关键 trade-off
 
-| 取舍 | 选择 | 理由 |
-| --- | --- | --- |
-| BOM vs 套装：分表还是合表 | **分表**，触发器更严 | 两者生命周期与冻结对象都不同（订单子行 vs 实物领料）；合成一张表要靠类型列，冻结规则无法按类型分叉 |
-| 损耗率：百分数 vs 比率 | **百分数** | 比率下「填 5」= 500% 损耗且不报错，采购量翻 6 倍 |
-| 需求量：取整 vs 精确 | **精确 6 位小数** | 取整是 3.5.2.2 与 06 的决定；提前取整等于替下游做决定 |
-| 展开深度：单层 vs 递归 | **单层** | 多级展开是 3.5.2.2 的独立职责，边界写在 V25 文件头末尾 |
-| 组件清单：整体替换 vs 增删改 | **整体替换** | 清单有「同版本一 SKU 一行」约束，增删式漏对账的表现是页面剩一条幽灵组件 |
-| 版本复制：沿用源区间 vs 从此刻 | **从此刻** | 沿用已发布版本的起点会直接撞 R2；运营要的是「改完从现在起接替」 |
-| 倒排跨租户：返回空集 vs 拒绝 | **拒绝** | 返回空集的话「这个料没人用」与「这个料不属于你」分不开 |
-| 区间重叠：自动裁决 vs 拒绝 | **拒绝**（沿用 R2） | 用错一版 BOM 是领错料，错在仓库里撤不回来 |
+| 取舍                           | 选择                 | 理由                                                                                               |
+| ------------------------------ | -------------------- | -------------------------------------------------------------------------------------------------- |
+| BOM vs 套装：分表还是合表      | **分表**，触发器更严 | 两者生命周期与冻结对象都不同（订单子行 vs 实物领料）；合成一张表要靠类型列，冻结规则无法按类型分叉 |
+| 损耗率：百分数 vs 比率         | **百分数**           | 比率下「填 5」= 500% 损耗且不报错，采购量翻 6 倍                                                   |
+| 需求量：取整 vs 精确           | **精确 6 位小数**    | 取整是 3.5.2.2 与 06 的决定；提前取整等于替下游做决定                                              |
+| 展开深度：单层 vs 递归         | **单层**             | 多级展开是 3.5.2.2 的独立职责，边界写在 V25 文件头末尾                                             |
+| 组件清单：整体替换 vs 增删改   | **整体替换**         | 清单有「同版本一 SKU 一行」约束，增删式漏对账的表现是页面剩一条幽灵组件                            |
+| 版本复制：沿用源区间 vs 从此刻 | **从此刻**           | 沿用已发布版本的起点会直接撞 R2；运营要的是「改完从现在起接替」                                    |
+| 倒排跨租户：返回空集 vs 拒绝   | **拒绝**             | 返回空集的话「这个料没人用」与「这个料不属于你」分不开                                             |
+| 区间重叠：自动裁决 vs 拒绝     | **拒绝**（沿用 R2）  | 用错一版 BOM 是领错料，错在仓库里撤不回来                                                          |
 
 ## 过程中修掉的两个真实缺陷
 
@@ -93,6 +93,7 @@ BOM 用错一版是**领错料、算错成本，而错在仓库里撤不回来**
 ## 文件清单
 
 **后端（新增）**
+
 - `backend/services/catalog/src/main/resources/db/migration/V25__bom_version.sql` —— 三张表 + 四触发器 + 八索引 + RLS/GRANT
 - `backend/services/catalog/src/main/java/com/starcon/catalog/BomRules.java` —— 纯规则层（R6/R7 自有，R1–R5 转发）
 - `backend/services/catalog/src/main/java/com/starcon/catalog/BomVersionService.java` —— jOOQ 显式 SQL 服务层
@@ -101,21 +102,26 @@ BOM 用错一版是**领错料、算错成本，而错在仓库里撤不回来**
 - `backend/services/catalog/src/test/java/com/starcon/catalog/BomVersionIntegrationTest.java` —— 24 例（PG16 + 强制 RLS）
 
 **后端（修改）**
+
 - `CatalogModels.java` —— 追加 18 个 `Bom*` DTO
 
 **契约（codegen 产物，只由脚本改）**
+
 - `packages/api-contracts/src/catalog.ts`、`catalog.openapi.json` —— +18 个 DTO，纯新增
 
 **前端（新增）**
+
 - `apps/web/src/app/products/bom/page.tsx`
 - `apps/web/src/components/catalog/bom-model.ts` / `bom-model.test.ts`（38 例）
 - `apps/web/src/components/catalog/bom-workspace.tsx`
 
 **前端（修改）**
+
 - `apps/web/src/lib/api-proxy.ts` —— 放行 `boms` / `bom-versions` / `bom-components`
 - `apps/web/src/app/api/catalog/[...path]/route.test.ts` —— +1 例路由放行/拒绝
 
 **台账**
+
 - `docs/product/capability-blueprint/module-progress.md` —— 仅 3.5.2.1 一行（其余为 `sync.mjs` 自动重算的计数）
 
 ## 验证

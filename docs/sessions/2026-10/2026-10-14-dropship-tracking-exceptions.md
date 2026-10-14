@@ -2,13 +2,13 @@
 
 ## 决策摘要
 
-| 项 | 内容 |
-| --- | --- |
-| 模块 | 9.6.1.3 代发履约跟踪与异常（卷 09 订单履约，L3 锚点 9.6.1，阶段 D4） |
-| 落在服务 | **trade**（蓝图 09 卷「后端主责服务：trade + channel，取第一项」） |
-| 迁移 | `backend/services/trade/.../V126__trade_dropship_tracking_exceptions.sql`（版本号台账预分配） |
+| 项       | 内容                                                                                                                                |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 模块     | 9.6.1.3 代发履约跟踪与异常（卷 09 订单履约，L3 锚点 9.6.1，阶段 D4）                                                                |
+| 落在服务 | **trade**（蓝图 09 卷「后端主责服务：trade + channel，取第一项」）                                                                  |
+| 迁移     | `backend/services/trade/.../V126__trade_dropship_tracking_exceptions.sql`（版本号台账预分配）                                       |
 | 命名空间 | 后端 `/trade/fulfillment/dropship-tracking`；前端 `/orders/fulfillment/dropship-tracking`；白名单组 `fulfillment/dropship-tracking` |
-| 车道 | `feat/9-6-1-3`（worktree `.worktrees/9.6.1.3`） |
+| 车道     | `feat/9-6-1-3`（worktree `.worktrees/9.6.1.3`）                                                                                     |
 
 ### 依赖自检结论（开工前 10 分钟）
 
@@ -70,19 +70,23 @@ CLAIMED→ACKNOWLEDGED；只有走到这里 `callback_status` 才允许从 PENDI
 ## 文件清单
 
 **迁移**
+
 - `backend/services/trade/src/main/resources/db/migration/V126__trade_dropship_tracking_exceptions.sql`
 
 **后端**
+
 - `backend/services/trade/src/main/java/com/starcon/trade/DropshipTrackingModels.java`
 - `backend/services/trade/src/main/java/com/starcon/trade/DropshipTrackingService.java`
 - `backend/services/trade/src/main/java/com/starcon/trade/DropshipTrackingController.java`
 - `backend/services/trade/src/test/java/com/starcon/trade/DropshipTrackingIntegrationTest.java`
 
 **契约（codegen 产物，只读）**
+
 - `packages/api-contracts/src/contracts/trade.ts`、`packages/api-contracts/src/trade.openapi.json`
   （其余五个服务**零改动**）
 
 **前端**
+
 - `apps/web/src/components/orders/dropship-tracking-model.ts`
 - `apps/web/src/components/orders/dropship-tracking-model.test.ts`
 - `apps/web/src/components/orders/dropship-tracking-workspace.tsx`
@@ -90,18 +94,19 @@ CLAIMED→ACKNOWLEDGED；只有走到这里 `callback_status` 才允许从 PENDI
 - `apps/web/src/app/api/trade/dropship-tracking-allowlist.test.ts`
 
 **共用文件（最小追加）**
+
 - `apps/web/src/lib/api-proxy.ts`（只在 trade 段追加 `fulfillment/dropship-tracking` 一组，未重排任何既有分支）
 - `docs/product/capability-blueprint/module-progress.md`（只改 9.6.1.3 那一行的「状态」「证据」两格）
 
 ## 验证方式与结果
 
-| 闸 | 命令 | 结果 |
-| --- | --- | --- |
-| L0 编译 | `backend && ./mvnw -q compile` | 通过，无错误 |
-| L0 类型 | `pnpm typecheck` | 通过（3 包全绿） |
-| L1 模块 | `backend && ./mvnw -pl services/trade -am test` | **Tests run: 276, Failures: 0, Errors: 0**（含本模块 29 例 + 上游 9.6.1.1/9.6.1.2 全量） |
-| 前端 | `pnpm vitest run <三个相关文件>` | model 21 例 + allowlist 5 例全绿；**同时复跑 9.6.1.1/9.6.1.2 的白名单测试确认兄弟组未被污染** |
-| Lint | `pnpm lint` | 通过（仅仓库既有的其他模块 warning） |
+| 闸      | 命令                                            | 结果                                                                                          |
+| ------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| L0 编译 | `backend && ./mvnw -q compile`                  | 通过，无错误                                                                                  |
+| L0 类型 | `pnpm typecheck`                                | 通过（3 包全绿）                                                                              |
+| L1 模块 | `backend && ./mvnw -pl services/trade -am test` | **Tests run: 276, Failures: 0, Errors: 0**（含本模块 29 例 + 上游 9.6.1.1/9.6.1.2 全量）      |
+| 前端    | `pnpm vitest run <三个相关文件>`                | model 21 例 + allowlist 5 例全绿；**同时复跑 9.6.1.1/9.6.1.2 的白名单测试确认兄弟组未被污染** |
+| Lint    | `pnpm lint`                                     | 通过（仅仓库既有的其他模块 warning）                                                          |
 
 集成测试实跑 Testcontainers PostgreSQL 16，连接池压到 1 条连接，多租户三断言齐全：
 两租户互不可见、伪造 `X-Tenant-Id` 头无效、连接池归还后不串租户。

@@ -69,7 +69,8 @@ export function handoverQuery(params: HandoverParams): string {
   if (params.warehouseId) parts.push(`warehouseId=${encodeURIComponent(params.warehouseId)}`);
   if (params.outboundOrderId)
     parts.push(`outboundOrderId=${encodeURIComponent(params.outboundOrderId)}`);
-  if (params.packingOrderId) parts.push(`packingOrderId=${encodeURIComponent(params.packingOrderId)}`);
+  if (params.packingOrderId)
+    parts.push(`packingOrderId=${encodeURIComponent(params.packingOrderId)}`);
   if (params.status) parts.push(`status=${encodeURIComponent(params.status)}`);
   if (params.carrierCode) parts.push(`carrierCode=${encodeURIComponent(params.carrierCode)}`);
   if (params.handoverUserId)
@@ -125,7 +126,8 @@ export function waybillInputOf(form: {
   const carrier = form.carrierCode.trim();
   const waybill = form.masterWaybillNo.trim();
   if (!carrier) return { ok: false, message: '承运渠道不能为空：确认承运商是交接的前提' };
-  if (!waybill) return { ok: false, message: '运单号不能为空：只有承运商没有运单号，就不知道运的是哪一单' };
+  if (!waybill)
+    return { ok: false, message: '运单号不能为空：只有承运商没有运单号，就不知道运的是哪一单' };
   const entries: ParcelWaybillEntry[] = Object.entries(form.parcelWaybills ?? {})
     .filter(([, v]) => v.trim().length > 0)
     .map(([parcelId, v]) => ({ parcelId, parcelWaybillNo: v.trim() }));
@@ -179,9 +181,11 @@ export function registeredCell(value: string | null | undefined, fallback = '未
 }
 
 /** 「确认交接」按钮的可点性只认后端的 handableOver；页面不自己算可用量。 */
-export function handoverVerdict(
-  report: HandoverDetail['completion'] | null | undefined,
-): { handable: boolean; reasons: string[]; warnings: string[] } {
+export function handoverVerdict(report: HandoverDetail['completion'] | null | undefined): {
+  handable: boolean;
+  reasons: string[];
+  warnings: string[];
+} {
   if (!report) return { handable: false, reasons: ['尚未加载交接判据'], warnings: [] };
   return {
     handable: report.handableOver === true,
@@ -214,7 +218,10 @@ export function handoverStatusLabel(status: HandoverStatus | string | null | und
  * 但**数字仍来自后端**，页面不自己把两个 delta 加减一遍。
  */
 export function ledgerDigest(
-  entries: ReadonlyArray<{ onHandDelta: string | null | undefined; reservedDelta: string | null | undefined }>,
+  entries: ReadonlyArray<{
+    onHandDelta: string | null | undefined;
+    reservedDelta: string | null | undefined;
+  }>,
 ): string {
   if (!entries.length) return '尚未产生出库分录';
   return entries

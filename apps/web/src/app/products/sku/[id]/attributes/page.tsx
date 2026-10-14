@@ -10,6 +10,11 @@ import { SkuAttributeOverrideWorkspace } from '@/components/catalog/sku-attribut
  * <p>与详情页分工：详情页的属性区是**只读**的有效值展示（回答"这个 SKU 现在是什么参数"），
  * 这里负责**改**它（回答"哪条值不对，要覆写、清空还是取消覆写"）。
  */
-export default function SkuAttributeOverridePage({ params }: { params: { id: string } }) {
-  return <SkuAttributeOverrideWorkspace skuId={params.id} />;
+export default async function SkuAttributeOverridePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = await params;
+  return <SkuAttributeOverrideWorkspace skuId={resolvedParams.id} />;
 }

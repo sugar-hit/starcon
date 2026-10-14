@@ -20,22 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 10.5.1.3 关税与税费。
  *
- * <p>命名空间 {@code /warehouse/duty-taxes}：与 10.5.1.1 报关单
- * （{@code /warehouse/customs-declarations}）、10.4.1.1 头程发运单
- * （{@code /warehouse/first-mile-shipments}）同一 {@code /warehouse} 前缀，浏览器只经
- * /api/warehouse 代理访问。放在 {@code /inventory/} 下会让「8.2 现场作业」与「10 物流税费」
+ * <p>命名空间 {@code /warehouse/duty-taxes}：与 10.5.1.1 报关单 （{@code
+ * /warehouse/customs-declarations}）、10.4.1.1 头程发运单 （{@code /warehouse/first-mile-shipments}）同一
+ * {@code /warehouse} 前缀，浏览器只经 /api/warehouse 代理访问。放在 {@code /inventory/} 下会让「8.2 现场作业」与「10 物流税费」
  * 两套语义混在一个前缀里，而本模块的输入就是报关单与头程发运单。
  *
- * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}，
- * 全部写动作（配税率 / 建估算 / 改基础 / 重算 / 锁定 / 作废 / 录实缴）挂
- * {@code warehouse.inventory.update} —— 锁定那一刻估算就成为对外报价依据，权限等级与调拨发货同档。
+ * <p>权限码沿用 {@code warehouse.}：读用 {@code warehouse.inventory.read}， 全部写动作（配税率 / 建估算 / 改基础 / 重算 / 锁定
+ * / 作废 / 录实缴）挂 {@code warehouse.inventory.update} —— 锁定那一刻估算就成为对外报价依据，权限等级与调拨发货同档。
  *
- * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限，
- * 再在一个事务里绑定 {@code app.current_tenant}，由 RLS 在数据库层强制隔离。
- * 客户端伪造的 {@code X-Tenant-Id} 进不来也改不动它。
+ * <p>租户**不**来自任何请求头：{@link #call} 先向 identity 确认已认证成员关系与权限， 再在一个事务里绑定 {@code app.current_tenant}，由
+ * RLS 在数据库层强制隔离。 客户端伪造的 {@code X-Tenant-Id} 进不来也改不动它。
  *
- * <p>动作端点是 **POST**：录实缴、锁定、作废、重算都是「发生一次业务事件」，
- * 用 PUT 会被 HTTP 语义读成「把单据设置成某个状态」，而实际发生的是一笔钱付出去。
+ * <p>动作端点是 **POST**：录实缴、锁定、作废、重算都是「发生一次业务事件」， 用 PUT 会被 HTTP 语义读成「把单据设置成某个状态」，而实际发生的是一笔钱付出去。
  */
 @RestController
 @RequestMapping("/warehouse/duty-taxes")
@@ -56,8 +52,7 @@ public class DutyTaxController {
   }
 
   /**
-   * 关税与税费能力：税种、承担方、贸易条款、状态机、归因词表、**未交付依赖逐条声明**
-   * 与四条必须讲清的口径。
+   * 关税与税费能力：税种、承担方、贸易条款、状态机、归因词表、**未交付依赖逐条声明** 与四条必须讲清的口径。
    *
    * <p>前端据此渲染各下拉与提示 —— 3.7.1.1 HS 编码字典、16.3.1.1 税则、16.3.2.1 VAT/IOSS
    * 与外部海关缴款接口**显式报不可用并给出归属模块**，而不是给一个点下去没反应的选项。
@@ -79,7 +74,8 @@ public class DutyTaxController {
       @RequestParam(required = false) String rateScope,
       @RequestParam(required = false) String hsCodePrefix,
       @RequestParam(required = false) Boolean preferentialOnly,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate effectiveOn,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+          LocalDate effectiveOn,
       @RequestParam(required = false) String keyword,
       @RequestParam(required = false) String sort,
       @RequestParam(required = false, defaultValue = "0") int page,
@@ -91,8 +87,16 @@ public class DutyTaxController {
             dutyTax.rates(
                 a.tenantId(),
                 new DutyRateQuery(
-                    destinationCountryCode, taxKind, rateScope, hsCodePrefix, preferentialOnly,
-                    effectiveOn, keyword, sort, page, size)));
+                    destinationCountryCode,
+                    taxKind,
+                    rateScope,
+                    hsCodePrefix,
+                    preferentialOnly,
+                    effectiveOn,
+                    keyword,
+                    sort,
+                    page,
+                    size)));
   }
 
   /** 录入税率。出处必填：没有出处的税率无法复核，而税率算错是要按海关核定补税的。 */
@@ -106,8 +110,7 @@ public class DutyTaxController {
   /**
    * 改税率（带行级乐观锁）。
    *
-   * <p>已算出的估算单明细行里抄着自己当时用的税率值，**不受本次改动影响** ——
-   * 那正是「当时按 3.25% 算的」能被回答的原因。
+   * <p>已算出的估算单明细行里抄着自己当时用的税率值，**不受本次改动影响** —— 那正是「当时按 3.25% 算的」能被回答的原因。
    */
   @PutMapping("/rates/{rateId}")
   public DutyRateSaved updateRate(
@@ -141,8 +144,17 @@ public class DutyTaxController {
             dutyTax.page(
                 a.tenantId(),
                 new DutyEstimateQuery(
-                    status, destinationCountryCode, dutyBearer, incoterm, declarationId,
-                    unmatchedRateOnly, varianceOnly, keyword, sort, page, size)));
+                    status,
+                    destinationCountryCode,
+                    dutyBearer,
+                    incoterm,
+                    declarationId,
+                    unmatchedRateOnly,
+                    varianceOnly,
+                    keyword,
+                    sort,
+                    page,
+                    size)));
   }
 
   /**
@@ -203,8 +215,7 @@ public class DutyTaxController {
   /**
    * 建估算单：取报关单申报价值快照 → 逐行匹配税率 → 算关税与增值税/GST → 算到岸成本。
    *
-   * <p>没匹配到税率的行会落在 {@code NO_MATCH} 并在返回消息里点名，
-   * 且**锁不了这张估算单** —— 按 0 税锁定的估算单会让报价与成本核算少算税。
+   * <p>没匹配到税率的行会落在 {@code NO_MATCH} 并在返回消息里点名， 且**锁不了这张估算单** —— 按 0 税锁定的估算单会让报价与成本核算少算税。
    */
   @PostMapping
   public DutySaved create(
@@ -231,8 +242,10 @@ public class DutyTaxController {
   public DutySaved recalculate(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID estimateId,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate rateDate) {
-    return call(auth, "inventory.update", a -> dutyTax.recalculate(a.tenantId(), estimateId, rateDate));
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+          LocalDate rateDate) {
+    return call(
+        auth, "inventory.update", a -> dutyTax.recalculate(a.tenantId(), estimateId, rateDate));
   }
 
   /**
@@ -248,7 +261,9 @@ public class DutyTaxController {
     return call(
         auth,
         "inventory.update",
-        a -> dutyTax.lock(a.tenantId(), estimateId, request == null ? new DutyLockRequest("") : request));
+        a ->
+            dutyTax.lock(
+                a.tenantId(), estimateId, request == null ? new DutyLockRequest("") : request));
   }
 
   /** 作废：终态。已有实缴的不许作废 —— 钱付出去了，作废估算会让「缴了多少税」在账上消失。 */
@@ -257,21 +272,22 @@ public class DutyTaxController {
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID estimateId,
       @RequestBody DutyVoidRequest request) {
-    return call(auth, "inventory.update", a -> dutyTax.voidEstimate(a.tenantId(), estimateId, request));
+    return call(
+        auth, "inventory.update", a -> dutyTax.voidEstimate(a.tenantId(), estimateId, request));
   }
 
   /**
    * 记录实际缴纳，并在**同一事务里**写下差异快照与归因。
    *
-   * <p>蓝图原文：「**税费估算与实际缴纳差异要记录**」。这不是可选的补充动作 ——
-   * DB 触发器会在提交时核对「有实缴却没有差异记录」并拒收，所以先存实缴、差异以后再补做不到。
+   * <p>蓝图原文：「**税费估算与实际缴纳差异要记录**」。这不是可选的补充动作 —— DB 触发器会在提交时核对「有实缴却没有差异记录」并拒收，所以先存实缴、差异以后再补做不到。
    */
   @PostMapping("/{estimateId}/payments")
   public DutySaved recordPayment(
       @RequestHeader(value = "Authorization", defaultValue = "") String auth,
       @PathVariable UUID estimateId,
       @RequestBody DutyPaymentCreateRequest request) {
-    return call(auth, "inventory.update", a -> dutyTax.recordPayment(a.tenantId(), estimateId, request));
+    return call(
+        auth, "inventory.update", a -> dutyTax.recordPayment(a.tenantId(), estimateId, request));
   }
 
   /**

@@ -71,10 +71,7 @@ export function toggleOption(attributeId: string, value: string, enabled: boolea
  * <p>用 `param` 而不是拼在 query 里：选项值是中文（深空灰 / XL），
  * 手写 encodeURIComponent 容易在别处漏掉，后端就会收到一个不存在的值。
  */
-export function reorderOptions(
-  attributeId: string,
-  items: { value: string; position: number }[],
-) {
+export function reorderOptions(attributeId: string, items: { value: string; position: number }[]) {
   return api<AttributeOptionOrderSaved>('catalog/attributes/options/order', 'PUT', {
     attributeId,
     items,

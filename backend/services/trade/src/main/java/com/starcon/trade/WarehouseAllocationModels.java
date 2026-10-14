@@ -12,28 +12,22 @@ import java.util.UUID;
 /**
  * 9.3.2.1 分仓规则的传输模型。
  *
- * <p>蓝图原话：「配置并执行仓库分配：按库存可用性、运费成本、时效承诺、货权归属、
- * 买家地区匹配度选择发货仓；支持优先级与兜底策略。」输出是
- * 「分配结果（发货仓 + 分配数量）」与「无法分配的异常挂起」—— 后者是硬输出，
- * 所以 {@link WarehouseAllocationDecisionDetail} 永远把挂起记录一起带出来，
- * 且 {@link WarehouseAllocationSimulation} 里每个候选仓都带自己的排除原因。
+ * <p>蓝图原话：「配置并执行仓库分配：按库存可用性、运费成本、时效承诺、货权归属、 买家地区匹配度选择发货仓；支持优先级与兜底策略。」输出是 「分配结果（发货仓 +
+ * 分配数量）」与「无法分配的异常挂起」—— 后者是硬输出， 所以 {@link WarehouseAllocationDecisionDetail} 永远把挂起记录一起带出来， 且 {@link
+ * WarehouseAllocationSimulation} 里每个候选仓都带自己的排除原因。
  *
- * <p><b>命名纪律（这条是硬要求，不是风格偏好）</b>：springdoc 用 record 的
- * <b>简单类名</b>做 {@code components.schemas} 的键，而本仓已有
- * {@code WarehouseRow}（warehouse）、{@code AllocationRequest} /
- * {@code AllocationResult}（warehouse 7.1.3.1）等同名 record，同名会互相覆盖。
- * 因此本文件所有 record 与 enum 一律以 {@code WarehouseAllocation} 开头，
- * 嵌套的维度声明同样起名 {@link WarehouseAllocationDimension} 而不是
- * {@code Dimension} —— 9.3.2.2 的嵌套 {@code Dimension} 就已经占了这个键。
+ * <p><b>命名纪律（这条是硬要求，不是风格偏好）</b>：springdoc 用 record 的 <b>简单类名</b>做 {@code components.schemas}
+ * 的键，而本仓已有 {@code WarehouseRow}（warehouse）、{@code AllocationRequest} / {@code
+ * AllocationResult}（warehouse 7.1.3.1）等同名 record，同名会互相覆盖。 因此本文件所有 record 与 enum 一律以 {@code
+ * WarehouseAllocation} 开头， 嵌套的维度声明同样起名 {@link WarehouseAllocationDimension} 而不是 {@code Dimension}
+ * —— 9.3.2.2 的嵌套 {@code Dimension} 就已经占了这个键。
  *
  * <p><b>三条建模纪律</b>：
  *
  * <ul>
- *   <li><b>词表与数量/成本口径只有一个来源</b>：各枚举一字不改地对应 DB 的 CHECK 词表，
- *       Java 侧不维护第二份可写别的取值的枚举。
- *   <li><b>货权是参与判定的维度，不是附注</b>：候选行上
- *       {@code legalEntityCode} / {@code legalEntityMatch} / {@code scoreLegalEntity}
- *       各占一列，决策行上 {@code crossLegalEntity} 如实标记是否跨法人。
+ *   <li><b>词表与数量/成本口径只有一个来源</b>：各枚举一字不改地对应 DB 的 CHECK 词表， Java 侧不维护第二份可写别的取值的枚举。
+ *   <li><b>货权是参与判定的维度，不是附注</b>：候选行上 {@code legalEntityCode} / {@code legalEntityMatch} / {@code
+ *       scoreLegalEntity} 各占一列，决策行上 {@code crossLegalEntity} 如实标记是否跨法人。
  *   <li><b>金额全程 BigDecimal</b>，结算口径 HALF_UP 到分（与 10.5.1.3 同一约定）。
  * </ul>
  */
@@ -221,8 +215,7 @@ public final class WarehouseAllocationModels {
   /**
    * 维护一条分仓规则。
    *
-   * <p>五个权重必须合计 1.0000：权重不是「随便给的大数」，合计不为 1 时
-   * 同样输入在不同租户口径下不可比，也说不清谁更重要。服务层与 DB 双向校验。
+   * <p>五个权重必须合计 1.0000：权重不是「随便给的大数」，合计不为 1 时 同样输入在不同租户口径下不可比，也说不清谁更重要。服务层与 DB 双向校验。
    */
   public record WarehouseAllocationRuleInput(
       @NotBlank @Size(max = 64) String ruleCode,
@@ -264,8 +257,7 @@ public final class WarehouseAllocationModels {
   /**
    * 一个发货仓的档案。
    *
-   * @param legalEntityCode 货权归属：该仓的货记在哪个法人名下，收入按此法人记账。
-   *     这是**仓库的属性**（蓝图的加粗句所在），不是分配结果里的附注。
+   * @param legalEntityCode 货权归属：该仓的货记在哪个法人名下，收入按此法人记账。 这是**仓库的属性**（蓝图的加粗句所在），不是分配结果里的附注。
    */
   public record WarehouseAllocationWarehouseRow(
       UUID id,
@@ -397,9 +389,8 @@ public final class WarehouseAllocationModels {
   /**
    * 试算请求：给一组输入，问「应该从哪个仓发、为什么、每个仓分别如何」。
    *
-   * <p>刻意**不落库**：试算是只读预演，页面用它做「如果按现状会怎么判」；
-   * 真正执行分配走 {@link WarehouseAllocationDecisionRequest}（会写决策 + 候选 + 挂起）。
-   * 把两者合成一个端点会导致「看一眼」也在库里留下分配行。
+   * <p>刻意**不落库**：试算是只读预演，页面用它做「如果按现状会怎么判」； 真正执行分配走 {@link WarehouseAllocationDecisionRequest}（会写决策
+   * + 候选 + 挂起）。 把两者合成一个端点会导致「看一眼」也在库里留下分配行。
    */
   public record WarehouseAllocationSimulationRequest(
       @NotBlank @Size(max = 64) String orderRef,
@@ -460,8 +451,7 @@ public final class WarehouseAllocationModels {
    * @param orderLegalEntityCode 订单货权主体 —— 加粗句里「收入应该记在谁名下」的那个「应该」。
    * @param chosenLegalEntityCode 选中仓的法人；两者不同即跨法人发货。
    * @param crossLegalEntity 是否真的跨了法人。只有兜底策略显式放开货权硬闸才可能为 true。
-   * @param feasibleCount 可行候选数。为 0 时 {@code chosenWarehouseRef} 为空，
-   *     且 {@code candidates} 里逐条带排除原因。
+   * @param feasibleCount 可行候选数。为 0 时 {@code chosenWarehouseRef} 为空， 且 {@code candidates} 里逐条带排除原因。
    */
   public record WarehouseAllocationSimulation(
       String orderRef,
@@ -596,8 +586,8 @@ public final class WarehouseAllocationModels {
   /**
    * 分配写入结果（含挂起记录 id —— 挂起是硬输出，不只是「内部记了一笔」）。
    *
-   * @param status 落库后的状态。SUSPENDED 时 {@code chosenWarehouseRef} 为空，
-   *     {@code holdId} 非空且 {@code holdReason} 报出整体挂起原因。
+   * @param status 落库后的状态。SUSPENDED 时 {@code chosenWarehouseRef} 为空， {@code holdId} 非空且 {@code
+   *     holdReason} 报出整体挂起原因。
    */
   public record WarehouseAllocationDecisionSaved(
       UUID decisionId,
@@ -615,16 +605,14 @@ public final class WarehouseAllocationModels {
 
   /** 状态推进请求。 */
   public record WarehouseAllocationStatusInput(
-      @NotBlank @Size(max = 16) String status,
-      @Size(max = 32) String releasedToModule) {}
+      @NotBlank @Size(max = 16) String status, @Size(max = 32) String releasedToModule) {}
 
   // ------------------------------------------------------------ 能力声明
 
   /**
    * 本模块的能力与上游可用性。
    *
-   * <p>存在的理由：把「哪些输入真有依据」显式报出来，而不是让调用方从 404 或空数组里猜
-   * 哪一环没通。
+   * <p>存在的理由：把「哪些输入真有依据」显式报出来，而不是让调用方从 404 或空数组里猜 哪一环没通。
    */
   public record WarehouseAllocationCapabilities(
       List<WarehouseAllocationDimension> dimensions,

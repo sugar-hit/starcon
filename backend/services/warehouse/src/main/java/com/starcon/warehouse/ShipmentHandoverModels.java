@@ -9,41 +9,31 @@ import java.util.UUID;
  * 8.3.4.1 发货交接的传输模型。
  *
  * <p>蓝图 08 卷 8.3.4.1 原文：「<b>发货交接：确认承运商与运单号、登记交接时间与交接人、扣减库存完成出库、
- * 触发物流轨迹与平台回传。</b>输入：包裹与运单号；承运渠道；交接确认。
- * 输出：出库完成分录（预占转实扣）+ 发货事件 → 9 订单状态、10 轨迹、2 平台回写。」
- * 关系段：「上游 = 8.3.3.2；下游 = 7 库存、9 订单、10 物流、2 渠道回写。
- * <b>实发扣减与预占消费在同一事务</b>，避免预占悬空或重复扣减。」
+ * 触发物流轨迹与平台回传。</b>输入：包裹与运单号；承运渠道；交接确认。 输出：出库完成分录（预占转实扣）+ 发货事件 → 9 订单状态、10 轨迹、2 平台回写。」 关系段：「上游 =
+ * 8.3.3.2；下游 = 7 库存、9 订单、10 物流、2 渠道回写。 <b>实发扣减与预占消费在同一事务</b>，避免预占悬空或重复扣减。」
  *
- * <p><b>命名空间：全部 {@code Handover} / {@code ShipmentHandover} 前缀。</b>
- * springdoc 用 record 的<b>简单类名</b>做 {@code components.schemas} 的键，重名会被
- * <b>静默覆盖</b>（别人的字段形状被改掉、单测全绿、只有跨服务契约比对才红）。
- * 开工前 grep 过 backend 全部 Java 源码，本组前缀下无同名类型；刻意<b>不</b>复用
- * {@code PackingModels.ParcelRow} / {@code ParcelItemRow}，那两个是 8.3.3.2 的形状。
+ * <p><b>命名空间：全部 {@code Handover} / {@code ShipmentHandover} 前缀。</b> springdoc 用 record
+ * 的<b>简单类名</b>做 {@code components.schemas} 的键，重名会被 <b>静默覆盖</b>（别人的字段形状被改掉、单测全绿、只有跨服务契约比对才红）。 开工前
+ * grep 过 backend 全部 Java 源码，本组前缀下无同名类型；刻意<b>不</b>复用 {@code PackingModels.ParcelRow} / {@code
+ * ParcelItemRow}，那两个是 8.3.3.2 的形状。
  *
- * <p><b>五个刻意不给默认值的地方：</p>
+ * <p><b>五个刻意不给默认值的地方：
  *
  * <ul>
- *   <li><b>承运商与运单号是两个字段，不是一个。</b>承运渠道在 V72 的
- *       {@code outbound_order.carrier_code} 上只是 varchar(64)；运单号在本服务
- *       <b>原本不存在</b>。只有承运商没有号 = 车来了但没人知道运的是哪一单；
- *       只有号没有渠道 = 不知道谁运的。所以 {@code carrierCode} 与
- *       {@code masterWaybillNo} 分开，且交接确认时两者都必须有。</li>
- *   <li><b>「已交接」不等于「已送达」。</b>{@link HandoverStatus} 三态里没有「已签收」：
- *       轨迹与签收归 10 物流（尚未交付），本模块只认「货交出去了」这一个事实。</li>
- *   <li><b>两个「预占量」是<b>两本账</b>，刻意分成两个字段。</b>
- *       {@code deductedQuantity} 是实扣件数；{@code reservedDeductedQuantity} 是其中
- *       <b>实物预占侧</b>（{@code stock_bucket.reserved}，7.1.1.1）被释放的量；
- *       {@code reservations()} / {@code reservationLineCount} 是<b>承诺侧</b>
- *       （{@code reservation_allocation}，7.2.1.2）被消费的量。
- *       两者不相等是常态甚至常态之外的常态：没有在册预占时
- *       {@code reservedDeductedQuantity} 仍可能大于 0（实物被圈过但承诺账没建），
- *       反之承诺账被整笔消费掉时它也只有那笔预占的量。
- *       把它们合成一个数，就答不出「这批货里到底有没有人订走」。</li>
- *   <li><b>「平台回传」不作为本模块的出参出现。</b>2 渠道回写与 10 轨迹是下游动作，
- *       本模块只产出 append-only 流水 + 冻结重量体积；在接口上放一个
- *       {@code platformCallback} 字段会是承诺一件本服务没做的事。</li>
- *   <li><b>金额一律不出现。</b>交接确认的是货与单据，计价归 10 物流与财务；
- *       本模块的重量与体积<b>不是</b>金额也不参与计价。</li>
+ *   <li><b>承运商与运单号是两个字段，不是一个。</b>承运渠道在 V72 的 {@code outbound_order.carrier_code} 上只是
+ *       varchar(64)；运单号在本服务 <b>原本不存在</b>。只有承运商没有号 = 车来了但没人知道运的是哪一单； 只有号没有渠道 = 不知道谁运的。所以 {@code
+ *       carrierCode} 与 {@code masterWaybillNo} 分开，且交接确认时两者都必须有。
+ *   <li><b>「已交接」不等于「已送达」。</b>{@link HandoverStatus} 三态里没有「已签收」： 轨迹与签收归 10
+ *       物流（尚未交付），本模块只认「货交出去了」这一个事实。
+ *   <li><b>两个「预占量」是<b>两本账</b>，刻意分成两个字段。</b> {@code deductedQuantity} 是实扣件数；{@code
+ *       reservedDeductedQuantity} 是其中 <b>实物预占侧</b>（{@code stock_bucket.reserved}，7.1.1.1）被释放的量；
+ *       {@code reservations()} / {@code reservationLineCount} 是<b>承诺侧</b> （{@code
+ *       reservation_allocation}，7.2.1.2）被消费的量。 两者不相等是常态甚至常态之外的常态：没有在册预占时 {@code
+ *       reservedDeductedQuantity} 仍可能大于 0（实物被圈过但承诺账没建）， 反之承诺账被整笔消费掉时它也只有那笔预占的量。
+ *       把它们合成一个数，就答不出「这批货里到底有没有人订走」。
+ *   <li><b>「平台回传」不作为本模块的出参出现。</b>2 渠道回写与 10 轨迹是下游动作， 本模块只产出 append-only 流水 + 冻结重量体积；在接口上放一个 {@code
+ *       platformCallback} 字段会是承诺一件本服务没做的事。
+ *   <li><b>金额一律不出现。</b>交接确认的是货与单据，计价归 10 物流与财务； 本模块的重量与体积<b>不是</b>金额也不参与计价。
  * </ul>
  */
 public final class ShipmentHandoverModels {
@@ -55,8 +45,7 @@ public final class ShipmentHandoverModels {
   /**
    * 交接单状态。三态：交接中 / 已交接 / 已作废。
    *
-   * <p><b>刻意没有「已取消出库」</b>：货已经交出去了就回不来了，后续的差异处理属
-   * 11 售后与 10 物流，不在本模块改写这一单的历史（与 8.3.3.2「打包失败要退回复核
+   * <p><b>刻意没有「已取消出库」</b>：货已经交出去了就回不来了，后续的差异处理属 11 售后与 10 物流，不在本模块改写这一单的历史（与 8.3.3.2「打包失败要退回复核
    * 重开一张」不同 —— 打包的货还在仓里，交出去的货不在）。
    */
   public enum HandoverStatus {
@@ -130,13 +119,10 @@ public final class ShipmentHandoverModels {
   /**
    * 登记承运商与运单号入参（蓝图输入「承运渠道；运单号」）。
    *
-   * @param parcelWaybillNos 每箱运单号（箱 id → 运单号）。留空 = 全部跟随主运单号；
-   *     整车发运的常态就是逐箱无独立号。
-   *
-   * <p><b>刻意没有 handoverUserId</b>：蓝图把「登记交接时间与交接人」当成<b>一对</b>事实，
-   * 两者都在交接确认那一刻才成立。在这一步先落人而不落时刻，会造出「有交接人、
-   * 没有交接时刻」的半截记录 —— V123 的 {@code (handover_user_id IS NULL) =
-   * (handover_at IS NULL)} 会在 DB 层当场拒掉它。
+   * @param parcelWaybillNos 每箱运单号（箱 id → 运单号）。留空 = 全部跟随主运单号； 整车发运的常态就是逐箱无独立号。
+   *     <p><b>刻意没有 handoverUserId</b>：蓝图把「登记交接时间与交接人」当成<b>一对</b>事实，
+   *     两者都在交接确认那一刻才成立。在这一步先落人而不落时刻，会造出「有交接人、 没有交接时刻」的半截记录 —— V123 的 {@code (handover_user_id IS
+   *     NULL) = (handover_at IS NULL)} 会在 DB 层当场拒掉它。
    */
   public record HandoverWaybillInput(
       String carrierCode,
@@ -173,8 +159,7 @@ public final class ShipmentHandoverModels {
   /**
    * 能力与边界声明。
    *
-   * <p>四段「不由本模块负责 / 尚未接入」的事<b>显式报出来</b>（照 8.3.3.2 的灰块约定）：
-   * 空列表会被读成「这件事不存在」，而不是「这段能力还没接入」。
+   * <p>四段「不由本模块负责 / 尚未接入」的事<b>显式报出来</b>（照 8.3.3.2 的灰块约定）： 空列表会被读成「这件事不存在」，而不是「这段能力还没接入」。
    */
   public record ShipmentHandoverCapabilities(
       List<String> responsibilities,
@@ -310,9 +295,7 @@ public final class ShipmentHandoverModels {
       OffsetDateTime occurredAt,
       String detail) {}
 
-  /**
-   * 交接单详情：一次调用返回整屏 = 单头 + 包裹 + 明细 + 预占消费 + 时间线 + 判据 + 边界声明。
-   */
+  /** 交接单详情：一次调用返回整屏 = 单头 + 包裹 + 明细 + 预占消费 + 时间线 + 判据 + 边界声明。 */
   public record HandoverDetail(
       HandoverRow order,
       List<HandoverParcelRow> parcels,
@@ -326,8 +309,7 @@ public final class ShipmentHandoverModels {
   /**
    * 可消费的预占候选（COMMITTED 且有剩余量的分配）。
    *
-   * <p><b>刻意列出来而不是让前端看不见</b>：交接时要回答「这批货原本被谁预占着」。
-   * 空列表有明确含义 —— 这个 SKU 没有任何在册预占，因此本次没有预占可消费，
+   * <p><b>刻意列出来而不是让前端看不见</b>：交接时要回答「这批货原本被谁预占着」。 空列表有明确含义 —— 这个 SKU 没有任何在册预占，因此本次没有预占可消费，
    * 界面应显示「无预占（未预占出库）」而不是「预占已全部消耗」。
    */
   public record HandoverReservationOption(
@@ -346,8 +328,7 @@ public final class ShipmentHandoverModels {
   /**
    * 能不能交接确认 —— <b>唯一的判据来源</b>。
    *
-   * <p>页面用 {@code handableOver} 决定「确认交接」按钮的可点性，<b>不自己数行、
-   * 不自己算可用量</b>：那套判断在前端再算一遍就会与库存账差一位，而差的那一位
+   * <p>页面用 {@code handableOver} 决定「确认交接」按钮的可点性，<b>不自己数行、 不自己算可用量</b>：那套判断在前端再算一遍就会与库存账差一位，而差的那一位
    * 就是超卖（与 8.3.3.1 / 8.3.3.2 的 blocking 同一纪律）。
    */
   public record HandoverCompletionReport(
@@ -367,8 +348,7 @@ public final class ShipmentHandoverModels {
   /**
    * 交接确认之后的回执：单头读数 + 本次实际动了库存的账。
    *
-   * <p>{@code inventoryTransactionId} 与 {@code ledgerEntries} 让「这次交接扣了多少」可反查，
-   * 而不是只有一个「成功」。
+   * <p>{@code inventoryTransactionId} 与 {@code ledgerEntries} 让「这次交接扣了多少」可反查， 而不是只有一个「成功」。
    */
   public record HandoverConfirmed(
       HandoverRow order,

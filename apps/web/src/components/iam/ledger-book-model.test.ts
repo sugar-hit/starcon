@@ -42,7 +42,12 @@ it('分类 / 本位币来源 / 科目体系来源 / 状态都有中文口径，�
 
 it('业务账与法定账在同一法人下并列，分组扁平化不丢也不重', () => {
   const business = book();
-  const statutory = book({ id: 'book-2', code: 'CNY-TAX', name: '法定账', bookCategory: 'STATUTORY' });
+  const statutory = book({
+    id: 'book-2',
+    code: 'CNY-TAX',
+    name: '法定账',
+    bookCategory: 'STATUTORY',
+  });
   const flat = allBooks({
     businessBooks: [business],
     statutoryBooks: [statutory],
@@ -69,7 +74,9 @@ it('默认账簿必须是本法人的启用账簿，停用的要能在提交前�
     '停用账簿不能作为默认账簿，请先启用或改选其他账簿',
   );
   // INHERIT 且本位币与法人不一致时也不能当默认账簿：落点的币必须是可信的
-  expect(defaultBookBlockReason(book(), 'USD')).toBe('继承法人本位币但本位币与法人不一致，需先同步本位币');
+  expect(defaultBookBlockReason(book(), 'USD')).toBe(
+    '继承法人本位币但本位币与法人不一致，需先同步本位币',
+  );
   // OWN 模式下本位币与法人不同是合法的，不拦
   expect(
     defaultBookBlockReason(book({ baseCurrency: 'USD', baseCurrencyMode: 'OWN' }), 'CNY'),

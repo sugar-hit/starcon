@@ -18,12 +18,11 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 2.2.1.2 授权向导测试用的本地授权服务器。
  *
- * <p>这不是 mock：它是一个真的 HTTP 服务器，跑在真的 socket 上，会真的 302 真的换令牌。
- * 之所以需要它，是因为模块 2.2.1.2 的核心风险全在协议层——state 怎么带、回调怎么回来、
- * 令牌怎么换、账号怎么读。这些用 mock 打桩就等于没测。
+ * <p>这不是 mock：它是一个真的 HTTP 服务器，跑在真的 socket 上，会真的 302 真的换令牌。 之所以需要它，是因为模块 2.2.1.2 的核心风险全在协议层——state
+ * 怎么带、回调怎么回来、 令牌怎么换、账号怎么读。这些用 mock 打桩就等于没测。
  *
- * <p>它模拟 eBay 的协议形状（Basic 认证换令牌、账号接口返回 username + shops 列表），
- * 对应 {@code platform_oauth_profile} 里 eBay 那一行配置；测试启动时把那行的端点改写成本机端口。
+ * <p>它模拟 eBay 的协议形状（Basic 认证换令牌、账号接口返回 username + shops 列表）， 对应 {@code platform_oauth_profile} 里
+ * eBay 那一行配置；测试启动时把那行的端点改写成本机端口。
  */
 final class StubOAuthServer implements AutoCloseable {
   private static final ObjectMapper JSON = new ObjectMapper();
@@ -33,25 +32,31 @@ final class StubOAuthServer implements AutoCloseable {
 
   private final HttpServer server;
   private final String base;
+
   /** code → state。平台发码时会记住，回调校验时用来证明 code 确实由自己发出。 */
   private final Map<String, String> issuedCodes = new ConcurrentHashMap<>();
+
   private final List<String> seenAuthorizeQueries = new ArrayList<>();
 
   // ---- 可切换的剧本，让不同失败原因都能被真实触发 ----
   volatile String accountId = "seller-stub-1";
   volatile String accountName = "Stub 旗舰店";
-  volatile List<String[]> shops =
-      List.<String[]>of(new String[] {"SHOP-1001", "美国旗舰店", "EBAY_US"});
+  volatile List<String[]> shops = List.<String[]>of(new String[] {"SHOP-1001", "美国旗舰店", "EBAY_US"});
   volatile String grantedScopes =
       "offline_access https://api.ebay.com/oauth/api_scope/sell.fulfillment";
+
   /** 0 = 正常；401 = 凭据被拒；400 = 参数错。 */
   volatile int tokenStatus = 0;
+
   /** 非空时直接作为 token 端点的 JSON 响应体，用来测"平台回了但结构不对"以外的各种形态。 */
   volatile String tokenBodyOverride = null;
+
   /** 授权页直接返回错误（如用户点了取消）。 */
   volatile String authorizeError = null;
+
   /** 换令牌时平台要求的 PKCE 校验，测我们确实带上了 code_verifier。 */
   volatile boolean requirePkce = false;
+
   volatile String lastCodeVerifier = null;
   volatile String lastCodeChallenge = null;
   volatile String issuedAccessToken = "stub-access-token-value";
@@ -103,9 +108,16 @@ final class StubOAuthServer implements AutoCloseable {
       String base = params.get("redirect_uri");
       String sep = base.contains("?") ? "&" : "?";
       // 真实平台在拒绝授权时同样会回传 state：不带 state 的回调我们无法定位会话，必须拒收
-      redirect(e, base + sep + "error=" + urlencode(authorizeError)
-          + "&error_description=" + urlencode("用户拒绝了授权")
-          + "&state=" + urlencode(params.get("state")));
+      redirect(
+          e,
+          base
+              + sep
+              + "error="
+              + urlencode(authorizeError)
+              + "&error_description="
+              + urlencode("用户拒绝了授权")
+              + "&state="
+              + urlencode(params.get("state")));
       return;
     }
     lastCodeChallenge = params.get("code_challenge");
@@ -134,7 +146,10 @@ final class StubOAuthServer implements AutoCloseable {
     lastCodeVerifier = form.get("code_verifier");
     if (tokenStatus == 401) {
       // 凭据被拒：平台不会告诉我们是 client_secret 错，只会回一个 error
-      json(e, 401, Map.of("error", "invalid_client", "error_description", "client authentication failed"));
+      json(
+          e,
+          401,
+          Map.of("error", "invalid_client", "error_description", "client authentication failed"));
       return;
     }
     if (tokenStatus != 0) {
@@ -143,19 +158,28 @@ final class StubOAuthServer implements AutoCloseable {
     }
     if (!expectedBasic.equals(e.getRequestHeaders().getFirst("Authorization"))
         && !clientId.equals(form.get("client_id"))) {
-      json(e, 401, Map.of("error", "invalid_client", "error_description", "client authentication failed"));
+      json(
+          e,
+          401,
+          Map.of("error", "invalid_client", "error_description", "client authentication failed"));
       return;
     }
     String code = form.get("code");
     if (code == null || !issuedCodes.containsKey(code)) {
-      json(e, 400, Map.of("error", "invalid_grant", "error_description", "authorization code is invalid"));
+      json(
+          e,
+          400,
+          Map.of("error", "invalid_grant", "error_description", "authorization code is invalid"));
       return;
     }
     // 平台校验 PKCE：requirePkce 打开后，没有 code_verifier 或对不上 challenge 就不给令牌
     if (requirePkce) {
       String verifier = form.get("code_verifier");
       if (verifier == null || verifier.isBlank()) {
-        json(e, 400, Map.of("error", "invalid_grant", "error_description", "code_verifier required"));
+        json(
+            e,
+            400,
+            Map.of("error", "invalid_grant", "error_description", "code_verifier required"));
         return;
       }
     }
@@ -236,7 +260,8 @@ final class StubOAuthServer implements AutoCloseable {
                  account_info_url = '%s/oauth/account'
             from platform p
            where p.id = pr.platform_id and p.code = '%s'
-          """.formatted(base, base, base, platformCode.toUpperCase(Locale.ROOT)));
+          """
+              .formatted(base, base, base, platformCode.toUpperCase(Locale.ROOT)));
       if (s.getUpdateCount() != 1)
         throw new IllegalStateException("profile 未指向 stub：" + platformCode);
     }

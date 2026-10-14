@@ -10,11 +10,7 @@ import { OrderOverviewWorkspace } from '@/components/orders/order-overview-works
  * （9.1.1 订单列表 / 9.1.2 手工订单）。子路由 `/orders/[id]` 不与那个 tab 壳冲突 ——
  * `page.tsx` 只匹配 `/orders` 本身，`[id]/page.tsx` 只匹配 `/orders/<某段>`。
  */
-export default async function OrderDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   return <OrderOverviewWorkspace orderId={id} />;
 }

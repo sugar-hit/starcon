@@ -60,9 +60,7 @@ export function fetchGoodsReceiptCapabilities() {
 }
 
 export function fetchGoodsReceiptDetail(receiptId: string) {
-  return api<GoodsReceiptDetail>(
-    `warehouse/goods-receipts/${encodeURIComponent(receiptId)}`,
-  );
+  return api<GoodsReceiptDetail>(`warehouse/goods-receipts/${encodeURIComponent(receiptId)}`);
 }
 
 /** 本单分录：后端复用 7.1.2.1 台账，`attributionNote` 必须在界面上显示。 */

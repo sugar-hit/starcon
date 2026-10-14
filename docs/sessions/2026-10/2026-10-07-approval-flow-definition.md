@@ -59,17 +59,18 @@ V1 明确写了「Service account cannot directly enumerate users」。正确做
 **契约重新生成带出了别的模块的历史漂移。** `catalog-contracts.py` 重跑后 `warehouse.openapi.json`
 出现 17k 行 diff —— 那是 8.2.1.2 合并时没重新生成契约留下的**既有漂移**，不是本次改动。
 用「类型集合求差」验证过：`catalog.ts` **没有丢任何类型**，只是新增 15 个 `Approval*`
-+ 重排。codegen 产物是只读生成物，不允许手改，因此保留工具的完整输出。
+
+- 重排。codegen 产物是只读生成物，不允许手改，因此保留工具的完整输出。
 
 ## 影响面
 
-| 面 | 落点 |
-| --- | --- |
+| 面   | 落点                                                                                                                                          |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | 迁移 | `backend/services/identity/src/main/resources/db/migration/V83__approval_flow_definition.sql`（版本号由调度器预分配，避让在途的 V80/V81/V82） |
-| 端点 | `backend/services/identity/src/main/java/com/starcon/identity/ApprovalFlowController.java`，13 个端点挂在 `/identity/approval-flows` 下 |
-| 页面 | `apps/web/src/app/org/approval-flows/page.tsx` + `components/iam/approval-flow-{model,workspace}.tsx` |
-| 契约 | `python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi`（带 `--spec-dir`，避免启动 Spring Boot 抓 /v3/api-docs 被拒） |
-| 代理 | `apps/web/src/lib/api-proxy.ts` —— **纯追加**，见下 |
+| 端点 | `backend/services/identity/src/main/java/com/starcon/identity/ApprovalFlowController.java`，13 个端点挂在 `/identity/approval-flows` 下       |
+| 页面 | `apps/web/src/app/org/approval-flows/page.tsx` + `components/iam/approval-flow-{model,workspace}.tsx`                                         |
+| 契约 | `python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi`（带 `--spec-dir`，避免启动 Spring Boot 抓 /v3/api-docs 被拒）  |
+| 代理 | `apps/web/src/lib/api-proxy.ts` —— **纯追加**，见下                                                                                           |
 
 ### api-proxy 是「求并」而不是「二选一」
 

@@ -10,15 +10,15 @@ import org.junit.jupiter.api.Test;
 /**
  * 3.6.1.1 往来单位档案的纯规则单测。
  *
- * <p>离线可穷举，所以 {@code V27__party_profile.sql} 第六节钉死的 P1~P7 七条语义
- * 在这里逐条钉一遍 —— 它们与迁移文件的文字是同一份承诺，两处对不上就说明有一处被改松了。
+ * <p>离线可穷举，所以 {@code V27__party_profile.sql} 第六节钉死的 P1~P7 七条语义 在这里逐条钉一遍 ——
+ * 它们与迁移文件的文字是同一份承诺，两处对不上就说明有一处被改松了。
  *
  * <p>重点覆盖三类容易漏的东西：
+ *
  * <ul>
  *   <li><b>状态流转表的方向性</b>：自环必须被拒（否则静默 +1 版本号骗过乐观锁）；
  *   <li><b>「进出拉黑」而不是「进入拉黑」</b>：解除拉黑也要理由；
- *   <li><b>可用性判定的优先级</b>：已删除的主体不能报「没有角色」—— 那会让运营
- *       去解指派角色，而真正要做的是恢复删除。
+ *   <li><b>可用性判定的优先级</b>：已删除的主体不能报「没有角色」—— 那会让运营 去解指派角色，而真正要做的是恢复删除。
  * </ul>
  */
 class PartyRulesTest {
@@ -208,15 +208,24 @@ class PartyRulesTest {
   @Test
   void oneRoleTypeCanOnlyBeAssignedOncePerParty() {
     // 蓝图「同一主体可同时是供应商和客户，用角色档案区分，不用多份记录」在输入侧的口径。
-    var both = List.of(new PartyRoleInput("SUPPLIER", "ACTIVE", ""), new PartyRoleInput("CUSTOMER", "ACTIVE", ""));
+    var both =
+        List.of(
+            new PartyRoleInput("SUPPLIER", "ACTIVE", ""),
+            new PartyRoleInput("CUSTOMER", "ACTIVE", ""));
     assertThat(rolesProblem(both)).isNull();
-    assertThat(rolesProblem(List.of(new PartyRoleInput("SUPPLIER", "ACTIVE", ""), new PartyRoleInput("supplier", "ACTIVE", ""))))
+    assertThat(
+            rolesProblem(
+                List.of(
+                    new PartyRoleInput("SUPPLIER", "ACTIVE", ""),
+                    new PartyRoleInput("supplier", "ACTIVE", ""))))
         .contains("同一个角色只能指派一次");
     assertThat(rolesProblem(null)).isNull();
     assertThat(rolesProblem(List.of())).isNull();
-    assertThat(rolesProblem(java.util.stream.IntStream.range(0, 11)
-            .mapToObj(i -> new PartyRoleInput("SUPPLIER", "ACTIVE", ""))
-            .toList()))
+    assertThat(
+            rolesProblem(
+                java.util.stream.IntStream.range(0, 11)
+                    .mapToObj(i -> new PartyRoleInput("SUPPLIER", "ACTIVE", ""))
+                    .toList()))
         .contains("最多指派");
   }
 
@@ -275,17 +284,23 @@ class PartyRulesTest {
     assertThat(usableBlock(new UsableInputs(false, "ACTIVE", 1))).isNull();
     assertThat(usableBlock(new UsableInputs(false, "ACTIVE", 0))).isEqualTo(BLOCK_PARTY_NO_ROLE);
     assertThat(usableBlock(new UsableInputs(false, "INACTIVE", 3))).isEqualTo(BLOCK_PARTY_INACTIVE);
-    assertThat(usableBlock(new UsableInputs(false, "BLACKLISTED", 3))).isEqualTo(BLOCK_PARTY_BLACKLISTED);
+    assertThat(usableBlock(new UsableInputs(false, "BLACKLISTED", 3)))
+        .isEqualTo(BLOCK_PARTY_BLACKLISTED);
     // 拉黑优先于没角色：已删除优先于一切。
     assertThat(usableBlock(new UsableInputs(true, "ACTIVE", 0))).isEqualTo(BLOCK_PARTY_DELETED);
-    assertThat(usableBlock(new UsableInputs(true, "BLACKLISTED", 0))).isEqualTo(BLOCK_PARTY_DELETED);
+    assertThat(usableBlock(new UsableInputs(true, "BLACKLISTED", 0)))
+        .isEqualTo(BLOCK_PARTY_DELETED);
   }
 
   @Test
   void everyBlockCodeHasItsOwnLabelAndAction() {
     // 四种原因对应四种处理动作，不能都写成「不可用」—— 运营看完不知道该做什么。
-    var codes = List.of(
-        BLOCK_PARTY_INACTIVE, BLOCK_PARTY_BLACKLISTED, BLOCK_PARTY_NO_ROLE, BLOCK_PARTY_DELETED);
+    var codes =
+        List.of(
+            BLOCK_PARTY_INACTIVE,
+            BLOCK_PARTY_BLACKLISTED,
+            BLOCK_PARTY_NO_ROLE,
+            BLOCK_PARTY_DELETED);
     var labels = codes.stream().map(PartyRules::usableBlockLabel).toList();
     var actions = codes.stream().map(code -> usableBlockMessage(code, "Acme")).toList();
     assertThat(labels).doesNotHaveDuplicates();

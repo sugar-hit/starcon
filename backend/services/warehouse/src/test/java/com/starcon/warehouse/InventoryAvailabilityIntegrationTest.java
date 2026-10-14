@@ -23,8 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * 3.5.2.2 BOM 展开消费的批量可用量端点：可用/在途的聚合口径、仓库过滤同时作用在两列上、
- * 零库存返回 0 而不是缺席、校验，以及租户隔离三断言。
+ * 3.5.2.2 BOM 展开消费的批量可用量端点：可用/在途的聚合口径、仓库过滤同时作用在两列上、 零库存返回 0 而不是缺席、校验，以及租户隔离三断言。
  *
  * <p><b>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。</b>
  *
@@ -59,14 +58,20 @@ class InventoryAvailabilityIntegrationTest {
   static final UUID qDefective = idFor(a, 9);
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-warehouse-availability-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-warehouse-availability-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(
       UUID uid, UUID tenant, UUID dept, List<AccessService.Grant> grants) {
     return new AccessService.Access(
-        uid, tenant, "Test", UUID.randomUUID(), dept,
-        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(), grants);
+        uid,
+        tenant,
+        "Test",
+        UUID.randomUUID(),
+        dept,
+        grants.stream().flatMap(g -> g.permissions().stream()).distinct().toList(),
+        grants);
   }
 
   static AccessService.Grant grant(String scope, List<String> permissions) {
@@ -89,7 +94,8 @@ class InventoryAvailabilityIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -141,30 +147,64 @@ class InventoryAvailabilityIntegrationTest {
               + " restart identity cascade");
     }
     for (var tenant : List.of(a, b)) {
-      access.run(actorFor(tenant), "warehouse.inventory.read", () -> {
-        sql.execute(
-            "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-            idFor(tenant, 1), tenant, "LE-1", "主体一");
-        sql.execute(
-            "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-            idFor(tenant, 2), tenant, "SKU-1", "组件一");
-        sql.execute(
-            "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
-            idFor(tenant, 3), tenant, "SKU-2", "组件二");
-        sql.execute(
-            "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-            idFor(tenant, 5), tenant, "WH-SH", "上海仓", "CN", "Asia/Shanghai");
-        sql.execute(
-            "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
-            idFor(tenant, 6), tenant, "WH-SZ", "深圳仓", "CN", "Asia/Shanghai");
-        sql.execute(
-            "insert into inventory_quality_status(id,tenant_id,code,name,role) values"
-                + "(?,?,?,?,?),(?,?,?,?,?),(?,?,?,?,?)",
-            idFor(tenant, 7), tenant, "SELLABLE", "可售", "SELLABLE",
-            idFor(tenant, 8), tenant, "PENDING", "待检", "PENDING_INSPECTION",
-            idFor(tenant, 9), tenant, "DEFECT", "残次", "DEFECTIVE");
-        return null;
-      });
+      access.run(
+          actorFor(tenant),
+          "warehouse.inventory.read",
+          () -> {
+            sql.execute(
+                "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
+            sql.execute(
+                "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+                idFor(tenant, 2),
+                tenant,
+                "SKU-1",
+                "组件一");
+            sql.execute(
+                "insert into sku_ref(id,tenant_id,code,name) values(?,?,?,?)",
+                idFor(tenant, 3),
+                tenant,
+                "SKU-2",
+                "组件二");
+            sql.execute(
+                "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
+                idFor(tenant, 5),
+                tenant,
+                "WH-SH",
+                "上海仓",
+                "CN",
+                "Asia/Shanghai");
+            sql.execute(
+                "insert into warehouse(id,tenant_id,code,name,country_code,timezone) values(?,?,?,?,?,?)",
+                idFor(tenant, 6),
+                tenant,
+                "WH-SZ",
+                "深圳仓",
+                "CN",
+                "Asia/Shanghai");
+            sql.execute(
+                "insert into inventory_quality_status(id,tenant_id,code,name,role) values"
+                    + "(?,?,?,?,?),(?,?,?,?,?),(?,?,?,?,?)",
+                idFor(tenant, 7),
+                tenant,
+                "SELLABLE",
+                "可售",
+                "SELLABLE",
+                idFor(tenant, 8),
+                tenant,
+                "PENDING",
+                "待检",
+                "PENDING_INSPECTION",
+                idFor(tenant, 9),
+                tenant,
+                "DEFECT",
+                "残次",
+                "DEFECTIVE");
+            return null;
+          });
     }
   }
 
@@ -174,43 +214,66 @@ class InventoryAvailabilityIntegrationTest {
 
   /** 一行余额（租户 A）。available 是生成列 on_hand − reserved，不含在途。 */
   void balance(UUID sku, UUID warehouse, UUID quality, String onHand, String reserved) {
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
-              + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
-          UUID.randomUUID(), a, sku, warehouse, leA, quality, new BigDecimal(onHand),
-          new BigDecimal(reserved));
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_balance(id,tenant_id,sku_id,warehouse_id,legal_entity_id,"
+                  + "quality_status_id,on_hand,reserved) values(?,?,?,?,?,?,?,?)",
+              UUID.randomUUID(),
+              a,
+              sku,
+              warehouse,
+              leA,
+              quality,
+              new BigDecimal(onHand),
+              new BigDecimal(reserved));
+          return null;
+        });
   }
 
   /** 一行在途：从 from 仓发往 to 仓。 */
   void inTransit(UUID sku, UUID from, UUID to, String quantity) {
-    access.run(actorA, "warehouse.inventory.read", () -> {
-      sql.execute(
-          "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,from_warehouse_id,"
-              + "to_warehouse_id,quality_status_id,quantity,shipped_at) values(?,?,?,?,?,?,?,?,now())",
-          UUID.randomUUID(), a, sku, leA, from, to, qSellable, new BigDecimal(quantity));
-      return null;
-    });
+    access.run(
+        actorA,
+        "warehouse.inventory.read",
+        () -> {
+          sql.execute(
+              "insert into inventory_transfer(id,tenant_id,sku_id,legal_entity_id,from_warehouse_id,"
+                  + "to_warehouse_id,quality_status_id,quantity,shipped_at) values(?,?,?,?,?,?,?,?,now())",
+              UUID.randomUUID(),
+              a,
+              sku,
+              leA,
+              from,
+              to,
+              qSellable,
+              new BigDecimal(quantity));
+          return null;
+        });
   }
 
   AvailabilityView query(AccessService.Access who, List<UUID> skus, UUID warehouseId) {
     return access.run(
-        who, "warehouse.inventory.read", () -> service.availability(new AvailabilityQuery(skus, warehouseId)));
+        who,
+        "warehouse.inventory.read",
+        () -> service.availability(new AvailabilityQuery(skus, warehouseId)));
   }
 
   static BigDecimal availableOf(AvailabilityView view, UUID skuId) {
     return view.items().stream()
         .filter(i -> i.skuId().equals(skuId))
-        .findFirst().orElseThrow()
+        .findFirst()
+        .orElseThrow()
         .available();
   }
 
   static BigDecimal transitOf(AvailabilityView view, UUID skuId) {
     return view.items().stream()
         .filter(i -> i.skuId().equals(skuId))
-        .findFirst().orElseThrow()
+        .findFirst()
+        .orElseThrow()
         .inTransit();
   }
 
@@ -277,14 +340,12 @@ class InventoryAvailabilityIntegrationTest {
 
   @Test
   void 空集合与超量集合被拒绝() {
-    assertThatThrownBy(() -> query(actorA, List.of(), null))
-        .hasMessageContaining("请至少传一个 SKU");
+    assertThatThrownBy(() -> query(actorA, List.of(), null)).hasMessageContaining("请至少传一个 SKU");
     List<UUID> tooMany = new ArrayList<>();
     for (int i = 0; i < InventoryAvailabilityService.MAX_SKUS + 1; i++) {
       tooMany.add(UUID.randomUUID());
     }
-    assertThatThrownBy(() -> query(actorA, tooMany, null))
-        .hasMessageContaining("一次最多查");
+    assertThatThrownBy(() -> query(actorA, tooMany, null)).hasMessageContaining("一次最多查");
   }
 
   // ================================================================ 端点形状
@@ -292,16 +353,18 @@ class InventoryAvailabilityIntegrationTest {
   @Test
   void 端点经租户上下文解析后返回结果() throws Exception {
     balance(skuA1, whSh, qSellable, "12", "2");
-    http.perform(post("/warehouse/inventory/availability")
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("{\"skuIds\":[\"" + skuA1 + "\"]}"))
+    http.perform(
+            post("/warehouse/inventory/availability")
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content("{\"skuIds\":[\"" + skuA1 + "\"]}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.items[0].available").value(10));
     // 没带 Authorization：租户无从解析，必须 401 而不是按空租户放行。
-    http.perform(post("/warehouse/inventory/availability")
-            .contentType("application/json")
-            .content("{\"skuIds\":[\"" + skuA1 + "\"]}"))
+    http.perform(
+            post("/warehouse/inventory/availability")
+                .contentType("application/json")
+                .content("{\"skuIds\":[\"" + skuA1 + "\"]}"))
         .andExpect(status().isUnauthorized());
   }
 
@@ -323,17 +386,19 @@ class InventoryAvailabilityIntegrationTest {
     assertThat(transitOf(theirs, theirSku)).isEqualByComparingTo("0");
 
     // 2) 伪造 X-Tenant-Id 头无效：租户只来自已认证成员关系。
-    http.perform(post("/warehouse/inventory/availability")
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a)
-            .contentType("application/json")
-            .content("{\"skuIds\":[\"" + skuA1 + "\"]}"))
+    http.perform(
+            post("/warehouse/inventory/availability")
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a)
+                .contentType("application/json")
+                .content("{\"skuIds\":[\"" + skuA1 + "\"]}"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.items[0].available").value(0));
 
     // 3) 连接池归还后不串租户（单连接反复交替）。
     for (int i = 0; i < 5; i++) {
-      assertThat(availableOf(query(actorA, List.of(skuA1), null), skuA1)).isEqualByComparingTo("60");
+      assertThat(availableOf(query(actorA, List.of(skuA1), null), skuA1))
+          .isEqualByComparingTo("60");
       assertThat(availableOf(query(actorB, List.of(theirSku), null), theirSku))
           .isEqualByComparingTo("0");
     }
@@ -342,12 +407,18 @@ class InventoryAvailabilityIntegrationTest {
   @Test
   void 两张被查的表都强制rls() {
     var tables =
-        access.run(actorA, "warehouse.inventory.read", () -> sql.fetch(
-            "select relname,relrowsecurity,relforcerowsecurity from pg_class"
-                + " where relname in ('inventory_balance','inventory_transfer') and relkind='r'"));
+        access.run(
+            actorA,
+            "warehouse.inventory.read",
+            () ->
+                sql.fetch(
+                    "select relname,relrowsecurity,relforcerowsecurity from pg_class"
+                        + " where relname in ('inventory_balance','inventory_transfer') and relkind='r'"));
     assertThat(tables).hasSize(2);
     assertThat(tables)
-        .allMatch(r -> Boolean.TRUE.equals(r.get("relforcerowsecurity", Boolean.class))
-            && Boolean.TRUE.equals(r.get("relrowsecurity", Boolean.class)));
+        .allMatch(
+            r ->
+                Boolean.TRUE.equals(r.get("relforcerowsecurity", Boolean.class))
+                    && Boolean.TRUE.equals(r.get("relrowsecurity", Boolean.class)));
   }
 }

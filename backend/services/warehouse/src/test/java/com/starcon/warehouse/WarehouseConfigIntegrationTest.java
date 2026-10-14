@@ -28,18 +28,15 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * 8.1.1.3 仓库配置。
  *
- * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接：
- * 只有复用同一条连接，才能真正证明归还后不会串租户。
+ * <p>真实 PostgreSQL 16 + 强制 RLS，不使用任何内存替身。连接池固定为 1 条连接： 只有复用同一条连接，才能真正证明归还后不会串租户。
  *
  * <p>本测试钉住七件「错了会误导人」的事：
  *
  * <ul>
- *   <li><b>「修改需记录变更」是硬要求。</b>逐字段留痕、前后值、首次配置时旧值为 null
- *       （「之前没有这个值」与「之前是默认值」必须能分开）。
+ *   <li><b>「修改需记录变更」是硬要求。</b>逐字段留痕、前后值、首次配置时旧值为 null （「之前没有这个值」与「之前是默认值」必须能分开）。
  *   <li><b>留痕改不掉。</b>REVOKE 之外还有触发器，表 owner 也改不动。
  *   <li><b>没配过 ≠ 配成默认值。</b>unconfigured 如实报出来。
- *   <li><b>未交付 ≠ 已生效。</b>拣货/复核/批次/序列号/拆零五条影响声明逐条 available=false
- *       并写明归哪个模块 —— 配置落库了不等于下游已经在按它跑。
+ *   <li><b>未交付 ≠ 已生效。</b>拣货/复核/批次/序列号/拆零五条影响声明逐条 available=false 并写明归哪个模块 —— 配置落库了不等于下游已经在按它跑。
  *   <li><b>班次存当地墙上时刻。</b>时长与跨夜由服务端算，不接受调用方传入。
  *   <li><b>归档是终态。</b>归档仓不允许再改配置。
  *   <li><b>租户隔离三断言</b>实跑 + 逐张断言 FORCE RLS。
@@ -63,7 +60,8 @@ class WarehouseConfigIntegrationTest {
           "warehouse.facilities.config");
 
   static UUID idFor(UUID tenant, int ordinal) {
-    return UUID.nameUUIDFromBytes(("starcon-warehouse-config-" + tenant + "-" + ordinal).getBytes());
+    return UUID.nameUUIDFromBytes(
+        ("starcon-warehouse-config-" + tenant + "-" + ordinal).getBytes());
   }
 
   static AccessService.Access actor(UUID uid, UUID tenant, List<AccessService.Grant> grants) {
@@ -84,7 +82,8 @@ class WarehouseConfigIntegrationTest {
   static {
     pg.start();
     try {
-      try (var c = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+      try (var c =
+              DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
           var s = c.createStatement()) {
         s.execute("create role starcon_app nologin");
         // nosuperuser nobypassrls：应用角色必须是普通角色，
@@ -101,7 +100,8 @@ class WarehouseConfigIntegrationTest {
               e.close();
               return;
             }
-            byte[] body = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
+            byte[] body =
+                new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(access);
             e.getResponseHeaders().add("Content-Type", "application/json");
             e.sendResponseHeaders(200, body.length);
             e.getResponseBody().write(body);
@@ -165,16 +165,24 @@ class WarehouseConfigIntegrationTest {
           () -> {
             sql.execute(
                 "insert into legal_entity_ref(id,tenant_id,code,name) values(?,?,?,?)",
-                idFor(tenant, 1), tenant, "LE-1", "主体一");
+                idFor(tenant, 1),
+                tenant,
+                "LE-1",
+                "主体一");
             // B 的仓库刻意用不同的编码、名称、国家与时区：隔离失效时
             // 断言不会因为「两个仓长得一样」而含糊。
             sql.execute(
                 "insert into warehouse(id,tenant_id,code,name,kind,country_code,timezone,"
                     + "default_legal_entity_id,status) values(?,?,?,?,?,?,?,?,?)",
-                idFor(tenant, 2), tenant, "WH-" + (tenant.equals(a) ? "A" : "B"), "本租仓库",
-                "LOCAL", tenant.equals(a) ? "CN" : "US",
+                idFor(tenant, 2),
+                tenant,
+                "WH-" + (tenant.equals(a) ? "A" : "B"),
+                "本租仓库",
+                "LOCAL",
+                tenant.equals(a) ? "CN" : "US",
                 tenant.equals(a) ? "Asia/Shanghai" : "America/Los_Angeles",
-                idFor(tenant, 1), "ACTIVE");
+                idFor(tenant, 1),
+                "ACTIVE");
             return null;
           });
     }
@@ -197,12 +205,7 @@ class WarehouseConfigIntegrationTest {
   }
 
   WarehouseConfigSaved save(
-      UUID tenant,
-      boolean lot,
-      boolean serial,
-      String strategy,
-      String ratio,
-      boolean split) {
+      UUID tenant, boolean lot, boolean serial, String strategy, String ratio, boolean split) {
     AccessService.Access actor = actorFor(tenant);
     return access.run(
         actor,
@@ -287,8 +290,7 @@ class WarehouseConfigIntegrationTest {
     assertThat(asA("read", () -> service.config(whOf(a))).defaultReviewRatio().toPlainString())
         .isEqualTo("0.050000");
     // 加法在 BigDecimal 上是精确的（这正是禁浮点记账要买到的东西）。
-    assertThat(new BigDecimal("0.1").add(new BigDecimal("0.2")).toPlainString())
-        .isEqualTo("0.3");
+    assertThat(new BigDecimal("0.1").add(new BigDecimal("0.2")).toPlainString()).isEqualTo("0.3");
   }
 
   @Test
@@ -307,11 +309,16 @@ class WarehouseConfigIntegrationTest {
     assertThatThrownBy(
             () -> {
               try (var c =
-                      DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+                      DriverManager.getConnection(
+                          pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
                   var s = c.createStatement()) {
                 s.execute(
                     "insert into warehouse_config(tenant_id,warehouse_id,default_review_ratio)"
-                        + " values('" + a + "','" + whOf(a) + "',1.5)");
+                        + " values('"
+                        + a
+                        + "','"
+                        + whOf(a)
+                        + "',1.5)");
               }
             })
         .hasMessageContaining("warehouse_config_default_review_ratio_check");
@@ -321,8 +328,7 @@ class WarehouseConfigIntegrationTest {
 
   @Test
   void 首次配置逐字段留痕_旧值为_null() {
-    var saved =
-        save(a, true, true, "LOCATION", "0.05", true);
+    var saved = save(a, true, true, "LOCATION", "0.05", true);
     assertThat(saved.changeCount()).isEqualTo(6);
     // 「之前没有这个值」与「之前是默认值」必须能分开：首次配置旧值全是 null。
     assertThat(saved.changes())
@@ -330,8 +336,12 @@ class WarehouseConfigIntegrationTest {
     assertThat(saved.changes())
         .extracting(ConfigChange::fieldName)
         .containsExactlyInAnyOrder(
-            "lotTrackingEnabled", "serialTrackingEnabled", "pickingStrategy",
-            "defaultReviewRatio", "allowSplitShipment", "note");
+            "lotTrackingEnabled",
+            "serialTrackingEnabled",
+            "pickingStrategy",
+            "defaultReviewRatio",
+            "allowSplitShipment",
+            "note");
     assertThat(saved.changes())
         .extracting(ConfigChange::newValue)
         .contains("true", "true", "LOCATION", "0.050000", "true", "");
@@ -362,14 +372,18 @@ class WarehouseConfigIntegrationTest {
     assertThat(again.changes()).isEmpty();
     // 首次配置写 6 条：六个字段的旧值全是 null（「之前没有这个值」），
     // 所以连 note 从「没有」到「空串」也算一条。第二次提交才真的什么都没变。
-    assertThat(asA("read", () -> service.changes(whOf(a), new ChangeQuery(null, null, 0, 50))).total())
+    assertThat(
+            asA("read", () -> service.changes(whOf(a), new ChangeQuery(null, null, 0, 50))).total())
         .isEqualTo(6);
   }
 
   @Test
   void 留痕记的是已认证成员_不接受请求参数传入() {
     save(a, false, false, "WAVE", "0", false);
-    var change = asA("read", () -> service.changes(whOf(a), new ChangeQuery(null, null, 0, 1))).rows().get(0);
+    var change =
+        asA("read", () -> service.changes(whOf(a), new ChangeQuery(null, null, 0, 1)))
+            .rows()
+            .get(0);
     assertThat(change.changedByMembershipId()).isEqualTo(actorA.userId());
     assertThat(change.changedAt()).isNotNull();
   }
@@ -400,7 +414,8 @@ class WarehouseConfigIntegrationTest {
         .rootCause()
         .hasMessageContaining("permission denied");
     // 留痕仍在，一条都没少
-    assertThat(asA("read", () -> service.changes(whOf(a), new ChangeQuery(null, null, 0, 50))).total())
+    assertThat(
+            asA("read", () -> service.changes(whOf(a), new ChangeQuery(null, null, 0, 50))).total())
         .isPositive();
   }
 
@@ -412,18 +427,21 @@ class WarehouseConfigIntegrationTest {
     assertThatThrownBy(
             () -> {
               try (var c =
-                      DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+                      DriverManager.getConnection(
+                          pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
                   var s = c.createStatement()) {
                 s.execute(
                     "update warehouse_config_change set new_value='WAVE' where tenant_id='"
-                        + a + "'");
+                        + a
+                        + "'");
               }
             })
         .hasMessageContaining("append-only");
     assertThatThrownBy(
             () -> {
               try (var c =
-                      DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+                      DriverManager.getConnection(
+                          pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
                   var s = c.createStatement()) {
                 s.execute("delete from warehouse_config_change where tenant_id='" + a + "'");
               }
@@ -449,8 +467,12 @@ class WarehouseConfigIntegrationTest {
     assertThat(page.rows().subList(4, 10))
         .extracting(ConfigChange::fieldName)
         .containsExactly(
-            "lotTrackingEnabled", "serialTrackingEnabled", "pickingStrategy",
-            "defaultReviewRatio", "allowSplitShipment", "note");
+            "lotTrackingEnabled",
+            "serialTrackingEnabled",
+            "pickingStrategy",
+            "defaultReviewRatio",
+            "allowSplitShipment",
+            "note");
     // 每一条都能在两次翻页里各出现一次，不重复不丢失。
     var all = page.rows().stream().map(ConfigChange::id).toList();
     assertThat(all).doesNotHaveDuplicates();
@@ -459,17 +481,29 @@ class WarehouseConfigIntegrationTest {
   @Test
   void 留痕_history_按范围与班次筛选() {
     save(a, false, false, "WAVE", "0.1", false);
-    var shift = asA("config", () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
-    var configOnly = asA("read", () -> service.changes(whOf(a), new ChangeQuery("CONFIG", null, 0, 50)));
-    assertThat(configOnly.total()).isEqualTo(6);   // 首次配置：六个字段旧值都是 null
+    var shift =
+        asA(
+            "config",
+            () ->
+                service.createShift(
+                    whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
+    var configOnly =
+        asA("read", () -> service.changes(whOf(a), new ChangeQuery("CONFIG", null, 0, 50)));
+    assertThat(configOnly.total()).isEqualTo(6); // 首次配置：六个字段旧值都是 null
     assertThat(configOnly.rows()).allSatisfy(c -> assertThat(c.scope()).isEqualTo("CONFIG"));
-    var shiftOnly = asA("read", () -> service.changes(whOf(a), new ChangeQuery("SHIFT", null, 0, 50)));
+    var shiftOnly =
+        asA("read", () -> service.changes(whOf(a), new ChangeQuery("SHIFT", null, 0, 50)));
     assertThat(shiftOnly.rows()).allSatisfy(c -> assertThat(c.scope()).isEqualTo("SHIFT"));
-    var byShift = asA("read", () -> service.changes(whOf(a), new ChangeQuery(null, shift.shift().id(), 0, 50)));
+    var byShift =
+        asA(
+            "read",
+            () -> service.changes(whOf(a), new ChangeQuery(null, shift.shift().id(), 0, 50)));
     assertThat(byShift.total()).isGreaterThan(0);
-    assertThat(byShift.rows()).allSatisfy(c -> assertThat(c.shiftId()).isEqualTo(shift.shift().id()));
+    assertThat(byShift.rows())
+        .allSatisfy(c -> assertThat(c.shiftId()).isEqualTo(shift.shift().id()));
     // 非法范围报可读错误，不静默忽略成「全部」。
-    assertThatThrownBy(() -> asA("read", () -> service.changes(whOf(a), new ChangeQuery("NOPE", null, 0, 50))))
+    assertThatThrownBy(
+            () -> asA("read", () -> service.changes(whOf(a), new ChangeQuery("NOPE", null, 0, 50))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不支持的留痕范围");
   }
@@ -486,7 +520,7 @@ class WarehouseConfigIntegrationTest {
     var ids = new java.util.ArrayList<UUID>();
     first.rows().forEach(r -> ids.add(r.id()));
     second.rows().forEach(r -> ids.add(r.id()));
-    assertThat(ids).doesNotHaveDuplicates();   // 翻页不重复：id 收尾定序在起作用
+    assertThat(ids).doesNotHaveDuplicates(); // 翻页不重复：id 收尾定序在起作用
   }
 
   // ================================================================ 班次
@@ -497,7 +531,12 @@ class WarehouseConfigIntegrationTest {
 
   @Test
   void 新建班次_时长与跨夜由服务端算() {
-    var day = asA("config", () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
+    var day =
+        asA(
+            "config",
+            () ->
+                service.createShift(
+                    whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
     assertThat(day.shift().durationMinutes()).isEqualTo(9 * 60);
     assertThat(day.shift().crossesMidnight()).isFalse();
     assertThat(day.shift().startLocal()).isEqualTo(LocalTime.of(9, 0));
@@ -505,7 +544,12 @@ class WarehouseConfigIntegrationTest {
 
     // 跨夜班 22:00 → 06:00：时长是 480 分钟（跨到次日），
     // 不能是负数，也不能是调用方自己传的 crosses_midnight。
-    var night = asA("config", () -> service.createShift(whOf(a), shiftIn("N", "夜班", "22:00", "06:00"), actorA.userId()));
+    var night =
+        asA(
+            "config",
+            () ->
+                service.createShift(
+                    whOf(a), shiftIn("N", "夜班", "22:00", "06:00"), actorA.userId()));
     assertThat(night.shift().crossesMidnight()).isTrue();
     assertThat(night.shift().durationMinutes()).isEqualTo(8 * 60);
   }
@@ -513,7 +557,12 @@ class WarehouseConfigIntegrationTest {
   @Test
   void 班次_上下班相同被拒() {
     assertThatThrownBy(
-            () -> asA("config", () -> service.createShift(whOf(a), shiftIn("Z", "零长班", "09:00", "09:00"), actorA.userId())))
+            () ->
+                asA(
+                    "config",
+                    () ->
+                        service.createShift(
+                            whOf(a), shiftIn("Z", "零长班", "09:00", "09:00"), actorA.userId())))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("不能相同");
   }
@@ -521,26 +570,38 @@ class WarehouseConfigIntegrationTest {
   @Test
   void 班次_时刻格式非法报可读错误() {
     assertThatThrownBy(
-            () -> asA("config", () -> service.createShift(whOf(a), shiftIn("B", "坏班", "九点", "18:00"), actorA.userId())))
+            () ->
+                asA(
+                    "config",
+                    () ->
+                        service.createShift(
+                            whOf(a), shiftIn("B", "坏班", "九点", "18:00"), actorA.userId())))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("格式不正确");
   }
 
   @Test
   void 班次_停用是出口_班次行仍在列() {
-    var created = asA("config", () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
+    var created =
+        asA(
+            "config",
+            () ->
+                service.createShift(
+                    whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
     asA(
         "config",
         () ->
             service.updateShift(
-                whOf(a), created.shift().id(),
+                whOf(a),
+                created.shift().id(),
                 new ShiftUpdateInput("白班", "09:00", "18:00", false, ""),
                 actorA.userId()));
     var shifts = asA("read", () -> service.shifts(whOf(a)));
     assertThat(shifts).hasSize(1);
     assertThat(shifts.get(0).enabled()).isFalse();
     // 停用走的是 SHIFT_SCHEDULE 范围的留痕，与改时刻（SHIFT）分开。
-    var history = asA("read", () -> service.changes(whOf(a), new ChangeQuery("SHIFT_SCHEDULE", null, 0, 50)));
+    var history =
+        asA("read", () -> service.changes(whOf(a), new ChangeQuery("SHIFT_SCHEDULE", null, 0, 50)));
     assertThat(history.total()).isEqualTo(2);
     assertThat(history.rows().get(0).oldValue()).isEqualTo("true");
     assertThat(history.rows().get(0).newValue()).isEqualTo("false");
@@ -548,22 +609,36 @@ class WarehouseConfigIntegrationTest {
 
   @Test
   void 班次_新建走留痕且带班次编码() {
-    var created = asA("config", () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
+    var created =
+        asA(
+            "config",
+            () ->
+                service.createShift(
+                    whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
     assertThat(created.changeCount()).isEqualTo(5);
-    var history = asA("read", () -> service.changes(whOf(a), new ChangeQuery(null, created.shift().id(), 0, 50)));
+    var history =
+        asA(
+            "read",
+            () -> service.changes(whOf(a), new ChangeQuery(null, created.shift().id(), 0, 50)));
     assertThat(history.total()).isEqualTo(5);
     assertThat(history.rows()).allSatisfy(c -> assertThat(c.shiftCode()).isEqualTo("D"));
   }
 
   @Test
   void 班次_改时刻只留痕变了的字段() {
-    var created = asA("config", () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
+    var created =
+        asA(
+            "config",
+            () ->
+                service.createShift(
+                    whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
     var saved =
         asA(
             "config",
             () ->
                 service.updateShift(
-                    whOf(a), created.shift().id(),
+                    whOf(a),
+                    created.shift().id(),
                     new ShiftUpdateInput("白班", "10:00", "18:00", true, ""),
                     actorA.userId()));
     assertThat(saved.changeCount()).isEqualTo(1);
@@ -574,22 +649,37 @@ class WarehouseConfigIntegrationTest {
 
   @Test
   void 班次_同仓编码重复被拒() {
-    asA("config", () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
+    asA(
+        "config",
+        () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
     assertThatThrownBy(
-            () -> asA("config", () -> service.createShift(whOf(a), shiftIn("D", "又一个白班", "10:00", "19:00"), actorA.userId())))
+            () ->
+                asA(
+                    "config",
+                    () ->
+                        service.createShift(
+                            whOf(a), shiftIn("D", "又一个白班", "10:00", "19:00"), actorA.userId())))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("已存在");
   }
 
   @Test
   void 班次_清单启用在前停用沉底() {
-    asA("config", () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
-    var night = asA("config", () -> service.createShift(whOf(a), shiftIn("N", "夜班", "22:00", "06:00"), actorA.userId()));
+    asA(
+        "config",
+        () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
+    var night =
+        asA(
+            "config",
+            () ->
+                service.createShift(
+                    whOf(a), shiftIn("N", "夜班", "22:00", "06:00"), actorA.userId()));
     asA(
         "config",
         () ->
             service.updateShift(
-                whOf(a), night.shift().id(),
+                whOf(a),
+                night.shift().id(),
                 new ShiftUpdateInput("夜班", "22:00", "06:00", false, ""),
                 actorA.userId()));
     var shifts = asA("read", () -> service.shifts(whOf(a)));
@@ -603,11 +693,22 @@ class WarehouseConfigIntegrationTest {
 
   @Test
   void 归档是终态_归档仓不允许再改配置() {
-    asA("read", () -> sql.execute("update warehouse set status='ARCHIVED' where tenant_id=current_setting('app.current_tenant', true)::uuid and id=?", whOf(a)));
+    asA(
+        "read",
+        () ->
+            sql.execute(
+                "update warehouse set status='ARCHIVED' where tenant_id=current_setting('app.current_tenant', true)::uuid and id=?",
+                whOf(a)));
     assertThatThrownBy(() -> save(a, false, false, "WAVE", "0", false))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("归档是终态");
-    assertThatThrownBy(() -> asA("config", () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId())))
+    assertThatThrownBy(
+            () ->
+                asA(
+                    "config",
+                    () ->
+                        service.createShift(
+                            whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId())))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("归档是终态");
     // 归档前留下的配置原样保留 —— 归档的是仓库，不是它的作业参数。
@@ -621,19 +722,23 @@ class WarehouseConfigIntegrationTest {
   void 改配置需要_config_权限码_不是_update() throws Exception {
     // 复用 warehouse.facilities.update（8.1.1.2 的码）改不了作业参数 ——
     // 两个风险面刻意分开，所以授权时也能分开授予。
-    http.perform(put("/warehouse/facilities/{id}/config", whOf(a))
-            .header("Authorization", "Bearer read-only")
-            .contentType("application/json")
-            .content("""
+    http.perform(
+            put("/warehouse/facilities/{id}/config", whOf(a))
+                .header("Authorization", "Bearer read-only")
+                .contentType("application/json")
+                .content(
+                    """
                 {"lotTrackingEnabled":true,"serialTrackingEnabled":false,
                  "pickingStrategy":"WAVE","defaultReviewRatio":0.1,
                  "allowSplitShipment":true,"note":""}"""))
         .andExpect(status().isForbidden());
     // 有 config 码就能改。
-    http.perform(put("/warehouse/facilities/{id}/config", whOf(a))
-            .header("Authorization", "Bearer tenant-a")
-            .contentType("application/json")
-            .content("""
+    http.perform(
+            put("/warehouse/facilities/{id}/config", whOf(a))
+                .header("Authorization", "Bearer tenant-a")
+                .contentType("application/json")
+                .content(
+                    """
                 {"lotTrackingEnabled":true,"serialTrackingEnabled":false,
                  "pickingStrategy":"WAVE","defaultReviewRatio":0.1,
                  "allowSplitShipment":true,"note":""}"""))
@@ -642,8 +747,9 @@ class WarehouseConfigIntegrationTest {
 
   @Test
   void 读配置用_facilities_read_不需要_config() throws Exception {
-    http.perform(get("/warehouse/facilities/{id}/config", whOf(a))
-            .header("Authorization", "Bearer read-only"))
+    http.perform(
+            get("/warehouse/facilities/{id}/config", whOf(a))
+                .header("Authorization", "Bearer read-only"))
         .andExpect(status().isOk());
   }
 
@@ -663,14 +769,20 @@ class WarehouseConfigIntegrationTest {
   void 下游影响逐条表态_未交付的显式报_false() {
     var impacts = asA("read", () -> service.impacts());
     assertThat(impacts).hasSize(6);
-    var byItem = impacts.stream().collect(java.util.stream.Collectors.toMap(ConfigImpact::item, i -> i));
+    var byItem =
+        impacts.stream().collect(java.util.stream.Collectors.toMap(ConfigImpact::item, i -> i));
     // 本模块自身的班次是真已交付
     assertThat(byItem.get("SHIFT_SCHEDULE").available()).isTrue();
     assertThat(byItem.get("SHIFT_SCHEDULE").ownerModule()).isEqualTo("8.1.1.3");
     // 其余五条逐条 available=false 并写明归哪个模块 ——
     // 「配置落库了」不等于「下游已经在按它跑」。
-    for (var item : List.of("BATCH_TRACKING", "SERIAL_TRACKING", "PICKING_STRATEGY",
-        "REVIEW_RATIO", "SPLIT_SHIPMENT")) {
+    for (var item :
+        List.of(
+            "BATCH_TRACKING",
+            "SERIAL_TRACKING",
+            "PICKING_STRATEGY",
+            "REVIEW_RATIO",
+            "SPLIT_SHIPMENT")) {
       assertThat(byItem.get(item).available()).as(item).isFalse();
       assertThat(byItem.get(item).ownerModule()).as(item).isNotBlank();
       assertThat(byItem.get(item).note()).as(item).isNotBlank();
@@ -681,12 +793,16 @@ class WarehouseConfigIntegrationTest {
   void 下拉项给三选一与本仓班次() {
     var options = asA("read", () -> service.options(whOf(a)));
     assertThat(options.strategies()).hasSize(3);
-    assertThat(options.strategies()).extracting(PickingStrategyOption::code)
+    assertThat(options.strategies())
+        .extracting(PickingStrategyOption::code)
         .containsExactly("ORDER", "WAVE", "LOCATION");
     assertThat(options.strategies()).allSatisfy(s -> assertThat(s.note()).isNotBlank());
-    assertThat(options.scopes()).extracting(WarehouseConfigScopeOption::code)
+    assertThat(options.scopes())
+        .extracting(WarehouseConfigScopeOption::code)
         .containsExactly("CONFIG", "SHIFT", "SHIFT_SCHEDULE");
-    asA("config", () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
+    asA(
+        "config",
+        () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
     assertThat(asA("read", () -> service.options(whOf(a))).shifts()).hasSize(1);
     assertThat(options.reviewRatioNote()).contains("0~1");
     assertThat(options.splitShipmentNote()).contains("拆零");
@@ -696,7 +812,9 @@ class WarehouseConfigIntegrationTest {
   @Test
   void 配置全貌一次返回且带仓库时区() {
     save(a, true, false, "WAVE", "0.1", false);
-    asA("config", () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
+    asA(
+        "config",
+        () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
     var overview = asA("read", () -> service.overview(whOf(a), new ChangeQuery(null, null, 0, 20)));
     assertThat(overview.warehouseCode()).isEqualTo("WH-A");
     assertThat(overview.timezone()).isEqualTo("Asia/Shanghai");
@@ -713,7 +831,9 @@ class WarehouseConfigIntegrationTest {
   @Test
   void 断言一_两租户互不可见() {
     save(a, true, true, "LOCATION", "0.9", true);
-    asA("config", () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
+    asA(
+        "config",
+        () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
 
     // B 拿 A 的仓 id 取配置：404，不是「B 的同名仓库」也不是空对象
     assertThatThrownBy(() -> asB("read", () -> service.config(whOf(a))))
@@ -726,10 +846,12 @@ class WarehouseConfigIntegrationTest {
     // B 也读不到 A 的班次与留痕
     assertThat(asB("read", () -> service.shifts(whOf(b)))).isEmpty();
     // 拿 A 的仓 id 查留痕同样是 404（不是「0 条」—— 「0 条」会读成「A 改过但没留痕」）
-    assertThatThrownBy(() -> asB("read", () -> service.changes(whOf(a), new ChangeQuery(null, null, 0, 50))))
+    assertThatThrownBy(
+            () -> asB("read", () -> service.changes(whOf(a), new ChangeQuery(null, null, 0, 50))))
         .hasMessageContaining("404");
     // B 自己的仓没有留痕，是真的 0 条
-    assertThat(asB("read", () -> service.changes(whOf(b), new ChangeQuery(null, null, 0, 50))).total())
+    assertThat(
+            asB("read", () -> service.changes(whOf(b), new ChangeQuery(null, null, 0, 50))).total())
         .isZero();
   }
 
@@ -738,26 +860,31 @@ class WarehouseConfigIntegrationTest {
     save(a, true, false, "WAVE", "0.4", true);
 
     // 身份是 B，伪造 X-Tenant-Id 指向 A：B 仍然拿不到 A 的配置
-    http.perform(get("/warehouse/facilities/{id}/config", whOf(a))
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString()))
+    http.perform(
+            get("/warehouse/facilities/{id}/config", whOf(a))
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString()))
         .andExpect(status().isNotFound());
     // 伪造头也不能让 B 改到 A 的配置
-    http.perform(put("/warehouse/facilities/{id}/config", whOf(a))
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString())
-            .contentType("application/json")
-            .content("""
+    http.perform(
+            put("/warehouse/facilities/{id}/config", whOf(a))
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString())
+                .contentType("application/json")
+                .content(
+                    """
                 {"lotTrackingEnabled":false,"serialTrackingEnabled":false,
                  "pickingStrategy":"ORDER","defaultReviewRatio":0,
                  "allowSplitShipment":false,"note":""}"""))
         .andExpect(status().isNotFound());
     // 伪造头也不能让 B 往 A 的仓里塞班次
-    http.perform(post("/warehouse/facilities/{id}/config/shifts", whOf(a))
-            .header("Authorization", "Bearer tenant-b")
-            .header("X-Tenant-Id", a.toString())
-            .contentType("application/json")
-            .content("""
+    http.perform(
+            post("/warehouse/facilities/{id}/config/shifts", whOf(a))
+                .header("Authorization", "Bearer tenant-b")
+                .header("X-Tenant-Id", a.toString())
+                .contentType("application/json")
+                .content(
+                    """
                 {"code":"FORGED","name":"伪造班次","startLocal":"09:00",
                  "endLocal":"18:00","enabled":true,"note":""}"""))
         .andExpect(status().isNotFound());
@@ -771,7 +898,9 @@ class WarehouseConfigIntegrationTest {
   @Test
   void 断言三_连接池归还后不串租户() {
     save(a, true, true, "LOCATION", "0.9", true);
-    asA("config", () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
+    asA(
+        "config",
+        () -> service.createShift(whOf(a), shiftIn("D", "白班", "09:00", "18:00"), actorA.userId()));
     save(b, false, false, "ORDER", "0", false);
 
     // 交替复用同一条物理连接（池容量=1）：A → B → A → B
@@ -795,8 +924,8 @@ class WarehouseConfigIntegrationTest {
     }
     // 本模块的三张新表逐张确认 FORCE RLS：
     // 留痕与配置都在这里，漏一张等于「读到别人家的配置」。
-    for (var table : List.of("warehouse", "warehouse_config", "warehouse_shift",
-        "warehouse_config_change")) {
+    for (var table :
+        List.of("warehouse", "warehouse_config", "warehouse_shift", "warehouse_config_change")) {
       boolean forced =
           sql.fetchOne(
                   "select (relrowsecurity and relforcerowsecurity) as on from pg_class"
@@ -807,10 +936,14 @@ class WarehouseConfigIntegrationTest {
     }
     // 不设 app.current_tenant 时读不到任何行：第一道防线在服务层谓词之前就生效。
     for (var table : List.of("warehouse_config", "warehouse_shift", "warehouse_config_change")) {
-      assertThat(sql.fetchOne(
-              "select count(*) from " + table
-                  + " where tenant_id=nullif(current_setting('app.current_tenant',true),'')::uuid")
-          .get(0, Long.class)).as(table).isZero();
+      assertThat(
+              sql.fetchOne(
+                      "select count(*) from "
+                          + table
+                          + " where tenant_id=nullif(current_setting('app.current_tenant',true),'')::uuid")
+                  .get(0, Long.class))
+          .as(table)
+          .isZero();
     }
   }
 
@@ -818,7 +951,9 @@ class WarehouseConfigIntegrationTest {
   void 班次写回的值就是墙上时刻_没有被时区偏移() {
     // 存的是 time 而不是 timestamptz，所以不存在 OffsetDateTime 往返的 −28800s 问题；
     // 断言的是**写进去再读出来的那个值**，而不是「与服务端时钟同时刻」的假想比较。
-    asA("config", () -> service.createShift(whOf(a), shiftIn("N", "夜班", "22:00", "06:00"), actorA.userId()));
+    asA(
+        "config",
+        () -> service.createShift(whOf(a), shiftIn("N", "夜班", "22:00", "06:00"), actorA.userId()));
     var shift = asA("read", () -> service.shifts(whOf(a))).get(0);
     assertThat(shift.startLocal()).isEqualTo(LocalTime.of(22, 0));
     assertThat(shift.endLocal()).isEqualTo(LocalTime.of(6, 0));
@@ -839,7 +974,10 @@ class WarehouseConfigIntegrationTest {
   void 留痕时刻是真实的_不是客户端传的() {
     var before = OffsetDateTime.now().minusSeconds(5);
     save(a, false, false, "WAVE", "0", false);
-    var change = asA("read", () -> service.changes(whOf(a), new ChangeQuery(null, null, 0, 1))).rows().get(0);
+    var change =
+        asA("read", () -> service.changes(whOf(a), new ChangeQuery(null, null, 0, 1)))
+            .rows()
+            .get(0);
     assertThat(change.changedAt()).isAfter(before);
   }
 }
