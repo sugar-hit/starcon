@@ -2,6 +2,7 @@
   "name": "starcon",
   "version": "0.1.0",
   "private": true,
+  "license": "PolyForm-Noncommercial-1.0.0",
   "description": "Enterprise SaaS ERP for cross-border e-commerce",
   "packageManager": "pnpm@9.0.0",
   "engines": {

@@ -1,6 +1,10 @@
 # Contributing to starcon
 
-> 占位文档，将在首个 PR 流程确立后补充。
+Contributions are welcome. Read [LICENSING.md](LICENSING.md) before submitting. Submit original contributions under [PolyForm Noncommercial 1.0.0](LICENSE), confirm you have the right to contribute, and retain third-party notices. You retain copyright; submission does not grant additional commercial relicensing rights.
+
+Create a branch from `main`, include relevant tests, and run lint, type checking, unit tests, and build before opening a PR. Use Conventional Commits and document architecture changes through an ADR.
+
+欢迎提交问题报告、文档改进和代码贡献。参与前请阅读 [使用许可与商业授权](LICENSING.md)。
 
 ## 提交流程
 
@@ -17,3 +21,9 @@
 ## 架构变更
 
 任何影响架构的改动**必须**先写 ADR (`docs/decisions/000N-<slug>.md`)，review 通过后才动代码。
+
+## 贡献许可
+
+提交供本项目收录的贡献，应同意将该贡献按 [PolyForm Noncommercial License 1.0.0](LICENSE) 提供，并确认有权提交相关代码或素材。贡献者保留版权；这不构成版权转让或额外商业再许可授权。第三方内容须注明来源和原有许可。
+
+商业授权涉及他人贡献时，需另行取得相应权利人的授权，详见 [LICENSING.md](LICENSING.md)。
