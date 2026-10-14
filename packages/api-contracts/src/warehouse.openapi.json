@@ -3760,12 +3760,317 @@
         }
       }
     },
+    "/warehouse/shipment-handovers": {
+      "get": {
+        "tags": [
+          "shipment-handover-controller"
+        ],
+        "operationId": "page_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "outboundOrderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "packingOrderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "carrierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "handoverUserId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CREATED_AT"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "shipment-handover-controller"
+        ],
+        "operationId": "open",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandoverOpenInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/shipment-handovers/{id}/waybills": {
+      "post": {
+        "tags": [
+          "shipment-handover-controller"
+        ],
+        "operationId": "registerWaybills",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandoverWaybillInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/shipment-handovers/{id}/confirm": {
+      "post": {
+        "tags": [
+          "shipment-handover-controller"
+        ],
+        "operationId": "confirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandoverConfirmInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverConfirmed"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/shipment-handovers/{id}/cancel": {
+      "post": {
+        "tags": [
+          "shipment-handover-controller"
+        ],
+        "operationId": "cancel_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandoverCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/recount-scans": {
       "get": {
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "page_2",
+        "operationId": "page_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -3884,7 +4189,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "open",
+        "operationId": "open_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -4207,7 +4512,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "cancel_1",
+        "operationId": "cancel_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -4420,7 +4725,7 @@
         "tags": [
           "putaway-task-controller"
         ],
-        "operationId": "page_3",
+        "operationId": "page_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -4719,7 +5024,7 @@
         "tags": [
           "putaway-task-controller"
         ],
-        "operationId": "cancel_2",
+        "operationId": "cancel_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -4860,7 +5165,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "page_4",
+        "operationId": "page_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -5148,7 +5453,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "cancel_3",
+        "operationId": "cancel_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -5327,7 +5632,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "page_5",
+        "operationId": "page_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -5709,7 +6014,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "cancel_4",
+        "operationId": "cancel_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -5809,7 +6114,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "page_6",
+        "operationId": "page_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -5919,7 +6224,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "open_1",
+        "operationId": "open_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -6277,7 +6582,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "cancel_5",
+        "operationId": "cancel_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -6556,7 +6861,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "confirm",
+        "operationId": "confirm_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -7160,7 +7465,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "cancel_6",
+        "operationId": "cancel_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -7844,7 +8149,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "page_7",
+        "operationId": "page_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -8088,7 +8393,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "confirm_1",
+        "operationId": "confirm_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -8679,7 +8984,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "cancel_7",
+        "operationId": "cancel_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -12027,7 +12332,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "cancel_8",
+        "operationId": "cancel_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -12251,7 +12556,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "page_8",
+        "operationId": "page_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -12633,7 +12938,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "page_9",
+        "operationId": "page_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -13045,7 +13350,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "cancel_9",
+        "operationId": "cancel_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -14589,7 +14894,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "page_10",
+        "operationId": "page_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -14826,7 +15131,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "page_11",
+        "operationId": "page_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -15294,7 +15599,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "page_12",
+        "operationId": "page_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -15511,7 +15816,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "confirm_2",
+        "operationId": "confirm_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -15561,7 +15866,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "cancel_10",
+        "operationId": "cancel_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -15800,7 +16105,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "page_13",
+        "operationId": "page_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -16363,7 +16668,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "page_14",
+        "operationId": "page_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -16562,7 +16867,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "cancel_11",
+        "operationId": "cancel_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -16612,7 +16917,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "page_15",
+        "operationId": "page_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -17261,7 +17566,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "cancel_12",
+        "operationId": "cancel_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -17361,7 +17666,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "page_16",
+        "operationId": "page_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -17560,7 +17865,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "cancel_13",
+        "operationId": "cancel_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -18211,12 +18516,121 @@
         }
       }
     },
+    "/warehouse/shipment-handovers/{id}": {
+      "get": {
+        "tags": [
+          "shipment-handover-controller"
+        ],
+        "operationId": "detail_9",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/shipment-handovers/{id}/completion": {
+      "get": {
+        "tags": [
+          "shipment-handover-controller"
+        ],
+        "operationId": "completion",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoverCompletionReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/shipment-handovers/capabilities": {
+      "get": {
+        "tags": [
+          "shipment-handover-controller"
+        ],
+        "operationId": "capabilities_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShipmentHandoverCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/recount-scans/{id}": {
       "get": {
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "detail_9",
+        "operationId": "detail_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -18294,7 +18708,7 @@
         "tags": [
           "recount-scan-controller"
         ],
-        "operationId": "capabilities_2",
+        "operationId": "capabilities_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -18359,7 +18773,7 @@
         "tags": [
           "putaway-task-controller"
         ],
-        "operationId": "detail_10",
+        "operationId": "detail_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -18399,7 +18813,7 @@
         "tags": [
           "putaway-task-controller"
         ],
-        "operationId": "capabilities_3",
+        "operationId": "capabilities_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -18490,7 +18904,7 @@
         "tags": [
           "processing-order-controller"
         ],
-        "operationId": "capabilities_4",
+        "operationId": "capabilities_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -18552,7 +18966,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "detail_11",
+        "operationId": "detail_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -18592,7 +19006,7 @@
         "tags": [
           "pick-wave-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -18663,7 +19077,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "detail_12",
+        "operationId": "detail_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -18703,7 +19117,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -18734,7 +19148,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "detail_13",
+        "operationId": "detail_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -18773,7 +19187,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "completion",
+        "operationId": "completion_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -18851,7 +19265,7 @@
         "tags": [
           "packing-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -19032,7 +19446,7 @@
         "tags": [
           "location-utilization-controller"
         ],
-        "operationId": "detail_14",
+        "operationId": "detail_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -19089,7 +19503,7 @@
         "tags": [
           "location-utilization-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -19160,7 +19574,7 @@
         "tags": [
           "warehouse-location-tree-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -19281,7 +19695,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -19668,7 +20082,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -19883,7 +20297,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "capabilities_12",
+        "operationId": "capabilities_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -19914,7 +20328,7 @@
         "tags": [
           "vmi-controller"
         ],
-        "operationId": "detail_15",
+        "operationId": "detail_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -20623,7 +21037,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "capabilities_13",
+        "operationId": "capabilities_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -21370,7 +21784,7 @@
         "tags": [
           "available-quantity-controller"
         ],
-        "operationId": "capabilities_14",
+        "operationId": "capabilities_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -21828,7 +22242,7 @@
         "tags": [
           "safety-stock-controller"
         ],
-        "operationId": "capabilities_15",
+        "operationId": "capabilities_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -22104,7 +22518,7 @@
         "tags": [
           "reservation-allocation-controller"
         ],
-        "operationId": "capabilities_16",
+        "operationId": "capabilities_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -22517,7 +22931,7 @@
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "capabilities_17",
+        "operationId": "capabilities_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -22921,7 +23335,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "capabilities_18",
+        "operationId": "capabilities_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -23206,7 +23620,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "capabilities_19",
+        "operationId": "capabilities_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -23383,7 +23797,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "detail_16",
+        "operationId": "detail_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -23423,7 +23837,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "capabilities_20",
+        "operationId": "capabilities_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -23454,7 +23868,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_21",
+        "operationId": "capabilities_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -23845,7 +24259,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_17",
+        "operationId": "detail_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -23993,7 +24407,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "page_17",
+        "operationId": "page_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -24813,7 +25227,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_18",
+        "operationId": "detail_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -25269,7 +25683,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_22",
+        "operationId": "capabilities_23",
         "parameters": [
           {
             "name": "Authorization",
@@ -25300,7 +25714,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_23",
+        "operationId": "capabilities_24",
         "parameters": [
           {
             "name": "Authorization",
@@ -25584,7 +25998,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "detail_19",
+        "operationId": "detail_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -25624,7 +26038,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_24",
+        "operationId": "capabilities_25",
         "parameters": [
           {
             "name": "Authorization",
@@ -25800,7 +26214,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_25",
+        "operationId": "capabilities_26",
         "parameters": [
           {
             "name": "Authorization",
@@ -26226,7 +26640,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_26",
+        "operationId": "capabilities_27",
         "parameters": [
           {
             "name": "Authorization",
@@ -26257,7 +26671,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "detail_20",
+        "operationId": "detail_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -26297,7 +26711,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_27",
+        "operationId": "capabilities_28",
         "parameters": [
           {
             "name": "Authorization",
@@ -26457,7 +26871,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "capabilities_28",
+        "operationId": "capabilities_29",
         "parameters": [
           {
             "name": "Authorization",
@@ -26814,7 +27228,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_29",
+        "operationId": "capabilities_30",
         "parameters": [
           {
             "name": "Authorization",
@@ -26991,7 +27405,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "capabilities_30",
+        "operationId": "capabilities_31",
         "parameters": [
           {
             "name": "Authorization",
@@ -27022,7 +27436,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "detail_21",
+        "operationId": "detail_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -27062,7 +27476,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "capabilities_31",
+        "operationId": "capabilities_32",
         "parameters": [
           {
             "name": "Authorization",
@@ -27136,7 +27550,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "capabilities_32",
+        "operationId": "capabilities_33",
         "parameters": [
           {
             "name": "Authorization",
@@ -27167,7 +27581,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "detail_22",
+        "operationId": "detail_23",
         "parameters": [
           {
             "name": "Authorization",
@@ -27207,7 +27621,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "capabilities_33",
+        "operationId": "capabilities_34",
         "parameters": [
           {
             "name": "Authorization",
@@ -27238,7 +27652,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "cancel_14",
+        "operationId": "cancel_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -29943,6 +30357,285 @@
             "type": "string"
           },
           "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "HandoverOpenInput": {
+        "type": "object",
+        "properties": {
+          "packingOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "carrierCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "carrierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "masterWaybillNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "HandoverRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "handoverCode": {
+            "type": "string"
+          },
+          "packingOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "packingCode": {
+            "type": "string"
+          },
+          "outboundOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundOrderCode": {
+            "type": "string"
+          },
+          "outboundOrderStatus": {
+            "type": "string"
+          },
+          "outboundOrderStatusLabel": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string"
+          },
+          "masterWaybillNo": {
+            "type": "string"
+          },
+          "handoverUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "handoverAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "receiverName": {
+            "type": "string"
+          },
+          "receiverContact": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "parcelCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "string"
+          },
+          "totalGrossWeightG": {
+            "type": "string"
+          },
+          "totalVolumeCbm": {
+            "type": "string"
+          },
+          "deductedQuantity": {
+            "type": "string"
+          },
+          "reservedDeductedQuantity": {
+            "type": "string"
+          },
+          "reservationLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "HandoverWaybillInput": {
+        "type": "object",
+        "properties": {
+          "carrierCode": {
+            "type": "string"
+          },
+          "carrierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "masterWaybillNo": {
+            "type": "string"
+          },
+          "receiverName": {
+            "type": "string",
+            "nullable": true
+          },
+          "receiverContact": {
+            "type": "string",
+            "nullable": true
+          },
+          "parcelWaybillNos": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ParcelWaybillEntry"
+            }
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ParcelWaybillEntry": {
+        "type": "object",
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelWaybillNo": {
+            "type": "string"
+          }
+        },
+        "nullable": true
+      },
+      "HandoverConfirmInput": {
+        "type": "object",
+        "properties": {
+          "handoverUserId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "handoverAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "receiverName": {
+            "type": "string",
+            "nullable": true
+          },
+          "receiverContact": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "HandoverConfirmed": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/HandoverRow"
+          },
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ledgerEntries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverLedgerEntry"
+            }
+          },
+          "reservationLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reservedDeductedQuantity": {
+            "type": "string"
+          },
+          "serialCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "HandoverLedgerEntry": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bucketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "onHandDelta": {
+            "type": "string"
+          },
+          "reservedDelta": {
+            "type": "string"
+          },
+          "locationCode": {
+            "type": "string"
+          }
+        }
+      },
+      "HandoverCancelInput": {
+        "type": "object",
+        "properties": {
+          "reason": {
             "type": "string"
           }
         }
@@ -44224,6 +44917,491 @@
           },
           "name": {
             "type": "string"
+          }
+        }
+      },
+      "HandoverPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/HandoverSummary"
+          }
+        }
+      },
+      "HandoverSummary": {
+        "type": "object",
+        "properties": {
+          "totalHandovers": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openHandovers": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "handedOverHandovers": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledHandovers": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "parcels": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalQuantity": {
+            "type": "string"
+          },
+          "deductedQuantity": {
+            "type": "string"
+          },
+          "reservedDeductedQuantity": {
+            "type": "string"
+          },
+          "totalGrossWeightG": {
+            "type": "string"
+          },
+          "totalVolumeCbm": {
+            "type": "string"
+          },
+          "reservationLineCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "HandoverCompletionReport": {
+        "type": "object",
+        "properties": {
+          "handableOver": {
+            "type": "boolean"
+          },
+          "blockingReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "carrierRegistered": {
+            "type": "boolean"
+          },
+          "waybillRegistered": {
+            "type": "boolean"
+          },
+          "handoverUserSet": {
+            "type": "boolean"
+          },
+          "handoverAtSet": {
+            "type": "boolean"
+          },
+          "parcelCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "string"
+          },
+          "shortQuantity": {
+            "type": "string"
+          },
+          "shortSkus": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "HandoverDetail": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/HandoverRow"
+          },
+          "parcels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverParcelRow"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverItemRow"
+            }
+          },
+          "reservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverReservationRow"
+            }
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverEventRow"
+            }
+          },
+          "reservationCandidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverReservationOption"
+            }
+          },
+          "unavailable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverUnavailableLink"
+            }
+          },
+          "completion": {
+            "$ref": "#/components/schemas/HandoverCompletionReport"
+          }
+        }
+      },
+      "HandoverEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "eventTypeLabel": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "parcelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "HandoverItemRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "serialId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "deductedQuantity": {
+            "type": "string"
+          },
+          "reservedDeductedQuantity": {
+            "type": "string"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bucketId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "deducted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "HandoverParcelRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "parcelCode": {
+            "type": "string"
+          },
+          "parcelWaybillNo": {
+            "type": "string"
+          },
+          "effectiveWaybillNo": {
+            "type": "string"
+          },
+          "grossWeightG": {
+            "type": "string"
+          },
+          "netContentWeightG": {
+            "type": "string"
+          },
+          "volumeCbm": {
+            "type": "string"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "string"
+          },
+          "deducted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "HandoverReservationOption": {
+        "type": "object",
+        "properties": {
+          "allocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationNo": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allocatedQuantity": {
+            "type": "string"
+          },
+          "consumedQuantity": {
+            "type": "string"
+          },
+          "remainingQuantity": {
+            "type": "string"
+          }
+        }
+      },
+      "HandoverReservationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "handoverItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationNo": {
+            "type": "string"
+          },
+          "allocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "HandoverUnavailableLink": {
+        "type": "object",
+        "properties": {
+          "capability": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ShipmentHandoverCapabilities": {
+        "type": "object",
+        "properties": {
+          "responsibilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "weightUnit": {
+            "type": "string"
+          },
+          "volumeUnit": {
+            "type": "string"
+          },
+          "transactionBasis": {
+            "type": "string"
+          },
+          "inventoryBasis": {
+            "type": "string"
+          },
+          "carrierBasis": {
+            "type": "string"
+          },
+          "waybillBasis": {
+            "type": "string"
+          },
+          "serialBasis": {
+            "type": "string"
+          },
+          "touchesInventory": {
+            "type": "boolean"
+          },
+          "unavailable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HandoverUnavailableLink"
+            }
+          },
+          "upstreamModule": {
+            "type": "string"
+          },
+          "downstreamModules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
