@@ -27696,6 +27696,76 @@
           }
         }
       }
+    },
+    "/warehouse/parcels/{id}": {
+      "get": {
+        "tags": [
+          "parcel-detail-controller"
+        ],
+        "operationId": "detail_13",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParcelDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/parcels/capabilities": {
+      "get": {
+        "tags": [
+          "parcel-detail-controller"
+        ],
+        "operationId": "capabilities_7",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParcelDetailCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -63366,6 +63436,552 @@
           "reason": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "ParcelCostAllocation": {
+        "type": "object",
+        "properties": {
+          "allocatableToLine": {
+            "type": "boolean"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "matchedQuantity": {
+            "type": "number"
+          },
+          "unmatchedQuantity": {
+            "type": "number"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "linkedItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unlinkedItemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distinctSalesOrderCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distinctSalesOrderLineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fallbackLevel": {
+            "type": "string"
+          },
+          "fallbackReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "unmatchedItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelUnmatchedItem"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetail": {
+        "type": "object",
+        "properties": {
+          "header": {
+            "$ref": "#/components/schemas/ParcelDetailHeader"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelDetailItem"
+            }
+          },
+          "label": {
+            "$ref": "#/components/schemas/ParcelDetailLabel"
+          },
+          "costAllocation": {
+            "$ref": "#/components/schemas/ParcelCostAllocation"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelDetailAction"
+            }
+          },
+          "unavailable": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelDetailUnavailable"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ParcelDetailAction": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "precondition": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailHeader": {
+        "type": "object",
+        "properties": {
+          "parcelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parcelCode": {
+            "type": "string"
+          },
+          "parcelNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "packingOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "packingOrderCode": {
+            "type": "string"
+          },
+          "packingOrderStatus": {
+            "type": "string"
+          },
+          "outboundOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundOrderCode": {
+            "type": "string"
+          },
+          "outboundSourceType": {
+            "type": "string"
+          },
+          "outboundSourceLabel": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "warehouseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseName": {
+            "type": "string",
+            "nullable": true
+          },
+          "materialId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "materialCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "materialName": {
+            "type": "string",
+            "nullable": true
+          },
+          "fillerMaterialId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "fillerMaterialName": {
+            "type": "string",
+            "nullable": true
+          },
+          "outerLengthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "outerWidthCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "outerHeightCm": {
+            "type": "number",
+            "nullable": true
+          },
+          "measuredGrossWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "tareWeightG": {
+            "type": "number"
+          },
+          "netContentWeightG": {
+            "type": "number",
+            "nullable": true
+          },
+          "volumeCbm": {
+            "type": "number",
+            "nullable": true
+          },
+          "measured": {
+            "type": "boolean"
+          },
+          "measuredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "measuredBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalQuantity": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "volumeDivisorNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailItem": {
+        "type": "object",
+        "properties": {
+          "parcelItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "serialId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "serialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "recountLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outboundLineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "declarationSource": {
+            "type": "string"
+          },
+          "hsCode": {
+            "type": "string"
+          },
+          "declaredItemName": {
+            "type": "string"
+          },
+          "declaredOriginCountryCode": {
+            "type": "string"
+          },
+          "salesOrderLines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelItemSalesOrderLine"
+            }
+          },
+          "orderLineNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailLabel": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "printJobId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "jobNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "jobStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "jobStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "copies": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "targetType": {
+            "type": "string",
+            "nullable": true
+          },
+          "externalRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "waybillNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "carrierCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "shipToName": {
+            "type": "string",
+            "nullable": true
+          },
+          "shipToAddress": {
+            "type": "string",
+            "nullable": true
+          },
+          "platformCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetPrintCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "firstPrintedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastPrintedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "printCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "labelPrintedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailUnavailable": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelItemSalesOrderLine": {
+        "type": "object",
+        "properties": {
+          "linkId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "salesOrderLineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "salesLineQuantity": {
+            "type": "number"
+          },
+          "matchBasis": {
+            "type": "string"
+          },
+          "matchBasisLabel": {
+            "type": "string"
+          },
+          "strongMatch": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ParcelUnmatchedItem": {
+        "type": "object",
+        "properties": {
+          "parcelItemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ParcelCostAllocationPolicy": {
+        "type": "object",
+        "properties": {
+          "basis": {
+            "type": "string"
+          },
+          "lineLevelSupported": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ParcelDetailCapabilities": {
+        "type": "object",
+        "properties": {
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParcelDetailUnavailable"
+            }
+          },
+          "costAllocationPolicy": {
+            "$ref": "#/components/schemas/ParcelCostAllocationPolicy"
+          },
+          "upstreamModules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "downstreamModules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "note": {
+            "type": "string"
           }
         }
       }
