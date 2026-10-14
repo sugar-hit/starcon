@@ -953,7 +953,8 @@ class PutawayTaskIntegrationTest {
                     .get("scanned_at", OffsetDateTime.class));
     // 断言写回的值本身，而不是「大概对」：同一个瞬间，秒级一致
     assertThat(written.toInstant()).isEqualTo(businessTime.toInstant());
-    assertThat(written.toString()).isEqualTo("2026-03-15T14:30+08:00");
+    assertThat(written.withOffsetSameInstant(java.time.ZoneOffset.ofHours(8)).toString())
+        .isEqualTo("2026-03-15T14:30+08:00");
   }
 
   // ================================================================ 完成：三条不变量

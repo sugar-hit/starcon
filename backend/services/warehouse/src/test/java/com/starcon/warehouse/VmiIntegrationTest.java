@@ -1092,7 +1092,9 @@ class VmiIntegrationTest {
             .findFirst()
             .orElseThrow();
     assertThat(readBack.occurredAt().toInstant()).isEqualTo(at.toInstant());
-    assertThat(readBack.occurredAt().getHour()).isEqualTo(15);
+    assertThat(
+            readBack.occurredAt().withOffsetSameInstant(java.time.ZoneOffset.ofHours(8)).getHour())
+        .isEqualTo(15);
   }
 
   @Test
@@ -1116,7 +1118,9 @@ class VmiIntegrationTest {
                         null),
                     user));
     assertThat(written.observedAt().toInstant()).isEqualTo(at.toInstant());
-    assertThat(written.observedAt().getHour()).isEqualTo(15);
+    assertThat(
+            written.observedAt().withOffsetSameInstant(java.time.ZoneOffset.ofHours(8)).getHour())
+        .isEqualTo(15);
   }
 
   // ================================================================ 租户隔离三断言

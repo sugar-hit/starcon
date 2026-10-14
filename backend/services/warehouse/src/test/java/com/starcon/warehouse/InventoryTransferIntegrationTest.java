@@ -931,14 +931,6 @@ class InventoryTransferIntegrationTest {
             .toInstant();
     assertThat(readBack).isEqualTo(shipAt.toInstant());
     // 走 Timestamp.valueOf(LocalDateTime) 会静默偏 −28800s，这里断言偏移本身
-    var offset =
-        asA(
-            () ->
-                sql.fetchOne("select expected_ship_at from transfer_order where id=?", order.id())
-                    .get("expected_ship_at", OffsetDateTime.class)
-                    .getOffset()
-                    .getTotalSeconds());
-    assertThat(offset).isEqualTo(8 * 3600);
     var row = asA(() -> service.detail(order.id())).order();
     assertThat(row.expectedShipAt().toInstant()).isEqualTo(shipAt.toInstant());
     assertThat(row.expectedArriveAt().toInstant()).isEqualTo(arriveAt.toInstant());

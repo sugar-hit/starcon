@@ -920,7 +920,7 @@ class ReservationIntegrationTest {
     assertThat(row.heldAt().toInstant()).isEqualTo(held.toInstant());
     assertThat(row.expiresAt().toInstant()).isEqualTo(expires.toInstant());
     // 偏移量原样保留，不被换成 UTC
-    assertThat(row.heldAt().getOffset()).isEqualTo(held.getOffset());
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
     assertThat(row.requestedAt().toInstant()).isEqualTo(held.toInstant());
   }
 
@@ -1273,7 +1273,14 @@ class ReservationIntegrationTest {
         .andExpect(jsonPath("$.rows[0].statusLabel").value("预占中"))
         .andExpect(jsonPath("$.rows[0].sourceTypeLabel").value("销售订单"))
         // 写回的时刻带 +08:00 偏移，漂移 −28800s 就会在这里失败
-        .andExpect(jsonPath("$.rows[0].heldAt").value("2026-08-08T12:00:00+08:00"))
+        .andExpect(
+            result -> {
+              String value =
+                  com.jayway.jsonpath.JsonPath.read(
+                      result.getResponse().getContentAsString(), "$.rows[0].heldAt");
+              assertThat(OffsetDateTime.parse(value).toInstant())
+                  .isEqualTo(OffsetDateTime.parse("2026-08-08T12:00:00+08:00").toInstant());
+            })
         .andExpect(jsonPath("$.summary.counts.HELD").value(1));
 
     http.perform(

@@ -871,7 +871,7 @@ class WarehouseDetailIntegrationTest {
             .rows()
             .get(0);
     assertThat(row.lastMovementAt().toInstant()).isEqualTo(moved.toInstant());
-    assertThat(row.lastMovementAt().getOffset()).isEqualTo(moved.getOffset());
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
     // 业务量本身没有时区：数量与时刻的绑定方式互不影响
     assertThat(row.onHand()).isEqualByComparingTo("5");
   }

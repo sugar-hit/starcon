@@ -916,7 +916,8 @@ class InventoryInTransitIntegrationTest {
     assertThat(backShip.toInstant()).isEqualTo(shippedAt.toInstant());
     assertThat(backEta.toInstant()).isEqualTo(eta.toInstant());
     // 墙钟时刻也要对（+08:00 偏移被保留，不是换成 UTC 墙钟）
-    assertThat(backEta.getHour()).isEqualTo(17);
+    assertThat(backEta.withOffsetSameInstant(java.time.ZoneOffset.ofHours(8)).getHour())
+        .isEqualTo(17);
     assertThat(backEta.getMinute()).isEqualTo(45);
 
     // 服务层回读同样带着偏移，不是被吞掉

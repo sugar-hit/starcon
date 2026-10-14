@@ -1283,7 +1283,7 @@ class GoodsReceiptIntegrationTest {
                     .get("received_at", OffsetDateTime.class));
     // 用 Timestamp.valueOf(LocalDateTime) 会静默偏 −28800s；这里断言写回的值与偏移
     assertThat(stored.toInstant()).isEqualTo(at.toInstant());
-    assertThat(stored.getOffset()).isEqualTo(ZoneOffset.ofHours(8));
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
 
     // 业务时间也进了库存业务时间字段
     var moved =

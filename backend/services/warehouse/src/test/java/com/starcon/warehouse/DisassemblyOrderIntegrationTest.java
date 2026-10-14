@@ -1066,8 +1066,12 @@ class DisassemblyOrderIntegrationTest {
                         "select executed_at from disassembly_order where id=?", order.orderId())
                     .get(0, OffsetDateTime.class));
     OffsetDateTime readBack = OffsetDateTime.parse(executed.occurredAt());
-    assertThat(written.toInstant()).isEqualTo(readBack.toInstant());
-    assertThat(written.getOffset()).isEqualTo(readBack.getOffset());
+    // PostgreSQL timestamps have microsecond precision; still reject any timezone drift.
+    assertThat(written.toInstant())
+        .isCloseTo(
+            readBack.toInstant(),
+            org.assertj.core.api.Assertions.within(1, java.time.temporal.ChronoUnit.MICROS));
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
   }
 
   // ================================================================ 列表与筛选

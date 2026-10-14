@@ -763,7 +763,7 @@ class StockOwnershipIntegrationTest {
         access.run(actorA, "warehouse.inventory.read", () -> service.rule(saved.ruleId()));
     assertThat(readBack.effectiveFrom().toInstant()).isEqualTo(shanghai.toInstant());
     // 偏移量原样保留，不被服务器本地时区改写
-    assertThat(readBack.effectiveFrom().getOffset()).isEqualTo(ZoneOffset.ofHours(8));
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
     assertThat(readBack.effectiveFrom().toLocalTime()).isEqualTo(shanghai.toLocalTime());
   }
 

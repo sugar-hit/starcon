@@ -946,7 +946,7 @@ class InventoryReconciliationIntegrationTest {
             () -> sql.fetchOne("select occurred_at from inventory_transaction where id=?", txId));
     assertThat(stored).isNotNull();
     assertThat(stored.get(0, OffsetDateTime.class).toInstant()).isEqualTo(shanghai.toInstant());
-    assertThat(stored.get(0, OffsetDateTime.class).getOffset().getTotalSeconds()).isEqualTo(28800);
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
 
     // 落库的核对区间也保持同一瞬间
     var header =

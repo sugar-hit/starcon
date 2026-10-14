@@ -1731,7 +1731,7 @@ class GoodsReceiptDiscrepancyIntegrationTest {
                         handlingId)
                     .get("captured_at", OffsetDateTime.class));
     assertThat(stored.toInstant()).isEqualTo(captured.toInstant());
-    assertThat(stored.getOffset()).isEqualTo(java.time.ZoneOffset.ofHours(8));
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
   }
 
   @Test

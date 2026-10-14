@@ -743,7 +743,8 @@ class PickTaskIntegrationTest {
     // 写回的值：东八区 09:30 存进来必须是同一瞬时，不是 01:30（那是 -28800s 的经典坑）。
     assertThat(pick.pickedAt().toInstant())
         .isEqualTo(OffsetDateTime.parse("2026-10-14T09:30:00+08:00").toInstant());
-    assertThat(pick.pickedAt().getHour()).isEqualTo(9);
+    assertThat(pick.pickedAt().withOffsetSameInstant(java.time.ZoneOffset.ofHours(8)).getHour())
+        .isEqualTo(9);
   }
 
   @Test

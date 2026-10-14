@@ -992,7 +992,7 @@ class LegalEntityTransferIntegrationTest {
                 sql.fetchOne("select shipped_at from cross_entity_transfer where id=?", order.id())
                     .get(0, OffsetDateTime.class));
     assertThat(stored.toInstant()).isEqualTo(shippedAt.toInstant());
-    assertThat(stored.getOffset()).isEqualTo(ZoneOffset.ofHours(8));
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
     var leg =
         asA(
             () ->

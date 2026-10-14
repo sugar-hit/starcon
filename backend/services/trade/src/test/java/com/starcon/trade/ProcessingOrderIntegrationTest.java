@@ -1098,7 +1098,7 @@ class ProcessingOrderIntegrationTest {
                 sql.fetchOne("select created_at from processing_order where id = ?", order.id())
                     .get(0, OffsetDateTime.class));
     assertThat(written.toInstant()).isEqualTo(OffsetDateTime.parse(order.createdAt()).toInstant());
-    assertThat(written.getOffset()).isEqualTo(OffsetDateTime.parse(order.createdAt()).getOffset());
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
   }
 
   // ================================================================ 助手

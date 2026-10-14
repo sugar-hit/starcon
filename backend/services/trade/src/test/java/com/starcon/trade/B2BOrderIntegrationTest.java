@@ -648,7 +648,7 @@ class B2BOrderIntegrationTest {
     OffsetDateTime dueDate = OffsetDateTime.parse(ar.get("dueDate").toString());
     assertThat(confirmedAt).isEqualTo(shippedAt);
     assertThat(dueDate).isEqualTo(shippedAt.plusDays(30));
-    assertThat(dueDate.getOffset()).isEqualTo(shippedAt.getOffset());
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
 
     // 未发货的部分不产生应收：剩余 60 件 = 480.0000 仍不在应收里。
     var order = (Map<String, Object>) detail.get("order");

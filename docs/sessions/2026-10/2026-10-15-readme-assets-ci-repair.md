@@ -13,7 +13,8 @@ Add the existing brand logo to both README versions and replace externally hoste
 - Patch braces 3.0.3 parsing/recursive traversal with a depth limit of 128 because upstream has no fix for CVE-2026-93687. Regression tests cover valid patterns, deep brace/parenthesis inputs and direct AST traversal. Exclude only this patched CVE from version-based audit; maintenance details are in docs/compliance/dependency-security.md.
 - Give the non-root container user owned, persistent media/secret storage directories. Fresh catalog/channel processes previously failed with AccessDeniedException. CI verifies runtime UID and write permission.
 - Wait for all six services needed by contract generation and print startup diagnostics on failure.
-- Correct two test assertions that confused preserved timestamps with preserved time-zone offsets. Keep instant and eight-hour drift assertions.
+- Correct the catalog/warehouse/trade assertions that confused preserved timestamps with preserved time-zone offsets. Keep instant and eight-hour drift assertions; normalize explicit warehouse wall-clock checks to +08:00. Match PostgreSQL microsecond precision in round-trip comparisons. Audit timestamp tests assert both before/after time bounds.
+- Parameterize the frontend bucket-label test with explicit Shanghai, UTC and New York timezones rather than rely on the machine timezone. The complete frontend suite passes with TZ=UTC.
 - Disable unsupported TLS negotiation only in the description-library PostgreSQL test container.
 - Make Playwright's base URL configurable for isolated acceptance, and derive request origins from the actual browser URL.
 - Generate deterministic OpenAPI operation IDs from HTTP method/path, with collision checks and tests, because SpringDoc's discovery-order suffixes cause drift. Regenerate contracts from six live services; never hand-edit them.
@@ -21,7 +22,7 @@ Add the existing brand logo to both README versions and replace externally hoste
 ## Validation so far
 
 - Browser-rendered logo, badges and architecture verified visually.
-- Node 22 lint/typecheck and 154 frontend test files / 2799 tests passed.
+- Node 22 lint/typecheck and 154 frontend test files / 2801 tests passed.
 - Next.js 15 production build passed.
 - 17 code-generation tests and module ledger consistency passed.
 - Complete frontend/document formatting check passed.
@@ -40,3 +41,7 @@ Repository-wide formatting is a large mechanical diff but necessary to restore e
 ## Follow-up
 
 Replace the braces patch and exact audit exception together when an upstream fix is released. Keep bilingual README assets and version labels synchronized. Do not merge until remote CI passes.
+
+## First remote verification
+
+PR #9 first run passed Lint, Typecheck, Security Scan/CodeQL, and Catalog Browser & Contract Tests. A frontend timezone-assumption failure was reproduced and fixed; broader warehouse timestamp assertions found by full Java verification were corrected in a follow-up commit. All gates remain enabled.

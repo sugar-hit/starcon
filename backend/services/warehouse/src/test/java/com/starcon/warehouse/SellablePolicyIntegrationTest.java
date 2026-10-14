@@ -1077,7 +1077,7 @@ class SellablePolicyIntegrationTest {
                         "select effective_from from sellable_policy where id = ?", id.policyId()))
             .get("effective_from", OffsetDateTime.class);
     assertThat(readBack.toInstant()).isEqualTo(written.toInstant());
-    assertThat(readBack.getOffset().getTotalSeconds()).isEqualTo(8 * 3600);
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
     // 按时刻解析也要认这个偏移：写进去之前那一刻用旧档/未配置，之后用新档
     assertThat(
             access

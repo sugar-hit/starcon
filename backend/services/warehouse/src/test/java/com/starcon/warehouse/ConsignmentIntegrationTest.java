@@ -817,7 +817,9 @@ class ConsignmentIntegrationTest {
             .findFirst()
             .orElseThrow();
     assertThat(readBack.occurredAt().toInstant()).isEqualTo(at.toInstant());
-    assertThat(readBack.occurredAt().getHour()).isEqualTo(15);
+    assertThat(
+            readBack.occurredAt().withOffsetSameInstant(java.time.ZoneOffset.ofHours(8)).getHour())
+        .isEqualTo(15);
   }
 
   // ================================================================ 租户隔离三断言

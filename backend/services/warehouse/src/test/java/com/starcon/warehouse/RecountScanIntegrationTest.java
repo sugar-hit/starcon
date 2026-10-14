@@ -1278,8 +1278,9 @@ class RecountScanIntegrationTest {
 
     // 东八区当天的 09:30 —— 若用 Timestamp.valueOf(LocalDateTime) 会静默偏 −28800s
     var row = scan(a, session.id(), "BARCODE", "SKU-1", "2026-03-14T09:30:00+08:00");
-    assertThat(row.scannedAt().getHour()).isEqualTo(9);
-    assertThat(row.scannedAt().getOffset().getTotalSeconds()).isEqualTo(8 * 3600);
+    assertThat(row.scannedAt().withOffsetSameInstant(java.time.ZoneOffset.ofHours(8)).getHour())
+        .isEqualTo(9);
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
     assertThat(row.scannedAt().toInstant().toString()).startsWith("2026-03-14T01:30:00");
 
     // 事件流水里的时刻同样写的是作业时刻，不是 DB 的 now()

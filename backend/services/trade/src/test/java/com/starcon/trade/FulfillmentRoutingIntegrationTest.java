@@ -792,7 +792,7 @@ class FulfillmentRoutingIntegrationTest {
                         saved.decisionId())
                     .get(0, OffsetDateTime.class));
     assertThat(readBack.toInstant()).isEqualTo(decidedAt.toInstant());
-    assertThat(readBack.getOffset()).isEqualTo(ZoneOffset.ofHours(8));
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
   }
 
   // ==========================================================================

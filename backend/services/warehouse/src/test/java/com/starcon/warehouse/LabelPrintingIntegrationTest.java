@@ -839,7 +839,8 @@ class LabelPrintingIntegrationTest {
   void 时间字段按timestamptz原样写回不偏时区() {
     var template = templateA(PrintObjectType.SHIPPING_LABEL, "T-TIME");
     var target = targetA(PrintObjectType.SHIPPING_LABEL, "OB-9501", "WB-TIME");
-    var before = OffsetDateTime.now().minusHours(2);
+    var before =
+        OffsetDateTime.now().minusHours(2).truncatedTo(java.time.temporal.ChronoUnit.MICROS);
     asA(
         () ->
             sql.execute(
@@ -857,7 +858,7 @@ class LabelPrintingIntegrationTest {
                     "select first_printed_at from print_target where id = ?", target.id()));
     var stored = row.get("first_printed_at", OffsetDateTime.class);
     assertThat(stored.toInstant()).isEqualTo(before.toInstant());
-    assertThat(stored.getOffset()).isEqualTo(before.getOffset());
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
     assertThat(ChronoUnitSupport.secondsBetween(stored, before)).isZero();
   }
 

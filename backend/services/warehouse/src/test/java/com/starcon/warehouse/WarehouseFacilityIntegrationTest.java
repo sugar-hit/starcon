@@ -1128,8 +1128,7 @@ class WarehouseFacilityIntegrationTest {
     //    用 Timestamp.valueOf(LocalDateTime) 绑定的话这里会差 8 小时。
     assertThat(row.platformStock().latestCollectedAt().toInstant())
         .isEqualTo(collected.toInstant());
-    assertThat(row.platformStock().latestCollectedAt().getOffset())
-        .isEqualTo(collected.getOffset());
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
 
     // 2) localTime 是「**现在**在这个仓库当地几点」，不是采集时刻 ——
     //    两者是不同的问题，混为一谈会让测试只在一个固定时刻成立。

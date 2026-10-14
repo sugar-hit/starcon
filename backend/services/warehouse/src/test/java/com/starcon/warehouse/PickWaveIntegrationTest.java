@@ -12,7 +12,6 @@ import java.sql.DriverManager;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -724,7 +723,7 @@ class PickWaveIntegrationTest {
     OffsetDateTime expected =
         LocalDate.now(WAREHOUSE_ZONE).atStartOfDay(WAREHOUSE_ZONE).plusHours(9).toOffsetDateTime();
     assertThat(created.plannedPickAt()).isEqualTo(expected);
-    assertThat(created.plannedPickAt().getOffset()).isEqualTo(ZoneOffset.ofHours(8));
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
     assertThat(as(a, () -> service.detail(created.id())).members().get(0).plannedPickAt())
         .isEqualTo(expected);
 

@@ -1649,8 +1649,9 @@ class FirstMileShipmentIntegrationTest {
                         "select expected_arrive_at from first_mile_shipment where id=?", saved.id())
                     .get(0, OffsetDateTime.class));
     assertThat(rawEta.toInstant()).isEqualTo(ETA.toInstant());
-    assertThat(rawEta.getOffset()).isEqualTo(ZoneOffset.ofHours(8));
-    assertThat(rawEta.getHour()).isEqualTo(9);
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
+    assertThat(rawEta.withOffsetSameInstant(java.time.ZoneOffset.ofHours(8)).getHour())
+        .isEqualTo(9);
     assertThat(rawEta.getMinute()).isEqualTo(45);
     // UTC 墙钟 = 01:45Z，同一瞬间
     assertThat(rawEta.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime())

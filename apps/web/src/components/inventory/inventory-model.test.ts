@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   actionNote,
   bucketPlacement,
@@ -498,10 +498,17 @@ describe('账实核对的前端口径', () => {
     expect(windowLabel(start, null)).toBe('2026-10-03');
   });
 
-  it('桶标签按本地时区取日：+08:00 的凌晨不会被折算成前一天', () => {
-    expect(windowLabel('2026-10-03T00:30:00+08:00', '2026-10-04T00:30:00+08:00')).toBe(
-      '2026-10-03 ~ 2026-10-04',
-    );
+  it.each([
+    ['Asia/Shanghai', '2026-10-03 ~ 2026-10-04'],
+    ['UTC', '2026-10-02 ~ 2026-10-03'],
+    ['America/New_York', '2026-10-02 ~ 2026-10-03'],
+  ])('bucket dates follow the local timezone %s', (timezone, expected) => {
+    vi.stubEnv('TZ', timezone);
+    try {
+      expect(windowLabel('2026-10-03T00:30:00+08:00', '2026-10-04T00:30:00+08:00')).toBe(expected);
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it('无法解析的时间原样返回，不编一个日期出来', () => {

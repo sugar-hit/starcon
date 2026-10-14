@@ -1228,7 +1228,7 @@ class TradeDocumentIntegrationTest {
             .get(0, OffsetDateTime.class);
     // 断言写回的值：静默偏 -28800s 是本仓库踩过的坑
     assertThat(readBack.toInstant()).isEqualTo(when.toInstant());
-    assertThat(readBack.getOffset()).isEqualTo(when.getOffset());
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
   }
 
   @Test

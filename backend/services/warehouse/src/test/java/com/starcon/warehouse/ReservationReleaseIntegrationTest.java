@@ -1421,7 +1421,14 @@ class ReservationReleaseIntegrationTest {
                 .contentType("application/json")
                 .content("{\"expiresAt\":\"2026-10-20T00:00:00+08:00\"}"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.expiresAt").value("2026-10-20T00:00:00+08:00"));
+        .andExpect(
+            result -> {
+              String value =
+                  com.jayway.jsonpath.JsonPath.read(
+                      result.getResponse().getContentAsString(), "$.expiresAt");
+              assertThat(OffsetDateTime.parse(value).toInstant())
+                  .isEqualTo(OffsetDateTime.parse("2026-10-20T00:00:00+08:00").toInstant());
+            });
 
     http.perform(
             get("/warehouse/inventory/reservations/release-capabilities")

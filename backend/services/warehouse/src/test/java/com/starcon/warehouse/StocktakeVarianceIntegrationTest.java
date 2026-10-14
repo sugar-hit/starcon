@@ -516,6 +516,7 @@ class StocktakeVarianceIntegrationTest {
     assertThat(loss.variance()).isEqualByComparingTo("-4");
     assertThat(gain.variance()).isEqualByComparingTo("4");
 
+    var beforeAttribution = java.time.Instant.now();
     attribute(sheet, loss.id(), "SHRINKAGE", "ADJUST", "搬运破损两件");
     attribute(sheet, gain.id(), "UNRECORDED", "ADJUST", "到货漏记入库单");
     var adj = adjust(sheet, List.of(loss.id(), gain.id()));
@@ -538,6 +539,7 @@ class StocktakeVarianceIntegrationTest {
   void 未审批的调整单不入账且数据库层写不进分录() {
     UUID sheet = countedSheet();
     var loss = varianceLine(sheet, "SKU-1", "A-01");
+    var beforeAttribution = java.time.Instant.now();
     attribute(sheet, loss.id(), "SHRINKAGE", "ADJUST", "搬运破损两件");
     var adj = adjust(sheet, List.of(loss.id()));
     UUID adjustmentId = adj.adjustment().id();
@@ -591,6 +593,7 @@ class StocktakeVarianceIntegrationTest {
   void 状态机在数据库层拒绝跳过审批() {
     UUID sheet = countedSheet();
     var loss = varianceLine(sheet, "SKU-1", "A-01");
+    var beforeAttribution = java.time.Instant.now();
     attribute(sheet, loss.id(), "SHRINKAGE", "ADJUST", "搬运破损两件");
     UUID adjustmentId = adjust(sheet, List.of(loss.id())).adjustment().id();
 
@@ -644,6 +647,7 @@ class StocktakeVarianceIntegrationTest {
   void 提交人不能审批自己提的单() {
     UUID sheet = countedSheet();
     var loss = varianceLine(sheet, "SKU-1", "A-01");
+    var beforeAttribution = java.time.Instant.now();
     attribute(sheet, loss.id(), "SHRINKAGE", "ADJUST", "搬运破损两件");
     UUID adjustmentId = adjust(sheet, List.of(loss.id())).adjustment().id();
     access.run(
@@ -666,6 +670,7 @@ class StocktakeVarianceIntegrationTest {
     UUID sheet = countedSheet();
     var loss = varianceLine(sheet, "SKU-1", "A-01");
     var gain = varianceLine(sheet, "SKU-2", "A-01");
+    var beforeAttribution = java.time.Instant.now();
     attribute(sheet, loss.id(), "SHRINKAGE", "ADJUST", "搬运破损两件");
     attribute(sheet, gain.id(), "UNRECORDED", "ADJUST", "到货漏记入库单");
     var adj = adjust(sheet, List.of(loss.id(), gain.id()));
@@ -750,6 +755,7 @@ class StocktakeVarianceIntegrationTest {
     UUID sheet = countedSheet();
     var loss = varianceLine(sheet, "SKU-1", "A-01");
     var gain = varianceLine(sheet, "SKU-2", "A-01");
+    var beforeAttribution = java.time.Instant.now();
     attribute(sheet, loss.id(), "SHRINKAGE", "ADJUST", "搬运破损两件");
     attribute(sheet, gain.id(), "UNRECORDED", "ADJUST", "到货漏记入库单");
     UUID adjustmentId = adjust(sheet, List.of(loss.id(), gain.id())).adjustment().id();
@@ -983,6 +989,7 @@ class StocktakeVarianceIntegrationTest {
   void 驳回释放归因后可重新归因() {
     UUID sheet = countedSheet();
     var loss = varianceLine(sheet, "SKU-1", "A-01");
+    var beforeAttribution = java.time.Instant.now();
     attribute(sheet, loss.id(), "SHRINKAGE", "ADJUST", "搬运破损两件");
     UUID adjustmentId = adjust(sheet, List.of(loss.id())).adjustment().id();
     access.run(
@@ -1044,6 +1051,7 @@ class StocktakeVarianceIntegrationTest {
     // 五种原因恒定各占一行（没有的那类是 0，不是缺席）。
     assertThat(report.byReason()).hasSize(5);
     var loss = varianceLine(sheet, "SKU-1", "A-01");
+    var beforeAttribution = java.time.Instant.now();
     attribute(sheet, loss.id(), "SHRINKAGE", "ADJUST", "搬运破损两件");
     var after = access.run(actorA, "warehouse.inventory.read", () -> service.report(sheet));
     assertThat(after.byReason())
@@ -1122,6 +1130,7 @@ class StocktakeVarianceIntegrationTest {
     var loss = varianceLine(sheet, "SKU-1", "A-01");
     OffsetDateTime at = OffsetDateTime.of(2026, 10, 7, 23, 30, 0, 0, ZoneOffset.ofHours(8));
     // 归因时刻用同一个值写进两个列，断言读回来还是 +08:00 的那一刻。
+    var beforeAttribution = java.time.Instant.now();
     attribute(sheet, loss.id(), "SHRINKAGE", "ADJUST", "搬运破损两件");
     var stored =
         access
@@ -1133,8 +1142,8 @@ class StocktakeVarianceIntegrationTest {
                         "select occurred_at from stocktake_variance_audit where tenant_id = ? and action = 'ATTRIBUTED'",
                         a))
             .get("occurred_at", OffsetDateTime.class);
-    assertThat(stored.getOffset()).isEqualTo(ZoneOffset.ofHours(8));
-    assertThat(stored.toInstant().isBefore(java.time.Instant.now().plusSeconds(60))).isTrue();
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
+    assertThat(stored.toInstant()).isBetween(beforeAttribution, java.time.Instant.now());
     assertThat(stored).isNotEqualTo(at); // 夹具时刻不是这次的归因时刻
   }
 
@@ -1158,6 +1167,7 @@ class StocktakeVarianceIntegrationTest {
         .isEqualTo(2);
 
     var loss = varianceLine(sheet, "SKU-1", "A-01");
+    var beforeAttribution = java.time.Instant.now();
     attribute(sheet, loss.id(), "SHRINKAGE", "ADJUST", "搬运破损两件");
     assertThat(
             access
@@ -1390,6 +1400,7 @@ class StocktakeVarianceIntegrationTest {
   void 断言二_伪造租户头无效() throws Exception {
     UUID sheet = countedSheet();
     var loss = varianceLine(sheet, "SKU-1", "A-01");
+    var beforeAttribution = java.time.Instant.now();
     attribute(sheet, loss.id(), "SHRINKAGE", "ADJUST", "搬运破损两件");
     UUID adjId = adjust(sheet, List.of(loss.id())).adjustment().id();
     access.run(actorA, "warehouse.inventory.update", () -> service.submit(adjId, null, user));

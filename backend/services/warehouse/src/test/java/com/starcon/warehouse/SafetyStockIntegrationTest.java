@@ -980,12 +980,12 @@ class SafetyStockIntegrationTest {
     var written = OffsetDateTime.of(2026, 9, 1, 8, 0, 0, 0, ZoneOffset.ofHours(8));
     var saved = save(skuPolicy("150", "WARNING", own(), null, false, written));
     assertThat(saved.effectiveFrom().toInstant()).isEqualTo(written.toInstant());
-    assertThat(saved.effectiveFrom().getOffset()).isEqualTo(ZoneOffset.ofHours(8));
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
 
     var detail =
         access.run(actorA, "warehouse.inventory.read", () -> service.detail(saved.policyId()));
     assertThat(detail.policy().effectiveFrom().toInstant()).isEqualTo(written.toInstant());
-    assertThat(detail.policy().effectiveFrom().getOffset()).isEqualTo(ZoneOffset.ofHours(8));
+    // TIMESTAMPTZ preserves the instant; its returned offset depends on the database/JVM zone.
 
     // 按时刻解析也必须落在同一瞬间。
     var effective =
