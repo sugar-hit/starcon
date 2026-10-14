@@ -16465,7 +16465,7 @@
         "tags": [
           "reservation-allocation-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -16579,7 +16579,7 @@
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -16983,7 +16983,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -17268,7 +17268,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "capabilities_12",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -17485,7 +17485,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "capabilities_13",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -17516,7 +17516,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_14",
+        "operationId": "capabilities_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -19331,7 +19331,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_15",
+        "operationId": "capabilities_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -19362,7 +19362,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_16",
+        "operationId": "capabilities_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -19686,7 +19686,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_17",
+        "operationId": "capabilities_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -19862,7 +19862,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_18",
+        "operationId": "capabilities_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -20288,7 +20288,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_19",
+        "operationId": "capabilities_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -20359,7 +20359,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_20",
+        "operationId": "capabilities_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -20519,7 +20519,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "capabilities_21",
+        "operationId": "capabilities_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -20876,7 +20876,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_22",
+        "operationId": "capabilities_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -21053,7 +21053,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "capabilities_23",
+        "operationId": "capabilities_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -21124,7 +21124,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "capabilities_24",
+        "operationId": "capabilities_23",
         "parameters": [
           {
             "name": "Authorization",
@@ -21198,7 +21198,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "capabilities_25",
+        "operationId": "capabilities_24",
         "parameters": [
           {
             "name": "Authorization",
@@ -21269,7 +21269,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "capabilities_26",
+        "operationId": "capabilities_25",
         "parameters": [
           {
             "name": "Authorization",
@@ -21338,6 +21338,443 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/LocationAllocationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/{reservationId}/release": {
+      "post": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "release_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationReleaseInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseOutcome"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/{reservationId}/expiry": {
+      "post": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "expiry",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationReleaseExpiryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseExpiryOutcome"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/expire-overdue": {
+      "post": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "expireOverdue",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationReleaseRunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseRunRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/release-records": {
+      "get": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "releaseRecords",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reservationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseRecordPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/release-options": {
+      "get": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "releaseOptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/release-capabilities": {
+      "get": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "releaseCapabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReservationCapability"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/release-candidates": {
+      "get": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "sourceType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "evaluatedAt",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/expiry-runs": {
+      "get": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "expiryRuns",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseRunPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/expiry-runs/{runId}": {
+      "get": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "expiryRun",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseRunDetail"
                 }
               }
             }
@@ -48994,6 +49431,717 @@
           "reason": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "ReservationReleaseAllocationInput": {
+        "required": [
+          "allocationId"
+        ],
+        "type": "object",
+        "properties": {
+          "allocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "ReservationReleaseInput": {
+        "type": "object",
+        "properties": {
+          "allocations": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseAllocationInput"
+            }
+          },
+          "quantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "triggerSource": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "idempotencyKey": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "finalizeReservation": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationReleaseOutcome": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationNo": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "modeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "triggerSource": {
+            "type": "string"
+          },
+          "triggerSourceLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "statusBefore": {
+            "type": "string"
+          },
+          "statusAfter": {
+            "type": "string"
+          },
+          "statusAfterLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "restoredQuantity": {
+            "type": "number"
+          },
+          "releasedDemandQuantity": {
+            "type": "number"
+          },
+          "allocationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "releaseRecordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "replayed": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationReleaseExpiryInput": {
+        "type": "object",
+        "properties": {
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "clear": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationReleaseExpiryOutcome": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updated": {
+            "type": "boolean"
+          },
+          "overdueSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationReleaseRunRequest": {
+        "type": "object",
+        "properties": {
+          "dryRun": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "limitCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "idempotencyKey": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationReleaseRunRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "limitCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "processedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "releaseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "restoredQuantity": {
+            "type": "number"
+          },
+          "releasedDemandQuantity": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "replayed": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ReservationReleaseRecordPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseRecordRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationReleaseRecordRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "mode": {
+            "type": "string"
+          },
+          "modeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "triggerSource": {
+            "type": "string"
+          },
+          "triggerSourceLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "statusBefore": {
+            "type": "string"
+          },
+          "statusAfter": {
+            "type": "string"
+          },
+          "statusAfterLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "allocationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "restoredQuantity": {
+            "type": "number"
+          },
+          "releasedDemandQuantity": {
+            "type": "number"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiryRunId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReservationReleaseOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "sweepOnly": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationReleaseOptions": {
+        "type": "object",
+        "properties": {
+          "modes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseOption"
+            }
+          },
+          "triggers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseOption"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseOption"
+            }
+          },
+          "ruleNote": {
+            "type": "string"
+          },
+          "timezoneNote": {
+            "type": "string"
+          },
+          "ownerNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationReleaseAllocationLine": {
+        "type": "object",
+        "properties": {
+          "allocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "consumedQuantity": {
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "type": "number"
+          },
+          "remainingQuantity": {
+            "type": "number"
+          },
+          "allocatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReservationReleaseCandidatePage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/ReservationReleaseSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseCandidateRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ruleNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationReleaseCandidateRow": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationNo": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "sourceSystemLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "consumedQuantity": {
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "type": "number"
+          },
+          "restorableQuantity": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "heldAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "overdueSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseAllocationLine"
+            }
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationReleaseSummary": {
+        "type": "object",
+        "properties": {
+          "totalHeldCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueRestorableQuantity": {
+            "type": "number"
+          },
+          "unmanagedHeldCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "committedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mixedCommitmentSkippedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "terminalReleasedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "terminalExpiredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "releasedQuantityTotal": {
+            "type": "number"
+          },
+          "modeCounts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "ReservationReleaseRunPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseRunRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationReleaseRunDetail": {
+        "type": "object",
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/ReservationReleaseRunRow"
+          },
+          "releases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseRecordRow"
+            }
+          },
+          "releaseTotal": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
           }
         }
       }

@@ -938,22 +938,30 @@ class ReservationAllocationIntegrationTest {
   }
 
   @Test
-  void 能力声明把释放与过期如实报为未接入() throws Exception {
+  void 能力声明在释放交付后翻成已接入并指明入口() throws Exception {
     var capabilities = asA("read", () -> service.capabilities());
     var release =
         capabilities.stream()
             .filter(c -> c.dimension().equals("ALLOCATION_RELEASE"))
             .findFirst()
             .orElseThrow();
-    // 报 available=false 而不是给一个点下去 404 的按钮
-    assertThat(release.available()).isFalse();
+    // 7.2.1.3 交付后由那条车道回填（见 ReservationReleaseService.capabilities）：
+    // 继续报 false 会让前端禁用一个已经能用的入口。
+    assertThat(release.available()).isTrue();
     assertThat(release.ownerModule()).isEqualTo("7.2.1.3");
-    var detail0 =
-        capabilities.stream()
-            .filter(c -> c.dimension().equals("ALLOCATION_DETAIL"))
-            .findFirst()
-            .orElseThrow();
-    assertThat(detail0.available()).isTrue();
+    // 声明必须指到真实入口，否则「已接入」只是一句话
+    assertThat(release.note()).contains("/reservations/{id}/release");
+    assertThat(release.note()).contains("expire-overdue");
+    // 本模块自己的两个维度仍然是已接入
+    for (var dimension : List.of("ALLOCATION_DETAIL", "ALLOCATION_REGISTER", "ALLOCATION_COMMIT",
+        "ALLOCATION_CONSUME")) {
+      var one =
+          capabilities.stream()
+              .filter(c -> c.dimension().equals(dimension))
+              .findFirst()
+              .orElseThrow();
+      assertThat(one.available()).as(dimension).isTrue();
+    }
   }
 
   @Test

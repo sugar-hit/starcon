@@ -586,6 +586,12 @@ public class ReservationAllocationService {
   /**
    * 链路各环节的接入情况。复用 7.2.1.1 的 {@code ReservationCapability}，
    * 不另造一份形状相同的类型（另造会让同一条链路的能力声明有两种表示）。
+   *
+   * <p><b>2026-10-14 更新</b>：{@code ALLOCATION_RELEASE} 由 {@code available=false} 翻成
+   * {@code true}。这是 7.2.1.3 落地后的回填 —— 7.2.1.2 交付时释放与过期尚未交付，
+   * 所以这里显式报了「未接入」并写明归属模块；现在 7.2.1.3 已交付
+   * （手动释放 / 批量过期清理 / 过期时刻补写 / append-only 凭据），声明必须跟着变，
+   * 否则前端会继续禁用一个已经能用的入口。
    */
   public List<ReservationCapability> capabilities() {
     return List.of(
@@ -612,10 +618,12 @@ public class ReservationAllocationService {
         new ReservationCapability(
             "ALLOCATION_RELEASE",
             "释放与过期",
-            false,
+            true,
             "7.2.1.3",
-            "释放与过期属 7.2.1.3（手动释放入口 + 批量过期清理 + 可用量恢复），本模块不提供入口，"
-                + "也不写入 RELEASED / EXPIRED 分配与对应分录"));
+            "已接入（7.2.1.3）：写入 RELEASED / EXPIRED 分配与对应分录，"
+                + "入口 POST /warehouse/inventory/reservations/{id}/release（手动）与 "
+                + "POST /warehouse/inventory/reservations/expire-overdue（批量）；"
+                + "COMMITTED 不参与自动过期，可用量的口径仍归 7.1.1.3"));
   }
 
   // ================================================================ 写入：登记分配
