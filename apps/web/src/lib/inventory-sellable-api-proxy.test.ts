@@ -67,7 +67,10 @@ describe('7.1.1.3 正向：三个真实形状必须放行', () => {
       // （代理拿的是 path，query 由 request.nextUrl.search 单独带上），
       // 所以截断到第一个 `${`，只留下真实的路径形状。
       .map((p) => p.split('${')[0])
-      .filter((p) => p.length > 0)
+      // `noUncheckedIndexedAccess` 下 `split('${')[0]` 的类型是 `string | undefined`
+      // （运行时 split 至少返回一个元素，所以这条过滤不会真的丢东西），
+      // 在同一层用类型谓词窄化而不是断言，把「非空串」的语义原样保留给下游。
+      .filter((p): p is string => typeof p === 'string' && p.length > 0)
       // 白名单正则只匹配 **prefix 之后** 的部分（代理的 resolve 就是先切掉 prefix 再 test），
       // 所以这里同样要切掉 warehouse/。
       .map((p) => p.slice(WAREHOUSE_PREFIX.length));
