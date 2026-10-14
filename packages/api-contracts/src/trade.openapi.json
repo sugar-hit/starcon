@@ -5167,7 +5167,7 @@
         "tags": [
           "dropship-order-controller"
         ],
-        "operationId": "events_1",
+        "operationId": "events_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -5499,6 +5499,907 @@
           }
         }
       }
+    },
+    "/trade/fulfillment/dropship-tracking/trackings": {
+      "get": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "trackings",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "salesOrderNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "activeLeg",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierLegStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownLegStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "exceptionOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTrackingPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "createTracking",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipTrackingInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTrackingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/trackings/{trackingId}/supplier-leg": {
+      "post": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "supplierLeg",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "trackingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipSupplierLegInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTrackingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/trackings/{trackingId}/own-leg": {
+      "post": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "ownLeg",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "trackingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipOwnLegInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTrackingSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/tasks/{taskId}/complete": {
+      "post": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "completeTask",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipTaskResultInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTaskSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/tasks/{taskId}/claim": {
+      "post": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "claimTask",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTaskSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/policy": {
+      "get": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "policy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTrackingPolicyRow"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "savePolicy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipTrackingPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTrackingPolicyRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/exceptions/{exceptionId}/dispose": {
+      "post": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "dispose",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "exceptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipDisposeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipDispositionSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/exceptions/{exceptionId}/dismiss": {
+      "post": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "dismiss",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "exceptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipDismissInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTrackingExceptionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/exceptions/evaluate": {
+      "post": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "evaluate_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTrackingEvaluateResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/dispositions/{dispositionId}/status": {
+      "post": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "dispositionStatus",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "dispositionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipDispositionStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipDispositionRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/trackings/{trackingId}": {
+      "get": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "tracking",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "trackingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTrackingDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/tasks": {
+      "get": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "tasks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "taskKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taskStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "targetSystem",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTaskPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/exceptions": {
+      "get": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "exceptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "exceptionKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTrackingExceptionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/events": {
+      "get": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "events_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "trackingId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTrackingEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship-tracking/capabilities": {
+      "get": {
+        "tags": [
+          "dropship-tracking-controller"
+        ],
+        "operationId": "capabilities_6",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipTrackingCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5731,7 +6632,7 @@
             "type": "number"
           },
           "discountAmount": {
-            "maximum": 0.0,
+            "maximum": 0,
             "exclusiveMaximum": false,
             "type": "number"
           },
@@ -13645,6 +14546,1051 @@
           "occurredAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "DropshipTrackingInput": {
+        "required": [
+          "orderId",
+          "supplierPromisedShipAt"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "9.6.1.2 代发单 ID（同库引用）",
+            "format": "uuid"
+          },
+          "supplierPromisedShipAt": {
+            "type": "string",
+            "description": "供应商承诺发货时限；延迟判定以它为基准",
+            "format": "date-time"
+          },
+          "note": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipTrackingSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trackingNo": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DropshipSupplierLegInput": {
+        "required": [
+          "supplierLegStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "supplierLegStatus": {
+            "minLength": 1,
+            "type": "string",
+            "description": "供应商段状态：NOT_SHIPMENT/SHIPPED/IN_TRANSIT/DELIVERED/LOST/ABANDONED"
+          },
+          "supplierCarrierCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "supplierTrackingNo": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "supplierShippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "supplierLastEventAt": {
+            "type": "string",
+            "description": "轨迹最后更新时刻（由观测方给）；用写入时刻冒充会让停滞检测失效",
+            "format": "date-time",
+            "nullable": true
+          },
+          "supplierDeliveredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "supplierExceptionNote": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipOwnLegInput": {
+        "required": [
+          "ownLegStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "ownLegStatus": {
+            "minLength": 1,
+            "type": "string",
+            "description": "我方段状态：NOT_HANDED_OVER/HANDED_OVER/IN_TRANSIT/DELIVERED/RETURNED"
+          },
+          "ownCarrierCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ownTrackingNo": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ownHandedOverAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ownLastEventAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ownDeliveredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ownDeliveryNote": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipTaskResultInput": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "true=受理成功，false=失败待重试（需给 error）"
+          },
+          "error": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipTaskSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "taskStatus": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipTrackingPolicyInput": {
+        "type": "object",
+        "properties": {
+          "delayToleranceHours": {
+            "maximum": 720,
+            "minimum": 0,
+            "type": "integer",
+            "description": "承诺时限过了多少小时才算延迟（宽限）",
+            "format": "int32"
+          },
+          "criticalDelayHours": {
+            "maximum": 2160,
+            "minimum": 1,
+            "type": "integer",
+            "description": "延迟严重度分界，超过则 CRITICAL",
+            "format": "int32"
+          },
+          "stallThresholdHours": {
+            "maximum": 2160,
+            "minimum": 1,
+            "type": "integer",
+            "description": "轨迹多少小时无更新算丢件前兆",
+            "format": "int32"
+          },
+          "criticalStallHours": {
+            "maximum": 4320,
+            "minimum": 1,
+            "type": "integer",
+            "description": "停滞严重度分界，超过则 CRITICAL",
+            "format": "int32"
+          },
+          "requireTrackingNoOnShipped": {
+            "type": "boolean",
+            "description": "供应商报发货是否必须给运单号；false 时停用跑单规则"
+          },
+          "note": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipTrackingPolicyRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "policyRegistered": {
+            "type": "boolean"
+          },
+          "delayToleranceHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "criticalDelayHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "stallThresholdHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "criticalStallHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requireTrackingNoOnShipped": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "DropshipDisposeInput": {
+        "required": [
+          "actionKind",
+          "note"
+        ],
+        "type": "object",
+        "properties": {
+          "actionKind": {
+            "minLength": 1,
+            "type": "string",
+            "description": "URGE_SUPPLIER / SWITCH_TO_SELF / REQUEST_REFUND"
+          },
+          "refundAmount": {
+            "type": "number",
+            "description": "退款金额（numeric，不走浮点）；仅 REQUEST_REFUND 必填"
+          },
+          "refundCurrencyCode": {
+            "type": "string",
+            "description": "退款币种；仅 REQUEST_REFUND 必填"
+          },
+          "note": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipDispositionSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipDismissInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string",
+            "description": "为什么这不是异常（必填）"
+          }
+        }
+      },
+      "DropshipTrackingExceptionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "exceptionNo": {
+            "type": "string"
+          },
+          "trackingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "exceptionKind": {
+            "type": "string"
+          },
+          "exceptionKindLabel": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleSummary": {
+            "type": "string"
+          },
+          "ruleThresholdHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ruleEvidence": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "acknowledgedByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "resolutionNote": {
+            "type": "string"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolvedByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipTrackingEvaluateResult": {
+        "type": "object",
+        "properties": {
+          "scanned": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "detected": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "detectedKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DropshipDispositionStatusInput": {
+        "required": [
+          "toStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "toStatus": {
+            "minLength": 1,
+            "type": "string",
+            "description": "SENT / ACKNOWLEDGED / COMPLETED / CANCELLED"
+          },
+          "outcome": {
+            "maxLength": 400,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipDispositionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dispositionNo": {
+            "type": "string"
+          },
+          "exceptionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trackingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "actionKind": {
+            "type": "string"
+          },
+          "actionLabel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "refundAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "refundCurrencyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetSystem": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipTrackingPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipTrackingRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipTrackingRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trackingNo": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "salesOrderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "activeLeg": {
+            "type": "string"
+          },
+          "supplierLegStatus": {
+            "type": "string"
+          },
+          "supplierCarrierCode": {
+            "type": "string"
+          },
+          "supplierTrackingNo": {
+            "type": "string"
+          },
+          "supplierShippedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "supplierLastEventAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "supplierDeliveredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "supplierPromisedShipAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "supplierExceptionNote": {
+            "type": "string"
+          },
+          "ownLegStatus": {
+            "type": "string"
+          },
+          "ownCarrierCode": {
+            "type": "string"
+          },
+          "ownTrackingNo": {
+            "type": "string"
+          },
+          "ownHandedOverAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ownLastEventAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ownDeliveredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ownDeliveryNote": {
+            "type": "string"
+          },
+          "switchedToOwnAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "switchedToOwnByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "switchReason": {
+            "type": "string"
+          },
+          "urgeCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastUrgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "callbackStatus": {
+            "type": "string"
+          },
+          "callbackSentAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "callbackAttempts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "callbackLastError": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipTaskPayload": {
+        "type": "object",
+        "properties": {
+          "orderNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "salesOrderNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierTrackingNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierCarrierCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "supplierShippedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "refundAmount": {
+            "type": "string",
+            "nullable": true
+          },
+          "refundCurrencyCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "urgedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "switchedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "description": "跨服务动作真正需要的载荷（运单号/金额等），不复制整张代发单"
+      },
+      "DropshipTaskRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "taskKind": {
+            "type": "string"
+          },
+          "taskKindLabel": {
+            "type": "string"
+          },
+          "taskStatus": {
+            "type": "string"
+          },
+          "trackingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "salesOrderNo": {
+            "type": "string"
+          },
+          "dispositionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "exceptionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "targetSystem": {
+            "type": "string"
+          },
+          "targetOwner": {
+            "type": "string"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/DropshipTaskPayload"
+          },
+          "idempotencyKey": {
+            "type": "string"
+          },
+          "attemptCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastAttemptAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastError": {
+            "type": "string"
+          },
+          "claimedByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "claimedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipTrackingDetail": {
+        "type": "object",
+        "properties": {
+          "tracking": {
+            "$ref": "#/components/schemas/DropshipTrackingRow"
+          },
+          "exceptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipTrackingExceptionRow"
+            }
+          },
+          "dispositions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipDispositionRow"
+            }
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipTaskRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipTrackingEventRow"
+            }
+          }
+        }
+      },
+      "DropshipTrackingEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trackingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "fromActiveLeg": {
+            "type": "string"
+          },
+          "toActiveLeg": {
+            "type": "string"
+          },
+          "fromSupplierLegStatus": {
+            "type": "string"
+          },
+          "toSupplierLegStatus": {
+            "type": "string"
+          },
+          "fromOwnLegStatus": {
+            "type": "string"
+          },
+          "toOwnLegStatus": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "actorMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipTaskPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipTaskRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipTrackingExceptionPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipTrackingExceptionRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipTrackingEventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipTrackingEventRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipTrackingCapabilities": {
+        "type": "object",
+        "properties": {
+          "supplierLegStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ownLegStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "exceptionKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dispositionActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "taskKinds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipTrackingCapabilityRule"
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipTrackingCapabilityDimension"
+            }
+          },
+          "platformCallbackReady": {
+            "type": "boolean"
+          },
+          "refundReady": {
+            "type": "boolean"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "twoLegNote": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipTrackingCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DropshipTrackingCapabilityRule": {
+        "type": "object",
+        "properties": {
+          "exceptionKind": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ruleCode": {
+            "type": "string"
+          },
+          "ruleSummary": {
+            "type": "string"
+          },
+          "suggestedActions": {
+            "type": "string"
+          },
+          "defaultSeverity": {
+            "type": "string"
           }
         }
       }

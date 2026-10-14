@@ -696,7 +696,26 @@ const services: readonly {
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',
     pattern:
-      /^(?:fulfillment\/routing\/(?:capabilities|mcf-authorizations|cost-profiles|stock-snapshots|evaluations|switches|decisions(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/allocation\/(?:capabilities|rules|warehouses|stock-estimates|shipping-estimates|simulations|holds|allocations(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/dropship\/(?:capabilities|shop-refs|supplier-refs|supplier-stocks|events|configs(?:\/[0-9a-f-]+(?:\/(?:status|lines))?)?|evaluations)|fulfillment\/dropship-orders\/(?:capabilities|endpoints|events|orders(?:\/[0-9a-f-]+(?:\/(?:confirm-payment|dispatch|supplier-ack|shipment|fail))?)?|alerts(?:\/[0-9a-f-]+\/acknowledge)?)|fulfillment\/pending-shipment\/(?:capabilities|board|units(?:\/[0-9a-f-]+(?:\/(?:sla|cancel))?)?|batch-tasks(?:\/[0-9a-f-]+(?:\/(?:execute|cancel|waybill-acks|labels))?)?|sync)|processing\/(?:capabilities|requirements|orders(?:\/[0-9a-f-]+(?:\/(?:status|progress|components\/issue|bom-binding(?:\/lines)?))?)?|factories(?:\/[0-9a-f-]+)?)|sales-orders(?:\/(?:capabilities|[0-9a-f-]+(?:\/submit)?))?|sales-orders\/list(?:\/(?:capabilities|filters))?|sales-orders\/detail(?:\/(?:capabilities|fulfillment-reference|[0-9a-f-]+))?)$/,
+    // fulfillment/dropship-tracking 是 9.6.1.3 代发履约跟踪与异常（**新的一组**，
+    // 与上面两组并列而不是并进去）：配置说「走不走代发」，代发单说「怎么下的」，
+    // 跟踪说「现在到哪了、卡在哪、怎么处置」。三件事混在一组里，权限与日志分不开。
+    //   capabilities     能力与上下游可用性声明（含三条检出规则的自述）
+    //   policy           检出策略（租户级单例）：集合读 + POST 维护
+    //   trackings        集合读 + POST 建单 + {uuid} 详情
+    //   trackings/{uuid}/supplier-leg  录入供应商段（发货 / 轨迹 / 妥投）
+    //   trackings/{uuid}/own-leg       录入我方段（交运 / 妥投）
+    //   exceptions       异常清单（集合读）；exceptions/evaluate 是跑检出规则
+    //   exceptions/{uuid}/dispose      处置（催供应商 / 改自营发货 / 发起退款）
+    //   exceptions/{uuid}/dismiss      判为误报（必须写明理由）
+    //   dispositions/{uuid}/status     处置状态流转
+    //   tasks            待回传 / 待处置任务（集合读）
+    //   tasks/{uuid}/claim             下游领取
+    //   tasks/{uuid}/complete          下游回执（受理 / 失败）
+    //   events           事件流（集合读；append-only，**没有**任何写形状）
+    // 判别顺序：字面量子路径（capabilities / policy / events / exceptions/evaluate）
+    // 排在 {uuid} 分支之前，否则会被 [0-9a-f-]+ 分支吃掉半截。
+    // 刻意**没有** DELETE：跟踪事件流与异常判定证据都是凭据，删掉等于抹掉历史。
+      /^(?:fulfillment\/routing\/(?:capabilities|mcf-authorizations|cost-profiles|stock-snapshots|evaluations|switches|decisions(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/allocation\/(?:capabilities|rules|warehouses|stock-estimates|shipping-estimates|simulations|holds|allocations(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/dropship\/(?:capabilities|shop-refs|supplier-refs|supplier-stocks|events|configs(?:\/[0-9a-f-]+(?:\/(?:status|lines))?)?|evaluations)|fulfillment\/dropship-orders\/(?:capabilities|endpoints|events|orders(?:\/[0-9a-f-]+(?:\/(?:confirm-payment|dispatch|supplier-ack|shipment|fail))?)?|alerts(?:\/[0-9a-f-]+\/acknowledge)?)|fulfillment\/pending-shipment\/(?:capabilities|board|units(?:\/[0-9a-f-]+(?:\/(?:sla|cancel))?)?|batch-tasks(?:\/[0-9a-f-]+(?:\/(?:execute|cancel|waybill-acks|labels))?)?|sync)|processing\/(?:capabilities|requirements|orders(?:\/[0-9a-f-]+(?:\/(?:status|progress|components\/issue|bom-binding(?:\/lines)?))?)?|factories(?:\/[0-9a-f-]+)?)|sales-orders(?:\/(?:capabilities|[0-9a-f-]+(?:\/submit)?))?|sales-orders\/list(?:\/(?:capabilities|filters))?|sales-orders\/detail(?:\/(?:capabilities|fulfillment-reference|[0-9a-f-]+))?|fulfillment\/dropship-tracking\/(?:capabilities|policy|events|exceptions\/evaluate|exceptions(?:\/[0-9a-f-]+\/(?:dispose|dismiss))?|dispositions\/[0-9a-f-]+\/status|trackings(?:\/[0-9a-f-]+(?:\/(?:supplier-leg|own-leg))?)?|tasks(?:\/[0-9a-f-]+\/(?:claim|complete))?))$/,
     // 裸路径 fulfillment/routing、fulfillment/allocation 与 processing **刻意不放行**：
     // 后端没有对应映射，放行它会让界面以为「一条不存在的列表接口」可用。
   },
