@@ -1196,3 +1196,137 @@ it('7.7.2.1 追加 vmi 分支后 7.7.1.2 寄售与 7.7.1.1 货权的形状仍被
     expect(response.status).toBe(200);
   }
 });
+
+/**
+ * 8.3.3.1 复核扫描：白名单双向断言。
+ *
+ * <p>判据是**真跑 proxy handler 断言 HTTP 状态码**（拦截 = 404，放行 = 转发），
+ * 不是眼看正则 —— 漏登记的路径只在浏览器里静默 404，而 typecheck / lint / vitest
+ * 全绿（这一组断言存在的全部理由）。
+ *
+ * <p><b>复核是顶层分支</b>，不挂在 outbound-orders 之下：一张出库单可以复核多次
+ * （判异常 → 退回拣货 → 重拣 → 再复核），每次是一张独立复核单，
+ * 挂成 `outbound-orders/{id}/recount` 会让契约看起来像「一张单只复核一次」。
+ */
+it('8.3.3.1 复核扫描的全部调用形状被放行并转发到 warehouse 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'warehouse/recount-scans',
+    'warehouse/recount-scans/capabilities',
+    'warehouse/recount-scans/rules',
+    `warehouse/recount-scans/rules/${id}`,
+    `warehouse/recount-scans/rules/${id}/retire`,
+    `warehouse/recount-scans/${id}`,
+    `warehouse/recount-scans/${id}/open-box`,
+    `warehouse/recount-scans/${id}/scans`,
+    `warehouse/recount-scans/${id}/settle`,
+    `warehouse/recount-scans/${id}/complete`,
+    `warehouse/recount-scans/${id}/escalate`,
+    `warehouse/recount-scans/${id}/cancel`,
+    // 两段 uuid 的异常处置：必须排在单段 {id} 组里用 \/ 分支匹配，
+    // 否则会被 {id}(exceptions) 提前吃掉半截、把 resolve 留在匹配之外。
+    `warehouse/recount-scans/${id}/exceptions/${id}/resolve`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行（白名单漏登记 = 浏览器里静默 404）`).toBe(200);
+  }
+  expect(fetcher).toHaveBeenCalledWith(
+    expect.stringContaining(':8084/warehouse/recount-scans'),
+    expect.anything(),
+  );
+});
+
+it('8.3.3.1 写动作的 POST 形状被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'warehouse/recount-scans',
+    'warehouse/recount-scans/rules',
+    `warehouse/recount-scans/rules/${id}/retire`,
+    `warehouse/recount-scans/${id}/open-box`,
+    `warehouse/recount-scans/${id}/scans`,
+    `warehouse/recount-scans/${id}/settle`,
+    `warehouse/recount-scans/${id}/complete`,
+    `warehouse/recount-scans/${id}/escalate`,
+    `warehouse/recount-scans/${id}/cancel`,
+    `warehouse/recount-scans/${id}/exceptions/${id}/resolve`,
+  ]) {
+    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    expect(response.status, `POST ${path} 未被放行`).toBe(200);
+  }
+  expect(fetcher).toHaveBeenCalledWith(
+    expect.stringContaining(':8084/warehouse/recount-scans'),
+    expect.objectContaining({ method: 'POST' }),
+  );
+});
+
+it('8.3.3.1 未登记的形状是 404、不发请求，且不挂在别的分支底下', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    // 已放行动作再多一层后缀 —— 必须仍然 404（放行不存在的动作比 404 更糟）。
+    `warehouse/recount-scans/${id}/scans/force`,
+    `warehouse/recount-scans/${id}/complete/force`,
+    `warehouse/recount-scans/${id}/exceptions/${id}/resolve/undo`,
+    // 后端只有 .../exceptions/{id}/resolve，没有 .../exceptions/{id} 这一读形状。
+    `warehouse/recount-scans/${id}/exceptions/${id}`,
+    // 字面量子路径后面多一层。
+    'warehouse/recount-scans/capabilities/advanced',
+    'warehouse/recount-scans/rules/advanced',
+    // 非 UUID 段不应被 [0-9a-f-]+ 分支吃掉。
+    'warehouse/recount-scans/not-a-uuid',
+    // 复核不是出库单或拣货任务的子资源（反向钉住命名空间的决定）。
+    `warehouse/inventory/outbound-orders/${id}/recount`,
+    `warehouse/pick-tasks/${id}/recount`,
+    // 拼错的顶层分支。
+    'warehouse/recount-scan/capabilities',
+    'warehouse/recount_scans/capabilities',
+    'warehouse/recountscans/capabilities',
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 不应被放行`).toBe(404);
+  }
+  expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
+});
+
+it('8.3.3.1 追加 recount-scans 分支后已交付的拣货与波次形状仍被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // recount-scans 与 pick-tasks / pick-waves / putaway-tasks 在同一条正则里相邻，
+  // 最怕的是新分支抢走它们的匹配（或反过来）。逐条正向断言把这一点钉死。
+  for (const path of [
+    'warehouse/pick-tasks/capabilities',
+    `warehouse/pick-tasks/${id}/complete`,
+    'warehouse/pick-waves/capabilities',
+    `warehouse/pick-waves/${id}/complete`,
+    'warehouse/putaway-tasks/capabilities',
+    'warehouse/inventory/outbound-orders/capabilities',
+    'warehouse/location-trees/capabilities',
+    'warehouse/inventory/overview',
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `已交付模块的 ${path} 被本车道误伤 —— 白名单必须求并`).toBe(200);
+  }
+});
+
+/** 跨源写请求必须被拒（CSRF 闸），与白名单无关但同一份代理代码。 */
+it('8.3.3.1 复核的跨源写请求被 403 拒绝，不转发', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const response = await POST(
+    new NextRequest(`http://localhost:3000/api/warehouse/warehouse/recount-scans/${id}/complete`, {
+      method: 'POST',
+      headers: { origin: 'http://evil.example', cookie: 'starcon_session=x' },
+      body: '{}',
+    }),
+    { params: { path: ['warehouse', 'recount-scans', id, 'complete'] } },
+  );
+  expect(response.status).toBe(403);
+  expect(fetcher).not.toHaveBeenCalled();
+});
