@@ -13754,7 +13754,7 @@
         "tags": [
           "warehouse-location-tree-controller"
         ],
-        "operationId": "capabilities_3",
+        "operationId": "capabilities_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -14096,7 +14096,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "report",
+        "operationId": "report_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -14578,7 +14578,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "report_1",
+        "operationId": "report_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -16037,7 +16037,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "report_2",
+        "operationId": "report_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -16361,7 +16361,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "detail_9",
+        "operationId": "detail_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -16823,7 +16823,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_10",
+        "operationId": "detail_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -17791,7 +17791,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_11",
+        "operationId": "detail_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -18562,7 +18562,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "detail_12",
+        "operationId": "detail_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -19235,7 +19235,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "detail_13",
+        "operationId": "detail_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -20941,6 +20941,142 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/DisassemblyCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/location-utilization/{warehouseId}": {
+      "get": {
+        "tags": [
+          "location-utilization-controller"
+        ],
+        "operationId": "report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LocationUtilizationQuery"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationUtilizationReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/location-utilization/{warehouseId}/locations/{locationId}": {
+      "get": {
+        "tags": [
+          "location-utilization-controller"
+        ],
+        "operationId": "detail_9",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LocationUtilizationQuery"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationUtilizationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/location-utilization/capabilities": {
+      "get": {
+        "tags": [
+          "location-utilization-controller"
+        ],
+        "operationId": "capabilities_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationUtilizationCapabilities"
                 }
               }
             }
@@ -47776,6 +47912,494 @@
             "type": "boolean"
           },
           "usage": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationUtilizationQuery": {
+        "type": "object",
+        "properties": {
+          "windowDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "grade": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "keyword": {
+            "type": "string",
+            "nullable": true
+          },
+          "minUtilization": {
+            "type": "number",
+            "nullable": true
+          },
+          "pickableOnly": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "LocationUtilizationAdvice": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "OVERFULL_LOCATION",
+              "IDLE_LOCATION",
+              "INEFFICIENT_LOCATION",
+              "HIGH_FREQUENT_NON_PICKABLE",
+              "SKU_DISPERSION",
+              "UNMEASURED_LOCATION"
+            ]
+          },
+          "kindLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ]
+          },
+          "severityLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "message": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LocationUtilizationHeatCell": {
+        "type": "object",
+        "properties": {
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "parentCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "depth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "grade": {
+            "type": "string",
+            "enum": [
+              "OVERFULL",
+              "HIGH",
+              "BALANCED",
+              "LOW",
+              "IDLE",
+              "UNMEASURED"
+            ]
+          },
+          "gradeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "capacityUtilization": {
+            "type": "number",
+            "nullable": true
+          },
+          "metric": {
+            "type": "string",
+            "enum": [
+              "CAPACITY_UTILIZATION",
+              "ON_HAND_RELATIVE",
+              "IDLE"
+            ]
+          },
+          "heat": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "value": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "LocationUtilizationReport": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "windowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationUtilizationRow"
+            }
+          },
+          "totals": {
+            "$ref": "#/components/schemas/LocationUtilizationTotals"
+          },
+          "heatmap": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationUtilizationHeatCell"
+            }
+          },
+          "advice": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationUtilizationAdvice"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationUtilizationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "typeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "pickable": {
+            "type": "boolean"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "capacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "capacityUtilization": {
+            "type": "number",
+            "nullable": true
+          },
+          "capacityMeasured": {
+            "type": "boolean"
+          },
+          "capacityZero": {
+            "type": "boolean"
+          },
+          "capacityExceeded": {
+            "type": "boolean"
+          },
+          "outboundQuantity": {
+            "type": "number"
+          },
+          "outboundMovements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "turnover": {
+            "type": "number",
+            "nullable": true
+          },
+          "turnoverComputable": {
+            "type": "boolean"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuDispersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dwellDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "grade": {
+            "type": "string",
+            "enum": [
+              "OVERFULL",
+              "HIGH",
+              "BALANCED",
+              "LOW",
+              "IDLE",
+              "UNMEASURED"
+            ]
+          },
+          "gradeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "heat": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LocationUtilizationTotals": {
+        "type": "object",
+        "properties": {
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "capacityMeasuredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "capacityZeroCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "idleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overfullCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "highCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lowCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "balancedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmeasuredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "capacity": {
+            "type": "number"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "capacityUtilization": {
+            "type": "number",
+            "nullable": true
+          },
+          "utilizationComputable": {
+            "type": "boolean"
+          },
+          "outboundQuantity": {
+            "type": "number"
+          },
+          "outboundMovements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "turnover": {
+            "type": "number",
+            "nullable": true
+          },
+          "turnoverComputable": {
+            "type": "boolean"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LocationUtilizationDetail": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/LocationUtilizationRow"
+          },
+          "skus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationUtilizationSkuRow"
+            }
+          },
+          "advice": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationUtilizationAdvice"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationUtilizationSkuRow": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "outboundQuantity": {
+            "type": "number"
+          },
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuDispersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shareOfSkuOnHand": {
+            "type": "number",
+            "nullable": true
+          },
+          "dwellDays": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "LocationUtilizationCapabilities": {
+        "type": "object",
+        "properties": {
+          "capacityUtilizationLive": {
+            "type": "boolean"
+          },
+          "turnoverLive": {
+            "type": "boolean"
+          },
+          "heatmapLive": {
+            "type": "boolean"
+          },
+          "adviceGenerated": {
+            "type": "boolean"
+          },
+          "skuDispersionLive": {
+            "type": "boolean"
+          },
+          "autoAllocationAvailable": {
+            "type": "boolean"
+          },
+          "autoAllocationOwnerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "pickPathOptimizationAvailable": {
+            "type": "boolean"
+          },
+          "pickPathOwnerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "outboundFrequencyGrain": {
+            "type": "string"
+          },
+          "turnoverBasis": {
+            "type": "string"
+          },
+          "grades": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "OVERFULL",
+                "HIGH",
+                "BALANCED",
+                "LOW",
+                "IDLE",
+                "UNMEASURED"
+              ]
+            }
+          },
+          "defaultWindowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxWindowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
             "type": "string"
           }
         }
