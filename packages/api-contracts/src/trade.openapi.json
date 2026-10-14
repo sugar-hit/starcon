@@ -1504,6 +1504,809 @@
         }
       }
     },
+    "/trade/fulfillment/dropship/supplier-stocks": {
+      "get": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "supplierStocks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "supplierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stockSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipSupplierStockPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "saveSupplierStock",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipSupplierStockInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipSupplierStockSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship/supplier-refs": {
+      "get": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "supplierRefs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "supplierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "quoteSource",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "activeOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "quoteValidOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipSupplierRefPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "saveSupplierRef",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipSupplierRefInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipSupplierRefSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship/shop-refs": {
+      "get": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "shopRefs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "activeOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipShopRefPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "saveShopRef",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipShopRefInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipShopRefSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship/evaluations": {
+      "get": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "evaluations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "configId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "supplierCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sellable",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "listable",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "reasonCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipEvaluationPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "evaluate_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipEvaluationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipEvaluationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship/configs": {
+      "get": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "configs",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "configCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scopeKind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shopCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fulfillmentPath",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ownershipMode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "settlementBasis",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "effectiveOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "countsAgainstOwnInventory",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipConfigPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "saveConfig",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipConfigInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipConfigSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship/configs/{configId}/status": {
+      "post": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "advanceStatus_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "configId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipConfigStatusInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipConfigSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship/configs/{configId}/lines": {
+      "post": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "saveLine",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "configId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DropshipConfigLineInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipConfigLineSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/allocation/warehouses": {
       "get": {
         "tags": [
@@ -2211,7 +3014,7 @@
         "tags": [
           "warehouse-allocation-controller"
         ],
-        "operationId": "advanceStatus_2",
+        "operationId": "advanceStatus_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -2887,6 +3690,137 @@
         }
       }
     },
+    "/trade/fulfillment/dropship/events": {
+      "get": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "events",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "configId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipEventPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship/configs/{configId}": {
+      "get": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "config",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "configId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipConfigDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/fulfillment/dropship/capabilities": {
+      "get": {
+        "tags": [
+          "dropship-config-controller"
+        ],
+        "operationId": "capabilities_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DropshipCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/fulfillment/allocation/holds": {
       "get": {
         "tags": [
@@ -2976,7 +3910,7 @@
         "tags": [
           "warehouse-allocation-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -4635,6 +5569,439 @@
           },
           "message": {
             "type": "string"
+          }
+        }
+      },
+      "DropshipSupplierStockInput": {
+        "required": [
+          "availableQty",
+          "observedAt",
+          "skuRef",
+          "stockSource",
+          "supplierCode"
+        ],
+        "type": "object",
+        "properties": {
+          "supplierCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "availableQty": {
+            "type": "number"
+          },
+          "stockSource": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipSupplierStockSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DropshipSupplierRefInput": {
+        "required": [
+          "currencyCode",
+          "quoteSource",
+          "supplierCode",
+          "supplierName",
+          "syncedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "supplierCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "supplierName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "currencyCode": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string"
+          },
+          "quoteValidFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "quoteValidTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "quoteSource": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "leadTimeDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipSupplierRefSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DropshipShopRefInput": {
+        "required": [
+          "platformCode",
+          "shopCode",
+          "shopName",
+          "sourceSystem",
+          "syncedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shopName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "platformCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "regionCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "sourceSystem": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipShopRefSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DropshipEvaluationRequest": {
+        "required": [
+          "configId",
+          "requestedQty",
+          "skuRef"
+        ],
+        "type": "object",
+        "properties": {
+          "configId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "requestedQty": {
+            "type": "number"
+          }
+        }
+      },
+      "DropshipEvaluationSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sellable": {
+            "type": "boolean"
+          },
+          "listable": {
+            "type": "boolean"
+          },
+          "reasonCode": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipConfigInput": {
+        "required": [
+          "availabilityCheckMode",
+          "configCode",
+          "configName",
+          "currencyCode",
+          "fulfillmentPath",
+          "listingPolicy",
+          "ownershipMode",
+          "referenceSellPrice",
+          "scopeKind",
+          "settlementBasis",
+          "settlementTiming",
+          "supplierCost"
+        ],
+        "type": "object",
+        "properties": {
+          "configCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "configName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "scopeKind": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "shopCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "fulfillmentPath": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "supplierCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "ownershipMode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ownershipConfirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ownershipConfirmedByMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "ownershipConfirmedNote": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "ownershipReviewedWith": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "settlementTiming": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "settlementBasis": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "marginShareRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "currencyCode": {
+            "maxLength": 3,
+            "minLength": 0,
+            "type": "string"
+          },
+          "supplierCost": {
+            "type": "number"
+          },
+          "referenceSellPrice": {
+            "type": "number"
+          },
+          "availabilityCheckMode": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minSupplierStockBuffer": {
+            "type": "number",
+            "nullable": true
+          },
+          "listingPolicy": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipConfigSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "configCode": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DropshipConfigStatusInput": {
+        "required": [
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DropshipConfigLineInput": {
+        "required": [
+          "skuRef"
+        ],
+        "type": "object",
+        "properties": {
+          "skuRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "supplierCostOverride": {
+            "type": "number",
+            "nullable": true
+          },
+          "referenceSellPriceOverride": {
+            "type": "number",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "DropshipConfigLineSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "configId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean"
           }
         }
       },
@@ -7722,6 +9089,688 @@
           },
           "note": {
             "type": "string"
+          }
+        }
+      },
+      "DropshipSupplierStockPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipSupplierStockRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipSupplierStockRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "availableQty": {
+            "type": "number"
+          },
+          "stockSource": {
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipSupplierRefPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipSupplierRefRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipSupplierRefRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "supplierName": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "quoteValidFrom": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "quoteValidTo": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "quoteSource": {
+            "type": "string"
+          },
+          "leadTimeDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipShopRefPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipShopRefRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipShopRefRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "regionCode": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipEventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipEventRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "configId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "eventKind": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "actorMembershipId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipEvaluationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipEvaluationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipEvaluationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "configId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "configLineId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "requestedQty": {
+            "type": "number"
+          },
+          "requiredQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "supplierAvailableQty": {
+            "type": "number",
+            "nullable": true
+          },
+          "sellable": {
+            "type": "boolean"
+          },
+          "listable": {
+            "type": "boolean"
+          },
+          "reasonCode": {
+            "type": "string"
+          },
+          "reasonDetail": {
+            "type": "string"
+          },
+          "settlementBasis": {
+            "type": "string"
+          },
+          "expectedMarginAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "countsAgainstOwnInventory": {
+            "type": "boolean"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipConfigPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipConfigRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DropshipConfigRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "configCode": {
+            "type": "string"
+          },
+          "configName": {
+            "type": "string"
+          },
+          "scopeKind": {
+            "type": "string"
+          },
+          "shopCode": {
+            "type": "string"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "fulfillmentPath": {
+            "type": "string"
+          },
+          "supplierCode": {
+            "type": "string"
+          },
+          "ownershipMode": {
+            "type": "string"
+          },
+          "countsAgainstOwnInventory": {
+            "type": "boolean"
+          },
+          "pureAgencyExempt": {
+            "type": "boolean"
+          },
+          "settlementTiming": {
+            "type": "string"
+          },
+          "settlementBasis": {
+            "type": "string"
+          },
+          "marginShareRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "supplierCost": {
+            "type": "number"
+          },
+          "referenceSellPrice": {
+            "type": "number"
+          },
+          "grossSpread": {
+            "type": "number"
+          },
+          "expectedMarginAmount": {
+            "type": "number"
+          },
+          "expectedSupplierAmount": {
+            "type": "number"
+          },
+          "availabilityCheckMode": {
+            "type": "string"
+          },
+          "minSupplierStockBuffer": {
+            "type": "number",
+            "nullable": true
+          },
+          "listingPolicy": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ownershipConfirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ownershipConfirmedNote": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownershipReviewedWith": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipConfigDetail": {
+        "type": "object",
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/DropshipConfigRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipConfigLineRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipEventRow"
+            }
+          },
+          "reservationNote": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipConfigLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "configId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuRef": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "supplierCostOverride": {
+            "type": "number",
+            "nullable": true
+          },
+          "referenceSellPriceOverride": {
+            "type": "number",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DropshipCapabilities": {
+        "type": "object",
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DropshipCapabilityDimension"
+            }
+          },
+          "scopeKinds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SHOP",
+                "SKU"
+              ]
+            }
+          },
+          "fulfillmentPaths": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SELF_FULFILLED",
+                "SUPPLIER_DIRECT"
+              ]
+            }
+          },
+          "ownershipModes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "PURE_AGENCY",
+                "OUR_ACCOUNT"
+              ]
+            }
+          },
+          "settlementTimings": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ON_ORDER",
+                "ON_RECEIPT"
+              ]
+            }
+          },
+          "settlementBases": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "FLAT_COST",
+                "MARGIN_SHARE"
+              ]
+            }
+          },
+          "availabilityCheckModes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SUPPLIER_STOCK",
+                "CONFIRM_ON_ORDER",
+                "SKIP"
+              ]
+            }
+          },
+          "listingPolicies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ALWAYS_LIST",
+                "PAUSE_WHEN_UNSELLABLE",
+                "PAUSE_WHEN_NEGATIVE_MARGIN",
+                "MANUAL"
+              ]
+            }
+          },
+          "configStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "ACTIVE",
+                "SUSPENDED",
+                "CLOSED"
+              ]
+            }
+          },
+          "sellReasonCodes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "SELLABLE",
+                "CONFIG_NOT_ACTIVE",
+                "CONFIG_NOT_EFFECTIVE",
+                "NO_SUPPLIER_STOCK_RECORD",
+                "SUPPLIER_STOCK_INSUFFICIENT",
+                "NEGATIVE_MARGIN",
+                "LISTING_PAUSED",
+                "QUOTE_EXPIRED",
+                "SHOP_INACTIVE",
+                "LINE_INACTIVE"
+              ]
+            }
+          },
+          "crossServiceReadAvailable": {
+            "type": "boolean"
+          },
+          "reservesOwnInventory": {
+            "type": "boolean"
+          },
+          "upstreamNote": {
+            "type": "string"
+          },
+          "ownershipNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DropshipCapabilityDimension": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "source": {
+            "type": "string"
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
