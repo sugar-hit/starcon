@@ -3806,7 +3806,7 @@
         "tags": [
           "warehouse-location-tree-controller"
         ],
-        "operationId": "create_2",
+        "operationId": "create_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -4072,7 +4072,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "create_3",
+        "operationId": "create_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -4113,7 +4113,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "start",
+        "operationId": "start_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -4212,7 +4212,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "complete",
+        "operationId": "complete_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -4262,7 +4262,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "assign",
+        "operationId": "assign_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -4312,7 +4312,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "page_2",
+        "operationId": "page_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -4415,7 +4415,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "create_4",
+        "operationId": "create_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -5147,7 +5147,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "cancel_1",
+        "operationId": "cancel_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -5927,7 +5927,7 @@
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "create_5",
+        "operationId": "create_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -7621,7 +7621,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "create_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -7794,7 +7794,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "cancel_2",
+        "operationId": "cancel_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -7977,7 +7977,7 @@
         "tags": [
           "inventory-lot-controller"
         ],
-        "operationId": "create_7",
+        "operationId": "create_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -8018,7 +8018,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "page_3",
+        "operationId": "page_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -8400,7 +8400,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "page_4",
+        "operationId": "page_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -8521,7 +8521,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "create_8",
+        "operationId": "create_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -8812,7 +8812,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "cancel_3",
+        "operationId": "cancel_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -8935,7 +8935,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "create_9",
+        "operationId": "create_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -9748,7 +9748,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "create_10",
+        "operationId": "create_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -10022,7 +10022,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "create_11",
+        "operationId": "create_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -10356,7 +10356,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "page_5",
+        "operationId": "page_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -10452,7 +10452,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "create_12",
+        "operationId": "create_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -10593,7 +10593,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "page_6",
+        "operationId": "page_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -11061,7 +11061,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "page_7",
+        "operationId": "page_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -11187,7 +11187,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "create_13",
+        "operationId": "create_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -11328,7 +11328,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "cancel_4",
+        "operationId": "cancel_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -11476,7 +11476,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "create_14",
+        "operationId": "create_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -11567,7 +11567,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "page_8",
+        "operationId": "page_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -11692,7 +11692,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "create_15",
+        "operationId": "create_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -12130,7 +12130,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "page_9",
+        "operationId": "page_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -12239,7 +12239,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "create_16",
+        "operationId": "create_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -12329,7 +12329,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "cancel_5",
+        "operationId": "cancel_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -12379,7 +12379,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "page_10",
+        "operationId": "page_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -12496,7 +12496,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "create_17",
+        "operationId": "create_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -13028,7 +13028,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "cancel_6",
+        "operationId": "cancel_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -13128,7 +13128,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "page_11",
+        "operationId": "page_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -13237,7 +13237,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "create_18",
+        "operationId": "create_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -13327,7 +13327,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "cancel_7",
+        "operationId": "cancel_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -14077,7 +14077,7 @@
         "tags": [
           "processing-order-controller"
         ],
-        "operationId": "capabilities_2",
+        "operationId": "capabilities_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -14289,7 +14289,7 @@
         "tags": [
           "location-utilization-controller"
         ],
-        "operationId": "detail_9",
+        "operationId": "detail_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -14346,7 +14346,7 @@
         "tags": [
           "location-utilization-controller"
         ],
-        "operationId": "capabilities_3",
+        "operationId": "capabilities_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -14417,7 +14417,7 @@
         "tags": [
           "warehouse-location-tree-controller"
         ],
-        "operationId": "capabilities_4",
+        "operationId": "capabilities_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -14538,7 +14538,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -14925,7 +14925,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -15425,7 +15425,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -16465,7 +16465,7 @@
         "tags": [
           "reservation-allocation-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -16579,7 +16579,7 @@
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -16983,7 +16983,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -17268,7 +17268,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -17445,7 +17445,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "detail_10",
+        "operationId": "detail_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -17485,7 +17485,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "capabilities_12",
+        "operationId": "capabilities_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -17516,7 +17516,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_13",
+        "operationId": "capabilities_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -17907,7 +17907,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_11",
+        "operationId": "detail_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -18055,7 +18055,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "page_12",
+        "operationId": "page_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -18875,7 +18875,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_12",
+        "operationId": "detail_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -19331,7 +19331,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_14",
+        "operationId": "capabilities_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -19362,7 +19362,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_15",
+        "operationId": "capabilities_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -19646,7 +19646,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "detail_13",
+        "operationId": "detail_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -19686,7 +19686,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_16",
+        "operationId": "capabilities_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -19862,7 +19862,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_17",
+        "operationId": "capabilities_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -20288,7 +20288,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_18",
+        "operationId": "capabilities_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -20319,7 +20319,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "detail_14",
+        "operationId": "detail_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -20359,7 +20359,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_19",
+        "operationId": "capabilities_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -20519,7 +20519,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "capabilities_20",
+        "operationId": "capabilities_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -20876,7 +20876,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_21",
+        "operationId": "capabilities_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -21053,7 +21053,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "capabilities_22",
+        "operationId": "capabilities_23",
         "parameters": [
           {
             "name": "Authorization",
@@ -21084,7 +21084,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "detail_15",
+        "operationId": "detail_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -21124,7 +21124,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "capabilities_23",
+        "operationId": "capabilities_24",
         "parameters": [
           {
             "name": "Authorization",
@@ -21198,7 +21198,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "capabilities_24",
+        "operationId": "capabilities_25",
         "parameters": [
           {
             "name": "Authorization",
@@ -21229,7 +21229,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "detail_16",
+        "operationId": "detail_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -21269,7 +21269,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "capabilities_25",
+        "operationId": "capabilities_26",
         "parameters": [
           {
             "name": "Authorization",
@@ -21300,7 +21300,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "cancel_8",
+        "operationId": "cancel_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -21775,6 +21775,476 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ReservationReleaseRunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/putaway-tasks": {
+      "get": {
+        "tags": [
+          "putaway-task-controller"
+        ],
+        "operationId": "page_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "receiptId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "assigneeId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CREATED_AT"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutawayTaskPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "putaway-task-controller"
+        ],
+        "operationId": "create_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutawayTaskCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutawayTaskCreated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/putaway-tasks/{id}/start": {
+      "post": {
+        "tags": [
+          "putaway-task-controller"
+        ],
+        "operationId": "start",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutawayTaskStartInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutawayTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/putaway-tasks/{id}/scan": {
+      "post": {
+        "tags": [
+          "putaway-task-controller"
+        ],
+        "operationId": "scan",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutawayTaskScanInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutawayTaskScanned"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/putaway-tasks/{id}/complete": {
+      "post": {
+        "tags": [
+          "putaway-task-controller"
+        ],
+        "operationId": "complete",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutawayTaskCompleteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutawayTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/putaway-tasks/{id}/cancel": {
+      "post": {
+        "tags": [
+          "putaway-task-controller"
+        ],
+        "operationId": "cancel_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutawayTaskCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutawayTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/putaway-tasks/{id}/assign": {
+      "post": {
+        "tags": [
+          "putaway-task-controller"
+        ],
+        "operationId": "assign",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutawayTaskAssignInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutawayTaskRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/putaway-tasks/{id}": {
+      "get": {
+        "tags": [
+          "putaway-task-controller"
+        ],
+        "operationId": "detail_9",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutawayTaskDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/putaway-tasks/capabilities": {
+      "get": {
+        "tags": [
+          "putaway-task-controller"
+        ],
+        "operationId": "capabilities_2",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutawayCapabilities"
                 }
               }
             }
@@ -50141,6 +50611,756 @@
             "format": "int64"
           },
           "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PutawayTaskCreateInput": {
+        "required": [
+          "lines",
+          "receiptId"
+        ],
+        "type": "object",
+        "properties": {
+          "receiptId": {
+            "type": "string",
+            "description": "上游 8.2.1.1 收货单（同一服务，真外键；上架的货必须来自一张真实收货单）",
+            "format": "uuid"
+          },
+          "allocationId": {
+            "type": "string",
+            "description": "8.1.2.2 已选定/已释放的上架决策（location_allocation.id）。可空 = 人工直接指派库位 —— 蓝图原文是「库位推荐**或**指定库位」，两种都是合法形态",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lines": {
+            "minItems": 1,
+            "type": "array",
+            "description": "待上架明细。每一行 = 一条收货明细行 + 一个目标库位",
+            "items": {
+              "$ref": "#/components/schemas/PutawayTaskLineInput"
+            }
+          },
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PutawayTaskLineInput": {
+        "required": [
+          "receiptLineId",
+          "targetLocationId"
+        ],
+        "type": "object",
+        "properties": {
+          "receiptLineId": {
+            "type": "string",
+            "description": "上游收货明细行（goods_receipt_line.id）：这批货是哪次实收的哪一行",
+            "format": "uuid"
+          },
+          "targetLocationId": {
+            "type": "string",
+            "description": "目标库位（warehouse_location.id）。质量状态决定它的**类型**：SELLABLE→STORAGE / PENDING_INSPECTION→QUARANTINE / DEFECTIVE→DEFECTIVE，这是 8.1.2.2 的硬规则，不是排序偏好",
+            "format": "uuid"
+          },
+          "lotId": {
+            "type": "string",
+            "description": "批次。非批次管理品留空；留空会按「无批次」定位源位库存行",
+            "format": "uuid",
+            "nullable": true
+          },
+          "requiredCapacity": {
+            "type": "number",
+            "description": "这批货要占的容量（体积单位）。**可空 = 没量过**，不是 0 ——「没量过」与「不占地方」是两件事，折成 0 会让没量过的批次凭空通过容量校验",
+            "nullable": true
+          },
+          "requiredWeight": {
+            "type": "number",
+            "description": "这批货的重量。同 requiredCapacity：可空 = 没量过",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "description": "待上架明细。每一行 = 一条收货明细行 + 一个目标库位"
+      },
+      "PutawayTaskCreated": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "detailLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "receiptCode": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PutawayTaskStartInput": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PutawayTaskRow": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusName": {
+            "type": "string"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptCode": {
+            "type": "string"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "assigneeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "assignedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "startedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string"
+          },
+          "detailLineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "putawayQuantity": {
+            "type": "number"
+          },
+          "scanCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "PutawayTaskScanInput": {
+        "required": [
+          "deviceType",
+          "lineId",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "本次搬走的量。累计不得超过该行的应上架量"
+          },
+          "scanReference": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string",
+            "description": "扫码读到的码（库位条码 / SKU 条码 / 单号）。同一张任务单内重复的码会被幂等索引挡下 —— PDA 网络抖动重发是现场常态，没有这道，同一批货会被搬两遍而「净额仍为 0」抓不到",
+            "nullable": true
+          },
+          "deviceType": {
+            "type": "string",
+            "description": "设备类型：PDA（蓝图点名）/ MOBILE / DESKTOP（后台补录）"
+          },
+          "scannedAt": {
+            "type": "string",
+            "description": "**业务时间**：作业员扫的那一下，不是提交入库的时刻。事后补录必须能填真实时刻，否则「这批货几点上的架」永远答不出来",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PutawayTaskScanned": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taskCode": {
+            "type": "string"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "sourceLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scannedQuantity": {
+            "type": "number"
+          },
+          "linePlannedQuantity": {
+            "type": "number"
+          },
+          "linePutawayQuantity": {
+            "type": "number"
+          },
+          "lineCompleted": {
+            "type": "boolean"
+          },
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inventoryEntryOutId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inventoryEntryInId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "onHandDeltaOut": {
+            "type": "number"
+          },
+          "onHandDeltaIn": {
+            "type": "number"
+          },
+          "scannedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "taskStatus": {
+            "type": "string"
+          },
+          "taskStatusName": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PutawayTaskCompleteInput": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PutawayTaskCancelInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "description": "取消原因必填：现场复盘的第一问就是「为什么撤这张单」"
+          }
+        }
+      },
+      "PutawayTaskAssignInput": {
+        "required": [
+          "assigneeId"
+        ],
+        "type": "object",
+        "properties": {
+          "assigneeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PutawayTargetStat": {
+        "type": "object",
+        "properties": {
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationCode": {
+            "type": "string"
+          },
+          "locationType": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "putawayQuantity": {
+            "type": "number"
+          }
+        }
+      },
+      "PutawayTaskPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PutawayTaskRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PutawayTaskSummary"
+          },
+          "targetStats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PutawayTargetStat"
+            }
+          }
+        }
+      },
+      "PutawayTaskSummary": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "putawayQuantity": {
+            "type": "number"
+          },
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inProgressCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unassignedCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PutawayTaskDetail": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "$ref": "#/components/schemas/PutawayTaskRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PutawayTaskLineRow"
+            }
+          },
+          "scans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PutawayTaskScanRow"
+            }
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PutawayTaskEntry"
+            }
+          },
+          "netOnHandDelta": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PutawayTaskEntry": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "onHandDelta": {
+            "type": "number"
+          },
+          "reservedDelta": {
+            "type": "number"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "locationCode": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PutawayTaskLineRow": {
+        "type": "object",
+        "properties": {
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "qualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualityCode": {
+            "type": "string"
+          },
+          "qualityRole": {
+            "type": "string"
+          },
+          "sourceLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceLocationCode": {
+            "type": "string"
+          },
+          "sourceBucketId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "targetLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetLocationCode": {
+            "type": "string"
+          },
+          "targetLocationType": {
+            "type": "string"
+          },
+          "targetBucketId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "plannedQuantity": {
+            "type": "number"
+          },
+          "putawayQuantity": {
+            "type": "number"
+          },
+          "remainingQuantity": {
+            "type": "number"
+          },
+          "completed": {
+            "type": "boolean"
+          },
+          "requiredCapacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "requiredWeight": {
+            "type": "number",
+            "nullable": true
+          },
+          "capacityEvaluated": {
+            "type": "boolean"
+          },
+          "weightEvaluated": {
+            "type": "boolean"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "completedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PutawayTaskScanRow": {
+        "type": "object",
+        "properties": {
+          "scanId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scannedQuantity": {
+            "type": "number"
+          },
+          "sourceLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "targetLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scanReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "deviceType": {
+            "type": "string"
+          },
+          "scannedAt": {
+            "type": "string"
+          },
+          "scannerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "inventoryEntryOutId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "inventoryEntryInId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PutawayCapabilities": {
+        "type": "object",
+        "properties": {
+          "refType": {
+            "type": "string"
+          },
+          "atomicLocationMoves": {
+            "type": "boolean"
+          },
+          "quantityIsNotAnInput": {
+            "type": "boolean"
+          },
+          "upstreamBoundary": {
+            "type": "string"
+          },
+          "allocationBoundary": {
+            "type": "string"
+          },
+          "quantityBoundary": {
+            "type": "string"
+          },
+          "upstreamModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PutawayUpstreamModule"
+            }
+          },
+          "downstreamModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PutawayDownstreamModule"
+            }
+          },
+          "invariant": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "PutawayDownstreamModule": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "effect": {
+            "type": "string"
+          }
+        }
+      },
+      "PutawayUpstreamModule": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "usage": {
             "type": "string"
           }
         }
