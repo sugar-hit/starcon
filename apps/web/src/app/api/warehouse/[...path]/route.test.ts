@@ -800,7 +800,9 @@ it('7.2.1.1 预占需求的三个调用形状都被放行并转发到 warehouse 
  * `pnpm test` 直连服务层测不出漏登记，而漏一条的现场表现是该页面在浏览器里静默 404，
  * 且 typecheck / lint / vitest 全绿。
  *
- * <p>同时钉住**反向**：释放（7.2.1.3）仍未交付，`{id}/release` 必须仍然 404 且不发请求。
+ * <p>同时钉住**反向**：`{id}/entries` 仍不是任何模块的对外形状（时间线叫 /timeline），
+ * 必须仍然 404 且不发请求。`{id}/release` 已由 7.2.1.3 交付，**移出**本用例的反向断言，
+ * 它现在由同文件 7.2.1.3 的放行用例钉住。
  */
 it('7.2.1.2 预占分配明细的读取与写入形状都被放行并转发到 warehouse 服务', async () => {
   const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
@@ -852,10 +854,14 @@ it('7.2.1.2 预占分配明细的读取与写入形状都被放行并转发到 w
     );
   }
 
-  // 关键：未交付的释放形状**仍然** 404，且连请求都不发出去。
+  // 关键：不是本链路对外形状的路径**仍然** 404，且连请求都不发出去。
   // 放行一个后端不存在的端点，比 404 更糟 —— 界面会以为「点进去有东西」。
-  const release = `${RESERVATION}/${id}/release`;
-  expect((await GET(request(release), { params: { path: release.split('/') } })).status).toBe(404);
+  // 注：`${id}/release` 原先在这里断言 404（7.2.1.3 未交付时的诚实标注），
+  // 7.2.1.3 落地后由它的放行用例接管，这里改钉它**再多一层后缀**仍然 404。
+  for (const path of [`${RESERVATION}/${id}/entries`, `${RESERVATION}/${id}/release/reason`]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 不应被放行`).toBe(404);
+  }
 });
 
 it('7.2.1.1 刻意不放行未交付的子路径（多一层后缀仍 404 且不发请求）', async () => {
@@ -863,15 +869,17 @@ it('7.2.1.1 刻意不放行未交付的子路径（多一层后缀仍 404 且不
   vi.stubGlobal('fetch', fetcher);
   const RESERVATION = 'warehouse/inventory/reservations';
   const id = '11111111-1111-1111-1111-111111111111';
-  // 后端 ReservationController 只有上面那四个集合级形状；7.2.1.3 释放与过期**未交付**，
-  // 放行它们等于让界面以为「点进去有东西」—— 放行不该存在的路径比 404 更糟。
+  // 后端 ReservationController 只有上面那四个集合级形状；7.2.1.3 的释放与过期已交付，
+  // 它交付的形状由同文件下方的放行用例钉住，**不**在本清单里重复。
   // 7.2.1.2 已交付，它交付的子路径由本文件下方 7.2.1.2 的放行用例钉住。
   for (const path of [
     // **多一层后缀**：这是最容易在补白名单时被顺手放行的形状。
-    // 释放（7.2.1.3）就在这一层之下。
-    // 注：`${RESERVATION}/${id}/allocations` 已由 7.2.1.2 交付并移出本清单 ——
-    // 它现在由同文件 7.2.1.2 的放行用例钉住；`${id}/entries` 仍不是任何模块的对外形状。
-    `${RESERVATION}/${id}/release`,
+    // 注：`${RESERVATION}/${id}/allocations` 已由 7.2.1.2 交付并移出本清单；
+    // `${RESERVATION}/${id}/release` 已由 7.2.1.3 交付并移出本清单 ——
+    // 但它**再多一层**（/release/reason、/expiry/clear）仍然必须 404，
+    // 放行一个不存在的动作比 404 更糟。
+    `${RESERVATION}/${id}/release/reason`,
+    `${RESERVATION}/${id}/expiry/clear`,
     `${RESERVATION}/${id}/entries`,
     `${RESERVATION}/summary`,
     // options / capabilities 是字面量子路径，不能再往下挂一段。
