@@ -98,6 +98,12 @@ const opsSystem: SystemDef = {
   items: [
     { label: '订单中心', href: '/orders', icon: Package, description: '多平台订单聚合' },
     {
+      label: '批发订单',
+      href: '/orders/b2b',
+      icon: Package,
+      description: 'B2B 账期 / 阶梯价 / 起订量',
+    },
+    {
       label: '售后中心',
       href: '/aftersales',
       icon: HeadphonesIcon,
