@@ -665,11 +665,28 @@ const services: readonly {
     //   alerts/{uuid}/acknowledge     处置告警（只改处置字段，不删历史行）
     //   events           事件流（集合读；append-only，**没有**任何写形状）
     // 刻意**没有** DELETE：告警与事件流是「已发生差异」的凭据，删掉等于抹掉历史。
+    // fulfillment/pending-shipment 是 9.4.1.1 待发货（**新的一组**，不并进上面四组）：
+    //   capabilities  能力与上游可用性声明（含「平台 SLA 无上游、8.3.4.2/8.3.4.1/10 未交付」）
+    //   sync          从 8.3.3.2 授权只读接口同步已完成打包的出库单（幂等投影，**唯一的写入口**）
+    //   board         分组看板：仓库 / 承运渠道 / 承运商 / 发货时限 四选一（真 GROUP BY）
+    //   units         待发货清单：集合读（真分页 + 真筛选 + 排序白名单）
+    //   units/{uuid}  单元详情（单头 + 包裹 + 运单 + 时间线 + 完成判据）
+    //   units/{uuid}/sla      登记发货时限（平台 SLA 无上游可读，登记而不伪造）
+    //   units/{uuid}/cancel   作废单元（退回仓库，不产生发货记录）
+    //   batch-tasks   集合读 + POST 建批量任务（{uuid} 形状见下）
+    //   batch-tasks/{uuid}            任务详情（任务头 + 逐条执行结果 + 时间线）
+    //   batch-tasks/{uuid}/execute     执行（逐条推进；任务状态由结果算出，不接受直接指定）
+    //   batch-tasks/{uuid}/cancel      取消任务（终态不可回退）
+    //   batch-tasks/{uuid}/waybill-acks 登记承运商运单回执
+    //   batch-tasks/{uuid}/labels       回填包裹面单打印凭据（8.3.4.2 未交付，本模块不渲染 ZPL）
+    // 判别顺序与既有两组一致：字面量子路径（capabilities / board / units / batch-tasks）
+    // 排在 [0-9a-f-]+ 分支之前，否则会被单段分支吃掉半截。
+    // 刻意**没有** DELETE：待发货单元与批量任务都带凭据，要更正就作废重开一张。
     prefix: 'trade/',
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',
     pattern:
-      /^(?:fulfillment\/routing\/(?:capabilities|mcf-authorizations|cost-profiles|stock-snapshots|evaluations|switches|decisions(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/allocation\/(?:capabilities|rules|warehouses|stock-estimates|shipping-estimates|simulations|holds|allocations(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/dropship\/(?:capabilities|shop-refs|supplier-refs|supplier-stocks|events|configs(?:\/[0-9a-f-]+(?:\/(?:status|lines))?)?|evaluations)|fulfillment\/dropship-orders\/(?:capabilities|endpoints|events|orders(?:\/[0-9a-f-]+(?:\/(?:confirm-payment|dispatch|supplier-ack|shipment|fail))?)?|alerts(?:\/[0-9a-f-]+\/acknowledge)?)|processing\/(?:capabilities|requirements|orders(?:\/[0-9a-f-]+(?:\/(?:status|progress|components\/issue|bom-binding(?:\/lines)?))?)?|factories(?:\/[0-9a-f-]+)?)|sales-orders(?:\/(?:capabilities|[0-9a-f-]+(?:\/submit)?))?|sales-orders\/list(?:\/(?:capabilities|filters))?|sales-orders\/detail(?:\/(?:capabilities|fulfillment-reference|[0-9a-f-]+))?)$/,
+      /^(?:fulfillment\/routing\/(?:capabilities|mcf-authorizations|cost-profiles|stock-snapshots|evaluations|switches|decisions(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/allocation\/(?:capabilities|rules|warehouses|stock-estimates|shipping-estimates|simulations|holds|allocations(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/dropship\/(?:capabilities|shop-refs|supplier-refs|supplier-stocks|events|configs(?:\/[0-9a-f-]+(?:\/(?:status|lines))?)?|evaluations)|fulfillment\/dropship-orders\/(?:capabilities|endpoints|events|orders(?:\/[0-9a-f-]+(?:\/(?:confirm-payment|dispatch|supplier-ack|shipment|fail))?)?|alerts(?:\/[0-9a-f-]+\/acknowledge)?)|fulfillment\/pending-shipment\/(?:capabilities|board|units(?:\/[0-9a-f-]+(?:\/(?:sla|cancel))?)?|batch-tasks(?:\/[0-9a-f-]+(?:\/(?:execute|cancel|waybill-acks|labels))?)?|sync)|processing\/(?:capabilities|requirements|orders(?:\/[0-9a-f-]+(?:\/(?:status|progress|components\/issue|bom-binding(?:\/lines)?))?)?|factories(?:\/[0-9a-f-]+)?)|sales-orders(?:\/(?:capabilities|[0-9a-f-]+(?:\/submit)?))?|sales-orders\/list(?:\/(?:capabilities|filters))?|sales-orders\/detail(?:\/(?:capabilities|fulfillment-reference|[0-9a-f-]+))?)$/,
     // 裸路径 fulfillment/routing、fulfillment/allocation 与 processing **刻意不放行**：
     // 后端没有对应映射，放行它会让界面以为「一条不存在的列表接口」可用。
   },
