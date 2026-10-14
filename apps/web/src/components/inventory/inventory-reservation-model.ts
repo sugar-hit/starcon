@@ -166,12 +166,14 @@ export function overdueIsSevere(seconds: number | null | undefined): boolean {
 /**
  * 已分配量的展示口径。
  *
- * <p>7.2.1.2 未交付时该值恒 0。直接显示 `0` 会被读成「这批货还没分配到任何货位」，
- * 而实际是「有没有分配这件事目前查不到」——所以如实说明。
+ * <p>7.2.1.2 交付后该值由 `reservation_allocation` 的分配行回写，**是真实数字**：
+ * 0 表示「这笔预占确实还没圈到任何 bucket」，不再是「有没有分配查不到」。
+ * 所以这里直接显示数值，注解交给模型文件的说明，不再对 0 加任何后缀 ——
+ * 一个恒为 0 的后缀会让人以为分配功能没接通，而它其实已经跑通。
  */
 export function allocatedText(quantity: number | null | undefined): string {
   if (quantity === null || quantity === undefined) return '—';
-  return quantity === 0 ? '0（分配明细未交付）' : String(quantity);
+  return String(quantity);
 }
 
 /** 剩余量口径说明。常驻显示，否则有人会把「已分配 12 / 剩余 20」当成算错。 */

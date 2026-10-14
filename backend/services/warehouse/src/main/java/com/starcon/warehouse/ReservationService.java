@@ -44,9 +44,9 @@ import org.springframework.stereotype.Service;
  *       否则已承诺发货的货会被误释放导致超卖」）。所以超时筛选与超时计数只认 HELD。
  * </ol>
  *
- * <p>本模块<b>登记 + 列表只读</b>：分配明细属 7.2.1.2、释放与过期属 7.2.1.3，
- * 两条兄弟车道未交付，所以 allocated_quantity 恒 0、终态不可达 ——
- * 这两件事由 {@code capabilities()} 如实报出，不在列表上装成已经跑通。
+ * <p>本模块<b>登记 + 列表只读</b>：分配明细由 7.2.1.2 承担（本列表的 allocated_quantity
+ * 由那张表的分配行回写），释放与过期仍属 7.2.1.3 未交付，所以**终态行在本库仍然不可达** ——
+ * 这件事由 {@code capabilities()} 如实报出，不在列表上装成已经跑通。
  *
  * <p>租户来自已认证成员关系（控制器传入），不接受任何客户端租户参数；RLS 在数据库层强制隔离。
  */
@@ -122,8 +122,9 @@ public class ReservationService {
                 bindsToArray(binds, size, page * size))
             .map(r -> row(r));
 
-    // detailUnavailable 从 true 翻成 false：7.2.1.2 分配明细交付后由那条车道来翻。
-    return new ReservationPage(summary(), rows, total, page, size, true, NOTE);
+    // detailUnavailable 从 true 翻成 false：7.2.1.2 分配明细已交付，明细入口现在真的点得进去。
+    // 这个翻旗动作由 7.2.1.2 那条车道按本方法原注释的约定来做。
+    return new ReservationPage(summary(), rows, total, page, size, false, NOTE);
   }
 
   /**
@@ -417,8 +418,7 @@ public class ReservationService {
   /**
    * 预占链路各环节的接入情况。
    *
-   * <p>本模块只交付「需求列表 + 登记」。分配明细（7.2.1.2）与释放/过期（7.2.1.3）
-   * 都未交付，这里逐条报出归哪个模块、缺什么 ——
+   * <p>分配明细（7.2.1.2）已交付；释放/过期（7.2.1.3）仍未交付，这里逐条报出归哪个模块、缺什么 ——
    * 前端据此禁用入口，而不是显示一个永远为 0 的「已分配量」让人以为分配已经跑通。
    */
   public List<ReservationCapability> capabilities() {
@@ -432,10 +432,10 @@ public class ReservationService {
         new ReservationCapability(
             "ALLOCATION_DETAIL",
             "分配明细",
-            false,
+            true,
             "7.2.1.2",
-            "7.2.1.2 预占分配明细尚未交付，reservation_allocation 表不存在，"
-                + "所以已分配量恒为 0（不是未知，是已知为 0）"),
+            "已接入 reservation_allocation：分配到具体 bucket（仓 / 货位 / 批次），"
+                + "迁移流水 append-only；入口 /warehouse/inventory/reservations/{id}/allocations"),
         new ReservationCapability(
             "RELEASE",
             "释放与过期",
