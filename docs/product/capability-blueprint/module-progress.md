@@ -6,25 +6,32 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
+
 ## 总览
+
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 142 |
+| 已交付 | 144 |
 | 进行中 | 0 |
-| **未开发** | **323** |
-| 完成率 | 30.5% |
+| **未开发** | **321** |
+| 完成率 | 31.0% |
+
 ## 分阶段进度（交付顺序看这里）
+
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
 | **D3** | 34 | 0 | 6 | 40 |
-| **D4** | 17 | 0 | 43 | 60 |
+| **D4** | 19 | 0 | 41 | 60 |
 | **D5** | 1 | 0 | 51 | 52 |
 | **D6** | 3 | 0 | 75 | 78 |
 | **D7** | 7 | 0 | 148 | 155 |
+
 ## 分系统进度
+
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
+| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
@@ -32,8 +39,8 @@
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 2 | 26 |
 | 07 | 库存核算系统 | D3 | 26 | 31 |
-| 08 | 仓储作业系统 | D3 / D4 | 17 | 22 |
-| 09 | 订单履约系统 | D4 / D5 | 5 | 27 |
+| 08 | 仓储作业系统 | D3 / D4 | 18 | 22 |
+| 09 | 订单履约系统 | D4 / D5 | 6 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 6 | 27 |
 | 11 | 售后与退货系统 | D4 / D7 | 1 | 22 |
 | 12 | 财务核算系统 | D6 | 0 | 32 |
@@ -43,22 +50,30 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 23 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
+
 ## 判定「已交付」的标准
+
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
+
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
+
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
+
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
+
 ## 跨期说明
+
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
+
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -72,7 +87,9 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
+
 ## 模块明细
+
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -278,7 +295,7 @@
 | 8.3.1.2 | 出库单详情 | — | D4 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V79__outbound_order_detail.sql`（**只建一条索引、零新建表、零 ALTER 既有表** —— 本模块是纯读投影，见下）；**核心交付物是 8.3.1.1 刻意留白的 GET /outbound-orders/{id}**：一次调用返回整屏 = 单头 + 明细行 + 已拣/已发口径 + 拣货交接 + 作业时间线 + 四段不可得能力 + 作业操作入口，对应蓝图那句「**详情页串联整条出库链路**，作业人员不需要在多个页面跳」；**为什么零新建表**（边界纪律，不是省事）：蓝图给本模块的六段内容逐段核对后全部落在 8.3.1.1 的 V72 四张表里，预占引用归 7.2.1、包裹归 8.3.4.1、买家地址归 9 订单履约 —— 在这里建引用表就是给别人的事实抢第二个写入所有者，上游交付后它们自己写入、本端点立即读到，无需迁移；**已拣量逐行返回 null 而不是 0**（本模块最要紧的一条）：8.3.1.1 刻意没建 picking_task（归 8.3.2.1），只做到 outbound_pick_request 交接为止，那是**请求量快照**不是实拣量；填 0 会让作业员以为一件都没拣然后重复拣一遍，所以逐行 pickedQuantity 恒 null，并由 OutboundQuantityAvailability 给出 ownerModule=8.3.2.1 与原因；**已发量只在 SHIPPED 时是真数**：SHIPPED 终态且 DB 层冻结（V72 §4.2）+ 明细行不可改（V72 §4.4）⇒ 已发量 = 计划件数成立，其余状态一律 null，**绝不按拣货进度推算发货进度**；**四段拿不到的数据显式 available=false**（照 8.2.1.1 既有约定）：关联销售订单（9.1.1.2）、买家地址（9.1.1.2）、预占引用（7.2.1.1）、包裹列表（8.3.4.1），各带 ownerModule + href + 原因，**不建占位表、不返回空集冒充成功** —— 空的包裹列表会被读成「这单没有包裹」而不是「这段能力还没接入」；刻意**不按 ref_type 猜**去 join inventory_transaction（预占侧自己的引用键，当前没有任何指向出库单的形态）或 print_target（按 external_ref 字符串索引、与出库单无 FK），那只是把「没数据」伪装成「查过了」；**作业操作入口直接取 OutboundOrderStatus.transitionsFrom()**，与 8.3.1.1 共用同一个转换矩阵不另写一份，集成测试逐状态比对两者没有分叉（防并行开发最常见的分叉），并给每个去向标注归属模块与前置条件；**刻意没有写端点**：状态推进/取消/打印/生成拣货任务由 8.3.1.1 已有的四个端点执行，本模块只负责讲清「现在能做什么、去哪个模块做、前置条件是什么」—— 再开一套写端点就是让同一状态跃迁有两个入口；时间线按 (occurred_at, id) 升序读 —— id 兜底是必要的，同一毫秒发生的事件光看 occurred_at 顺序不确定，界面上会随机跳行；跨租户与不存在**返回同一个 404**（让 A 拿 B 的 id 探测存在性本身就是泄露面）；端点 2 个挂 `/warehouse/inventory/outbound-orders`：GET /detail-capabilities（详情页六段边界与两条数量口径，刻意与 8.3.1.1 的集合级 /capabilities 分开）、GET /{id}；页面 `/warehouse/outbound/[id]` 为真实工作区（单头 + 已拣/已发口径卡 + 明细行 + 拣货交接 + 作业时间线 + 关联对象灰块 + 作业操作入口，含加载态、错误态、空态），列表页单号可点进详情；前端模型 `quantityCell` 对拿不到的数量返回 null 而非 '0'，并有单测钉死这条；路由白名单在 api-proxy.ts 对既有 `outbound-orders` 分支做**联合**（追加 detail-capabilities 与 /{id}，未替换 8.3.1.1 已登记的 capabilities/pick-requests/print/cancel/transition 五支），并在 api-proxy.test.ts 里既验新增两支放行、也**反验 8.3.1.1 已交付的分支没被改掉**（取错一侧会静默删掉已交付路由，表现为页面 404 而 typecheck/lint/vitest 全绿）；集成测试 `OutboundOrderDetailIntegrationTest` 20 项真实 PostgreSQL 16 + Testcontainers（池容量 1）+ 租户隔离三断言全跑，含 timestamptz 写回断言与 numeric(19,6) 口径断言；验证：`cd backend && ./mvnw verify` 全绿、`pnpm typecheck` / `pnpm lint` / `pnpm test`(1417) 全绿、`NEXT_TELEMETRY_DISABLED=1 pnpm --filter @starcon/web build` 成功、`node tools/module-progress/sync.mjs --check` 通过 |
 | 8.3.2.1 | 拣货任务 | — | D4 | 已交付 | V110__warehouse_pick_task.sql（warehouse，**建六张表**：pick_task 拣货任务单头 / pick_task_line 路径优化后的「库位 × 批次」计划段 / pick_task_pick 实拣（实际库位、批次、数量、逐次留痕）/ pick_task_serial 实拣序列号逐个 / pick_task_exception 异常（缺货·破损·序列号缺失·错位·其它）/ pick_task_event append-only 作业留痕；**零 ALTER 别人的表**）· **核心口径：拣货= 同 balance 的库位间搬移** —— 打包区是同仓的 warehouse_location.type='SHIPPING'，balance 的六元组（sku × warehouse × legal_entity × quality）不含库位与批次，所以 inventory_balance **一个字都不改**、inventory_entry **一条都不写**（V1 的 CHECK(on_hand_delta<>0 OR reserved_delta<>0) 本来也不允许 delta=0 的分录，写两条 ±q 互相抵消只会把守恒式变成噪音）；**reserved 跟着货一起搬、绝不释放**（蓝图关系段「库存仍占用未释放」），搬 min(reserved, 实拣量)；序列号改 current_location_id、status 保持 IN_STOCK。V2 §4.4 的 bucket 守恒式（balance = Σ bucket）在事务提交时天然成立，因为两侧 bucket 的合计没变 · **路径优化是三件事叠加，缺一不可**（照抄 8.1.2.1 的 order by path，与库位树出树逐字一致）：①排序= 库位树层级路径升序（父先于子、同层按编码）；②**收敛**= 同一 SKU 优先在一个库位一次拣齐，拣不齐才拆段（**这就是 8.5.2.1「SKU 散在多库位」那条 ownerModule=8.3.2.1 的落地**，pick_task_line.sku_location_count 是真实跨库位计数）；③**避让**= 优先可拣且 ACTIVE 的库位，没有可拣来源才退到不可拣库位并把该行 non_pickable_source 置 true（**8.5.2.1「高频货在不可拣库位」的落地**）。口径原文随响应返回（path_basis / pathReport.basis），不靠文档口口相传 · **分配基准是 on_hand 而不是 available（= on_hand − reserved）**：拣货要取的正是已为这张单预占住的那批货；按 available 分配的话，只要销售预占生效，每一张出库单都会变成「一库位可拣货都没有」——预占越成功拣货越拣不动。这个坑是实跑用例逼出来的（原来按 available 分配，计划 10 件的出库单只排出 4 件） · **DB 级不变量，超级用户直连 SQL 也绕不开**：终态任务明细不可改 / 取货库位与打包区必须同仓 / 打包区必须 type=SHIPPING 且 ACTIVE / 超拣当场拒（服务层与 V110 都拒）/ 序列号四校验（在库 · SKU 绑定 · 确实在本次实拣的库位上 · 同一任务里不重复）/ 缺货必填缺多少件而其余四类不许填数量 / 异常处置只能写一次 / 实拣与留痕 append-only / 状态机四条边（终态重开必须写原因）/ 行状态由数量**派生**（BEFORE 触发器改写，应用层写不出「拣齐了却还是待拣」）/ 单头合计由 refresh 触发器从明细表重算（应用层自己算就会差一位）· **权限码复用 warehouse.inventory.read / .update 而不新起 warehouse.picking.***：identity 只注册了 warehouse.inventory 与 warehouse.facilities 两个页面资源的权限码（V8/V69/V77），用一个**没注册**的码会让连 OWNER 都 403；拣货与 8.2.1.1 收货单、8.3.1.1 出库单、8.3.4.1 首程发货同属「出入库作业」这一族 · PickTaskModels（22 个 record/enum **全部 PickTask* 前缀**，开工前逐个 grep 六个服务与四个 library 均为 0 冲突；**状态词表四态里没有「已发货」**——蓝图关系段点名两件事必须分开；progress 分母为 0 给 null 不给 0%；**没有 PUT / DELETE**：拣货明细是事实，完成的任务是交给复核的凭据，要更正走「重开 + 补拣」）· PickTaskService（**generate 只在有 outbound_pick_request 时才建任务**——V72 §3 明写「8.3.2.1 交付后按 (tenant_id, order_id) 读这张表接手」，凭空生成一张拣货任务在账上说不通；打包区解析**不猜**：本仓有多个 ACTIVE 发货暂存位时 400 要求显式指定；无货可拣的行仍占一个序号并显示「无可分配库存」，而不是让任务少一段看起来拣齐了；**允许实际取货库位与计划不同**——分配是建议、现场是事实，真碰上计划的库位已经空了时作业员必须能在别处取到并记下真实库位，而不是被系统逼着报缺货；**没有「强制完成」**：每一段都要拣齐或已按缺货登记，9/10 提交到复核时缺件的原因已分不清）· PickTaskController（**新起顶层 /warehouse/pick-tasks**，刻意不挂 outbound-orders 之下：出库单是履约单据、拣货任务是现场工单，单据取消后工单还在；十个形状逐个列出不做通配）· 测试 PickTaskIntegrationTest **33 例**实跑 Testcontainers PostgreSQL 16（连接池压到 1）覆盖 **租户隔离三断言**（两租户互不可见含 B 用 A 的任务 id 得 404 / 伪造 X-Tenant-Id 无效且伪造头下仍只看到自己的行 / 连接池归还后 A→B→A 三轮不串租户）+ **逐张断言六张表 FORCE RLS** + **路径是真路径**（库位树 A 段下 A-1 与 B 段下 B-1，序号必须父先于子，与 uuid 顺序无关）+ **收敛与拆分**（一个库位够就不拆段；不够才拆成两段且先拣够的那段）+ **不可拣库位是最后退路**（待检位上有 100 件、可拣位上有 10 件时仍然只取可拣位）+ **拣货搬库位、balance 不动、entry 不写** + **超拣服务层与 DB 双拒** + **序列号四校验** + **时刻写回精确到瞬时**（东八区 09:30 存进去读回来还是 09:30，不是经典的那 −28800s）+ **完成 ≠ 已发货**（出库单只到 PENDING_RECHECK）+ **取消不动库存** + **重开实拣量累加不覆盖** + **六个 DB 守卫逐条用超级用户直连证明** + 列表真分页/排序白名单/汇总不受筛选影响 + NUMERIC 精确 · 前端 /warehouse/pick-tasks（**真实工作区非占位页**：5 张统计卡 + 筛选（状态/关键字/分页）+ 任务列表（状态色、进度、拣齐判据、异常数、不可拣段数）+ 详情五段（任务概览与「拣货完 ≠ 已发货」告示、**拣货路径与计划段逐行标出序号/层级路径/不可拣/批次/警示**、实拣登记表单、实拣记录（实际库位与计划不符时并排显示）、异常上报（**只有缺货才出现数量输入框**）、异常清单、作业时间线）+ 加载/空/错误三态分开渲染）· pick-task-model.test.ts **15 例**（钉住「分母为 0 时给 — 而不是 0%」「0 与没量过不是一回事」「拣了多少 ≠ 拣齐了没」「无货可拣 ≠ 还没拣」「三条警示并列不互斥」「实拣库位漂移可识别」「只有缺货填数量」）· pick-task-allowlist.test.ts **8 例**（**双向**：从模型源码反向抽取真实调用点逐条断言放行 + 未交付形状与「多一层后缀」仍 404 且不发请求 + **反向钉住 outbound-orders 底下不许挂拣货子路径** + **反向钉住 capabilities 不会被 UUID 通配吃掉** + **不误伤本车道之前已放行的 8 条仓库分支**）· api-proxy **只追加** pick-tasks 一个顶层分支（10 个真实形状，**`\/capabilities` 排在 `\/[0-9a-f-]+` 之前**），**插在 disassembly-orders 分支之后（全表最后一条）**，脚本比对：插入点之前 **7258 字符逐字节相同**、其余所有行零改动 · 契约由 tools/codegen/catalog-contracts.py 重新生成（22 个新 schema、10 条新 path，**零重名**）· 验证 L0 `./mvnw -q compile` + `pnpm typecheck` 3/3；L1 `./mvnw -pl services/warehouse -am test` 全绿 · **边界**：不做 8.3.2.2 波次与合并拣货（capabilities 如实报 false + 归属模块）、不做 8.3.3.1 复核（完成只交到「待复核」）、不写 outbound_order_event（8.3.1.1 那张表的唯一写入所有者是它自己，且 V72 的 event_type CHECK 没有本模块的取值），不碰别的模块的迁移/端点/页面/台账行，不改 task-pages 与 nav-config（详情是同路由下的子视图） |
 | 8.3.2.2 | 波次与合并拣货 | — | D4 | 已交付 | V113__warehouse_pick_wave.sql（warehouse，**建四张表、零 ALTER**：pick_wave_rule 合并规则配置 / pick_wave 波次单头 / pick_wave_task 波次成员（各出库单在波次中的位置）/ pick_wave_event append-only 流水）· **合并只影响拣货效率，不改变订单粒度**：V110 的六张表一个字都没改，实拣与完成仍在 8.3.2.1，波次只是把若干张工单排成「一起走」 · **三个合并维度都落到数据上**：承运渠道 = outbound_order.carrier_code（冻结进成员行）；库区 = 取货库位沿 V105 库位树上行到的**顶层根节点**（V105 注释把顶层节点称作「区」，仓库里没有 zone 列）；订单数 = pick_wave_rule.max_order_count 硬上限 · **时段按仓本地小时窗口 [start,end)** 判（时区取 warehouse.timezone）—— 拣货班次按仓库所在地作息排，「下午班」在两个时区的仓库里不是同一批货 · **跨区任务没有单一库区**（crossZone=true、zone_id=null），只能进「库区不限」的规则，绝不硬塞进某一个区 · **波次进度刻意不做冗余列**：明细的进度住在 8.3.2.1 的 pick_task 里，在本表挂「工单变了就刷波次」的触发器等于ALTER 别人的表；所以 6 个计数字段全部在查询时由 pick_wave_task ⋈ pick_task 一次聚合算出 —— 「永远算得对」比「算得快而且大部分时候对」值钱 · **DB 级不变量，超级用户直连 SQL 也绕不开**：同租户同仓同库区同承运渠道**同时只能有一个未完波次**（pick_wave_open_key 部分唯一索引 —— 两个拣货组在同一个区按同一承运商口径拣货必然互相踩，而这在任何 CHECK 里都看不出来）；一张拣货任务只能在一个未完波次里（pick_wave_task_active）；**完成波次必须全部成员工单到终态**（guard_pick_wave_status_fn 回表读当前行，这是「合并不改订单粒度」在 DB 层的落点）；状态机四条边（PLANNED→PICKING/CANCELLED、PICKING→COMPLETED/CANCELLED，没有 PICKING→PLANNED）；成员增删后位置重排为 1..n 连续（不留 1,2,4 这种洞）；流水 append-only；规则停用必填原因且只能停一次；同一承运渠道+库区+时段窗口在同仓只能有一条 ACTIVE 规则（两条规则认领同一批订单却各有上限时归属没有确定答案）· **代价写进接口**：订单数撞顶后剩下的出库单要等这个波次收工，所以候选接口报 eligibleCount（现在能并）/ waitingCount（等上一波或等上限）/ unruledCount（没有规则认领）三个数，只报第一个时看板上只剩一个解释不通的空白 · 候选查询**刻意不用 WITH RECURSIVE**（六层上限由 V105 的守卫保证），改用六次自连接 + coalesce 从最深往上取根 · PickWaveModels（23 个 record/enum **全部 PickWave* 前缀**，开工前 grep 六个服务与四个 library 无 Wave* 冲突）· PickWaveService（候选与建波次**共用同一份候选 CTE**，避免「预览能合、建波次找不到」的错位；等待数在落库之后**现查**一次，不接着用建波次前那份 —— 否则会把刚并进去的那几张也算成在等）· PickWaveController（**新起顶层 /warehouse/pick-waves**，刻意不挂 outbound-orders 或 pick-tasks 之下；12 个形状逐个列出不做通配；**没有 PUT / DELETE**：成员归属是排班事实、流水是 append-only 凭据）· 测试 PickWaveIntegrationTest **30 例**实跑 Testcontainers PostgreSQL 16（连接池压到 1）覆盖 **租户隔离三断言**（两租户互不可见含 B 用 A 的波次 id 得 404 与 A 的规则看不见 / 伪造 X-Tenant-Id 无效且伪造头下仍只看到自己的行 / 连接池归还后 A→B→A 三轮不串租户）+ **逐张断言四张表 FORCE RLS** + **三个合并维度真合并**（同承运商同库区三张单 + 上限 2 → 并 2 张、1 张在等，位置 1..2 连续且每行是一张出库单）+ **库区取顶层根节点**（在 B-1 拣货的订单属于 B 区而不是「B-1」）+ **限定库区的规则收不到别的区的单** + **跨区任务只进库区不限的规则** + **时段按仓本地小时**（08 时进 08–19 窗口、20 时不进）+ **计划拣货时刻真落在仓本地 09:00 且带 +08:00 偏移量**（断言写回值，不只断言没抛异常）+ **三个 DB 守卫逐条用超级用户直连证明**（同键第二个未完波次 23505、工单进两个未完波次 23505、成员未终态时完成波次 23514、非法跃迁 23514、流水改删 23514）+ **移出成员后位置重排不留洞** + **只剩一个成员时拒绝再移**（空波次既不能放行也不能完成）+ **取消不动库存不写分录且成员放回候选池** + **合并不改订单粒度**（一行一张出库单、出库单状态停在「拣货中」、波次进度是各工单之和）+ 列表真分页/真筛选/排序白名单/汇总 + 规则台认领数与在等数 · 前端 /warehouse/pick-waves（**真实工作区非占位页**：5 张统计卡 + 合并口径/库区口径/时段口径三段常驻说明 + 仓库与筛选 + **合并规则台（覆盖范围、订单数上限、当前认领、在等上一波）** + **候选按合并键分组并给三个计数** + 波次台账（状态色、进度、在等提示）+ 波次详情（成员表一行一张出库单含位置序号/出库单状态/拣货状态/分段进度、放行必填负责人、完成常驻「合并只影响拣货效率」提示、取消必填原因、移出成员、append-only 流水）+ 加载/空/错误三态分开渲染）· pick-wave-model.test.ts **20 例**（钉住「分母为 0 时给 — 而不是 0%」「库区为空要写成跨区或库区不限而不是留空」「完成判据是全部成员工单终态而不是拣了多少件」「已完成提示里必须写明合并只影响拣货效率」「取消不动库存」「三种候选结论各自说清」「跨区/已取消/没拣齐三件事并列不互斥」）· pick-wave-allowlist.test.ts **8 例**（**双向**：从模型源码反向抽取真实调用点逐条断言放行 —— 抽取器只把 encodeURIComponent 这类 id 引用替换成 ID、查询串插值整段剥掉，否则会自己拼出「rules1111…」这种不存在的形状再被它的失败掩盖成白名单漏登记；+ 未交付形状与「多一层后缀」仍 404 且不发请求 + **反向钉住波次不挂 outbound-orders / pick-tasks 底下** + **反向钉住 capabilities/rules/candidates 三个字面量子路径不会被 UUID 通配吃掉**（candidates 的 c/a/n/d/i/t/e/s 全落在 [0-9a-f-] 里）+ **不误伤本车道之前已放行的 8 条仓库分支**）· api-proxy **只追加** pick-waves 一个顶层分支（9 个真实形状，**capabilities / rules / candidates 三个字面量子路径全部排在 [0-9a-f-]+ 之前**），脚本比对：插入点之前 **554 行逐字节相同**、其后 **168 行逐字节相同**，正则行是纯后缀追加（pick-tasks 支原样保留、收尾 )$/, 未变）· 契约由 tools/codegen/catalog-contracts.py 重新生成（**23 个新 schema、10 条新 path、零删除**，warehouse.ts 纯新增 23 行零删除，**零重名**）· 验证 L0 `./mvnw -q compile` + `pnpm typecheck` 3/3；L1 `./mvnw -pl services/warehouse -am test`；前端 vitest 本车道 28 例 + warehouse 白名单目录 103 例全绿 · **边界**：不做 8.3.3.1 复核（完成只交到「待复核」，复核与打包仍按订单逐张做）、不做 8.3.4.1 发货（cancel 一个波次不动库存不动预占不改出库单状态）、不写 outbound_order_event（8.3.1.1 那张表的唯一写入所有者是它自己），不碰别的模块的迁移/端点/页面/台账行；本车道把 8.3.2.1 capabilities 的 waveAvailable 由 false 改为 true 并同步更新其两处断言，让能力声明与实际一致 |
-| 8.3.3.1 | 复核扫描 | — | D4 | 已交付 | V117__warehouse_recount_scan.sql（warehouse，**六张表** recount_rule / recount_session / recount_line / recount_scan / recount_exception / recount_event，全部 tenant_id NOT NULL + FORCE RLS + 仅 GRANT warehouse_app）· **「复核是错发拦截的最后机会」做成 DB 守卫而非服务层校验**：guard_recount_session_status_fn 在 PASSED 上同时要求 ①出库单复核前确实在 PENDING_RECHECK ②每行 line_status='MATCHED' ③无任何 resolution='PENDING' 的异常 ④有复核人与完成时刻；集成测试用**超级用户直连 SQL** 强行改 PASSED 被拒（23514），「先放行再补异常」绕开服务层也走不通 · **recount_line.line_status 由 BEFORE UPDATE 触发器派生**：直连写 MATCHED 语句成功但值当场被改回 MISSING —— 行状态不是可写列（比「报错拒掉」更能说明是真约束）· **序列号逐件核对用集合相等而不是件数相等**：serial_match 由两个差集查询算出（实拣−实扫、反向再减），应发3/实拣3/实扫3 但扫的是 S1/S2/S9 时件数一样内容不一样，判「序列号不符」；计数由触发器去重派生、serial_match 由服务层按真实 SQL 算、line_status 再由触发器派生，CHECK 保证 requires_serial 的行拿不到 MATCHED · **六类异常各有判定来源**（漏件/错件/多件来自结算逐行比、重复扫来自 recount_scan 第几次计数、序列号集合不符来自差集、未知码来自条码解析失败），不是同一类换名字 · **两种扫描的计件口径分开**（条码扫 N 遍=N 件、序列号一件一号按去重的号计），DUPLICATE 判定也只对序列号成立 —— 这是测试逼出来的真 bug，原先按值去重会把「扫齐了」说成「还差两件」· **「高价值订单」在本服务只能取件数**：出库单上根本没有金额列（V72 §1 明写不存类目/售价/成本，COPY 语义，金额 owner 是 9 订单履约侧且跨服务读表被禁止），故阈值列如实命名 high_value_quantity_threshold（件数），口径原文随 capabilities.highValueBasis 与每单 verifyBasis 返回，界面上写「应发件数达到阈值」而不编金额 · **复核不动库存**：通过与失败两种结局下 balance/stock_bucket/inventory_entry 全不变、预占不释放；检出拣错/漏件的出口是**退回拣货**（PENDING_RECHECK→PICKING，由 8.3.2.1 的 reopen 接住），且该动作刻意不在本模块服务层（跨模块状态回退由调用方显式发起，不自动触发）· 基线冻结在 recount_line（COPY 语义，与 V72 的 outbound_order_line 不可改守卫、V110 的 COMPLETED 后实拣不可改两道上游守卫配套）· 波次**不挂外键**（排班成员会 detach/rebind，钉一列会静默过期，改经 pick_task→pick_wave_task 读出）· 一张出库单同时只有一个 OPEN 复核单（部分唯一索引），返工轮次是新会话不追认上一轮 · RecountScanService + RecountModels（**Recount* 简单类名开工前逐个 grep 全仓 0 冲突**，springdoc 用简单类名做 components.schemas 键、重名会静默覆盖）+ RecountScanController（命名空间新起 /warehouse/recount-scans，刻意不挂 outbound-orders —— 一张出库单可复核多次；也不挂 pick-tasks；**14 个形状逐个列出**，刻意无 PUT/DELETE，扫描记录与流水 append-only、异常只能处置一次；权限**复用** warehouse.inventory.read/update —— identity 没注册 warehouse.recount.*，用不存在的码会让连 OWNER 都 403，8.1.2.1 车道踩过这个坑）· 测试 RecountScanIntegrationTest **25 例**实跑 Testcontainers PostgreSQL 16（连接池压到 1）覆盖 **租户隔离三断言**（B 用 A 的复核单 id 读/写/完成全 404、B 看不到 A 的规则、B 列表只有自己那张 / 伪造 X-Tenant-Id 无效且伪造头下仍只看到自己的行 / 连接池归还后 A→B→A 三轮不串租户）+ **六张表逐张断言 FORCE RLS** + 开单三道闸（不在待复核开不了、拣货任务没完成开不了、基线空开不了）+ 扫描记录 append-only 与异常只能处置一次与规则停用不能复活（均超级用户直连验过）+ 「转人工不等于放行」（清的是谁来管，不是这一行核过了）+ 时刻写回不偏 −28800s（+08:00 原样读回）+ 真分页/真筛选/排序与状态白名单/超 size 被夹 · 前端 /warehouse/recount-scans（**真实工作区非占位页**：5 张统计卡 + 能力口径区（含「高价值只取件数」与「复核不碰库存」两条明说）+ 复核单列表（真分页真筛选，含异常/开箱标记）+ 详情（应发/实拣/实扫**三数分列**、序列号应扫号与已扫号逐个列出并把没核过的行顶到最前面、扫一件/结算/开箱/转人工/逐条处置/完成或取消、append-only 作业留痕）+ 加载/空/错误三态分开渲染）· recount-scan-model.test.ts **22 例**（钉住 null≠0、少/多说法的区分、序列号集合不等必须顶出警告、六类异常各有说法、**完成按钮可点性只看后端 blocking 不在前端自己数行**、提示文案逐字含「不释放预占」且不含金额）· api-proxy **外科式追加** recount-scans 一个顶层分支（capabilities / rules / rules/{id} / rules/{id}/retire / {id} / {id}/(open-box|scans|settle|complete|escalate|cancel) / {id}/exceptions/{exceptionId}/resolve；capabilities 与 rules 两个**字面量子路径排在 [0-9a-f-]+ 之前**，两段 uuid 的 resolve 排在单段 {id} 组里用 \/ 分支匹配；既有分支一条没重排），另写脚本按仓库路由逐条验证 **18 条放行 / 10 条拒绝全对**（含「多一层后缀仍 404」与「不误伤 pick-tasks / pick-waves / putaway-tasks / outbound-orders / location-trees」回归断言）· route.test.ts 追加 5 例（含跨源写 403、不误伤已交付分支、非 UUID 段不被通配吃掉）36 例全绿 · 验证 L0 `./mvnw -pl services/warehouse -am compile` 绿 + `pnpm typecheck` 3/3 + `pnpm lint` 3/3；L1 `./mvnw -pl services/warehouse -am test` **1401 例 0 失败 0 错误全绿**（本模块 25 例）· **边界**：不做 8.3.3.2 打包与称重（capabilities 如实报 packingHandoffLive=false，通过的单停在「待打包」）、不做退回拣货的自动触发、不新增权限码、不碰别的模块的迁移/端点/页面/台账行 |
+| 8.3.3.1 | 复核扫描 | — | D4 | 已交付 | V117__warehouse_recount_scan.sql（warehouse，**六张表** recount_rule / recount_session / recount_line / recount_scan / recount_exception / recount_event，全部 tenant_id NOT NULL + FORCE RLS + 仅 GRANT warehouse_app）· **「复核是错发拦截的最后机会」做成 DB 守卫而非服务层校验**：guard_recount_session_status_fn 在 PASSED 上同时要求 ①出库单复核前确实在 PENDING_RECHECK ②每行 line_status='MATCHED' ③无任何 resolution='PENDING' 的异常 ④有复核人与完成时刻；集成测试用**超级用户直连 SQL** 强行改 PASSED 被拒（23514），「先放行再补异常」绕开服务层也走不通 · **recount_line.line_status 由 BEFORE UPDATE 触发器派生**：直连写 MATCHED 语句成功但值当场被改回 MISSING —— 行状态不是可写列（比「报错拒掉」更能说明是真约束）· **序列号逐件核对用集合相等而不是件数相等**：serial_match 由两个差集查询算出（实拣−实扫、反向再减），应发3/实拣3/实扫3 但扫的是 S1/S2/S9 时件数一样内容不一样，判「序列号不符」；计数由触发器去重派生、serial_match 由服务层按真实 SQL 算、line_status 再由触发器派生，CHECK 保证 requires_serial 的行拿不到 MATCHED · **六类异常各有判定来源**（漏件/错件/多件来自结算逐行比、重复扫来自 recount_scan 第几次计数、序列号集合不符来自差集、未知码来自条码解析失败），不是同一类换名字 · **两种扫描的计件口径分开**（条码扫 N 遍=N 件、序列号一件一号按去重的号计），DUPLICATE 判定也只对序列号成立 —— 这是测试逼出来的真 bug，原先按值去重会把「扫齐了」说成「还差两件」· **「高价值订单」在本服务只能取件数**：出库单上根本没有金额列（V72 §1 明写不存类目/售价/成本，COPY 语义，金额 owner 是 9 订单履约侧且跨服务读表被禁止），故阈值列如实命名 high_value_quantity_threshold（件数），口径原文随 capabilities.highValueBasis 与每单 verifyBasis 返回，界面上写「应发件数达到阈值」而不编金额 · **复核不动库存**：通过与失败两种结局下 balance/stock_bucket/inventory_entry 全不变、预占不释放；检出拣错/漏件的出口是**退回拣货**（PENDING_RECHECK→PICKING，由 8.3.2.1 的 reopen 接住），且该动作刻意不在本模块服务层（跨模块状态回退由调用方显式发起，不自动触发）· 基线冻结在 recount_line（COPY 语义，与 V72 的 outbound_order_line 不可改守卫、V110 的 COMPLETED 后实拣不可改两道上游守卫配套）· 波次**不挂外键**（排班成员会 detach/rebind，钉一列会静默过期，改经 pick_task→pick_wave_task 读出）· 一张出库单同时只有一个 OPEN 复核单（部分唯一索引），返工轮次是新会话不追认上一轮 · RecountScanService + RecountModels（**Recount* 简单类名开工前逐个 grep 全仓 0 冲突**，springdoc 用简单类名做 components.schemas 键、重名会静默覆盖）+ RecountScanController（命名空间新起 /warehouse/recount-scans，刻意不挂 outbound-orders —— 一张出库单可复核多次；也不挂 pick-tasks；**14 个形状逐个列出**，刻意无 PUT/DELETE，扫描记录与流水 append-only、异常只能处置一次；权限**复用** warehouse.inventory.read/update —— identity 没注册 warehouse.recount.*，用不存在的码会让连 OWNER 都 403，8.1.2.1 车道踩过这个坑）· 测试 RecountScanIntegrationTest **25 例**实跑 Testcontainers PostgreSQL 16（连接池压到 1）覆盖 **租户隔离三断言**（B 用 A 的复核单 id 读/写/完成全 404、B 看不到 A 的规则、B 列表只有自己那张 / 伪造 X-Tenant-Id 无效且伪造头下仍只看到自己的行 / 连接池归还后 A→B→A 三轮不串租户）+ **六张表逐张断言 FORCE RLS** + 开单三道闸（不在待复核开不了、拣货任务没完成开不了、基线空开不了）+ 扫描记录 append-only 与异常只能处置一次与规则停用不能复活（均超级用户直连验过）+ 「转人工不等于放行」（清的是谁来管，不是这一行核过了）+ 时刻写回不偏 −28800s（+08:00 原样读回）+ 真分页/真筛选/排序与状态白名单/超 size 被夹 · 前端 /warehouse/recount-scans（**真实工作区非占位页**：5 张统计卡 + 能力口径区（含「高价值只取件数」与「复核不碰库存」两条明说）+ 复核单列表（真分页真筛选，含异常/开箱标记）+ 详情（应发/实拣/实扫**三数分列**、序列号应扫号与已扫号逐个列出并把没核过的行顶到最前面、扫一件/结算/开箱/转人工/逐条处置/完成或取消、append-only 作业留痕）+ 加载/空/错误三态分开渲染）· recount-scan-model.test.ts **22 例**（钉住 null≠0、少/多说法的区分、序列号集合不等必须顶出警告、六类异常各有说法、**完成按钮可点性只看后端 blocking 不在前端自己数行**、提示文案逐字含「不释放预占」且不含金额）· api-proxy **外科式追加** recount-scans 一个顶层分支（capabilities / rules / rules/{id} / rules/{id}/retire / {id} / {id}/(open-box |
 | 8.3.3.2 | 打包与称重 | — | D4 | 未开发 | — |
 | 8.3.4.1 | 发货交接 | — | D4 | 未开发 | — |
 | 8.3.4.2 | 面单与标签打印 | — | D4 | 已交付 | V73 迁移（print_device/print_template/print_target/print_job/print_job_item/label_print_log/print_reprint_rule，RLS+FORCE，计数单调/凭据一一对应/快照冻结/任务状态机/append-only 触发器）；`/warehouse/inventory/printing` 17 个端点（能力声明·打印机·模板·打印对象·重复打印规则·任务·执行·取消·打印内容下载·日志）；`/inventory/printing` 工作区；`LabelPrintingIntegrationTest` 26 项（Testcontainers PG16，五种对象真渲染 ZPL/HTML+Code128、打印次数真累加、平台超限拦截与强制重打留名、租户隔离三断言+跨租户不可见次数与凭据） |
@@ -540,19 +557,3 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
-| 已交付 | 140 |
-| **未开发** | **325** |
-| 完成率 | 30.1% |
-| **D3** | 32 | 0 | 8 | 40 |
-| 07 | 库存核算系统 | D3 | 24 | 31 |
-| 已交付 | 138 |
-| **未开发** | **327** |
-| 完成率 | 29.7% |
-| **D4** | 15 | 0 | 45 | 60 |
-| 08 | 仓储作业系统 | D3 / D4 | 16 | 22 |
-| 09 | 订单履约系统 | D4 / D5 | 4 | 27 |
-| 已交付 | 139 |
-| **未开发** | **326** |
-| 完成率 | 29.9% |
-| **D3** | 33 | 0 | 7 | 40 |
-| 07 | 库存核算系统 | D3 | 25 | 31 |
