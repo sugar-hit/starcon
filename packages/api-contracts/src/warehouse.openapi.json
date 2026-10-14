@@ -5963,6 +5963,422 @@
         }
       }
     },
+    "/warehouse/inventory/reservations/{reservationId}/release": {
+      "post": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "release_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationReleaseInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseOutcome"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/{reservationId}/expiry": {
+      "post": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "expiry",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationReleaseExpiryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseExpiryOutcome"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/{reservationId}/allocations": {
+      "get": {
+        "tags": [
+          "reservation-allocation-controller"
+        ],
+        "operationId": "allocations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "lotId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationAllocationPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "reservation-allocation-controller"
+        ],
+        "operationId": "allocate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationAllocationCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationAllocationCreated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/{reservationId}/allocations/{allocationId}/consume": {
+      "post": {
+        "tags": [
+          "reservation-allocation-controller"
+        ],
+        "operationId": "consume",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "allocationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationAllocationTransitionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationAllocationTransitioned"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/{reservationId}/allocations/{allocationId}/commit": {
+      "post": {
+        "tags": [
+          "reservation-allocation-controller"
+        ],
+        "operationId": "commit",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "allocationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationAllocationTransitionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationAllocationTransitioned"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/expire-overdue": {
+      "post": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "expireOverdue",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationReleaseRunRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseRunRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/reconciliation": {
       "get": {
         "tags": [
@@ -11847,6 +12263,255 @@
         }
       }
     },
+    "/warehouse/disassembly-orders": {
+      "get": {
+        "tags": [
+          "disassembly-order-controller"
+        ],
+        "operationId": "page_9",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productSkuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sourceSystem",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "referenceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "CREATED_AT"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisassemblyOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "disassembly-order-controller"
+        ],
+        "operationId": "create_16",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisassemblyOrderCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisassemblyOrderCreated"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/disassembly-orders/{id}/execute": {
+      "post": {
+        "tags": [
+          "disassembly-order-controller"
+        ],
+        "operationId": "execute",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisassemblyOrderExecuteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisassemblyOrderExecuted"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/disassembly-orders/{id}/cancel": {
+      "post": {
+        "tags": [
+          "disassembly-order-controller"
+        ],
+        "operationId": "cancel_5",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DisassemblyOrderCancelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisassemblyOrderRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/customs-declarations": {
       "get": {
         "tags": [
@@ -13709,6 +14374,142 @@
         }
       }
     },
+    "/warehouse/location-utilization/{warehouseId}": {
+      "get": {
+        "tags": [
+          "location-utilization-controller"
+        ],
+        "operationId": "report",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LocationUtilizationQuery"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationUtilizationReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/location-utilization/{warehouseId}/locations/{locationId}": {
+      "get": {
+        "tags": [
+          "location-utilization-controller"
+        ],
+        "operationId": "detail_9",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LocationUtilizationQuery"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationUtilizationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/location-utilization/capabilities": {
+      "get": {
+        "tags": [
+          "location-utilization-controller"
+        ],
+        "operationId": "capabilities_3",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationUtilizationCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/location-trees/{warehouseId}": {
       "get": {
         "tags": [
@@ -13875,7 +14676,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "capabilities_4",
+        "operationId": "capabilities_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -14262,7 +15063,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -14762,7 +15563,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -15459,6 +16260,374 @@
         }
       }
     },
+    "/warehouse/inventory/reservations/{reservationId}/timeline": {
+      "get": {
+        "tags": [
+          "reservation-allocation-controller"
+        ],
+        "operationId": "timeline_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "allocationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "transition",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationAllocationTimeline"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/{reservationId}/capabilities": {
+      "get": {
+        "tags": [
+          "reservation-allocation-controller"
+        ],
+        "operationId": "capabilities_8",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReservationCapability"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/{reservationId}/allocation-options": {
+      "get": {
+        "tags": [
+          "reservation-allocation-controller"
+        ],
+        "operationId": "options",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reservationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationAllocationOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/release-records": {
+      "get": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "releaseRecords",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "reservationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseRecordPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/release-options": {
+      "get": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "releaseOptions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseOptions"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/release-capabilities": {
+      "get": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "releaseCapabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReservationCapability"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/release-candidates": {
+      "get": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "candidates",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "sourceType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "evaluatedAt",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseCandidatePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/reservations/options": {
       "get": {
         "tags": [
@@ -15490,12 +16659,103 @@
         }
       }
     },
+    "/warehouse/inventory/reservations/expiry-runs": {
+      "get": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "expiryRuns",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseRunPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/reservations/expiry-runs/{runId}": {
+      "get": {
+        "tags": [
+          "reservation-release-controller"
+        ],
+        "operationId": "expiryRun",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationReleaseRunDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/warehouse/inventory/reservations/capabilities": {
       "get": {
         "tags": [
           "reservation-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -15899,7 +17159,7 @@
         "tags": [
           "label-printing-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -16184,7 +17444,7 @@
         "tags": [
           "stock-ownership-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -16401,7 +17661,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -16432,7 +17692,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "capabilities_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -18247,7 +19507,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "capabilities_12",
+        "operationId": "capabilities_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -18278,7 +19538,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "capabilities_13",
+        "operationId": "capabilities_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -18602,7 +19862,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "capabilities_14",
+        "operationId": "capabilities_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -18778,7 +20038,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "capabilities_15",
+        "operationId": "capabilities_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -19204,7 +20464,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "capabilities_16",
+        "operationId": "capabilities_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -19275,7 +20535,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "capabilities_17",
+        "operationId": "capabilities_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -19435,7 +20695,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "capabilities_18",
+        "operationId": "capabilities_20",
         "parameters": [
           {
             "name": "Authorization",
@@ -19792,7 +21052,7 @@
         "tags": [
           "warehouse-facility-controller"
         ],
-        "operationId": "capabilities_19",
+        "operationId": "capabilities_21",
         "parameters": [
           {
             "name": "Authorization",
@@ -19969,7 +21229,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "capabilities_20",
+        "operationId": "capabilities_22",
         "parameters": [
           {
             "name": "Authorization",
@@ -19988,6 +21248,77 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/DutyTaxCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/disassembly-orders/{id}": {
+      "get": {
+        "tags": [
+          "disassembly-order-controller"
+        ],
+        "operationId": "detail_15",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisassemblyOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/disassembly-orders/capabilities": {
+      "get": {
+        "tags": [
+          "disassembly-order-controller"
+        ],
+        "operationId": "capabilities_23",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisassemblyCapabilities"
                 }
               }
             }
@@ -20043,7 +21374,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "capabilities_21",
+        "operationId": "capabilities_24",
         "parameters": [
           {
             "name": "Authorization",
@@ -20074,7 +21405,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "detail_15",
+        "operationId": "detail_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -20114,7 +21445,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "capabilities_22",
+        "operationId": "capabilities_25",
         "parameters": [
           {
             "name": "Authorization",
@@ -20145,7 +21476,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "cancel_7",
+        "operationId": "cancel_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -20183,900 +21514,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/LocationAllocationSaved"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/reservations/{reservationId}/allocations": {
-      "get": {
-        "tags": [
-          "reservation-allocation-controller"
-        ],
-        "operationId": "allocations",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "reservationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "locationId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "lotId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservationAllocationPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "reservation-allocation-controller"
-        ],
-        "operationId": "allocate",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "reservationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReservationAllocationCreateInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservationAllocationCreated"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/reservations/{reservationId}/allocations/{allocationId}/consume": {
-      "post": {
-        "tags": [
-          "reservation-allocation-controller"
-        ],
-        "operationId": "consume",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "reservationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "allocationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReservationAllocationTransitionInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservationAllocationTransitioned"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/reservations/{reservationId}/allocations/{allocationId}/commit": {
-      "post": {
-        "tags": [
-          "reservation-allocation-controller"
-        ],
-        "operationId": "commit",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "reservationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "allocationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReservationAllocationTransitionInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservationAllocationTransitioned"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/reservations/{reservationId}/timeline": {
-      "get": {
-        "tags": [
-          "reservation-allocation-controller"
-        ],
-        "operationId": "timeline_1",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "reservationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "allocationId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "transition",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservationAllocationTimeline"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/reservations/{reservationId}/capabilities": {
-      "get": {
-        "tags": [
-          "reservation-allocation-controller"
-        ],
-        "operationId": "capabilities_6",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "reservationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ReservationCapability"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/inventory/reservations/{reservationId}/allocation-options": {
-      "get": {
-        "tags": [
-          "reservation-allocation-controller"
-        ],
-        "operationId": "options",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "reservationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservationAllocationOptions"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/disassembly-orders": {
-      "get": {
-        "tags": [
-          "disassembly-order-controller"
-        ],
-        "operationId": "page_9",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "productSkuId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "sourceSystem",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "referenceId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "keyword",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "CREATED_AT"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DisassemblyOrderPage"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "disassembly-order-controller"
-        ],
-        "operationId": "create_16",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DisassemblyOrderCreateInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DisassemblyOrderCreated"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/disassembly-orders/{id}/execute": {
-      "post": {
-        "tags": [
-          "disassembly-order-controller"
-        ],
-        "operationId": "execute",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DisassemblyOrderExecuteInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DisassemblyOrderExecuted"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/disassembly-orders/{id}/cancel": {
-      "post": {
-        "tags": [
-          "disassembly-order-controller"
-        ],
-        "operationId": "cancel_5",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DisassemblyOrderCancelInput"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DisassemblyOrderRow"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/disassembly-orders/{id}": {
-      "get": {
-        "tags": [
-          "disassembly-order-controller"
-        ],
-        "operationId": "detail_14",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DisassemblyOrderDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/disassembly-orders/capabilities": {
-      "get": {
-        "tags": [
-          "disassembly-order-controller"
-        ],
-        "operationId": "capabilities_20",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/DisassemblyCapabilities"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/location-utilization/{warehouseId}": {
-      "get": {
-        "tags": [
-          "location-utilization-controller"
-        ],
-        "operationId": "report",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "query",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/LocationUtilizationQuery"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LocationUtilizationReport"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/location-utilization/{warehouseId}/locations/{locationId}": {
-      "get": {
-        "tags": [
-          "location-utilization-controller"
-        ],
-        "operationId": "detail_9",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
-          {
-            "name": "warehouseId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "locationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "query",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/LocationUtilizationQuery"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LocationUtilizationDetail"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/warehouse/location-utilization/capabilities": {
-      "get": {
-        "tags": [
-          "location-utilization-controller"
-        ],
-        "operationId": "capabilities_3",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/LocationUtilizationCapabilities"
                 }
               }
             }
@@ -26213,6 +26650,405 @@
           }
         }
       },
+      "ReservationReleaseAllocationInput": {
+        "required": [
+          "allocationId"
+        ],
+        "type": "object",
+        "properties": {
+          "allocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "ReservationReleaseInput": {
+        "type": "object",
+        "properties": {
+          "allocations": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseAllocationInput"
+            }
+          },
+          "quantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "triggerSource": {
+            "maxLength": 24,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "idempotencyKey": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "finalizeReservation": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationReleaseOutcome": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationNo": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "modeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "triggerSource": {
+            "type": "string"
+          },
+          "triggerSourceLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "statusBefore": {
+            "type": "string"
+          },
+          "statusAfter": {
+            "type": "string"
+          },
+          "statusAfterLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "restoredQuantity": {
+            "type": "number"
+          },
+          "releasedDemandQuantity": {
+            "type": "number"
+          },
+          "allocationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "releaseRecordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "replayed": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationReleaseExpiryInput": {
+        "type": "object",
+        "properties": {
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "clear": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationReleaseExpiryOutcome": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updated": {
+            "type": "boolean"
+          },
+          "overdueSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationAllocationCreateInput": {
+        "required": [
+          "allocatedQuantity",
+          "warehouseId"
+        ],
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "allocatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationAllocationCreated": {
+        "type": "object",
+        "properties": {
+          "allocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "reservationAllocatedQuantity": {
+            "type": "number"
+          },
+          "reservationUnallocatedQuantity": {
+            "type": "number"
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ReservationAllocationTransitionInput": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationAllocationTransitioned": {
+        "type": "object",
+        "properties": {
+          "allocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "allocationStatus": {
+            "type": "string"
+          },
+          "allocationStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "reservationStatus": {
+            "type": "string"
+          },
+          "reservationStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "consumedQuantity": {
+            "type": "number"
+          },
+          "reservationRemainingQuantity": {
+            "type": "number"
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ReservationReleaseRunRequest": {
+        "type": "object",
+        "properties": {
+          "dryRun": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "limitCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "reason": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "idempotencyKey": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationReleaseRunRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dryRun": {
+            "type": "boolean"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "limitCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "candidateCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "processedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "releaseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "restoredQuantity": {
+            "type": "number"
+          },
+          "releasedDemandQuantity": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "replayed": {
+            "type": "boolean"
+          }
+        }
+      },
       "ReconciliationRequest": {
         "type": "object",
         "properties": {
@@ -31034,6 +31870,448 @@
           }
         }
       },
+      "DisassemblyComponentInput": {
+        "required": [
+          "destinationLocationId",
+          "destinationQualityStatusId",
+          "expectedQuantity",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomComponentId": {
+            "type": "string",
+            "description": "catalog 3.5.2 bom_component 的逻辑 ID，仅作追溯",
+            "format": "uuid",
+            "nullable": true
+          },
+          "expectedQuantity": {
+            "type": "number",
+            "description": "按「单位用量 × 拆解数量 × 回收率/100」冻结的应回量（6 位小数 HALF_UP）。本服务原样落库，不重算、不取整"
+          },
+          "unitQuantity": {
+            "maximum": 1000000000000,
+            "exclusiveMaximum": true,
+            "type": "number",
+            "description": "单位用量快照（每 1 个成品能拆出多少），可空：只作追溯展示，不参与任何判定",
+            "nullable": true
+          },
+          "recoveryRate": {
+            "maximum": 100,
+            "exclusiveMaximum": false,
+            "type": "number",
+            "description": "回收率快照（百分数，95 = 95%）。退件拆解与样品回收的实际损耗，默认 100（无损）",
+            "nullable": true
+          },
+          "destinationQualityStatusId": {
+            "type": "string",
+            "description": "组件入库去向的质量状态。**必填、没有默认值** —— 蓝图点名「拆解结果的组件质量状态由接收方决定，不能默认全部回可售」。取值落在 inventory_quality_status.role：SELLABLE(可用) / PENDING_INSPECTION(待检) / DEFECTIVE(残次)",
+            "format": "uuid"
+          },
+          "destinationLocationId": {
+            "type": "string",
+            "description": "组件入库库位（逐行：良品区 / 待检区 / 残次区可以分开）",
+            "format": "uuid"
+          },
+          "destinationLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "role": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DisassemblyOrderCreateInput": {
+        "required": [
+          "bomCode",
+          "bomId",
+          "bomVersionId",
+          "bomVersionNo",
+          "components",
+          "disassemblyQuantity",
+          "legalEntityId",
+          "outboundLocationId",
+          "productSkuId",
+          "sourceSystem",
+          "warehouseId"
+        ],
+        "type": "object",
+        "properties": {
+          "productSkuId": {
+            "type": "string",
+            "description": "被拆的成品 SKU（必须是本服务 sku_ref 里登记过的真实 SKU）",
+            "format": "uuid"
+          },
+          "bomId": {
+            "type": "string",
+            "description": "catalog 3.5.2 的 BOM 逻辑 ID（引用键，无外键）",
+            "format": "uuid"
+          },
+          "bomCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "bomVersionId": {
+            "type": "string",
+            "description": "catalog 3.5.2 的 BOM 版本逻辑 ID（引用键，无外键）",
+            "format": "uuid"
+          },
+          "bomVersionNo": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string",
+            "description": "上游来源：ASSEMBLY_ORDER = 来自 8.4.1.1 组装单；AFTERSALES_RETURN = 来自 11 售后退件；DIRECT = 仓库现场直接发起（样品回收等）"
+          },
+          "referenceId": {
+            "type": "string",
+            "description": "上游单据引用键；sourceSystem=DIRECT 时必须为空",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceNo": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "disassemblyQuantity": {
+            "type": "number",
+            "description": "拆解数量（成品出库量）。必须能被库存刻度 4 位小数精确表示"
+          },
+          "outboundLocationId": {
+            "type": "string",
+            "description": "成品出库库位；必填（库存的最小事实单位含库位）",
+            "format": "uuid"
+          },
+          "outboundQualityStatusId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "outboundLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "components": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyComponentInput"
+            }
+          }
+        }
+      },
+      "DisassemblyOrderCreated": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "productSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "disassemblyQuantity": {
+            "type": "number"
+          },
+          "expectedComponentQuantity": {
+            "type": "number"
+          },
+          "componentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyOrderExecuteInput": {
+        "type": "object",
+        "properties": {
+          "notes": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DisassemblyComponentRecovered": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "expectedQuantity": {
+            "type": "number"
+          },
+          "recoveredQuantity": {
+            "type": "number"
+          },
+          "destinationQualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationQualityCode": {
+            "type": "string"
+          },
+          "destinationQualityRole": {
+            "type": "string"
+          },
+          "destinationLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "DisassemblyOrderEntry": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "onHandDelta": {
+            "type": "number"
+          },
+          "reservedDelta": {
+            "type": "number"
+          },
+          "direction": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyOrderExecuted": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "productSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "disassemblyQuantity": {
+            "type": "number"
+          },
+          "outboundProductQuantity": {
+            "type": "number"
+          },
+          "expectedComponentQuantity": {
+            "type": "number"
+          },
+          "recoveredComponentQuantity": {
+            "type": "number"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyComponentRecovered"
+            }
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyOrderEntry"
+            }
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyOrderCancelInput": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "description": "取消理由（必填：取消一张拆解单必须能解释为什么）"
+          }
+        }
+      },
+      "DisassemblyOrderRow": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "productSkuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "productSkuCode": {
+            "type": "string"
+          },
+          "bomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomCode": {
+            "type": "string"
+          },
+          "bomVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bomVersionNo": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "disassemblyQuantity": {
+            "type": "number"
+          },
+          "expectedComponentQuantity": {
+            "type": "number"
+          },
+          "recoveredComponentQuantity": {
+            "type": "number"
+          },
+          "outboundProductQuantity": {
+            "type": "number"
+          },
+          "componentCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inventoryTransactionId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "executedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelledAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
       "CustomsCreateRequest": {
         "type": "object",
         "properties": {
@@ -33712,6 +34990,494 @@
             "type": "boolean"
           },
           "status": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationUtilizationQuery": {
+        "type": "object",
+        "properties": {
+          "windowDays": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "grade": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "keyword": {
+            "type": "string",
+            "nullable": true
+          },
+          "minUtilization": {
+            "type": "number",
+            "nullable": true
+          },
+          "pickableOnly": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "LocationUtilizationAdvice": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "OVERFULL_LOCATION",
+              "IDLE_LOCATION",
+              "INEFFICIENT_LOCATION",
+              "HIGH_FREQUENT_NON_PICKABLE",
+              "SKU_DISPERSION",
+              "UNMEASURED_LOCATION"
+            ]
+          },
+          "kindLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "HIGH",
+              "MEDIUM",
+              "LOW"
+            ]
+          },
+          "severityLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "message": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "ownerModule": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LocationUtilizationHeatCell": {
+        "type": "object",
+        "properties": {
+          "locationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "parentCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "depth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "grade": {
+            "type": "string",
+            "enum": [
+              "OVERFULL",
+              "HIGH",
+              "BALANCED",
+              "LOW",
+              "IDLE",
+              "UNMEASURED"
+            ]
+          },
+          "gradeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "capacityUtilization": {
+            "type": "number",
+            "nullable": true
+          },
+          "metric": {
+            "type": "string",
+            "enum": [
+              "CAPACITY_UTILIZATION",
+              "ON_HAND_RELATIVE",
+              "IDLE"
+            ]
+          },
+          "heat": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "value": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "LocationUtilizationReport": {
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "windowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationUtilizationRow"
+            }
+          },
+          "totals": {
+            "$ref": "#/components/schemas/LocationUtilizationTotals"
+          },
+          "heatmap": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationUtilizationHeatCell"
+            }
+          },
+          "advice": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationUtilizationAdvice"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationUtilizationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "typeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "pickable": {
+            "type": "boolean"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "capacity": {
+            "type": "number",
+            "nullable": true
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "capacityUtilization": {
+            "type": "number",
+            "nullable": true
+          },
+          "capacityMeasured": {
+            "type": "boolean"
+          },
+          "capacityZero": {
+            "type": "boolean"
+          },
+          "capacityExceeded": {
+            "type": "boolean"
+          },
+          "outboundQuantity": {
+            "type": "number"
+          },
+          "outboundMovements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "turnover": {
+            "type": "number",
+            "nullable": true
+          },
+          "turnoverComputable": {
+            "type": "boolean"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuDispersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dwellDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "grade": {
+            "type": "string",
+            "enum": [
+              "OVERFULL",
+              "HIGH",
+              "BALANCED",
+              "LOW",
+              "IDLE",
+              "UNMEASURED"
+            ]
+          },
+          "gradeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "heat": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "LocationUtilizationTotals": {
+        "type": "object",
+        "properties": {
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "capacityMeasuredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "capacityZeroCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "idleCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overfullCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "highCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lowCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "balancedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmeasuredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pickableCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "capacity": {
+            "type": "number"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "capacityUtilization": {
+            "type": "number",
+            "nullable": true
+          },
+          "utilizationComputable": {
+            "type": "boolean"
+          },
+          "outboundQuantity": {
+            "type": "number"
+          },
+          "outboundMovements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "turnover": {
+            "type": "number",
+            "nullable": true
+          },
+          "turnoverComputable": {
+            "type": "boolean"
+          },
+          "skuCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "LocationUtilizationDetail": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/LocationUtilizationRow"
+          },
+          "skus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationUtilizationSkuRow"
+            }
+          },
+          "advice": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocationUtilizationAdvice"
+            }
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "LocationUtilizationSkuRow": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "onHand": {
+            "type": "number"
+          },
+          "reserved": {
+            "type": "number"
+          },
+          "outboundQuantity": {
+            "type": "number"
+          },
+          "locationCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skuDispersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shareOfSkuOnHand": {
+            "type": "number",
+            "nullable": true
+          },
+          "dwellDays": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "LocationUtilizationCapabilities": {
+        "type": "object",
+        "properties": {
+          "capacityUtilizationLive": {
+            "type": "boolean"
+          },
+          "turnoverLive": {
+            "type": "boolean"
+          },
+          "heatmapLive": {
+            "type": "boolean"
+          },
+          "adviceGenerated": {
+            "type": "boolean"
+          },
+          "skuDispersionLive": {
+            "type": "boolean"
+          },
+          "autoAllocationAvailable": {
+            "type": "boolean"
+          },
+          "autoAllocationOwnerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "pickPathOptimizationAvailable": {
+            "type": "boolean"
+          },
+          "pickPathOwnerModule": {
+            "type": "string",
+            "nullable": true
+          },
+          "outboundFrequencyGrain": {
+            "type": "string"
+          },
+          "turnoverBasis": {
+            "type": "string"
+          },
+          "grades": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "OVERFULL",
+                "HIGH",
+                "BALANCED",
+                "LOW",
+                "IDLE",
+                "UNMEASURED"
+              ]
+            }
+          },
+          "defaultWindowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxWindowDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
             "type": "string"
           }
         }
@@ -36452,6 +38218,920 @@
           }
         }
       },
+      "ReservationAllocationEntryRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "allocationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "level": {
+            "type": "string"
+          },
+          "transition": {
+            "type": "string"
+          },
+          "transitionLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "fromStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "toStatusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "lotCode": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationAllocationTimeline": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationAllocationEntryRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationCapability": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationAllocationHeader": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationNo": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "sourceSystemLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "consumedQuantity": {
+            "type": "number"
+          },
+          "remainingQuantity": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "heldAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "committedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "settledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationAllocationPage": {
+        "type": "object",
+        "properties": {
+          "reservation": {
+            "$ref": "#/components/schemas/ReservationAllocationHeader"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ReservationAllocationSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationAllocationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "timelineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationAllocationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "occupying": {
+            "type": "boolean"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "locationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "lotExpiresOn": {
+            "type": "string",
+            "nullable": true
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "consumedQuantity": {
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "type": "number"
+          },
+          "remainingQuantity": {
+            "type": "number"
+          },
+          "allocatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "committedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "settledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "transitionCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReservationAllocationSummary": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "counts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "consumedQuantity": {
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "type": "number"
+          },
+          "remainingQuantity": {
+            "type": "number"
+          },
+          "unallocatedQuantity": {
+            "type": "number"
+          },
+          "bucketCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReservationAllocationBucketOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "allocationCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReservationAllocationOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationAllocationOptions": {
+        "type": "object",
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationAllocationOption"
+            }
+          },
+          "transitions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationAllocationOption"
+            }
+          },
+          "warehouses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationAllocationBucketOption"
+            }
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationAllocationBucketOption"
+            }
+          },
+          "lots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationAllocationBucketOption"
+            }
+          },
+          "sortOptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationAllocationOption"
+            }
+          },
+          "targets": {
+            "$ref": "#/components/schemas/ReservationAllocationTargets"
+          },
+          "timezoneNote": {
+            "type": "string"
+          },
+          "ownerNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationAllocationTarget": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationAllocationTargets": {
+        "type": "object",
+        "properties": {
+          "warehouses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationAllocationTarget"
+            }
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationAllocationTarget"
+            }
+          },
+          "lots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationAllocationTarget"
+            }
+          }
+        }
+      },
+      "ReservationReleaseRecordPage": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseRecordRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationReleaseRecordRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationNo": {
+            "type": "string",
+            "nullable": true
+          },
+          "mode": {
+            "type": "string"
+          },
+          "modeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "triggerSource": {
+            "type": "string"
+          },
+          "triggerSourceLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "terminal": {
+            "type": "boolean"
+          },
+          "statusBefore": {
+            "type": "string"
+          },
+          "statusAfter": {
+            "type": "string"
+          },
+          "statusAfterLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "allocationCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "restoredQuantity": {
+            "type": "number"
+          },
+          "releasedDemandQuantity": {
+            "type": "number"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiryRunId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReservationReleaseOption": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "sweepOnly": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationReleaseOptions": {
+        "type": "object",
+        "properties": {
+          "modes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseOption"
+            }
+          },
+          "triggers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseOption"
+            }
+          },
+          "sorts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseOption"
+            }
+          },
+          "ruleNote": {
+            "type": "string"
+          },
+          "timezoneNote": {
+            "type": "string"
+          },
+          "ownerNote": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationReleaseAllocationLine": {
+        "type": "object",
+        "properties": {
+          "allocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "locationCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "lotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "lotCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "consumedQuantity": {
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "type": "number"
+          },
+          "remainingQuantity": {
+            "type": "number"
+          },
+          "allocatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReservationReleaseCandidatePage": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/ReservationReleaseSummary"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseCandidateRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ruleNote": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "ReservationReleaseCandidateRow": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationNo": {
+            "type": "string"
+          },
+          "sourceSystem": {
+            "type": "string"
+          },
+          "sourceSystemLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceTypeLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "referenceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referenceCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "skuName": {
+            "type": "string",
+            "nullable": true
+          },
+          "legalEntityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "legalEntityCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "requestedQuantity": {
+            "type": "number"
+          },
+          "allocatedQuantity": {
+            "type": "number"
+          },
+          "consumedQuantity": {
+            "type": "number"
+          },
+          "releasedQuantity": {
+            "type": "number"
+          },
+          "restorableQuantity": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "statusLabel": {
+            "type": "string",
+            "nullable": true
+          },
+          "heldAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "overdueSeconds": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseAllocationLine"
+            }
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ReservationReleaseSummary": {
+        "type": "object",
+        "properties": {
+          "totalHeldCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueRestorableQuantity": {
+            "type": "number"
+          },
+          "unmanagedHeldCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "committedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mixedCommitmentSkippedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "terminalReleasedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "terminalExpiredCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "releasedQuantityTotal": {
+            "type": "number"
+          },
+          "modeCounts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        }
+      },
       "ReservationOptions": {
         "type": "object",
         "properties": {
@@ -36512,20 +39192,47 @@
           }
         }
       },
-      "ReservationCapability": {
+      "ReservationReleaseRunPage": {
         "type": "object",
         "properties": {
-          "dimension": {
-            "type": "string"
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseRunRow"
+            }
           },
-          "label": {
-            "type": "string"
+          "total": {
+            "type": "integer",
+            "format": "int64"
           },
-          "available": {
-            "type": "boolean"
+          "page": {
+            "type": "integer",
+            "format": "int32"
           },
-          "ownerModule": {
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
             "type": "string"
+          }
+        }
+      },
+      "ReservationReleaseRunDetail": {
+        "type": "object",
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/ReservationReleaseRunRow"
+          },
+          "releases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationReleaseRecordRow"
+            }
+          },
+          "releaseTotal": {
+            "type": "integer",
+            "format": "int64"
           },
           "note": {
             "type": "string"
@@ -45711,6 +48418,249 @@
           }
         }
       },
+      "DisassemblyDestinationStat": {
+        "type": "object",
+        "properties": {
+          "qualityStatusId": {
+            "type": "string"
+          },
+          "qualityCode": {
+            "type": "string"
+          },
+          "qualityRole": {
+            "type": "string"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "expectedQuantity": {
+            "type": "number"
+          },
+          "recoveredQuantity": {
+            "type": "number"
+          }
+        }
+      },
+      "DisassemblyOrderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyOrderRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalDisassemblyQuantity": {
+            "type": "number"
+          },
+          "totalExpectedComponentQuantity": {
+            "type": "number"
+          },
+          "totalRecoveredComponentQuantity": {
+            "type": "number"
+          },
+          "draftCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "completedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cancelledCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "destinations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyDestinationStat"
+            }
+          },
+          "sort": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyComponentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "bomComponentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "unitQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "recoveryRate": {
+            "type": "number",
+            "nullable": true
+          },
+          "expectedQuantity": {
+            "type": "number"
+          },
+          "recoveredQuantity": {
+            "type": "number"
+          },
+          "destinationQualityStatusId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationQualityCode": {
+            "type": "string"
+          },
+          "destinationQualityRole": {
+            "type": "string"
+          },
+          "destinationLocationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destinationLotId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "balanceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "role": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyOrderDetail": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/DisassemblyOrderRow"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyComponentRow"
+            }
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyOrderEntry"
+            }
+          }
+        }
+      },
+      "DisassemblyCapabilities": {
+        "type": "object",
+        "properties": {
+          "refType": {
+            "type": "string"
+          },
+          "atomicProductAndComponentMovements": {
+            "type": "boolean"
+          },
+          "supportsDirectInitiation": {
+            "type": "boolean"
+          },
+          "bomBoundary": {
+            "type": "string"
+          },
+          "upstreamBoundary": {
+            "type": "string"
+          },
+          "qualityDestinationRule": {
+            "type": "string"
+          },
+          "upstreamModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyUpstreamModule"
+            }
+          },
+          "downstreamModules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisassemblyDownstreamModule"
+            }
+          },
+          "invariant": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyDownstreamModule": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "effect": {
+            "type": "string"
+          }
+        }
+      },
+      "DisassemblyUpstreamModule": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "usage": {
+            "type": "string"
+          }
+        }
+      },
       "CustomsDeclarationPage": {
         "type": "object",
         "properties": {
@@ -46599,1808 +49549,6 @@
           "reason": {
             "type": "string",
             "nullable": true
-          }
-        }
-      },
-      "ReservationAllocationCreateInput": {
-        "required": [
-          "allocatedQuantity",
-          "warehouseId"
-        ],
-        "type": "object",
-        "properties": {
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "locationId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "lotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "allocatedQuantity": {
-            "type": "number"
-          },
-          "allocatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "note": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ReservationAllocationCreated": {
-        "type": "object",
-        "properties": {
-          "allocationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reservationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "reservationAllocatedQuantity": {
-            "type": "number"
-          },
-          "reservationUnallocatedQuantity": {
-            "type": "number"
-          },
-          "entryId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "ReservationAllocationTransitionInput": {
-        "type": "object",
-        "properties": {
-          "quantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "reason": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ReservationAllocationTransitioned": {
-        "type": "object",
-        "properties": {
-          "allocationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reservationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "fromStatus": {
-            "type": "string"
-          },
-          "toStatus": {
-            "type": "string"
-          },
-          "allocationStatus": {
-            "type": "string"
-          },
-          "allocationStatusLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "reservationStatus": {
-            "type": "string"
-          },
-          "reservationStatusLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "consumedQuantity": {
-            "type": "number"
-          },
-          "reservationRemainingQuantity": {
-            "type": "number"
-          },
-          "entryId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "ReservationAllocationEntryRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reservationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "allocationId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "level": {
-            "type": "string"
-          },
-          "transition": {
-            "type": "string"
-          },
-          "transitionLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "fromStatus": {
-            "type": "string",
-            "nullable": true
-          },
-          "toStatus": {
-            "type": "string"
-          },
-          "toStatusLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "occurredAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "actorId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "reason": {
-            "type": "string",
-            "nullable": true
-          },
-          "warehouseCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "locationCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "lotCode": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ReservationAllocationTimeline": {
-        "type": "object",
-        "properties": {
-          "reservationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReservationAllocationEntryRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ReservationAllocationHeader": {
-        "type": "object",
-        "properties": {
-          "reservationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reservationNo": {
-            "type": "string"
-          },
-          "sourceSystem": {
-            "type": "string"
-          },
-          "sourceSystemLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "sourceType": {
-            "type": "string"
-          },
-          "sourceTypeLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "referenceId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "referenceCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "skuName": {
-            "type": "string",
-            "nullable": true
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "legalEntityCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "requestedQuantity": {
-            "type": "number"
-          },
-          "allocatedQuantity": {
-            "type": "number"
-          },
-          "consumedQuantity": {
-            "type": "number"
-          },
-          "remainingQuantity": {
-            "type": "number"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "terminal": {
-            "type": "boolean"
-          },
-          "heldAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "committedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "settledAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "expiresAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ReservationAllocationPage": {
-        "type": "object",
-        "properties": {
-          "reservation": {
-            "$ref": "#/components/schemas/ReservationAllocationHeader"
-          },
-          "summary": {
-            "$ref": "#/components/schemas/ReservationAllocationSummary"
-          },
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReservationAllocationRow"
-            }
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "timelineCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "ReservationAllocationRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "reservationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "status": {
-            "type": "string"
-          },
-          "statusLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "terminal": {
-            "type": "boolean"
-          },
-          "occupying": {
-            "type": "boolean"
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "warehouseCode": {
-            "type": "string"
-          },
-          "warehouseName": {
-            "type": "string"
-          },
-          "locationId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "locationCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "locationName": {
-            "type": "string",
-            "nullable": true
-          },
-          "lotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "lotCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "lotExpiresOn": {
-            "type": "string",
-            "nullable": true
-          },
-          "allocatedQuantity": {
-            "type": "number"
-          },
-          "consumedQuantity": {
-            "type": "number"
-          },
-          "releasedQuantity": {
-            "type": "number"
-          },
-          "remainingQuantity": {
-            "type": "number"
-          },
-          "allocatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "committedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "settledAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          },
-          "transitionCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "ReservationAllocationSummary": {
-        "type": "object",
-        "properties": {
-          "totalCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "counts": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          "allocatedQuantity": {
-            "type": "number"
-          },
-          "consumedQuantity": {
-            "type": "number"
-          },
-          "releasedQuantity": {
-            "type": "number"
-          },
-          "remainingQuantity": {
-            "type": "number"
-          },
-          "unallocatedQuantity": {
-            "type": "number"
-          },
-          "bucketCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "ReservationAllocationBucketOption": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "allocationCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "ReservationAllocationOption": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "terminal": {
-            "type": "boolean"
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ReservationAllocationOptions": {
-        "type": "object",
-        "properties": {
-          "statuses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReservationAllocationOption"
-            }
-          },
-          "transitions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReservationAllocationOption"
-            }
-          },
-          "warehouses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReservationAllocationBucketOption"
-            }
-          },
-          "locations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReservationAllocationBucketOption"
-            }
-          },
-          "lots": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReservationAllocationBucketOption"
-            }
-          },
-          "sortOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReservationAllocationOption"
-            }
-          },
-          "targets": {
-            "$ref": "#/components/schemas/ReservationAllocationTargets"
-          },
-          "timezoneNote": {
-            "type": "string"
-          },
-          "ownerNote": {
-            "type": "string"
-          }
-        }
-      },
-      "ReservationAllocationTarget": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "parentId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "ReservationAllocationTargets": {
-        "type": "object",
-        "properties": {
-          "warehouses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReservationAllocationTarget"
-            }
-          },
-          "locations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReservationAllocationTarget"
-            }
-          },
-          "lots": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReservationAllocationTarget"
-            }
-          }
-        }
-      },
-      "DisassemblyComponentInput": {
-        "required": [
-          "destinationLocationId",
-          "destinationQualityStatusId",
-          "expectedQuantity",
-          "skuId"
-        ],
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "bomComponentId": {
-            "type": "string",
-            "description": "catalog 3.5.2 bom_component 的逻辑 ID，仅作追溯",
-            "format": "uuid",
-            "nullable": true
-          },
-          "expectedQuantity": {
-            "type": "number",
-            "description": "按「单位用量 × 拆解数量 × 回收率/100」冻结的应回量（6 位小数 HALF_UP）。本服务原样落库，不重算、不取整"
-          },
-          "unitQuantity": {
-            "maximum": 1000000000000,
-            "exclusiveMaximum": true,
-            "type": "number",
-            "description": "单位用量快照（每 1 个成品能拆出多少），可空：只作追溯展示，不参与任何判定",
-            "nullable": true
-          },
-          "recoveryRate": {
-            "maximum": 100,
-            "exclusiveMaximum": false,
-            "type": "number",
-            "description": "回收率快照（百分数，95 = 95%）。退件拆解与样品回收的实际损耗，默认 100（无损）",
-            "nullable": true
-          },
-          "destinationQualityStatusId": {
-            "type": "string",
-            "description": "组件入库去向的质量状态。**必填、没有默认值** —— 蓝图点名「拆解结果的组件质量状态由接收方决定，不能默认全部回可售」。取值落在 inventory_quality_status.role：SELLABLE(可用) / PENDING_INSPECTION(待检) / DEFECTIVE(残次)",
-            "format": "uuid"
-          },
-          "destinationLocationId": {
-            "type": "string",
-            "description": "组件入库库位（逐行：良品区 / 待检区 / 残次区可以分开）",
-            "format": "uuid"
-          },
-          "destinationLotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "role": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "note": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "DisassemblyOrderCreateInput": {
-        "required": [
-          "bomCode",
-          "bomId",
-          "bomVersionId",
-          "bomVersionNo",
-          "components",
-          "disassemblyQuantity",
-          "legalEntityId",
-          "outboundLocationId",
-          "productSkuId",
-          "sourceSystem",
-          "warehouseId"
-        ],
-        "type": "object",
-        "properties": {
-          "productSkuId": {
-            "type": "string",
-            "description": "被拆的成品 SKU（必须是本服务 sku_ref 里登记过的真实 SKU）",
-            "format": "uuid"
-          },
-          "bomId": {
-            "type": "string",
-            "description": "catalog 3.5.2 的 BOM 逻辑 ID（引用键，无外键）",
-            "format": "uuid"
-          },
-          "bomCode": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string"
-          },
-          "bomVersionId": {
-            "type": "string",
-            "description": "catalog 3.5.2 的 BOM 版本逻辑 ID（引用键，无外键）",
-            "format": "uuid"
-          },
-          "bomVersionNo": {
-            "maxLength": 32,
-            "minLength": 0,
-            "type": "string"
-          },
-          "sourceSystem": {
-            "type": "string",
-            "description": "上游来源：ASSEMBLY_ORDER = 来自 8.4.1.1 组装单；AFTERSALES_RETURN = 来自 11 售后退件；DIRECT = 仓库现场直接发起（样品回收等）"
-          },
-          "referenceId": {
-            "type": "string",
-            "description": "上游单据引用键；sourceSystem=DIRECT 时必须为空",
-            "format": "uuid",
-            "nullable": true
-          },
-          "referenceNo": {
-            "maxLength": 64,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "legalEntityId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "disassemblyQuantity": {
-            "type": "number",
-            "description": "拆解数量（成品出库量）。必须能被库存刻度 4 位小数精确表示"
-          },
-          "outboundLocationId": {
-            "type": "string",
-            "description": "成品出库库位；必填（库存的最小事实单位含库位）",
-            "format": "uuid"
-          },
-          "outboundQualityStatusId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "outboundLotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "notes": {
-            "maxLength": 2000,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          },
-          "components": {
-            "maxItems": 50,
-            "minItems": 0,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DisassemblyComponentInput"
-            }
-          }
-        }
-      },
-      "DisassemblyOrderCreated": {
-        "type": "object",
-        "properties": {
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderCode": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "productSkuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "disassemblyQuantity": {
-            "type": "number"
-          },
-          "expectedComponentQuantity": {
-            "type": "number"
-          },
-          "componentCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "createdAt": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DisassemblyOrderExecuteInput": {
-        "type": "object",
-        "properties": {
-          "notes": {
-            "maxLength": 2000,
-            "minLength": 0,
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "DisassemblyComponentRecovered": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "expectedQuantity": {
-            "type": "number"
-          },
-          "recoveredQuantity": {
-            "type": "number"
-          },
-          "destinationQualityStatusId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "destinationQualityCode": {
-            "type": "string"
-          },
-          "destinationQualityRole": {
-            "type": "string"
-          },
-          "destinationLocationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "destinationLotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "balanceId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "DisassemblyOrderEntry": {
-        "type": "object",
-        "properties": {
-          "entryId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "balanceId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "onHandDelta": {
-            "type": "number"
-          },
-          "reservedDelta": {
-            "type": "number"
-          },
-          "direction": {
-            "type": "string"
-          }
-        }
-      },
-      "DisassemblyOrderExecuted": {
-        "type": "object",
-        "properties": {
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderCode": {
-            "type": "string"
-          },
-          "inventoryTransactionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "occurredAt": {
-            "type": "string"
-          },
-          "productSkuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "disassemblyQuantity": {
-            "type": "number"
-          },
-          "outboundProductQuantity": {
-            "type": "number"
-          },
-          "expectedComponentQuantity": {
-            "type": "number"
-          },
-          "recoveredComponentQuantity": {
-            "type": "number"
-          },
-          "components": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DisassemblyComponentRecovered"
-            }
-          },
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DisassemblyOrderEntry"
-            }
-          },
-          "entryCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DisassemblyOrderCancelInput": {
-        "required": [
-          "reason"
-        ],
-        "type": "object",
-        "properties": {
-          "reason": {
-            "maxLength": 200,
-            "minLength": 1,
-            "type": "string",
-            "description": "取消理由（必填：取消一张拆解单必须能解释为什么）"
-          }
-        }
-      },
-      "DisassemblyOrderRow": {
-        "type": "object",
-        "properties": {
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "orderCode": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "productSkuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "productSkuCode": {
-            "type": "string"
-          },
-          "bomId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "bomCode": {
-            "type": "string"
-          },
-          "bomVersionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "bomVersionNo": {
-            "type": "string"
-          },
-          "sourceSystem": {
-            "type": "string"
-          },
-          "referenceId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "referenceNo": {
-            "type": "string",
-            "nullable": true
-          },
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "disassemblyQuantity": {
-            "type": "number"
-          },
-          "expectedComponentQuantity": {
-            "type": "number"
-          },
-          "recoveredComponentQuantity": {
-            "type": "number"
-          },
-          "outboundProductQuantity": {
-            "type": "number"
-          },
-          "componentCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "inventoryTransactionId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "executedAt": {
-            "type": "string",
-            "nullable": true
-          },
-          "cancelledAt": {
-            "type": "string",
-            "nullable": true
-          },
-          "cancelReason": {
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string"
-          },
-          "createdBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "notes": {
-            "type": "string"
-          }
-        }
-      },
-      "DisassemblyDestinationStat": {
-        "type": "object",
-        "properties": {
-          "qualityStatusId": {
-            "type": "string"
-          },
-          "qualityCode": {
-            "type": "string"
-          },
-          "qualityRole": {
-            "type": "string"
-          },
-          "lineCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "expectedQuantity": {
-            "type": "number"
-          },
-          "recoveredQuantity": {
-            "type": "number"
-          }
-        }
-      },
-      "DisassemblyOrderPage": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DisassemblyOrderRow"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalDisassemblyQuantity": {
-            "type": "number"
-          },
-          "totalExpectedComponentQuantity": {
-            "type": "number"
-          },
-          "totalRecoveredComponentQuantity": {
-            "type": "number"
-          },
-          "draftCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "completedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "cancelledCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "destinations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DisassemblyDestinationStat"
-            }
-          },
-          "sort": {
-            "type": "string"
-          }
-        }
-      },
-      "DisassemblyComponentRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "skuCode": {
-            "type": "string"
-          },
-          "bomComponentId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "unitQuantity": {
-            "type": "number",
-            "nullable": true
-          },
-          "recoveryRate": {
-            "type": "number",
-            "nullable": true
-          },
-          "expectedQuantity": {
-            "type": "number"
-          },
-          "recoveredQuantity": {
-            "type": "number"
-          },
-          "destinationQualityStatusId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "destinationQualityCode": {
-            "type": "string"
-          },
-          "destinationQualityRole": {
-            "type": "string"
-          },
-          "destinationLocationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "destinationLotId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "balanceId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "role": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DisassemblyOrderDetail": {
-        "type": "object",
-        "properties": {
-          "order": {
-            "$ref": "#/components/schemas/DisassemblyOrderRow"
-          },
-          "components": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DisassemblyComponentRow"
-            }
-          },
-          "entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DisassemblyOrderEntry"
-            }
-          }
-        }
-      },
-      "DisassemblyCapabilities": {
-        "type": "object",
-        "properties": {
-          "refType": {
-            "type": "string"
-          },
-          "atomicProductAndComponentMovements": {
-            "type": "boolean"
-          },
-          "supportsDirectInitiation": {
-            "type": "boolean"
-          },
-          "bomBoundary": {
-            "type": "string"
-          },
-          "upstreamBoundary": {
-            "type": "string"
-          },
-          "qualityDestinationRule": {
-            "type": "string"
-          },
-          "upstreamModules": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DisassemblyUpstreamModule"
-            }
-          },
-          "downstreamModules": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DisassemblyDownstreamModule"
-            }
-          },
-          "invariant": {
-            "type": "string"
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "DisassemblyDownstreamModule": {
-        "type": "object",
-        "properties": {
-          "moduleId": {
-            "type": "string"
-          },
-          "moduleName": {
-            "type": "string"
-          },
-          "service": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "effect": {
-            "type": "string"
-          }
-        }
-      },
-      "DisassemblyUpstreamModule": {
-        "type": "object",
-        "properties": {
-          "moduleId": {
-            "type": "string"
-          },
-          "moduleName": {
-            "type": "string"
-          },
-          "service": {
-            "type": "string"
-          },
-          "available": {
-            "type": "boolean"
-          },
-          "usage": {
-            "type": "string"
-          }
-        }
-      },
-      "LocationUtilizationQuery": {
-        "type": "object",
-        "properties": {
-          "windowDays": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "grade": {
-            "type": "string",
-            "nullable": true
-          },
-          "type": {
-            "type": "string",
-            "nullable": true
-          },
-          "keyword": {
-            "type": "string",
-            "nullable": true
-          },
-          "minUtilization": {
-            "type": "number",
-            "nullable": true
-          },
-          "pickableOnly": {
-            "type": "boolean",
-            "nullable": true
-          }
-        }
-      },
-      "LocationUtilizationAdvice": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "OVERFULL_LOCATION",
-              "IDLE_LOCATION",
-              "INEFFICIENT_LOCATION",
-              "HIGH_FREQUENT_NON_PICKABLE",
-              "SKU_DISPERSION",
-              "UNMEASURED_LOCATION"
-            ]
-          },
-          "kindLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "severity": {
-            "type": "string",
-            "enum": [
-              "HIGH",
-              "MEDIUM",
-              "LOW"
-            ]
-          },
-          "severityLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "locationId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "locationCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "skuId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "message": {
-            "type": "string"
-          },
-          "action": {
-            "type": "string"
-          },
-          "ownerModule": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "LocationUtilizationHeatCell": {
-        "type": "object",
-        "properties": {
-          "locationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "parentId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "parentCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "depth": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "grade": {
-            "type": "string",
-            "enum": [
-              "OVERFULL",
-              "HIGH",
-              "BALANCED",
-              "LOW",
-              "IDLE",
-              "UNMEASURED"
-            ]
-          },
-          "gradeLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "capacityUtilization": {
-            "type": "number",
-            "nullable": true
-          },
-          "metric": {
-            "type": "string",
-            "enum": [
-              "CAPACITY_UTILIZATION",
-              "ON_HAND_RELATIVE",
-              "IDLE"
-            ]
-          },
-          "heat": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "value": {
-            "type": "number",
-            "nullable": true
-          }
-        }
-      },
-      "LocationUtilizationReport": {
-        "type": "object",
-        "properties": {
-          "warehouseId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "windowDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "locations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LocationUtilizationRow"
-            }
-          },
-          "totals": {
-            "$ref": "#/components/schemas/LocationUtilizationTotals"
-          },
-          "heatmap": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LocationUtilizationHeatCell"
-            }
-          },
-          "advice": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LocationUtilizationAdvice"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "LocationUtilizationRow": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "typeLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string"
-          },
-          "pickable": {
-            "type": "boolean"
-          },
-          "parentId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "capacity": {
-            "type": "number",
-            "nullable": true
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "capacityUtilization": {
-            "type": "number",
-            "nullable": true
-          },
-          "capacityMeasured": {
-            "type": "boolean"
-          },
-          "capacityZero": {
-            "type": "boolean"
-          },
-          "capacityExceeded": {
-            "type": "boolean"
-          },
-          "outboundQuantity": {
-            "type": "number"
-          },
-          "outboundMovements": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "turnover": {
-            "type": "number",
-            "nullable": true
-          },
-          "turnoverComputable": {
-            "type": "boolean"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "skuDispersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "dwellDays": {
-            "type": "number",
-            "nullable": true
-          },
-          "grade": {
-            "type": "string",
-            "enum": [
-              "OVERFULL",
-              "HIGH",
-              "BALANCED",
-              "LOW",
-              "IDLE",
-              "UNMEASURED"
-            ]
-          },
-          "gradeLabel": {
-            "type": "string",
-            "nullable": true
-          },
-          "heat": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "LocationUtilizationTotals": {
-        "type": "object",
-        "properties": {
-          "locationCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "capacityMeasuredCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "capacityZeroCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "idleCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "overfullCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "highCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lowCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "balancedCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unmeasuredCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pickableCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "capacity": {
-            "type": "number"
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "capacityUtilization": {
-            "type": "number",
-            "nullable": true
-          },
-          "utilizationComputable": {
-            "type": "boolean"
-          },
-          "outboundQuantity": {
-            "type": "number"
-          },
-          "outboundMovements": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "turnover": {
-            "type": "number",
-            "nullable": true
-          },
-          "turnoverComputable": {
-            "type": "boolean"
-          },
-          "skuCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "LocationUtilizationDetail": {
-        "type": "object",
-        "properties": {
-          "location": {
-            "$ref": "#/components/schemas/LocationUtilizationRow"
-          },
-          "skus": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LocationUtilizationSkuRow"
-            }
-          },
-          "advice": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/LocationUtilizationAdvice"
-            }
-          },
-          "note": {
-            "type": "string"
-          }
-        }
-      },
-      "LocationUtilizationSkuRow": {
-        "type": "object",
-        "properties": {
-          "skuId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "onHand": {
-            "type": "number"
-          },
-          "reserved": {
-            "type": "number"
-          },
-          "outboundQuantity": {
-            "type": "number"
-          },
-          "locationCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "skuDispersion": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "shareOfSkuOnHand": {
-            "type": "number",
-            "nullable": true
-          },
-          "dwellDays": {
-            "type": "number",
-            "nullable": true
-          }
-        }
-      },
-      "LocationUtilizationCapabilities": {
-        "type": "object",
-        "properties": {
-          "capacityUtilizationLive": {
-            "type": "boolean"
-          },
-          "turnoverLive": {
-            "type": "boolean"
-          },
-          "heatmapLive": {
-            "type": "boolean"
-          },
-          "adviceGenerated": {
-            "type": "boolean"
-          },
-          "skuDispersionLive": {
-            "type": "boolean"
-          },
-          "autoAllocationAvailable": {
-            "type": "boolean"
-          },
-          "autoAllocationOwnerModule": {
-            "type": "string",
-            "nullable": true
-          },
-          "pickPathOptimizationAvailable": {
-            "type": "boolean"
-          },
-          "pickPathOwnerModule": {
-            "type": "string",
-            "nullable": true
-          },
-          "outboundFrequencyGrain": {
-            "type": "string"
-          },
-          "turnoverBasis": {
-            "type": "string"
-          },
-          "grades": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "OVERFULL",
-                "HIGH",
-                "BALANCED",
-                "LOW",
-                "IDLE",
-                "UNMEASURED"
-              ]
-            }
-          },
-          "defaultWindowDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "maxWindowDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "note": {
-            "type": "string"
           }
         }
       }
