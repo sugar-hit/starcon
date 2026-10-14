@@ -187,6 +187,307 @@
         }
       }
     },
+    "/trade/b2b-orders/{id}": {
+      "get": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "detail_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BOrderDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/B2BOrderUpdateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/b2b-orders/price-books": {
+      "get": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "listPriceBooks",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "customerLevel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BPriceBookPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "upsertPriceBook",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/B2BPriceBookRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BPriceBookRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/b2b-orders/customer-terms": {
+      "get": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "listCustomerTerms",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "customerLevel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BCustomerTermsPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "upsertCustomerTerms",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/B2BCustomerTermsInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BCustomerTermsRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/sales-orders": {
       "get": {
         "tags": [
@@ -2256,12 +2557,314 @@
         }
       }
     },
+    "/trade/b2b-orders": {
+      "get": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "list_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customerLevel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customerPartyId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "paymentMethod",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BOrderPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "create_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/B2BOrderCreateInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/b2b-orders/{id}/shipments": {
+      "post": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "ship",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/B2BShipmentInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/b2b-orders/{id}/invoice-requests": {
+      "post": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "requestInvoice",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/b2b-orders/{id}/confirm": {
+      "post": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "confirm",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/b2b-orders/price-quote": {
+      "post": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "quote",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/B2BPriceQuoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BQuoteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/trade/sales-orders/list": {
       "get": {
         "tags": [
           "sales-order-list-controller"
         ],
-        "operationId": "list_1",
+        "operationId": "list_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -2474,7 +3077,7 @@
         "tags": [
           "sales-order-overview-controller"
         ],
-        "operationId": "detail_1",
+        "operationId": "detail_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -3041,6 +3644,153 @@
           }
         }
       }
+    },
+    "/trade/b2b-orders/receivables": {
+      "get": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "receivables",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "invoiceState",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BReceivablePage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/b2b-orders/price-books/{id}": {
+      "get": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "priceBook",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BPriceBookRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trade/b2b-orders/capabilities": {
+      "get": {
+        "tags": [
+          "b-2-b-order-controller"
+        ],
+        "operationId": "capabilities_6",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/B2BCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3459,6 +4209,346 @@
           },
           "updatedAt": {
             "type": "string"
+          }
+        }
+      },
+      "B2BOrderLineInput": {
+        "required": [
+          "quantity",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "B2BOrderUpdateInput": {
+        "required": [
+          "lines"
+        ],
+        "type": "object",
+        "properties": {
+          "lines": {
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BOrderLineInput"
+            }
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "B2BSaved": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "CONFIRMED",
+              "PARTIALLY_SHIPPED",
+              "SHIPPED"
+            ]
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "receivableAmount": {
+            "type": "number"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "B2BPriceBookInput": {
+        "required": [
+          "currency",
+          "customerLevel",
+          "moqQuantity",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "customerLevel": {
+            "type": "string",
+            "enum": [
+              "STRATEGIC",
+              "KEY",
+              "STANDARD",
+              "PROSPECT",
+              "RISK"
+            ]
+          },
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "moqQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "sourceVersion": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "B2BPriceBookRequest": {
+        "required": [
+          "book",
+          "tiers"
+        ],
+        "type": "object",
+        "properties": {
+          "book": {
+            "$ref": "#/components/schemas/B2BPriceBookInput"
+          },
+          "tiers": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BPriceTierInput"
+            }
+          }
+        }
+      },
+      "B2BPriceTierInput": {
+        "required": [
+          "minQuantity",
+          "unitPrice"
+        ],
+        "type": "object",
+        "properties": {
+          "minQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "unitPrice": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          }
+        }
+      },
+      "B2BPriceBookRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "customerLevel": {
+            "type": "string",
+            "enum": [
+              "STRATEGIC",
+              "KEY",
+              "STANDARD",
+              "PROSPECT",
+              "RISK"
+            ]
+          },
+          "currency": {
+            "type": "string"
+          },
+          "moqQuantity": {
+            "type": "number"
+          },
+          "sourceVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BPriceTierRow"
+            }
+          }
+        }
+      },
+      "B2BPriceTierRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minQuantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "B2BCustomerTermsInput": {
+        "required": [
+          "customerLevel",
+          "customerPartyId"
+        ],
+        "type": "object",
+        "properties": {
+          "customerPartyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerCode": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "customerName": {
+            "maxLength": 160,
+            "minLength": 0,
+            "type": "string"
+          },
+          "customerLevel": {
+            "type": "string",
+            "enum": [
+              "STRATEGIC",
+              "KEY",
+              "STANDARD",
+              "PROSPECT",
+              "RISK"
+            ]
+          },
+          "paymentTermsDays": {
+            "maximum": 365,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "defaultCurrency": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "creditLimit": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "sourceVersion": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "B2BCustomerTermsRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerPartyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerCode": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerLevel": {
+            "type": "string",
+            "enum": [
+              "STRATEGIC",
+              "KEY",
+              "STANDARD",
+              "PROSPECT",
+              "RISK"
+            ]
+          },
+          "paymentTermsDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "defaultCurrency": {
+            "type": "string"
+          },
+          "creditLimit": {
+            "type": "number"
+          },
+          "sourceVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -5384,6 +6474,232 @@
             "maxLength": 32,
             "minLength": 0,
             "type": "string"
+          }
+        }
+      },
+      "B2BOrderCreateInput": {
+        "required": [
+          "costBasis",
+          "currency",
+          "customerPartyId",
+          "lines",
+          "orderNo",
+          "orderType",
+          "paymentMethod"
+        ],
+        "type": "object",
+        "properties": {
+          "orderNo": {
+            "maxLength": 48,
+            "minLength": 0,
+            "type": "string"
+          },
+          "orderType": {
+            "type": "string",
+            "enum": [
+              "B2B_WHOLESALE",
+              "B2B_DISTRIBUTION",
+              "B2B_PROJECT"
+            ]
+          },
+          "customerPartyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": [
+              "ORDER_SETTLEMENT",
+              "ON_RECEIPT",
+              "CREDIT_TERM"
+            ]
+          },
+          "paymentTermsDays": {
+            "maximum": 365,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "costBasis": {
+            "type": "string",
+            "enum": [
+              "STANDARD",
+              "MOVING_WEIGHTED",
+              "LOT"
+            ]
+          },
+          "lines": {
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BOrderLineInput"
+            }
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "B2BShipmentInput": {
+        "required": [
+          "lines",
+          "shipmentNo"
+        ],
+        "type": "object",
+        "properties": {
+          "shipmentNo": {
+            "maxLength": 48,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "carrierRef": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "lines": {
+            "maxItems": 200,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BShipmentLineInput"
+            }
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "B2BShipmentLineInput": {
+        "required": [
+          "orderLineId",
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          }
+        }
+      },
+      "B2BPriceQuoteLineInput": {
+        "required": [
+          "quantity",
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "type": "number"
+          }
+        }
+      },
+      "B2BPriceQuoteRequest": {
+        "required": [
+          "customerLevel",
+          "lines"
+        ],
+        "type": "object",
+        "properties": {
+          "lines": {
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BPriceQuoteLineInput"
+            }
+          },
+          "customerLevel": {
+            "type": "string",
+            "enum": [
+              "STRATEGIC",
+              "KEY",
+              "STANDARD",
+              "PROSPECT",
+              "RISK"
+            ]
+          }
+        }
+      },
+      "B2BPriceQuoteRow": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "customerLevel": {
+            "type": "string",
+            "enum": [
+              "STRATEGIC",
+              "KEY",
+              "STANDARD",
+              "PROSPECT",
+              "RISK"
+            ]
+          },
+          "moqQuantity": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "appliedTierMinQuantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "lineAmount": {
+            "type": "number"
+          },
+          "lowestTier": {
+            "type": "boolean"
+          },
+          "nextTierMinQuantity": {
+            "type": "number"
+          },
+          "nextTierUnitPrice": {
+            "type": "number"
+          }
+        }
+      },
+      "B2BQuoteResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BPriceQuoteRow"
+            }
           }
         }
       },
@@ -8438,6 +9754,640 @@
           "occurredAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "B2BOrderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BOrderRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "draft": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "confirmed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partiallyShipped": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "shipped": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "overdueAmount": {
+            "type": "number"
+          },
+          "openReceivableAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "B2BOrderRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "orderType": {
+            "type": "string",
+            "enum": [
+              "B2B_WHOLESALE",
+              "B2B_DISTRIBUTION",
+              "B2B_PROJECT"
+            ]
+          },
+          "customerPartyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerLevel": {
+            "type": "string",
+            "enum": [
+              "STRATEGIC",
+              "KEY",
+              "STANDARD",
+              "PROSPECT",
+              "RISK"
+            ]
+          },
+          "currency": {
+            "type": "string"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": [
+              "ORDER_SETTLEMENT",
+              "ON_RECEIPT",
+              "CREDIT_TERM"
+            ]
+          },
+          "paymentTermsDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "costBasis": {
+            "type": "string",
+            "enum": [
+              "STANDARD",
+              "MOVING_WEIGHTED",
+              "LOT"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "CONFIRMED",
+              "PARTIALLY_SHIPPED",
+              "SHIPPED"
+            ]
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "receivableAmount": {
+            "type": "number"
+          },
+          "unshippedAmount": {
+            "type": "number"
+          },
+          "lineCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "B2BEventRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "UPDATED",
+              "CONFIRMED",
+              "SHIPPED",
+              "INVOICE_REQUESTED"
+            ]
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "B2BOrderDetail": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "$ref": "#/components/schemas/B2BOrderRow"
+          },
+          "terms": {
+            "$ref": "#/components/schemas/B2BCustomerTermsRow"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BOrderLineRow"
+            }
+          },
+          "shipments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BShipmentRow"
+            }
+          },
+          "receivables": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BReceivableRow"
+            }
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BEventRow"
+            }
+          }
+        }
+      },
+      "B2BOrderLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lineNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "shippedQuantity": {
+            "type": "number"
+          },
+          "moqQuantity": {
+            "type": "number"
+          },
+          "appliedTierId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "appliedTierMinQuantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "lineAmount": {
+            "type": "number"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "B2BReceivableLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "lineAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "B2BReceivableRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receivableNo": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNo": {
+            "type": "string"
+          },
+          "shipmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerPartyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": [
+              "ORDER_SETTLEMENT",
+              "ON_RECEIPT",
+              "CREDIT_TERM"
+            ]
+          },
+          "paymentTermsDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "SETTLED",
+              "CANCELLED"
+            ]
+          },
+          "invoiceState": {
+            "type": "string",
+            "enum": [
+              "NOT_REQUESTED",
+              "REQUESTED",
+              "INVOICED"
+            ]
+          },
+          "invoiceRequestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BReceivableLineRow"
+            }
+          }
+        }
+      },
+      "B2BShipmentLineRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "lineAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "B2BShipmentRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shipmentNo": {
+            "type": "string"
+          },
+          "shippedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "carrierRef": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "receivableId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BShipmentLineRow"
+            }
+          }
+        }
+      },
+      "B2BReceivablePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BReceivableRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "openAmount": {
+            "type": "number"
+          },
+          "overdueAmount": {
+            "type": "number"
+          },
+          "invoicePending": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "B2BPriceBookPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BPriceBookRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "B2BCustomerTermsPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BCustomerTermsRow"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "B2BCapabilities": {
+        "type": "object",
+        "properties": {
+          "orderTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "B2B_WHOLESALE",
+                "B2B_DISTRIBUTION",
+                "B2B_PROJECT"
+              ]
+            }
+          },
+          "paymentMethods": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ORDER_SETTLEMENT",
+                "ON_RECEIPT",
+                "CREDIT_TERM"
+              ]
+            }
+          },
+          "costBases": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "STANDARD",
+                "MOVING_WEIGHTED",
+                "LOT"
+              ]
+            }
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "CONFIRMED",
+                "PARTIALLY_SHIPPED",
+                "SHIPPED"
+              ]
+            }
+          },
+          "customerLevels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "STRATEGIC",
+                "KEY",
+                "STANDARD",
+                "PROSPECT",
+                "RISK"
+              ]
+            }
+          },
+          "invoiceStates": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "NOT_REQUESTED",
+                "REQUESTED",
+                "INVOICED"
+              ]
+            }
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "upstreamCustomerProfileAvailable": {
+            "type": "boolean"
+          },
+          "upstreamCustomerProfileNote": {
+            "type": "string"
+          },
+          "upstreamPriceBookAvailable": {
+            "type": "boolean"
+          },
+          "upstreamPriceBookNote": {
+            "type": "string"
+          },
+          "downstreamReceivableAvailable": {
+            "type": "boolean"
+          },
+          "downstreamReceivableNote": {
+            "type": "string"
+          },
+          "downstreamFulfillmentAvailable": {
+            "type": "boolean"
+          },
+          "downstreamFulfillmentNote": {
+            "type": "string"
+          },
+          "gaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/B2BDownstreamGap"
+            }
+          }
+        }
+      },
+      "B2BDownstreamGap": {
+        "type": "object",
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          },
+          "moduleName": {
+            "type": "string"
+          },
+          "service": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "ownerModule": {
+            "type": "string"
+          },
+          "effect": {
+            "type": "string"
           }
         }
       }

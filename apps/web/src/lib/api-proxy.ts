@@ -621,11 +621,23 @@ const services: readonly {
     //   holds         挂起清单（集合读；挂起是 append-only 的凭据，**没有**任何写形状）
     // 判别顺序与 routing 组一致：字面量子路径排在 allocations/{uuid} 之前，
     // 否则会被 [0-9a-f-]+ 分支吃掉；两段形状排在单段 {uuid} 之后。
+    // b2b-orders 是 9.7.1.1 批发订单与账期（卷 09，本车道追加这一支）：
+    //   capabilities          能力与上下游可用性
+    //   customer-terms        客户档案投影（3.6.1.2 → trade 侧只读投影）：GET 集合 + PUT upsert
+    //   price-books           阶梯价投影（05 价目 5.1.1.2 的 trade 侧投影）：GET 集合 + PUT upsert + {uuid} 详情
+    //   price-quote           阶梯价试算（POST，只读不落库）
+    //   receivables           账期应收列表（只读；核销属于 12 财务，本服务不提供写形状）
+    //   {uuid}                订单详情
+    //   {uuid}/confirm        确认订单（**确认不产生应收**）
+    //   {uuid}/shipments      发货确认 —— 应收的**唯一**产生入口
+    //   {uuid}/invoice-requests 登记开票需求
+    // 判别顺序：字面量子路径排在 {uuid} 之前，否则会被 [0-9a-f-]+ 分支吃掉。
+    // 裸路径 b2b-orders 与集合读共用一支（本文件的 pattern 按路径登记、不区分方法）。
     prefix: 'trade/',
     env: 'TRADE_URL',
     fallback: 'http://127.0.0.1:8085',
     pattern:
-      /^(?:fulfillment\/routing\/(?:capabilities|mcf-authorizations|cost-profiles|stock-snapshots|evaluations|switches|decisions(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/allocation\/(?:capabilities|rules|warehouses|stock-estimates|shipping-estimates|simulations|holds|allocations(?:\/[0-9a-f-]+(?:\/status)?)?)|processing\/(?:capabilities|requirements|orders(?:\/[0-9a-f-]+(?:\/(?:status|progress|components\/issue|bom-binding(?:\/lines)?))?)?|factories(?:\/[0-9a-f-]+)?)|sales-orders(?:\/(?:capabilities|[0-9a-f-]+(?:\/submit)?))?|sales-orders\/list(?:\/(?:capabilities|filters))?|sales-orders\/detail(?:\/(?:capabilities|fulfillment-reference|[0-9a-f-]+))?)$/,
+      /^(?:fulfillment\/routing\/(?:capabilities|mcf-authorizations|cost-profiles|stock-snapshots|evaluations|switches|decisions(?:\/[0-9a-f-]+(?:\/status)?)?)|fulfillment\/allocation\/(?:capabilities|rules|warehouses|stock-estimates|shipping-estimates|simulations|holds|allocations(?:\/[0-9a-f-]+(?:\/status)?)?)|processing\/(?:capabilities|requirements|orders(?:\/[0-9a-f-]+(?:\/(?:status|progress|components\/issue|bom-binding(?:\/lines)?))?)?|factories(?:\/[0-9a-f-]+)?)|sales-orders(?:\/(?:capabilities|[0-9a-f-]+(?:\/submit)?))?|sales-orders\/list(?:\/(?:capabilities|filters))?|sales-orders\/detail(?:\/(?:capabilities|fulfillment-reference|[0-9a-f-]+))?|b2b-orders(?:\/(?:capabilities|receivables|customer-terms|price-quote|price-books(?:\/[0-9a-f-]+)?|[0-9a-f-]+(?:\/(?:confirm|shipments|invoice-requests))?))?)$/,
     // 裸路径 fulfillment/routing、fulfillment/allocation 与 processing **刻意不放行**：
     // 后端没有对应映射，放行它会让界面以为「一条不存在的列表接口」可用。
   },
