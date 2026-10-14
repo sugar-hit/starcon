@@ -628,7 +628,10 @@ class PickWaveIntegrationTest {
   void plannedPickAtIsDerivedFromTheRuleSlotInWarehouseLocalTime() {
     Layout la = layout(a);
     bucket(a, la.a1(), sku(a, 1), "100");
-    pickTask(a, outbound(a, "OB-PLAN", "SF", sku(a, 1)));
+    UUID plan = outbound(a, "OB-PLAN", "SF", sku(a, 1));
+    setCreatedAt(a, plan, LocalDate.now(WAREHOUSE_ZONE).atTime(10, 0)
+        .atZone(WAREHOUSE_ZONE).toOffsetDateTime());
+    pickTask(a, plan);
     var r = rule(a, "R-SLOT-PLAN", "SF", la.zoneA(), 9, 18, 10);
     var created = wave(a, r.id(), "SF", la.zoneA());
 
