@@ -129,6 +129,10 @@ jobs:
               exit 1
             fi
           done
+      - name: Verify fresh database initialization did not require a restart
+        run: |
+          container=$(docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml ps -q postgres)
+          test "$(docker inspect --format '{{.RestartCount}}' "$container")" = 0
       - name: Verify writable storage as the runtime user
         run: |
           docker compose --env-file deploy/.env.catalog.local -f deploy/docker/docker-compose.catalog.yml exec -T catalog sh -c 'test "$(id -u)" = 10001 && test -w "$MEDIA_STORAGE_ROOT"'

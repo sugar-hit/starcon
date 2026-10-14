@@ -12,7 +12,7 @@ services:
       - catalog-pg-data:/var/lib/postgresql/data
       - ./catalog-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U starcon_migrator -d postgres']
+      test: ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -U starcon_migrator -d postgres']
       interval: 3s
       timeout: 3s
       retries: 40
