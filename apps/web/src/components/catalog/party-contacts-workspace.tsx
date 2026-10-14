@@ -19,7 +19,7 @@ import type {
   PartyAddressVersion,
   PartyContact,
   PartyRow,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { Editor, Field, control } from '../common/fields';
 import {
   ADDRESS_COUNTRIES,

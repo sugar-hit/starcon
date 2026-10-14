@@ -4,7 +4,7 @@ import type {
   DepartmentView,
   OnboardingView,
   RoleView,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   accountModeLabel,
   assignableRoles,

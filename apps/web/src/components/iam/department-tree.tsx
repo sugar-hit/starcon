@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Button } from '@starcon/ui';
-import type { DepartmentView } from '../../../../../packages/api-contracts/src/catalog';
+import type { DepartmentView } from '../../../../../packages/api-contracts/src/index';
 import { canDropDepartment } from './administration-model';
 
 /** 提升为根部门的投放区，用一个不会与部门 id 混淆的哨兵值。 */

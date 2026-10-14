@@ -26,7 +26,7 @@ import {
 import type {
   LegalEntityTransferDetail,
   LegalEntityTransferSaved,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   cancelCrossEntityTransfer,
   closeCrossEntityTransfer,

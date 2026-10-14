@@ -8,7 +8,7 @@ import type {
   DictHistoryView,
   DictItemUsageView,
   DictItemView,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from '@/lib/api';
 import { useIdentity } from '../iam/identity-shell';
 import {

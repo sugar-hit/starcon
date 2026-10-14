@@ -14,7 +14,7 @@ import type {
   AllocationRunPage,
   SaleRow,
   SkuRef,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { fetchSkus } from './inventory-model';
 import {
   bufferModeLabels,

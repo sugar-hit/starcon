@@ -10,7 +10,7 @@ import type {
   ZombieCleanupRuleView,
   ZombieCleanupRecord,
   ZombieOptions,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { Field, control } from '../common/fields';
 import {
   DIMENSION_STATE_LABELS,

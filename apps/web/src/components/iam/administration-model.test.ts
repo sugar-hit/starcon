@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Access, DepartmentView } from '../../../../../packages/api-contracts/src/catalog';
+import type { Access, DepartmentView } from '../../../../../packages/api-contracts/src/index';
 import {
   assignRole,
   canManage,

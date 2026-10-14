@@ -3,7 +3,7 @@ import type {
   ApprovalChainView,
   DepartmentLeaderView,
   MemberView,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   addGrant,
   addProxy,

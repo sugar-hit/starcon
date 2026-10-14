@@ -18,8 +18,20 @@ export class ApiError extends Error {
  * Backend service routing.
  *
  * <p>Each service is reached through /api/<service> so the browser never holds a backend address.
- * `auth` and `identity` are the identity service, `catalog` is 03 商品主数据, and `channel` is
- * 02 渠道与店铺. Callers pass the path exactly as the backend exposes it (e.g. `identity/roles`).
+ * `auth` and `identity` are the identity service, `catalog` is 03 商品主数据, `channel` is
+ * 02 渠道与店铺, `warehouse` is 07 库存核算 + 08 仓储作业. Callers pass the path exactly as the
+ * backend exposes it (e.g. `identity/roles`).
+ *
+ * <p>`trade` 是 09 订单履约与 **06 采购与供应**（蓝图 README 系统地图：06 的主责服务是
+ * trade + catalog）的服务。这里此前**漏了** trade 这一项：9.3.2.2 的模型已经在调
+ * `trade/fulfillment/routing/...`，而本表没有对应分支，`api()` 会直接抛
+ * 「未知的接口路径」。本条目是**追加**的，不改动既有任何一项（并入时按分支求并，
+ * 取错一侧也不会丢掉其它服务）。
+ *
+ * <p>`crm` 是 **15 客户与客服**的服务（端口 8086，数据库 starcon_crm）。
+ * 15.4.2.1 知识库是它的第一条业务端点，模型在调 `crm/knowledge/...`。
+ * 它与 catalog 的 `catalog/kb`（11.4.2.2 客服话术，按平台规则版本组织）是
+ * **两个不同的模块**，前缀不同、命名空间不同，不要互相调用。
  */
 const backends: readonly { prefix: string; route: string }[] = [
   { prefix: 'auth/', route: 'iam' },
@@ -27,6 +39,8 @@ const backends: readonly { prefix: string; route: string }[] = [
   { prefix: 'catalog/', route: 'catalog' },
   { prefix: 'channel/', route: 'channel' },
   { prefix: 'warehouse/', route: 'warehouse' },
+  { prefix: 'trade/', route: 'trade' },
+  { prefix: 'crm/', route: 'crm' },
 ];
 
 let workspaceBlocked = false;

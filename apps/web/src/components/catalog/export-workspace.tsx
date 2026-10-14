@@ -38,7 +38,7 @@ import {
   statusTone,
   unavailableFilters,
 } from './export-model';
-import type { ExportJobInput } from '../../../../../packages/api-contracts/src/catalog';
+import type { ExportJobInput } from '../../../../../packages/api-contracts/src/index';
 
 const PAGE_SIZE = 20;
 

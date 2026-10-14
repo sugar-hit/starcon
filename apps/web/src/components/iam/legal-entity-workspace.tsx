@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Badge, Button } from '@starcon/ui';
 import { Plus, RefreshCw, Search } from 'lucide-react';
-import type { LegalEntityView } from '../../../../../packages/api-contracts/src/catalog';
+import type { LegalEntityView } from '../../../../../packages/api-contracts/src/index';
 import { api } from '@/lib/api';
 import { useIdentity } from '../iam/identity-shell';
 

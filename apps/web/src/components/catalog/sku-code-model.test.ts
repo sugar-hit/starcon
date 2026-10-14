@@ -5,7 +5,7 @@ import type {
   SkuCodeRuleInput,
   SkuIdentifier,
   SkuIdentifierImportResult,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   barcodeProblem,
   batchSummary,

@@ -24,7 +24,7 @@ import type {
   BundleComponentCheck,
   BundleComponentItem,
   BundleComponentProblem,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 
 function item(overrides: Partial<BundleComponentItem> = {}): BundleComponentItem {
   return {

@@ -1,7 +1,7 @@
 import type {
   RuleInput,
   TransitionOption,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 
 export const lifecycleStatusLabels: Record<string, string> = {
   DRAFT: '草稿',

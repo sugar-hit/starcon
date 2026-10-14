@@ -1,0 +1,1149 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Same-origin service base"
+    }
+  ],
+  "paths": {
+    "/crm/knowledge/versions/{versionId}/references": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "references",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CrmKnowledgeReference"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "recordReference",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmRecordReferenceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmKnowledgeReference"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/knowledge/versions/{versionId}/publish": {
+      "post": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "publish",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmPublishVersionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmKnowledgeVersion"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/knowledge/versions/{versionId}/close": {
+      "post": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "close",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "versionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCloseVersionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmKnowledgeVersion"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/knowledge/entries": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "entries",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "topicType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeArchived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CrmKnowledgeEntry"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "createEntry",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCreateEntryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmKnowledgeEntry"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/knowledge/entries/{entryId}/versions": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "versions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CrmKnowledgeVersion"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "createVersion",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrmCreateVersionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmKnowledgeVersion"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/knowledge/scopes": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "scopes",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CrmKnowledgeScope"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/knowledge/review-due": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "reviewDue",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "platformCode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyChangedAt",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmReviewDueReport"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/knowledge/entries/{entryId}": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "entry",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmKnowledgeEntryDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/knowledge/entries/{entryId}/references": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "entryReferences",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CrmKnowledgeReference"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/knowledge/entries/effective": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "effectiveEntries",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "shopId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CrmKnowledgeEntry"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/knowledge/capabilities": {
+      "get": {
+        "tags": [
+          "knowledge-base-controller"
+        ],
+        "operationId": "capabilities",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmKnowledgeCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CrmRecordReferenceInput": {
+        "required": [
+          "consumer"
+        ],
+        "type": "object",
+        "properties": {
+          "consumer": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sourceRef": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmKnowledgeReference": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryTitle": {
+            "type": "string"
+          },
+          "referencedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referencedAt": {
+            "type": "string"
+          },
+          "consumer": {
+            "type": "string"
+          },
+          "sourceRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmPublishVersionInput": {
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmKnowledgeVersion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "publishedBy": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "publishedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "referenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCloseVersionInput": {
+        "required": [
+          "effectiveTo"
+        ],
+        "type": "object",
+        "properties": {
+          "effectiveTo": {
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "CrmCreateEntryInput": {
+        "required": [
+          "categoryId",
+          "locale",
+          "platformCode",
+          "shopId",
+          "title",
+          "topicKey",
+          "topicType"
+        ],
+        "type": "object",
+        "properties": {
+          "topicKey": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "categoryName": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "locale": {
+            "minLength": 1,
+            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$",
+            "type": "string"
+          },
+          "platformCode": {
+            "minLength": 1,
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "type": "string"
+          },
+          "topicType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmKnowledgeEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "topicKey": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "topicType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "effectiveVersion": {
+            "$ref": "#/components/schemas/CrmKnowledgeVersion"
+          },
+          "versionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "referenceCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "CrmCreateVersionInput": {
+        "required": [
+          "answer",
+          "effectiveFrom",
+          "question",
+          "versionNo"
+        ],
+        "type": "object",
+        "properties": {
+          "versionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "question": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "answer": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "CrmKnowledgeScope": {
+        "type": "object",
+        "properties": {
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "entryCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CrmReviewDueEntry": {
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "topicKey": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "shopId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "shopName": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "platformCode": {
+            "type": "string"
+          },
+          "topicType": {
+            "type": "string"
+          },
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "question": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string"
+          },
+          "staleDays": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "referenceCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "CrmReviewDueReport": {
+        "type": "object",
+        "properties": {
+          "platformCode": {
+            "type": "string"
+          },
+          "policyChangedAt": {
+            "type": "string"
+          },
+          "criterion": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmReviewDueEntry"
+            }
+          }
+        }
+      },
+      "CrmKnowledgeEntryDetail": {
+        "type": "object",
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/CrmKnowledgeEntry"
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmKnowledgeVersion"
+            }
+          }
+        }
+      },
+      "CrmKnowledgeCapabilities": {
+        "type": "object",
+        "properties": {
+          "effectiveLookup": {
+            "type": "boolean"
+          },
+          "versionManagement": {
+            "type": "boolean"
+          },
+          "referenceRecords": {
+            "type": "boolean"
+          },
+          "platformReview": {
+            "type": "boolean"
+          },
+          "topicTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "consumers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

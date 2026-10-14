@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type {
   RuleInput,
   TransitionOption,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   operatorLabel,
   ruleDraftValid,

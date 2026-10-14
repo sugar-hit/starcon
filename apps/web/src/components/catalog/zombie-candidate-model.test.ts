@@ -3,7 +3,7 @@ import type {
   ZombieCandidate,
   ZombieCandidatePage,
   ZombieDimensionStatus,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   VERDICT_ACTIONS,
   VERDICT_LABELS,

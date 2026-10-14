@@ -9,7 +9,7 @@ import type {
   OAuthShopCandidateView,
   OAuthStartView,
   PlatformView,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from '@/lib/api';
 
 /**

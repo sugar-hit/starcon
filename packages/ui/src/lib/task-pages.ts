@@ -236,6 +236,20 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['同步订单', '审核', '交付履约'],
   },
   {
+    // 9.7.1.1 批发订单与账期。与 /orders 同属订单域，domain 取域级 'orders'，
+    // 导航条目由 SYSTEMS 的 children 从 IMPLEMENTED_TASK_PAGES 派生（见 nav-config），
+    // 所以这里**只**登记任务页，不需要改共享的导航常量文件。
+    // 刻意不是 /orders 的第三个 tab：那边是零售订单列表与手工录入（只读投影 / 零售录入），
+    // 本页是 B2B 录入 + 发货确认应收，账期应收按到期日排序（资金计划 12.1.2.2 取数顺序）。
+    href: '/orders/b2b',
+    implemented: true,
+    domain: 'orders',
+    label: '批发订单',
+    description: '按客户分级价与阶梯价录单，管理起订量、账期结算与开票对账需求。',
+    fields: ['订单号', '客户分级', '收款方式', '订单总额', '已确认应收', '账期到期日', '开票需求'],
+    workflow: ['试算阶梯价与起订量', '发货确认账期应收', '按账期开票对账'],
+  },
+  {
     href: '/orders/review',
     implemented: false,
     domain: 'orders',
@@ -560,6 +574,19 @@ export const TASK_PAGES: TaskPage[] = [
     workflow: ['筛选仓库', '核对货权与库存', '新增仓库'],
   },
   {
+    // 8.1.2.2 库位自动分配：按规则为入库商品推荐库位（残次品入残次库位是硬规则）。
+    // 与 8.1.2.1 库位树同属「仓库与库位」这个 L3 下的两个子功能，所以共用 domain
+    // 'warehouse'，由导航的 children 从 IMPLEMENTED_TASK_PAGES 派生 —— 同样只登记
+    // 任务页、不改共享的 nav-config.ts。
+    href: '/warehouse/location-allocations',
+    implemented: true,
+    domain: 'warehouse',
+    label: '库位自动分配',
+    description: '为入库商品推荐库位：同品类聚类、最短上架路径、容量与承重匹配，并给出推荐理由。',
+    fields: ['收货单', 'SKU', '质量状态', '目标库位', '容量承重', '推荐理由', '状态'],
+    workflow: ['选收货单', '看候选与理由', '指派库位'],
+  },
+  {
     href: '/warehouse/inbound',
     implemented: false,
     domain: 'warehouse',
@@ -630,6 +657,17 @@ export const TASK_PAGES: TaskPage[] = [
     description: '识别断货、滞销和超龄库存并安排处理。',
     fields: ['SKU', '仓库', '库龄区间', '安全库存', '预警类型', '负责人'],
     workflow: ['识别风险', '制定处置', '跟进结果'],
+  },
+  {
+    // 7.2.1.1 预占需求列表。与 ledger / aging 同属库存卷，按 href 排序插在 ledger 之后。
+    // 本条是**追加**：该文件是多车道共用的注册表，并入时按 href 求并。
+    href: '/inventory/reservation',
+    implemented: true,
+    domain: 'inventory',
+    label: '预占需求',
+    description: '查看订单履约、加工领料与其他占用的预占需求及剩余量、超时时长。',
+    fields: ['预占单号', '需求来源', 'SKU', '需求量', '剩余量', '状态', '超时时长'],
+    workflow: ['筛选需求', '核对剩余量', '跟进超时'],
   },
 ];
 export function findTaskPage(href: string) {

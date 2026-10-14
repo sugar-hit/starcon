@@ -18,7 +18,7 @@ import type {
   SkuMergePreview,
   SkuMergeRow,
   SkuMergeTrace,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   actionableReferences,
   blockReason,

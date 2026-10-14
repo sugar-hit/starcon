@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { OutboundBulkFailure, OutboundOrderCapabilities, OutboundOrderSummary } from '../../../../../packages/api-contracts/src/catalog';
+import type { OutboundBulkFailure, OutboundOrderCapabilities, OutboundOrderSummary } from '../../../../../packages/api-contracts/src/index';
 import {
   canCancel,
   canRequestPicking,

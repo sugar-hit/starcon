@@ -39,7 +39,9 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(HERE, '..', '..');
+// 默认就是脚本所在的仓库；LANE_ROOT 仅供 lane-*.itest.mjs 把整条流水线
+// 指向一个一次性仓库来跑端到端断言（不设时行为完全不变）。
+const ROOT = process.env.LANE_ROOT ? resolve(process.env.LANE_ROOT) : join(HERE, '..', '..');
 const STATE_DIR = join(ROOT, '.dev-agent');
 const STATE_FILE = join(STATE_DIR, 'lanes.json');
 const WORKTREE_DIR = join(ROOT, '.worktrees');
@@ -198,7 +200,103 @@ function readUpstreamMap() {
   return map;
 }
 
-/* ── 模块选取：L3 锚点互不相同 + 上游必须已交付 ───────────────────────── */
+/* ── 卷 → 后端主责服务（微服务盲区闸）─────────────────────────────────────
+ *
+ * 为什么需要这道闸（2026-10-07 22:52 / 23:03 实测）：
+ * `plan` 原来只检查「上游已交付 + L3 锚点不同」，**不检查模块该落到哪个微服务**，
+ * 而那个服务可能压根不在集成头里。集成头 backend/services 当时只有
+ * catalog / channel / identity / warehouse —— 没有 trade。
+ *
+ * 于是卷 09（订单履约，主责 trade）与卷 11（售后，主责 trade）的车道**注定 BLOCK**：
+ * 一条车道 40 分钟、烧掉一个 worktree 和一个 Flyway 版本号，产出为零。
+ * 2026-10-07 一晚白烧了 9.3.2.2(V84)、11.4.2.2(V85)、7.8.1.1 三条。
+ *
+ * 数据源不是在这里硬编码一张表，而是读蓝图 README 里本来就有的
+ * 「后端主责服务」列（docs/product/capability-blueprint/README.md）。
+ * 那张表由人维护、与蓝图同步；在这里另抄一份只会漂移。
+ *
+ * 判定规则：**卷的主责服务（列表第一项）必须已存在于集成头**。
+ * 列表顺序即优先级 —— 「trade + channel」表示履约归 trade、channel 只是协同方。
+ * 若改成「任一存在即可」，卷 09 会因为 channel 存在而被放行，
+ * worker 就会把履约逻辑写进 channel（平台接入服务），那才是真正的架构事故。
+ *
+ * 读不到 / 解析不出映射时**直接失败**，绝不静默放行 ——
+ * 静默放行正是这道闸要消灭的那种失败。
+ */
+
+/** 卷号（01..18）→ 主责服务标识；主责服务不是 ASCII 标识符（如「前端聚合」）时返回 null */
+function readVolumeOwners() {
+  const readme = join(BLUEPRINT_DIR, 'README.md');
+  if (!existsSync(readme)) {
+    throw new Error(
+      `找不到 ${readme}：无法判定卷的后端主责服务，微服务盲区闸拒绝放行任何模块。`,
+    );
+  }
+  const owners = new Map();
+  for (const line of readFileSync(readme, 'utf8').split('\n')) {
+    // | 09  | **订单履约** | 核心业务域 | ... | trade + channel | [09](...) |
+    const cells = line.split('|').map((c) => c.trim());
+    if (cells.length < 6) continue;
+    const vol = /^(\d{1,2})$/.exec(cells[1])?.[1];
+    if (!vol) continue; // 表头行（cells[1] 是 '#'）与分隔行（'---'）都会在这里被滤掉，
+    // 不需要再靠「单元格加粗」这种排版特征去猜 —— 2026-10-07 实测那种启发式
+    // 会把任何未加粗的卷名整行丢掉。
+    const raw = cells[5]; // 「后端主责服务」列
+    // 去掉括注（catalog（finance 供数）→ catalog），再按 + 拆开取第一项
+    const primary = raw
+      .replace(/[（(][^）)]*[）)]/g, '')
+      .split('+')
+      .map((s) => s.trim())
+      .filter(Boolean)[0];
+    // README 里卷号是零填充的 `09`，模块 ID 是 `9.3.2.2` —— 两侧都归一到不填充才查得到。
+    // 不归一时卷 4/6/8/9 会被判成「README 里没有这一卷」而全被误封。
+    owners.set(String(Number(vol)), primary ?? null);
+  }
+  if (owners.size === 0) {
+    throw new Error(`${readme} 里一行「后端主责服务」都没解析出来，闸门失效，拒绝放行。`);
+  }
+  return owners;
+}
+
+/** 该服务是否已经存在于集成头（**不是**磁盘上有没有目录 —— 那可能是别人 worktree 里的半成品） */
+function serviceInHead(name) {
+  if (!/^[a-z][a-z0-9_-]*$/.test(name)) return false;
+  const out = git(['ls-tree', '--name-only', INTEGRATION, 'backend/services/'], ROOT, true);
+  // ls-tree 返回的是完整路径 `backend/services/<name>`，不是裸目录名 ——
+  // 2026-10-07 实测：不剥前缀时 channel 会被判成「不在集成头」，
+  // 于是卷 16/14/15 这些真正可做的卷全被误封。
+  return (out ?? '')
+    .split('\n')
+    .map((s) => s.trim().replace(/^backend\/services\//, ''))
+    .includes(name);
+}
+
+/**
+ * 预判一个模块所属卷的服务是否可落地。
+ * 返回 null = 可排；返回字符串 = 不可排的原因。
+ */
+function serviceGate() {
+  const owners = readVolumeOwners();
+  const memo = new Map();
+  return (id) => {
+    const vol = String(Number(id.split('.')[0]));
+    if (memo.has(vol)) return memo.get(vol);
+    const primary = owners.get(vol);
+    let verdict = null;
+    if (!owners.has(vol)) {
+      verdict = `卷 ${vol} 在蓝图 README 里没有「后端主责服务」条目，无法判定落地服务`;
+    } else if (!primary) {
+      // 主责不是服务标识符（如卷 01「前端聚合 + 各服务投影」）→ 纯前端聚合层，照排
+      verdict = null;
+    } else if (!serviceInHead(primary)) {
+      verdict = `卷 ${vol} 主责服务 ${primary} 不在集成头`;
+    }
+    memo.set(vol, verdict);
+    return verdict;
+  };
+}
+
+/* ── 模块选取：L3 锚点互不相同 + 上游必须已交付 + 落地服务必须已存在 ─────── */
 
 const l3Of = (id) => id.split('.').slice(0, 3).join('.');
 
@@ -222,6 +320,11 @@ function pickModules(count, ledger, state) {
 
   const delivered = new Set(ledger.filter((r) => r.status === '已交付').map((r) => r.id));
   const upstream = readUpstreamMap();
+  const gate = serviceGate();
+
+  // 服务未落地的卷：既不排车道，也不烧版本号。顺带把原因带出去，
+  // 否则 plan 返回空数组时，调度器只会以为「没活了」，看不出是整体被服务缺口堵死。
+  const serviceBlocked = new Map();
 
   const unfinished = ledger.filter(
     (r) => (r.status === '未开发' || r.status === '进行中') && !taken.has(r.id),
@@ -244,6 +347,17 @@ function pickModules(count, ledger, state) {
       if (picked.length >= count) return;
       const l3 = l3Of(r.id);
       if (usedL3.has(l3)) continue;
+      // 落地微服务必须已存在于集成头，否则这条车道注定 BLOCK
+      const blocked = gate(r.id);
+      if (blocked) {
+        const vol = String(Number(r.id.split('.')[0]));
+        if (!serviceBlocked.has(vol)) {
+          serviceBlocked.set(vol, { reason: blocked, sample: [r.id] });
+        } else {
+          serviceBlocked.get(vol).sample.push(r.id);
+        }
+        continue;
+      }
       // 已知阻塞项（证据列带「阻塞：」）先跳过，除非实在凑不满
       if (/^阻塞[：:]/.test(r.evidence)) continue;
       usedL3.add(l3);
@@ -253,21 +367,53 @@ function pickModules(count, ledger, state) {
 
   tryTake(inFlight);
 
-  // 再按阶段顺序补齐：同一阶段内按模块 ID 升序
-  for (const stage of STAGE_ORDER) {
-    if (picked.length >= count) break;
-    const cands = unfinished
-      .filter((r) => r.stage === stage && r.status !== '进行中' && upstreamReady(r))
-      .sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true }));
-    tryTake(cands);
-  }
+  // 关键路径优先：依赖深度降序；同深度仍按阶段顺序，再按模块 ID 升序。
+  //
+  // 为什么改（2026-10-07 22:04 实测）：原逻辑走 STAGE_ORDER，同阶段内按 ID 升序。
+  // 而 D7 的 ID 天然比 D4 大得多，于是「阶段靠后 + ID 靠后」的模块永远排在最后 ——
+  // 可它们恰恰是下游最多、解锁面最大的那批。实测同样 6 个名额：
+  //
+  //   旧（阶段顺序）  平均依赖深度 1.2，且 6 个里 4 个 depth=0（蓝图没写上游）
+  //   新（深度降序）  平均依赖深度 4.2
+  //
+  // 依赖深度 = 该模块到依赖链起点的最长路径长度。**与上游何时交付无关**：
+  // 深度衡量的是「做完它能解锁多少下游」，而候选池已经过 upstreamReady 过滤，
+  // 所以只看池内模块之间谁的解锁面更大。
+  const ledgerIds = new Set(ledger.map((r) => r.id));
+  const depth = new Map();
+
+  const depthOf = (id, stack = new Set()) => {
+    if (depth.has(id)) return depth.get(id);
+    if (stack.has(id)) return 0; // 环保护：蓝图写坏时不要死循环
+    stack.add(id);
+    const us = (upstream.get(id) ?? []).filter((u) => ledgerIds.has(u));
+    const d = us.length === 0 ? 0 : 1 + Math.max(...us.map((u) => depthOf(u, stack)));
+    stack.delete(id);
+    depth.set(id, d);
+    return d;
+  };
+
+  const stageRank = (s) => {
+    const i = STAGE_ORDER.indexOf(s);
+    return i === -1 ? STAGE_ORDER.length : i;
+  };
+
+  const cands = unfinished
+    .filter((r) => r.status !== '进行中' && upstreamReady(r))
+    .sort(
+      (a, b) =>
+        depthOf(b.id) - depthOf(a.id) ||
+        stageRank(a.stage) - stageRank(b.stage) ||
+        a.id.localeCompare(b.id, 'en', { numeric: true }),
+    );
+  tryTake(cands);
 
   // 仍然凑不满才动用阻塞项（明确标注，让任务书知道要先修数据模型）
   if (picked.length < count) {
     tryTake(unfinished.filter((r) => /^阻塞[：:]/.test(r.evidence)));
   }
 
-  return picked;
+  return { picked, serviceBlocked: [...serviceBlocked].map(([volume, v]) => ({ volume, ...v })) };
 }
 
 /* ── 车道生命周期 ─────────────────────────────────────────────────────── */
@@ -480,11 +626,14 @@ if (cmd === 'plan') {
     l.reDispatched = (l.reDispatched ?? 0) + 1;
   }
 
-  const picks = pickModules(count - orphaned.length, ledger, state);
+  const { picked, serviceBlocked } = pickModules(count - orphaned.length, ledger, state);
   const base = git(['rev-parse', state.integrationBranch]);
   const planned = [];
 
-  for (const row of picks) {
+  // --dry-run：只算不建。用来回答「为什么 plan 排不出来」而不留 worktree 和分支。
+  const dryRun = flag('--dry-run') === true;
+
+  for (const row of picked) {
     const id = row.id;
     if (state.lanes[id] && ['running', 'ready'].includes(state.lanes[id].state)) continue;
 
@@ -492,15 +641,17 @@ if (cmd === 'plan') {
     const wt = laneWorktree(id);
     const version = nextFree();
 
-    // 车道分支已存在（上一次跑崩了留的）就直接复用，不重新切
-    const branchExists = git(['rev-parse', '--verify', branch], ROOT, true);
-    if (!branchExists) git(['branch', branch, base]);
+    if (!dryRun) {
+      // 车道分支已存在（上一次跑崩了留的）就直接复用，不重新切
+      const branchExists = git(['rev-parse', '--verify', branch], ROOT, true);
+      if (!branchExists) git(['branch', branch, base]);
 
-    // worktree 已存在就直接复用
-    if (!existsSync(wt)) {
-      mkdirSync(WORKTREE_DIR, { recursive: true });
-      git(['worktree', 'add', wt, branch]);
-      sh('pnpm install --prefer-offline', wt);
+      // worktree 已存在就直接复用
+      if (!existsSync(wt)) {
+        mkdirSync(WORKTREE_DIR, { recursive: true });
+        git(['worktree', 'add', wt, branch]);
+        sh('pnpm install --prefer-offline', wt);
+      }
     }
 
     state.lanes[id] = {
@@ -520,15 +671,19 @@ if (cmd === 'plan') {
       heartbeatAt: new Date().toISOString(),
       note: null,
     };
+    // dry-run 也要把「本该排出来的」报出来 —— 只 push 不落盘。
+    // 早先写成 `if (!dryRun) planned.push(...)`，结果 --dry-run 的 newlyPlanned 恒为空，
+    // 看起来像「闸门把能干的活也挡掉了」，其实是自己把结果吞了（2026-10-07 实测）。
     planned.push(state.lanes[id]);
   }
 
-  writeState(state);
+  if (!dryRun) writeState(state);
   console.log(
     JSON.stringify(
       {
         ok: true,
         integration: state.integrationBranch,
+        dryRun: dryRun || undefined,
         toDispatch: [...orphaned, ...planned].map((l) => ({
           id: l.id,
           name: l.name,
@@ -541,6 +696,7 @@ if (cmd === 'plan') {
           redispatched: l.reDispatched ?? 0,
         })),
         newlyPlanned: planned.map((l) => l.id),
+        serviceBlocked,
         note: planned.length === 0 && orphaned.length === 0 ? '没有可并行的未开发模块' : null,
       },
       null,
@@ -748,7 +904,13 @@ if (cmd === 'merge-ready') {
         conflicts: conflicts ? conflicts.split('\n').filter(Boolean) : [],
       });
       console.error(`✗ ${lane.id} 并入冲突：${conflicts || '(未知)'}`);
-      // 冲突留给人工/下一轮处理，先把这辆车道挪出 ready，避免反复重试
+      // 冲突留给人工/下一轮处理，先把这辆车道挪出 ready，避免反复重试。
+      //
+      // 但**必须立刻 abort**：不 abort 的话 MERGE_HEAD 残留、主工作区保持脏，
+      // 于是 ① 下一个 tick 的 merge-ready 会在「主工作区不干净，拒绝切分支」处直接退出，
+      // 并入通道彻底堵死；② 本循环里下一条车道会在同一棵冲突树上再 merge，
+      // 报出与它自身毫无关系的级联冲突。2026-10-07 一晚被这个缺陷撂了两次。
+      git(['merge', '--abort'], ROOT, true);
       lane.state = 'conflict';
       lane.conflicts = conflicts ? conflicts.split('\n').filter(Boolean) : [];
       continue;

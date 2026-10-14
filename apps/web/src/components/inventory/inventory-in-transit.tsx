@@ -20,8 +20,8 @@ import {
   Segmented,
   StatCard,
 } from '@starcon/ui';
-import type { InTransitDetail, InTransitRow } from '../../../../../packages/api-contracts/src/catalog';
-import type { LotRef } from '../../../../../packages/api-contracts/src/catalog';
+import type { InTransitDetail, InTransitRow } from '../../../../../packages/api-contracts/src/index';
+import type { LotRef } from '../../../../../packages/api-contracts/src/index';
 import {
   arriveBlockers,
   arriveInTransitLeg,

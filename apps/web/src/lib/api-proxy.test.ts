@@ -122,7 +122,77 @@ describe('收货单的具体路径形状', () => {
     expect(resolveOk('warehouse/inventory/buckets')).toBe(true);
   });
 
-  it('不误放行不存在的兄弟模块路径', () => {
-    expect(resolveOk('warehouse/goods-receipt-discrepancies')).toBe(false);
+  it('8.2.1.2 收货差异已交付：原本挂在拒绝清单上的路径转为放行', () => {
+    // 这一条曾以「不存在的兄弟模块路径」的形式留在拒绝清单里 —— 那正是 8.2.1.2
+    // 尚未交付时的状态。交付后必须把它改成正向断言，否则拒绝清单就变成一条死链断言：
+    // 模块已经实现、页面却在浏览器里被代理 404，而 typecheck / lint / vitest 全绿。
+    expect(resolveOk('warehouse/goods-receipt-discrepancies')).toBe(true);
+    expect(resolveOk('warehouse/goods-receipt-discrepancies/capabilities')).toBe(true);
+    expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}`)).toBe(true);
+    for (const action of ['evidence', 'decide', 'claim', 'close']) {
+      expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}/${action}`)).toBe(true);
+    }
+    expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}/claim/submit`)).toBe(true);
+    expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}/claim/withdraw`)).toBe(true);
+  });
+
+  it('差异处理路径同样没有放行删除与未实现的动作形状', () => {
+    expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}/purge`)).toBe(false);
+    expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}/revise`)).toBe(false);
+    expect(resolveOk(`warehouse/goods-receipt-discrepancies/${UUID}/claim/settle`)).toBe(false);
+  });
+
+  it('差异处理路径与收货单路径互不吃掉', () => {
+    // 两组前缀首段不同但极其接近（goods-receipts vs goods-receipt-discrepancies），
+    // 正则里少写一个 `|` 或多写一个 `?` 就会让其中一组静默失放行。
+    expect(resolveOk('warehouse/goods-receipts')).toBe(true);
+    expect(resolveOk(`warehouse/goods-receipts/${UUID}/receive`)).toBe(true);
+    expect(resolveOk('warehouse/goods-receipt-discrepancies')).toBe(true);
+  });
+});
+
+/**
+ * 8.3.1.2 出库单详情的 api-proxy 白名单回归。
+ *
+ * <p>8.3.1.1 的白名单分支是 {@code outbound-orders(?:\/(?:capabilities|pick-requests|print|cancel)|\/[0-9a-f-]+\/transition)?}，
+ * 本车道往里**追加**了详情与 detail-capabilities 两支。`api-proxy.ts` 是并行车道共同的
+ * 累积型文件，所以这里既验证新增的两支放行，也验证**8.3.1.1 已登记的分支没被改掉** ——
+ * 取错一侧会静默删掉已交付的路由，而 typecheck / lint / vitest 仍全绿（白名单只在浏览器端生效）。
+ */
+describe('8.3.1.2 出库单详情调用点在 api-proxy 白名单里', () => {
+  const sites = callSitesIn('../components/inventory/outbound-order-detail-model.ts');
+
+  it('确实从组件里挖到了调用点（防止正则写坏后静默通过）', () => {
+    expect(sites.length).toBeGreaterThan(0);
+    expect(sites.every((s) => s.startsWith(WAREHOUSE_PREFIX))).toBe(true);
+  });
+
+  it('每条真实调用路径都应被放行', () => {
+    for (const site of sites) {
+      expect(resolveOk(site), `${site} 未登记`).toBe(true);
+    }
+  });
+
+  it('详情与详情能力声明放行', () => {
+    expect(resolveOk(`warehouse/inventory/outbound-orders/${UUID}`)).toBe(true);
+    expect(resolveOk('warehouse/inventory/outbound-orders/detail-capabilities')).toBe(true);
+  });
+
+  it('不误伤 8.3.1.1 已登记的分支（累积型文件只追加不改写）', () => {
+    // 这四条是 8.3.1.1 交付的路由。追加详情时若把分支替换掉，
+    // 表现是列表页 404 —— 而 typecheck / lint / vitest 全绿，因为白名单只在浏览器端生效。
+    expect(resolveOk('warehouse/inventory/outbound-orders')).toBe(true);
+    expect(resolveOk('warehouse/inventory/outbound-orders/capabilities')).toBe(true);
+    expect(resolveOk('warehouse/inventory/outbound-orders/pick-requests')).toBe(true);
+    expect(resolveOk('warehouse/inventory/outbound-orders/print')).toBe(true);
+    expect(resolveOk('warehouse/inventory/outbound-orders/cancel')).toBe(true);
+    expect(resolveOk(`warehouse/inventory/outbound-orders/${UUID}/transition`)).toBe(true);
+  });
+
+  it('没有放行删除形状：出库单是履约凭证，只能取消留痕', () => {
+    expect(resolveOk(`warehouse/inventory/outbound-orders/${UUID}/purge`)).toBe(false);
+    expect(resolveOk(`warehouse/inventory/outbound-orders/${UUID}/delete`)).toBe(false);
+    // 未知动作后缀一律不放行，即使有人发明 /{id}/fulfil 也会 404。
+    expect(resolveOk(`warehouse/inventory/outbound-orders/${UUID}/fulfil`)).toBe(false);
   });
 });

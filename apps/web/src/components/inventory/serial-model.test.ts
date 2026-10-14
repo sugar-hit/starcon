@@ -19,7 +19,7 @@ import type {
   SerialIssue,
   SerialStats,
   SerialValidationResult,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 
 /**
  * 7.3.2.1 序列号前端模型的纯函数测试。

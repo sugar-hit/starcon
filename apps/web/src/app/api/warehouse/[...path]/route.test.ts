@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { DELETE, GET, POST } from './route';
+import { DELETE, GET, POST, PUT } from './route';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -187,6 +187,137 @@ it('warehouse 的全部路由被放行且转发到 warehouse 服务', async () =
   }
 });
 
+it('10.4.1.1 头程发运单白名单：从模型文件反向抽取的每条调用点都被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // 路径是从 first-mile-shipment-model.ts 里反向抽取的，不是照着正则抄的 ——
+  // 少放行一个，页面就只在浏览器里静默 404（typecheck / lint / vitest 全绿都发现不了）。
+  for (const path of [
+    'warehouse/first-mile-shipments',
+    'warehouse/first-mile-shipments/capabilities',
+    'warehouse/first-mile-shipments/source-candidates',
+    `warehouse/first-mile-shipments/${id}`,
+    `warehouse/first-mile-shipments/${id}/transit-legs`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  // 建单与三个写动作走 POST：白名单只看路径形状不看方法，
+  // 这里显式跑 POST 证明写动作也真的被转发（而不是只放行了读）。
+  for (const path of [
+    'warehouse/first-mile-shipments',
+    `warehouse/first-mile-shipments/${id}/confirm`,
+    `warehouse/first-mile-shipments/${id}/dispatch`,
+    `warehouse/first-mile-shipments/${id}/cancel`,
+  ]) {
+    expect(
+      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+    ).toBe(200);
+  }
+  // 改单走 PUT：后端 FirstMileShipmentController 的改单端点是 @PutMapping
+  expect(
+    (await PUT(request(`warehouse/first-mile-shipments/${id}`, 'PUT'), {
+      params: { path: ['warehouse', 'first-mile-shipments', id] },
+    })).status,
+  ).toBe(200);
+});
+
+it('头程发运单白名单：后端不存在的子路径仍被拒绝', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  // 后端只有上面那 10 个端点。多一段 / 少一个动作后缀、以及看起来合理的推导路径
+  // （tracking / customs / forecast）后端都不存在，放行它们等于让界面以为已交付 ——
+  // 放行不该存在的路径比 404 更糟。
+  for (const path of [
+    `warehouse/first-mile-shipments/${'11111111-1111-1111-1111-111111111111'}/tracking`,
+    `warehouse/first-mile-shipments/${'11111111-1111-1111-1111-111111111111'}/customs`,
+    `warehouse/first-mile-shipments/${'11111111-1111-1111-1111-111111111111'}/dispatch/reverse`,
+    // capabilities / source-candidates 是字面量子路径，不能再往下挂一段
+    `warehouse/first-mile-shipments/capabilities/${'11111111-1111-1111-1111-111111111111'}`,
+    `warehouse/first-mile-shipments/source-candidates/${'11111111-1111-1111-1111-111111111111'}`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+    ).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it('10.4.1.2 在途跟踪白名单：从模型文件反向抽取的每条调用点都被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const tid = '11111111-1111-1111-1111-111111111111';
+  const aid = '22222222-2222-2222-2222-222222222222';
+  // 路径是从 transit-tracking-model.ts 里反向抽取的，不是照着正则抄的 ——
+  // 少放行一个，页面就只在浏览器里静默 404（typecheck / lint / vitest 全绿都发现不了）。
+  for (const path of [
+    'warehouse/transit-trackings',
+    'warehouse/transit-trackings/capabilities',
+    'warehouse/transit-trackings/alerts',
+    'warehouse/transit-trackings/alerts/evaluate-all',
+    'warehouse/transit-trackings/thresholds',
+    `warehouse/transit-trackings/${tid}`,
+    `warehouse/transit-trackings/${tid}/events`,
+    `warehouse/transit-trackings/${tid}/receipt`,
+    `warehouse/transit-trackings/${tid}/close`,
+    `warehouse/transit-trackings/${tid}/alerts/evaluate`,
+    `warehouse/transit-trackings/alerts/${aid}/acknowledge`,
+    `warehouse/transit-trackings/alerts/${aid}/close`,
+    `warehouse/transit-trackings/thresholds/${tid}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  // 建跟踪与节点登记走 POST：白名单只看路径形状不看方法，
+  // 这里显式跑 POST 证明写动作也真的被转发（而不是只放行了读）。
+  for (const path of [
+    'warehouse/transit-trackings',
+    `warehouse/transit-trackings/${tid}/events`,
+    `warehouse/transit-trackings/${tid}/receipt`,
+    `warehouse/transit-trackings/${tid}/close`,
+    `warehouse/transit-trackings/${tid}/alerts/evaluate`,
+    'warehouse/transit-trackings/alerts/evaluate-all',
+    `warehouse/transit-trackings/alerts/${aid}/acknowledge`,
+    `warehouse/transit-trackings/alerts/${aid}/close`,
+  ]) {
+    expect(
+      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+    ).toBe(200);
+  }
+  // 改阈值走 PUT：后端 InTransitTrackingController 的改阈值端点是 @PutMapping
+  expect(
+    (await PUT(request(`warehouse/transit-trackings/thresholds/${tid}`, 'PUT'), {
+      params: { path: ['warehouse', 'transit-trackings', 'thresholds', tid] },
+    })).status,
+  ).toBe(200);
+});
+
+it('10.4.1.2 在途跟踪白名单：后端不存在的子路径仍被拒绝', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const tid = '11111111-1111-1111-1111-111111111111';
+  // 后端只有上面那 13 个端点。多一段 / 少一个动作后缀、以及看起来合理的推导路径
+  // （sync / cancel / forecast）在后端都不存在，放行它们等于让界面以为外部同步已交付 ——
+  // 放行不该存在的路径比 404 更糟。
+  for (const path of [
+    // 外部同步连接器（10.4.2.1）**未交付**：刻意不放行 sync / import 形状，
+    // 否则界面上会出现一个点下去必然 404 的「同步」按钮。
+    `warehouse/transit-trackings/${tid}/sync`,
+    `warehouse/transit-trackings/${tid}/cancel`,
+    'warehouse/transit-trackings/forecast',
+    'warehouse/transit-trackings/sync',
+    // capabilities / alerts / thresholds / evaluate-all 是字面量子路径，不能再往下挂一段。
+    `warehouse/transit-trackings/capabilities/${tid}`,
+    `warehouse/transit-trackings/alerts/${tid}`,
+    `warehouse/transit-trackings/alerts/evaluate-all/${tid}`,
+    `warehouse/transit-trackings/thresholds/${tid}/history`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+    ).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
 it('在途库存白名单：未交付的子路径仍被拒绝', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
@@ -240,20 +371,228 @@ it('8.1.1.1 仓库列表的四个调用形状都被放行', async () => {
   ).toBe(200);
 });
 
-it('8.1.1.1 刻意不放行仓库详情与改删形状', async () => {
+it('8.1.1.2 仓库详情与库位清单被放行，且不越界到未交付的子路径', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // 8.1.1.2 已交付，详情与它下面的两个子资源必须逐条钉住。
+  // 白名单只在浏览器端生效，单测直连服务层发现不了漏登记 ——
+  // 少放行一个的现场表现是「页面进了控制塔却只加载出骨架」，而且四道 CI 全绿。
+  for (const path of [
+    `warehouse/facilities/${id}`,
+    `warehouse/facilities/${id}/locations`,
+    `warehouse/facilities/${id}/entrypoints`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行`).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 改基础信息与地址走 PUT 同一路径
+  expect(
+    (
+      await PUT(request(`warehouse/facilities/${id}`, 'PUT'), {
+        params: { path: ['warehouse', 'facilities', id] },
+      })
+    ).status,
+  ).toBe(200);
+  // 8.1.1.1 已交付的四个形状一条都不能被这次放宽挤掉：白名单是求并，不是二选一。
+  for (const path of [
+    'warehouse/facilities',
+    'warehouse/facilities/options',
+    'warehouse/facilities/capabilities',
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 被详情车道的改动挤掉了`,
+    ).toBe(200);
+  }
+  expect(
+    (await POST(request('warehouse/facilities', 'POST'), { params: { path: ['warehouse', 'facilities'] } }))
+      .status,
+  ).toBe(200);
+});
+
+it('8.1.1.2 刻意不放行未交付的子路径', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
   const id = '11111111-1111-1111-1111-111111111111';
-  // 详情属 8.1.1.2、改仓库属性属 8.1.1.2、行为参数属 8.1.1.3，三者都未交付。
-  // 放行这些形状会让界面以为「按 id 取单仓」「能改能删仓库」已经可用 ——
+  // 库位树属 8.1.2.1，尚未交付。放行这个形状会让界面以为库位容量已经能维护 ——
   // 放行不该存在的路径比 404 更糟。
-  for (const path of [`warehouse/facilities/${id}`, 'warehouse/facilities/wrong-segment']) {
+  //
+  // {uuid}/config 原本也在这张拒绝清单里（8.1.1.2 交付时写的是「行为参数属 8.1.1.3、
+  // 尚未交付」）。8.1.1.3 交付后它进了放行清单，由下面那组用例钉住 ——
+  // 那就是 8.1.1.2 文件头点名要本条车道兑现的交接。
+  for (const path of [
+    `warehouse/facilities/${id}/locations/capacity`,
+    'warehouse/facilities/wrong-segment',
+  ]) {
     expect(
       (await GET(request(path), { params: { path: path.split('/') } })).status,
       `${path} 不应被放行`,
     ).toBe(404);
   }
   expect(fetcher).not.toHaveBeenCalled();
+});
+
+/**
+ * 8.1.1.3 仓库配置：六个真实调用形状逐条钉住。
+ *
+ * <p>白名单是**按路径**登记的，不区分方法 —— 同一个 pattern 覆盖 GET/PUT/POST/DELETE，
+ * 方法原样透传给后端。所以这里显式跑 GET、PUT、POST 三种方法，
+ * 证明写形状也真的被转发（而不是只放行了读）。
+ *
+ * <p>路径是从 `components/warehouse/warehouse-config-model.ts` **反向抽取**的真实调用点，
+ * 不是照着正则抄的 —— 少放行一个，前端就只在浏览器里静默 404
+ * （typecheck / lint / vitest 全绿都发现不了）。
+ */
+it('8.1.1.3 仓库配置的调用形状都被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const shiftId = '22222222-2222-2222-2222-222222222222';
+  for (const path of [
+    `warehouse/facilities/${id}/config`,
+    `warehouse/facilities/${id}/config/options`,
+    `warehouse/facilities/${id}/config/impacts`,
+    `warehouse/facilities/${id}/config/changes`,
+    `warehouse/facilities/${id}/config/shifts`,
+    `warehouse/facilities/${id}/config/shifts/${shiftId}`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行`).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 改作业参数走 PUT /{id}/config（整份替换，不是逐字段补丁）
+  expect(
+    (
+      await PUT(request(`warehouse/facilities/${id}/config`, 'PUT'), {
+        params: { path: ['warehouse', 'facilities', id, 'config'] },
+      })
+    ).status,
+  ).toBe(200);
+  // 新建班次走 POST /{id}/config/shifts
+  expect(
+    (
+      await POST(request(`warehouse/facilities/${id}/config/shifts`, 'POST'), {
+        params: { path: ['warehouse', 'facilities', id, 'config', 'shifts'] },
+      })
+    ).status,
+  ).toBe(200);
+  // 改班次 / 停用走 PUT /{id}/config/shifts/{shiftId} —— 两段 uuid 必须真的匹配上，
+  // 否则单段 config 分支会把半截吃掉、把 shiftId 留在匹配之外。
+  expect(
+    (
+      await PUT(request(`warehouse/facilities/${id}/config/shifts/${shiftId}`, 'PUT'), {
+        params: { path: ['warehouse', 'facilities', id, 'config', 'shifts', shiftId] },
+      })
+    ).status,
+  ).toBe(200);
+});
+
+it('8.1.1.3 仓库配置：不越界到后端不存在的子路径', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const shiftId = '22222222-2222-2222-2222-222222222222';
+  // 后端 WarehouseConfigController 只有上面那六个形状。多一段 / 少一个动作后缀、
+  // 以及看起来合理的推导路径（config/history、config/schedules、config/roster…）
+  // 在后端都不存在，放行它们会让界面以为已交付 —— 放行不该存在的路径比 404 更糟。
+  //
+  // 特别说 roster：8.1.1.2 的证据栏点名「人员花名册与排班无表」，而 8.1.1.3 只建了
+  // **班次**（工作时段）。花名册的真相来源在 identity（成员关系），
+  // 在本服务再建一份就是造第二个真相来源，所以这条形状刻意不放行。
+  for (const path of [
+    `warehouse/facilities/${id}/config/history`,
+    `warehouse/facilities/${id}/config/roster`,
+    `warehouse/facilities/${id}/config/schedules`,
+    `warehouse/facilities/${id}/config/picking-strategy`,
+    `warehouse/facilities/${id}/config/review-ratio`,
+    `warehouse/facilities/${id}/config/shifts/${shiftId}/retire`,
+    `warehouse/facilities/${id}/config/shifts/${shiftId}/disable`,
+    // options / impacts / changes 是字面量子路径，不能再往下挂一段
+    `warehouse/facilities/${id}/config/options/${shiftId}`,
+    `warehouse/facilities/${id}/config/impacts/${shiftId}`,
+    `warehouse/facilities/${id}/config/changes/${shiftId}`,
+    // config 本身也不能再往下多挂一段
+    `warehouse/facilities/${id}/config/${shiftId}/shifts`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 不应被放行`,
+    ).toBe(404);
+  }
+  // DELETE 落到已登记的形状上由后端裁决：代理只看路径不看方法，
+  // 后端没有 DELETE 端点会返回 405 —— 「配置不可删」的两道真实防线在服务端与 V104。
+  const notAllowed = await DELETE(
+    request(`warehouse/facilities/${id}/config`, 'DELETE'),
+    { params: { path: ['warehouse', 'facilities', id, 'config'] } },
+  );
+  expect(notAllowed.status).not.toBe(404);
+  expect(fetcher).toHaveBeenCalledTimes(1);
+});
+
+it('8.1.1.3 仓库配置放行后，8.1.1.1 与 8.1.1.2 的形状一条都没被挤掉', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // 白名单是求并，不是二选一。三条车道各自往同一行正则上追加，
+  // 少一条别人的形状就等于那个页面在浏览器里静默 404。
+  for (const path of [
+    'warehouse/facilities',
+    'warehouse/facilities/options',
+    'warehouse/facilities/capabilities',
+    `warehouse/facilities/${id}`,
+    `warehouse/facilities/${id}/locations`,
+    `warehouse/facilities/${id}/entrypoints`,
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 被仓库配置车道的改动挤掉了`,
+    ).toBe(200);
+  }
+  expect(
+    (await POST(request('warehouse/facilities', 'POST'), {
+      params: { path: ['warehouse', 'facilities'] },
+    })).status,
+  ).toBe(200);
+  expect(
+    (await PUT(request(`warehouse/facilities/${id}`, 'PUT'), {
+      params: { path: ['warehouse', 'facilities', id] },
+    })).status,
+  ).toBe(200);
+});
+
+/**
+ * 白名单只管**路径形状**，不管 HTTP 方法 —— 这是 api-proxy 的既有设计
+ * （同一个 pattern 覆盖 GET/PUT/POST/DELETE，方法原样透传给后端）。
+ *
+ * <p>所以「仓库不能被删」这条纪律的落点**不在**白名单，而在后端：
+ * DELETE /warehouse/facilities/{id} 没有对应端点，由 Spring 返回 405。
+ * 本模块因此不给代理层加任何「拦 DELETE」的特例：那会让代理的行为与
+ * 其余所有前缀不一致，而真正需要拒绝的方法本来就该由拥有该端点的服务裁决。
+ */
+it('DELETE 落到同一个路径形状上由后端裁决而不是由代理拦', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('', { status: 405 })));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const response = await DELETE(request(`warehouse/facilities/${id}`, 'DELETE'), {
+    params: { path: ['warehouse', 'facilities', id] },
+  });
+  expect(response.status).toBe(405);
+  expect(fetcher).toHaveBeenCalledWith(
+    expect.stringContaining(`:8084/warehouse/facilities/${id}`),
+    expect.objectContaining({ method: 'DELETE' }),
+  );
 });
 
 /**
@@ -294,9 +633,12 @@ it('7.8.1.1 分配策略与序列号历史的调用形状都被放行', async ()
 it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
   const fetcher = vi.fn();
   vi.stubGlobal('fetch', fetcher);
-  // 预占（7.2.1）与调整单（7.4.1.1）尚未交付，不应被代理放行。
+  // 调整单（7.4.1.1）尚未交付，不应被代理放行。
   // transfer 曾在这份拒绝清单里，那是 7.5.1.1 交付前的状态；它已并入且前端在调
   // /transfers 这组路径，不放行等于调拨页面在浏览器里 404，故已移出。
+  // reservations 曾在这份拒绝清单里，那是 7.2.1 未交付时的状态；7.2.1.1 已交付、
+  // 前端预占页面就在调这个路径，不放行等于该页面在浏览器里静默 404，故已移出
+  // （放行覆盖由本文件 7.2.1.1 的放行用例钉住，未交付的子路径仍由同组拒绝用例钉住）。
   // 7.1.1.2 明细页的行内操作入口指向这些路由，入口契约就位但目标模块还没到 ——
   // 目标模块交付后再加，否则就是一个点下去 404 的死链。
   //
@@ -304,7 +646,6 @@ it('warehouse 白名单外的路径被拒绝且不发出请求', async () => {
   // 7.1.2.1 已交付并入后它的前端页面就在调这个路径，不放行等于页面在浏览器里 404，
   // 所以已移出拒绝清单（放行覆盖由上面「已放行」用例钉住）。
   for (const path of [
-    'warehouse/inventory/reservations',
     'warehouse/inventory/adjustments',
     'warehouse/internal/access',
   ]) {
@@ -365,4 +706,627 @@ it('打印内容（ZPL / HTML）原样透传而不是被 JSON 解析吞成 503',
     // 字节必须一字不差 —— 条码少一个字符，扫码枪就读不出来了
     expect(await response.text()).toBe(body);
   }
+});
+
+/**
+ * 8.2.1.1 收货单 + 8.2.1.2 收货差异：两组路径**逐条钉住放行**。
+ *
+ * <p>白名单是一条共享正则，多条车道各自往同一个组追加分支。这组用例的价值在于
+ * 它同时钉住了**上一条车道已交付的 goods-receipts 全路径** ——
+ * 取错一侧（整段替换而不是追加）会静默删掉已交付的路由，表现为页面 404，
+ * 而 typecheck / lint / vitest / Playwright 全绿，因为白名单只在浏览器端生效。
+ *
+ * <p>因此新增 8.2.1.2 的分支时，**不得覆盖或收窄**下面 goods-receipts 的任何一条。
+ */
+it('8.2.1.1 收货单与 8.2.1.2 收货差异的全部调用形状都被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('[]')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+
+  // 8.2.1.1 收货单：读形状 + 详情 + 分录 + 三个动作。
+  for (const path of [
+    'warehouse/goods-receipts',
+    'warehouse/goods-receipts/capabilities',
+    `warehouse/goods-receipts/${id}`,
+    `warehouse/goods-receipts/${id}/movements`,
+    `warehouse/goods-receipts/${id}/receive`,
+    `warehouse/goods-receipts/${id}/close`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  expect(
+    (await POST(request('warehouse/goods-receipts', 'POST'), {
+      params: { path: ['warehouse', 'goods-receipts'] },
+    })).status,
+  ).toBe(200);
+
+  // 8.2.1.2 收货差异：集合读 + 接手 + 详情 + 留证 / 决定 / 索赔 / 提交 / 撤回 / 结案。
+  for (const path of [
+    'warehouse/goods-receipt-discrepancies',
+    'warehouse/goods-receipt-discrepancies/capabilities',
+    `warehouse/goods-receipt-discrepancies/${id}`,
+  ]) {
+    expect((await GET(request(path), { params: { path: path.split('/') } })).status).toBe(200);
+  }
+  for (const path of [
+    'warehouse/goods-receipt-discrepancies',
+    `warehouse/goods-receipt-discrepancies/${id}/evidence`,
+    `warehouse/goods-receipt-discrepancies/${id}/decide`,
+    `warehouse/goods-receipt-discrepancies/${id}/claim`,
+    `warehouse/goods-receipt-discrepancies/${id}/claim/submit`,
+    `warehouse/goods-receipt-discrepancies/${id}/claim/withdraw`,
+    `warehouse/goods-receipt-discrepancies/${id}/close`,
+  ]) {
+    expect(
+      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+    ).toBe(200);
+  }
+});
+
+/**
+ * 7.2.1.1 预占需求列表：从 `components/inventory/inventory-reservation-model.ts`
+ * **反向抽取**真实调用点。
+ *
+ * <p>路径不是照着正则抄的 —— 组件改了这里就会红。白名单只在浏览器端生效，
+ * `pnpm test` 直连服务层测不出漏登记，而漏一条的现场表现是该页面在浏览器里静默 404，
+ * 且 typecheck / lint / vitest 全绿。
+ */
+it('7.2.1.1 预占需求的三个调用形状都被放行并转发到 warehouse 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const RESERVATION = 'warehouse/inventory/reservations';
+  // 三个形状逐条钉住：列表读 / 下拉项读 / 能力声明读。
+  for (const path of [RESERVATION, `${RESERVATION}/options`, `${RESERVATION}/capabilities`]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行`).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 登记预占走 POST 同一路径：白名单只看形状不看方法，
+  // 这里显式跑一次证明写动作也真被转发（而不是只放行了读）。
+  expect(
+    (await POST(request(RESERVATION, 'POST'), { params: { path: RESERVATION.split('/') } })).status,
+  ).toBe(200);
+});
+
+/**
+ * 7.2.1.2 预占分配明细：五个读取形状 + 两个写入形状全部放行。
+ *
+ * <p>路径不是照着正则抄的 —— 组件改了这里就会红。白名单只在浏览器端生效，
+ * `pnpm test` 直连服务层测不出漏登记，而漏一条的现场表现是该页面在浏览器里静默 404，
+ * 且 typecheck / lint / vitest 全绿。
+ *
+ * <p>同时钉住**反向**：`{id}/entries` 仍不是任何模块的对外形状（时间线叫 /timeline），
+ * 必须仍然 404 且不发请求。`{id}/release` 已由 7.2.1.3 交付，**移出**本用例的反向断言，
+ * 它现在由同文件 7.2.1.3 的放行用例钉住。
+ */
+it('7.2.1.2 预占分配明细的读取与写入形状都被放行并转发到 warehouse 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const RESERVATION = 'warehouse/inventory/reservations';
+  const id = '11111111-1111-1111-1111-111111111111';
+  const allocationId = '22222222-2222-2222-2222-222222222222';
+
+  const reads = [
+    // 分配明细行 + 预占抬头 + 汇总
+    `${RESERVATION}/${id}/allocations`,
+    // 状态迁移时间线
+    `${RESERVATION}/${id}/timeline`,
+    // 下拉项（状态词表 / bucket 候选 / 登记目标）
+    `${RESERVATION}/${id}/allocation-options`,
+    // 能力声明（释放与过期报 7.2.1.3 未接入）
+    `${RESERVATION}/${id}/capabilities`,
+  ];
+  for (const path of reads) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行`).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+
+  // 登记分配走 POST 同一路径：白名单只看形状不看方法，
+  // 这里显式跑一次证明写动作也真被转发（而不是只放行了读）。
+  expect(
+    (
+      await POST(request(`${RESERVATION}/${id}/allocations`, 'POST'), {
+        params: { path: `${RESERVATION}/${id}/allocations`.split('/') },
+      })
+    ).status,
+  ).toBe(200);
+
+  // 两个状态迁移动作：白名单里 commit / consume 必须在 allocations 之下再挂一段 id，
+  // 只放行 allocations 会让两个按钮在浏览器里 404。
+  for (const action of ['commit', 'consume']) {
+    const path = `${RESERVATION}/${id}/allocations/${allocationId}/${action}`;
+    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行`).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.anything(),
+    );
+  }
+
+  // 关键：不是本链路对外形状的路径**仍然** 404，且连请求都不发出去。
+  // 放行一个后端不存在的端点，比 404 更糟 —— 界面会以为「点进去有东西」。
+  // 注：`${id}/release` 原先在这里断言 404（7.2.1.3 未交付时的诚实标注），
+  // 7.2.1.3 落地后由它的放行用例接管，这里改钉它**再多一层后缀**仍然 404。
+  for (const path of [`${RESERVATION}/${id}/entries`, `${RESERVATION}/${id}/release/reason`]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 不应被放行`).toBe(404);
+  }
+});
+
+it('7.2.1.1 刻意不放行未交付的子路径（多一层后缀仍 404 且不发请求）', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const RESERVATION = 'warehouse/inventory/reservations';
+  const id = '11111111-1111-1111-1111-111111111111';
+  // 后端 ReservationController 只有上面那四个集合级形状；7.2.1.3 的释放与过期已交付，
+  // 它交付的形状由同文件下方的放行用例钉住，**不**在本清单里重复。
+  // 7.2.1.2 已交付，它交付的子路径由本文件下方 7.2.1.2 的放行用例钉住。
+  for (const path of [
+    // **多一层后缀**：这是最容易在补白名单时被顺手放行的形状。
+    // 注：`${RESERVATION}/${id}/allocations` 已由 7.2.1.2 交付并移出本清单；
+    // `${RESERVATION}/${id}/release` 已由 7.2.1.3 交付并移出本清单 ——
+    // 但它**再多一层**（/release/reason、/expiry/clear）仍然必须 404，
+    // 放行一个不存在的动作比 404 更糟。
+    `${RESERVATION}/${id}/release/reason`,
+    `${RESERVATION}/${id}/expiry/clear`,
+    `${RESERVATION}/${id}/entries`,
+    `${RESERVATION}/summary`,
+    // options / capabilities 是字面量子路径，不能再往下挂一段。
+    `${RESERVATION}/options/${id}`,
+    `${RESERVATION}/capabilities/${id}`,
+    // 词表外与单复数形状：后端路由是 reservations（复数），单数不存在。
+    'warehouse/inventory/reservation',
+  ]) {
+    expect(
+      (await GET(request(path), { params: { path: path.split('/') } })).status,
+      `${path} 不应被放行`,
+    ).toBe(404);
+  }
+  // 关键：未登记的形状**连请求都不该发出去**。
+  // 只断言 404 的话，一个「先转发再由后端报错」的实现也能过，
+  // 而那意味着未交付的端点每次点击都会打到真实服务。
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+/**
+ * 8.1.2.1 库位树：location-trees 的四个形状放行 + 反向拒绝。
+ *
+ * <p>两层断言都用**真实代理 handler** 跑真实 HTTP 状态码，不是断言字符串出现在文件里：
+ * 白名单只按路径形状放行，落不在分支里的路径一律被拦成 404，页面只进错误态，
+ * 看起来像「后端没实现」—— 而这类漏登记 `pnpm test` 直连服务层天然测不出来。
+ */
+it('8.1.2.1 库位树的四个形状被放行并转发到 warehouse 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const paths = [
+    'warehouse/location-trees/capabilities',
+    `warehouse/location-trees/${id}`,
+    `warehouse/location-trees/${id}/locations`,
+    `warehouse/location-trees/${id}/locations/${id}`,
+  ];
+  for (const path of paths) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 写动作走同一批路径：白名单只看路径形状不看方法，所以要显式跑一遍证明真被转发。
+  expect(
+    (await POST(request(`warehouse/location-trees/${id}/locations`, 'POST'), {
+      params: { path: ['warehouse', 'location-trees', id, 'locations'] },
+    })).status,
+  ).toBe(200);
+  expect(
+    (await PUT(request(`warehouse/location-trees/${id}/locations/${id}`, 'PUT'), {
+      params: { path: ['warehouse', 'location-trees', id, 'locations', id] },
+    })).status,
+  ).toBe(200);
+  expect(
+    (await DELETE(request(`warehouse/location-trees/${id}/locations/${id}`, 'DELETE'), {
+      params: { path: ['warehouse', 'location-trees', id, 'locations', id] },
+    })).status,
+  ).toBe(200);
+});
+
+it('8.1.2.1 多一层后缀仍是 404 且不发出请求', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // 「多一层后缀」这一组是本用例的重点：白名单是锚定正则，多一层就掉出分支。
+  // 放行了 /{id}/locations/{id} 却顺手放行了 /{id}/locations/{id}/stock 之类的形状，
+  // 会让一个「还不存在的动作」看起来像已交付。
+  for (const path of [
+    `warehouse/location-trees/${id}/locations/${id}/stock`,
+    `warehouse/location-trees/${id}/locations/${id}/allocate`,
+    `warehouse/location-trees/${id}/locations/${id}/allocate/recommend`,
+    // 自动分配已由 8.1.2.2 交付，但**命名空间不同**（/warehouse/location-allocations），
+    // 所以 location-trees/{id}/allocate 仍然 404 —— 交付了不等于换个前缀也能穿透白名单。
+    `warehouse/location-trees/${id}/allocate`,
+    `warehouse/location-trees/${id}/allocation-rules`,
+    // capabilities 是单段字面量，多一段就不是它
+    'warehouse/location-trees/capabilities/extra',
+    // 单段根路径本身没有对应端点（后端只有 /capabilities 与 /{warehouseId}）
+    'warehouse/location-trees',
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+/**
+ * 8.1.2.2 库位自动分配：location-allocations 的七个形状放行 + 反向拒绝。
+ *
+ * <p>同样跑**真实代理 handler** 与真实 HTTP 状态码，不断言字符串出现在文件里。
+ */
+it('8.1.2.2 库位自动分配的七个形状被放行并转发到 warehouse 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const paths = [
+    'warehouse/location-allocations/capabilities',
+    'warehouse/location-allocations/recommend',
+    'warehouse/location-allocations/list',
+    `warehouse/location-allocations/by-receipt/${id}`,
+    `warehouse/location-allocations/${id}`,
+    `warehouse/location-allocations/${id}/release`,
+    // 裸 POST 是本模块的写入形状（选定一个库位），末位可选量必须带
+    'warehouse/location-allocations',
+  ];
+  for (const path of paths) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+  // 写动作：选定（裸 POST）、释放（POST {id}/release）、撤销（DELETE {id}）
+  expect(
+    (await POST(request('warehouse/location-allocations', 'POST'), {
+      params: { path: ['warehouse', 'location-allocations'] },
+    })).status,
+  ).toBe(200);
+  expect(
+    (await POST(request(`warehouse/location-allocations/${id}/release`, 'POST'), {
+      params: { path: ['warehouse', 'location-allocations', id, 'release'] },
+    })).status,
+  ).toBe(200);
+  expect(
+    (await DELETE(request(`warehouse/location-allocations/${id}`, 'DELETE'), {
+      params: { path: ['warehouse', 'location-allocations', id] },
+    })).status,
+  ).toBe(200);
+});
+
+it('8.1.2.2 多一层后缀仍是 404 且不发出请求', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    // 字面量子路径多一段：capabilities / recommend / list / by-receipt 都不是它们的父级
+    'warehouse/location-allocations/capabilities/extra',
+    'warehouse/location-allocations/recommend/extra',
+    'warehouse/location-allocations/list/extra',
+    // by-receipt 后面的 uuid 层写死，多一层仍 404
+    `warehouse/location-allocations/by-receipt/${id}/extra`,
+    // {id} 只有 release 这一个动作段，放行别的动作等于让「还不存在的动作」看起来已交付
+    `warehouse/location-allocations/${id}/stock`,
+    `warehouse/location-allocations/${id}/execute`,
+    `warehouse/location-allocations/${id}/release/extra`,
+    // 与 8.1.2.1 的命名空间刻意分开：库位树上没有 allocate 端点
+    `warehouse/location-trees/${id}/allocate`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+
+/**
+ * 8.5.2.1 库位利用率：location-utilization 的三个形状放行 + 反向拒绝。
+ *
+ * <p>本车道只**追加**这一组断言，不改动 8.1.2.1 的任何一条 —— 白名单是累积型共享文件，
+ * 每条车道各加各的分支，谁也不重排别人的那段。
+ *
+ * <p>白名单分支的排序说明：{@code location-utilization} 放在 {@code location-trees} 之后，
+ * 但**两者的先后其实不影响判定** —— 它们在第 9 个字符就分叉（{@code t} vs {@code u}），
+ * 正则分支在这里不存在前缀歧义。真正有排序讲究的是同一分支内「字面量子路径 vs 通配段」：
+ * {@code \/capabilities} 必须排在 {@code \/[0-9a-f-]+} 之前，否则 {@code capabilities}
+ * 会先被当成一个 uuid 形状的 id 匹配掉再失败。
+ */
+it('8.5.2.1 库位利用率的三个形状被放行并转发到 warehouse 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'warehouse/location-utilization/capabilities',
+    `warehouse/location-utilization/${id}`,
+    `warehouse/location-utilization/${id}/locations/${id}`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+    expect(fetcher).toHaveBeenLastCalledWith(
+      expect.stringContaining(`:8084/${path}`),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer private-session' },
+      }),
+    );
+  }
+});
+
+it('8.5.2.1 未登记的库位利用率形状是 404 且不发出请求', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    // 本模块是**只读分析**，没有任何写端点：放行一个写形状会让「这里能不能改库位」看起来是能。
+    `warehouse/location-utilization/${id}/locations`,
+    `warehouse/location-utilization/${id}/locations/${id}/allocate`,
+    // 报表按仓库聚合，不按单个库位聚合
+    `warehouse/location-utilization/${id}/locations/${id}/report`,
+    // 热力图是报表响应里的 heatmap 字段，不是独立端点
+    `warehouse/location-utilization/${id}/heatmap`,
+    // capabilities 是单段字面量，多一段就不是它
+    'warehouse/location-utilization/capabilities/extra',
+    // 裸根路径本身没有对应端点（后端只有 /capabilities 与 /{warehouseId}）
+    'warehouse/location-utilization',
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it('8.5.2.1 追加分支后 8.1.2.1 的四个库位树形状仍被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // 两条分支在同一条正则里相邻，最怕的是新加的 location-utilization 抢走
+  // location-trees 的匹配（或反过来）。逐条正向断言把这一点钉死。
+  for (const path of [
+    'warehouse/location-trees/capabilities',
+    `warehouse/location-trees/${id}`,
+    `warehouse/location-trees/${id}/locations`,
+    `warehouse/location-trees/${id}/locations/${id}`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+  }
+});
+
+it('7.7.2.1 VMI 白名单：模型文件里每条调用点都被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const aid = '11111111-1111-1111-1111-111111111111';
+  const sid = '22222222-2222-2222-2222-222222222222';
+  // 路径是从 vmi-model.ts 里反向抽取的，不是照着正则抄的 ——
+  // 少放行一个，页面就只在浏览器里静默 404（typecheck / lint / vitest 全绿都发现不了）。
+  for (const path of [
+    'warehouse/inventory/vmi/capabilities',
+    'warehouse/inventory/vmi/agreements',
+    `warehouse/inventory/vmi/agreements/${aid}`,
+    `warehouse/inventory/vmi/agreements/${aid}/water-levels`,
+    `warehouse/inventory/vmi/agreements/${aid}/settlement-window`,
+    `warehouse/inventory/vmi/agreements/${aid}/audit`,
+    `warehouse/inventory/vmi/agreements/${aid}/snapshots`,
+    `warehouse/inventory/vmi/replenishment-signals`,
+    'warehouse/inventory/vmi/settlements',
+    `warehouse/inventory/vmi/settlements/${sid}`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+  }
+  // 写动作逐个钉住：建协议、出信号、信号三步流转、记售出、出对账单、确认。
+  for (const path of [
+    'warehouse/inventory/vmi/agreements',
+    `warehouse/inventory/vmi/agreements/${aid}/lines`,
+    `warehouse/inventory/vmi/agreements/${aid}/activate`,
+    `warehouse/inventory/vmi/agreements/${aid}/suspend`,
+    `warehouse/inventory/vmi/agreements/${aid}/close`,
+    `warehouse/inventory/vmi/agreements/${aid}/replenishment-signals`,
+    `warehouse/inventory/vmi/agreements/${aid}/snapshots`,
+    `warehouse/inventory/vmi/agreements/${aid}/settlements`,
+    `warehouse/inventory/vmi/replenishment-signals/${sid}/acknowledge`,
+    `warehouse/inventory/vmi/replenishment-signals/${sid}/dispatch`,
+    `warehouse/inventory/vmi/replenishment-signals/${sid}/fulfil`,
+    `warehouse/inventory/vmi/replenishment-signals/${sid}/cancel`,
+    `warehouse/inventory/vmi/settlements/${sid}/confirm`,
+  ]) {
+    expect(
+      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+    ).toBe(200);
+  }
+});
+
+it('7.7.2.1 VMI 白名单：后端不存在的子路径仍被拒绝', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const aid = '11111111-1111-1111-1111-111111111111';
+  const sid = '22222222-2222-2222-2222-222222222222';
+  // 后端 VmiController 只有上面那些端点。多一段推导路径（export / forecast / cancel）、
+  // 以及一个不存在的信号动作，在后端都不存在；放行它们等于让界面以为已交付 ——
+  // 放行不该存在的路径比 404 更糟。
+  for (const path of [
+    `warehouse/inventory/vmi/agreements/${aid}/export`,
+    `warehouse/inventory/vmi/agreements/${aid}/forecast`,
+    `warehouse/inventory/vmi/agreements/${aid}/snapshots/${sid}`,
+    `warehouse/inventory/vmi/replenishment-signals/${sid}/acknowledge/again`,
+    `warehouse/inventory/vmi/replenishment-signals/${sid}/destroy`,
+    `warehouse/inventory/vmi/settlements/${sid}/void`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it('7.7.2.1 追加 vmi 分支后 7.7.1.2 寄售与 7.7.1.1 货权的形状仍被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // vmi 与 consignments/ownership 在同一条正则里相邻，最怕的是新加的 vmi 抢走它们的匹配
+  // （或反过来）。逐条正向断言把这一点钉死 —— 首段都是字面量，不会互相吃掉。
+  for (const path of [
+    'warehouse/inventory/consignments/capabilities',
+    `warehouse/inventory/consignments/${id}/stock-view`,
+    'warehouse/inventory/ownership/capabilities',
+    'warehouse/inventory/ownership/report',
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+  }
+});
+
+/**
+ * 8.3.3.1 复核扫描：白名单双向断言。
+ *
+ * <p>判据是**真跑 proxy handler 断言 HTTP 状态码**（拦截 = 404，放行 = 转发），
+ * 不是眼看正则 —— 漏登记的路径只在浏览器里静默 404，而 typecheck / lint / vitest
+ * 全绿（这一组断言存在的全部理由）。
+ *
+ * <p><b>复核是顶层分支</b>，不挂在 outbound-orders 之下：一张出库单可以复核多次
+ * （判异常 → 退回拣货 → 重拣 → 再复核），每次是一张独立复核单，
+ * 挂成 `outbound-orders/{id}/recount` 会让契约看起来像「一张单只复核一次」。
+ */
+it('8.3.3.1 复核扫描的全部调用形状被放行并转发到 warehouse 服务', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'warehouse/recount-scans',
+    'warehouse/recount-scans/capabilities',
+    'warehouse/recount-scans/rules',
+    `warehouse/recount-scans/rules/${id}`,
+    `warehouse/recount-scans/rules/${id}/retire`,
+    `warehouse/recount-scans/${id}`,
+    `warehouse/recount-scans/${id}/open-box`,
+    `warehouse/recount-scans/${id}/scans`,
+    `warehouse/recount-scans/${id}/settle`,
+    `warehouse/recount-scans/${id}/complete`,
+    `warehouse/recount-scans/${id}/escalate`,
+    `warehouse/recount-scans/${id}/cancel`,
+    // 两段 uuid 的异常处置：必须排在单段 {id} 组里用 \/ 分支匹配，
+    // 否则会被 {id}(exceptions) 提前吃掉半截、把 resolve 留在匹配之外。
+    `warehouse/recount-scans/${id}/exceptions/${id}/resolve`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 未被放行（白名单漏登记 = 浏览器里静默 404）`).toBe(200);
+  }
+  expect(fetcher).toHaveBeenCalledWith(
+    expect.stringContaining(':8084/warehouse/recount-scans'),
+    expect.anything(),
+  );
+});
+
+it('8.3.3.1 写动作的 POST 形状被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    'warehouse/recount-scans',
+    'warehouse/recount-scans/rules',
+    `warehouse/recount-scans/rules/${id}/retire`,
+    `warehouse/recount-scans/${id}/open-box`,
+    `warehouse/recount-scans/${id}/scans`,
+    `warehouse/recount-scans/${id}/settle`,
+    `warehouse/recount-scans/${id}/complete`,
+    `warehouse/recount-scans/${id}/escalate`,
+    `warehouse/recount-scans/${id}/cancel`,
+    `warehouse/recount-scans/${id}/exceptions/${id}/resolve`,
+  ]) {
+    const response = await POST(request(path, 'POST'), { params: { path: path.split('/') } });
+    expect(response.status, `POST ${path} 未被放行`).toBe(200);
+  }
+  expect(fetcher).toHaveBeenCalledWith(
+    expect.stringContaining(':8084/warehouse/recount-scans'),
+    expect.objectContaining({ method: 'POST' }),
+  );
+});
+
+it('8.3.3.1 未登记的形状是 404、不发请求，且不挂在别的分支底下', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  for (const path of [
+    // 已放行动作再多一层后缀 —— 必须仍然 404（放行不存在的动作比 404 更糟）。
+    `warehouse/recount-scans/${id}/scans/force`,
+    `warehouse/recount-scans/${id}/complete/force`,
+    `warehouse/recount-scans/${id}/exceptions/${id}/resolve/undo`,
+    // 后端只有 .../exceptions/{id}/resolve，没有 .../exceptions/{id} 这一读形状。
+    `warehouse/recount-scans/${id}/exceptions/${id}`,
+    // 字面量子路径后面多一层。
+    'warehouse/recount-scans/capabilities/advanced',
+    'warehouse/recount-scans/rules/advanced',
+    // 非 UUID 段不应被 [0-9a-f-]+ 分支吃掉。
+    'warehouse/recount-scans/not-a-uuid',
+    // 复核不是出库单或拣货任务的子资源（反向钉住命名空间的决定）。
+    `warehouse/inventory/outbound-orders/${id}/recount`,
+    `warehouse/pick-tasks/${id}/recount`,
+    // 拼错的顶层分支。
+    'warehouse/recount-scan/capabilities',
+    'warehouse/recount_scans/capabilities',
+    'warehouse/recountscans/capabilities',
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `${path} 不应被放行`).toBe(404);
+  }
+  expect(fetcher, '被拒的路径不得触发任何上游调用').not.toHaveBeenCalled();
+});
+
+it('8.3.3.1 追加 recount-scans 分支后已交付的拣货与波次形状仍被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // recount-scans 与 pick-tasks / pick-waves / putaway-tasks 在同一条正则里相邻，
+  // 最怕的是新分支抢走它们的匹配（或反过来）。逐条正向断言把这一点钉死。
+  for (const path of [
+    'warehouse/pick-tasks/capabilities',
+    `warehouse/pick-tasks/${id}/complete`,
+    'warehouse/pick-waves/capabilities',
+    `warehouse/pick-waves/${id}/complete`,
+    'warehouse/putaway-tasks/capabilities',
+    'warehouse/inventory/outbound-orders/capabilities',
+    'warehouse/location-trees/capabilities',
+    'warehouse/inventory/overview',
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status, `已交付模块的 ${path} 被本车道误伤 —— 白名单必须求并`).toBe(200);
+  }
+});
+
+/** 跨源写请求必须被拒（CSRF 闸），与白名单无关但同一份代理代码。 */
+it('8.3.3.1 复核的跨源写请求被 403 拒绝，不转发', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  const response = await POST(
+    new NextRequest(`http://localhost:3000/api/warehouse/warehouse/recount-scans/${id}/complete`, {
+      method: 'POST',
+      headers: { origin: 'http://evil.example', cookie: 'starcon_session=x' },
+      body: '{}',
+    }),
+    { params: { path: ['warehouse', 'recount-scans', id, 'complete'] } },
+  );
+  expect(response.status).toBe(403);
+  expect(fetcher).not.toHaveBeenCalled();
 });

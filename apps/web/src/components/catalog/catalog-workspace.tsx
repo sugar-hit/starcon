@@ -16,7 +16,7 @@ import type {
   Detail,
   Attribute,
   Sku,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api, ApiError } from './api';
 import { control, statuses, modes, types } from './fields';
 import { SpuEditor, AttributeEditor, SkuEditor } from './product-editors';

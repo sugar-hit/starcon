@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { PartyAddress, PartyContact } from '../../../../../packages/api-contracts/src/catalog';
+import type { PartyAddress, PartyContact } from '../../../../../packages/api-contracts/src/index';
 import {
   ADDRESS_USAGES,
   addressEmptyHint,

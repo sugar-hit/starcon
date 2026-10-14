@@ -11,7 +11,7 @@ import type {
   LegalEntityView,
   ChildView,
   AssignmentInput,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from '@/lib/api';
 import { Field, Editor, control } from '../common/fields';
 import {
@@ -373,7 +373,7 @@ function RoleForm({
   permissions: PermissionView[];
   busy: boolean;
   save: (
-    input: import('../../../../../packages/api-contracts/src/catalog').RoleInput,
+    input: import('../../../../../packages/api-contracts/src/index').RoleInput,
   ) => Promise<void>;
 }) {
   const [code, setCode] = useState(role?.code ?? '');
@@ -485,8 +485,8 @@ function MemberForm({
   busy: boolean;
   save: (
     input:
-      | import('../../../../../packages/api-contracts/src/catalog').MemberInput
-      | import('../../../../../packages/api-contracts/src/catalog').MemberUpdate,
+      | import('../../../../../packages/api-contracts/src/index').MemberInput
+      | import('../../../../../packages/api-contracts/src/index').MemberUpdate,
   ) => Promise<void>;
 }) {
   const [username, setUsername] = useState('');
@@ -629,8 +629,8 @@ function ChildForm({
   busy: boolean;
   save: (
     input:
-      | import('../../../../../packages/api-contracts/src/catalog').ChildInput
-      | import('../../../../../packages/api-contracts/src/catalog').ChildUpdate,
+      | import('../../../../../packages/api-contracts/src/index').ChildInput
+      | import('../../../../../packages/api-contracts/src/index').ChildUpdate,
   ) => Promise<void>;
 }) {
   const [code, setCode] = useState('');

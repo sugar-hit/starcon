@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { SpecAxisOption, SpecAxisPanel } from '../../../../../packages/api-contracts/src/catalog';
+import type { SpecAxisOption, SpecAxisPanel } from '../../../../../packages/api-contracts/src/index';
 import {
   axisUsageText,
   codeProblem,

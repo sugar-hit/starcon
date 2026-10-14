@@ -244,7 +244,7 @@ public final class WarehouseFacilityModels {
       List<KindOption> kinds,
       List<CountryOption> countries,
       List<LegalEntityOption> legalEntities,
-      List<StatusOption> statuses,
+      List<WarehouseFacilityStatusOption> statuses,
       String timezoneNote,
       String countryNote) {}
 
@@ -255,7 +255,8 @@ public final class WarehouseFacilityModels {
 
   public record LegalEntityOption(UUID id, String code, String name, String status) {}
 
-  public record StatusOption(String code, String label) {}
+  /** 仓库状态下拉项。带模块前缀以避开 {@code ReservationModels.StatusOption}（形状不同）。 */
+  public record WarehouseFacilityStatusOption(String code, String label) {}
 
   // ------------------------------------------------------------ 新增仓库
 

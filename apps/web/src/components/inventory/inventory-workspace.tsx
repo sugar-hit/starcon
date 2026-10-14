@@ -24,7 +24,7 @@ import type {
   OverviewRow,
   QualityStatusRef,
   WarehouseRef,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { deletePolicy, errorText, fetchCapabilities, fetchLegalEntities, fetchOverview, fetchPolicies, fetchQualityStatuses, fetchWarehouses, groupByDimension, groupLabel, parseDetailHref, qty, roleBadge, roleLabels, rowComposition, savePolicy, scopeLabels, type BucketDrill, type OverviewParams } from './inventory-model';
 import { InventoryBucketDetail } from './inventory-bucket-detail';
 import { InventoryLedger } from './inventory-ledger';

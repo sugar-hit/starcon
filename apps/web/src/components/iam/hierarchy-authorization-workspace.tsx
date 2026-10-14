@@ -9,7 +9,7 @@ import type {
   HierarchyGrantInput,
   HierarchyGrantUpdate,
   HierarchyGrantView,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api } from '@/lib/api';
 import { Field, control } from '../common/fields';
 import { useIdentity } from './identity-shell';

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Boxes, Filter, Plus, RefreshCw, Warehouse } from 'lucide-react';
 import { Button, EmptyState, FormField, Input, Notice, PageHeader, SectionCard, StatCard } from '@starcon/ui';
@@ -8,7 +9,7 @@ import type {
   WarehouseCreated,
   WarehouseFacilityPage,
   WorkVolumeCapability,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { useIdentity } from '../iam/identity-shell';
 import {
   ALL,
@@ -477,6 +478,7 @@ export function WarehouseFacilityWorkspace() {
               <thead className="text-left text-muted-foreground">
                 <tr className="border-b">
                   <th className="py-2 pr-3">仓库</th>
+                  <th className="py-2 pr-3">详情</th>
                   <th className="py-2 pr-3">类型</th>
                   <th className="py-2 pr-3">所属法人</th>
                   <th className="py-2 pr-3">国家</th>
@@ -497,6 +499,21 @@ export function WarehouseFacilityWorkspace() {
                           {row.code}
                           {row.defaultWarehouse ? ' · 默认发货仓' : ''}
                         </div>
+                      </td>
+                      {/* 8.1.1.2 已交付：详情入口在交付前是禁用的，
+                          现在由后端 detailUnavailable=false 放行。
+                          href 指向本 worktree 里真实存在的页面路由。 */}
+                      <td className="py-2 pr-3">
+                        {page?.detailUnavailable === false ? (
+                          <Link
+                            href={`/warehouse/facilities/${row.id}`}
+                            className="text-copy-12 hover:underline"
+                          >
+                            详情
+                          </Link>
+                        ) : (
+                          <span className="text-copy-12 text-muted-foreground">—</span>
+                        )}
                       </td>
                       <td className="py-2 pr-3">{kindLabel(row.kind)}</td>
                       <td className="py-2 pr-3">

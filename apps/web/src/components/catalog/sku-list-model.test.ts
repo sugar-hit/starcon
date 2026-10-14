@@ -3,7 +3,7 @@ import type {
   SkuListCapabilities,
   SkuPage,
   SkuProjectionCell,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { ApiError } from './api';
 import {
   emptySkuFilters,

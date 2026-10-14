@@ -24,7 +24,7 @@ import type {
   SerialVocabularies,
   SkuRef,
   WarehouseRef,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { errorText } from './inventory-model';
 import {
   allowedTargetStatuses,
@@ -747,7 +747,7 @@ function SerialDetail({
 function MovementTable({
   rows,
 }: {
-  rows: import('../../../../../packages/api-contracts/src/catalog').SerialMovementRow[];
+  rows: import('../../../../../packages/api-contracts/src/index').SerialMovementRow[];
 }) {
   return (
     <div className="overflow-x-auto">

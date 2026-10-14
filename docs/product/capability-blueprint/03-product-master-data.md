@@ -91,8 +91,8 @@
 │       └── 3.6.3.1 地址与联系人 → /partners/contacts
 ├── 3.7 商品合规属性  → /products/compliance
 │   ├── 3.7.1 报关与税务
-│   │   ├── 3.7.1.1 HS 编码与申报要素
-│   │   └── 3.7.1.2 目的地报关版本
+│   │   ├── 3.7.1.1 HS 编码与申报要素 → /products/sku/[id]/customs
+│   │   └── 3.7.1.2 目的地报关版本 → /products/sku/[id]/customs-destinations
 │   └── 3.7.2 物理与安全属性
 │       └── 3.7.2.1 物理与安全属性
 ├── 3.8 批量数据管理  → /products/import

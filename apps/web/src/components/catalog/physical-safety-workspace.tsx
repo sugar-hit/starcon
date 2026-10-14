@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Badge, Button, EmptyState } from '@starcon/ui';
 import { ArrowLeft, Info, RefreshCw, Save, TriangleAlert, Zap } from 'lucide-react';
-import type { PhysicalSafetyProfile } from '../../../../../packages/api-contracts/src/catalog';
+import type { PhysicalSafetyProfile } from '../../../../../packages/api-contracts/src/index';
 import {
   decimal,
   draftFrom,

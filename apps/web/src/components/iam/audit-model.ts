@@ -1,4 +1,4 @@
-import type { AuditDetail, AuditPage, AuditView } from '../../../../../packages/api-contracts/src/catalog';
+import type { AuditDetail, AuditPage, AuditView } from '../../../../../packages/api-contracts/src/index';
 import { api } from '../../lib/api';
 
 /**

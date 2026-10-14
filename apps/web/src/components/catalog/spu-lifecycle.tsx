@@ -11,7 +11,7 @@ import type {
   RuleInput,
   RulePreview,
   TransitionInput,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { api, ApiError } from './api';
 import { control, Editor, Field } from './fields';
 import {

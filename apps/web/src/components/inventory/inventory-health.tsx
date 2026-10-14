@@ -8,7 +8,7 @@ import type {
   InventoryHealthMetric,
   InventoryHealthScorecard,
   InventoryHealthTrend,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import {
   assessHealth,
   availabilityLabels,

@@ -34,7 +34,7 @@ import {
   versionNameProblem,
   versionNoProblem,
 } from './bundle-model';
-import type { BundleComponentRow, BundleRow, BundleVersionRow } from '../../../../../packages/api-contracts/src/catalog';
+import type { BundleComponentRow, BundleRow, BundleVersionRow } from '../../../../../packages/api-contracts/src/index';
 
 function versionRow(overrides: Partial<BundleVersionRow> = {}): BundleVersionRow {
   return {

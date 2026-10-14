@@ -7,7 +7,7 @@ import type {
   SupplierQuote,
   SupplierQuoteOptions,
   SupplierQuoteOverview,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { Field, control } from '../common/fields';
 import {
   PRIORITY_HINT,

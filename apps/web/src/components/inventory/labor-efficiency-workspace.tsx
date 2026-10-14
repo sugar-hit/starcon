@@ -20,7 +20,7 @@ import type {
   LaborWorkTask,
   LaborWorkTaskDetail,
   LaborWorkTaskPage,
-} from '../../../../../packages/api-contracts/src/catalog';
+} from '../../../../../packages/api-contracts/src/index';
 import { fetchWarehouses } from './inventory-model';
 import {
   assignLaborTask,
