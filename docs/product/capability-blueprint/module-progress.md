@@ -6,33 +6,40 @@
 >
 > 状态词表只有三个值，统计逻辑依赖它，不要新增：
 > `已交付`（迁移 + API + 页面 + 测试齐全，无 TODO 残留）· `进行中`（部分交付、未收口，证据列写清缺哪一块）· `未开发`（未开工）。
+
 ## 总览
+
 | 指标 | 数量 |
 | --- | --- |
 | 模块总数 | 465 |
-| 已交付 | 131 |
+| 已交付 | 134 |
 | 进行中 | 0 |
-| **未开发** | **334** |
-| 完成率 | 28.2% |
+| **未开发** | **331** |
+| 完成率 | 28.8% |
+
 ## 分阶段进度（交付顺序看这里）
+
 | 阶段 | 已交付 | 进行中 | 未开发 | 合计 |
 | --- | --- | --- | --- | --- |
 | **D1–D2** | 80 | 0 | 0 | 80 |
-| **D3** | 28 | 0 | 12 | 40 |
-| **D4** | 12 | 0 | 48 | 60 |
+| **D3** | 29 | 0 | 11 | 40 |
+| **D4** | 14 | 0 | 46 | 60 |
 | **D5** | 1 | 0 | 51 | 52 |
 | **D6** | 3 | 0 | 75 | 78 |
 | **D7** | 7 | 0 | 148 | 155 |
+
 ## 分系统进度
+
 | 卷 | 系统 | 阶段 | 已交付 | 模块数 |
+| --- | --- | --- | --- | --- |
 | 01 | 工作台与门户系统 | D7 | 0 | 23 |
 | 02 | 渠道与店铺系统 | D1–D2 / D5 | 20 | 25 |
 | 03 | 商品主数据系统 | D1–D2 | 40 | 40 |
 | 04 | 刊登与内容系统 | D5 | 1 | 26 |
 | 05 | 定价与价目系统 | D6 | 0 | 19 |
 | 06 | 采购与供应系统 | D6 | 2 | 26 |
-| 07 | 库存核算系统 | D3 | 21 | 31 |
-| 08 | 仓储作业系统 | D3 / D4 | 12 | 22 |
+| 07 | 库存核算系统 | D3 | 22 | 31 |
+| 08 | 仓储作业系统 | D3 / D4 | 14 | 22 |
 | 09 | 订单履约系统 | D4 / D5 | 4 | 27 |
 | 10 | 物流与头程系统 | D5 / D7 | 6 | 27 |
 | 11 | 售后与退货系统 | D4 / D7 | 1 | 22 |
@@ -43,22 +50,30 @@
 | 16 | 合规与风控系统 | D7 | 0 | 23 |
 | 17 | 组织权限与系统设置系统 | D1–D2 / D4 / D6 / D7 | 23 | 29 |
 | 18 | 集成开放与智能自动化系统 | D7 | 0 | 24 |
+
 ## 判定「已交付」的标准
+
 一个模块标 `已交付` 当且仅当下面四件都成立，缺一件就是 `未开发` 或 `进行中`：
+
 1. **迁移** — `backend/services/<svc>/src/main/resources/db/migration/V*.sql` 里有真实表结构，
    带 `tenant_id NOT NULL` + RLS 策略，不是注释里的设计。
 2. **API** — 服务里有对应端点，走 jOOQ 显式 SQL，不是返回硬编码常量的桩。
 3. **页面** — `apps/web/src/app/**/page.tsx` 是真实工作区，不是 `DomainPlaceholder`。
 4. **测试** — `cd backend && ./mvnw verify` 绿；涉及租户隔离的必须实跑
    「两租户互不可见 / 伪造 tenant header 无效 / 连接池归还后不串租户」三条断言。
+
 **判定为 `未开发` 的典型形态**（见到就说明没做完，不许算进已交付）：
+
 - `DomainPlaceholder` 占位页
 - 硬编码数组 / 常量当数据源
 - 服务里 `TODO` + `throw new UnsupportedOperationException()`
 - 迁移文件存在但没有 RLS 策略
 - 前端有页面但后端没有对应端点（或反之）
+
 ## 跨期说明
+
 「阶段」列按**依赖就绪顺序**逐模块标注，不是卷归属。跨期卷的拆分如下：
+
 - **01 工作台与门户 → 全部 D7**：它是纯投影聚合层（蓝图原文「不写业务数据，只读投影」），
   聚合 09 订单 / 07 库存 / 02 渠道 / 12 财务 / 15 客户 / 17 审批的投影。
   这些数据源没落地之前建「我的待办」只能造假数据，所以整卷排到最后收口。
@@ -72,7 +87,9 @@
 - **11 售后与退货**：D4 交付售后单、退货授权与实收、退款换货；平台纠纷 / 客诉工单 / 分析排 D7。
 - **17 组织权限**：D1–D2 交付租户、法人、部门、成员、角色、页面权限、数据范围、审计；
   17.4 审批流随单据排 D4，17.6.1.1 账簿与本位币随财务排 D6，17.7 套餐与平台参数排 D7。
+
 ## 模块明细
+
 | 模块 ID | 模块名 | L3 锚点路由 | 阶段 | 状态 | 证据 |
 | --- | --- | --- | --- | --- | --- |
 | 1.1.1.1 | 我的待办 | /dashboard/todo | D7 | 未开发 | — |
@@ -241,7 +258,7 @@
 | 7.1.2.2 | 账实核对 | — | D3 | 已交付 | 迁移 warehouse V54__warehouse_inventory_reconciliation.sql（**不建累计值表**：核对两侧都现算，Σ 分录与余额快照各只有一个真相来源，再存一份累计值会让核对时无法判断该信谁；只落核对**结论**：inventory_reconciliation_run 批次头 + inventory_reconciliation_finding 发现表，两表 tenant_id NOT NULL、ENABLE+FORCE RLS isolation 策略、GRANT SELECT/INSERT 给 warehouse_app、REVOKE UPDATE/DELETE 并挂 V1 的 append-only 触发器，结论写下即不可改、只能重跑并存新旧两批）+ 端点 POST /warehouse/inventory/reconciliation 发起核对（**写权限 warehouse.inventory.update**，因为它落不可变结论；区间左闭右开，范围仓库/SKU/货权法人三选一，缺省近 30 天）、GET 同路径批次列表（真分页、按结论筛）、GET /{runId} 结论加可疑区间排名、GET /{runId}/findings 差异明细与可疑流水分页（跨租户 404 不泄露存在性）+ 页面 /inventory 工作区第四个页签「账实核对」（发起核对、结论条含期初+区间内+区间后=应等于快照的口径公式、按天分桶的可疑区间排名、差异明细、可疑流水定位，点可疑流水经 /inventory/ledger?transactionId= 直达那笔分录；加载/空/错误三态，差异为零也占满版面并写明核了哪个区间多少笔分录）+ 测试 InventoryReconciliationIntegrationTest 30 例实跑 Testcontainers PG16（账实一致也出可追溯结论、三桶恰好分完全部历史、差异等于累计减快照、漏记 transactionId 必为 null、重复记与并发丢失成对给出另一笔流水与相差秒数、超过 60 秒窗口不算重复/并发、迟到补记未到一天不报、一笔可同时命中多类信号、结论不可改删且超级用户也改不动、+08:00 时间零漂移、范围三选一与倒置区间 400、租户隔离三断言） |
 | 7.1.3.1 | 多仓分布视图 | — | D3 | 已交付 | 迁移 warehouse V55__warehouse_multi_warehouse_distribution.sql（补三件「不建就做不出这个视图」的事：warehouse.kind 仓库性质列 LOCAL／OVERSEAS／PLATFORM_FBA／THIRD_PARTY 让分类真在数据里、platform_stock_observation 平台仓观测表 source 与 collected_at 均 NOT NULL 强制标注来源与采集时间、sku_ref.spu_id 补 SPU 引用登记；四条 DB 级强制：guard_platform_warehouse_no_ledger 平台仓不得写 balance/bucket、guard_platform_kind_change 有余额的仓不得改成平台仓、guard_observation_requires_platform_warehouse 非平台仓不得写观测、观测表 append-only 挂 V1 触发器并 REVOKE UPDATE/DELETE；ENABLE+FORCE RLS isolation 策略、GRANT SELECT/INSERT 给 warehouse_app）+ 端点 GET /warehouse/inventory/distribution（skuId 与 spuId 互斥必居其一、在手／预占／可用聚合自 inventory_balance、在途按收货仓取 inventory_transfer IN_TRANSIT、bucket 分解度与最近变动时间、带法人过滤与 1–180 天回看窗口）、GET /warehouse/inventory/distribution/spus SPU 下拉、POST /warehouse/inventory/platform-observations 观测录入（写权限 warehouse.inventory.update）+ 页面 /inventory/distribution（自有账本仓与平台仓两个区块分区展示、在途单列、周转天数算不出显示「—」并挂原因、观测新鲜度超一天标「数据较旧」、同仓多来源分行不混加、SPU 覆盖缺口如实报出、平台观测录入表单、加载／空／错误三态）与 /inventory 第五个页签「多仓分布」+ 测试 InventoryDistributionIntegrationTest 37 例（矩阵分区与合计两组不相加、零库存仓保留、在途不与在手相加且已收货不再计、平台行自带来源与采集时间、DB 级四条强制的拒绝、自有周转天数=在手÷日均发货出库、调拨出库不计入、无出库与样本不足时留空而非 0、+08:00 采集时间写回零漂移、SPU 聚合与未登记 SPU 缺口、租户隔离三断言）＋ inventory-model.test.ts 6 例 |
 | 7.2.1.1 | 预占需求列表 | /inventory/reservation | D3 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V102__warehouse_inventory_reservation.sql`（**新建 inventory_reservation 表，落在 warehouse 而非蓝图所写的 trade —— 偏离理由见下**，只建本模块自己那张表：7.2.1.2 的 reservation_allocation / 7.2.1.3 的 reservation_entry **都不建空表占位**，已分配量先记成 allocated_quantity 标量列、待 7.2.1.2 在同一张 reservation 上补子表回写；数量 NUMERIC(19,6) + BigDecimal 禁浮点；`remaining GENERATED ALWAYS AS (requested-consumed) STORED` **唯一口径**（不含「已分配未出库」——那部分货还在仓里占着可用量，算进来会让列表显示成已结清）；守恒式 `consumed+released<=requested` 写成 CHECK，是超卖的 DB 级兜底（与 V1 ck_balance_available、V2 available>=0 同一道防线）；**状态机由 DB 层两个触发器裁决**：guard_reservation_state_machine 钉「终态（CONSUMED/RELEASED/EXPIRED）不可复活」+ 状态与时间戳自洽（COMMITTED 必有 committed_at、三个终态必有 settled_at）+ version 自增；guard_reservation_insert_state 拒绝「插一行终态」（没有 held 就没有预留，凭什么直接说已消耗）；**COMMITTED 不参与自动过期**（蓝图 7.2.1.3 红线「承诺分配后不再自动 TTL 释放」）由超时部分索引 `WHERE status='HELD' AND expires_at IS NOT NULL` 兑现；四条索引（状态/来源/时间倒序/过期候选）；四条筛选索引全部对齐蓝图点名的三个筛选条件（状态、来源类型、时间）；tenant_id NOT NULL + ENABLE/FORCE RLS isolation + GRANT SELECT/INSERT/UPDATE/DELETE 与 GRANT USAGE ON SEQUENCE inventory_reservation_no_seq（漏这条登记会报 permission denied for sequence，而错误文案完全指不到授权上）+ starcon_app REVOKE ALL；**跨服务边界**：上游 09 订单（trade V100/V101）与 6.4.1.1 加工（trade V97/V98）都在另一个服务另一个库，所以只登记 source_system/source_type/source_ref_id/source_ref_code 定位键、**不建跨库 FK 不 join 对方表**，legal_entity_id/sku_id 同样只登记 id、code/name 从本服务 sku_ref/legal_entity_ref 读；来源系统 × 来源类型的**组合自洽**在服务层再钉一层（两个 CHECK 只保证各自在词表内，不拦「手工登记的销售订单预占」这种自相矛盾行））；**端点** GET /warehouse/inventory/reservations（筛选：状态多选/来源类型/来源系统/时间范围左闭右开/只看过期/法人/SKU + 关键字命中预占单号·上游单号·SKU编码·SKU名称·备注四处 + 六个排序键白名单 + 真分页 MAX_PAGE_SIZE=200）、GET /options、GET /capabilities、POST /（登记预占，只允许建成 HELD、单号由本服务发 RSV-日期-序号、**不采信调用方传入单号**因为两个上游各发一次 RSV-000001 会撞唯一键而调用方拿到的是指不到具体行的 409）；权限 warehouse.inventory.read / warehouse.inventory.update（与 7.1.x 各库存端点同一组，预占与余额属同一风险面）；**状态汇总用 `count(*) filter (where status=…)` 标量子查询聚合，不 join 展开** —— 7.2.1.2 交付后reservation_allocation 会按预占展开成多行，届时若改成 join+group by 五个计数会被分配行数放大而与列表逐行求和不一致，本期就把口径钉成「只数预占行」；合计**不受分页与筛选影响**；页面 `/inventory/reservation` 为真实工作区（状态汇总四卡 + 五态分布固定五行可点筛选 + 筛选区 + 列表 + 分页，含加载态/错误态重试/空态/只读态）；**页面上四条「写成 0 就完了」的口径**：超时长 null 显示「—」而不是 0（null 是「没超时/已终态/无过期时间」，0 是「超时 0 秒」）、已分配量恒 0 时标注「分配明细未交付」而不是冒充「还没分配」、合计不随筛选变化旁边写明、剩余量口径常驻说明；7.2.1.2 / 7.2.1.3 未交付在页面与 /capabilities 上显式报 available=false + ownerModule + 原因，**本页没有释放按钮**（放一个点下去必然 404 的按钮比不放更糟），且刻意**不实现自动过期动作**（蓝图 7.2.1.3 明确承诺分配后不再自动 TTL 释放，属高风险不可逆动作）；契约 `packages/api-contracts` 由 `python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi` 重新生成（+7 个 Reservation* DTO，纯新增，identity/catalog/channel/trade/crm 快照零漂移）；**测试** ReservationIntegrationTest.java（35 例，真实 PG16 Testcontainers + 强制 RLS，连接池固定 1 条）；前端 `inventory-reservation-model.test.ts` 12 例 + `api/warehouse/[...path]/route.test.ts` 新增放行/反向拒绝两组用例；**验证** `cd backend && ./mvnw -q compile` 绿、`./mvnw -pl services/warehouse -am test` **959 例全绿**、`pnpm typecheck` 绿、改动的前端测试文件 29 例绿、`node tools/module-progress/sync.mjs --check` 通过。**服务归属偏离蓝图的关系句（本车道最需要评审的一条）**：蓝图 7.2.1.1 关系栏写「预占需求由 trade 持久化协调」，本实现**不采纳**，理由是对集成头全库实查的硬事实而非偏好 —— (1) inventory_reservation 表在**任何一个服务里都不存在**，全库 grep 只命中 `V1__warehouse_inventory_core.sql` 的**文件头注释**，那段注释写明 warehouse 是该表的**唯一**所有者并逐字注明「reservation 属 7.2.1.x，本期**不建空表占位**」，也就是说 V1 早已把位置预留给 warehouse、7.2.1.x 一直没来建，这是**补上预留的位置而不是抢 trade 的活**；(2) trade 服务（V1 baseline + V92~V101）**没有任何预占相关表**，所以「去 trade 查」在物理上不存在 —— 不是不该跨库读，是那张表根本没有；(3) AGENTS.md 模块边界纪律禁止跨服务读写对方表，即使 trade 将来建了同名表本库也不该 join 它。蓝图那句描述的是**履约流程中的协调分工**（trade 决定何时发起取消/回传实发，warehouse 执行本地事务），不是「这张表归 trade 建」；蓝图 07 卷开头「后端归属」一行本身就写着 warehouse 拥有 inventory_reservation，两句有张力，本迁移取「后端归属」与 V1 文件头一致的那一句。**后续 7.2.1.2 分配明细与 7.2.1.3 释放与过期同样落在 warehouse**，三张表同库同 RLS 策略，两条兄弟车道可直接建外键、不需要跨服务协调 |
-| 7.2.1.2 | 预占分配明细 | /inventory/reservation | D3 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V107__warehouse_reservation_allocation.sql`
+| 7.2.1.2 | 预占分配明细 | /inventory/reservation | D3 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V107__warehouse_reservation_allocation.sql` |
 | 7.2.1.3 | 释放与过期 | /inventory/reservation | D3 | 未开发 | — |
 | 7.2.2.1 | 可售量口径 | — | D3 | 已交付 | 迁移 `backend/services/warehouse/src/main/resources/db/migration/V56__warehouse_sellable_policy.sql`（sellable_policy 口径分档 + sellable_policy_warehouse 挂仓，两表 tenant_id NOT NULL + FORCE RLS isolation + GRANT 与 starcon_app REVOKE；**口径内容写定后不可改**由 guard_sellable_policy_immutable 触发器钉死，改口径只能收口旧档 + 开新档，与 17.5.1.1 业务参数的 effective_from 分档生效同一套约定 —— 因此刻意不建第二张变更历史表，已关区间的那些行就是历史，它永远是「当时真正生效的防线」的凭据；guard_sellable_policy_interval 触发器挡住同槽位生效区间重叠并报出冲突档 id（重叠的区间在解析时没有唯一答案）；缓冲比例 numeric(9,6) 且 CHECK 取值 0~1 落在 DB 层（禁浮点）；独占池键由服务按 EXCL-{referenceId} 派生并由 CHECK 钉死（人手填才可能把独占池写成共享池），共享池名不得占用 EXCL- 命名空间；REVOKE DELETE 挡住物理删除） · 端点 9 个挂在 `/warehouse/inventory/sellable-policies`：GET 列表（真分页 + effectiveOnly + 关键字）、GET `/effective`（按时刻解析生效档，SHOP > CHANNEL > DEFAULT 优先级，回退兜底与完全未配置都**如实报出**而不是静默按 0 处理）、GET `/pools`（池名册与安全判定）、GET `/pools/{poolKey}`（成员清单 + 仓构成 + 被平台口径排除掉的 FBA 量）、GET `/{id}` 详情、POST 新建、POST `/{id}/versions` 换版、POST `/{id}/retire` 作废、POST `/calculation` 按 SKU 试算（`InventoryController.java` + `SellablePolicyService.java` + `SellablePolicyModels.java`） · 页面 `/inventory/sellable-policies`（`apps/web/src/app/inventory/sellable-policies/page.tsx` + `components/inventory/sellable-policy-workspace.tsx` + `sellable-policy-model.ts`），api-proxy 放行 5 个读形状与 3 个动作、刻意不设 DELETE 段（能不能物理删掉一条防超卖配置的答案是不能） · 测试 `SellablePolicyIntegrationTest.java` 17 例实跑 Testcontainers PostgreSQL 16（连接池压到 1） **共享池与缓冲作为一组不可拆开测**：allocationRatio = 成员数 − 缓冲比例之和，两店铺各留 50% 缓冲时恰好为 1.0、余量为 0（判定 NO_HEADROOM），任一提到 80% 后回到 0.7、余量 30（GUARDED），各留 10% 时为 1.8、余量 −80（OVERSOLD）；超卖容忍额度内的负余量判 TOLERATED（有意为之）而不是配置错误。**口径逐项可计算**：仅自有仓时 FBA 的 60 件不进池容量且被排除量如实报出、改含 FBA 后容量变 160；include_in_transit 为真时发往该仓的在途 40 件计入、残次 500 件被**排除而不是扣减**（蓝图 7.1.1.3 原文）、buffer_ratio 边界 0/1/越界由 DB CHECK 拒；池容量按去重后的仓集合聚合（同一仓被两个共享成员引用只算一次）。其余用例覆盖分档生效（按时刻解析出不同档、旧档值原样保留）、未配置时拒绝回写、输入校验拒绝共享池名占用 EXCL- 命名空间与挂不存在的仓、effective_from 带 +08:00 偏移写入后断言读回 Instant 与偏移零漂移、端点权限码（改防超卖的最后一道防线挂 warehouse.inventory.update 而非 read，只有读权限返回 403）、逐张表断言 relforcerowsecurity 为真 · 跨服务边界（AGENTS.md 禁止跨服务 SQL/FK/视图）：店铺与渠道属 channel 服务，本模块只用 source_system + reference_id 逻辑定位键与写入时的可读名快照，不建外键也不查它的表；池容量所需的「哪些仓计入」挂在口径自己的挂仓表上，且 warehouse 没有 type 列（FBA 分类归 7.1.3.1 那条车道），因此 OWN/PLATFORM_FBA 分类标注在口径侧而不去改 warehouse 表语义 |
 | 7.2.2.2 | 安全库存 | — | D3 | 未开发 | — |
@@ -540,76 +557,3 @@
 | 18.4.3.2 | 效果评估 | — | D7 | 未开发 | — |
 | 18.5.1.1 | 模板管理 | — | D7 | 未开发 | — |
 | 18.5.2.1 | 投递记录 | — | D7 | 未开发 | — |
-| 07 | 库存核算系统 | D3 | 22 | 31 |
-| 08 | 仓储作业系统 | D3 / D4 | 11 | 22 |
-（**本迁移同时建两张表**：V102 §一 明写「reservation_allocation 与 reservation_entry 都不在本车道范围、不建空表占位」，
-而集成头全库实查两张表**在任何服务里都不存在**；蓝图把 reservation_entry 列为本模块输入之一、输出之一是「状态迁移时间线」，
-只建主表不建流水表 = 时间线永远空，而「空时间线」会被读成「这笔预占没发生过任何迁移」，与「功能未交付」混淆，
-正是 V1/V102 反复拒绝的假交付。7.2.1.3 会**写**同一张流水表（释放也是一次迁移），
-同服务多写入方共享事实表是正常分工，跨服务才是 AGENTS.md 禁止的那件事）；
-**分配行引用「仓 + 货位 + 批次」三维而不是 stock_bucket.id**（偏离理由逐条写进迁移 §一：
-stock_bucket 外键指向 inventory_balance，而「预占」常常先于该 bucket 的实物入库发生（先圈住这批货、到货才建 bucket），
-引它会让「先预占后建账」写不进去；且预占分配长于 bucket 存续时间，bucket 会被盘点/效期/合桶重建，
-而「当初圈在了哪个货位」是审计事实，不该因下游事实表换了一行 id 就查不到。
-兜底是维度自洽 —— 货位用**复合外键** `(tenant_id,warehouse_id,location_id)` → `warehouse_location(tenant_id,warehouse_id,id)`
-（V2 专门建那个唯一键就是为此），所以「仓 A + 仓 B 的货位」在 DB 层就被拒；批次与预占同 SKU 由触发器比对。
-location_id 与 lot_id **可空**（虚拟仓/直发仓没有货位档案、非批次管理品没有批次，与 V2 stock_bucket.lot_id 可空同一判断），
-warehouse_id 恒非空）；数量 NUMERIC(19,6) + BigDecimal 禁浮点 + `remaining GENERATED ALWAYS AS (allocated-consumed-released) STORED`；
-**父表 inventory_reservation.allocated_quantity 由 DB 触发器回写**（非终态分配之和 = HELD+COMMITTED+CONSUMED，
-RELEASED/EXPIRED 不再占额）—— 放触发器不放 Java：V102 §一 已把「allocated_quantity 由 7.2.1.2 回写」写进契约，
-而 7.2.1.3 的释放路径也会改分配状态，两条写入路径各回写一次迟早漏一次，父表就与明细**永久对不上账**；
-父行已终结时跳过（终态行是历史快照，它的 allocated_quantity 就该停在终结那刻的值，也避开 V102 的状态机触发器）；
-**四个守卫触发器**：guard_reservation_allocation_insert（建行即 HELD、不带任何终结痕迹）、
-**guard_reservation_allocation_capacity（BEFORE INSERT OR UPDATE —— 第一版漏挂在 UPDATE 上，是被测试打出来的：
-超卖在插入时被漏过去，插入成功、随后的父表回写撞上 allocated_quantity<=requested 检查而失败，
-结果仍是拒绝，但错误文案只剩 `violates check constraint`、完全指不出是哪一笔分配顶破了总量；
-现拆成容量守卫跨 INSERT/UPDATE 共用 + 更新守卫只管终态/改指/时间戳，触发器按名字字母序 capacity 先跑）**
-钉跨行守恒（所有非终态分配之和 + 本行 ≤ 父预占需求量，超卖即拒，与 V102 ck_balance_available、V2 available>=0 同一道防线）、
-批次 SKU 自洽、父预占已终结不得再分配；guard_reservation_allocation_update 钉终态不可复活 +
-**bucket 与预占不可改指**（改掉等于把「当初圈在哪」这段审计痕迹改写掉，而批次追溯与成本分摊正是本模块存在的理由）+
-状态与时间戳自洽 + version 自增；**guard_reservation_entry** 钉「流水不得与事实脱节」——
-分录的 to_status 必须恰等于该分配**此刻**的状态，否则可以凭空追加一条「它曾经变成 CONSUMED」的假流水；
-并按 allocation_id 可空区分分配级/预占级（两类迁移在时间线上混排，拆开就看不出「分配在 10:03 承诺、预占在 10:03 也承诺」的因果）；
-**guard_reservation_entry_immutable** 让 reservation_entry 全表 append-only（UPDATE/DELETE 一律拒）——
-改得动一条历史，追溯结论就能被事后编出来。四条索引（按预占+圈定时间倒序 / 按预占+状态 / 按 bucket 反查非终态 / HELD 超时候选）+
-租户隔离；**端点** 7 个形状全部挂在 `/warehouse/inventory/reservations/{reservationId}` 之下（与 7.2.1.1 的集合级
-options/capabilities 同前缀不同层级，两条车道各改各的形状）：GET /allocations（状态多选 + 仓/货位/批次精确匹配 +
-关键字命中仓编码·仓名·货位编码·货位名·批次号·备注六处 + 五个排序键白名单 + 真分页 MAX_PAGE_SIZE=200）、
-GET /timeline（按 allocationId / transition 筛，按 (occurred_at,id) 正序 —— id 兜底是必要的，
-同一毫秒发生的两次请求顺序不确定）、GET /allocation-options、GET /capabilities、POST /allocations（登记分配）、
-POST /allocations/{id}/commit（承诺）、POST /allocations/{id}/consume（消耗，支持部分出库）；
-权限 warehouse.inventory.read / warehouse.inventory.update；**汇总不受分页与筛选影响**，
-且 **bucket 数与分配笔数分开报**（同一 bucket 分两次圈只算一个 bucket，只报笔数会让「圈了几个地方」虚高一倍）；
-**跨租户与不存在返回同一个 404**（给 403 等于确认「这条存在、只是不归你管」，猜 id 就能试出别人预占的存在性）；
-**分配状态变、预占状态跟着变**（全部承诺 → 预占 COMMITTED；全部消耗且覆盖需求量 → 预占 CONSUMED 并按分配之和**重算**已消费量）：
-不同步的话预占一直停在 HELD，而蓝图 7.2.1.3 的超时清理会把已承诺发货的货误释放 —— 蓝图自己点名的超卖场景；
-重算而不是累加是因为累加在并发或重试时会翻倍；**父表 released_quantity 本模块绝不碰**（归 7.2.1.3，
-碰了就会在对方写完释放量后被下一次分配变更覆盖回去）；**释放与过期不是本模块的按钮** ——
-`ALLOCATION_RELEASE` 能力位报 available=false + ownerModule=7.2.1.3（给一个点下去什么也不发生的按钮比不给更糟）；
-对外路径用 **/timeline 而不是 /entries**（蓝图输出原话是「时间线」，reservation_entry 是表的内部名字），
-顺带让 `reservations/{id}/entries` 继续留在反向拒绝清单里不与任何模块抢形状；
-**契约** `packages/api-contracts` 由 `python3 tools/codegen/catalog-contracts.py --spec-dir backend/target/openapi` 重新生成
-（+17 个 ReservationAllocation* DTO，纯新增，identity/catalog/channel/trade/crm 快照零漂移，跨服务同名冲突检测通过）；
-**测试** ReservationAllocationIntegrationTest.java **34 例**（真实 PG16 Testcontainers + 强制 RLS，连接池固定 1 条），
-覆盖 bucket 三维展示 / 无货位无批次的合法写入 / 汇总不受筛选影响 / bucket 数与笔数分开 / 下拉候选值与登记目标两组口径 /
-**跨行守恒被 DB 层拒（并经 HTTP 断言翻成 409 而不是 500）** / 货位不属于所声明的仓被拒 / 批次与预占 SKU 不一致被拒 /
-**时间线逐字断言写回的 occurredAt 与 quantity**（比 Instant 而非 OffsetDateTime.equals，否则时区偏移不同会误判）/
-append-only 改与删都被拒 / 分录不得与事实脱节 / 非法迁移矩阵被拒 / 终态不可复活 / 不可改指 /
-预占状态联动与部分消耗不终结 / 超额消耗被拒 / 已终结预占不能再分配 / 空态 / 404 / 只读角色 403 / **租户隔离三断言实跑**；
-前端 `inventory-reservation-allocation-model.test.ts` 14 例 + 兄弟模块 `inventory-reservation-model.test.ts` 12 例 +
-`api/warehouse/[...path]/route.test.ts` 23 例（新增 7.2.1.2 放行用例并把 `${id}/allocations` 移出 404 清单，
-`release` / `entries` **保持 404**）；**页面** `/inventory/reservation/[reservationId]` 为真实工作区
-（预占抬头五卡含未分配量与剩余量分列 + 分配汇总十项固定显示、0 也显示 + 状态/仓库/关键字/排序筛选 +
-**登记分配表单**（仓必选、货位与批次可不填，换仓即清空货位）+ 分配明细表（按状态给动作：只有 HELD 显承诺、
-只有 COMMITTED 显消耗，在当前状态下必然被拒的动作不给）+ 迁移时间线（建行那条来源显示「新建」而不是 HELD）+
-释放未交付说明，含加载态/错误态重试/空态/只读态，写动作失败只在动作处提示不把整页顶掉）；
-**跨车道改动**按 7.2.1.1 原注释「detailUnavailable 从 true 翻成 false 由那条车道来翻」的显式约定执行共 4 个文件：
-ReservationService 的 detailUnavailable 与 ALLOCATION_DETAIL、其两处断言、
-allocatedText(0) 从「0（分配明细未交付）」改成「0」（该值现在是回写的真值，0 就是「确实还没圈到任何 bucket」，
-恒挂未交付后缀反而误导）；**验证**
-`cd backend && ./mvnw -q compile` 绿、`./mvnw -pl services/warehouse -am test` **1075 例全绿**、
-`pnpm typecheck` 3 包全绿、改动的前端测试文件 49 例绿 |
-| 已交付 | 130 |
-| **未开发** | **335** |
-| 完成率 | 28.0% |
-| **D3** | 27 | 0 | 13 | 40 |
