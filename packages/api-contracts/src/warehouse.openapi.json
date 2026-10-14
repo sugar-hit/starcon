@@ -4672,7 +4672,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "page_4",
+        "operationId": "page_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -5014,7 +5014,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "complete_2",
+        "operationId": "complete_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -5054,7 +5054,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "cancel_3",
+        "operationId": "cancel_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -5560,7 +5560,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "complete_3",
+        "operationId": "complete_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -5660,7 +5660,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "page_5",
+        "operationId": "page_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -5763,7 +5763,7 @@
         "tags": [
           "inventory-transfer-controller"
         ],
-        "operationId": "create_6",
+        "operationId": "create_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -6495,7 +6495,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "cancel_4",
+        "operationId": "cancel_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -8408,7 +8408,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "policies",
+        "operationId": "policies_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -8448,7 +8448,7 @@
         "tags": [
           "inventory-controller"
         ],
-        "operationId": "createPolicy",
+        "operationId": "createPolicy_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -9280,7 +9280,7 @@
         "tags": [
           "outbound-order-controller"
         ],
-        "operationId": "cancel_5",
+        "operationId": "cancel_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -9504,7 +9504,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "page_6",
+        "operationId": "page_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -9886,7 +9886,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "page_7",
+        "operationId": "page_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -10007,7 +10007,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "create_10",
+        "operationId": "create_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -10298,7 +10298,7 @@
         "tags": [
           "legal-entity-transfer-controller"
         ],
-        "operationId": "cancel_6",
+        "operationId": "cancel_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -11006,7 +11006,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "sales",
+        "operationId": "sales_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -11065,7 +11065,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "recordSales",
+        "operationId": "recordSales_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -11417,7 +11417,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "policies_1",
+        "operationId": "policies_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -11508,7 +11508,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "create_13",
+        "operationId": "create_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -11842,7 +11842,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "page_8",
+        "operationId": "page_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -11938,7 +11938,7 @@
         "tags": [
           "goods-receipt-controller"
         ],
-        "operationId": "create_14",
+        "operationId": "create_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -12079,7 +12079,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "page_9",
+        "operationId": "page_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -12547,7 +12547,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "page_10",
+        "operationId": "page_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -12673,7 +12673,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "create_15",
+        "operationId": "create_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -12814,7 +12814,7 @@
         "tags": [
           "first-mile-shipment-controller"
         ],
-        "operationId": "cancel_7",
+        "operationId": "cancel_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -13053,7 +13053,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "page_11",
+        "operationId": "page_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -13178,7 +13178,7 @@
         "tags": [
           "duty-tax-controller"
         ],
-        "operationId": "create_17",
+        "operationId": "create_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -13616,7 +13616,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "page_12",
+        "operationId": "page_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -13725,7 +13725,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "create_18",
+        "operationId": "create_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -13815,7 +13815,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "cancel_8",
+        "operationId": "cancel_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -13865,7 +13865,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "page_13",
+        "operationId": "page_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -13982,7 +13982,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "create_19",
+        "operationId": "create_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -14514,7 +14514,7 @@
         "tags": [
           "customs-declaration-controller"
         ],
-        "operationId": "cancel_9",
+        "operationId": "cancel_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -14614,7 +14614,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "page_14",
+        "operationId": "page_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -14723,7 +14723,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "create_20",
+        "operationId": "create_19",
         "parameters": [
           {
             "name": "Authorization",
@@ -14813,7 +14813,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "cancel_10",
+        "operationId": "cancel_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -15807,7 +15807,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "detail_11",
+        "operationId": "detail_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -15847,7 +15847,7 @@
         "tags": [
           "pick-task-controller"
         ],
-        "operationId": "capabilities_5",
+        "operationId": "capabilities_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -16028,7 +16028,7 @@
         "tags": [
           "location-utilization-controller"
         ],
-        "operationId": "detail_12",
+        "operationId": "detail_11",
         "parameters": [
           {
             "name": "Authorization",
@@ -16085,7 +16085,7 @@
         "tags": [
           "location-utilization-controller"
         ],
-        "operationId": "capabilities_6",
+        "operationId": "capabilities_5",
         "parameters": [
           {
             "name": "Authorization",
@@ -16156,7 +16156,7 @@
         "tags": [
           "warehouse-location-tree-controller"
         ],
-        "operationId": "capabilities_7",
+        "operationId": "capabilities_6",
         "parameters": [
           {
             "name": "Authorization",
@@ -16277,7 +16277,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "capabilities_8",
+        "operationId": "capabilities_7",
         "parameters": [
           {
             "name": "Authorization",
@@ -16664,7 +16664,7 @@
         "tags": [
           "labor-efficiency-controller"
         ],
-        "operationId": "capabilities_9",
+        "operationId": "capabilities_8",
         "parameters": [
           {
             "name": "Authorization",
@@ -17164,7 +17164,7 @@
         "tags": [
           "stocktake-variance-controller"
         ],
-        "operationId": "capabilities_10",
+        "operationId": "capabilities_9",
         "parameters": [
           {
             "name": "Authorization",
@@ -17911,7 +17911,7 @@
         "tags": [
           "available-quantity-controller"
         ],
-        "operationId": "capabilities_11",
+        "operationId": "capabilities_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -19483,7 +19483,7 @@
         "tags": [
           "outbound-order-detail-controller"
         ],
-        "operationId": "detail_13",
+        "operationId": "detail_12",
         "parameters": [
           {
             "name": "Authorization",
@@ -19945,7 +19945,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "detail_14",
+        "operationId": "detail_13",
         "parameters": [
           {
             "name": "Authorization",
@@ -20062,7 +20062,7 @@
         "tags": [
           "inventory-in-transit-controller"
         ],
-        "operationId": "alerts_1",
+        "operationId": "alerts_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -20093,7 +20093,7 @@
         "tags": [
           "inventory-health-controller"
         ],
-        "operationId": "page_15",
+        "operationId": "page_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -20397,7 +20397,7 @@
         "tags": [
           "inventory-expiry-controller"
         ],
-        "operationId": "policy",
+        "operationId": "policy_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -20437,7 +20437,7 @@
         "tags": [
           "inventory-expiry-controller"
         ],
-        "operationId": "policies_2",
+        "operationId": "policies_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -20575,7 +20575,7 @@
         "tags": [
           "inventory-expiry-controller"
         ],
-        "operationId": "alerts_2",
+        "operationId": "alerts_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -20913,7 +20913,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "detail_15",
+        "operationId": "detail_14",
         "parameters": [
           {
             "name": "Authorization",
@@ -21033,7 +21033,7 @@
         "tags": [
           "consignment-controller"
         ],
-        "operationId": "sales_1",
+        "operationId": "sales_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -21684,7 +21684,7 @@
         "tags": [
           "allocation-priority-controller"
         ],
-        "operationId": "detail_16",
+        "operationId": "detail_15",
         "parameters": [
           {
             "name": "Authorization",
@@ -21755,7 +21755,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "policy_1",
+        "operationId": "policy_2",
         "parameters": [
           {
             "name": "Authorization",
@@ -21835,7 +21835,7 @@
         "tags": [
           "allocation-policy-controller"
         ],
-        "operationId": "effective",
+        "operationId": "effective_1",
         "parameters": [
           {
             "name": "Authorization",
@@ -22044,7 +22044,7 @@
         "tags": [
           "inventory-aging-controller"
         ],
-        "operationId": "policy_2",
+        "operationId": "policy_3",
         "parameters": [
           {
             "name": "Authorization",
@@ -22084,7 +22084,7 @@
         "tags": [
           "inventory-aging-controller"
         ],
-        "operationId": "policies_3",
+        "operationId": "policies_4",
         "parameters": [
           {
             "name": "Authorization",
@@ -22357,7 +22357,7 @@
         "tags": [
           "goods-receipt-discrepancy-controller"
         ],
-        "operationId": "detail_17",
+        "operationId": "detail_16",
         "parameters": [
           {
             "name": "Authorization",
@@ -23122,7 +23122,7 @@
         "tags": [
           "disassembly-order-controller"
         ],
-        "operationId": "detail_18",
+        "operationId": "detail_17",
         "parameters": [
           {
             "name": "Authorization",
@@ -23267,7 +23267,7 @@
         "tags": [
           "assembly-order-controller"
         ],
-        "operationId": "detail_19",
+        "operationId": "detail_18",
         "parameters": [
           {
             "name": "Authorization",
@@ -23338,7 +23338,7 @@
         "tags": [
           "location-allocation-controller"
         ],
-        "operationId": "cancel_11",
+        "operationId": "cancel_10",
         "parameters": [
           {
             "name": "Authorization",
@@ -23376,6 +23376,1010 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/LocationAllocationSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/suggestions/{id}/dismiss": {
+      "post": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "dismissSuggestion",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockSuggestionAction"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/suggestions/{id}/acknowledge": {
+      "post": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "acknowledgeSuggestion",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockSuggestionAction"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/sales": {
+      "get": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "sales",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockSalesPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "recordSales",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SafetyStockSalesInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockSalesSaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/policies": {
+      "get": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "policies",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "scopeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "alertSeverity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "effectiveOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockPolicyPage"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "createPolicy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SafetyStockPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockPolicySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/policies/{id}/versions": {
+      "post": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "versionPolicy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SafetyStockPolicyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockPolicySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/policies/{id}/retire": {
+      "post": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "retirePolicy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockPolicySaved"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/evaluate": {
+      "post": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "evaluate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SafetyStockEvaluationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockEvaluationRow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/alerts/{id}/resolve": {
+      "post": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "resolveAlert",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockAlertActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/alerts/{id}/acknowledge": {
+      "post": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "acknowledgeAlert",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockAlertActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/suggestions": {
+      "get": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "suggestions",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "unquantifiedOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockSuggestionPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/policies/{id}": {
+      "get": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "policy",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockPolicyDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/policies/effective": {
+      "get": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "effective",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "scopeType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "at",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockPolicyEffective"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/evaluations": {
+      "get": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "evaluations",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockEvaluationPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/capabilities": {
+      "get": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "capabilities_11",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/alerts": {
+      "get": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "alerts_1",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "warehouseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "skuId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "alertType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "policyId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "evaluationId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "platformRiskOnly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockAlertPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/inventory/safety-stock/alerts/{id}": {
+      "get": {
+        "tags": [
+          "safety-stock-controller"
+        ],
+        "operationId": "alert",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SafetyStockAlertDetail"
                 }
               }
             }
@@ -54251,6 +55255,917 @@
           "reason": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "SafetyStockSuggestionAction": {
+        "type": "object",
+        "properties": {
+          "suggestionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PROPOSED",
+              "ACKNOWLEDGED",
+              "DISMISSED"
+            ]
+          },
+          "dismissalReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "SafetyStockSalesInput": {
+        "required": [
+          "periodEnd",
+          "periodStart",
+          "skuId",
+          "sourceSystem",
+          "unitsSold"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceSystem": {
+            "maxLength": 32,
+            "minLength": 0,
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuLabel": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "unitsSold": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          }
+        }
+      },
+      "SafetyStockSalesSaved": {
+        "type": "object",
+        "properties": {
+          "salesId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "unitsSold": {
+            "type": "number"
+          },
+          "dailyAverage": {
+            "type": "number"
+          },
+          "coveredDays": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "SafetyStockPolicyInput": {
+        "required": [
+          "alertSeverity",
+          "scopeType",
+          "thresholdQuantity"
+        ],
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuLabel": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": "string"
+          },
+          "thresholdQuantity": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number"
+          },
+          "alertSeverity": {
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "string"
+          },
+          "reorderCoverageDays": {
+            "minimum": 0,
+            "exclusiveMinimum": false,
+            "type": "number",
+            "nullable": true
+          },
+          "autoSuggestReplenishment": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "warehouses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockWarehouseBinding"
+            }
+          }
+        }
+      },
+      "SafetyStockWarehouseBinding": {
+        "required": [
+          "warehouseId",
+          "warehouseKind"
+        ],
+        "type": "object",
+        "properties": {
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseKind": {
+            "maxLength": 16,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "SafetyStockPolicySaved": {
+        "type": "object",
+        "properties": {
+          "policyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "thresholdQuantity": {
+            "type": "number"
+          },
+          "alertSeverity": {
+            "type": "string"
+          },
+          "warehouseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "supersededPolicyId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "SafetyStockEvaluationRequest": {
+        "type": "object",
+        "properties": {
+          "skus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockEvaluationSkuContext"
+            }
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "SafetyStockEvaluationSkuContext": {
+        "required": [
+          "skuId"
+        ],
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
+      },
+      "SafetyStockEvaluationRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "triggeredByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "policiesEvaluated": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "policiesNotScannable": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "warehousesEvaluated": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skusEvaluated": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "skusWithoutSales": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "alertsOpened": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "alertsSuppressed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "suggestionsCreated": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "scopeWarehouseId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SafetyStockAlertActionResult": {
+        "type": "object",
+        "properties": {
+          "alertId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "ACKNOWLEDGED",
+              "RESOLVED"
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "SafetyStockSuggestionPage": {
+        "type": "object",
+        "properties": {
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockSuggestionRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SafetyStockSuggestionRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "alertId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "policyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuLabel": {
+            "type": "string"
+          },
+          "suggestedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "dailyAverageSales": {
+            "type": "number",
+            "nullable": true
+          },
+          "coverageDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "targetStockQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "unquantifiedReason": {
+            "type": "string"
+          },
+          "externalPurchaseReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PROPOSED",
+              "ACKNOWLEDGED",
+              "DISMISSED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dismissedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dismissalReason": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SafetyStockSalesPage": {
+        "type": "object",
+        "properties": {
+          "sales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockSalesRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SafetyStockSalesRow": {
+        "type": "object",
+        "properties": {
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuLabel": {
+            "type": "string"
+          },
+          "unitsSold": {
+            "type": "number"
+          },
+          "dailyAverage": {
+            "type": "number"
+          },
+          "firstPeriodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "lastPeriodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "coveredDays": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "records": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SafetyStockPolicyPage": {
+        "type": "object",
+        "properties": {
+          "policies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockPolicyRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SafetyStockPolicyRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scopeType": {
+            "type": "string",
+            "enum": [
+              "DEFAULT",
+              "CATEGORY",
+              "SKU"
+            ]
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "skuLabel": {
+            "type": "string"
+          },
+          "thresholdQuantity": {
+            "type": "number"
+          },
+          "alertSeverity": {
+            "type": "string",
+            "enum": [
+              "CRITICAL",
+              "WARNING",
+              "INFO"
+            ]
+          },
+          "reorderCoverageDays": {
+            "type": "number",
+            "nullable": true
+          },
+          "autoSuggestReplenishment": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdByMembershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SafetyStockPolicyDetail": {
+        "type": "object",
+        "properties": {
+          "policy": {
+            "$ref": "#/components/schemas/SafetyStockPolicyRow"
+          },
+          "warehouses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockWarehouseLink"
+            }
+          }
+        }
+      },
+      "SafetyStockWarehouseLink": {
+        "type": "object",
+        "properties": {
+          "policyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "warehouseKind": {
+            "type": "string"
+          },
+          "warehouseKindLabel": {
+            "type": "string"
+          },
+          "platformRisk": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SafetyStockPolicyEffective": {
+        "type": "object",
+        "properties": {
+          "policy": {
+            "$ref": "#/components/schemas/SafetyStockPolicyRow"
+          },
+          "resolvedScopeType": {
+            "type": "string",
+            "enum": [
+              "DEFAULT",
+              "CATEGORY",
+              "SKU"
+            ]
+          },
+          "usedFallback": {
+            "type": "boolean"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SafetyStockEvaluationPage": {
+        "type": "object",
+        "properties": {
+          "evaluations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockEvaluationRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SafetyStockCapabilities": {
+        "type": "object",
+        "properties": {
+          "scopeTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockCapabilityOption"
+            }
+          },
+          "severities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockCapabilityOption"
+            }
+          },
+          "alertTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockCapabilityOption"
+            }
+          },
+          "alertStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockCapabilityOption"
+            }
+          },
+          "warehouseKinds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockCapabilityOption"
+            }
+          },
+          "suggestionStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockCapabilityOption"
+            }
+          },
+          "salesSourceDerived": {
+            "type": "boolean"
+          },
+          "skuCategoryExpansionAvailable": {
+            "type": "boolean"
+          },
+          "replenishmentTargetDelivered": {
+            "type": "boolean"
+          },
+          "workbenchAlertFeedDelivered": {
+            "type": "boolean"
+          },
+          "salesSourceNote": {
+            "type": "string"
+          },
+          "categoryExpansionNote": {
+            "type": "string"
+          },
+          "replenishmentNote": {
+            "type": "string"
+          },
+          "workbenchNote": {
+            "type": "string"
+          },
+          "platformStockoutEscalation": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "SafetyStockCapabilityOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "SafetyStockAlertPage": {
+        "type": "object",
+        "properties": {
+          "alerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafetyStockAlertRow"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SafetyStockAlertRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "evaluationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "policyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "policyScopeType": {
+            "type": "string",
+            "enum": [
+              "DEFAULT",
+              "CATEGORY",
+              "SKU"
+            ]
+          },
+          "warehouseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "warehouseName": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "skuLabel": {
+            "type": "string"
+          },
+          "alertType": {
+            "type": "string",
+            "enum": [
+              "PLATFORM_STOCKOUT_RISK",
+              "OWN_WAREHOUSE_DEPLETION"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "CRITICAL",
+              "WARNING",
+              "INFO"
+            ]
+          },
+          "effectiveSeverity": {
+            "type": "string",
+            "enum": [
+              "CRITICAL",
+              "WARNING",
+              "INFO"
+            ]
+          },
+          "availableQuantity": {
+            "type": "number"
+          },
+          "thresholdQuantity": {
+            "type": "number"
+          },
+          "shortfallQuantity": {
+            "type": "number"
+          },
+          "dailyAverageSales": {
+            "type": "number",
+            "nullable": true
+          },
+          "daysOfCover": {
+            "type": "number",
+            "nullable": true
+          },
+          "suggestedQuantity": {
+            "type": "number",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "ACKNOWLEDGED",
+              "RESOLVED"
+            ]
+          },
+          "detectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reviewNote": {
+            "type": "string"
+          }
+        }
+      },
+      "SafetyStockAlertDetail": {
+        "type": "object",
+        "properties": {
+          "alert": {
+            "$ref": "#/components/schemas/SafetyStockAlertRow"
+          },
+          "suggestion": {
+            "$ref": "#/components/schemas/SafetyStockSuggestionRow"
           }
         }
       }
