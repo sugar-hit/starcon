@@ -1113,3 +1113,86 @@ it('8.5.2.1 追加分支后 8.1.2.1 的四个库位树形状仍被放行', async
     expect(response.status).toBe(200);
   }
 });
+
+it('7.7.2.1 VMI 白名单：模型文件里每条调用点都被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const aid = '11111111-1111-1111-1111-111111111111';
+  const sid = '22222222-2222-2222-2222-222222222222';
+  // 路径是从 vmi-model.ts 里反向抽取的，不是照着正则抄的 ——
+  // 少放行一个，页面就只在浏览器里静默 404（typecheck / lint / vitest 全绿都发现不了）。
+  for (const path of [
+    'warehouse/inventory/vmi/capabilities',
+    'warehouse/inventory/vmi/agreements',
+    `warehouse/inventory/vmi/agreements/${aid}`,
+    `warehouse/inventory/vmi/agreements/${aid}/water-levels`,
+    `warehouse/inventory/vmi/agreements/${aid}/settlement-window`,
+    `warehouse/inventory/vmi/agreements/${aid}/audit`,
+    `warehouse/inventory/vmi/agreements/${aid}/snapshots`,
+    `warehouse/inventory/vmi/replenishment-signals`,
+    'warehouse/inventory/vmi/settlements',
+    `warehouse/inventory/vmi/settlements/${sid}`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+  }
+  // 写动作逐个钉住：建协议、出信号、信号三步流转、记售出、出对账单、确认。
+  for (const path of [
+    'warehouse/inventory/vmi/agreements',
+    `warehouse/inventory/vmi/agreements/${aid}/lines`,
+    `warehouse/inventory/vmi/agreements/${aid}/activate`,
+    `warehouse/inventory/vmi/agreements/${aid}/suspend`,
+    `warehouse/inventory/vmi/agreements/${aid}/close`,
+    `warehouse/inventory/vmi/agreements/${aid}/replenishment-signals`,
+    `warehouse/inventory/vmi/agreements/${aid}/snapshots`,
+    `warehouse/inventory/vmi/agreements/${aid}/settlements`,
+    `warehouse/inventory/vmi/replenishment-signals/${sid}/acknowledge`,
+    `warehouse/inventory/vmi/replenishment-signals/${sid}/dispatch`,
+    `warehouse/inventory/vmi/replenishment-signals/${sid}/fulfil`,
+    `warehouse/inventory/vmi/replenishment-signals/${sid}/cancel`,
+    `warehouse/inventory/vmi/settlements/${sid}/confirm`,
+  ]) {
+    expect(
+      (await POST(request(path, 'POST'), { params: { path: path.split('/') } })).status,
+    ).toBe(200);
+  }
+});
+
+it('7.7.2.1 VMI 白名单：后端不存在的子路径仍被拒绝', async () => {
+  const fetcher = vi.fn();
+  vi.stubGlobal('fetch', fetcher);
+  const aid = '11111111-1111-1111-1111-111111111111';
+  const sid = '22222222-2222-2222-2222-222222222222';
+  // 后端 VmiController 只有上面那些端点。多一段推导路径（export / forecast / cancel）、
+  // 以及一个不存在的信号动作，在后端都不存在；放行它们等于让界面以为已交付 ——
+  // 放行不该存在的路径比 404 更糟。
+  for (const path of [
+    `warehouse/inventory/vmi/agreements/${aid}/export`,
+    `warehouse/inventory/vmi/agreements/${aid}/forecast`,
+    `warehouse/inventory/vmi/agreements/${aid}/snapshots/${sid}`,
+    `warehouse/inventory/vmi/replenishment-signals/${sid}/acknowledge/again`,
+    `warehouse/inventory/vmi/replenishment-signals/${sid}/destroy`,
+    `warehouse/inventory/vmi/settlements/${sid}/void`,
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(404);
+  }
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it('7.7.2.1 追加 vmi 分支后 7.7.1.2 寄售与 7.7.1.1 货权的形状仍被放行', async () => {
+  const fetcher = vi.fn().mockImplementation(() => Promise.resolve(new Response('{}')));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '11111111-1111-1111-1111-111111111111';
+  // vmi 与 consignments/ownership 在同一条正则里相邻，最怕的是新加的 vmi 抢走它们的匹配
+  // （或反过来）。逐条正向断言把这一点钉死 —— 首段都是字面量，不会互相吃掉。
+  for (const path of [
+    'warehouse/inventory/consignments/capabilities',
+    `warehouse/inventory/consignments/${id}/stock-view`,
+    'warehouse/inventory/ownership/capabilities',
+    'warehouse/inventory/ownership/report',
+  ]) {
+    const response = await GET(request(path), { params: { path: path.split('/') } });
+    expect(response.status).toBe(200);
+  }
+});
